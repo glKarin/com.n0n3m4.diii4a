@@ -35,8 +35,9 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE4_D3BFG_VULKAN  = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
 
 
-    public static final String GAME_VERSION_REALRTCW_5_2 = "5.2"; // RealRTCW 5.2
-    public static final String LIB_ENGINE3_REALRTCW_5_2  = "libRealRTCW_5_2.so"; // RealRTCW(5.2)
+    // KARIN_GAME_VERSION_BOOKMARK
+    //public static final String GAME_VERSION_REALRTCW_5_2 = "5.2"; // RealRTCW 5.2
+    //public static final String LIB_ENGINE3_REALRTCW_5_2  = "libRealRTCW_5_2.so"; // RealRTCW(5.2)
 
     //public static final String GAME_VERSION_TDM      = "2.13"; // TDM 2.13
     //public static final String LIB_ENGINE4_TDM_2_12     = "libTheDarkMod_2_12.so"; // TDM(2.12)

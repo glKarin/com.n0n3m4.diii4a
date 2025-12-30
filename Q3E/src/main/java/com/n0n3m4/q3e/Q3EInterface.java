@@ -122,6 +122,7 @@ public class Q3EInterface
 		return Q3EGame.Find(game_id).ENGINE_LIB;
 	}
 
+	// KARIN_GAME_VERSION_BOOKMARK
 	public String GetEngineLibName()
 	{
 		if(null == engine_version || engine_version.isEmpty())
@@ -134,13 +135,13 @@ public class Q3EInterface
 			else
 				return Q3EGameConstants.LIB_ENGINE4_D3BFG;
 		}
-		else if(isRealRTCW)
+/*		else if(isRealRTCW)
 		{
 			if(Q3EGameConstants.GAME_VERSION_REALRTCW_5_2.equalsIgnoreCase(engine_version))
 				return Q3EGameConstants.LIB_ENGINE3_REALRTCW_5_2;
 			else
 				return Q3EGameConstants.LIB_ENGINE3_REALRTCW;
-		}
+		}*/
 		/*else if(isTDM)
 		{
 			if(Q3EGameConstants.GAME_VERSION_TDM_2_12.equalsIgnoreCase(engine_version))
@@ -860,11 +861,13 @@ public class Q3EInterface
 		return IsIdTech4() || isXash3D;
 	}
 
+	// KARIN_DISABLE_GAME_BOOKMARK
 	public boolean IsDisabled()
 	{
 		return isFTEQW || isXash3D;
 	}
 
+	// KARIN_DISABLE_GAME_BOOKMARK
 	public static boolean IsDisabled(String game)
 	{
 		final String[] DisabledGames = {
@@ -991,6 +994,7 @@ public class Q3EInterface
 		return ControlPreference(game);
 	}
 
+	// KARIN_GAME_VERSION_BOOKMARK
 	public static String[] GetGameVersions(String game)
 	{
 		switch(game)
@@ -1000,11 +1004,11 @@ public class Q3EInterface
 						Q3EGameConstants.GAME_VERSION_D3BFG_OPENGL,
 						Q3EGameConstants.GAME_VERSION_D3BFG_VULKAN,
 				};
-			case Q3EGameConstants.GAME_REALRTCW:
+/*			case Q3EGameConstants.GAME_REALRTCW:
 				return new String[]{
 						Q3EGameConstants.GAME_VERSION_REALRTCW,
 						Q3EGameConstants.GAME_VERSION_REALRTCW_5_2,
-				};
+				};*/
 			default:
 				return null;
 		}

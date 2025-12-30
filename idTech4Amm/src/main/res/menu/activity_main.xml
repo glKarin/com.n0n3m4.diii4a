@@ -10,6 +10,7 @@
         android:title="@string/game"
         android:showAsAction="always">
         <menu>
+            <!-- KARIN_DISABLE_GAME_BOOKMARK -->
             <item
                 android:id="@+id/main_menu_game_doom3"
                 android:title="@string/doom_3"

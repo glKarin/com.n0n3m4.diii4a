@@ -20,7 +20,7 @@ endif()
 
 
 # Backport
-OPTION(BUILD_BACKPORT               "Build backport version"                        ON)
+OPTION(BUILD_BACKPORT               "Build backport version"                        OFF)
 
 
 # Supported
@@ -183,9 +183,9 @@ endif()
 if(GAME_REALRTCW) # 5.3 | Jul 26, 2025 | 32e574d19bc3d5fa92c3c67cfe168154a26ed217 | Never do special wave if chance is 0
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
-    if(BUILD_BACKPORT)
+#[[    if(BUILD_BACKPORT)
         add_subdirectory ( backports/realrtcw_5_2 "realrtcw_5_2" )
-    endif()
+    endif()]]
 endif()
 
 if(GAME_FTEQW) # 5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 | engine/common/fs.c: Update game definitions

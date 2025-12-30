@@ -1,0 +1,7 @@
+* For add game version
+// KARIN_GAME_VERSION_BOOKMARK
+
+1. Add version name and engine library constants on Q3EGameConstants
+2. Edit Q3EInterface::GetGameVersions for add version list
+3. Edit Q3EInterface::GetEngineLibName for choose game engine library
+4. Make build BUILD_BACKPORT option to OFF on master CMakeLists.txt

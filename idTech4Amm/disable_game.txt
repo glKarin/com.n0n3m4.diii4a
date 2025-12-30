@@ -1,4 +1,5 @@
 * For disable game
+// KARIN_DISABLE_GAME_BOOKMARK
 
 1. Edit 2 Q3EInterface::IsDisabled methods
 2. Edit menu/activity_menu.xml, make game menu invisible
