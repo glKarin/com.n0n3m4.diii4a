@@ -107,7 +107,7 @@ class FAudiot : public FUncompressedFile
 				DWORD size = positions[i+1] - positions[i];
 
 				char name[9];
-				sprintf(name, "AUD%05d", i);
+				mysnprintf(name, 9, "AUD%05d", i);
 				Lumps[i].Owner = this;
 				Lumps[i].LumpNameSetup(name);
 				Lumps[i].Position = positions[i];

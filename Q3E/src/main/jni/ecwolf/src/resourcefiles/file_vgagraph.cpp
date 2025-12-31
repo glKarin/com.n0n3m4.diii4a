@@ -73,24 +73,22 @@ struct FVGALump : public FResourceLump
 		{
 			Owner->Reader->Seek(position+(noSkip ? 0 : 4), SEEK_SET);
 
-			byte* data = new byte[length];
-			byte* out = new byte[LumpSize];
-			memset(out, 0, LumpSize);
-			Owner->Reader->Read(data, length);
+			TUniquePtr<byte[]> data(new byte[length]);
+			TUniquePtr<byte[]> out(new byte[LumpSize]);
+			memset(out.Get(), 0, LumpSize);
+			Owner->Reader->Read(data.Get(), length);
 			HuffExpand(data, out);
-			delete[] data;
 
 			Cache = new char[LumpSize];
 			if(!isImage)
-				memcpy(Cache, out, LumpSize);
+				memcpy(Cache, out.Get(), LumpSize);
 			else
 			{
 				// We flip again on big endian so that the code that reads the data makes sense
-				WriteLittleShort((BYTE*)Cache, dimensions.width);
-				WriteLittleShort((BYTE*)Cache+2, dimensions.height);
-				memcpy(Cache+4, out, LumpSize-4);
+				*(WORD*)Cache = LittleShort(dimensions.width);
+				*((WORD*)(Cache+2)) = LittleShort(dimensions.height);
+				memcpy(Cache+4, out.Get(), LumpSize-4);
 			}
-			delete[] out;
 
 			RefCount = 1;
 			return 1;
@@ -208,12 +206,6 @@ class FVGAGraph : public FResourceFile
 			}
 		}
 
-		~FVGAGraph()
-		{
-			if(lumps != NULL)
-				delete[] lumps;
-		}
-
 		bool Open(bool quiet)
 		{
 			vgadictReader->Read(huffman, sizeof(huffman));
@@ -225,26 +217,26 @@ class FVGAGraph : public FResourceFile
 
 			NumLumps = vgaheadReader->GetLength()/3;
 			vgaheadReader->Seek(0, SEEK_SET);
-			lumps = new FVGALump[NumLumps];
+			lumps.Reset(new FVGALump[NumLumps]);
 			// The vgahead has 24-bit ints.
-			BYTE* data = new BYTE[NumLumps*3];
-			vgaheadReader->Read(data, NumLumps*3);
+			TUniquePtr<BYTE[]> vgahead(new BYTE[NumLumps*3]);
+			vgaheadReader->Read(vgahead.Get(), NumLumps*3);
 
 			unsigned int numPictures = 0;
 			unsigned int numFonts = 0;
-			Dimensions* dimensions = NULL;
+			TArray<Dimensions> dimensions;
 			for(unsigned int i = 0;i < NumLumps;i++)
 			{
 				// Give the lump a temporary name.
 				char lumpname[9];
-				sprintf(lumpname, "VGA%05d", i);
+				mysnprintf(lumpname, 9, "VGA%05d", i);
 				lumps[i].Owner = this;
 				lumps[i].LumpNameSetup(lumpname);
 
 				lumps[i].noSkip = false;
 				lumps[i].isImage = (i > numFonts+2 && i-numFonts-1 < numPictures);
 				lumps[i].Namespace = lumps[i].isImage ? ns_graphics : ns_global;
-				lumps[i].position = ReadLittle24(&data[i*3]);
+				lumps[i].position = ReadLittle24(&vgahead[i*3]);
 				lumps[i].huffman = huffman;
 
 				// The actual length isn't stored so we need to go by the position of the following lump.
@@ -271,16 +263,16 @@ class FVGAGraph : public FResourceFile
 					Reader->Seek(lumps[0].position+4, SEEK_SET);
 					lumps[0].LumpSize = (NumLumps-1)*4;
 
-					byte* data = new byte[lumps[0].length];
-					byte* out = new byte[lumps[0].LumpSize];
-					Reader->Read(data, lumps[0].length);
-					byte* endPtr = lumps[0].HuffExpand(data, out);
-					delete[] data;
+					TUniquePtr<byte[]> data(new byte[lumps[0].length]);
+					Reader->Read(data.Get(), lumps[0].length);
 
-					lumps[0].LumpSize = (unsigned int)(endPtr - out);
+					TUniquePtr<byte[]> out(new byte[lumps[0].LumpSize]);
+					byte* endPtr = lumps[0].HuffExpand(data, out);
+
+					lumps[0].LumpSize = (unsigned int)(endPtr - out.Get());
 					numPictures = lumps[0].LumpSize/4;
 
-					dimensions = new Dimensions[numPictures];
+					dimensions.Resize(numPictures);
 					for(unsigned int j = 0;j < numPictures;j++)
 					{
 						dimensions[j].width = ReadLittleShort(&out[j*4]);
@@ -291,7 +283,6 @@ class FVGAGraph : public FResourceFile
 							dimensions[j].width == 0 || dimensions[j].height == 0)
 							numPictures = j;
 					}
-					delete[] out;
 				}
 				// Check if the last lump is a font, but only until we hit a
 				// lump we determined was not a font.
@@ -302,11 +293,11 @@ class FVGAGraph : public FResourceFile
 					{
 						Reader->Seek(lumps[i-1].position+4, SEEK_SET);
 
-						byte* data = new byte[lumps[i-1].length];
-						byte* out = new byte[lumps[i-1].LumpSize];
-						Reader->Read(data, lumps[i-1].length);
+						TUniquePtr<byte[]> data(new byte[lumps[i-1].length]);
+						Reader->Read(data.Get(), lumps[i-1].length);
+
+						TUniquePtr<byte[]> out(new byte[lumps[i-1].LumpSize]);
 						byte* endPtr = lumps[i-1].HuffExpand(data, out);
-						delete[] data;
 
 						bool endhit = false;
 						WORD height = ReadLittleShort(out);
@@ -324,7 +315,6 @@ class FVGAGraph : public FResourceFile
 							else if(space == 0)
 								endhit = true;
 						}
-						delete[] out;
 
 						if(!endhit)
 							lumps[i-1].isImage = lumps[i].isImage = true;
@@ -369,20 +359,16 @@ class FVGAGraph : public FResourceFile
 			//       We will use the method from before to guess a size.
 			if(tile8Position < NumLumps && (unsigned)lumps[tile8Position].LumpSize > lumps[tile8Position].length)
 			{
-				byte* data = new byte[lumps[tile8Position].length];
-				byte* out = new byte[64*256];
+				TUniquePtr<byte[]> data(new byte[lumps[tile8Position].length]);
 				Reader->Seek(lumps[tile8Position].position, SEEK_SET);
-				Reader->Read(data, lumps[tile8Position].length);
-				byte* endPtr = lumps[tile8Position].HuffExpand(data, out);
-				delete[] data;
-				delete[] out;
+				Reader->Read(data.Get(), lumps[tile8Position].length);
+
+				byte out[64*256];
+				byte* endPtr = lumps[tile8Position].HuffExpand(data.Get(), out);
 
 				lumps[tile8Position].noSkip = true;
 				lumps[tile8Position].LumpSize = (unsigned int)(endPtr - out)&~0x3F;
 			}
-			if(dimensions != NULL)
-				delete[] dimensions;
-			delete[] data;
 
 			// We don't care about the PICTABLE lump now so we can just skip
 			// over it.
@@ -400,7 +386,7 @@ class FVGAGraph : public FResourceFile
 
 	private:
 		Huffnode huffman[255];
-		FVGALump* lumps;
+		TUniquePtr<FVGALump[]> lumps;
 
 		FString extension;
 		TUniquePtr<FileReader> vgaheadReader;

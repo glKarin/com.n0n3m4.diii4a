@@ -19,6 +19,7 @@
 extern  bool noadaptive;
 extern  unsigned        tics;
 extern  int             viewsize;
+extern unsigned short Paused;
 
 //
 // current user input
@@ -27,8 +28,8 @@ struct TicCmd_t
 {
 	int controlx,controly, controlstrafe; // range from -100 to 100
 	int controlpanx, controlpany;
-	bool buttonstate[NUMBUTTONS], ambuttonstate[NUMAMBUTTONS];
-	bool buttonheld[NUMBUTTONS], ambuttonheld[NUMAMBUTTONS];
+	BYTE buttonstate[NUMBUTTONS], ambuttonstate[NUMAMBUTTONS];
+	BYTE buttonheld[NUMBUTTONS], ambuttonheld[NUMAMBUTTONS];
 };
 extern unsigned int ConsolePlayer;
 extern TicCmd_t control[MAXPLAYERS];
@@ -41,11 +42,13 @@ extern  bool        demorecord,demoplayback;
 extern  int8_t      *demoptr, *lastdemoptr;
 extern  memptr      demobuffer;
 
+void    PlayFrame();
 void    PlayLoop (void);
 
 void    InitRedShifts (void);
 void    FinishPaletteShifts (void);
 
+void    CheckKeys();
 void    PollControls (bool);
 int     StopMusic(void);
 void    StartMusic(void);

@@ -289,7 +289,7 @@ bool P_ChangeSwitchTexture (MapSpot spot, MapTile::Side side, int useAgain, BYTE
 	{
 		//FName test = "switches/normbutn";
 		//Printf("Here %d %s %d %s\n", (int)test, test.GetChars(), (int)sound, sound.GetChars());
-		SD_PlaySound(FName(sound).GetChars());
+		PlaySoundLocMapSpot(FName(sound).GetChars(), spot);
 		//PlaySoundLocMapSpot(FName(sound), spot);
 	}
 	if (quest != NULL)

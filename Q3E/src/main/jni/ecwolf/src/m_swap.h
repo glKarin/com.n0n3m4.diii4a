@@ -51,22 +51,6 @@ static inline void WriteLittleShort(BYTE * const ptr, WORD value)
 	ptr[1] = (value>>8)&0xFF;
 }
 
-static inline void WriteLittleLong(BYTE * const ptr, DWORD value)
-{
-	ptr[0] = value&0xFF;
-	ptr[1] = (value>>8)&0xFF;
-	ptr[2] = (value>>16)&0xFF;
-	ptr[3] = (value>>24)&0xFF;
-}
-
-static inline void WriteBigLong(BYTE * const ptr, DWORD value)
-{
-	ptr[0] = (value>>24)&0xFF;
-	ptr[1] = (value>>16)&0xFF;
-	ptr[2] = (value>>8)&0xFF;
-	ptr[3] = value&0xFF;
-}
-
 // After the fact Byte Swapping ------------------------------------------------
 
 static inline WORD SwapShort(WORD x)
@@ -101,8 +85,6 @@ static inline QWORD SwapLongLong(QWORD x)
 #define LittleShort SwapShort
 #define LittleLong SwapLong
 #define LittleLongLong SwapLongLong
-#define ReadNativeShort ReadBigShort
-#define ReadNativeLong ReadBigLong
 #else
 #define BigShort SwapShort
 #define BigLong SwapLong
@@ -110,8 +92,6 @@ static inline QWORD SwapLongLong(QWORD x)
 #define LittleShort(x) (x)
 #define LittleLong(x) (x)
 #define LittleLongLong(x) (x)
-#define ReadNativeShort ReadLittleShort
-#define ReadNativeLong ReadLittleLong
 #endif
 
 #endif /* __M_SWAP__ */

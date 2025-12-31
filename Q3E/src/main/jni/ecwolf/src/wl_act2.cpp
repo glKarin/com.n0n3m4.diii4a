@@ -492,7 +492,8 @@ ACTION_FUNCTION(A_Chase)
 		CHF_DONTDODGE = 1,
 		CHF_BACKOFF = 2,
 		CHF_NOSIGHTCHECK = 4,
-		CHF_NOPLAYACTIVE = 8
+		CHF_NOPLAYACTIVE = 8,
+		CHF_ALWAYSDODGE = 16
 	};
 
 	ACTION_PARAM_STATE(melee, 0, self->MeleeState);
@@ -504,20 +505,35 @@ ACTION_FUNCTION(A_Chase)
 	bool	dodge = !(flags & CHF_DONTDODGE);
 	bool	pathing = (self->flags & FL_PATHING) ? true : false;
 
-	if(!pathing && self->target == NULL)
+	if(!pathing)
 	{
-		// Auto select player to target. ZDoom tries to sight for a target and
-		// if it doesn't find one switches to idle. Wolf3D, however, never had
-		// explicit targets so the player was assumed to always be targeted.
-		self->target = players[pr_chase()%Net::InitVars.numPlayers].mo;
-		assert(self->target);
+		if(self->target == NULL)
+		{
+			// Auto select player to target. ZDoom tries to sight for a target and
+			// if it doesn't find one switches to idle. Wolf3D, however, never had
+			// explicit targets so the player was assumed to always be targeted.
+			self->target = players[pr_chase()%Net::InitVars.numPlayers].mo;
+			assert(self->target);
+		}
+
+		if(self->target->health <= 0 || !(self->target->flags & FL_SHOOTABLE))
+		{
+			// Target is no longer valid so find a new one
+			if (!SightPlayer (self, 0, 0, 0, 180, NULL))
+			{
+				self->SetIdle();
+				self->target = NULL;
+				self->flags &= ~(FL_ATTACKMODE|FL_FIRSTATTACK);
+				return true;
+			}
+		}
 	}
 
 	if (self->dir == nodir)
 	{
 		if (pathing)
 			SelectPathDir (self);
-		else if (dodge)
+		else if (dodge || (flags & CHF_ALWAYSDODGE))
 			SelectDodgeDir (self);
 		else
 			SelectChaseDir (self);
@@ -656,7 +672,7 @@ ACTION_FUNCTION(A_Chase)
 			dist = dx>dy ? dx : dy;
 			if ((flags & CHF_BACKOFF) && dist < 4)
 				SelectRunDir (self);
-			else if (dodge)
+			else if (dodge || (flags & CHF_ALWAYSDODGE))
 				SelectDodgeDir (self);
 			else
 				SelectChaseDir (self);
@@ -780,6 +796,10 @@ ACTION_FUNCTION(A_WolfAttack)
 
 	A_Face(self, target);
 
+	// Targeting something we shouldn't be able to hit?
+	if(!(target->flags & FL_SHOOTABLE))
+		return true;
+
 	if (CheckLine (self, target)) // player is not behind a wall
 	{
 		dx = abs(self->x - target->x);
@@ -791,14 +811,14 @@ ACTION_FUNCTION(A_WolfAttack)
 
 		if (target->player->thrustspeed >= runspeed)
 		{
-			if (self->flags&FL_VISABLE)
+			if (target->CheckVisibility(self))
 				hitchance = 160-dist*16; // player can see to dodge
 			else
 				hitchance = 160-dist*8;
 		}
 		else
 		{
-			if (self->flags&FL_VISABLE)
+			if (target->CheckVisibility(self))
 				hitchance = 256-dist*16; // player can see to dodge
 			else
 				hitchance = 256-dist*8;

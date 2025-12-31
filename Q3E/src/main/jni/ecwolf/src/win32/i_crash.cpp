@@ -37,67 +37,43 @@
 #define WIN32_LEAN_AND_MEAN
 #define _WIN32_WINNT 0x0501
 #include <windows.h>
-#include <winnt.h>
 #include <richedit.h>
-#include <winuser.h>
 #include <tlhelp32.h>
 #ifndef _M_IX86
 #include <winternl.h>
 #endif
 #ifndef __GNUC__
+#if _MSC_VER
+#pragma warning(disable:4091)	// this silences a warning for a bogus definition in the Windows 8.1 SDK.
+#endif
 #include <dbghelp.h>
+#if _MSC_VER
+#pragma warning(default:4091)
+#endif
 #endif
 #include <commctrl.h>
 #include <commdlg.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <setupapi.h>
 #include <uxtheme.h>
 #include <shellapi.h>
-#include <uxtheme.h>
-#include <stddef.h>
 
 #define USE_WINDOWS_DWORD
 #include "wl_def.h"
 #include "resource.h"
-#include "zstring.h"
 #include "version.h"
 #include "m_swap.h"
+#include "zstring.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
 #include <time.h>
 #include <zlib.h>
 
+#ifndef _M_ARM64
 // MACROS ------------------------------------------------------------------
 
-#define FORUM_URL		"http://forum.drdteam.org/viewforum.php?f=174"
-#define BUGS_FORUM_URL	"https://bitbucket.org/ecwolf/ecwolf/issues"
-#define REMOTE_HOST		"localhost"
-#define REMOTE_PORT		"80"
-#define UPLOAD_URI		"/test.php"
-#define UPLOAD_BOUNDARY	"Von-DnrNbJl0 P9d_BD;cEEsQVWpYMq0pbZ6NUmYHus;yIbFbkgB?.N=YC5O=BGZm+Rab5"
-#define DBGHELP_URI		"/msredist/dbghelp.dl_"
-
-// If you are working on your own modified version of ZDoom, change
-// the last part of the UPLOAD_AGENT (between parentheses) to your
-// own program's name. e.g. (Skulltag) or (ZDaemon) or (ZDoomFu)
-#define UPLOAD_AGENT	GAMENAME "/" DOTVERSIONSTR_NOREV " (" GAMESIG ")"
-
-// Time, in milliseconds, to wait for a send() or recv() to complete.
-#define TIMEOUT			60000
+#define FORUM_URL       "https://bitbucket.org/ecwolf/ecwolf/issues"
+#define BUGS_FORUM_URL  FORUM_URL
 
 // Maximum number of files that might appear in a crash report.
 #define MAX_FILES 5
-
-#ifndef MAKE_ID
-#ifndef __BIG_ENDIAN__
-#define MAKE_ID(a,b,c,d)	((a)|((b)<<8)|((c)<<16)|((d)<<24))
-#else
-#define MAKE_ID(a,b,c,d)	((d)|((c)<<8)|((b)<<16)|((a)<<24))
-#endif
-#endif
 
 #define ZIP_LOCALFILE	MAKE_ID('P','K',3,4)
 #define ZIP_CENTRALFILE	MAKE_ID('P','K',1,2)
@@ -169,50 +145,50 @@ namespace zip
 #pragma pack(push,1)
 	struct LocalFileHeader
 	{
-		DWORD	Magic;						// 0
-		BYTE	VersionToExtract[2];		// 4
-		WORD	Flags;						// 6
-		WORD	Method;						// 8
-		WORD	ModTime;					// 10
-		WORD	ModDate;					// 12
-		DWORD	CRC32;						// 14
-		DWORD	CompressedSize;				// 18
-		DWORD	UncompressedSize;			// 22
-		WORD	NameLength;					// 26
-		WORD	ExtraLength;				// 28
+		uint32_t	Magic;						// 0
+		uint8_t	VersionToExtract[2];		// 4
+		uint16_t	Flags;						// 6
+		uint16_t	Method;						// 8
+		uint16_t	ModTime;					// 10
+		uint16_t	ModDate;					// 12
+		uint32_t	CRC32;						// 14
+		uint32_t	CompressedSize;				// 18
+		uint32_t	UncompressedSize;			// 22
+		uint16_t	NameLength;					// 26
+		uint16_t	ExtraLength;				// 28
 	};
 
 	struct CentralDirectoryEntry
 	{
-		DWORD	Magic;
-		BYTE	VersionMadeBy[2];
-		BYTE	VersionToExtract[2];
-		WORD	Flags;
-		WORD	Method;
-		WORD	ModTime;
-		WORD	ModDate;
-		DWORD	CRC32;
-		DWORD	CompressedSize;
-		DWORD	UncompressedSize;
-		WORD	NameLength;
-		WORD	ExtraLength;
-		WORD	CommentLength;
-		WORD	StartingDiskNumber;
-		WORD	InternalAttributes;
-		DWORD	ExternalAttributes;
-		DWORD	LocalHeaderOffset;
+		uint32_t	Magic;
+		uint8_t		VersionMadeBy[2];
+		uint8_t		VersionToExtract[2];
+		uint16_t	Flags;
+		uint16_t	Method;
+		uint16_t	ModTime;
+		uint16_t	ModDate;
+		uint32_t	CRC32;
+		uint32_t	CompressedSize;
+		uint32_t	UncompressedSize;
+		uint16_t	NameLength;
+		uint16_t	ExtraLength;
+		uint16_t	CommentLength;
+		uint16_t	StartingDiskNumber;
+		uint16_t	InternalAttributes;
+		uint32_t	ExternalAttributes;
+		uint32_t	LocalHeaderOffset;
 	};
 
 	struct EndOfCentralDirectory
 	{
-		DWORD	Magic;
-		WORD	DiskNumber;
-		WORD	FirstDisk;
-		WORD	NumEntries;
-		WORD	NumEntriesOnAllDisks;
-		DWORD	DirectorySize;
-		DWORD	DirectoryOffset;
-		WORD	ZipCommentLength;
+		uint32_t	Magic;
+		uint16_t	DiskNumber;
+		uint16_t	FirstDisk;
+		uint16_t	NumEntries;
+		uint16_t	NumEntriesOnAllDisks;
+		uint32_t	DirectorySize;
+		uint32_t	DirectoryOffset;
+		uint16_t	ZipCommentLength;
 	};
 #pragma pack(pop)
 }
@@ -222,9 +198,9 @@ struct TarFile
 	HANDLE		File;
 	const char *Filename;
 	int			ZipOffset;
-	DWORD		UncompressedSize;
-	DWORD		CompressedSize;
-	DWORD		CRC32;
+	uint32_t	UncompressedSize;
+	uint32_t	CompressedSize;
+	uint32_t	CRC32;
 	bool		Deflated;
 };
 
@@ -237,8 +213,6 @@ struct MiniDumpThreadData
 
 // EXTERNAL FUNCTION PROTOTYPES --------------------------------------------
 
-// PUBLIC FUNCTION PROTOTYPES ----------------------------------------------
-
 // PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
 
 static void AddFile (HANDLE file, const char *filename);
@@ -247,7 +221,7 @@ static HANDLE MakeZip ();
 static void AddZipFile (HANDLE ziphandle, TarFile *whichfile, short dosdate, short dostime);
 static HANDLE CreateTempFile ();
 
-static void DumpBytes (HANDLE file, BYTE *address);
+static void DumpBytes (HANDLE file, uint8_t *address);
 static void AddStackInfo (HANDLE file, void *dumpaddress, DWORD code, CONTEXT *ctxt);
 static void StackWalk (HANDLE file, void *dumpaddress, DWORD *topOfStack, DWORD *jump, CONTEXT *ctxt);
 static void AddToolHelp (HANDLE file);
@@ -271,53 +245,6 @@ EXCEPTION_POINTERS CrashPointers;
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
 static HRESULT (__stdcall *pEnableThemeDialogTexture) (HWND hwnd, DWORD dwFlags);
-
-static const char PostHeader[] =
-"POST " UPLOAD_URI " HTTP/1.1\r\n"
-"Host: " REMOTE_HOST "\r\n"
-"Connection: Close\r\n"
-"User-Agent: " UPLOAD_AGENT "\r\n"
-"Expect: 100-continue\r\n"
-"Content-Type: multipart/form-data; boundary=\"" UPLOAD_BOUNDARY "\"\r\n"
-"Content-Length: %lu\r\n"
-"\r\n";
-
-static const char MultipartInfoHeader[] =
-"\r\n--" UPLOAD_BOUNDARY "\r\n"
-"Content-Transfer-Encoding: 7bit\r\n"
-"Content-Disposition: form-data; name=\"Info\"\r\n"
-"\r\n";
-
-static const char MultipartUserSummaryHeader[] =
-"\r\n--" UPLOAD_BOUNDARY "\r\n"
-"Content-Transfer-Encoding: 8bit\r\n"
-"Content-Disposition: form-data; name=\"UserSummary\"\r\n"
-"\r\n";
-
-static const char MultipartBinaryHeader[] =
-"\r\n--" UPLOAD_BOUNDARY "\r\n"
-"Content-Transfer-Encoding: binary\r\n"
-"Content-Disposition: form-data; name=\"reportfile\"; filename=\"itdidcrash.tar";
-
-static const char MultipartHeaderGZip[] =
-".gz\"\r\n"
-"Content-Type: application/x-tar-gz\r\n"
-"\r\n";
-
-static const char MultipartHeaderNoGZip[] =
-"\"\r\n"
-"Content-Type: application/x-tar\r\n"
-"\r\n";
-
-static const char MultipartFooter[] =
-"\r\n--" UPLOAD_BOUNDARY "--\r\n\r\n";
-
-static const char DbgHelpRequest[] =
-"GET " DBGHELP_URI " HTTP/1.1\r\n"
-"Host: " REMOTE_HOST "\r\n"
-"Connection: Close\r\n"
-"User-Agent: " UPLOAD_AGENT "\r\n"
-"\r\n";
 
 static TarFile TarFiles[MAX_FILES];
 
@@ -389,7 +316,7 @@ DWORD *GetTopOfStack (void *top)
 
 	if (VirtualQuery (top, &memInfo, sizeof(memInfo)))
 	{
-		return (DWORD *)((BYTE *)memInfo.BaseAddress + memInfo.RegionSize);
+		return (DWORD *)((uint8_t *)memInfo.BaseAddress + memInfo.RegionSize);
 	}
 	else
 	{
@@ -496,7 +423,7 @@ static DWORD WINAPI WriteMiniDumpInAnotherThread (LPVOID lpParam)
 //
 //==========================================================================
 
-void __cdecl Writef (HANDLE file, const char *format, ...)
+void Writef (HANDLE file, const char *format, ...)
 {
 	char buffer[1024];
 	va_list args;
@@ -608,7 +535,7 @@ void CreateCrashLog (char *custominfo, DWORD customsize, HWND richlog)
 
 		if (file != INVALID_HANDLE_VALUE)
 		{
-			BYTE buffer[512];
+			uint8_t buffer[512];
 			DWORD left;
 
 			for (;; customsize -= left, custominfo += left)
@@ -800,10 +727,10 @@ HANDLE WriteTextReport ()
 			"\r\nFPU State:\r\n ControlWord=%04x StatusWord=%04x TagWord=%04x\r\n"
 			" ErrorOffset=%08x\r\n ErrorSelector=%08x\r\n DataOffset=%08x\r\n DataSelector=%08x\r\n"
 			// Cr0NpxState was renamed in recent Windows headers so better skip it here. Its meaning is unknown anyway.
-			//" Cr0NpxState=%08x\r\n\r\n"
+			//" Cr0NpxState=%08x\r\n"
 			"\r\n"
 			,
-			(WORD)ctxt->FloatSave.ControlWord, (WORD)ctxt->FloatSave.StatusWord, (WORD)ctxt->FloatSave.TagWord,
+			(uint16_t)ctxt->FloatSave.ControlWord, (uint16_t)ctxt->FloatSave.StatusWord, (uint16_t)ctxt->FloatSave.TagWord,
 			ctxt->FloatSave.ErrorOffset, ctxt->FloatSave.ErrorSelector, ctxt->FloatSave.DataOffset,
 			ctxt->FloatSave.DataSelector
 			//, ctxt->FloatSave.Cr0NpxState
@@ -835,7 +762,7 @@ HANDLE WriteTextReport ()
 #else
 	Writef (file, "\r\nBytes near RIP:");
 #endif
-	DumpBytes (file, (BYTE *)CrashPointers.ExceptionRecord->ExceptionAddress-16);
+	DumpBytes (file, (uint8_t *)CrashPointers.ExceptionRecord->ExceptionAddress-16);
 
 	if (ctxt->ContextFlags & CONTEXT_CONTROL)
 	{
@@ -946,11 +873,11 @@ static void AddStackInfo (HANDLE file, void *dumpaddress, DWORD code, CONTEXT *c
 {
 	DWORD *addr = (DWORD *)dumpaddress, *jump;
 	DWORD *topOfStack = GetTopOfStack (dumpaddress);
-	BYTE peekb;
+	uint8_t peekb;
 #ifdef _M_IX86
 	DWORD peekd;
 #else
-	QWORD peekq;
+	uint64_t peekq;
 #endif
 
 	jump = topOfStack;
@@ -1002,9 +929,9 @@ static void AddStackInfo (HANDLE file, void *dumpaddress, DWORD code, CONTEXT *c
 			Writef (file, "         ");
 		}
 #else
-		if ((QWORD *)topOfStack - (QWORD *)scan < 2)
+		if ((uint64_t *)topOfStack - (uint64_t *)scan < 2)
 		{
-			max = (QWORD *)topOfStack - (QWORD *)scan;
+			max = (uint64_t *)topOfStack - (uint64_t *)scan;
 		}
 		else
 		{
@@ -1027,7 +954,7 @@ static void AddStackInfo (HANDLE file, void *dumpaddress, DWORD code, CONTEXT *c
 		Writef (file, "  ");
 		for (i = 0; i < int(max*sizeof(void*)); ++i)
 		{
-			if (!SafeReadMemory ((BYTE *)scan + i, &peekb, 1))
+			if (!SafeReadMemory ((uint8_t *)scan + i, &peekb, 1))
 			{
 				break;
 			}
@@ -1054,7 +981,7 @@ static void StackWalk (HANDLE file, void *dumpaddress, DWORD *topOfStack, DWORD 
 {
 	DWORD *addr = (DWORD *)dumpaddress;
 
-	BYTE *pBaseOfImage = (BYTE *)GetModuleHandle (0);
+	uint8_t *pBaseOfImage = (uint8_t *)GetModuleHandle (0);
 	IMAGE_OPTIONAL_HEADER *pHeader = (IMAGE_OPTIONAL_HEADER *)(pBaseOfImage +
 		((IMAGE_DOS_HEADER*)pBaseOfImage)->e_lfanew +
 		sizeof(IMAGE_NT_SIGNATURE) + sizeof(IMAGE_FILE_HEADER));
@@ -1082,8 +1009,8 @@ static void StackWalk (HANDLE file, void *dumpaddress, DWORD *topOfStack, DWORD 
 			};
 
 			// Check if address is after a call statement. Print what was called if it is.
-			const BYTE *bytep = (BYTE *)code;
-			BYTE peekb;
+			const uint8_t *bytep = (uint8_t *)code;
+			uint8_t peekb;
 
 #define chkbyte(x,m,v) (SafeReadMemory(x, &peekb, 1) && ((peekb & m) == v))
 
@@ -1179,7 +1106,7 @@ static void StackWalk (HANDLE file, void *dumpaddress, DWORD *topOfStack, DWORD 
 
 					if (mod == 1)
 					{
-						signed char miniofs = 0;
+						signed char miniofs;
 						SafeReadMemory (bytep++, &miniofs, 1);
 						offset = miniofs;
 					}
@@ -1364,11 +1291,11 @@ static void StackWalk (HANDLE file, void *dumpaddress, DWORD *topOfStack, DWORD 
 //
 //==========================================================================
 
-static void DumpBytes (HANDLE file, BYTE *address)
+static void DumpBytes (HANDLE file, uint8_t *address)
 {
 	char line[68*3], *line_p = line;
 	DWORD len;
-	BYTE peek;
+	uint8_t peek;
 
 	for (int i = 0; i < 16*3; ++i)
 	{
@@ -1514,7 +1441,8 @@ static HANDLE MakeZip ()
 	struct tm *nowtm;
 	int i, numfiles;
 	HANDLE file;
-	DWORD len, dirsize;
+	DWORD len;
+	uint32_t dirsize;
 	size_t namelen;
 
 	if (NumFiles == 0)
@@ -1554,7 +1482,7 @@ static HANDLE MakeZip ()
 	central.ModTime = dostime;
 	central.ModDate = dosdate;
 
-	dirend.DirectoryOffset = LittleLong(SetFilePointer (file, 0, NULL, FILE_CURRENT));
+	dirend.DirectoryOffset = LittleLong((uint32_t)SetFilePointer (file, 0, NULL, FILE_CURRENT));
 
 	for (i = 0, numfiles = 0, dirsize = 0; i < NumFiles; ++i)
 	{
@@ -1566,8 +1494,8 @@ static HANDLE MakeZip ()
 		numfiles++;
 		if (TarFiles[i].Deflated)
 		{
-			central.Flags = LittleShort(2);
-			central.Method = LittleShort(8);
+			central.Flags = LittleShort((uint16_t)2);
+			central.Method = LittleShort((uint16_t)8);
 		}
 		else
 		{
@@ -1578,12 +1506,12 @@ static HANDLE MakeZip ()
 		central.InternalAttributes = 0;
 		if (namelen > 4 && stricmp(TarFiles[i].Filename - 4, ".txt") == 0)
 		{ // Bit 0 set indicates this is probably a text file. But do any tools use it?
-			central.InternalAttributes = LittleShort(1);
+			central.InternalAttributes = LittleShort((uint16_t)1);
 		}
 		central.CRC32 = LittleLong(TarFiles[i].CRC32);
 		central.CompressedSize = LittleLong(TarFiles[i].CompressedSize);
 		central.UncompressedSize = LittleLong(TarFiles[i].UncompressedSize);
-		central.NameLength = LittleShort((WORD)namelen);
+		central.NameLength = LittleShort((uint16_t)namelen);
 		central.LocalHeaderOffset = LittleLong(TarFiles[i].ZipOffset);
 		WriteFile (file, &central, sizeof(central), &len, NULL);
 		WriteFile (file, TarFiles[i].Filename, (DWORD)namelen, &len, NULL);
@@ -1591,7 +1519,7 @@ static HANDLE MakeZip ()
 	}
 
 	// Write the directory terminator
-	dirend.NumEntriesOnAllDisks = dirend.NumEntries = LittleShort(numfiles);
+	dirend.NumEntriesOnAllDisks = dirend.NumEntries = LittleShort((uint16_t)numfiles);
 	dirend.DirectorySize = LittleLong(dirsize);
 	WriteFile (file, &dirend, sizeof(dirend), &len, NULL);
 
@@ -1636,7 +1564,7 @@ static void AddZipFile (HANDLE ziphandle, TarFile *whichfile, short dosdate, sho
 
 	if (gzip)
 	{
-		local.Method = LittleShort(8);
+		local.Method = LittleShort((uint16_t)8);
 		whichfile->Deflated = true;
 		stream.next_out = outbuf;
 		stream.avail_out = sizeof(outbuf);
@@ -1644,11 +1572,11 @@ static void AddZipFile (HANDLE ziphandle, TarFile *whichfile, short dosdate, sho
 
 	// Write out the header and filename.
 	local.VersionToExtract[0] = 20;
-	local.Flags = gzip ? LittleShort(2) : 0;
+	local.Flags = gzip ? LittleShort((uint16_t)2) : 0;
 	local.ModTime = dostime;
 	local.ModDate = dosdate;
 	local.UncompressedSize = LittleLong(whichfile->UncompressedSize);
-	local.NameLength = LittleShort((WORD)strlen(whichfile->Filename));
+	local.NameLength = LittleShort((uint16_t)strlen(whichfile->Filename));
 	
 	whichfile->ZipOffset = SetFilePointer (ziphandle, 0, NULL, FILE_CURRENT);
 	WriteFile (ziphandle, &local, sizeof(local), &wrote, NULL);
@@ -1854,33 +1782,6 @@ static LRESULT CALLBACK TransparentStaticProc (HWND hWnd, UINT uMsg, WPARAM wPar
 }
 
 static HMODULE WinHlp32;
-static char *UserSummary;
-
-//==========================================================================
-//
-// AddDescriptionText
-//
-// Adds a file with the contents of the specified edit control to a new
-// file in the tarball. The control's user data is used to keep track of
-// the file handle for the created file, so you can call this more than
-// once and it will only open the file the first time.
-//
-//==========================================================================
-
-static void AddDescriptionText (HWND edit)
-{
-	DWORD textlen;
-
-	textlen = (DWORD)SendMessage (edit, WM_GETTEXTLENGTH, 0, 0) + 1;
-	if (textlen > 1)
-	{
-		UserSummary = (char *)HeapAlloc (GetProcessHeap(), 0, textlen);
-		if (UserSummary != NULL)
-		{
-			textlen = (DWORD)SendMessage (edit, WM_GETTEXT, textlen, (LPARAM)UserSummary);
-		}
-	}
-}
 
 //==========================================================================
 //
@@ -1925,7 +1826,7 @@ static INT_PTR CALLBACK OverviewDlgProc (HWND hDlg, UINT message, WPARAM wParam,
 		SendMessage (edit, WM_SETTEXT, 0, (LPARAM)"Please tell us about this problem.\n"
 			"The information will NOT be sent to Microsoft.\n\n"
 			"An error report has been created that you can submit to help improve " GAMENAME ". "
-			"You can either save it to disk and make a report in the issues tracker at " BUGS_FORUM_URL ", "
+			"You can either save it to disk and make a report in the issues tracker at " FORUM_URL ", "
 			"or you can send it directly without letting other people know about it.");
 		SendMessage (edit, EM_SETSEL, 0, 81);
 		SendMessage (edit, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&charFormat);
@@ -1955,11 +1856,6 @@ static INT_PTR CALLBACK OverviewDlgProc (HWND hDlg, UINT message, WPARAM wParam,
 			}
 		}
 		return FALSE;
-		break;
-
-	case WM_DESTROY:
-		// When this pane is destroyed, extract the user's summary.
-		AddDescriptionText (GetDlgItem (hDlg, IDC_CRASHINFO));
 		break;
 	}
 	return FALSE;
@@ -2157,7 +2053,7 @@ struct BinStreamInfo
 static DWORD CALLBACK StreamEditBinary (DWORD_PTR cookie, LPBYTE buffer, LONG cb, LONG *pcb)
 {
 	BinStreamInfo *info = (BinStreamInfo *)cookie;
-	BYTE buf16[16];
+	uint8_t buf16[16];
 	DWORD read, i;
 	char *buff_p = (char *)buffer;
 	char *buff_end = (char *)buffer + cb;
@@ -2207,7 +2103,7 @@ repeat:
 			buff_p += mysnprintf (buff_p, buff_end - buff_p, "\\cf3 ");
 			for (i = 0; i < read; ++i)
 			{
-				BYTE code = buf16[i];
+				uint8_t code = buf16[i];
 				if (code < 0x20 || code > 0x7f) code = 0xB7;
 				if (code == '\\' || code == '{' || code == '}') *buff_p++ = '\\';
 				*buff_p++ = code;
@@ -2311,931 +2207,6 @@ static void SetEditControl (HWND edit, HWND sizedisplay, int filenum)
 	SendMessage (edit, EM_SETSEL, (WPARAM)-1, 0);
 }
 
-#if 0		// Server-side support is not done yet
-
-//==========================================================================
-//
-// GetHeader
-//
-// Receives the HTTP header from a socket, up to and including the empty
-// line that terminates the header.
-//
-//==========================================================================
-
-static char *GetHeader (SOCKET sock)
-{
-	DWORD spaceHave = 0, spaceAt = 0;
-	char *space = NULL;
-	char inchar;
-	int got;
-
-	for (;;)
-	{
-		// Get one character
-		got = recv (sock, &inchar, 1, 0);
-		if (got != 1)
-		{
-error:
-			if (space != NULL) HeapFree (GetProcessHeap(), 0, space);
-			return NULL;
-		}
-		// Append it to the header we have so far
-		if (space == NULL)
-		{
-			spaceHave = 256;
-			space = (char *)HeapAlloc (GetProcessHeap(), 0, 256);
-		}
-		else if (spaceAt == spaceHave-1)
-		{
-			spaceHave += 256;
-			space = (char *)HeapReAlloc (GetProcessHeap(), 0, space, spaceHave);
-		}
-		switch (spaceAt)
-		{
-		case 0: if (inchar != 'H') goto error; break;
-		case 1: if (inchar != 'T') goto error; break;
-		case 2: if (inchar != 'T') goto error; break;
-		case 3: if (inchar != 'P') goto error; break;
-		case 4: if (inchar != '/') goto error; break;
-		}
-		space[spaceAt++] = inchar;
-		if (inchar == '\n' && space[spaceAt-2] == '\r' && space[spaceAt-3] == '\n' && space[spaceAt-4] == '\r')
-		{ // The header is complete
-			break;
-		}
-	}
-	space[spaceAt++] = '\0';
-	if (spaceAt < 12) goto error;
-	return space;
-}
-
-//==========================================================================
-//
-// UploadFail
-//
-// Stuffs some text into the status control to indicate what went wrong.
-//
-//==========================================================================
-
-static void UploadFail (HWND hDlg, const char *message, int reason)
-{
-	char buff[512];
-
-	mysnprintf (buff, countof(buff), "%s: %d", message, reason);
-	SetWindowText (GetDlgItem (hDlg, IDC_BOINGSTATUS), buff);
-
-	if (reason >= 10000 && reason <= 11999)
-	{
-		LPVOID lpMsgBuf;
-		if (FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			FORMAT_MESSAGE_FROM_SYSTEM |
-			FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,
-			GetLastError(),
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPTSTR)&lpMsgBuf,
-			0,
-			NULL))
-		{
-			SetWindowText (GetDlgItem (hDlg, IDC_BOINGEDIT), (LPCSTR)lpMsgBuf);
-			LocalFree (lpMsgBuf);
-		}
-	}
-}
-
-//==========================================================================
-//
-// GetChunkLen
-//
-// Returns the chunk length for a HTTP response using the chunked
-// transfer-encoding.
-//
-//==========================================================================
-
-static int GetChunkLen (SOCKET sock)
-{
-	char crlf[2] = { '\r', '\n' };
-	int len = 0;
-	int stage = 0;
-	char inchar;
-
-	while (recv (sock, &inchar, 1, 0) == 1)
-	{
-		switch (stage)
-		{
-		case 0:	// Checking for CRLF from the previous chunk
-		case 1:
-			if (inchar == crlf[stage]) { stage++; break; }
-			else stage = 2;
-
-		case 2:	// Reading length
-			if (inchar == ';') stage = 3;
-			else if (inchar >= '0' && inchar <= '9') len = (len << 4) | (inchar - '0');
-			else if (inchar >= 'A' && inchar <= 'F') len = (len << 4) | ((inchar - 'A') + 10);
-			else if (inchar >= 'a' && inchar <= 'f') len = (len << 4) | ((inchar - 'a') + 10);
-			else if (inchar == '\r') stage = 4;
-			break;
-
-		case 3: // Skipping chunk extension
-		case 4:
-			if (inchar == crlf[stage-3]) stage++;
-			else stage = 3;
-			if (stage == 5)
-			{
-				return len;
-			}
-			break;
-		}
-	}
-	return len;
-}
-
-//==========================================================================
-//
-// TranslateHTML
-//
-// Converts HTML text into something closer to plain-text and appends it
-// to the edit control's contents.
-//
-//==========================================================================
-
-struct TranslateHTML
-{
-	TranslateHTML (char *header, HWND editcontrol)
-		: edit(editcontrol), state(0), allowspace(false)
-	{
-		plaintext = strstr (header, "content-type: text/html") == NULL;
-	}
-	void Translate (char *buf);
-
-	HWND edit;
-	int state;
-	bool allowspace;
-	char token[64];
-	bool plaintext;
-};
-
-void TranslateHTML::Translate (char *buf)
-{
-	char *in, *out;
-	int tokenp = 0;
-	bool endrange = false;
-	bool inhead = false, inscript = false;
-
-	if (plaintext)
-	{
-		SendMessage (edit, EM_REPLACESEL, 0, (LPARAM)buf);
-		return;
-	}
-
-	for (in = out = buf; *in != 0; in++)
-	{
-		char x = *in;
-		switch (state)
-		{
-		case 0:	// Not in a token
-			if (x == '<' || x == '&')
-			{
-				state = x == '<' ? 1 : 11;
-			}
-			else if (!inhead && !inscript)
-			{
-				if (x <= ' ')
-				{
-					if (allowspace)
-					{
-						allowspace = false;
-						*out++ = ' ';
-					}
-				}
-				else
-				{
-					*out++ = x;
-					allowspace = true;
-				}
-			}
-			break;
-
-		case 1:	// Just got a '<'
-			state = 2;
-			tokenp = 0;
-			if (x == '/')
-			{
-				endrange = true;
-				break;
-			}
-			else if (x == '!')
-			{
-				state = 20;
-				break;
-			}
-			else
-			{
-				endrange = false;
-			}
-
-		case 2: // Somewhere past '<'
-			if (x == '>')
-			{ // Token finished
-gottoken:
-				token[tokenp] = 0;
-				if (!endrange)
-				{
-					if (stricmp (token, "head") == 0)
-					{
-						inhead = true;
-					}
-					else if (stricmp (token, "script") == 0)
-					{
-						inscript = true;
-					}
-					else if (stricmp (token, "p") == 0 || stricmp (token, "address") == 0)
-					{
-						*out++ = '\n';
-						*out++ = '\n';
-						allowspace = false;
-					}
-					else if (stricmp (token, "br") == 0)
-					{
-						*out++ = '\n';
-						allowspace = false;
-					}
-					else if (stricmp (token, "li") == 0)
-					{
-						*out++ = '\n';
-						*out++ = '*';
-						*out++ = ' ';
-						allowspace = false;
-					}
-					else if ((token[0] == 'h' || token[0] == 'H') && token[1] >= '0' && token[1] <= '9' && token[2] == '\0')
-					{
-						*out++ = '\n';
-						allowspace = false;
-					}
-				}
-				else
-				{
-					if (stricmp (token, "head") == 0)
-					{
-						inhead = false;
-					}
-					else if (stricmp (token, "script") == 0)
-					{
-						inscript = false;
-					}
-					else if ((token[0] == 'h' || token[0] == 'H') && token[1] >= '0' && token[1] <= '9' && token[2] == '\0')
-					{
-						*out++ = '\n';
-						*out++ = '\n';
-						allowspace = false;
-					}
-					else if (stricmp (token, "ul") == 0 || stricmp (token, "ol") == 0)
-					{
-						*out++ = '\n';
-						allowspace = false;
-					}
-				}
-				state = 0;
-			}
-			else if (x == ' ')
-			{
-				state = 3;
-			}
-			else if (tokenp < 63)
-			{
-				token[tokenp++] = x;
-			}
-			break;
-
-		case 3: // Past '<' TOKEN ' '
-			if (x == '>')
-			{ // Token finished
-				goto gottoken;
-			}
-			break;
-
-		case 11:	// Just got a '&'
-			state = 12;
-			tokenp = 0;
-
-		case 12:
-			if (x == ';')
-			{ // Token finished
-				if (stricmp (token, "lt") == 0)
-				{
-					*out++ = '<';
-				}
-				else if (stricmp (token, "gt") == 0)
-				{
-					*out++ = '>';
-				}
-				else if (stricmp (token, "amp") == 0)
-				{
-					*out++ = '&';
-				}
-				state = 0;
-			}
-			else if (tokenp < 63)
-			{
-				token[tokenp++] = x;
-			}
-			break;
-
-		case 20:	// Just got "<!"
-		case 21:	// Just got "<!-"
-			if (x == '-') state++;
-			else state = 2;
-			break;
-
-		case 22:	// Somewhere after "<!--"
-		case 23:	// Just got '-'
-			if (x == '-') state++;
-			else state = 22;
-			break;
-
-		case 24:	// Just got "--"
-			if (x == '>')
-			{
-				state = 0;
-			}
-			else
-			{
-				state = 22;
-			}
-			break;
-		}
-	}
-	if (out != buf)
-	{
-		*out++ = '\0';
-		SendMessage (edit, EM_REPLACESEL, 0, (LPARAM)buf);
-	}
-}
-
-//==========================================================================
-//
-// ReadResponse
-//
-// Read the HTTP response. If file is not INVALID_HANDLE_VALUE, then the
-// response is downloaded to the file. Otherwise, it is passed through
-// TranslateHTML and into the upload dialog's edit control.
-//
-//==========================================================================
-
-static bool ReadResponse (HWND hDlg, char *header, SOCKET sock, char *buf, int bufsize, HANDLE file)
-{
-	HWND edit = GetDlgItem (hDlg, IDC_BOINGEDIT);
-	DWORD wrote;
-	int len, avail, totalRecv;
-	int recvBytes = 0;
-	POINT pt = { 0, 0 };
-
-	strlwr (header);
-
-	TranslateHTML translator (header, edit);
-	SendMessage (edit, WM_SETREDRAW, FALSE, 0);
-
-	if (strstr (header, "transfer-encoding: chunked") != NULL)
-	{ // Response body is chunked
-		for (;;)
-		{
-			len = GetChunkLen (sock);
-			if (len == 0)
-			{
-				break;
-			}
-			while (len > 0)
-			{
-				if (len > bufsize-1) avail = bufsize-1;
-				else avail = len;
-				recvBytes = recv (sock, buf, avail, 0);
-				if (recvBytes == 0 || recvBytes == SOCKET_ERROR)
-				{
-					goto done;
-				}
-				buf[recvBytes] = '\0';
-				if (file != INVALID_HANDLE_VALUE)
-				{
-					WriteFile (file, buf, recvBytes, &wrote, NULL);
-				}
-				else
-				{
-					translator.Translate (buf);
-				}
-				len -= recvBytes;
-			}
-		}
-	}
-	else
-	{ // Response body is uninterrupted
-		char *lenhead = strstr (header, "content-length: ");
-		if (lenhead != 0)
-		{
-			len = strtol (lenhead + 16, NULL, 10);
-			if (file != INVALID_HANDLE_VALUE)
-			{
-				ShowWindow (GetDlgItem (hDlg, IDC_BOINGPROGRESS), SW_SHOW);
-				SendMessage (GetDlgItem (hDlg, IDC_BOINGPROGRESS), PBM_SETRANGE, 0, MAKELPARAM (0, (len + bufsize-2)/(bufsize-1)));
-			}
-		}
-		else
-		{
-			len = 0;
-		}
-		totalRecv = 0;
-		for (;;)
-		{
-			if (len == 0) avail = bufsize - 1;
-			else
-			{
-				avail = len - totalRecv;
-				if (avail > bufsize - 1) avail = bufsize - 1;
-			}
-			recvBytes = recv (sock, buf, avail, 0);
-			if (recvBytes == 0 || recvBytes == SOCKET_ERROR)
-			{
-				break;
-			}
-			totalRecv += recvBytes;
-			buf[recvBytes] = '\0';
-			if (file != INVALID_HANDLE_VALUE)
-			{
-				SendMessage (GetDlgItem (hDlg, IDC_BOINGPROGRESS), PBM_SETPOS, totalRecv/(bufsize-1), 0);
-				WriteFile (file, buf, recvBytes, &wrote, NULL);
-			}
-			else
-			{
-				translator.Translate (buf);
-			}
-			if (len != 0 && totalRecv >= len)
-			{
-				break;
-			}
-		}
-	}
-done:
-	SendMessage (edit, EM_SETSCROLLPOS, 0, (LPARAM)&pt);
-	SendMessage (edit, WM_SETREDRAW, TRUE, 0);
-	InvalidateRect (edit, NULL, FALSE);
-	return recvBytes != SOCKET_ERROR;
-}
-
-//==========================================================================
-//
-// CheckServerResponse
-//
-// Waits for a response from the server. If it doesn't get a 1xx or 2xx
-// response, the response is displayed. The return value is either the
-// response code or -1 if a socket error occurred.
-//
-//==========================================================================
-
-static int CheckServerResponse (HWND hDlg, SOCKET sock, char *&header, char *buf, int bufsize)
-{
-	int response;
-
-	header = GetHeader (sock);
-	if (header == NULL)
-	{
-		UploadFail (hDlg, "Error reading server response", WSAGetLastError());
-		return -1;
-	}
-	response = strtoul (strchr (header, ' '), NULL, 10);
-	if (response >= 300)
-	{
-		char *topline = strstr (header, "\r\n");
-		*topline = 0;
-		SetWindowText (GetDlgItem (hDlg, IDC_BOINGSTATUS), header);
-		*topline = '\r';
-		if (response != 304)
-		{
-			ReadResponse (hDlg, header, sock, buf, bufsize, INVALID_HANDLE_VALUE);
-		}
-	}
-	return response;
-}
-
-//==========================================================================
-//
-// CabinetCallback
-//
-// Used to extract dbghelp.dll out of the downloaded cabinet.
-//
-//==========================================================================
-
-static UINT CALLBACK CabinetCallback (PVOID context, UINT notification, UINT_PTR param1, UINT_PTR param2)
-{
-	if (notification == SPFILENOTIFY_FILEINCABINET)
-	{
-		FILE_IN_CABINET_INFO *info = (FILE_IN_CABINET_INFO *)param1;
-		if (strcmp (info->NameInCabinet, "dbghelp.dll") == 0)
-		{
-			strncpy (info->FullTargetName, (char *)context, sizeof(info->FullTargetName));
-			info->FullTargetName[sizeof(info->FullTargetName)-1] = '\0';
-			info->FullTargetName[strlen(info->FullTargetName)-1] = 'l';
-			return FILEOP_DOIT;
-		}
-		return FILEOP_SKIP;
-	}
-	return NO_ERROR;
-}
-
-struct UploadParmStruct
-{
-	HWND hDlg;
-	HANDLE hThread;
-	HANDLE hFile;
-	const char *UserSummary;
-};
-
-//==========================================================================
-//
-// UploadProc
-//
-// Drives the error report upload and optionally the dbghelp download,
-// using standard HTTP requests.
-//
-//==========================================================================
-
-static DWORD WINAPI UploadProc (LPVOID lpParam)
-{
-	char dbghelpPath[MAX_PATH+12];
-	UploadParmStruct *parm = (UploadParmStruct *)lpParam;
-	char xferbuf[1024];
-	WSADATA wsad;
-	SOCKET sock = INVALID_SOCKET;
-	addrinfo aiHints = { 0 };
-	addrinfo *aiList = NULL;
-	char *header = NULL;
-	DWORD fileLen, fileLeft, contentLength;
-	int bytesSent;
-	int headerLen;
-	int err, i;
-	int retries;
-	DWORD returnval = TRUE;
-	HANDLE dbghelp = INVALID_HANDLE_VALUE;
-	HWND status = GetDlgItem (parm->hDlg, IDC_BOINGSTATUS);
-
-	dbghelpPath[0] = '\0';
-	SetWindowText (status, "Looking up " REMOTE_HOST "...");
-
-	// Startup Winsock. If this doesn't work, then we can't do anything.
-	err = WSAStartup (0x0101, &wsad);
-	if (err != 0)
-	{
-		UploadFail (parm->hDlg, "Could not initialize Winsock", err);
-		return FALSE;
-	}
-
-	try
-	{
-		OSVERSIONINFO verinfo = { sizeof(verinfo) };
-		GetVersionEx (&verinfo);
-		if (verinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-		{
-			verinfo.dwBuildNumber &= 0xFFFF;
-		}
-
-		// Lookup the host we want to talk with.
-		aiHints.ai_family = AF_INET;
-		aiHints.ai_socktype = SOCK_STREAM;
-		aiHints.ai_protocol = IPPROTO_TCP;
-
-		err = getaddrinfo (REMOTE_HOST, REMOTE_PORT, &aiHints, &aiList);
-		if (err != 0 || aiList == NULL)
-		{
-			UploadFail (parm->hDlg, "Could not resolve " REMOTE_HOST, err);
-			throw 1;
-		}
-
-		// Create a new socket...
-		sock = socket (aiList->ai_family, aiList->ai_socktype, aiList->ai_protocol);
-		if (sock == INVALID_SOCKET)
-		{
-			UploadFail (parm->hDlg, "Could not create socket", WSAGetLastError());
-			throw 1;
-		}
-
-		int timeout = TIMEOUT;
-		setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
-		setsockopt (sock, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
-
-		// ...and connect it to the remote host.
-		SetWindowText (status, "Connecting to " REMOTE_HOST "...");
-		err = connect (sock, aiList->ai_addr, sizeof(*aiList->ai_addr));
-		if (err == SOCKET_ERROR)
-		{
-			UploadFail (parm->hDlg, "Failed to connect", WSAGetLastError());
-			throw 1;
-		}
-
-		// Now tell the host we want to submit the report.
-		SetWindowText (status, "Sending HTTP request...");
-		fileLen = GetFileSize (parm->hFile, NULL);
-		contentLength = sizeof(MultipartInfoHeader)-1 + 8+9*7+2 + strlen(verinfo.szCSDVersion) +
-						(parm->UserSummary ? (sizeof(MultipartUserSummaryHeader)-1 + strlen(UserSummary)) : 0) +
-						sizeof(MultipartBinaryHeader)-1 +
-						sizeof(MultipartHeaderGZip)-1 + fileLen +
-						sizeof(MultipartFooter)-1;
-		headerLen = mysnprintf (xferbuf, countof(xferbuf), PostHeader, contentLength);
-		bytesSent = send (sock, xferbuf, headerLen, 0);
-		if (bytesSent != headerLen)
-		{
-			UploadFail (parm->hDlg, "Could not send HTTP request", WSAGetLastError());
-			throw 1;
-		}
-
-		// Wait for a 100 continue response from the host.
-		err = CheckServerResponse (parm->hDlg, sock, header, xferbuf, sizeof(xferbuf));
-		if (err < 0 || err >= 300)
-		{
-			throw 1;
-		}
-
-		// And now that we have it, we can finally send the report.
-		SetWindowText (status, "Sending report...");
-
-		// First show the progress bar so the user knows how much of the report has been sent.
-		ShowWindow (GetDlgItem (parm->hDlg, IDC_BOINGPROGRESS), SW_SHOW);
-		SendMessage (GetDlgItem (parm->hDlg, IDC_BOINGPROGRESS), PBM_SETRANGE, 0, MAKELPARAM (0, (fileLen + sizeof(xferbuf)-1)/sizeof(xferbuf)));
-
-		// Send the bare-bones info (exception and windows version info)
-		bytesSent = send (sock, MultipartInfoHeader, sizeof(MultipartInfoHeader)-1, 0);
-		if (bytesSent == SOCKET_ERROR)
-		{
-			UploadFail (parm->hDlg, "Could not upload report", WSAGetLastError());
-			throw 1;
-		}
-		headerLen = mysnprintf (xferbuf, countof(xferbuf), "Windows %08lX %p %X %08lX %08lX %08lX %08lX %08lX %s",
-			CrashPointers.ExceptionRecord->ExceptionCode,
-			CrashPointers.ExceptionRecord->ExceptionAddress,
-			!!CrashPointers.ExceptionRecord->ExceptionInformation[0],
-			CrashPointers.ExceptionRecord->ExceptionInformation[1],
-
-			verinfo.dwMajorVersion,
-			verinfo.dwMinorVersion,
-			verinfo.dwBuildNumber,
-			verinfo.dwPlatformId,
-			verinfo.szCSDVersion);
-		bytesSent = send (sock, xferbuf, headerLen, 0);
-		if (bytesSent == SOCKET_ERROR)
-		{
-			UploadFail (parm->hDlg, "Could not upload report", WSAGetLastError());
-			throw 1;
-		}
-
-		// Send the user summary.
-		if (parm->UserSummary)
-		{
-			bytesSent = send (sock, MultipartUserSummaryHeader, sizeof(MultipartUserSummaryHeader)-1, 0);
-			if (bytesSent == SOCKET_ERROR)
-			{
-				UploadFail (parm->hDlg, "Could not upload report", WSAGetLastError());
-				throw 1;
-			}
-			bytesSent = send (sock, parm->UserSummary, (int)strlen(parm->UserSummary), 0);
-			if (bytesSent == SOCKET_ERROR)
-			{
-				UploadFail (parm->hDlg, "Could not upload report", WSAGetLastError());
-				throw 1;
-			}
-		}
-
-		// Send the report file.
-		headerLen = mysnprintf (xferbuf, countof(xferbuf), "%s%s", MultipartBinaryHeader, MultipartHeaderZip);
-
-		bytesSent = send (sock, xferbuf, headerLen, 0);
-		if (bytesSent == SOCKET_ERROR)
-		{
-			UploadFail (parm->hDlg, "Could not upload report", WSAGetLastError());
-			throw 1;
-		}
-
-		// Send the report itself.
-		SetFilePointer (parm->hFile, 0, NULL, FILE_BEGIN);
-		fileLeft = fileLen;
-		i = 0;
-		while (fileLeft != 0)
-		{
-			DWORD grab = fileLeft > sizeof(xferbuf) ? sizeof(xferbuf) : fileLeft;
-			DWORD didread;
-
-			ReadFile (parm->hFile, xferbuf, grab, &didread, NULL);
-			bytesSent = send (sock, xferbuf, didread, 0);
-			if (bytesSent == SOCKET_ERROR)
-			{
-				UploadFail (parm->hDlg, "Could not upload report", WSAGetLastError());
-				throw 1;
-			}
-			fileLeft -= grab;
-			SendMessage (GetDlgItem (parm->hDlg, IDC_BOINGPROGRESS), PBM_SETPOS, ++i, 0);
-		}
-		// Send the multipart footer.
-		bytesSent += send (sock, MultipartFooter, sizeof(MultipartFooter) - 1, 0);
-
-		// And now we're done uploading the report. Yay!
-		SetWindowText (status, "Report sent");
-
-		// But we still need a 200 response from the host. Hopefully it gives us one.
-		HeapFree (GetProcessHeap(), 0, header);
-		err = CheckServerResponse (parm->hDlg, sock, header, xferbuf, sizeof(xferbuf));
-		if (err < 0 || err >= 300)
-		{
-			throw 1;
-		}
-
-		// Fill the edit control with the response body, in case the host wants
-		// to say, "Thank you for clicking that send button."
-		ReadResponse (parm->hDlg, header, sock, xferbuf, sizeof(xferbuf), INVALID_HANDLE_VALUE);
-
-		// Close the connection, because we told the host this was a one-shot communication.
-		closesocket (sock); sock = INVALID_SOCKET;
-
-		// If dbghelp.dll was not available or too old when the report was created,
-		// ask the user if they want to download it. It's too late to be of any use
-		// to this report, but it can still be used for future reports.
-		if (NeedDbgHelp && MessageBox (parm->hDlg,
-			"Shall I download dbghelp.dll?\n\n"
-			"This is a Microsoft-supplied DLL that can gather detailed information when a program crashes.\n\n"
-			"Although it is not essential for "GAMENAME", it will make any future error\n"
-			"reports more useful, so it is strongly suggested that you answer \"yes.\"\n\n"
-			"If you answer \"yes,\" dbghelp.dll will be installed in the same directory as "GAMENAME".",
-			"Download dbghelp.dll?", MB_YESNO|MB_ICONQUESTION) == IDYES)
-		{
-			char *bs;
-
-			// Download it to the same directory as zdoom.exe.
-			GetModuleFileName (NULL, dbghelpPath, MAX_PATH);
-			dbghelpPath[MAX_PATH] = 0;
-			bs = strrchr (dbghelpPath, '\\');
-			if (bs != NULL)
-			{
-				strcpy (bs + 1, "dbghelp.dl_");
-			}
-			else
-			{
-				strcpy (dbghelpPath, "dbghelp.dl_");
-			}
-			dbghelp = CreateFile (dbghelpPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
-			if (dbghelp != INVALID_HANDLE_VALUE)
-			{
-				SetWindowText (status, "Receiving dbghelp...");
-				retries = 0;
-
-				// Reopen the socket. We don't need to repeat the lookup, because
-				// we already know where the host is.
-				SetWindowText (status, "Reconnecting to " REMOTE_HOST "...");
-				sock = socket (aiList->ai_family, aiList->ai_socktype, aiList->ai_protocol);
-				if (sock == INVALID_SOCKET)
-				{
-					UploadFail (parm->hDlg, "Could not create socket", WSAGetLastError());
-					throw 1;
-				}
-
-				// Socket is open. Try reconnecting now.
-				err = connect (sock, aiList->ai_addr, sizeof(*aiList->ai_addr));
-				if (err == SOCKET_ERROR)
-				{
-					UploadFail (parm->hDlg, "Failed to reconnect", WSAGetLastError());
-					throw 2;
-				}
-				SetWindowText (status, "Receiving dbghelp...");
-
-				// And send the request.
-				bytesSent = send (sock, DbgHelpRequest, sizeof(DbgHelpRequest)-1, 0);
-				if (bytesSent == 0 || bytesSent == SOCKET_ERROR)
-				{
-					UploadFail (parm->hDlg, "Failed trying to request dbghelp", WSAGetLastError());
-					throw 2;
-				}
-
-				// Ignore any information replies from the server. There shouldn't be any,
-				// but this loop is here just in case.
-				err = 100;
-				while (err / 100 == 1)
-				{
-					HeapFree (GetProcessHeap(), 0, header);
-					err = CheckServerResponse (parm->hDlg, sock, header, xferbuf, sizeof(xferbuf));
-				}
-				// Now, if we haven't received a 200 OK response, give up because we
-				// shouldn't receive anything but that.
-				if (err != 200)
-				{
-					throw 2;
-				}
-				// Write the response body to the dbghelp.dl_ file.
-				if (!ReadResponse (parm->hDlg, header, sock, xferbuf, sizeof(xferbuf), dbghelp))
-				{
-					UploadFail (parm->hDlg, "Could not receive dbghelp", WSAGetLastError());
-					throw 2;
-				}
-				CloseHandle (dbghelp); dbghelp = INVALID_HANDLE_VALUE;
-
-				// Now use the Setup API to extract dbghelp.dll from the file we just downloaded.
-				if (!SetupIterateCabinet (dbghelpPath, 0, CabinetCallback, dbghelpPath))
-				{
-					UploadFail (parm->hDlg, "Extraction of dbghelp failed", GetLastError());
-				}
-
-				// And now we're done with that. There's nothing more to do here now.
-				SetWindowText (status, "Dbghelp installed");
-			}
-		}
-	}
-	catch (...)
-	{
-		returnval = FALSE;
-	}
-
-	ShowWindow (GetDlgItem (parm->hDlg, IDC_BOINGPROGRESS), SW_HIDE);
-	KillTimer (parm->hDlg, 1);
-	EnableWindow (GetDlgItem (parm->hDlg, IDOK), TRUE);
-	EnableWindow (GetDlgItem (parm->hDlg, IDC_BOINGEDIT), TRUE);
-
-	if (dbghelp != INVALID_HANDLE_VALUE) CloseHandle (dbghelp);
-	if (dbghelpPath[0] != '\0') DeleteFile (dbghelpPath);
-	if (header != NULL) HeapFree (GetProcessHeap(), 0, header);
-	if (sock != INVALID_SOCKET) closesocket (sock);
-	if (aiList != NULL) freeaddrinfo (aiList);
-	WSACleanup ();
-	return returnval;
-}
-
-//==========================================================================
-//
-// BoingDlgProc
-//
-// The dialog procedure for the upload status dialog. Aside from spawning
-// off a new thread executing UploadProc, it doesn't do a whole lot.
-//
-//==========================================================================
-
-static BOOL CALLBACK BoingDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	UploadParmStruct *parms = (UploadParmStruct *)lParam;
-	HWND ctrl;
-	WLONG_PTR iconNum;
-	HANDLE icon;
-	DWORD threadID;
-
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		SetTimer (hDlg, 1, 100, NULL);
-		ctrl = GetDlgItem (hDlg, IDC_BOING);
-		SetWindowLongPtr (ctrl, GWLP_USERDATA, IDI_BOING1);
-		parms->hDlg = hDlg;
-		parms->hThread = CreateThread (NULL, 0, UploadProc, parms, 0, &threadID);
-		return TRUE;
-
-	case WM_TIMER:
-		if (wParam == 1)
-		{
-			ctrl = GetDlgItem (hDlg, IDC_BOING);
-			iconNum = GetWindowLongPtr (ctrl, GWLP_USERDATA) + 1;
-			if (iconNum > IDI_BOING8) iconNum = IDI_BOING1;
-			SetWindowLongPtr (ctrl, GWLP_USERDATA, iconNum);
-			icon = LoadImage (g_hInst, MAKEINTRESOURCE(iconNum), IMAGE_ICON, 32, 32, LR_SHARED|LR_DEFAULTCOLOR);
-			SendMessage (ctrl, STM_SETICON, (WPARAM)icon, 0);
-			InvalidateRect (ctrl, NULL, FALSE);
-			SetWindowLongPtr (hDlg, DWLP_MSGRESULT, 0);
-			return TRUE;
-		}
-		break;
-
-	case WM_COMMAND:
-		if (HIWORD(wParam) == BN_CLICKED)
-		{
-			KillTimer (hDlg, 1);
-			EndDialog (hDlg, LOWORD(wParam));
-		}
-		break;
-	}
-	return FALSE;
-}
-
-//==========================================================================
-//
-// UploadReport
-//
-// Starts off the upload by showing the upload dialog.
-//
-//==========================================================================
-
-static BOOL UploadReport (HANDLE file)
-{
-	UploadParmStruct uploadParm = { 0, 0, file, UserSummary };
-	BOOL res = (BOOL)DialogBoxParam (g_hInst, MAKEINTRESOURCE(IDD_BOING), NULL, (DLGPROC)BoingDlgProc, (LPARAM)&uploadParm);
-	if (UserSummary != NULL)
-	{
-		HeapFree (GetProcessHeap(), 0, UserSummary);
-		UserSummary = NULL;
-	}
-	return res;
-}
-
-#endif	// #if 0
-
 //==========================================================================
 //
 // SaveReport
@@ -3330,15 +2301,7 @@ void DisplayCrashLog ()
 			pEnableThemeDialogTexture = (HRESULT (__stdcall *)(HWND,DWORD))GetProcAddress (uxtheme, "EnableThemeDialogTexture");
 		}
 		INT_PTR result = DialogBox (g_hInst, MAKEINTRESOURCE(IDD_CRASHDIALOG), NULL, (DLGPROC)CrashDlgProc);
-		if (result == IDYES)
-		{
-#if 0	// Server-side support is not done yet because I am too lazy.
-			file = MakeZip ();
-			UploadReport (file);
-			CloseHandle (file);
-#endif
-		}
-		else if (result == IDC_SAVEREPORT)
+		if (result == IDC_SAVEREPORT)
 		{
 			file = MakeZip ();
 			SaveReport (file);
@@ -3351,3 +2314,4 @@ void DisplayCrashLog ()
 	}
 	CloseTarFiles ();
 }
+#endif

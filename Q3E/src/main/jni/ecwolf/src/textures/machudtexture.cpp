@@ -91,7 +91,8 @@ FMacHudTexture::FMacHudTexture(const char* name, int lumpnum, int offset, FileRe
 	file.Seek(offset, SEEK_SET);
 
 	WORD width, height;
-	file >> width >> height;
+	file.Read(&width, sizeof(width));
+	file.Read(&height, sizeof(height));
 	Width = BigShort(width);
 	Height = BigShort(height);
 	yScale = xScale = 2*FRACUNIT;
@@ -103,7 +104,8 @@ FMacHudTexture::FMacHudTexture(const char* name, int lumpnum, int offset, FileRe
 		LeftOffset = -256-Width;
 		TopOffset = -172-Height;
 
-		file >> width >> height;
+		file.Read(&width, sizeof(width));
+		file.Read(&height, sizeof(height));
 		Width = BigShort(width);
 		Height = BigShort(height);
 		Offset += 4;

@@ -67,6 +67,8 @@ function(find_sdl_library PKG LIB HEADER INTERNAL_TARGET)
 	string(TOUPPER "${LIB}" INTERNAL_VAR_NAME)
 	string(REPLACE "SDL2" "INTERNAL_SDL" INTERNAL_VAR_NAME "${INTERNAL_VAR_NAME}")
 
+	set(MODERN_TARGET "${LIB}::${LIB}")
+
 	# Detect if we have vendored libraries available
 	if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/${PKG}/CMakeLists.txt")
 		option(${INTERNAL_VAR_NAME} "Force build with internal ${LIB}" OFF)
@@ -94,9 +96,17 @@ function(find_sdl_library PKG LIB HEADER INTERNAL_TARGET)
 			# Finally if that fails then use the vendored copy if it's available
 			if(${INTERNAL_VAR_NAME} OR NOT ${LIB}_LIBRARIES OR NOT ${LIB}_INCLUDE_DIRS)
 				if(HAS_${INTERNAL_VAR_NAME})
-					add_subdirectory(deps/${PKG})
-					add_library(SDL2::${LIB} ALIAS ${INTERNAL_TARGET})
+					set(ANDROID_NDK ${CMAKE_ANDROID_NDK})
+					add_subdirectory(deps/${PKG} EXCLUDE_FROM_ALL)
+					if(NOT TARGET "${MODERN_TARGET}")
+						add_library("${MODERN_TARGET}" ALIAS ${INTERNAL_TARGET})
+					endif()
 					set(TARGET_TYPE "internal")
+
+					if(ANDROID)
+						# SDL requires C99 or newer for SDL_android.c
+						set_target_properties(${INTERNAL_TARGET} PROPERTIES C_STANDARD 99)
+					endif()
 				else()
 					string(TOLOWER "${LIB}" CONF_NAME)
 					message(SEND_ERROR "Please set ${LIB}_DIR to the location of ${CONF_NAME}-config.cmake.")
@@ -106,7 +116,7 @@ function(find_sdl_library PKG LIB HEADER INTERNAL_TARGET)
 		endif()
 
 		# Tell the user what we're using and finalize the config
-		if(TARGET SDL2::${LIB})
+		if(TARGET "${MODERN_TARGET}")
 			message(STATUS "Using ${TARGET_TYPE} ${LIB}")
 		else()
 			message(STATUS "Using ${LIB}: ${${LIB}_LIBRARIES}, ${${LIB}_INCLUDE_DIRS}")
@@ -125,8 +135,10 @@ function(find_sdl_library PKG LIB HEADER INTERNAL_TARGET)
 		set(${LIB}_INCLUDE_DIRS ${${SDL1_VAR}_INCLUDE_DIR})
 	endif()
 
-	sdl_modernize(SDL2::${LIB} ${LIB}_LIBRARIES ${LIB}_INCLUDE_DIRS)
+	sdl_modernize("${MODERN_TARGET}" ${LIB}_LIBRARIES ${LIB}_INCLUDE_DIRS)
 endfunction()
+
+option(INTERNAL_SDL_MIXER_CODECS "Build SDL_mixer with vendored codec libraries" OFF)
 
 if(_DIII4A) #k: SDL
 	set(SDL2::SDL2 SDL2)

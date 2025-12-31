@@ -1042,7 +1042,7 @@ void V_CalcCleanFacs (int designwidth, int designheight, int realwidth, int real
 		else
 			*cleany = *cleanx;
 	}
-	else if (*cleanx > 1 && *cleany > 1 && *cleanx != *cleany)
+	else if ((*cleanx > 1 || *cleany > 1) && *cleanx != *cleany)
 	{
 		if (*cleanx < *cleany)
 			*cleany = *cleanx;

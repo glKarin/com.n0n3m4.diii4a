@@ -166,12 +166,8 @@ int FMapLump::FillCache()
 		// We do this after the things plane has been read
 		if(rtlMap && i == 1)
 		{
-			const WORD floorTex = ReadLittleShort((const BYTE*)(Cache+HEADERSIZE))-0xB4;
-			const WORD ceilingTex = ReadLittleShort((const BYTE*)(Cache+HEADERSIZE+2))-0xC6;
-			const WORD fill = (floorTex&0xFF)|((ceilingTex&0xFF)<<8);
-			WORD *out = reinterpret_cast<WORD*>(output);
-			for(unsigned int j = 0;j < PlaneSize/2;++j)
-				*out++ = fill;
+			// Fill with garbage since a global texture selection is part of the tile data.
+			memset(output, 0xFF, PlaneSize);
 			output += PlaneSize;
 		}
 	}

@@ -109,17 +109,16 @@ struct FVSwapSound : public FResourceLump
 		{
 			const unsigned int samples = (LumpSize - sizeof(WAV_HEADER))/2;
 
-			DWORD *CacheAlign = new DWORD[(LumpSize+3)/4];
-			Cache = (char *) CacheAlign;
+			Cache = new char[LumpSize];
 			if(LumpSize == 0)
 				return 1;
 
 			// Copy our template header and update various values
 			memcpy(Cache, WAV_HEADER, sizeof(WAV_HEADER));
-			CacheAlign[1] = LittleLong(samples*2 + sizeof(WAV_HEADER) - 8);
-			CacheAlign[6] = LittleLong(param_samplerate);
-			CacheAlign[7] = LittleLong(param_samplerate*2);
-			CacheAlign[(sizeof(WAV_HEADER)-4)/4] = LittleLong(samples*2);
+			*(DWORD*)(Cache+4) = LittleLong(samples*2 + sizeof(WAV_HEADER) - 8);
+			*(DWORD*)(Cache+24) = LittleLong(param_samplerate);
+			*(DWORD*)(Cache+28) = LittleLong(param_samplerate*2);
+			*(DWORD*)(Cache+sizeof(WAV_HEADER)-4) = LittleLong(samples*2);
 
 			// Read original data
 			BYTE* origdata = new BYTE[numOrigSamples];
@@ -134,7 +133,7 @@ struct FVSwapSound : public FResourceLump
 
 			// Do resampling to param_samplerate 16-bit with linear interpolation
 			static const fixed sampleStep = static_cast<fixed>(((double)origSampleRate / param_samplerate)*FRACUNIT);
-			SWORD* data = (SWORD*)(CacheAlign+sizeof(WAV_HEADER)/4);
+			SWORD* data = (SWORD*)(Cache+sizeof(WAV_HEADER));
 			i = 0;
 			fixed samplefrac = 0;
 			unsigned int sample = 0;
@@ -201,7 +200,7 @@ class FVSwap : public FResourceFile
 			for(unsigned int i = 0;i < soundStart;i++)
 			{
 				char lumpname[9];
-				sprintf(lumpname, "VSP%05d", i);
+				mysnprintf(lumpname, 9, "VSP%05d", i);
 
 				Lumps[i].Owner = this;
 				Lumps[i].LumpNameSetup(lumpname);
@@ -232,7 +231,7 @@ class FVSwap : public FResourceFile
 				}
 
 				char lumpname[9];
-				sprintf(lumpname, "VSP%05d", i+soundStart);
+				mysnprintf(lumpname, 9, "VSP%05d", i+soundStart);
 				SoundLumps[i] = new FVSwapSound(end-start);
 				SoundLumps[i]->Owner = this;
 				SoundLumps[i]->LumpNameSetup(lumpname);

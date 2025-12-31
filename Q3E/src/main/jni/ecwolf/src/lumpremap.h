@@ -85,6 +85,4 @@ class LumpRemapper
 		TArray<RemapFile>	files;
 };
 
-extern FString mapVersionId;
-
 #endif

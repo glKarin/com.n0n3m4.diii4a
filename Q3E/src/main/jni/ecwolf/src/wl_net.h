@@ -35,11 +35,11 @@
 #ifndef __WL_NET_H__
 #define __WL_NET_H__
 
-#ifndef LIBRETRO
 #include <SDL_net.h>
-#endif
 
+#include "id_in.h"
 #include "wl_def.h"
+#include "zstring.h"
 
 namespace Net {
 
@@ -52,9 +52,16 @@ enum Mode
 	MODE_Client
 };
 
+enum GameMode
+{
+	GM_Cooperative,
+	GM_Battle
+};
+
 struct NetInit
 {
 	Mode mode;
+	GameMode gameMode;
 	uint16_t port;
 	byte numPlayers;
 	const char* joinAddress;
@@ -62,8 +69,22 @@ struct NetInit
 
 extern NetInit InitVars;
 
+bool IsArbiter();
+bool IsBlocked();
+void BlockPlaysim();
+void DebugKey(const struct DebugCmd &cmd);
+void EndGame();
 void Init(InitStatusCallback callback);
+void NewGame(int &difficulty, class FString &map, class FName (&playerClassNames)[MAXPLAYERS]);
 void PollControls();
+
+bool CheckAck(bool send);
+void StartAck(AckType type);
+
+// TODO: Redo these as proper options (and probably move to wl_game or something)
+static bool FriendlyFire() { return InitVars.gameMode == GM_Battle; }
+static bool RespawnItems() { return InitVars.gameMode == GM_Battle; }
+static bool NoMonsters() { return InitVars.gameMode == GM_Battle; }
 
 }
 

@@ -52,7 +52,8 @@ extern enum Aspect
 	ASPECT_17_10,
 	ASPECT_4_3,
 	ASPECT_5_4,
-	ASPECT_64_27 // marketed as 21:9
+	ASPECT_64_27,	// marketed as 21:9
+	ASPECT_32_9
 } r_ratio;
 
 extern bool		forcegrabmouse;

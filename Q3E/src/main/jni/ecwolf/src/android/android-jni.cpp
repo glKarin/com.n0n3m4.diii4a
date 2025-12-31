@@ -532,15 +532,10 @@ void Android_SetScreenSize(int w, int h)
 	initControls(android_screen_width,-android_screen_height,graphicpath.c_str(),(graphicpath + "/game_controls.xml").c_str());
 }
 
-int Android_EventWatch(void *, SDL_Event *event)
+static int Android_EventWatch(void *, SDL_Event *event)
 {
 	switch(event->common.type)
 	{
-	case SDL_WINDOWEVENT:
-		if(event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-			Android_SetScreenSize(event->window.data1, event->window.data2);
-		break;
-
 	case SDL_FINGERMOTION:
 		controlsContainer.processPointer(P_MOVE, event->tfinger.fingerId, event->tfinger.x, event->tfinger.y);
 		break;
@@ -555,9 +550,29 @@ int Android_EventWatch(void *, SDL_Event *event)
 	return 0;
 }
 
-void PostSDLInit(SDL_Window *Screen)
+static int Android_WindowEventWatch(void *, SDL_Event *event)
 {
+	switch(event->common.type)
+	{
+	case SDL_WINDOWEVENT:
+		if(event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+			Android_SetScreenSize(event->window.data1, event->window.data2);
+		break;
+	}
+
+	return 0;
+}
+
+void Android_InitGraphics()
+{
+	// Finger events must be captured before the SDL_Renderer is initialized
+	// otherwise it will clip the input range to the viewport.
 	SDL_AddEventWatch(Android_EventWatch, NULL);
+}
+
+void PostSDLCreateRenderer(SDL_Window *Screen)
+{
+	SDL_AddEventWatch(Android_WindowEventWatch, NULL);
 
 	SDL_DisplayMode mode;
 	SDL_GetWindowDisplayMode(Screen, &mode);

@@ -58,8 +58,9 @@ static void DoScriptMessage(const Scanner::Position &pos, Scanner::MessageLevel 
 			break;
 	}
 
-	char* newMessage = new char[strlen(error) + SCString_Len(pos.scriptIdentifier) + 25];
-	sprintf(newMessage, "%s:%d:%d:%s: %s\n", SCString_GetChars(pos.scriptIdentifier), pos.tokenLine, pos.tokenLinePosition, messageLevel, error);
+	size_t newMessageSize = strlen(error) + SCString_Len(pos.scriptIdentifier) + 25;
+	char* newMessage = new char[newMessageSize];
+	mysnprintf(newMessage, newMessageSize, "%s:%d:%d:%s: %s\n", SCString_GetChars(pos.scriptIdentifier), pos.tokenLine, pos.tokenLinePosition, messageLevel, error);
 	ScriptMessageHandler(level, newMessage, args);
 	delete[] newMessage;
 
@@ -78,7 +79,7 @@ static const char* const TokenNames[TK_NumSpecialTokens] =
 	"Logical Or",
 	"Equals",
 	"Not Equals",
-	"Greater Than or Equals"
+	"Greater Than or Equals",
 	"Less Than or Equals",
 	"Left Shift",
 	"Right Shift",
@@ -658,7 +659,7 @@ void Scanner::MustGetToken(char token)
 	if(!CheckToken(token))
 	{
 		ExpandState();
-		if(state.token == TK_NoToken)
+		if(state.token == static_cast<char>(TK_NoToken))
 			ScriptMessage(Scanner::ERROR, "Unexpected end of script.");
 		else if(token < TK_NumSpecialTokens && state.token < TK_NumSpecialTokens)
 			ScriptMessage(Scanner::ERROR, "Expected '%s' but got '%s' instead.", TokenNames[(int)token], TokenNames[(int)state.token]);

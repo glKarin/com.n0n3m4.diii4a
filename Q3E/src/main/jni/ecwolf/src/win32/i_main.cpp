@@ -196,15 +196,23 @@ LONG WINAPI ExitMessedUp (LPEXCEPTION_POINTERS foo)
 void CALLBACK ExitFatally (ULONG_PTR dummy)
 {
 	SetUnhandledExceptionFilter (ExitMessedUp);
+#ifndef _M_ARM64
 	DisplayCrashLog ();
+#endif
 	exit(-1);
 }
 
+#ifndef _M_ARM64
 //==========================================================================
 //
 // CatchAllExceptions
 //
 //==========================================================================
+
+namespace
+{
+	CONTEXT MainThreadContext;
+}
 
 LONG WINAPI CatchAllExceptions (LPEXCEPTION_POINTERS info)
 {
@@ -230,10 +238,10 @@ LONG WINAPI CatchAllExceptions (LPEXCEPTION_POINTERS info)
 	// Otherwise, put the crashing thread to sleep and signal the main thread to clean up.
 	if (GetCurrentThreadId() == MainThreadID)
 	{
-#ifndef _M_X64
-		info->ContextRecord->Eip = (DWORD_PTR)ExitFatally;
+#ifdef _M_X64
+		*info->ContextRecord = MainThreadContext;
 #else
-		info->ContextRecord->Rip = (DWORD_PTR)ExitFatally;
+		info->ContextRecord->Eip = (DWORD_PTR)ExitFatally;
 #endif
 	}
 	else
@@ -247,6 +255,14 @@ LONG WINAPI CatchAllExceptions (LPEXCEPTION_POINTERS info)
 	}
 	return EXCEPTION_CONTINUE_EXECUTION;
 }
+#else // !_M_ARM64
+// stub this function for ARM64
+LONG WINAPI CatchAllExceptions(LPEXCEPTION_POINTERS info)
+{
+	return EXCEPTION_CONTINUE_EXECUTION;
+}
+#endif // !_M_ARM64
+
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE nothing, LPSTR cmdline, int nCmdShow)
 {
@@ -272,7 +288,22 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE nothing, LPSTR cmdline, int n
 #ifndef _DEBUG
 	if (MainThread != INVALID_HANDLE_VALUE)
 	{
+#ifndef _M_ARM64
 		SetUnhandledExceptionFilter(CatchAllExceptions);
+#else
+		SetUnhandledExceptionFilter(nullptr);
+#endif
+
+#ifdef _M_X64
+		static bool setJumpResult = false;
+		RtlCaptureContext(&MainThreadContext);
+		if (setJumpResult)
+		{
+			ExitFatally(0);
+			return 0;
+		}
+		setJumpResult = true;
+#endif // _M_X64
 	}
 #endif
 

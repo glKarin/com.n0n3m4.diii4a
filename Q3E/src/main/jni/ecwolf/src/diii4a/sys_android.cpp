@@ -1,4 +1,4 @@
-#include "../zdoomsupport.h"
+//#include "../zdoomsupport.h"
 
 extern int PortableInMenu(void);
 
@@ -8,7 +8,7 @@ void ShutdownGame();
 
 #define Q3E_GAME_NAME "Wolf3D"
 #define Q3E_IS_INITIALIZED (q3e_initialized)
-#define Q3E_PRINTF Printf
+#define Q3E_PRINTF printf
 #define Q3E_SHUTDOWN_GAME ShutdownGame()
 #define Q3Ebool bool
 #define Q3E_TRUE true

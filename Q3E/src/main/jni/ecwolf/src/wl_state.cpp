@@ -677,7 +677,7 @@ bool MoveObj (AActor *ob, int32_t move)
 			if (abs(ob->x - players[i].mo->x) > r || abs(ob->y - players[i].mo->y) > r)
 				continue;
 
-			if (ob->GetClass()->Meta.GetMetaInt(AMETA_Damage) >= 0)
+			if ((players[i].mo->flags & FL_SHOOTABLE) && ob->GetClass()->Meta.GetMetaInt(AMETA_Damage) >= 0)
 				DamageActor (players[i].mo, ob, ob->GetDamage());
 
 			//
@@ -767,6 +767,9 @@ void DamageActor (AActor *ob, AActor *attacker, unsigned damage)
 {
 	if (ob->player)
 	{
+		if ((attacker && attacker->player) && !Net::FriendlyFire())
+			return;
+
 		ob->player->TakeDamage(damage, attacker);
 		return;
 	}
@@ -854,7 +857,7 @@ static inline bool CheckAdjacentTileBlockage(int x, int y, int lastx, int lasty)
 =
 =====================
 */
-bool CheckLine (AActor *ob, AActor *ob2)
+bool CheckLine (const AActor *ob, const AActor *ob2)
 {
 	int         x1,y1,xt1,yt1,x2,y2,xt2,yt2;
 	int         x,y;
@@ -1031,6 +1034,9 @@ bool CheckLine (AActor *ob, AActor *ob2)
 
 static bool CheckSightTo (AActor *ob, AActor *target, double minseedist, double maxseedist, double maxheardist, double fov)
 {
+	if (!(target->flags & FL_SHOOTABLE))
+		return false;
+
 	bool heardnoise = madenoise;
 
 	// Check if we can hear the player's noise

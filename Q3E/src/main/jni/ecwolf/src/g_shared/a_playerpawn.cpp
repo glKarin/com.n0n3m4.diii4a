@@ -35,10 +35,13 @@
 #include "a_inventory.h"
 #include "a_playerpawn.h"
 #include "c_cvars.h"
+#include "g_mapinfo.h"
+#include "g_shared/a_keys.h"
 #include "thingdef/thingdef.h"
 #include "wl_agent.h"
 #include "wl_game.h"
 #include "wl_main.h"
+#include "wl_net.h"
 #include "wl_play.h"
 
 #include <climits>
@@ -89,17 +92,78 @@ void APlayerPawn::CheckWeaponSwitch(const ClassDef *ammo)
 		player->PendingWeapon = weapon;
 }
 
+void APlayerPawn::DeathTick()
+{
+	angle_t iangle;
+
+	//
+	// swing around to face attacker
+	//
+	if(player->killerobj)
+	{
+		int dx = player->killerobj->x - x;
+		int dy = y - player->killerobj->y;
+
+		float fangle = (float) atan2((float) dy, (float) dx);     // returns -pi to pi
+		if (fangle<0)
+			fangle = (float) (M_PI*2+fangle);
+
+		iangle = (angle_t) (fangle*ANGLE_180/M_PI);
+	}
+	else
+	{
+		iangle = angle;
+	}
+
+	static const angle_t DEATHROTATE = ANGLE_1*2;
+	angle_t &curangle = angle;
+	const int rotate = angle - iangle > ANGLE_180 ? 1 : -1;
+
+	if (angle - iangle < DEATHROTATE)
+		angle = iangle;
+	else
+		angle += rotate*DEATHROTATE;
+
+	if(player->RespawnEligible == -1)
+	{
+		if(player->psprite[player_t::ps_weapon].frame == NULL && angle == iangle)
+		{
+			player->RespawnEligible = gamestate.TimeCount + 70;
+			player->DeathFade();
+		}
+	}
+	else
+	{
+		TicCmd_t &cmd = control[player->GetPlayerNum()];
+
+		if((player->RespawnEligible <= gamestate.TimeCount && cmd.buttonstate[bt_use]) || player->RespawnEligible + 100 <= gamestate.TimeCount)
+		{
+			if(Net::InitVars.mode == Net::MODE_SinglePlayer)
+			{
+				player->state = player_t::PST_ENTER;
+				playstate = ex_died;
+			}
+			else
+			{
+				player->state = player_t::PST_REBORN;
+				player->DeathFadeClear();
+			}
+		}
+	}
+}
+
 void APlayerPawn::Die()
 {
-	player->state = player_t::PST_DEAD;
-
 	if(player)
 	{
+		player->state = player_t::PST_DEAD;
+
 		player->extralight = 0;
 		player->PendingWeapon = WP_NOCHANGE;
 		if(player->ReadyWeapon)
 			player->SetPSprite(player->ReadyWeapon->GetDownState(), player_t::ps_weapon);
 	}
+
 	Super::Die();
 }
 
@@ -111,8 +175,31 @@ AActor::DropList *APlayerPawn::GetStartInventory()
 	return NULL;
 }
 
+void APlayerPawn::GiveDeathmatchInventory()
+{
+	ClassDef::ClassIterator iter = ClassDef::GetClassIterator();
+	ClassDef::ClassPair *pair;
+	while(iter.NextPair(pair))
+	{
+		const ClassDef *cls = pair->Value;
+		if(cls->IsDescendantOf(NATIVE_CLASS(Key)))
+		{
+			if(((AKey *)cls->GetDefault())->KeyNumber != 0)
+			{
+				AKey *key = (AKey *)AActor::Spawn(cls, 0, 0, 0, 0);
+				key->RemoveFromWorld();
+				if(!key->CallTryPickup(this))
+					key->Destroy();
+			}
+		}
+	}
+}
+
 void APlayerPawn::GiveStartingInventory()
 {
+	if(Net::InitVars.gameMode == Net::GM_Battle)
+		GiveDeathmatchInventory();
+
 	if(!GetStartInventory())
 		return;
 
@@ -248,6 +335,12 @@ void APlayerPawn::Tick()
 	if(gamestate.victoryflag)
 		return;
 
+	if(player->state == player_t::PST_DEAD)
+	{
+		DeathTick();
+		return;
+	}
+
 	if((player->GetPlayerNum()) == ConsolePlayer)
 		StatusBar->UpdateFace();
 	CheckWeaponChange(this);
@@ -291,7 +384,7 @@ void APlayerPawn::Tick()
 		}
 	}
 	else if(player->attackheld)
-		player->attackheld = cmd.buttonstate[bt_attack]|cmd.buttonstate[bt_altattack];
+		player->attackheld = !!(cmd.buttonstate[bt_attack]|cmd.buttonstate[bt_altattack]);
 
 	// Reload
 	if((player->flags & player_t::PF_WEAPONRELOADOK) && cmd.buttonstate[bt_reload])

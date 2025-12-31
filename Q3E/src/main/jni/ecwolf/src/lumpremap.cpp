@@ -51,14 +51,12 @@ public:
 static TMap<int, unsigned int> sampleRateMap;
 static TMap<FName, LumpRemapper> remaps;
 static TArray<PSprite> psprites;
-FString mapVersionId;
 
 LumpRemapper::LumpRemapper(const char* extension) : digiTimerValue(TIMER_VALUE_DEFAULT),
 	loaded(false), mapLumpName(extension)
 {
 	mapLumpName.ToUpper();
 	mapLumpName += "MAP";
-	mapLumpName += mapVersionId;
 }
 
 void LumpRemapper::AddFile(const char* extension, FResourceFile *file, Type type)

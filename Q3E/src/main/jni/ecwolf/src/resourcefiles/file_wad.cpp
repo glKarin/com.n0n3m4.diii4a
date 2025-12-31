@@ -216,6 +216,7 @@ bool FWadFile::Open(bool quiet)
 		SetNamespace("EXITSTRT", "EXITSTOP", ns_flats, HACK_ROTT);
 		SetNamespace("ELEVSTRT", "ELEVSTOP", ns_flats, HACK_ROTT);
 		SetNamespace("SIDESTRT", "SIDESTOP", ns_flats, HACK_ROTT);
+		SetNamespace("SKYSTART", "SKYSTOP", ns_rottsky);
 		SetNamespace("UPDNSTRT", "UPDNSTOP", ns_flats);
 
 		SkinHack();

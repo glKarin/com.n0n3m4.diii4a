@@ -22,6 +22,7 @@
 #include "wl_agent.h"
 #include "wl_draw.h"
 #include "wl_game.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "wl_state.h"
 #include "a_inventory.h"
@@ -50,16 +51,18 @@
 */
 
 void DrawFloorAndCeiling(byte *vbuf, unsigned vbufPitch, int min_wallheight);
+void DrawParallax(byte *vbuf, unsigned vbufPitch);
 
 const RatioInformation AspectCorrection[] =
 {
-	/* UNC */    {960,  600, 0x10000, 0,                    48,         false},
-	/* 16:9 */   {1280, 450, 0x15555, 0,                    48*3/4,     true},
-	/* 16:10 */  {1152, 500, 0x13333, 0,                    48*5/6,     true},
-	/* 17:10 */  {1224, 471, 0x14666, 0,                    48*40/51,   true},
-	/* 4:3 */    {960,  600, 0x10000, 0,                    48,         false},
-	/* 5:4 */    {960,  640, 0x10000, (fixed) 6.5*FRACUNIT, 48*15/16,   false},
-	/* 64:27 */  {1720, 346, 0x1C71C, 0,                    48*173/300, true},
+	/* UNC		*/  {960,  600, 0x10000, 0,                    48,         false},
+	/* 16:9		*/  {1280, 450, 0x15555, 0,                    48*3/4,     true},
+	/* 16:10	*/  {1152, 500, 0x13333, 0,                    48*5/6,     true},
+	/* 17:10	*/  {1224, 471, 0x14666, 0,                    48*40/51,   true},
+	/* 4:3 		*/  {960,  600, 0x10000, 0,                    48,         false},
+	/* 5:4		*/  {960,  640, 0x10000, (fixed) 6.5*FRACUNIT, 48*15/16,   false},
+	/* 64:27	*/  {1720, 346, 0x1C71C, 0,                    48*173/300, true},
+	/* 32:9		*/  {2560, 600, 0x2AAAB, 0,					   48*3/8,     true}
 };
 
 /*static*/ byte *vbuf = NULL;
@@ -611,11 +614,7 @@ void DrawScaleds (void)
 
 			if (visptr < &vislist[MAXVISABLE-1])    // don't let it overflow
 				visptr++;
-
-			obj->flags |= FL_VISABLE;
 		}
-		else
-			obj->flags &= ~FL_VISABLE;
 	}
 
 //
@@ -1165,6 +1164,29 @@ void CalcViewVariables()
 		r_extralight = 0;
 }
 
+static TUniquePtr<FFader> fizzlein;
+void ThreeDStartFadeIn()
+{
+	// For multiplayer disable fade in since players need to be back in the
+	// action immediately after respawning.
+	if(Net::InitVars.mode != Net::MODE_SinglePlayer)
+		return;
+
+	switch(gameinfo.DeathTransition)
+	{
+		case GameInfo::TRANSITION_Fizzle:
+		{
+			FFizzleFader *fader = new FFizzleFader(0, 0, screenWidth, screenHeight, 20, true);
+			fader->CaptureFrame();
+			fizzlein.Reset(fader);
+			break;
+		}
+		case GameInfo::TRANSITION_Fade:
+			fizzlein.Reset(new FBlendFader(255, 0, 0, 0, 0, 24));
+			break;
+	}
+}
+
 //==========================================================================
 
 void R_RenderView()
@@ -1174,18 +1196,15 @@ void R_RenderView()
 //
 // follow the walls from there to the right, drawing as we go
 //
-#if defined(USE_FEATUREFLAGS) && defined(USE_STARSKY)
+#if 0 // USE_STARSKY
 	if(GetFeatureFlags() & FF_STARSKY)
 		DrawStarSky(vbuf, vbufPitch);
 #endif
 
 	WallRefresh ();
 
-#if defined(USE_FEATUREFLAGS) && defined(USE_PARALLAX)
-	if(GetFeatureFlags() & FF_PARALLAXSKY)
-		DrawParallax(vbuf, vbufPitch);
-#endif
-#if defined(USE_FEATUREFLAGS) && defined(USE_CLOUDSKY)
+	DrawParallax(vbuf, vbufPitch);
+#if 0 // USE_CLOUDSKY
 	if(GetFeatureFlags() & FF_CLOUDSKY)
 		DrawClouds(vbuf, vbufPitch, min_wallheight);
 #endif
@@ -1196,11 +1215,11 @@ void R_RenderView()
 //
 	DrawScaleds();                  // draw scaled stuff
 
-#if defined(USE_FEATUREFLAGS) && defined(USE_RAIN)
+#if 0 // USE_RAIN
 	if(GetFeatureFlags() & FF_RAIN)
 		DrawRain(vbuf, vbufPitch);
 #endif
-#if defined(USE_FEATUREFLAGS) && defined(USE_SNOW)
+#if 0 // USE_SNOW
 	if(GetFeatureFlags() & FF_SNOW)
 		DrawSnow(vbuf, vbufPitch);
 #endif
@@ -1226,14 +1245,13 @@ void R_RenderView()
 ========================
 */
 
+
+
 void    ThreeDRefresh (void)
 {
 	// Ensure we have a valid camera
 	if(players[ConsolePlayer].camera == NULL)
 		players[ConsolePlayer].camera = players[ConsolePlayer].mo;
-
-	if (fizzlein && gameinfo.DeathTransition == GameInfo::TRANSITION_Fizzle)
-		FizzleFadeStart();
 
 //
 // clear out the traced array
@@ -1251,16 +1269,21 @@ void    ThreeDRefresh (void)
 	VL_UnlockSurface();
 	vbuf = NULL;
 
+	if(player_t *player = players[ConsolePlayer].camera->player)
+	{
+		if(player->ScreenFader)
+			player->ScreenFader->Update();
+	}
+
 //
 // show screen and time last cycle
 //
 	if (fizzlein)
 	{
-		if(gameinfo.DeathTransition == GameInfo::TRANSITION_Fizzle)
-			FizzleFade(0, 0, screenWidth, screenHeight, 20, false);
-		else
-			VL_FadeIn(0, 255, 24);
-		fizzlein = false;
+		while(!fizzlein->Update())
+			VH_UpdateScreen();
+		VH_UpdateScreen();
+		fizzlein.Reset();
 
 		// don't make a big tic count
 		ResetTimeCount();

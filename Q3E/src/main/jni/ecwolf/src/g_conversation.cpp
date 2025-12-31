@@ -458,7 +458,7 @@ void QuizMenu::loadQuestion(const Page *page)
 	hint = page->Hint;
 	if(hint[0] == '$')
 		hint = language[hint.Mid(1)];
-	hint.Format("(%s)", hint.GetChars());
+	hint.Format("(%s)", FString(hint).GetChars());
 
 	for(unsigned int i = 0;i < page->Choices.Size();++i)
 	{
@@ -517,14 +517,13 @@ void QuizMenu::draw() const
 	VW_UpdateScreen ();
 }
 
-#ifndef LIBRETRO
 #ifdef __ANDROID__
 extern "C"
 {
 int inConversation;
 }
 #endif
-void StartConversation(AActor *npc)
+void StartConversation(AActor *npc, AActor *pc)
 {
 #ifdef __ANDROID__
 	inConversation = 1;
@@ -546,7 +545,7 @@ void StartConversation(AActor *npc)
 			FString response = choice.YesMessage;
 			if(response[0] == '$')
 				response = language[response.Mid(1)];
-			GiveConversationItem(players[0].mo, choice.GiveItem);
+			GiveConversationItem(pc, choice.GiveItem);
 
 			quiz.drawBackground();
 
@@ -556,7 +555,9 @@ void StartConversation(AActor *npc)
 				TAG_DONE);
 
 			VW_UpdateScreen();
-			VL_WaitVBL(140);
+			// Vanilla waited for sound to finish and then waited 30 frames.
+			// No bonus sound is about 42 frames long.
+			VL_WaitVBL(72);
 
 			*page = choice.NextPage;
 			if(choice.CloseDialog)
@@ -585,6 +586,5 @@ void StartConversation(AActor *npc)
 	inConversation = 0;
 #endif
 }
-#endif
 
 }

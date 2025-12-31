@@ -167,8 +167,8 @@ void FPalette::SetPalette (const BYTE *colors)
 	// Find white and black from the original palette so that they can be
 	// used to make an educated guess of the translucency % for a BOOM
 	// translucency map.
-	WhiteIndex = BestColor ((const uint32 *)BaseColors, 255, 255, 255, 0, 255);
-	BlackIndex = BestColor ((const uint32 *)BaseColors, 0, 0, 0, 0, 255);
+	WhiteIndex = BestColor ((DWORD *)BaseColors, 255, 255, 255, 0, 255);
+	BlackIndex = BestColor ((DWORD *)BaseColors, 0, 0, 0, 0, 255);
 }
 
 // In ZDoom's new texture system, color 0 is used as the transparent color.
@@ -298,7 +298,7 @@ void FPalette::MakeRemap (const DWORD *colors, BYTE *remap, const BYTE *useful, 
 		{
 			if (workspace[i].Foreign == 1)
 			{
-				remap[workspace[i].PalEntry] = BestColor ((const uint32 *)BaseColors,
+				remap[workspace[i].PalEntry] = BestColor ((DWORD *)BaseColors,
 					RPART(workspace[i].Color), GPART(workspace[i].Color), BPART(workspace[i].Color),
 					1, 255);
 			}
@@ -376,13 +376,14 @@ void InitPalette (const char* defpalname)
 	GPalette.SetPalette (pal);
 	GPalette.MakeGoodRemap ();
 	ColorMatcher.SetPalette ((DWORD *)GPalette.BaseColors);
+	FTexture::InitGrayMap ();
 
 	// The BUILD engine already has a transparent color, so it doesn't need any remapping.
 	if (!usingBuild)
 	{
 		if (GPalette.Remap[0] == 0)
 		{ // No duplicates, so settle for something close to color 0
-			GPalette.Remap[0] = BestColor ((const uint32 *)GPalette.BaseColors,
+			GPalette.Remap[0] = BestColor ((DWORD *)GPalette.BaseColors,
 				GPalette.BaseColors[0].r, GPalette.BaseColors[0].g, GPalette.BaseColors[0].b, 1, 255);
 		}
 	}

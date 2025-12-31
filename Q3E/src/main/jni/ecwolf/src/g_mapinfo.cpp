@@ -59,6 +59,8 @@ public:
 	{
 	}
 
+	virtual ~MapInfoBlockParser() {}
+
 	void Parse()
 	{
 		ParseHeader();
@@ -295,6 +297,9 @@ LevelInfo::LevelInfo() : ResetHealth(false), ResetInventory(false),
 	SpawnWithWeaponRaised = false;
 	ForceTally = false;
 	HighScoresGraphic.SetInvalid();
+	Sky.SetInvalid();
+	SkyScrollSpeed = 0.0;
+	SkyHorizonOffset = 0;
 }
 
 FTextureID LevelInfo::GetBorderTexture() const
@@ -555,6 +560,26 @@ protected:
 		}
 		else if(key.CompareNoCase("Translator") == 0)
 			ParseStringAssignment(mapInfo.Translator);
+		else if(key.CompareNoCase("Sky1") == 0)
+		{
+			FString texName;
+			ParseStringAssignment(texName);
+			mapInfo.Sky = TexMan.CheckForTexture(texName, FTexture::TEX_Wall);
+
+			if(sc.CheckToken(','))
+			{
+				bool negative = sc.CheckToken('-');
+				sc.MustGetToken(TK_FloatConst);
+				mapInfo.SkyScrollSpeed = negative ? -sc->decimal : sc->decimal;
+
+				if(sc.CheckToken(','))
+				{
+					negative = sc.CheckToken('-');
+					sc.MustGetToken(TK_IntConst);
+					mapInfo.SkyHorizonOffset = negative ? -sc->number : sc->number;
+				}
+			}
+		}
 		else
 			return false;
 		return true;
@@ -866,9 +891,9 @@ protected:
 
 static TMap<unsigned int, ClusterInfo> clusters;
 
-ClusterInfo::ClusterInfo() : ExitTextType(ClusterInfo::EXIT_STRING),
-	TextFont(SmallFont), TextAlignment(TS_Left), TextAnchor(TS_Middle),
-	TextColor(CR_UNTRANSLATED)
+ClusterInfo::ClusterInfo() : EnterTextType(ClusterInfo::EXIT_STRING),
+	ExitTextType(ClusterInfo::EXIT_STRING), TextFont(SmallFont),
+	TextAlignment(TS_Left), TextAnchor(TS_Middle), TextColor(CR_UNTRANSLATED)
 {
 }
 
@@ -1372,7 +1397,7 @@ protected:
 static void SkipBlock(Scanner &sc)
 {
 	// Skip header
-	while(sc.GetNextToken() && sc->token != '{');
+	while(sc.GetNextToken() && sc->token != '{') {}
 	// Skip content
 	unsigned int level = 0;
 	while(sc.GetNextToken() && (level != 0 || sc->token != '}'))
@@ -1494,14 +1519,19 @@ void ParseMacMapList(int lumpnum)
 	FWadLump lump = Wads.OpenLumpNum(lumpnum);
 
 	WORD numMaps;
-	lump >> numMaps;
+	lump.Read(&numMaps, sizeof(numMaps));
 	lump.Seek(2, SEEK_CUR);
 	numMaps = BigShort(numMaps);
 
 	for(unsigned int i = 0;i < numMaps;++i)
 	{
 		WORD nextLevel, nextSecret, parTime, scenarioNum, floorNum;
-		lump >> nextLevel >> nextSecret >> parTime >> scenarioNum >> floorNum;
+		lump.Read(&nextLevel, sizeof(nextLevel));
+		lump.Read(&nextSecret, sizeof(nextSecret));
+		lump.Read(&parTime, sizeof(parTime));
+		lump.Read(&scenarioNum, sizeof(scenarioNum));
+		lump.Read(&floorNum, sizeof(floorNum));
+
 		nextLevel = BigShort(nextLevel);
 		nextSecret = BigShort(nextSecret);
 		parTime = BigShort(parTime);
@@ -1509,7 +1539,7 @@ void ParseMacMapList(int lumpnum)
 		floorNum = BigShort(floorNum);
 
 		LevelInfo info = defaultMap;
-		sprintf(info.MapName, "MAP%02d", i+1);
+		mysnprintf(info.MapName, countof(info.MapName), "MAP%02d", i+1);
 		info.NextMap.Format("MAP%02d", nextLevel+1);
 		info.NextSecret.Format("MAP%02d", nextSecret+1);
 		info.Par = parTime;

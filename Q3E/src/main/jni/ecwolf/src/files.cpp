@@ -37,15 +37,11 @@
 #define USE_WINDOWS_DWORD
 #endif
 #include "LzmaDec.h"
-#ifdef _MSC_VER
-#define DWORD_IS_DEFINED 1
-#endif
 
 #include "files.h"
 #include "filesys.h"
 #include "templates.h"
 #include "zdoomsupport.h"
-#include "doomerrors.h"
 
 //==========================================================================
 //
@@ -54,8 +50,6 @@
 // reads data from an uncompressed file or part of it
 //
 //==========================================================================
-
-#ifndef LIBRETRO
 
 FileReader::FileReader ()
 : File(NULL), Length(0), StartPos(0), FilePos(0), CloseOnDestruct(false)
@@ -171,20 +165,6 @@ char *FileReader::Gets(char *strbuf, int len)
 	return p;
 }
 
-FileReader *FileReader::SafeOpen(const char*filename)
-{
-	try
-	{
-		return new FileReader(filename);
-	}
-	catch (CRecoverableError &)
-	{
-		return NULL;
-	}
-}
-
-#endif
-
 char *FileReader::GetsFromBuffer(const char * bufptr, char *strbuf, int len)
 {
 	if (len>Length-FilePos) len=Length-FilePos;
@@ -215,7 +195,6 @@ char *FileReader::GetsFromBuffer(const char * bufptr, char *strbuf, int len)
 	return strbuf;
 }
 
-#ifndef LIBRETRO
 long FileReader::CalcFileLen() const
 {
 	long endpos;
@@ -225,7 +204,6 @@ long FileReader::CalcFileLen() const
 	fseek (File, 0, SEEK_SET);
 	return endpos;
 }
-#endif
 
 //==========================================================================
 //
@@ -406,11 +384,7 @@ struct FileReaderLZMA::StreamPointer
 	CLzmaDec Stream;
 };
 
-static void *SzAlloc(void *, size_t size) {
-	void *ret = malloc(size);
-	CHECKMALLOCRESULT(ret);
-	return ret;
-}
+static void *SzAlloc(void *, size_t size) { return malloc(size); }
 static void SzFree(void *, void *address) { free(address); }
 ISzAlloc g_Alloc = { SzAlloc, SzFree };
 

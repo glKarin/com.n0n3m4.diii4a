@@ -70,8 +70,8 @@ template<class T> struct TDefaultDelete<T[]>
 	{
 		// Array types can't be cast, so this will allow us to check if both
 		// types are arrays.
-		sizeof(Array);
-		sizeof(typename D::Array);
+		(void)sizeof(Array);
+		(void)sizeof(typename D::Array);
 		static_cast<Type*>((typename D::Type*)0);
 	}
 
@@ -265,6 +265,15 @@ class TSharedPtr
 	{
 		if(--r->shared == 0)
 		{
+			assert(r != &TSharedPtrRef::NullRef<void>::Null);
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 5))
+			// Static analysis sees the possibility of deleting a stack
+			// object, but if the code is written right the reference count
+			// should never drop to 0.
+			if(r == &TSharedPtrRef::NullRef<void>::Null)
+				__builtin_unreachable();
+#endif
+
 			(void)Deleter(p);
 
 			// All active SharedPtrs count as 1 weak reference in order to

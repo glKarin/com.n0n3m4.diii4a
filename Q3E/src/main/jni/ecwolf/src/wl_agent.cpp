@@ -3,6 +3,7 @@
 #include <cmath>
 #include <climits>
 
+#include "doomerrors.h"
 #include "wl_def.h"
 #include "id_ca.h"
 #include "id_sd.h"
@@ -57,8 +58,6 @@
 //
 // player state info
 //
-AActor			*LastAttacker;
-
 player_t		players[MAXPLAYERS];
 
 void ClipMove (AActor *ob, int32_t xmove, int32_t ymove);
@@ -272,7 +271,7 @@ void player_t::GiveExtraMan (int amount)
 		else if(lives > 9)
 			lives = 9;
 	}
-	SD_PlaySound ("misc/1up");
+	PlaySoundLocActor ("misc/1up", mo);
 }
 
 /*
@@ -304,8 +303,6 @@ void player_t::GivePoints (int32_t points)
 static FRandom pr_damageplayer("PlayerTakeDamge");
 void player_t::TakeDamage (int points, AActor *attacker)
 {
-	LastAttacker = attacker;
-
 	if (gamestate.victoryflag)
 		return;
 	points = (points*gamestate.difficulty->DamageFactor)>>FRACBITS;
@@ -314,13 +311,26 @@ void player_t::TakeDamage (int points, AActor *attacker)
 	if (!godmode)
 		mo->health = health -= points;
 
+	if (godmode != 2 && GetPlayerNum() == ConsolePlayer)
+		StartDamageFlash (points);
+
 	if (health<=0)
 	{
 		mo->target = attacker;
 		mo->Die();
 		health = 0;
-		playstate = ex_died;
 		killerobj = attacker;
+
+		if(attacker && attacker->player)
+		{
+			if(attacker == mo)
+				--frags;
+			else
+			{
+				++attacker->player->frags;
+				Printf("Attacker got frag (%d)\n", attacker->player->frags);
+			}
+		}
 	}
 	else
 	{
@@ -328,11 +338,8 @@ void player_t::TakeDamage (int points, AActor *attacker)
 			mo->SetState(mo->PainState);
 	}
 
-	if (godmode != 2 && GetPlayerNum() == ConsolePlayer)
-		StartDamageFlash (points);
-
 	if (points > 0)
-		SD_PlaySound("player/pain");
+		PlaySoundLocActor("player/pain", mo);
 
 	StatusBar->UpdateFace(points);
 	StatusBar->DrawStatusBar();
@@ -521,7 +528,7 @@ void ClipMove (AActor *ob, int32_t xmove, int32_t ymove)
 	}
 
 	if (!SD_SoundPlaying())
-		SD_PlaySound ("world/hitwall");
+		PlaySoundLocActor ("world/hitwall", ob);
 
 	ob->x = basex+xmove;
 	ob->y = basey;
@@ -650,7 +657,7 @@ void APlayerPawn::Cmd_Use()
 	}
 
 	if(doNothing)
-		SD_PlaySound ("misc/do_nothing");
+		PlaySoundLocActor("misc/do_nothing", this);
 	else
 		P_ChangeSwitchTexture(spot, static_cast<MapTile::Side>(direction), isRepeatable, lastTrigger);
 }
@@ -823,6 +830,51 @@ ACTION_FUNCTION(A_Raise)
 	return true;
 }
 
+void player_t::DeathFade()
+{
+	if(ScreenFader)
+		return; // Already setup
+
+	if(GetPlayerNum() == ConsolePlayer)
+		FinishPaletteShifts();
+
+	switch(gameinfo.DeathTransition)
+	{
+		case GameInfo::TRANSITION_Fizzle:
+		{
+			// Fizzle fade used a slightly darker shade of red.
+			const byte fr = RPART(mo->damagecolor)*2/3;
+			const byte fg = GPART(mo->damagecolor)*2/3;
+			const byte fb = BPART(mo->damagecolor)*2/3;
+
+			FFizzleFader* fader = new FFizzleFader(viewscreenx,viewscreeny,viewwidth,viewheight,70,false);
+			fader->FadeToColor(fr, fg, fb);
+			ScreenFader = fader;
+			break;
+		}
+
+		case GameInfo::TRANSITION_Fade:
+			ScreenFader = new FBlendFader(0, 255, 0, 0, 0, 64);
+			break;
+	}
+}
+
+void player_t::DeathFadeClear()
+{
+	if(ScreenFader)
+		ScreenFader.Reset();
+
+	switch(gameinfo.DeathTransition)
+	{
+		case GameInfo::TRANSITION_Fade:
+			V_SetBlend(0, 0, 0, 0);
+			break;
+
+		case GameInfo::TRANSITION_Fizzle:
+			break;
+	}
+}
+
 // Finds the target closest to the player within shooting range.
 AActor *player_t::FindTarget()
 {
@@ -842,19 +894,13 @@ AActor *player_t::FindTarget()
 			if(check == mo)
 				continue;
 
-			if ((check->flags & FL_SHOOTABLE))// && (check->flags & FL_VISABLE)
-			//	&& abs(check->viewx-centerx) < shootdelta)
+			if ((check->flags & FL_SHOOTABLE) &&
+				(!check->player || Net::FriendlyFire()) &&
+				mo->CheckVisibility(check, ANGLE_90/9))
 			{
 				const int dist = MAX(abs(check->x - mo->x), abs(check->y - mo->y));
 
-				float angle = (float) atan2 ((float) (check->y - mo->y), (float) (check->x - mo->x));
-				if (angle<0)
-					angle = (float) (M_PI*2+angle);
-				angle_t iangle = 0-(angle_t)(angle*ANGLE_180/M_PI);
-				angle_t lowerAngle = MIN(iangle, mo->angle);
-				angle_t upperAngle = MAX(iangle, mo->angle);
-				if(MIN(upperAngle - lowerAngle, lowerAngle - upperAngle) <= (ANGLE_90/9) &&
-					CheckLine(check, mo) && dist < viewdist)
+				if(dist < viewdist)
 				{
 					viewdist = dist;
 					closest = check;
@@ -887,16 +933,19 @@ size_t player_t::PropagateMark()
 
 void player_t::Reborn()
 {
+	ScreenFader.Reset();
 	ReadyWeapon = NULL;
 	PendingWeapon = WP_NOCHANGE;
 	flags = 0;
 	FOV = DesiredFOV;
+	RespawnEligible = -1;
 
 	if(state == PST_ENTER)
 	{
 		lives = gamestate.difficulty->LivesCount;
 		score = oldscore = 0;
 		nextextra = EXTRAPOINTS;
+		frags = 0;
 	}
 
 	mo->GiveStartingInventory();
@@ -936,10 +985,21 @@ void player_t::Serialize(FArchive &arc)
 	if(GameSave::SaveProdVersion >= 0x001002FF && GameSave::SaveVersion > 1374729160)
 		arc << FOV << DesiredFOV;
 
+	if(GameSave::SaveVersion > 1672116695)
+		arc << frags;
+	else
+		frags = 0;
+
+	if(GameSave::SaveVersion > 1690159133)
+		arc << RespawnEligible;
+	else
+		RespawnEligible = -1;
+
 	if(arc.IsLoading())
 	{
 		mo->SetupWeaponSlots();
 		CalcProjection(mo->radius);
+		DeathFadeClear();
 	}
 }
 
@@ -1037,35 +1097,69 @@ FArchive &operator<< (FArchive &arc, player_t *&player)
 /*
 ===============
 =
+= CheckSpawnPlayer
+=
+= Look for any players waiting to be spawned
+=
+===============
+*/
+
+void CheckSpawnPlayer(bool setup)
+{
+	for(unsigned int p = 0;p < Net::InitVars.numPlayers;++p)
+	{
+		if(setup || players[p].state == player_t::PST_ENTER || players[p].state == player_t::PST_REBORN)
+		{
+			SpawnPlayer(p);
+			if(players[p].mo == NULL)
+			{
+				FString err;
+				err.Format("No player %u start!", p+1);
+				throw CRecoverableError(err);
+			}
+		}
+	}
+}
+
+/*
+===============
+=
 = SpawnPlayer
 =
 ===============
 */
 
-void SpawnPlayer (int tilex, int tiley, int dir)
+void SpawnPlayer (int num)
 {
-	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+	const GameMap::PlayerSpawn *spot = map->GetPlayerSpawn(num);
+	if(spot == NULL)
+		return;
+
+	player_t &player = players[num];
+
+	if(player.state == player_t::PST_REBORN && player.mo) // Detach from previous pawn if it exists
 	{
-		player_t &player = players[i];
-
-		player.mo = (APlayerPawn *) AActor::Spawn(gamestate.playerClass, ((int32_t)tilex<<TILESHIFT)+TILEGLOBAL/2, ((int32_t)tiley<<TILESHIFT)+TILEGLOBAL/2, 0, 0);
-		player.mo->angle = dir*ANGLE_1;
-		player.mo->player = &player;
-		Thrust (player.mo,0,0); // set some variables
-		player.mo->SetPriority(ThinkerList::PLAYER);
-
-		if(player.state == player_t::PST_ENTER || player.state == player_t::PST_REBORN)
-			player.Reborn();
-
-		player.camera = player.mo;
-		player.state = player_t::PST_LIVE;
-		player.extralight = 0;
-
-		// Re-raise the weapon like Doom if we don't have the flag set in mapinfo.
-		if(!levelInfo->SpawnWithWeaponRaised && player.PendingWeapon == WP_NOCHANGE)
-			player.PendingWeapon = player.ReadyWeapon;
-		player.BringUpWeapon();
+		player.mo->player = NULL;
+		player.mo->SetPriority(ThinkerList::NORMAL);
 	}
+
+	player.mo = (APlayerPawn *) AActor::Spawn(gamestate.playerClass[num], spot->x, spot->y, 0, 0);
+	player.mo->angle = spot->angle*ANGLE_1;
+	player.mo->player = &player;
+	Thrust (player.mo,0,0); // set some variables
+	player.mo->SetPriority(ThinkerList::PLAYER);
+
+	if(player.state == player_t::PST_ENTER || player.state == player_t::PST_REBORN)
+		player.Reborn();
+
+	player.camera = player.mo;
+	player.state = player_t::PST_LIVE;
+	player.extralight = 0;
+
+	// Re-raise the weapon like Doom if we don't have the flag set in mapinfo.
+	if(!levelInfo->SpawnWithWeaponRaised && player.PendingWeapon == WP_NOCHANGE)
+		player.PendingWeapon = player.ReadyWeapon;
+	player.BringUpWeapon();
 }
 
 
@@ -1100,7 +1194,7 @@ ACTION_FUNCTION(A_CustomPunch)
 	player_t *player = self->player;
 
 	if(flags & CPF_ALWAYSPLAYSOUND)
-		SD_PlaySound(player->ReadyWeapon->attacksound, SD_WEAPONS);
+		PlaySoundLocActor(player->ReadyWeapon->attacksound, self, self == players[ConsolePlayer].camera ? SD_WEAPONS : SD_GENERIC);
 	if(range == 0)
 		range = 64;
 
@@ -1115,12 +1209,15 @@ ACTION_FUNCTION(A_CustomPunch)
 		if(check == self)
 			continue;
 
-		if ( (check->flags & FL_SHOOTABLE) && (check->flags & FL_VISABLE)
-			&& abs(check->viewx-centerx) < shootdelta)
+		if((check->flags & FL_SHOOTABLE) &&
+			(!check->player || Net::FriendlyFire()) &&
+			self->CheckVisibility(check, ANGLE_90/9))
 		{
-			if (check->transx < dist)
+			const int checkdist = MAX(abs(check->x - self->x), abs(check->y - self->y));
+
+			if (checkdist < dist)
 			{
-				dist = check->transx;
+				dist = checkdist;
 				closest = check;
 			}
 		}
@@ -1137,7 +1234,7 @@ ACTION_FUNCTION(A_CustomPunch)
 
 	// hit something
 	if(!(flags & CPF_ALWAYSPLAYSOUND))
-		SD_PlaySound(player->ReadyWeapon->attacksound, SD_WEAPONS);
+		PlaySoundLocActor(player->ReadyWeapon->attacksound, self, self == players[ConsolePlayer].camera ? SD_WEAPONS : SD_GENERIC);
 	DamageActor(closest, self, damage);
 
 	// Ammo is only used when hit
@@ -1186,9 +1283,9 @@ ACTION_FUNCTION(A_GunAttack)
 	}
 
 	if(sound.Len() == 1 && sound[0] == '*')
-		SD_PlaySound(player->ReadyWeapon->attacksound, SD_WEAPONS);
+		PlaySoundLocActor(player->ReadyWeapon->attacksound, self, self == players[ConsolePlayer].camera ? SD_WEAPONS : SD_GENERIC);
 	else
-		SD_PlaySound(sound, SD_WEAPONS);
+		PlaySoundLocActor(sound, self, self == players[ConsolePlayer].camera ? SD_WEAPONS : SD_GENERIC);
 
 	if(self->MeleeState)
 		self->SetState(self->MeleeState);

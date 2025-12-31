@@ -78,6 +78,8 @@ typedef enum {
 	ns_music,
 	ns_voxels,
 
+	ns_rottsky,
+
 	ns_firstskin,
 } namespace_t;
 

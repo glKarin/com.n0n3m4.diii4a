@@ -151,7 +151,7 @@ DObject *Gray;
 DObject *Root;
 DObject *SoftRoots;
 DObject **SweepPos;
-uint32 CurrentWhite = OF_White0 | OF_Fixed;
+DWORD CurrentWhite = OF_White0 | OF_Fixed;
 EGCState State = GCS_Pause;
 int Pause = DEFAULT_GCPAUSE;
 int StepMul = DEFAULT_GCMUL;

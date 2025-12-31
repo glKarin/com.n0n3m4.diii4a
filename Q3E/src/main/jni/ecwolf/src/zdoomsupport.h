@@ -8,10 +8,7 @@
 
 #include <cstring>
 
-#if defined(LIBRETRO) && LIBRETRO
-void libretro_log(const char *format, ...);
-#define printf(...) libretro_log(__VA_ARGS__)
-#elif defined(__ANDROID__) && !defined(_DIII4A) //karin: using std printf
+#if defined(__ANDROID__) && !defined(_DIII4A) //karin: using std printf
 #include <android/log.h>
 #define printf(...) __android_log_print(ANDROID_LOG_INFO,"ECWolf",__VA_ARGS__)
 #endif
@@ -63,7 +60,7 @@ static inline unsigned int MakeKey(const char *s) { return MakeKey(s, strlen(s))
 // circular dependency issue.
 template<class T> void FixPathSeperator (T &path) { path.ReplaceChars('\\', '/'); }
 
-static inline void DPrintf(const char* fmt, ...) {}
+static void DPrintf(const char* fmt, ...) {}
 
 #define countof(x) (sizeof(x)/sizeof(x[0]))
 #ifndef __BIG_ENDIAN__

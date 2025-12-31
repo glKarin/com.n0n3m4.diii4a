@@ -49,6 +49,7 @@
 #include "wl_draw.h"
 #include "wl_game.h"
 #include "wl_main.h"
+#include "wl_net.h"
 #include "wl_play.h"
 
 AutoMap::Color &AutoMap::Color::operator=(int rgb)
@@ -85,6 +86,11 @@ bool am_pause = true;
 bool am_showratios = false;
 bool am_needsrecalc = false;
 
+static bool AM_ShouldPauseGame()
+{
+	return am_pause && Net::InitVars.mode == Net::MODE_SinglePlayer;
+}
+
 void AM_ChangeResolution()
 {
 	if(StatusBar == NULL)
@@ -113,7 +119,7 @@ void AM_CheckKeys()
 		AM_Main.SetScale(FRACUNIT*122/128, true);
 	}
 
-	if(am_pause)
+	if(AM_ShouldPauseGame())
 	{
 		const fixed PAN_AMOUNT = FixedDiv(FRACUNIT*10, AM_Main.GetScreenScale());
 		const fixed PAN_ANALOG_MULTIPLIER = PAN_AMOUNT/100;
@@ -176,7 +182,7 @@ void AM_Toggle()
 		DrawPlayScreen();
 	}
 
-	if(am_pause)
+	if(AM_ShouldPauseGame())
 	{
 		if(automap == AMA_Normal)
 			Paused |= 2;
@@ -270,6 +276,7 @@ void AutoMap::ClipTile(TArray<FVector2> &points) const
 			bool Ein, Sin;
 			switch(i)
 			{
+				default:
 				case 0: // Left
 					Ein = e.X > amx;
 					Sin = s->X > amx;
@@ -319,12 +326,12 @@ void AutoMap::Draw()
 	if(!(amFlags & AMF_Overlay))
 		screen->Clear(amx, amy+1, amx+amsizex, amy+amsizey+1, BackgroundColor.palcolor, BackgroundColor.color);
 
-	const fixed playerx = players[0].mo->x;
-	const fixed playery = players[0].mo->y;
+	const fixed playerx = players[ConsolePlayer].mo->x;
+	const fixed playery = players[ConsolePlayer].mo->y;
 
-	if(fullRefresh || amangle != ((amFlags & AMF_Rotate) ? players[0].mo->angle-ANGLE_90 : 0))
+	if(fullRefresh || amangle != ((amFlags & AMF_Rotate) ? players[ConsolePlayer].mo->angle-ANGLE_90 : 0))
 	{
-		amangle = (amFlags & AMF_Rotate) ? players[0].mo->angle-ANGLE_90 : 0;
+		amangle = (amFlags & AMF_Rotate) ? players[ConsolePlayer].mo->angle-ANGLE_90 : 0;
 		minmaxSel = amangle/ANGLE_90;
 		amsin = finesine[amangle>>ANGLETOFINESHIFT];
 		amcos = finecosine[amangle>>ANGLETOFINESHIFT];
@@ -467,7 +474,7 @@ void AutoMap::Draw()
 			screen->FillSimplePoly(NULL, &pwall.points[0], pwall.points.Size(), originx + pwall.shiftx, originy + pwall.shifty, origTexScale, origTexScale, ~amangle, &NormalLight, 256, WallColor.palcolor, WallColor.color);
 	}
 
-	DrawVector(AM_Arrow, 8, FixedMul(playerx - ofsx, scale), FixedMul(playery - ofsy, scale), scale, (amFlags & AMF_Rotate) ? 0 : ANGLE_90-players[0].mo->angle, ArrowColor);
+	DrawVector(AM_Arrow, 8, FixedMul(playerx - ofsx, scale), FixedMul(playery - ofsy, scale), scale, (amFlags & AMF_Rotate) ? 0 : ANGLE_90-players[ConsolePlayer].mo->angle, ArrowColor);
 
 	if((amFlags & AMF_ShowThings) && (am_cheat || gamestate.fullmap))
 	{
@@ -766,8 +773,8 @@ void AutoMap::SetPanning(fixed x, fixed y, bool relative)
 			const int sizey = map->GetHeader().height;
 			maxx = abs(sizex*amcos) + abs(sizey*amsin);
 			maxy = abs(sizex*amsin) + abs(sizey*amcos);
-			posx = players[0].mo->x - (sizex<<(FRACBITS-1));
-			posy = players[0].mo->y - (sizey<<(FRACBITS-1));
+			posx = players[ConsolePlayer].mo->x - (sizex<<(FRACBITS-1));
+			posy = players[ConsolePlayer].mo->y - (sizey<<(FRACBITS-1));
 			fixed tmp = (FixedMul(posx, amcos) - FixedMul(posy, amsin)) + (maxx>>1);
 			posy = (FixedMul(posy, amcos) + FixedMul(posx, amsin)) + (maxy>>1);
 			posx = tmp;
@@ -776,8 +783,8 @@ void AutoMap::SetPanning(fixed x, fixed y, bool relative)
 		{
 			maxx = map->GetHeader().width<<FRACBITS;
 			maxy = map->GetHeader().height<<FRACBITS;
-			posx = players[0].mo->x;
-			posy = players[0].mo->y;
+			posx = players[ConsolePlayer].mo->x;
+			posy = players[ConsolePlayer].mo->y;
 		}
 		ampanx = clamp<fixed>(ampanx+x, posx - maxx, posx);
 		ampany = clamp<fixed>(ampany+y, posy - maxy, posy);

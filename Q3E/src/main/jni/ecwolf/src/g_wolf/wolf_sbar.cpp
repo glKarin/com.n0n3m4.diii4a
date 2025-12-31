@@ -17,6 +17,7 @@
 #include "a_inventory.h"
 #include "a_keys.h"
 #include "wl_iwad.h"
+#include "wl_net.h"
 
 /*
 =============================================================================
@@ -215,7 +216,7 @@ void WolfStatusBar::UpdateFace (int damage)
 
 	const int maxHealth = players[ConsolePlayer].mo ? players[ConsolePlayer].mo->maxhealth : 100;
 	const int damageLevel = macDamage ? (players[ConsolePlayer].health > (maxHealth>>2) ? 0 : 1)
-	        : MIN<int>(6, players[ConsolePlayer].health > maxHealth ? 0 : (maxHealth-players[ConsolePlayer].health)/(maxHealth/6));
+		: MIN(6, players[ConsolePlayer].health > maxHealth ? 0 : (maxHealth-players[ConsolePlayer].health)/(maxHealth/6));
 	if(damage)
 	{
 		static FTextureID ouchFace = TexMan.CheckForTexture("STFOUCH0", FTexture::TEX_Any);
@@ -415,7 +416,12 @@ void WolfStatusBar::DrawItems (void)
 void WolfStatusBar::DrawScore (void)
 {
 	if((viewsize == 21 && ingame) || !StatusBarConfig.Score.Enabled) return;
-	LatchNumber (StatusBarConfig.Score.X,StatusBarConfig.Score.Y,StatusBarConfig.Score.Digits,players[ConsolePlayer].score,mac);
+
+	int32_t score = players[ConsolePlayer].score;
+	if(Net::InitVars.gameMode == Net::GM_Battle)
+		score = players[ConsolePlayer].frags;
+
+	LatchNumber (StatusBarConfig.Score.X,StatusBarConfig.Score.Y,StatusBarConfig.Score.Digits,score,mac);
 }
 
 //===========================================================================

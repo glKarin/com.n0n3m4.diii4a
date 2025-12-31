@@ -90,9 +90,7 @@
 #include <locale.h>
 
 #include "zstring.h"
-#ifndef DISABLE_GDTOA
 #include "gdtoa.h"
-#endif
 
 #ifndef _MSC_VER
 #include <stdint.h>
@@ -328,7 +326,7 @@ namespace StringFormat
 		 */
 		const char *decimal_point = ".";/* locale specific decimal point */
 		int signflag;					/* true if float is negative */
-		int expt = 0;						/* integer value of exponent */
+		int expt;						/* integer value of exponent */
 		char expchar = 'e';				/* exponent character: [eEpP\0] */
 		char *dtoaend;					/* pointer to end of converted digits */
 		int expsize = 0;				/* character count for expstr */
@@ -626,7 +624,6 @@ namespace StringFormat
 				*va_arg (arglist, int *) = inlen;
 			}
 		}
-#ifndef DISABLE_GDTOA
 		else if (type == 'f' || type == 'F')
 		{
 			expchar = '\0';
@@ -641,7 +638,6 @@ namespace StringFormat
 			}
 			goto fp_begin;
 		}
-#endif
 #if 0
 		// The hdtoa function provided with FreeBSD uses a hexadecimal FP constant.
 		// Microsoft's compiler does not support these, so I would need to hack it
@@ -677,7 +673,6 @@ namespace StringFormat
 			goto fp_common;
 		}
 #endif
-#ifndef DISABLE_GDTOA
 		else if (type == 'e' || type == 'E')
 		{
 			expchar = type;
@@ -778,8 +773,7 @@ fp_begin:
 				}
 			}
 		}
-#endif
-		
+
 		// Check for sign prefix (only for signed numbers)
 		if (flags & F_SIGNED)
 		{
@@ -891,9 +885,7 @@ fp_begin:
 		len += outlen;
 		if (dtoaresult != NULL)
 		{
-#ifndef DISABLE_GDTOA
 			freedtoa(dtoaresult);
-#endif
 			dtoaresult = NULL;
 		}
 	}

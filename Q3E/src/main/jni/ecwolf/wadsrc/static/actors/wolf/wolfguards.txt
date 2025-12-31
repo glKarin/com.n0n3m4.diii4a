@@ -145,12 +145,12 @@ actor Dog : WolfensteinMonster 14
 	{
 		Spawn:
 		Path:
-			DOGY A 10 NOP A_Chase
+			DOGY A 10 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			DOGY A 2.5
-			DOGY B 7.5 NOP A_Chase
-			DOGY C 10 NOP A_Chase
+			DOGY B 7.5 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
+			DOGY C 10 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			DOGY C 2.5
-			DOGY D 7.5 NOP A_Chase
+			DOGY D 7.5 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			loop
 		Melee:
 			DOGY EF 5 A_FaceTarget
@@ -158,12 +158,12 @@ actor Dog : WolfensteinMonster 14
 			DOGY EA 5
 			goto See
 		See:
-			DOGY A 5 NOP A_Chase
+			DOGY A 5 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			DOGY A 1.5
-			DOGY B 4 NOP A_Chase
-			DOGY C 5 NOP A_Chase
+			DOGY B 4 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
+			DOGY C 5 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			DOGY C 1.5
-			DOGY D 4 NOP A_Chase
+			DOGY D 4 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			loop
 		Death:
 			DOGY H 7.5 A_Fall
@@ -183,12 +183,12 @@ actor Doberman : Dog 95
 	{
 		Spawn:
 		Path:
-			DOBR A 10 NOP A_Chase
+			DOBR A 10 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			DOBR A 2.5
-			DOBR B 7.5 NOP A_Chase
-			DOBR C 10 NOP A_Chase
+			DOBR B 7.5 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
+			DOBR C 10 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			DOBR C 2.5
-			DOBR D 7.5 NOP A_Chase
+			DOBR D 7.5 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			loop
 		Melee:
 			DOBR EF 5 A_FaceTarget
@@ -196,12 +196,12 @@ actor Doberman : Dog 95
 			DOBR EA 5
 			goto See
 		See:
-			DOBR A 5 NOP A_Chase
+			DOBR A 5 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			DOBR A 1.5
-			DOBR B 4 NOP A_Chase
-			DOBR C 5 NOP A_Chase
+			DOBR B 4 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
+			DOBR C 5 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			DOBR C 1.5
-			DOBR D 4 NOP A_Chase
+			DOBR D 4 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			loop
 		Death:
 			DOBR H 7.5 A_Fall

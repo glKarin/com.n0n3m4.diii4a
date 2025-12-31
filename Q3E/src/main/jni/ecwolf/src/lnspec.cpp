@@ -327,8 +327,8 @@ class EVDoor : public Thinker
 		FName seqname;
 
 		unsigned int speed;
-		int32_t amount;
-		int32_t opentics;
+		int amount;
+		int opentics;
 		unsigned int wait;
 		bool direction;
 };
@@ -985,6 +985,9 @@ FUNC(Teleport_NewMap)
 	playstate = ex_newmap;
 	NewMap.newmap = args[0];
 	NewMap.flags = args[2];
+	NewMap.x = activator->x;
+	NewMap.y = activator->y;
+	NewMap.angle = activator->angle;
 	return 1;
 }
 
@@ -1133,7 +1136,7 @@ FUNC(StartConversation)
 		A_Face(activator, talker);
 	}
 
-	Dialog::StartConversation(talker);
+	Dialog::StartConversation(talker, activator);
 
 	return 1;
 }
@@ -1174,8 +1177,8 @@ FUNC(Teleport_Relative)
 	fixed y = activator->y + ((dest->GetY() - spot->GetY())<<FRACBITS);
 	if((args[2] & TELEPORT_Center))
 	{
-		x = (activator->x&0xFFFF0000)|0x8000;
-		y = (activator->y&0xFFFF0000)|0x8000;
+		x = (x&0xFFFF0000)|0x8000;
+		y = (y&0xFFFF0000)|0x8000;
 	}
 
 	angle_t angle = (args[1]<<24) +

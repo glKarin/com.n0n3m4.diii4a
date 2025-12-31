@@ -43,16 +43,15 @@
 class SoundInformation;
 
 struct Mix_Chunk;
-struct Mix_ChunkDeleter
-{
-	explicit Mix_ChunkDeleter(Mix_Chunk *obj);
-};
+struct Mix_ChunkDeleter;
 
 class SoundIndex
 {
 	public:
 		SoundIndex(int index = 0) : index(index) {}
 		SoundIndex(const char* logical);
+
+		bool IsNull() const { return index == 0; }
 
 		operator int() const { return index; }
 	private:
@@ -78,7 +77,6 @@ class SoundData
 		byte* GetSpeakerData() const { return speakerData; }
 		bool HasType(Type type=ADLIB) const { return lump[type] != -1; }
 		bool IsNull() const { return lump[0] == -1 && lump[1] == -1 && lump[2] == -1 && !isAlias; }
-  	        int GetIndex() const { return index; }
 
 	private:
 		const SoundData &operator= (const SoundData &);
@@ -107,7 +105,6 @@ class SoundInformation
 
 		SoundIndex		FindSound(const char* logical) const;
 		void			Init();
-	        void                    Clear();
 		const SoundData	&operator[] (const char* logical) const { return operator[](FindSound(logical)); }
 		const SoundData	&operator[] (const SoundIndex &index) const;
 		uint32_t		GetLastPlayTick(const SoundData &sound) const { return lastPlayTicks[sound.index]; }

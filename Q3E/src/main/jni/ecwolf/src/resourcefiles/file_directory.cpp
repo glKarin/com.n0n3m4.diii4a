@@ -33,15 +33,20 @@
 **
 */
 
+#if !defined(_WIN32) && !defined(__sun)
+#if !defined(__ANDROID__) || (__ANDROID_API__ >= 21)
+#define USE_FTS 1
+#endif
+#endif
 
 #include <sys/stat.h>
 #include <sys/types.h>
 #ifdef _WIN32
 #include <io.h>
 #define stat _stat
-#elif !defined(LIBRETRO)
+#else
 #include <dirent.h>
-#if !defined( __sun)
+#ifdef USE_FTS
 #include <fts.h>
 #endif
 #endif
@@ -56,6 +61,42 @@
 #include "resourcefile.h"
 #include "zstring.h"
 #include "doomerrors.h"
+
+
+
+//==========================================================================
+//
+// Zip Lump
+//
+//==========================================================================
+
+struct FDirectoryLump : public FResourceLump
+{
+	virtual FileReader *NewReader();
+	virtual int FillCache();
+
+private:
+};
+
+
+//==========================================================================
+//
+// Zip file
+//
+//==========================================================================
+
+class FDirectory : public FResourceFile
+{
+	TArray<FDirectoryLump> Lumps;
+
+	int AddDirectory(const char *dirpath);
+	void AddEntry(const char *fullpath, int size);
+
+public:
+	FDirectory(const char * dirname);
+	bool Open(bool quiet);
+	virtual FResourceLump *GetLump(int no) { return ((unsigned)no < NumLumps)? &Lumps[no] : NULL; }
+};
 
 
 
@@ -85,7 +126,6 @@ FDirectory::FDirectory(const char * directory)
 }
 
 
-#ifndef LIBRETRO
 #ifdef _WIN32
 //==========================================================================
 //
@@ -148,7 +188,7 @@ int FDirectory::AddDirectory(const char *dirpath)
 	return count;
 }
 
-#elif defined(__sun)
+#elif !defined(USE_FTS)
 
 int FDirectory::AddDirectory(const char *dirpath)
 {
@@ -237,7 +277,7 @@ int FDirectory::AddDirectory(const char *dirpath)
 	return count;
 }
 #endif
-#endif
+
 
 //==========================================================================
 //
@@ -280,9 +320,17 @@ void FDirectory::AddEntry(const char *fullpath, int size)
 
 FileReader *FDirectoryLump::NewReader()
 {
-	FString fullpath = Owner->Filename;
-	fullpath += FullName;
-	return FileReader::SafeOpen(fullpath);
+	try
+	{
+		FString fullpath = Owner->Filename;
+		fullpath += FullName;
+		printf("%s\n", fullpath.GetChars());
+		return new FileReader(fullpath);
+	}
+	catch (CRecoverableError &)
+	{
+		return NULL;
+	}
 }
 
 //==========================================================================

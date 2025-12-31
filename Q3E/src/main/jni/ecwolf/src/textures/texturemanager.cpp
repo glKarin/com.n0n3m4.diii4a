@@ -863,6 +863,9 @@ void FTextureManager::AddTexturesForWad(int wadnum)
 	// First step: Load sprites
 	AddGroup(wadnum, ns_sprites, FTexture::TEX_Sprite);
 
+	// Composite ROTT skies
+	AddRottSkies(wadnum);
+
 	// When loading a Zip, all graphics in the patches/ directory should be
 	// added as well.
 	AddGroup(wadnum, ns_patches, FTexture::TEX_WallPatch);

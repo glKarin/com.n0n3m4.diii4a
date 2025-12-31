@@ -69,7 +69,7 @@ public:
 
 	void NewGame()
 	{
-		CurrentScore = players[0].score;
+		CurrentScore = players[ConsolePlayer].score;
 	}
 
 	void Tick();
@@ -176,23 +176,23 @@ void BlakeStatusBar::DrawStatusBar()
 		area = "SECRET";
 	else
 		area.Format("AREA: %d", levelInfo->LevelNumber);
-	lives.Format("LIVES: %d", players[0].lives);
+	lives.Format("LIVES: %d", players[ConsolePlayer].lives);
 	DrawString(IndexFont, area, 18, 5, true, CR_WHITE);
 	DrawString(IndexFont, levelInfo->GetName(map), 160, 5, true, CR_WHITE, true);
 	DrawString(IndexFont, lives, 267, 5, true, CR_WHITE);
 
 	// Draw bottom information
 	FString health;
-	health.Format("%3d", players[0].health);
+	health.Format("%3d", players[ConsolePlayer].health);
 	DrawString(HealthFont, health, 128, 162, false);
 
 	FString score;
 	score.Format("%7d", CurrentScore);
 	DrawString(ScoreFont, score, 256, 155, false);
 
-	if(players[0].ReadyWeapon)
+	if(players[ConsolePlayer].ReadyWeapon)
 	{
-		FTexture *weapon = TexMan(players[0].ReadyWeapon->icon);
+		FTexture *weapon = TexMan(players[ConsolePlayer].ReadyWeapon->icon);
 		if(weapon)
 		{
 			stx = 248;
@@ -207,18 +207,18 @@ void BlakeStatusBar::DrawStatusBar()
 		}
 
 		// TODO: Fix color
-		unsigned int amount = players[0].ReadyWeapon->ammo[AWeapon::PrimaryFire]->amount;
-		DrawLed(static_cast<double>(amount)/static_cast<double>(players[0].ReadyWeapon->ammo[AWeapon::PrimaryFire]->maxamount), 243, 155);
+		unsigned int amount = players[ConsolePlayer].ReadyWeapon->ammo[AWeapon::PrimaryFire]->amount;
+		DrawLed(static_cast<double>(amount)/static_cast<double>(players[ConsolePlayer].ReadyWeapon->ammo[AWeapon::PrimaryFire]->maxamount), 243, 155);
 
 		FString ammo;
 		ammo.Format("%3d%%", amount);
 		DrawString(IndexFont, ammo, 252, 190, false, CR_LIGHTBLUE);
 	}
 
-	if(players[0].mo)
+	if(players[ConsolePlayer].mo)
 	{
 		static const ClassDef * const radarPackCls = ClassDef::FindClass("RadarPack");
-		AInventory *radarPack = players[0].mo->FindInventory(radarPackCls);
+		AInventory *radarPack = players[ConsolePlayer].mo->FindInventory(radarPackCls);
 		if(radarPack)
 			DrawLed(static_cast<double>(radarPack->amount)/static_cast<double>(radarPack->maxamount), 235, 155);
 		else
@@ -227,9 +227,9 @@ void BlakeStatusBar::DrawStatusBar()
 
 	// Find keys in inventory
 	int presentKeys = 0;
-	if(players[0].mo)
+	if(players[ConsolePlayer].mo)
 	{
-		for(AInventory *item = players[0].mo->inventory;item != NULL;item = item->inventory)
+		for(AInventory *item = players[ConsolePlayer].mo->inventory;item != NULL;item = item->inventory)
 		{
 			if(item->IsKindOf(NATIVE_CLASS(Key)))
 			{
@@ -320,7 +320,7 @@ void BlakeStatusBar::DrawString(FFont *font, const char* string, double x, doubl
 
 void BlakeStatusBar::Tick()
 {
-	int scoreDelta = players[0].score - CurrentScore;
+	int scoreDelta = players[ConsolePlayer].score - CurrentScore;
 	if(scoreDelta > 1500)
 		CurrentScore += scoreDelta/4;
 	else

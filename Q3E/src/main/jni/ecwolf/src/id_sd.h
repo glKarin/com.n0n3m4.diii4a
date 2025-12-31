@@ -9,9 +9,10 @@
 #define __ID_SD__
 
 #include "wl_def.h"
+#include "dobject.h"
 #include "sndinfo.h"
 
-#define alOut(n,b) 		YM3812Write(oplChip, n, b, AdlibVolume)
+#define alOut(n,b) 		YM3812Write(oplChip, n, b, AdlibVolumePositioned)
 #define alOutMusic(n,b)	YM3812Write(oplChip, n, b, MusicVolume)
 
 typedef enum
@@ -104,20 +105,21 @@ typedef struct
 	word    length;
 	word    values[1];
 } MusicGroup;
-
-typedef struct
-{
-	int valid;
-	fixed globalsoundx, globalsoundy;
-} globalsoundpos;
 #pragma pack(pop)
 
+struct globalsoundpos
+{
+	TObjPtr<AActor> source;
+	fixed globalsoundx, globalsoundy;
+	bool valid, positioned;
+};
+
 extern globalsoundpos channelSoundPos[];
+extern globalsoundpos AdlibSoundPos;
 
 // Global variables
 extern  bool			AdLibPresent,
-						SoundBlasterPresent,
-						SoundPositioned;
+						SoundBlasterPresent;
 extern  SDMode          SoundMode;
 extern  SDSMode         DigiMode;
 extern  SMMode          MusicMode;
@@ -127,6 +129,7 @@ static inline double MULTIPLY_VOLUME(const int &v)
 {
 	return (double(v)+0.3)/(MAX_VOLUME+0.3);
 }
+extern	int				AdlibVolumePositioned;
 extern	int				AdlibVolume;
 extern	int				MusicVolume;
 extern	int				SoundVolume;
@@ -163,7 +166,6 @@ extern  bool    SD_SoundPlaying(void);
 
 extern  void    SD_SetDigiDevice(SDSMode);
 extern  struct Mix_Chunk *SD_PrepareSound(int which);
-extern  int     SD_PlayDigitized(const SoundData &which,int leftpos,int rightpos,SoundChannel chan=SD_GENERIC);
 extern  void    SD_StopDigitized(void);
 
 #endif

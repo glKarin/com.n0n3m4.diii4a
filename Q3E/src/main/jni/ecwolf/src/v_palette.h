@@ -55,7 +55,6 @@ struct PalEntry
 #ifdef __BIG_ENDIAN__
 	PalEntry (BYTE ir, BYTE ig, BYTE ib) : a(0), r(ir), g(ig), b(ib) {}
 	PalEntry (BYTE ia, BYTE ir, BYTE ig, BYTE ib) : a(ia), r(ir), g(ig), b(ib) {}
-PACK_START
 	union
 	{
 		struct
@@ -63,12 +62,10 @@ PACK_START
 			BYTE a,r,g,b;
 		};
 		uint32 d;
-	} PACKED;
-PACK_END
+	};
 #else
 	PalEntry (BYTE ir, BYTE ig, BYTE ib) : b(ib), g(ig), r(ir), a(0) {}
 	PalEntry (BYTE ia, BYTE ir, BYTE ig, BYTE ib) : b(ib), g(ig), r(ir), a(ia) {}
-PACK_START
 	union
 	{
 		struct
@@ -76,8 +73,7 @@ PACK_START
 			BYTE b,g,r,a;
 		};
 		uint32 d;
-	} PACKED;
-PACK_END
+	};
 #endif
 };
 

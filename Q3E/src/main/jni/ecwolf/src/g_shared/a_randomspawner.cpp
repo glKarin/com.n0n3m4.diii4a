@@ -8,13 +8,14 @@
 #include "actor.h"
 #include "m_random.h"
 #include "thingdef/thingdef.h"
+#include "wl_net.h"
 
 static const int MAX_RANDOMSPAWNERS_RECURSION = 32; // Should be largely more than enough, honestly.
 static FRandom pr_randomspawn("RandomSpawn");
 
 class ARandomSpawner : public AActor
 {
-	DECLARE_NATIVE_CLASS (RandomSpawner, Actor)
+	DECLARE_CLASS (ARandomSpawner, AActor)
 
 	int bouncecount;
 	FName Species;
@@ -28,7 +29,7 @@ class ARandomSpawner : public AActor
 		DropList::Iterator di; // di will be our drop item list iterator
 		DropList *drop; // while drop stays as the reference point.
 		int n=0;
-		//bool nomonsters = (dmflags & DF_NO_MONSTERS) || (level.flags2 & LEVEL2_NOMONSTERS);
+		bool nomonsters = Net::NoMonsters();
 
 		//Super::BeginPlay();
 		drop = GetDropList();
@@ -39,7 +40,7 @@ class ARandomSpawner : public AActor
 			{
 				if (di->className != NAME_None)
 				{
-					//if (!nomonsters || !(GetDefaultByType(PClass::FindClass(di->Name))->flags3 & MF3_ISMONSTER))
+					if (!nomonsters || !(ClassDef::FindClass(di->className)->GetDefault()->flags & FL_ISMONSTER))
 					{
 						if (di->amount == 0) di->amount = 1; // default value is -1, we need a positive value.
 						n += di->amount; // this is how we can weight the list.
@@ -60,8 +61,8 @@ class ARandomSpawner : public AActor
 			// And iterate in the array up to the random number chosen.
 			while (n > -1 && di)
 			{
-				if (di->className != NAME_None)// &&
-					//(!nomonsters || !(GetDefaultByType(PClass::FindClass(di->Name))->flags3 & MF3_ISMONSTER)))
+				if (di->className != NAME_None &&
+					(!nomonsters || !(ClassDef::FindClass(di->className)->GetDefault()->flags & FL_ISMONSTER)))
 				{
 					n -= di->amount;
 					if (di.HasNext() && (n > -1))

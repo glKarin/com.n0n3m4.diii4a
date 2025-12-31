@@ -39,7 +39,6 @@
 #include "wl_def.h"
 #include "templates.h"
 #include "v_palette.h"
-#include "m_swap.h"
 
 struct FCopyInfo;
 
@@ -293,9 +292,9 @@ struct cI16
 
 struct cRGB555
 {
-	static __forceinline unsigned char R(const unsigned char * p) { return (((ReadNativeShort(p))&0x1f)<<3); }
-	static __forceinline unsigned char G(const unsigned char * p) { return (((ReadNativeShort(p))&0x3e0)>>2); }
-	static __forceinline unsigned char B(const unsigned char * p) { return (((ReadNativeShort(p))&0x7c00)>>7); }
+	static __forceinline unsigned char R(const unsigned char * p) { return (((*(WORD*)p)&0x1f)<<3); }
+	static __forceinline unsigned char G(const unsigned char * p) { return (((*(WORD*)p)&0x3e0)>>2); }
+	static __forceinline unsigned char B(const unsigned char * p) { return (((*(WORD*)p)&0x7c00)>>7); }
 	static __forceinline unsigned char A(const unsigned char * p, BYTE x, BYTE y, BYTE z) { return 255; }
 	static __forceinline int Gray(const unsigned char * p) { return (R(p)*77 + G(p)*143 + B(p)*36)>>8; }
 };

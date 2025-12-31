@@ -81,7 +81,7 @@ class TypeHierarchy
 
 		enum PrimitiveTypes
 		{
-			VOID_TYPE,
+			VOID,
 			STRING,
 			BOOL,
 			INT,

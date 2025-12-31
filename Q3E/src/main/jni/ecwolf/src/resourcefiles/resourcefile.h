@@ -164,25 +164,4 @@ public:
 	}
 };
 
-struct FDirectoryLump : public FResourceLump
-{
-	virtual FileReader *NewReader();
-	virtual int FillCache();
-
-private:
-};
-
-class FDirectory : public FResourceFile
-{
-	TArray<FDirectoryLump> Lumps;
-
-	int AddDirectory(const char *dirpath);
-	void AddEntry(const char *fullpath, int size);
-
-public:
-	FDirectory(const char * dirname);
-	bool Open(bool quiet);
-	virtual FResourceLump *GetLump(int no) { return ((unsigned)no < NumLumps)? &Lumps[no] : NULL; }
-};
-
 #endif

@@ -7,18 +7,19 @@ actor FakeHitler : WolfensteinMonster 18
 	deathsound "fake/death"
 	seesound "fake/sight"
 	+AMBUSH
+	-CANUSEWALLS
 	states
 	{
 		Spawn:
 			FAKE A -1 NOP A_Look(0, 0, 0, 0, 360)
 			stop
 		See:
-			FAKE A 5 NOP A_Chase("*", "*", CHF_BACKOFF)
+			FAKE A 5 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			FAKE A 1.5
-			FAKE B 4 NOP A_Chase("*", "*", CHF_BACKOFF)
-			FAKE C 5 NOP A_Chase("*", "*", CHF_BACKOFF)
+			FAKE B 4 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
+			FAKE C 5 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			FAKE C 1.5
-			FAKE D 4 NOP A_Chase("*", "*", CHF_BACKOFF)
+			FAKE D 4 NOP A_Chase("*", "*", CHF_ALWAYSDODGE)
 			loop
 		Missile:
 			FAKE E 4 bright A_FaceTarget

@@ -25,6 +25,7 @@
 #include "v_video.h"
 #include "wl_inter.h"
 #include "wl_draw.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "wl_game.h"
 #include "wl_text.h"
@@ -55,14 +56,10 @@
 =============================================================================
 */
 
-bool			ingame,fizzlein;
+bool			ingame;
 gametype        gamestate;
 
 NewMap_t NewMap;
-
-#ifdef USE_FEATUREFLAGS
-int ffDataTopLeft, ffDataTopRight, ffDataBottomLeft, ffDataBottomRight;
-#endif
 
 #ifdef _DIII4A //karin: main loop control
 extern volatile bool q3e_running;
@@ -199,36 +196,89 @@ SetSoundLoc(fixed gx,fixed gy)
 =
 ==========================
 */
-void PlaySoundLocGlobal(const char* s,fixed gx,fixed gy,int chan)
+void PlaySoundLocGlobal(const char* s,fixed gx,fixed gy,SoundChannel chan)
 {
 	SetSoundLoc(gx, gy);
 	SD_PositionSound(leftchannel, rightchannel);
 
-	int channel = SD_PlaySound(s, static_cast<SoundChannel> (chan));
-	if(channel)
+	int channel = SD_PlaySound(s, chan);
+	if(channel > 0)
 	{
+		channelSoundPos[channel - 1].source = NULL;
 		channelSoundPos[channel - 1].globalsoundx = gx;
 		channelSoundPos[channel - 1].globalsoundy = gy;
-		channelSoundPos[channel - 1].valid = 1;
+		channelSoundPos[channel - 1].valid = true;
+	}
+	else if(channel == -1)
+	{
+		AdlibSoundPos.source = NULL;
+		AdlibSoundPos.globalsoundx = gx;
+		AdlibSoundPos.globalsoundy = gy;
+		AdlibSoundPos.valid = true;
+	}
+}
+
+void PlaySoundLocActor(const char* s, AActor *ob, SoundChannel chan)
+{
+	SetSoundLoc(ob->x, ob->y);
+	SD_PositionSound(leftchannel, rightchannel);
+
+	int channel = SD_PlaySound(s, chan);
+	if(channel > 0)
+	{
+		channelSoundPos[channel - 1].source = ob;
+		channelSoundPos[channel - 1].globalsoundx = ob->x;
+		channelSoundPos[channel - 1].globalsoundy = ob->y;
+		channelSoundPos[channel - 1].valid = true;
+	}
+	else if(channel == -1)
+	{
+		AdlibSoundPos.source = ob;
+		AdlibSoundPos.globalsoundx = ob->x;
+		AdlibSoundPos.globalsoundy = ob->y;
+		AdlibSoundPos.valid = true;
 	}
 }
 
 void UpdateSoundLoc(void)
 {
-/*    if (SoundPositioned)
-	{
-		SetSoundLoc(globalsoundx,globalsoundy);
-		SD_SetPosition(leftchannel,rightchannel);
-	}*/
+	fixed x, y;
 
 	for(int i = 0; i < MIX_CHANNELS; i++)
 	{
-		if(channelSoundPos[i].valid)
+		if(channelSoundPos[i].valid && channelSoundPos[i].positioned)
 		{
-			SetSoundLoc(channelSoundPos[i].globalsoundx,
-				channelSoundPos[i].globalsoundy);
+			if(channelSoundPos[i].source)
+			{
+				x = channelSoundPos[i].source->x;
+				y = channelSoundPos[i].source->y;
+			}
+			else
+		{
+				x = channelSoundPos[i].globalsoundx;
+				y = channelSoundPos[i].globalsoundy;
+			}
+
+			SetSoundLoc(x, y);
 			SD_SetPosition(i, leftchannel, rightchannel);
 		}
+	}
+
+	if(AdlibSoundPos.valid && AdlibSoundPos.positioned)
+	{
+		if(AdlibSoundPos.source)
+		{
+			x = AdlibSoundPos.source->x;
+			y = AdlibSoundPos.source->y;
+		}
+		else
+		{
+			x = AdlibSoundPos.globalsoundx;
+			y = AdlibSoundPos.globalsoundy;
+		}
+
+		SetSoundLoc(x, y);
+		SD_SetPosition(-1, leftchannel, rightchannel);
 	}
 }
 
@@ -259,8 +309,8 @@ void SetupGameLevel (void)
 			= gamestate.secretcount
 			= gamestate.killcount
 			= gamestate.treasurecount = 0;
-		LastAttacker = NULL;
-		players[0].killerobj = NULL;
+		for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+			players[i].killerobj = NULL;
 	}
 
 	gamestate.faceframe.SetInvalid();
@@ -272,29 +322,13 @@ void SetupGameLevel (void)
 	if (!loadedgame)
 		StartMusic ();
 
-#ifdef USE_FEATUREFLAGS
-	// Temporary definition to make things clearer
-	#define MXX MAPSIZE - 1
-
-	// Read feature flags data from map corners and overwrite corners with adjacent tiles
-	ffDataTopLeft     = MAPSPOT(0,   0,   0); MAPSPOT(0,   0,   0) = MAPSPOT(1,       0,       0);
-	ffDataTopRight    = MAPSPOT(MXX, 0,   0); MAPSPOT(MXX, 0,   0) = MAPSPOT(MXX,     1,       0);
-	ffDataBottomRight = MAPSPOT(MXX, MXX, 0); MAPSPOT(MXX, MXX, 0) = MAPSPOT(MXX - 1, MXX,     0);
-	ffDataBottomLeft  = MAPSPOT(0,   MXX, 0); MAPSPOT(0,   MXX, 0) = MAPSPOT(0,       MXX - 1, 0);
-
-	#undef MXX
-#endif
-
 //
 // spawn actors
 //
 	if(!loadedgame)
 	{
 		map->SpawnThings();
-
-		// Check to see if a player spawned
-		if(players[0].mo == NULL)
-			throw CRecoverableError("No player 1 start!");
+		CheckSpawnPlayer(true);
 	}
 }
 
@@ -546,8 +580,8 @@ void RecordDemo (void)
 
 	SetupGameLevel ();
 
-	if(usedoublebuffering) VH_UpdateScreen();
-	fizzlein = true;
+	VH_UpdateScreen();
+	ThreeDStartFadeIn();
 
 	PlayLoop ();
 
@@ -628,75 +662,11 @@ void PlayDemo (int demonumber)
 
 void Died (void)
 {
-	float   fangle;
-	int32_t dx,dy;
-	angle_t iangle;
-
 	if (screenfaded)
 	{
 		ThreeDRefresh ();
 		VW_FadeIn ();
 	}
-
-	SD_PlaySound ("player/death");
-
-	//
-	// swing around to face attacker
-	//
-	if(players[0].killerobj)
-	{
-		dx = players[0].killerobj->x - players[0].mo->x;
-		dy = players[0].mo->y - players[0].killerobj->y;
-
-		fangle = (float) atan2((float) dy, (float) dx);     // returns -pi to pi
-		if (fangle<0)
-			fangle = (float) (M_PI*2+fangle);
-
-		iangle = (angle_t) (fangle*ANGLE_180/M_PI);
-	}
-	else
-	{
-		iangle = players[0].mo->angle;
-	}
-
-	static const angle_t DEATHROTATE = ANGLE_1*2;
-	angle_t &curangle = players[0].mo->angle;
-	const int rotate = curangle - iangle > ANGLE_180 ? 1 : -1;
-
-	do
-	{
-		for(unsigned int t = tics;t-- > 0;)
-		{
-			players[0].mo->Tick();
-
-			if (curangle - iangle < DEATHROTATE)
-				curangle = iangle;
-			else
-				curangle += rotate*DEATHROTATE;
-		}
-
-		ThreeDRefresh ();
-		VH_UpdateScreen();
-		CalcTics ();
-	} while (curangle != iangle);
-
-	// Wait for weapon to drop
-	while(players[0].psprite[player_t::ps_weapon].frame)
-	{
-		for(unsigned int t = tics;t-- > 0;)
-			players[0].mo->Tick();
-
-		ThreeDRefresh();
-		VH_UpdateScreen();
-		CalcTics();
-	}
-
-	//
-	// fade to red
-	//
-	FinishPaletteShifts ();
-
-	if(usedoublebuffering) VH_UpdateScreen();
 
     if (gamestate.difficulty->LivesCount >= 0) {
         --players[0].lives;
@@ -708,31 +678,6 @@ void Died (void)
                 R_DrawZoomer(texID);
         }
     }
-
-	if(gameinfo.DeathTransition == GameInfo::TRANSITION_Fizzle)
-	{
-		FizzleFadeStart();
-
-		// Fizzle fade used a slightly darker shade of red.
-		byte fr = RPART(players[0].mo->damagecolor)*2/3;
-		byte fg = GPART(players[0].mo->damagecolor)*2/3;
-		byte fb = BPART(players[0].mo->damagecolor)*2/3;
-		VWB_Clear(ColorMatcher.Pick(fr,fg,fb), viewscreenx, viewscreeny, viewwidth+viewscreenx, viewheight+viewscreeny);
-
-		IN_ClearKeysDown ();
-
-		FizzleFade(viewscreenx,viewscreeny,viewwidth,viewheight,70,false);
-
-		IN_UserInput(100);
-	}
-	else
-	{
-		// If we get a game over we will fade out any way
-		if((players[0].lives > -1) || (gamestate.difficulty->LivesCount < 0))
-			VL_FadeOut(0, 255, 0, 0, 0, 64);
-	}
-
-	SD_WaitSoundDone ();
 
 	if ((players[0].lives > -1) || (gamestate.difficulty->LivesCount < 0))
 		players[0].state = player_t::PST_REBORN;
@@ -750,7 +695,7 @@ static void StripInventory(AActor *actor)
 			// Remove the inventory item and clean it up
 			AInventory *removeMe = inv;
 			inv = inv->inventory;
-			players[0].mo->RemoveInventory(removeMe);
+			actor->RemoveInventory(removeMe);
 			removeMe->Destroy();
 			continue;
 		}
@@ -789,9 +734,6 @@ restartgame:
 		if(!GLimp_CheckGLInitialized())
 			continue;
 #endif
-		if (!loadedgame)
-			players[0].score = players[0].oldscore;
-
 		startgame = false;
 		if (!loadedgame)
 		{
@@ -801,23 +743,33 @@ restartgame:
 				FinishTravel ();
 				if(playstate == ex_newmap)
 				{
+					// This logic could probably use refinement for multiplayer
+					for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+					{
 					if(NewMap.flags & NEWMAP_KEEPPOSITION)
 					{
-						players[0].mo->x = NewMap.x;
-						players[0].mo->y = NewMap.y;
+							players[i].mo->x = NewMap.x;
+							players[i].mo->y = NewMap.y;
 					}
 					if(NewMap.flags & NEWMAP_KEEPFACING)
-						players[0].mo->angle = NewMap.angle;
+							players[i].mo->angle = NewMap.angle;
 				}
 			}
+			}
+
+			for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+			{
+				player_t &player = players[i];
+
+				player.score = player.oldscore;
 
 			if(levelInfo->ResetHealth)
-				players[0].health = players[0].mo->health = players[0].mo->SpawnHealth();
+					player.health = player.mo->health = player.mo->SpawnHealth();
 
 			if(levelInfo->ResetInventory)
 			{
-				players[0].mo->ClearInventory();
-				players[0].mo->GiveStartingInventory();
+					player.mo->ClearInventory();
+					player.mo->GiveStartingInventory();
 			}
 
 			if(levelInfo->EnsureInventory.Size() > 0)
@@ -825,7 +777,7 @@ restartgame:
 				for(unsigned int i = 0;i < levelInfo->EnsureInventory.Size();++i)
 				{
 					const ClassDef *ensure = levelInfo->EnsureInventory[i];
-					AInventory *holding = players[0].mo->FindInventory(ensure);
+						AInventory *holding = player.mo->FindInventory(ensure);
 
 					if(ensure->IsDescendantOf(NATIVE_CLASS(Ammo)))
 					{
@@ -834,7 +786,7 @@ restartgame:
 						ammo->RemoveFromWorld();
 
 						if(!holding)
-							holding = players[0].mo->FindInventory(ammo->GetAmmoType());
+								holding = player.mo->FindInventory(ammo->GetAmmoType());
 
 						if(holding && holding->amount < ammo->amount)
 							ammo->amount -= holding->amount;
@@ -844,7 +796,7 @@ restartgame:
 							ammo = NULL;
 						}
 
-						if(ammo && !ammo->CallTryPickup(players[0].mo))
+							if(ammo && !ammo->CallTryPickup(player.mo))
 								ammo->Destroy();
 						continue;
 					}
@@ -854,10 +806,11 @@ restartgame:
 
 					AInventory *item = static_cast<AInventory*>(AActor::Spawn(ensure, 0, 0, 0, 0));
 					item->RemoveFromWorld();
-					if(!item->CallTryPickup(players[0].mo))
+						if(!item->CallTryPickup(player.mo))
 						item->Destroy();
 				}
 			}
+		}
 		}
 		else
 		{
@@ -872,7 +825,7 @@ restartgame:
 		else
 		{
 			died = false;
-			fizzlein = true;
+			ThreeDStartFadeIn();
 		}
 
 		StatusBar->DrawStatusBar();
@@ -951,23 +904,20 @@ restartgame:
 							gotoMenu = ShowIntermission(intermission);
 						}
 
-						CheckHighScore (players[0].score,levelInfo);
+						CheckHighScore (players[ConsolePlayer].score,levelInfo);
 						return gotoMenu;
 					}
 				}
 				else
 				{
-					NewMap.x = players[0].mo->x;
-					NewMap.y = players[0].mo->y;
-					NewMap.angle = players[0].mo->angle;
-
 					LevelInfo &teleportMap = LevelInfo::FindByNumber(NewMap.newmap);
 					if(teleportMap.MapName[0] == 0)
 						I_FatalError("Tried to teleport to unkown map.");
 					next = teleportMap.MapName;
 				}
 
-				StripInventory(players[0].mo);
+				for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+					StripInventory(players[i].mo);
 
 				if(dointermission)
 					VL_FadeOut(0, 255, RPART(levelInfo->ExitFadeColor), GPART(levelInfo->ExitFadeColor), BPART(levelInfo->ExitFadeColor), levelInfo->ExitFadeDuration);
@@ -986,11 +936,12 @@ restartgame:
 
 				if(next.CompareNoCase("EndDemo") == 0)
 				{
-					CheckHighScore (players[0].score,levelInfo);
+					CheckHighScore (players[ConsolePlayer].score,levelInfo);
 					return false;
 				}
 
-				players[0].oldscore = players[0].score;
+				for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+					players[i].oldscore = players[i].score;
 
 				strncpy(gamestate.mapname, next, 8);
 				gamestate.mapname[8] = 0;
@@ -1008,11 +959,12 @@ restartgame:
 				if(screenHeight % 200 != 0)
 					VL_ClearScreen(0);
 
-				CheckHighScore (players[0].score,levelInfo);
+				CheckHighScore (players[ConsolePlayer].score,levelInfo);
 				return false;
 
 			case ex_warped:
-				players[0].state = player_t::PST_ENTER;
+				for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+					players[i].state = player_t::PST_ENTER;
 				break;
 
 			default:

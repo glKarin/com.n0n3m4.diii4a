@@ -238,10 +238,13 @@ void FWadCollection::AddFile (const char *filename, FileReader *wadinfo)
 
 		if (!isdir)
 		{
-			wadinfo = FileReader::SafeOpen(filename);
-			if (wadinfo == NULL)
+			try
+			{
+				wadinfo = new FileReader(filename);
+			}
+			catch (CRecoverableError &err)
 			{ // Didn't find file
-				Printf (TEXTCOLOR_RED "File %s couln't be opened\n", filename);
+				Printf (TEXTCOLOR_RED "%s\n", err.GetMessage());
 				PrintLastError ();
 				return;
 			}
@@ -1123,8 +1126,6 @@ const char *FWadCollection::GetWadFullName (int wadnum) const
 //
 //==========================================================================
 
-#ifndef LIBRETRO
-
 bool FWadCollection::IsUncompressedFile(int lump) const
 {
 	if ((unsigned)lump >= (unsigned)NumLumps)
@@ -1139,8 +1140,6 @@ bool FWadCollection::IsUncompressedFile(int lump) const
 	// Any other case means it won't work.
 	return (f != NULL && f->GetFile() != NULL);
 }
-
-#endif
 
 //==========================================================================
 //

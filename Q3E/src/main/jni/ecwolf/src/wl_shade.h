@@ -17,7 +17,7 @@
 // Convert a shade and visibility to a clamped colormap index.
 // Result is not fixed point.
 // Change R_CalcTiltedLighting() when this changes.
-#define GETPALOOKUP(vis,shade)	(clamp<int> (((shade)-MIN<fixed>(gLevelMaxLightVis,(vis)))>>FRACBITS, 0, NUMCOLORMAPS-1))
+#define GETPALOOKUP(vis,shade)	(clamp<int> (((shade)-MIN(gLevelMaxLightVis,(vis)))>>FRACBITS, 0, NUMCOLORMAPS-1))
 
 #define MINZ			(2048*4)
 

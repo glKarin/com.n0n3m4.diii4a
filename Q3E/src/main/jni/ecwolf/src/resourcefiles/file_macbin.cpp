@@ -67,7 +67,7 @@
 struct FMacBinHeader
 {
 public:
-	BYTE version;
+	BYTE oldVersion;
 	BYTE filenameLength;
 	char filename[63];
 	char fileType[4];
@@ -83,8 +83,22 @@ public:
 	DWORD resourceForkLength;
 	DWORD creationDate;
 	DWORD modifiedDate;
-	char pad2[27];
-	WORD reserved;
+	WORD commentLength;
+	// Mac Binary 2
+	BYTE finderFlags2;
+	// Mac Binary 3
+	char macBin3Signature[4];
+	BYTE filenameScript;
+	BYTE extendedFinderFlags;
+	char pad2[8];
+	// End Mac Binary 3
+	DWORD unpackedLength;
+	WORD secondaryHeaderLength;
+	BYTE version;
+	BYTE minimumVersion;
+	WORD crc;
+	// End Mac Binary 2
+	WORD pad3;
 };
 
 struct FResHeader
@@ -432,7 +446,7 @@ class FMacBin : public FResourceFile
 			header.dataForkLength = BigLong(header.dataForkLength);
 			header.resourceForkLength = BigLong(header.resourceForkLength);
 			resourceForkOffset = sizeof(FMacBinHeader) + ((header.dataForkLength+127)&(~0x7F));
-			if(header.version != 0)
+			if(header.oldVersion != 0)
 				return false;
 
 			// We only care about the resource fork so seek to it and read the header
@@ -453,7 +467,7 @@ class FMacBin : public FResourceFile
 			// Get the types and the number of chunks within each
 			unsigned int numTotalResources = 0;
 			Reader->Seek(resTypeListOffset, SEEK_SET);
-			*Reader >> numTypes;
+			Reader->Read(&numTypes, sizeof(numTypes));
 			numTypes = BigShort(numTypes)+1;
 			TUniquePtr<FResType[]> resTypes(new FResType[numTypes]);
 			for(unsigned int i = 0;i < numTypes;++i)
@@ -554,23 +568,23 @@ class FMacBin : public FResourceFile
 							if(refPtr->ref.resID >= 128 && refPtr->ref.resID < 128+countof(MacSoundNames))
 								strcpy(name, MacSoundNames[refPtr->ref.resID-128]);
 							else
-								sprintf(name, "SND%04X", refPtr->ref.resID);
+								mysnprintf(name, 9, "SND%04X", refPtr->ref.resID);
 						}
 						else if(music)
 						{
 							lump->Namespace = ns_music;
-							sprintf(name, "MUS_%04X", refPtr->ref.resID);
+							mysnprintf(name, 9, "MUS_%04X", refPtr->ref.resID);
 						}
 						else if(pict)
 						{
 							lump->Namespace = ns_graphics;
 							// TODO: Do something else with these
-							sprintf(name, "PICT%04X", refPtr->ref.resID);
+							mysnprintf(name, 9, "PICT%04X", refPtr->ref.resID);
 						}
 						else
 						{
 							lump->Namespace = ns_global;
-							sprintf(name, "%s%04X", type, refPtr->ref.resID);
+							mysnprintf(name, 9, "%s%04X", type, refPtr->ref.resID);
 						}
 
 						// Find special BRGR lumps
@@ -594,16 +608,17 @@ class FMacBin : public FResourceFile
 						lump->Owner = this;
 
 						Reader->Seek(lump->Position - 4, SEEK_SET);
-						*Reader >> length;
+						Reader->Read(&length, sizeof(length));
 						lump->LumpSize = BigLong(length);
 
 						if(csnd)
 							lump->Compressed = FMacResLump::MODE_CSound;
 						if(lump->Compressed != FMacResLump::MODE_Uncompressed)
 						{
-							*Reader >> length;
 							lump->CompressedSize = lump->LumpSize-4;
 							lump->Position += 4;
+
+							Reader->Read(&length, sizeof(length));
 							lump->LumpSize = BigLong(length);
 						}
 						// Sprites. It may be tempting to consider anything
@@ -616,7 +631,7 @@ class FMacBin : public FResourceFile
 							*Reader >> csize;
 							lump->CompressedSize = lump->LumpSize-2;
 							lump->Position += 2;
-							lump->LumpSize = LittleShort(csize);
+							lump->LumpSize = csize;
 							lump->Namespace = ns_sprites;
 
 							strcpy(name, MacSpriteNames[refPtr->ref.resID-428]);
@@ -634,7 +649,8 @@ class FMacBin : public FResourceFile
 			if(lists[LIST_Maps] && lists[LIST_Maps]->LumpSize >= 4)
 			{
 				Reader->Seek(lists[LIST_Maps]->Position, SEEK_SET);
-				*Reader >> mapmax >> mapbase;
+				Reader->Read(&mapmax, sizeof(mapmax));
+				Reader->Read(&mapbase, sizeof(mapbase));
 				mapmax = BigShort(mapmax);
 				mapbase = BigShort(mapbase);
 			}
@@ -654,7 +670,7 @@ class FMacBin : public FResourceFile
 					if(refPtr->ref.resID >= mapbase && refPtr->ref.resID < mapbase+mapmax)
 					{
 						memset(lump->Name, 0, 8); // Some code requires 0-filled
-						sprintf(lump->Name, "MAP%02u", refPtr->ref.resID-mapbase+1);
+						mysnprintf(lump->Name, countof(lump->Name), "MAP%02u", refPtr->ref.resID-mapbase+1);
 					}
 				}
 			}
@@ -689,7 +705,7 @@ class FMacBin : public FResourceFile
 					{
 						if((walllist[i]&0x3FFF) == refPtr->ref.resID)
 						{
-							sprintf(lump->Name, "WALL%04X", refPtr->ref.resID);
+							mysnprintf(lump->Name, countof(lump->Name), "WALL%04X", refPtr->ref.resID);
 							lump->Compressed = FMacResLump::MODE_Compressed;
 							lump->CompressedSize = lump->LumpSize;
 							lump->LumpSize = 0x4000;
@@ -711,16 +727,19 @@ FResourceFile *CheckMacBin(const char *filename, FileReader *file, bool quiet)
 {
 	if(file->GetLength() > 128)
 	{
-		char type[8];
-		unsigned int sizes[2];
-		file->Seek(65, SEEK_SET);
-		file->Read(type, 8);
-		file->Seek(83, SEEK_SET);
-		file->Read(&sizes, 8);
+		FMacBinHeader header;
+		file->Read(&header, sizeof(FMacBinHeader));
 		file->Seek(0, SEEK_SET);
 
-		if((strncmp(type, "APPLWOLF", 8) == 0 || strncmp(type, "MAPSWOLF", 8) == 0) &&
-			BigLong(sizes[0]) + BigLong(sizes[1]) < static_cast<unsigned>(file->GetLength()))
+		// type should be APPLWOLF or MAPSWOLF but it's possible users will use
+		// a lossy process to create their macbin and get ???????? instead.
+		bool validType =
+			(strncmp(header.fileType, "APPL", 4) == 0 || strncmp(header.fileType, "MAPS", 4) == 0 || strncmp(header.fileType, "????", 4) == 0) &&
+			(strncmp(header.fileCreator, "WOLF", 4) == 0 || strncmp(header.fileCreator, "????", 4) == 0);
+
+		if(header.oldVersion == 0 && header.filenameLength > 0 && header.filenameLength <= 63 &&
+			(validType || strncmp(header.macBin3Signature, "mBIN", 4) == 0) &&
+			BigLong(header.dataForkLength) + BigLong(header.resourceForkLength) + 128 < static_cast<unsigned>(file->GetLength()))
 		{
 			FResourceFile *rf = new FMacBin(filename, file);
 			if(rf->Open(quiet)) return rf;

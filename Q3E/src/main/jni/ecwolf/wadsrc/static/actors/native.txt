@@ -2,6 +2,7 @@ const int CHF_DONTDODGE = 1;
 const int CHF_BACKOFF = 2;
 const int CHF_NOSIGHTCHECK = 4;
 const int CHF_NOPLAYACTIVE = 8;
+const int CHF_ALWAYSDODGE = 16;
 
 const int CMF_AIMOFFSET = 1;
 const int CMF_AIMDIRECTION = 2;
@@ -200,6 +201,8 @@ actor PlayerPawn native
 	painchance 255
 	sighttime 0
 	speed 1
+	deathsound "player/death"
+	painsound "player/pain"
 	player.viewheight 41
 	player.forwardmove 1, 1
 	player.sidemove 1, 1
@@ -213,6 +216,7 @@ actor PlayerPawn native
 	{
 		// ZDoom doesn't do this, but since invisible player classes are likely here, we need this state.
 		Death:
+			TNT1 A 0 A_Scream
 			TNT1 A -1 A_Fall
 			stop
 	}

@@ -36,6 +36,7 @@
 #include "id_sd.h"
 #include "thinker.h"
 #include "wl_game.h"
+#include "wl_play.h"
 #include "g_shared/a_inventory.h"
 #include "thingdef/thingdef.h"
 
@@ -47,11 +48,21 @@ class ASpearOfDestiny : public AInventory
 		void Destroy()
 		{
 			gamestate.victoryflag = false;
+			if(target && playstate == ex_newmap)
+			{
+				// Fixup new map warp position to toucher and not ourselves
+				NewMap.x = target->x;
+				NewMap.y = target->y;
+				NewMap.angle = target->angle;
+			}
+
 			Super::Destroy();
 		}
 
 		bool TryPickup(AActor *toucher)
 		{
+			target = toucher;
+
 			PlaySoundLocActor(pickupsound, toucher);
 			gamestate.victoryflag = true;
 

@@ -142,7 +142,7 @@ extern void ClearConversations();
 // Not yet implemented
 //extern void LoadMapModules();
 extern void LoadGlobalModule(const char* module);
-extern void StartConversation(AActor *npc);
+extern void StartConversation(AActor *npc, AActor *pc);
 
 void GiveConversationItem(AActor *recipient, unsigned int id);
 const Page **FindConversation(AActor *npc);

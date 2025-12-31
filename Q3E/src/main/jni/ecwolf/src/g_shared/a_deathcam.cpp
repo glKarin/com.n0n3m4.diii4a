@@ -14,6 +14,7 @@
 #include "wl_agent.h"
 #include "wl_draw.h"
 #include "wl_game.h"
+#include "wl_net.h"
 #include "wl_play.h"
 
 IMPLEMENT_POINTY_CLASS(DeathCam)
@@ -76,8 +77,10 @@ void ADeathCam::Tick()
 
 	if(gamestate.victoryflag)
 	{
-		if(killer->player)
-			barrier_cast<APlayerPawn *>(killer)->TickPSprites();
+		for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+		{
+			players[i].mo->TickPSprites();
+		}
 	}
 
 	Super::Tick();
@@ -102,8 +105,6 @@ ACTION_FUNCTION(A_FinishDeathCam)
 	gamestate.victoryflag = true;
 	cam->camState = ADeathCam::CAM_ACTIVE;
 
-	FizzleFadeStart();
-
 	double fadex = 0, fadey, fadew = 320, fadeh;
 	if(viewsize == 21)
 	{
@@ -116,6 +117,9 @@ ACTION_FUNCTION(A_FinishDeathCam)
 		fadeh = 200-StatusBar->GetHeight(false) - fadey + 1;
 	}
 	screen->VirtualToRealCoords(fadex, fadey, fadew, fadeh, 320, 200, true, true);
+
+	FFizzleFader fader(0, static_cast<unsigned int>(fadey), screenWidth, static_cast<unsigned int>(fadeh), 70, true);
+
 	VWB_DrawFill(TexMan(levelInfo->GetBorderTexture()), 0., fadey, screenWidth, fadeh);
 
 	word width, height;
@@ -124,7 +128,7 @@ ACTION_FUNCTION(A_FinishDeathCam)
 	py = ((200 - StatusBar->GetHeight(false) - StatusBar->GetHeight(true)) - height)/2;
 	VWB_DrawPropString(IntermissionFont, language["STR_SEEAGAIN"], CR_UNTRANSLATED);
 
-	FizzleFade(0, static_cast<unsigned int>(fadey), screenWidth, static_cast<unsigned int>(fadeh), 70, false);
+	FizzleFade(fader);
 
 	A_Face(cam, cam->actor);
 
@@ -144,14 +148,17 @@ ACTION_FUNCTION(A_FinishDeathCam)
 	}
 	while(!CheckPosition(cam));
 
-	IN_UserInput(300);
+	IN_UserInput(300, ACK_Any);
 
-	players[0].camera = cam;
-	players[0].SetPSprite(cam->FindState(NAME_Ready), player_t::ps_weapon);
+	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+	{
+		players[i].camera = cam;
+		players[i].SetPSprite(cam->FindState(NAME_Ready), player_t::ps_weapon);
+	}
 	cam->actor->SetState(cam->actor->FindState(NAME_Death));
 
 	DrawPlayScreen();
 
-	fizzlein = true;
+	ThreeDStartFadeIn();
 	return true;
 }

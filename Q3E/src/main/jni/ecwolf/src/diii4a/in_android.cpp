@@ -55,14 +55,23 @@ void pollAndroidControls()
 #endif
 }
 
-void PostSDLInit(SDL_Window *Screen)
+void PostSDLCreateRenderer(SDL_Window *Screen)
 {
 #if 0
-    SDL_AddEventWatch(Android_EventWatch, NULL);
+    SDL_AddEventWatch(Android_WindowEventWatch, NULL);
 
-    SDL_DisplayMode mode;
-    SDL_GetWindowDisplayMode(Screen, &mode);
-    Android_SetScreenSize(mode.w, mode.h);
+	SDL_DisplayMode mode;
+	SDL_GetWindowDisplayMode(Screen, &mode);
+	Android_SetScreenSize(mode.w, mode.h);
+#endif
+}
+
+void Android_InitGraphics()
+{
+#if 0
+    // Finger events must be captured before the SDL_Renderer is initialized
+    // otherwise it will clip the input range to the viewport.
+    SDL_AddEventWatch(Android_EventWatch, NULL);
 #endif
 }
 

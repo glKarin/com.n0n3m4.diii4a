@@ -1405,7 +1405,7 @@ BYTE *find_central_dir(FILE *fin)
 	if (pos_found == 0 ||
 		fseek(fin, pos_found, SEEK_SET) != 0 ||
 		fread(&eod, sizeof(eod), 1, fin) != 1 ||
-		fseek(fin, LittleShort(eod.DirectoryOffset), SEEK_SET) != 0)
+		fseek(fin, LittleLong(eod.DirectoryOffset), SEEK_SET) != 0)
 	{
 		return NULL;
 	}

@@ -68,6 +68,7 @@ extern class ThinkerList
 		void	DestroyAll(Priority start=FIRST_TICKABLE);
 		void	Serialize(FArchive &arc);
 		void	Tick();
+		void	Tick(Priority list);
 
 		void	MarkRoots();
 	protected:

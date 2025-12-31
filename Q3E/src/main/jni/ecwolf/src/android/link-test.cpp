@@ -3,6 +3,6 @@
 
 int main(int argc, char* argv[])
 {
-	extern int main_android(int, char*[]);
-	return main_android(argc, argv);
+	extern int WL_Main(int, char*[]);
+	return WL_Main(argc, argv);
 }

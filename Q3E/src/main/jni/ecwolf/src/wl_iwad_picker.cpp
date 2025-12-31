@@ -297,7 +297,7 @@ int I_PickIWad (WadStuff *wads, int numwads, bool showwin, int defaultiwad)
 	}
 #elif defined(__APPLE__)
 	return I_PickIWad_Cocoa (wads, numwads, showwin, defaultiwad);
-#elif defined(__ANDROID__) && !defined(_DIII4A)
+#elif defined(__ANDROID__) && !defined(_DIII4A) //karin: don't support pick wad
 	return I_PickIWad_Android (wads, numwads, showwin, defaultiwad);
 #endif
 #ifndef USE_TEXTSCREEN

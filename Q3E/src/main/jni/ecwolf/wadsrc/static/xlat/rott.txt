@@ -1,3 +1,4 @@
+enable globalflat;
 enable lightlevels;
 enable planedepth;
 enable zheights;

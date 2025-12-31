@@ -25,10 +25,11 @@
 #include "id_vl.h"
 #include "id_vh.h"
 #include "config.h"
+#include "wl_net.h"
 #include "wl_play.h"
 
 
-#if !SDL_VERSION_ATLEAST(1,3,0)
+#if !SDL_VERSION_ATLEAST(2,0,0)
 #define SDLK_KP_0 SDLK_KP0
 #define SDLK_KP_1 SDLK_KP1
 #define SDLK_KP_2 SDLK_KP2
@@ -46,6 +47,7 @@ typedef SDLMod SDL_Keymod;
 inline void SDL_SetRelativeMouseMode(bool enabled)
 {
 	SDL_WM_GrabInput(enabled ? SDL_GRAB_ON : SDL_GRAB_OFF);
+	SDL_ShowCursor(enabled ? SDL_DISABLE : SDL_ENABLE);
 }
 inline void SDL_WarpMouseInWindow(struct SDL_Window* window, int x, int y)
 {
@@ -80,7 +82,6 @@ bool MouseWheel[4];
 
 // 	Global variables
 bool Keyboard[SDL_NUM_SCANCODES];
-unsigned short Paused;
 char LastASCII;
 ScanCode LastScan;
 
@@ -336,7 +337,7 @@ static void processEvent(SDL_Event *event)
 			Quit();
 
 		// ASCII (Unicode) text entry for saves and stuff like that.
-#if SDL_VERSION_ATLEAST(1,3,0)
+#if SDL_VERSION_ATLEAST(2,0,0)
 		case SDL_TEXTINPUT:
 		{
 			LastASCII = event->text.text[0];
@@ -354,7 +355,7 @@ static void processEvent(SDL_Event *event)
 				return;
 			}
 
-#if SDL_VERSION_ATLEAST(1,3,0)
+#if SDL_VERSION_ATLEAST(2,0,0)
 			LastScan = event->key.keysym.scancode;
 
 			// Android back button should be treated as escape for now
@@ -388,7 +389,7 @@ static void processEvent(SDL_Event *event)
 				}
 			}
 
-#if !SDL_VERSION_ATLEAST(1,3,0)
+#if !SDL_VERSION_ATLEAST(2,0,0)
 			static const byte ASCIINames[] = // Unshifted ASCII for scan codes       // TODO: keypad
 			{
 			//	 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
@@ -434,14 +435,12 @@ static void processEvent(SDL_Event *event)
 
 			if(LastScan<SDL_NUM_SCANCODES)
 				Keyboard[LastScan] = 1;
-			if(LastScan == SDLx_SCANCODE(PAUSE))
-				Paused |= 1;
 			break;
 		}
 
 		case SDL_KEYUP:
 		{
-#if SDL_VERSION_ATLEAST(1,3,0)
+#if SDL_VERSION_ATLEAST(2,0,0)
 			int key = event->key.keysym.scancode;
 #else
 			int key = event->key.keysym.sym;
@@ -504,7 +503,7 @@ static void processEvent(SDL_Event *event)
 		}
 #endif
 
-#if !SDL_VERSION_ATLEAST(1,3,0)
+#if !SDL_VERSION_ATLEAST(2,0,0)
 		case SDL_ACTIVEEVENT:
 		{
 			if (!fullscreen && forcegrabmouse && (event->active.state & SDL_APPINPUTFOCUS || event->active.state & SDL_APPACTIVE))
@@ -536,7 +535,22 @@ static void processEvent(SDL_Event *event)
 void IN_WaitAndProcessEvents()
 {
 	SDL_Event event;
+
+	if(Net::InitVars.mode == Net::MODE_SinglePlayer)
+	{
 	if(!SDL_WaitEvent(&event)) return;
+	}
+	else
+	{
+		// In net games we need to periodically return to process network packets
+#if SDL_VERSION_ATLEAST(2,0,0)
+		if(!SDL_WaitEventTimeout(&event, 10)) return;
+#else
+		SDL_Delay(1);
+		if(!SDL_PollEvent(&event)) return;
+#endif
+	}
+
 	do
 	{
 		processEvent(&event);
@@ -822,8 +836,10 @@ IN_WaitForASCII(void)
 
 bool	btnstate[NUMBUTTONS];
 
-void IN_StartAck(void)
+void IN_StartAck(AckType type)
 {
+	Net::StartAck(type);
+
 	IN_ProcessEvents();
 //
 // get initial state of everything
@@ -849,7 +865,7 @@ bool IN_CheckAck (void)
 // see if something has been pressed
 //
 	if(LastScan)
-		return true;
+		return Net::CheckAck(true);
 
 	int buttons = IN_JoyButtons() << 4;
 
@@ -873,20 +889,20 @@ bool IN_CheckAck (void)
 				}
 				while(buttons & (1 << i));
 
-				return true;
+				return Net::CheckAck(true);
 			}
 		}
 		else
 			btnstate[i] = false;
 	}
 
-	return false;
+	return Net::CheckAck(false);
 }
 
 
-void IN_Ack (void)
+void IN_Ack (AckType type)
 {
-	IN_StartAck ();
+	IN_StartAck (type);
 
 	do
 	{
@@ -904,12 +920,12 @@ void IN_Ack (void)
 //		button up.
 //
 ///////////////////////////////////////////////////////////////////////////
-bool IN_UserInput(longword delay)
+bool IN_UserInput(longword delay, AckType type)
 {
 	longword	lasttime;
 
 	lasttime = GetTimeCount();
-	IN_StartAck ();
+	IN_StartAck (type);
 	do
 	{
 		IN_ProcessEvents();

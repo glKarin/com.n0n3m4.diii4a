@@ -4,6 +4,7 @@
 #define __ID_VH_H__
 
 #include "id_vl.h"
+#include "tmemory.h"
 #include "wl_main.h"
 #include "v_font.h"
 
@@ -70,8 +71,28 @@ void VH_UpdateScreen();
 void	VW_MeasurePropString (FFont *font, const char *string, word &width, word &height, word *finalWidth=NULL);
 
 void    VH_Startup();
-void FizzleFadeStart();
-bool FizzleFade (int x1, int y1,
-	unsigned width, unsigned height, unsigned frames, bool abortable);
+
+class FFizzleFader : public FFader
+{
+	TUniquePtr<byte[]> destptr;
+	TUniquePtr<byte[]> srcptr;
+	int x1, y1;
+	unsigned width, height;
+	int32_t fadems;
+	int32_t startms;
+
+	unsigned pixcovered;
+	int32_t rndval;
+	bool staticframes;
+
+public:
+	FFizzleFader(int x1, int y1, unsigned width, unsigned height, unsigned frames, bool staticframes);
+
+	void CaptureFrame();
+	void FadeToColor(int red, int green, int blue);
+	bool Update();
+};
+
+void FizzleFade (FFader &fader);
 
 #endif

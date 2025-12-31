@@ -48,7 +48,7 @@ bool queryiwad = true;
 static bool showpreviewgames = false;
 
 int I_PickIWad(WadStuff *wads, int numwads, bool showwin, int defaultiwad);
-#if !defined(_WIN32) && !defined(LIBRETRO)
+#ifndef _WIN32
 #include "wl_iwad_picker.cpp"
 #endif
 
@@ -71,6 +71,16 @@ static TArray<FString> iwadNames;
 static TArray<LevelSet> levelSets;
 static const IWadData *selectedGame;
 static unsigned int NumIWads;
+
+static bool CheckIWadNotYetFound(const TArray<WadStuff> &iwads, int type)
+{
+	for(unsigned int i = 0; i < iwads.Size(); ++i)
+	{
+		if(iwads[i].Type == type)
+			return false;
+	}
+	return true;
+}
 
 // Insert Paths from one WadStuff into another when Required is satisfied
 static void TransferWadStuffPaths(WadStuff &dest, const WadStuff &src)
@@ -168,7 +178,7 @@ static bool CheckStandalone(const char* directory, FString filename, FString ext
 			TUniquePtr<unsigned int[]> valid(new unsigned int[iwadTypes.Size()]);
 			memset(valid.Get(), 0, sizeof(unsigned int)*iwadTypes.Size());
 
-			if((wad.Type = CheckFileContents(file, valid)) >= 0)
+			if((wad.Type = CheckFileContents(file, valid)) >= 0 && CheckIWadNotYetFound(iwads, wad.Type))
 			{
 				wad.Path.Push(path);
 				wad.Extension = extension;
@@ -311,7 +321,6 @@ static bool VerifySpearInstall(const char* directory)
 static void LookForGameData(FResourceFile *res, TArray<WadStuff> &iwads, const char* directory)
 {
 	static const unsigned int LoadableBaseFiles[] = { FILE_AUDIOT, FILE_GAMEMAPS, FILE_VGAGRAPH, FILE_VSWAP, BASEFILES };
-	static const int vgaHeadId = 5;
 	static const char* const BaseFileNames[BASEFILES][3] = {
 		{"audiohed", NULL}, {"audiot", NULL},
 		{"gamemaps", "maptemp", NULL}, {"maphead", NULL},
@@ -389,58 +398,9 @@ static void LookForGameData(FResourceFile *res, TArray<WadStuff> &iwads, const c
 				wadStuff.Path.Push(foundFiles[i].filename[LoadableBaseFiles[j]]);
 		}
 
-		int vgaheadsz = -1;
-		// Size of vgahead is 3 * number of pictures, hence checking
-		// its size is a good way to determine its mapping
-		if (foundFiles[i].isValid & (1<<vgaHeadId)) {
-			FileReader vgaheadReader;
-			if(vgaheadReader.Open(foundFiles[i].filename[vgaHeadId])) {
-				vgaheadsz = vgaheadReader.GetLength();
-			}
-		}
-
-		if (foundFiles[i].extension.CompareNoCase("WL1") == 0) {
-			switch (vgaheadsz) {
-			case 471: // 1.4
-				mapVersionId = "";
-				break;
-			case 462: // 1.1 and 1.2
-				mapVersionId = "12";
-				break;
-			case 447: // 1.0
-				mapVersionId = "10";
-				break;
-			default:
-				printf("Unknown vgahead, assuming version 1.4. Please report this version to the devs\n");
-				mapVersionId = "";
-				break;
-			}
-		}
-
-		if (foundFiles[i].extension.CompareNoCase("WL6") == 0) {
-			switch (vgaheadsz) {
-			case 486: // 1.4
-				mapVersionId = "14";
-				break;
-			case 450: // 1.1 and 1.2
-				mapVersionId = "";
-				break;
-			default:
-				printf("Unknown vgahead, assuming version 1.2. Please report this version to the devs\n");
-				mapVersionId = "";
-				break;
-			}
-		}
-
-		printf("Using asset mapping \"%smap%s\"\n",
-		       foundFiles[i].extension.GetChars(),
-		       mapVersionId.GetChars());
-
 		// Before checking the data we must load the remap file.
 		FString mapFile;
-		mapFile.Format("%sMAP%s",
-			       foundFiles[i].extension.GetChars(),
-			       mapVersionId.GetChars());
+		mapFile.Format("%sMAP", foundFiles[i].extension.GetChars());
 		for(unsigned int j = res->LumpCount();j-- > 0;)
 		{
 			FResourceLump *lump = res->GetLump(j);
@@ -451,16 +411,7 @@ static void LookForGameData(FResourceFile *res, TArray<WadStuff> &iwads, const c
 		if(CheckData(wadStuff) > -1)
 		{
 			// Check to ensure there are no duplicates
-			bool doPush = true;
-			for(unsigned int j = 0;j < iwads.Size();++j)
-			{
-				if(iwads[j].Type == wadStuff.Type)
-				{
-					doPush = false;
-					break;
-				}
-			}
-			if(doPush)
+			if(CheckIWadNotYetFound(iwads, wadStuff.Type))
 			{
 				if(iwadTypes[wadStuff.Type].Required.Size() > 0 ||
 					(foundFiles[i].isValid & FILE_REQMASK) == FILE_REQMASK)
@@ -648,10 +599,6 @@ void SelectGame(TArray<FString> &wadfiles, const char* iwad, const char* datawad
 		else if((datawadRes = FResourceFile::OpenResourceFile(FString(INSTALL_PREFIX "/share/" BINNAME "/") + datawad, NULL, true)))
 			datawadDir = FString(INSTALL_PREFIX "/share/" BINNAME "/");
 #endif
-#ifdef LIBRETRO
-		else if(config.GetSetting("BaseDataPaths") != NULL && (datawadRes = FResourceFile::OpenResourceFile(FString(config.GetSetting("BaseDataPaths")->GetString()) + "/" + datawad, NULL, true)))
-			datawadDir = FString(FString(config.GetSetting("BaseDataPaths")->GetString()) + "/");
-#endif
 	}
 	if(!datawadRes)
 		I_Error("Could not open %s!", datawad);
@@ -660,7 +607,6 @@ void SelectGame(TArray<FString> &wadfiles, const char* iwad, const char* datawad
 
 	// Get a list of potential data paths
 	FString dataPaths;
-#ifndef LIBRETRO
 	if(config.GetSetting("BaseDataPaths") == NULL)
 	{
 		FString configDir = FileSys::GetDirectoryPath(FileSys::DIR_Configuration);
@@ -680,7 +626,6 @@ void SelectGame(TArray<FString> &wadfiles, const char* iwad, const char* datawad
 
 		config.CreateSetting("BaseDataPaths", dataPaths);
 	}
-#endif
 	dataPaths = config.GetSetting("BaseDataPaths")->GetString();
 
 	TArray<WadStuff> basefiles;
@@ -717,7 +662,6 @@ void SelectGame(TArray<FString> &wadfiles, const char* iwad, const char* datawad
 	LookForGameData(datawadRes, basefiles, "/usr/local/share/games/wolf3d");
 #endif
 
-#if !defined(NO_STORE)
 	// Look for a steam install. (Basically from ZDoom)
 	{
 		struct CommercialGameDir
@@ -729,15 +673,28 @@ void SelectGame(TArray<FString> &wadfiles, const char* iwad, const char* datawad
 		static const CommercialGameDir steamDirs[] =
 		{
 			{FileSys::APP_Wolfenstein3D, PATH_SEPARATOR "base"},
+			{FileSys::APP_Wolfenstein3D, PATH_SEPARATOR "base" PATH_SEPARATOR "m1"},
 			{FileSys::APP_SpearOfDestiny, PATH_SEPARATOR "base"},
 			{FileSys::APP_NoahsArk, ""},
 #if defined(__APPLE__)
 			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Blake Stone AOG.app/Contents/Resources/BlakestoneAOG"},
-			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Blake Stone PS.app/Contents/Resources/BlakestonePS"}
+			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Blake Stone PS.app/Contents/Resources/BlakestonePS"},
+			// Note: There's also a Rise of the triad EX app but the DARKWAR.RTL is different in it, both have Extreme Rise of the Triad data in them anyway
+			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Rise of the triad.app/Contents/Resources/ROTT"},
+			{FileSys::APP_AliensOfGold, PATH_SEPARATOR "Blake Stone AOG.app/Contents/Resources/BlakestoneAOG"},
+			{FileSys::APP_PlanetStrike, PATH_SEPARATOR "Blake Stone PS.app/Contents/Resources/BlakestonePS"},
+			{FileSys::APP_RiseOfTheTriad, PATH_SEPARATOR "Rise of the triad.app/Contents/Resources/ROTT"},
 #else
 			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Blake Stone"},
-			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Planet Strike"}
+			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Planet Strike"},
+			{FileSys::APP_ThrowbackPack, PATH_SEPARATOR "Rise of the Triad"},
+			{FileSys::APP_AliensOfGold, PATH_SEPARATOR "Blake Stone - Aliens of Gold"},
+			{FileSys::APP_PlanetStrike, PATH_SEPARATOR "Blake Stone - Planet Strike"},
+			{FileSys::APP_RiseOfTheTriad, PATH_SEPARATOR "Rise of the Triad - Dark War"},
 #endif
+			// TODO: Corridor 7 isn't unpacked
+			//{FileSys::APP_Corridor7, PATH_SEPARATOR "cd"},
+			{FileSys::APP_OperationBodyCount, PATH_SEPARATOR "C" PATH_SEPARATOR "BCCD"}
 		};
 		for(unsigned int i = 0;i < countof(steamDirs);++i)
 			LookForGameData(datawadRes, basefiles, FileSys::GetSteamPath(steamDirs[i].app) + steamDirs[i].dir);
@@ -745,7 +702,25 @@ void SelectGame(TArray<FString> &wadfiles, const char* iwad, const char* datawad
 		static const CommercialGameDir gogDirs[] = 
 		{
 			{FileSys::APP_Wolfenstein3D, ""},
-			{FileSys::APP_SpearOfDestiny, PATH_SEPARATOR "M1"}
+			{FileSys::APP_Wolfenstein3D, PATH_SEPARATOR "m1"},
+			{FileSys::APP_SpearOfDestiny, PATH_SEPARATOR "M1"},
+			{FileSys::APP_NoahsArk, ""},
+#if defined(_WIN32)
+			{FileSys::APP_AliensOfGold, ""},
+			{FileSys::APP_PlanetStrike, ""},
+			{FileSys::APP_RiseOfTheTriad, ""},
+#elif defined(__APPLE__)
+			{FileSys::APP_AliensOfGold, PATH_SEPARATOR "Contents/Resources/game/Blake Stone Aliens of Gold.app/Contents/Resources/Blake Stone Aliens of Gold.boxer/C Blake Stone Aliens of Gold.harddisk"},
+			{FileSys::APP_PlanetStrike, PATH_SEPARATOR "Contents/Resources/game/Blake Stone Planet Strike.app/Contents/Resources/Blake Stone Planet Strike.boxer/C Blake Stone Planet Strike.harddisk"},
+			{FileSys::APP_RiseOfTheTriad, PATH_SEPARATOR "Contents/Resources/game/Rise of the Triad Dark War.app/Contents/Resources/Rise of the Triad Dark-War.boxer/C Rise of The Triad.harddisk"},
+#else
+			{FileSys::APP_AliensOfGold, PATH_SEPARATOR "data"},
+			{FileSys::APP_PlanetStrike, PATH_SEPARATOR "data"},
+			{FileSys::APP_RiseOfTheTriad, PATH_SEPARATOR "data"},
+#endif
+			// TODO: Corridor 7 isn't unpacked
+			//{FileSys::APP_Corridor7, PATH_SEPARATOR "cd"},
+			{FileSys::APP_OperationBodyCount, PATH_SEPARATOR "C" PATH_SEPARATOR "BCCD"}
 		};
 		for(unsigned int i = 0;i < countof(gogDirs);++i)
 		{
@@ -769,7 +744,6 @@ void SelectGame(TArray<FString> &wadfiles, const char* iwad, const char* datawad
 			}
 		}
 	}
-#endif
 
 	delete datawadRes;
 

@@ -64,7 +64,6 @@
 
 // TYPES -------------------------------------------------------------------
 
-PACK_START
 struct IHDR
 {
 	DWORD		Width;
@@ -74,17 +73,12 @@ struct IHDR
 	BYTE		Compression;
 	BYTE		Filter;
 	BYTE		Interlace;
-} PACKED;
-PACK_END
-
-#ifndef LIBRETRO
+};
 
 PNGHandle::PNGHandle (FILE *file) : File(0), bDeleteFilePtr(true), ChunkPt(0)
 {
 	File = new FileReader(file);
 }
-
-#endif
 
 PNGHandle::PNGHandle (FileReader *file) : File(file), bDeleteFilePtr(false), ChunkPt(0) {}
 PNGHandle::~PNGHandle ()
@@ -140,8 +134,6 @@ CVAR(Float, png_gamma, 0.f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)*/
 //
 //==========================================================================
 
-#ifndef LIBRETRO
-
 bool M_CreatePNG (FILE *file, const BYTE *buffer, const PalEntry *palette,
 				  ESSType color_type, int width, int height, int pitch)
 {
@@ -187,8 +179,6 @@ bool M_CreatePNG (FILE *file, const BYTE *buffer, const PalEntry *palette,
 
 	return M_SaveBitmap (buffer, color_type, width, height, pitch, file);
 }
-
-#endif
 
 //==========================================================================
 //
@@ -271,7 +261,7 @@ bool M_AppendPNGText (FILE *file, const char *keyword, const char *text)
 	head.len = BigLong(len + keylen + 1);
 	head.id = MAKE_ID('t','E','X','t');
 	memset (&head.key, 0, sizeof(head.key));
-	strncpy (head.key, keyword, keylen);
+	memcpy (head.key, keyword, keylen);
 	head.key[keylen] = 0;
 
 	if ((int)fwrite (&head, 1, keylen + 9, file) == keylen + 9 &&
@@ -387,7 +377,6 @@ bool M_GetPNGText (PNGHandle *png, const char *keyword, char *buffer, size_t buf
 //
 //==========================================================================
 
-#ifndef LIBRETRO
 PNGHandle *M_VerifyPNG (FILE *file)
 {
 	PNGHandle::Chunk chunk;
@@ -467,7 +456,6 @@ PNGHandle *M_VerifyPNG (FILE *file)
 	delete png;
 	return NULL;
 }
-#endif
 
 //==========================================================================
 //
@@ -625,14 +613,45 @@ bool M_ReadIDAT (FileReader *file, BYTE *buffer, int width, int height, int pitc
 				// Distribute pixels into the output buffer
 				out = curr;
 				colstep = bytesPerPixel << passwidthshift[pass];
-				for (x = passwidth; x > 0; --x)
+				switch (bytesPerPixel)
 				{
-					int y;
-					for (y = 0; y < bytesPerPixel; y++)
-						*out++ = *in++;
-						
-					out += colstep - bytesPerPixel;
-					in += 2;
+				case 1:
+					for (x = passwidth; x > 0; --x)
+					{
+						*out = *in;
+						out += colstep;
+						in += 1;
+					}
+					break;
+
+				case 2:
+					for (x = passwidth; x > 0; --x)
+					{
+						*(WORD *)out = *(WORD *)in;
+						out += colstep;
+						in += 2;
+					}
+					break;
+
+				case 3:
+					for (x = passwidth; x > 0; --x)
+					{
+						out[0] = in[0];
+						out[1] = in[1];
+						out[2] = in[2];
+						out += colstep;
+						in += 3;
+					}
+					break;
+
+				case 4:
+					for (x = passwidth; x > 0; --x)
+					{
+						*(DWORD *)out = *(DWORD *)in;
+						out += colstep;
+						in += 4;
+					}
+					break;
 				}
 			}
 			if ((curr += passpitch) >= bufferend)
@@ -694,9 +713,9 @@ bool M_ReadIDAT (FileReader *file, BYTE *buffer, int width, int height, int pitc
 static inline void MakeChunk (void *where, DWORD type, size_t len)
 {
 	BYTE *const data = (BYTE *)where;
-	WriteBigLong (data - 8, (unsigned int)len);
-	WriteBigLong (data - 4, type);
-	WriteBigLong (data + len, (unsigned int)CalcCRC32 (data-4, (unsigned int)(len+4)));
+	*(DWORD *)(data - 8) = BigLong ((unsigned int)len);
+	*(DWORD *)(data - 4) = type;
+	*(DWORD *)(data + len) = BigLong ((unsigned int)CalcCRC32 (data-4, (unsigned int)(len+4)));
 }
 
 //==========================================================================

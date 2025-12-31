@@ -60,42 +60,45 @@
 // Since we want this to compile under Linux too, we need to define this
 // stuff ourselves instead of including a DirectX header.
 
-#define ID_DDS						MAKE_ID('D','D','S',' ')
-#define ID_DXT1						MAKE_ID('D','X','T','1')
-#define ID_DXT2						MAKE_ID('D','X','T','2')
-#define ID_DXT3						MAKE_ID('D','X','T','3')
-#define ID_DXT4						MAKE_ID('D','X','T','4')
-#define ID_DXT5						MAKE_ID('D','X','T','5')
+enum
+{
+	ID_DDS = MAKE_ID('D', 'D', 'S', ' '),
+	ID_DXT1 = MAKE_ID('D', 'X', 'T', '1'),
+	ID_DXT2 = MAKE_ID('D', 'X', 'T', '2'),
+	ID_DXT3 = MAKE_ID('D', 'X', 'T', '3'),
+	ID_DXT4 = MAKE_ID('D', 'X', 'T', '4'),
+	ID_DXT5 = MAKE_ID('D', 'X', 'T', '5'),
 
-// Bits in dwFlags
-#define DDSD_CAPS					0x00000001
-#define DDSD_HEIGHT					0x00000002
-#define DDSD_WIDTH					0x00000004
-#define DDSD_PITCH					0x00000008
-#define DDSD_PIXELFORMAT			0x00001000
-#define DDSD_MIPMAPCOUNT			0x00020000
-#define DDSD_LINEARSIZE				0x00080000
-#define DDSD_DEPTH					0x00800000
+	// Bits in dwFlags
+	DDSD_CAPS = 0x00000001,
+	DDSD_HEIGHT = 0x00000002,
+	DDSD_WIDTH = 0x00000004,
+	DDSD_PITCH = 0x00000008,
+	DDSD_PIXELFORMAT = 0x00001000,
+	DDSD_MIPMAPCOUNT = 0x00020000,
+	DDSD_LINEARSIZE = 0x00080000,
+	DDSD_DEPTH = 0x00800000,
 
-// Bits in ddpfPixelFormat
-#define DDPF_ALPHAPIXELS			0x00000001
-#define DDPF_FOURCC					0x00000004
-#define DDPF_RGB					0x00000040
+	// Bits in ddpfPixelFormat
+	DDPF_ALPHAPIXELS = 0x00000001,
+	DDPF_FOURCC = 0x00000004,
+	DDPF_RGB = 0x00000040,
 
-// Bits in DDSCAPS2.dwCaps1
-#define DDSCAPS_COMPLEX				0x00000008
-#define DDSCAPS_TEXTURE				0x00001000
-#define DDSCAPS_MIPMAP				0x00400000
+	// Bits in DDSCAPS2.dwCaps1
+	DDSCAPS_COMPLEX = 0x00000008,
+	DDSCAPS_TEXTURE = 0x00001000,
+	DDSCAPS_MIPMAP = 0x00400000,
 
-// Bits in DDSCAPS2.dwCaps2
-#define DDSCAPS2_CUBEMAP			0x00000200
-#define DDSCAPS2_CUBEMAP_POSITIVEX	0x00000400
-#define DDSCAPS2_CUBEMAP_NEGATIVEX	0x00000800
-#define DDSCAPS2_CUBEMAP_POSITIVEY	0x00001000
-#define DDSCAPS2_CUBEMAP_NEGATIVEY	0x00002000
-#define DDSCAPS2_CUBEMAP_POSITIVEZ	0x00004000
-#define DDSCAPS2_CUBEMAP_NEGATIZEZ	0x00008000
-#define DDSCAPS2_VOLUME				0x00200000
+	// Bits in DDSCAPS2.dwCaps2
+	DDSCAPS2_CUBEMAP = 0x00000200,
+	DDSCAPS2_CUBEMAP_POSITIVEX = 0x00000400,
+	DDSCAPS2_CUBEMAP_NEGATIVEX = 0x00000800,
+	DDSCAPS2_CUBEMAP_POSITIVEY = 0x00001000,
+	DDSCAPS2_CUBEMAP_NEGATIVEY = 0x00002000,
+	DDSCAPS2_CUBEMAP_POSITIVEZ = 0x00004000,
+	DDSCAPS2_CUBEMAP_NEGATIZEZ = 0x00008000,
+	DDSCAPS2_VOLUME = 0x00200000,
+};
 
 //==========================================================================
 //
@@ -531,11 +534,11 @@ void FDDSTexture::ReadRGB (FWadLump &lump, BYTE *tcbuf)
 			DWORD c;
 			if (Format == 4)
 			{
-				c = ReadLittleLong(buffp); buffp += 4;
+				c = LittleLong(*(DWORD *)buffp); buffp += 4;
 			}
 			else if (Format == 2)
 			{
-				c = ReadLittleShort(buffp); buffp += 2;
+				c = LittleShort(*(WORD *)buffp); buffp += 2;
 			}
 			else if (Format == 3)
 			{
@@ -603,7 +606,7 @@ void FDDSTexture::DecompressDXT1 (FWadLump &lump, BYTE *tcbuf)
 		block = blockbuff;
 		for (ox = 0; ox < Width; ox += 4)
 		{
-			WORD color16[2] = { ReadLittleShort(block), ReadLittleShort(block+2) };
+			WORD color16[2] = { LittleShort(((WORD *)block)[0]), LittleShort(((WORD *)block)[1]) };
 
 			// Convert color from R5G6B5 to R8G8B8.
 			for (i = 1; i >= 0; --i)
@@ -697,7 +700,7 @@ void FDDSTexture::DecompressDXT3 (FWadLump &lump, bool premultiplied, BYTE *tcbu
 		block = blockbuff;
 		for (ox = 0; ox < Width; ox += 4)
 		{
-			WORD color16[2] = { ReadLittleShort(block + 8), ReadLittleShort(block + 10) };
+			WORD color16[2] = { LittleShort(((WORD *)block)[4]), LittleShort(((WORD *)block)[5]) };
 
 			// Convert color from R5G6B5 to R8G8B8.
 			for (i = 1; i >= 0; --i)
@@ -728,7 +731,7 @@ void FDDSTexture::DecompressDXT3 (FWadLump &lump, bool premultiplied, BYTE *tcbu
 					break;
 				}
 				BYTE yslice = block[12 + y];
-				WORD yalphaslice = ReadLittleShort(block + 2 * y);
+				WORD yalphaslice = LittleShort(((WORD *)block)[y]);
 				for (x = 0; x < 4; ++x)
 				{
 					if (ox + x >= Width)
@@ -747,7 +750,7 @@ void FDDSTexture::DecompressDXT3 (FWadLump &lump, bool premultiplied, BYTE *tcbu
 						tcp[0] = color[c].r;
 						tcp[1] = color[c].g;
 						tcp[2] = color[c].b;
-						tcp[3] = color[c].a;
+						tcp[3] = ((yalphaslice >> (x * 4)) & 15) * 0x11;
 					}
 				}
 			}
@@ -780,7 +783,7 @@ void FDDSTexture::DecompressDXT5 (FWadLump &lump, bool premultiplied, BYTE *tcbu
 		block = blockbuff;
 		for (ox = 0; ox < Width; ox += 4)
 		{
-			WORD color16[2] = { ReadLittleShort(block+8), ReadLittleShort(block+10) };
+			WORD color16[2] = { LittleShort(((WORD *)block)[4]), LittleShort(((WORD *)block)[5]) };
 			BYTE alpha[8];
 
 			// Calculate the eight alpha values.

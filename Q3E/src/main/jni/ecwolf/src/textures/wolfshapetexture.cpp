@@ -115,7 +115,7 @@ static bool CheckIfMacShape(FileReader &file)
 	
 	WORD width;
 	file.Seek(0, SEEK_SET);
-	file >> width;
+	file.Read(&width, sizeof(width));
 	width = BigShort(width);
 
 	if(width == 0)
@@ -242,7 +242,7 @@ void FWolfShapeTexture::InitMac(FileReader &file)
 	// Width, which implies left offset.
 	WORD width;
 	file.Seek(0, SEEK_SET);
-	file >> width;
+	file.Read(&width, sizeof(width));
 	Width = BigShort(width);
 	Height = 128;
 	LeftOffset = Width>>1;

@@ -280,11 +280,13 @@ class UWMFParser : public TextMapParser
 
 		void Parse()
 		{
-			bool ecwolf12Namespace = false;
+			bool ecwolfNamespace = false;
 			bool canChangeHeader = true;
 			gm->header.width = 64;
 			gm->header.height = 64;
 			gm->header.tileSize = 64;
+			gm->header.sky.SetInvalid();
+			gm->header.skyHorizonOffset = 0;
 
 			while(sc.TokensLeft())
 			{
@@ -296,9 +298,9 @@ class UWMFParser : public TextMapParser
 					{
 						sc.MustGetToken(TK_StringConst);
 						// Experimental namespace
-						ecwolf12Namespace = sc->str.Compare("ECWolf-v12") == 0;
-						if(sc->str.Compare("Wolf3D") != 0 && !ecwolf12Namespace)
-							sc.ScriptMessage(Scanner::WARNING, "Wolf3D and ECWolf-v12 are the only supported namespaces.\n");
+						ecwolfNamespace = sc->str.Compare("ECWolf-v12") == 0 || sc->str.Compare("ECWolf-v14") == 0;
+						if(sc->str.Compare("Wolf3D") != 0 && !ecwolfNamespace)
+							sc.ScriptMessage(Scanner::WARNING, "Wolf3D, ECWolf-v12, and ECWolf-v14 are the only supported namespaces.\n");
 					}
 					else CheckKey("tilesize")
 					{
@@ -329,17 +331,30 @@ class UWMFParser : public TextMapParser
 					// stone.
 					else CheckKey("defaultlightlevel")
 					{
-						if(!ecwolf12Namespace)
+						if(!ecwolfNamespace)
 							sc.ScriptMessage(Scanner::WARNING, "Setting defaultlightlevel on Wolf3D namespace not standard, use ECWolf-v12\n");
 						sc.MustGetToken(TK_IntConst);
 						gLevelLight = sc->number;
 					}
 					else CheckKey("defaultvisibility")
 					{
-						if(!ecwolf12Namespace)
+						if(!ecwolfNamespace)
 							sc.ScriptMessage(Scanner::WARNING, "Setting defaultvisibility on Wolf3D namespace not standard, use ECWolf-v12\n");
 						sc.MustGetToken(TK_FloatConst);
 						gLevelVisibility = static_cast<fixed>(sc->decimal*LIGHTVISIBILITY_FACTOR*65536.);
+					}
+					else CheckKey("sky")
+					{
+						if(!ecwolfNamespace)
+							sc.ScriptMessage(Scanner::WARNING, "Setting sky on Wolf3D namespace not standard, use ECWolf-v14\n");
+						sc.MustGetToken(TK_StringConst);
+						gm->header.sky = TexMan.GetTexture(sc->str, FTexture::TEX_Wall);
+					}
+					else CheckKey("skyhorizonoffset")
+					{
+						if(!ecwolfNamespace)
+							sc.ScriptMessage(Scanner::WARNING, "Setting skyhorizonoffset on Wolf3D namespace not standard, use ECWolf-v14\n");
+						gm->header.skyHorizonOffset = MustGetSignedInteger(sc);
 					}
 					else
 						sc.GetNextToken();

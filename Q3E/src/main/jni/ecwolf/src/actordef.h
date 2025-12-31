@@ -57,8 +57,7 @@
 #define DECLARE_NATIVE_CLASS(name, parent) DECLARE_CLASS(A##name, A##parent)
 #define HAS_OBJECT_POINTERS
 #define __IMPCLS_ABSTRACT(cls, name) \
-	const ClassDef *cls::__StaticClass = ClassDef::DeclareNativeClass<cls>(name, &Super::__StaticClass); \
-	const void * Puller ## cls = cls::__StaticClass;
+	const ClassDef *cls::__StaticClass = ClassDef::DeclareNativeClass<cls>(name, &Super::__StaticClass);
 #define __IMPCLS(cls, name) \
 	__IMPCLS_ABSTRACT(cls, name) \
 	DObject *cls::__InPlaceConstructor(const ClassDef *classType, void *mem) { return new ((EInPlace *) mem) cls(classType); }

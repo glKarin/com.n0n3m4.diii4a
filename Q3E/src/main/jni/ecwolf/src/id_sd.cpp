@@ -38,11 +38,12 @@
 #include "mame/fmopl.h"
 #endif
 #include "wl_main.h"
+#include "wl_net.h"
 #include "id_sd.h"
-#include <SDL.h>
 
-#ifndef ECWOLF_MIXER
-#pragma message "Not using customized SDL_mixer. Features will be disabled. https://bitbucket.org/ecwolf/sdl_mixer-for-ecwolf"
+// Introduced in SDL_mixer 2.0.2
+#ifndef SDL_MIXER_VERSION_ATLEAST
+#define SDL_MIXER_VERSION_ATLEAST(X, Y, Z) (SDL_VERSIONNUM(SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL) >= SDL_VERSIONNUM(X, Y, Z))
 #endif
 
 // For AdLib sounds & music:
@@ -61,17 +62,18 @@
 SDL_mutex *audioMutex;
 
 globalsoundpos channelSoundPos[MIX_CHANNELS];
+globalsoundpos AdlibSoundPos;
 
 //      Global variables
 bool	AdLibPresent,
-		SoundBlasterPresent,SBProPresent,
-		SoundPositioned;
+		SoundBlasterPresent,SBProPresent;
 SDMode	SoundMode;
 SMMode	MusicMode;
 SDSMode	DigiMode;
 int		AdlibVolume=MAX_VOLUME;
 int		MusicVolume=MAX_VOLUME;
 int		SoundVolume=MAX_VOLUME;
+int		AdlibVolumePositioned=MAX_VOLUME;
 
 // SDL_mixer values from Mix_QuerySpec
 static struct
@@ -85,7 +87,7 @@ static SDL_AudioCVT AudioCVTStereo;
 //      Internal variables
 static  bool					SD_Started;
 static  bool					nextsoundpos;
-FString                 SoundPlaying;
+SoundIndex						SoundPlaying;
 static  word                    SoundPriority;
 static  word                    DigiPriority;
 static  int                     LeftPosition;
@@ -215,14 +217,14 @@ extern const int oplChip = 0;
 
 #endif
 
-#ifndef ECWOLF_MIXER
-static int Mix_SetMusicPCMPosition(Uint64 position) { return 0; }
-static Uint64 Mix_GetMusicPCMPosition() { return 0; }
+#if !SDL_MIXER_VERSION_ATLEAST(2,6,0)
+#warning SDL_mixer version lacks music position support
+static double Mix_GetMusicPosition(Mix_Music*) { return 0.0; }
 #endif
 
 static void SDL_SoundFinished(void)
 {
-	SoundPlaying = FString();
+	SoundPlaying = SoundIndex();
 	SoundPriority = 0;
 }
 
@@ -254,18 +256,22 @@ static longword	pcNumReadySamples = 0;
 
 #define PC_BASE_TIMER 1193181
 
-// Function prototype is for menu listener
-bool SD_UpdatePCSpeakerVolume(int)
+static void _SDL_SetPCSpeakerVolume(int volume)
 {
 	SDL_LockMutex(audioMutex);
 
 	if(pcVolume > 0)
-		pcVolume = AdlibVolume*250;
+		pcVolume = volume*250;
 	else
-		pcVolume = -AdlibVolume*250;
+		pcVolume = -volume*250;
 
 	SDL_UnlockMutex(audioMutex);
+}
 
+// Function prototype is for menu listener
+bool SD_UpdatePCSpeakerVolume(int)
+{
+	_SDL_SetPCSpeakerVolume(AdlibVolume);
 	return true;
 }
 
@@ -487,7 +493,6 @@ void SD_StopDigitized(void)
 {
 	DigiPlaying = false;
 	DigiPriority = 0;
-	SoundPositioned = false;
 	if ((DigiMode == sds_PC) && (SoundMode == sdm_PC))
 		SDL_SoundFinished();
 
@@ -500,14 +505,22 @@ void SD_SetPosition(int channel, int leftpos, int rightpos)
 			|| ((leftpos == 15) && (rightpos == 15)))
 		I_FatalError("SD_SetPosition: Illegal position");
 
-	switch (DigiMode)
+	if(channel >= 0)
 	{
-		default:
-			break;
-		case sds_SoundBlaster:
-//            SDL_PositionSBP(leftpos,rightpos);
-			Mix_SetPanning(channel, TO_SDL_POSITION(leftpos), TO_SDL_POSITION(rightpos));
-			break;
+		switch (DigiMode)
+		{
+			default:
+				break;
+			case sds_SoundBlaster:
+				Mix_SetPanning(channel, TO_SDL_POSITION(leftpos), TO_SDL_POSITION(rightpos));
+				break;
+		}
+	}
+	else
+	{
+		AdlibVolumePositioned = clamp(FixedMul((AdlibVolume << FRACBITS), (MAX(TO_SDL_POSITION(leftpos), TO_SDL_POSITION(rightpos))+1)<<8)>>FRACBITS, 0, MAX_VOLUME);
+		if (SoundMode == sdm_PC)
+			_SDL_SetPCSpeakerVolume(AdlibVolumePositioned);
 	}
 }
 
@@ -562,7 +575,7 @@ static int MacSound_Read(SDL_RWops *ops, void *buffer, int size, int nmem)
 	Sint64 &pos = ((MacSoundData*)ops->hidden.unknown.data1)->pos;
 	if(pos < (Sint64)sizeof(WAV_HEADER))
 	{
-		size_t copysize = MIN<size_t>(totalsize, sizeof(WAV_HEADER)-pos);
+		size_t copysize = MIN<size_t>(totalsize, static_cast<size_t>(sizeof(WAV_HEADER)-pos));
 		memcpy(buffer, WAV_HEADER+pos, copysize);
 		pos += copysize;
 		buffer = ((char*)buffer)+copysize;
@@ -572,8 +585,10 @@ static int MacSound_Read(SDL_RWops *ops, void *buffer, int size, int nmem)
 	}
 	if(pos < (Sint64)sizeof(WAV_HEADER)+4)
 	{
-		size_t copysize = MIN<size_t>(totalsize, sizeof(ssize)+sizeof(WAV_HEADER)-pos);
-		memcpy(buffer, (char*)(&ssize)+(pos-sizeof(WAV_HEADER)), copysize);
+		DWORD leSize = LittleLong(ssize);
+
+		size_t copysize = MIN<size_t>(totalsize, static_cast<size_t>(sizeof(leSize)+sizeof(WAV_HEADER)-pos));
+		memcpy(buffer, (char*)(&leSize)+(pos-sizeof(WAV_HEADER)), copysize);
 		pos += copysize;
 		buffer = ((char*)buffer)+copysize;
 		totalsize -= copysize;
@@ -581,7 +596,7 @@ static int MacSound_Read(SDL_RWops *ops, void *buffer, int size, int nmem)
 			return nmem;
 	}
 
-	size_t copysize = MIN<size_t>(totalsize, ssize-(pos-sizeof(WAV_HEADER)-4));
+	size_t copysize = MIN<size_t>(totalsize, static_cast<size_t>(ssize-(pos-sizeof(WAV_HEADER)-4)));
 	memcpy(buffer, ((MacSoundData*)ops->hidden.unknown.data1)->data+pos-sizeof(WAV_HEADER)-4, copysize);
 
 	// Mac sound data is signed, we need unsigned
@@ -605,12 +620,13 @@ Mix_Chunk* SD_PrepareSound(int which)
 		return NULL;
 
 	FMemLump soundLump = Wads.ReadLump(which);
+	byte* soundData = (byte*)soundLump.GetMem();
 
 	// 0x2A is the size of the sound header. From what I can tell the csnds
 	// have mostly garbage filled headers (outside of what is precisely needed
 	// since the sample rate is hard coded). I'm not sure if the sounds are
 	// 8-bit or 16-bit, but it looks like the sample rate is coded to ~22050.
-	if(BigShort(*(WORD*)soundLump.GetMem()) == 1 && size > 0x2A)
+	if(size > 0x2A && BigShort(*(WORD*)soundData) == 1)
 	{
 		SDL_RWops *ops = SDL_AllocRW();
 		//ops->size = MacSound_Size;
@@ -619,20 +635,24 @@ Mix_Chunk* SD_PrepareSound(int which)
 		ops->write = NULL;
 		ops->close = MacSound_Close;
 		ops->type = 0;
-		ops->hidden.unknown.data1 = malloc(sizeof(MacSoundData));
-		((MacSoundData*)ops->hidden.unknown.data1)->data = (uint8_t*)malloc(size-0x2A);
-		((MacSoundData*)ops->hidden.unknown.data1)->size = size-0x2A;
-		((MacSoundData*)ops->hidden.unknown.data1)->pos = 0;
-		memcpy(((MacSoundData*)ops->hidden.unknown.data1)->data, ((char*)soundLump.GetMem())+0x2A, size-0x2A);
+
+		MacSoundData *macSndData = (MacSoundData*)malloc(sizeof(MacSoundData));
+		ops->hidden.unknown.data1 = macSndData;
+
+		macSndData->data = (uint8_t*)malloc(size-0x2A);
+		macSndData->size = size-0x2A;
+		macSndData->pos = 0;
+		memcpy(macSndData->data, soundData+0x2A, size-0x2A);
 		for(unsigned int i = size-0x2A;i-- > 0;)
-			((MacSoundData*)ops->hidden.unknown.data1)->data[i] = 0x80+((MacSoundData*)ops->hidden.unknown.data1)->data[i];
+			macSndData->data[i] = 0x80+macSndData->data[i];
+
 		return Mix_LoadWAV_RW(ops, 1);
 	}
 
-	return Mix_LoadWAV_RW(SDL_RWFromMem(soundLump.GetMem(), size), 1);
+	return Mix_LoadWAV_RW(SDL_RWFromMem(soundData, size), 1);
 }
 
-int SD_PlayDigitized(const SoundData &which,int leftpos,int rightpos,SoundChannel chan)
+static int SD_PlayDigitized(const SoundData &which,int leftpos,int rightpos,SoundChannel chan)
 {
 	if (!DigiMode)
 		return 0;
@@ -674,8 +694,10 @@ int SD_PlayDigitized(const SoundData &which,int leftpos,int rightpos,SoundChanne
 
 void SD_ChannelFinished(int channel)
 {
-	SoundPlaying = FString();
-	channelSoundPos[channel].valid = 0;
+	SoundPlaying = SoundIndex();
+	channelSoundPos[channel].source = NULL;
+	channelSoundPos[channel].valid = false;
+	channelSoundPos[channel].positioned = false;
 }
 
 void
@@ -859,7 +881,7 @@ SDL_StartDevice(void)
 			SDL_StartAL();
 			break;
 	}
-	SoundPlaying = FString();
+	SoundPlaying = SoundIndex();
 	SoundPriority = 0;
 }
 
@@ -1169,6 +1191,8 @@ SD_Startup(void)
 		return;
 	}
 
+	SD_UpdatePCSpeakerVolume();
+
 #if defined(__ANDROID__)
 	// Working directory will be in the form: Beloko/Wolf3d/FULL
 	Mix_SetSoundFonts("../../FluidR3_GM.sf2");
@@ -1236,7 +1260,8 @@ SD_PositionSound(int leftvol,int rightvol)
 ///////////////////////////////////////////////////////////////////////////
 //
 //      SD_PlaySound() - plays the specified sound on the appropriate hardware
-//              Returns the channel of the sound if it played, else 0.
+//             Returns the channel of the sound if it played, -1 if synthesized,
+//             else 0.
 //
 ///////////////////////////////////////////////////////////////////////////
 int SD_PlaySound(const char* sound, SoundChannel chan)
@@ -1252,12 +1277,13 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 	ispos = nextsoundpos;
 	nextsoundpos = false;
 
-	const SoundData &sindex = SoundInfo[sound];
+	const SoundIndex sindex = SoundInfo.FindSound(sound);
+	const SoundData &sdata = SoundInfo[sindex];
 
-	if ((SoundMode != sdm_Off) && sindex.IsNull())
+	if ((SoundMode != sdm_Off) && sdata.IsNull())
 		return 0;
 
-	if ((DigiMode != sds_Off) && sindex.HasType(SoundData::DIGITAL))
+	if ((DigiMode != sds_Off) && sdata.HasType(SoundData::DIGITAL))
 	{
 		if ((DigiMode == sds_PC) && (SoundMode == sdm_PC))
 		{
@@ -1267,7 +1293,7 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 
 			SDL_PCStopSound();
 
-			SD_PlayDigitized(sindex,lp,rp);
+			SD_PlayDigitized(sdata,lp,rp);
 			SoundPositioned = ispos;
 			SoundPriority = s->priority;
 #else
@@ -1281,10 +1307,10 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 				return(false);
 #endif
 
-			int channel = SD_PlayDigitized(sindex, lp, rp, chan);
-			SoundPositioned = ispos;
-			DigiPriority = sindex.GetPriority();
-			SoundPlaying = sound;
+			int channel = SD_PlayDigitized(sdata, lp, rp, chan);
+			channelSoundPos[channel-1].positioned = ispos;
+			DigiPriority = sdata.GetPriority();
+			SoundPlaying = sindex;
 			return channel;
 		}
 
@@ -1294,16 +1320,17 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 	if (SoundMode == sdm_Off)
 		return 0;
 
-	if (sindex.GetPriority() < SoundPriority)
+	if (sdata.GetPriority() < SoundPriority)
 		return 0;
-
-#ifndef ECWOLF_MIXER
-	// With stock SDL_mixer we can't play music and emulated sounds.
-	if (music != NULL)
-		return 0;
-#endif
 
 	bool didPlaySound = false;
+
+	// Volume fall off for Adlib/PC Speaker sounds is added for multiplayer.
+	// We may wish to enable it for single player at a later time but it's
+	// absolutely needed in multiplayer.
+	ispos &= (Net::InitVars.mode != Net::MODE_SinglePlayer);
+	if(!ispos)
+		lp = rp = 0;
 
 	switch (SoundMode)
 	{
@@ -1311,16 +1338,20 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 			didPlaySound = true;
 			break;
 		case sdm_PC:
-			if(sindex.HasType(SoundData::PCSPEAKER))
+			if(sdata.HasType(SoundData::PCSPEAKER))
 			{
-				SDL_PCPlaySound((PCSound *)sindex.GetSpeakerData());
+				SD_SetPosition(-1, lp, rp);
+				SDL_PCPlaySound((PCSound *)sdata.GetSpeakerData());
+				AdlibSoundPos.positioned = ispos;
 				didPlaySound = true;
 			}
 			break;
 		case sdm_AdLib:
-			if(sindex.HasType(SoundData::ADLIB))
+			if(sdata.HasType(SoundData::ADLIB))
 			{
-				SDL_ALPlaySound((AdLibSound *)sindex.GetAdLibData());
+				SD_SetPosition(-1, lp, rp);
+				SDL_ALPlaySound((AdLibSound *)sdata.GetAdLibData());
+				AdlibSoundPos.positioned = ispos;
 				didPlaySound = true;
 			}
 			break;
@@ -1328,11 +1359,11 @@ int SD_PlaySound(const char* sound, SoundChannel chan)
 
 	if (didPlaySound)
 	{
-		SoundPriority = sindex.GetPriority();
-		SoundPlaying = sound;
+		SoundPriority = sdata.GetPriority();
+		SoundPlaying = sindex;
 	}
 
-	return 0;
+	return didPlaySound ? -1 : 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1358,7 +1389,7 @@ bool SD_SoundPlaying(void)
 	}
 
 	if (result)
-		return SoundPlaying.IsNotEmpty();
+		return !SoundPlaying.IsNull();
 	else
 		return false;
 }
@@ -1385,8 +1416,6 @@ SD_StopSound(void)
 			SDL_ALStopSound();
 			break;
 	}
-
-	SoundPositioned = false;
 
 	SDL_SoundFinished();
 }
@@ -1450,7 +1479,7 @@ SD_MusicOff(void)
 				if(Mix_PlayingMusic() == 1)
 				{
 					Mix_PauseMusic();
-					return (int)Mix_GetMusicPCMPosition();
+					return FLOAT2FIXED(Mix_GetMusicPosition(music));
 				}
 				return 0;
 			}
@@ -1512,7 +1541,7 @@ SD_StartMusic(const char* chunk)
 		SDL_RWops *mus_cunk = SDL_RWFromMem(chunkmem.Get(), Wads.LumpLength(lumpNum));
 
 		// Technically an SDL_mixer 2 feature to free the source
-#if defined(ECWOLF_MIXER) || SDL_VERSION_ATLEAST(2,0,0)
+#if SDL_MIXER_VERSION_ATLEAST(2,0,0)
 		music = Mix_LoadMUS_RW(mus_cunk, true);
 #else
 		music = Mix_LoadMUS_RW(mus_cunk);
@@ -1598,7 +1627,7 @@ SD_ContinueMusic(const char* chunk, int startoffs)
 			}
 
 			SDL_RWops *mus_cunk = SDL_RWFromMem(chunkmem.Get(), Wads.LumpLength(lumpNum));
-#if defined(ECWOLF_MIXER) || SDL_VERSION_ATLEAST(2,0,0)
+#if SDL_MIXER_VERSION_ATLEAST(2,0,0)
 			music = Mix_LoadMUS_RW(mus_cunk, true);
 #else
 			music = Mix_LoadMUS_RW(mus_cunk);
@@ -1659,7 +1688,7 @@ SD_ContinueMusic(const char* chunk, int startoffs)
 				printf("Unable to play music file: %s\n", Mix_GetError());
 			}
 
-			Mix_SetMusicPCMPosition(startoffs);
+			Mix_SetMusicPosition(FIXED2FLOAT(startoffs));
 		}
 	}
 }

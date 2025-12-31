@@ -950,10 +950,8 @@ Channel* Channel::BlockTemplate( Chip* chip, Bit32u samples, Bit32s* output ) {
 			sample += Op(3)->GetSample( 0 );
 		}
 
-#ifndef LIBRETRO
 		if(playVolume)
 			sample = (Bit32s)(sample*MULTIPLY_VOLUME(*playVolume));
-#endif
 
 		switch( mode ) {
 		case sm2AM:

@@ -25,6 +25,8 @@
 #include "wl_draw.h"
 #include "wl_game.h"
 #include "wl_inter.h"
+#include "wl_iwad.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "w_wad.h"
 #include "thingdef/thingdef.h"
@@ -37,47 +39,9 @@
 #include "wl_cloudsky.h"
 #endif
 
-/*
-=============================================================================
-
-												LOCAL CONSTANTS
-
-=============================================================================
-*/
-
-#define VIEWTILEX       (viewwidth/16)
-#define VIEWTILEY       (viewheight/16)
-
-/*
-=============================================================================
-
-												GLOBAL VARIABLES
-
-=============================================================================
-*/
-
-
-int DebugKeys (void);
-
-
-// from WL_DRAW.C
-
-void ScalePost();
-
-/*
-=============================================================================
-
-												LOCAL VARIABLES
-
-=============================================================================
-*/
-
-int     maporgx;
-int     maporgy;
-enum ViewType {mapview,tilemapview,actoratview,visview};
-ViewType viewtype;
-
-void ViewMap (void);
+#ifdef __ANDROID__
+extern bool ShadowingEnabled;
+#endif
 
 //===========================================================================
 
@@ -116,17 +80,17 @@ void PictureGrabber (void)
 	US_CenterWindow (18,2);
 	US_PrintCentered ("Screenshot taken");
 	VW_UpdateScreen();
-	IN_Ack();
+	IN_Ack(ACK_Block);
 }
 
 //===========================================================================
 
 
-static void GiveAllWeaponsAndAmmo()
+static void GiveAllWeaponsAndAmmo(player_t &player)
 {
 	// Give Weapons and Max out ammo
 	const ClassDef *bestWeapon = NULL;
-	int bestWeaponOrder = players[0].ReadyWeapon ? players[0].ReadyWeapon->GetClass()->Meta.GetMetaInt(AWMETA_SelectionOrder) : INT_MAX;
+	int bestWeaponOrder = player.ReadyWeapon ? player.ReadyWeapon->GetClass()->Meta.GetMetaInt(AWMETA_SelectionOrder) : INT_MAX;
 
 	ClassDef::ClassIterator iter = ClassDef::GetClassIterator();
 	ClassDef::ClassPair *pair;
@@ -159,7 +123,7 @@ static void GiveAllWeaponsAndAmmo()
 				}
 			}
 
-			if(!inv->CallTryPickup(players[0].mo))
+			if(!inv->CallTryPickup(player.mo))
 				inv->Destroy();
 		}
 	}
@@ -167,12 +131,12 @@ static void GiveAllWeaponsAndAmmo()
 	// Switch to best weapon
 	if(bestWeapon)
 	{
-		AWeapon *weapon = static_cast<AWeapon *>(players[0].mo->FindInventory(bestWeapon));
+		AWeapon *weapon = static_cast<AWeapon *>(player.mo->FindInventory(bestWeapon));
 		if(weapon)
-			players[0].PendingWeapon = weapon;
+			player.PendingWeapon = weapon;
 	}
 	else
-		players[0].PendingWeapon = WP_NOCHANGE;
+		player.PendingWeapon = WP_NOCHANGE;
 }
 
 /*
@@ -183,7 +147,7 @@ static void GiveAllWeaponsAndAmmo()
 ================
 */
 
-int DebugKeys (void)
+static int DebugKeys (void)
 {
 	bool esc;
 	int level;
@@ -219,7 +183,7 @@ int DebugKeys (void)
 		US_Print (SmallFont, actorCount);
 
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 	if (Keyboard[sc_D])             // D = Darkone's FPS counter
@@ -230,28 +194,33 @@ int DebugKeys (void)
 		else
 			US_PrintCentered ("Darkone's FPS Counter ON");
 		VW_UpdateScreen();
-		IN_Ack();
+		IN_Ack(ACK_Block);
 		fpscounter ^= 1;
 		return 1;
 	}
 	if (Keyboard[sc_E])             // E = quit level
 	{
-		playstate = ex_completed;
 		IN_ClearKeysDown();
+		if(Net::IsArbiter())
+		{
+			DebugCmd cmd = {DEBUG_NextLevel};
+			Net::DebugKey(cmd);
+		}
+		return 0;
 	}
 
 	if (Keyboard[sc_F])             // F = facing spot
 	{
 		FString position;
 		position.Format("X: %d\nY: %d\nA: %d",
-			players[0].mo->x >> 10,
-			players[0].mo->y >> 10,
-			players[0].mo->angle/ANGLE_1
+			players[ConsolePlayer].mo->x >> 10,
+			players[ConsolePlayer].mo->y >> 10,
+			players[ConsolePlayer].mo->angle/ANGLE_1
 		);
 		US_CenterWindow (14,6);
 		US_PrintCentered(position);
 		VW_UpdateScreen();
-		IN_Ack();
+		IN_Ack(ACK_Block);
 		return 1;
 	}
 
@@ -266,28 +235,29 @@ int DebugKeys (void)
 			US_PrintCentered ("God mode OFF");
 
 		VW_UpdateScreen();
-		IN_Ack();
-		if (godmode != 2)
-			godmode++;
-		else
-			godmode = 0;
+		IN_Ack(ACK_Block);
+
+		DebugCmd cmd = {DEBUG_GodMode};
+		cmd.ArgI = (godmode+1)%3;
+		Net::DebugKey(cmd);
 		return 1;
 	}
 	if (Keyboard[sc_H])             // H = hurt self
 	{
 		IN_ClearKeysDown ();
-		players[0].TakeDamage (16,NULL);
+
+		DebugCmd cmd = {DEBUG_HurtSelf};
+		Net::DebugKey(cmd);
 	}
 	else if (Keyboard[sc_I])        // I = item cheat
 	{
 		US_CenterWindow (12,3);
 		US_PrintCentered ("Free items!");
 		VW_UpdateScreen();
-		GiveAllWeaponsAndAmmo();
-		players[0].GivePoints (100000);
-		players[0].health = 100;
-		StatusBar->DrawStatusBar();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
+
+		DebugCmd cmd = {DEBUG_GiveItems};
+		Net::DebugKey(cmd);
 		return 1;
 	}
 	else if (Keyboard[sc_K])        // K = give keys
@@ -299,8 +269,8 @@ int DebugKeys (void)
 		esc = !US_LineInput (SmallFont,PrintX,py,str,NULL,true,3,WindowX+WindowW-PrintX,GPalette.WhiteIndex);
 		if (!esc)
 		{
-			level = atoi (str);
-			P_GiveKeys(players[0].mo, level);
+			DebugCmd cmd = {DEBUG_GiveKey};
+			cmd.ArgI = atoi (str);
 		}
 		return 1;
 	}
@@ -331,7 +301,7 @@ int DebugKeys (void)
 		US_CenterWindow(17, 12);
 		US_PrintCentered(ratios);
 		VW_UpdateScreen();
-		IN_Ack();
+		IN_Ack(ACK_Block);
 
 		return 1;
 	}
@@ -344,19 +314,21 @@ int DebugKeys (void)
 		else
 			US_PrintCentered ("Mouse look OFF");
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 	else if (Keyboard[sc_N])        // N = no clip
 	{
-		noclip^=1;
 		US_CenterWindow (18,3);
 		if (noclip)
 			US_PrintCentered ("No clipping ON");
 		else
 			US_PrintCentered ("No clipping OFF");
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
+
+		DebugCmd cmd = {DEBUG_NoClip};
+		Net::DebugKey(cmd);
 		return 1;
 	}
 	else if (Keyboard[sc_O])
@@ -368,7 +340,7 @@ int DebugKeys (void)
 		else
 			US_PrintCentered ("Automap hidden");
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 	else if(Keyboard[sc_P])         // P = Ripper's picture grabber
@@ -402,7 +374,7 @@ int DebugKeys (void)
 		else
 			US_PrintCentered("No target mode OFF");
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 	else if (Keyboard[sc_V])        // V = extra VBLs
@@ -422,6 +394,9 @@ int DebugKeys (void)
 	}
 	else if (Keyboard[sc_W])        // W = warp to level
 	{
+		if(!Net::IsArbiter())
+			return 0;
+
 		US_CenterWindow(26,3);
 		PrintY+=6;
 		US_Print(SmallFont, "  Warp to which level: ");
@@ -447,12 +422,9 @@ int DebugKeys (void)
 					strcpy(str, info.MapName);
 			}
 
-			if(GameMap::CheckMapExists(str))
-			{
-				strncpy(gamestate.mapname, str, 8);
-				gamestate.mapname[8] = 0;
-				playstate = ex_warped;
-			}
+			DebugCmd cmd = {DEBUG_Warp};
+			cmd.ArgS = str;
+			Net::DebugKey(cmd);
 		}
 		return 1;
 	}
@@ -466,23 +438,13 @@ int DebugKeys (void)
 		esc = !US_LineInput (SmallFont,PrintX,py,str,NULL,true,summon ? 20 : 22,WindowX+WindowW-PrintX,GPalette.WhiteIndex);
 		if (!esc)
 		{
-			const ClassDef *cls = ClassDef::FindClass(str);
-			if(summon && cls)
-			{
-				fixed distance = FixedMul(cls->GetDefault()->radius + players[0].mo->radius, 0x16A0A); // sqrt(2)
-				AActor *newobj = AActor::Spawn(cls,
-					players[0].mo->x + FixedMul(distance, finecosine[players[0].mo->angle>>ANGLETOFINESHIFT]),
-					players[0].mo->y - FixedMul(distance, finesine[players[0].mo->angle>>ANGLETOFINESHIFT]),
-					0, 0);
-				newobj->angle = players[0].mo->angle;
-			}
-			else
-			{
-				if(!cls || !cls->IsDescendantOf(NATIVE_CLASS(Inventory)))
-					return 1;
+			FName clsName(str, true);
+			if(clsName == NAME_None)
+				return 1;
 
-				players[0].mo->GiveInventory(cls, 0, false);
-			}
+			DebugCmd cmd = {summon ? DEBUG_Summon : DEBUG_Give};
+			cmd.ArgS = clsName;
+			Net::DebugKey(cmd);
 		}
 		return 1;
 	}
@@ -522,7 +484,7 @@ int DebugKeys (void)
 			US_CenterWindow (18,3);
 			US_PrintCentered ("Illegal color map!");
 			VW_UpdateScreen();
-			IN_Ack ();
+			IN_Ack (ACK_Block);
 		}
 	}
 #endif
@@ -557,38 +519,39 @@ int DebugKeys (void)
 		else
 			US_PrintCentered("3D Sprite scaler: ECWolf");
 		VW_UpdateScreen();
-		IN_Ack ();
+		IN_Ack (ACK_Block);
 		return 1;
 	}
 
 	return 0;
 }
 
-static void GiveMLI()
+static void GiveMLI(player_t &player)
 {
-	players[0].health = 100;
-	players[0].score = 0;
+	player.health = 100;
+	player.score = 0;
 	gamestate.TimeCount += 42000L;
-	GiveAllWeaponsAndAmmo();
-	P_GiveKeys(players[0].mo, 101);
+	GiveAllWeaponsAndAmmo(player);
+	P_GiveKeys(player.mo, 101);
 	DrawPlayScreen();
 }
 
-void DebugMLI()
+static void DebugMLI()
 {
-	GiveMLI();
+	DebugCmd cmd = {DEBUG_MLI};
+	Net::DebugKey(cmd);
 
 	ClearSplitVWB ();
 
 	Message (language["STR_CHEATER"]);
 
 	IN_ClearKeysDown ();
-	IN_Ack ();
+	IN_Ack (ACK_Block);
 
 	DrawPlayScreen();
 }
 
-void DebugGod(bool noah)
+static void DebugGod(bool noah)
 {
 	WindowH = 160;
 
@@ -619,16 +582,212 @@ void DebugGod(bool noah)
 		}
 	}
 
-	godmode ^= 1;
+	DebugCmd cmd = {DEBUG_GodMode};
+	cmd.ArgI = !godmode;
+	Net::DebugKey(cmd);
 
 	IN_ClearKeysDown ();
-	IN_Ack ();
+	IN_Ack (ACK_Block);
 
 	if (noah)
 	{
-		GiveMLI();
+		DebugCmd cmd2 = {DEBUG_MLI};
+		Net::DebugKey(cmd2);
 	}
 
 	if (viewsize < 18)
 		StatusBar->RefreshBackground ();
+}
+
+/*
+================
+=
+= CheckDebugKeys
+=
+================
+*/
+
+void CheckDebugKeys()
+{
+	static bool DebugOk = false;
+
+	if (screenfaded || demoplayback) // don't do anything with a faded screen
+		return;
+
+	if(IWad::CheckGameFilter(NAME_Wolf3D))
+	{
+		//
+		// SECRET CHEAT CODE: TAB-G-F10
+		//
+		if (Keyboard[sc_Tab] && Keyboard[sc_G] && Keyboard[sc_F10])
+		{
+			DebugGod(false);
+			return;
+		}
+
+		//
+		// SECRET CHEAT CODE: 'MLI'
+		//
+		if (Keyboard[sc_M] && Keyboard[sc_L] && Keyboard[sc_I])
+			DebugMLI();
+
+		//
+		// TRYING THE KEEN CHEAT CODE!
+		//
+		if (Keyboard[sc_B] && Keyboard[sc_A] && Keyboard[sc_T])
+		{
+			ClearSplitVWB ();
+
+			Message ("Commander Keen is also\n"
+					"available from Apogee, but\n"
+					"then, you already know\n" "that - right, Cheatmeister?!");
+
+			IN_ClearKeysDown ();
+			IN_Ack (ACK_Block);
+
+			if (viewsize < 18)
+				StatusBar->RefreshBackground ();
+		}
+	}
+	else if(IWad::CheckGameFilter(NAME_Noah))
+	{
+		//
+		// Secret cheat code: JIM
+		//
+		if (Keyboard[sc_J] && Keyboard[sc_I] && Keyboard[sc_M])
+		{
+			DebugGod(true);
+		}
+	}
+
+	//
+	// OPEN UP DEBUG KEYS
+	//
+	if (Keyboard[sc_BackSpace] && Keyboard[sc_LShift] && Keyboard[sc_Alt])
+	{
+		ClearSplitVWB ();
+
+		Message ("Debugging keys are\nnow available!");
+		IN_ClearKeysDown ();
+		IN_Ack (ACK_Block);
+
+		DrawPlayBorderSides ();
+		DebugOk = 1;
+	}
+
+#ifdef __ANDROID__
+	if(ShadowingEnabled)
+		DebugOk = 1;
+#endif
+
+	//
+	// TAB-? debug keys
+	//
+	if(DebugOk)
+	{
+		// Jam debug sequence if we're trying to open the automap
+		// We really only need to check for the automap control since it's
+		// likely to be put in the Tab space and be tapped while using other controls
+		bool keyDown = Keyboard[sc_Tab] || Keyboard[sc_BackSpace] || Keyboard[sc_Grave];
+		if ((schemeAutomapKey.keyboard == sc_Tab || schemeAutomapKey.keyboard == sc_BackSpace || schemeAutomapKey.keyboard == sc_Grave)
+			&& (control[ConsolePlayer].buttonstate[bt_automap] || control[ConsolePlayer].buttonheld[bt_automap]))
+			keyDown = false;
+
+#ifdef __ANDROID__
+		// Soft keyboard
+		if (ShadowingEnabled)
+			keyDown = true;
+#endif
+
+		if (keyDown)
+		{
+			if (DebugKeys ())
+			{
+				if (viewsize < 20)
+					StatusBar->RefreshBackground ();       // dont let the blue borders flash
+
+				if (MousePresent && IN_IsInputGrabbed())
+					IN_CenterMouse();     // Clear accumulated mouse movement
+
+				ResetTimeCount();
+			}
+		}
+	}
+}
+
+
+/*
+================
+=
+= DoDebugKey
+=
+================
+*/
+
+void DoDebugKey(int player, const DebugCmd &cmd)
+{
+	switch(cmd.Type)
+	{
+		case DEBUG_Give:
+			if(const ClassDef *cls = ClassDef::FindClass(FName(cmd.ArgS, true)))
+			{
+				if(!cls->IsDescendantOf(NATIVE_CLASS(Inventory)))
+					return;
+
+				players[player].mo->GiveInventory(cls, 0, false);
+			}
+			break;
+
+		case DEBUG_GiveItems:
+			GiveAllWeaponsAndAmmo(players[player]);
+			players[player].GivePoints(100000);
+			players[player].health = 100;
+			StatusBar->DrawStatusBar();
+			break;
+
+		case DEBUG_GiveKey:
+			P_GiveKeys(players[player].mo, cmd.ArgI);
+			break;
+
+		case DEBUG_GodMode:
+			godmode = cmd.ArgI;
+			break;
+
+		case DEBUG_HurtSelf:
+			players[player].TakeDamage(16,NULL);
+			break;
+
+		case DEBUG_MLI:
+			GiveMLI(players[player]);
+			break;
+
+		case DEBUG_NextLevel:
+			playstate = ex_completed;
+			break;
+
+		case DEBUG_NoClip:
+			noclip^=1;
+			break;
+
+		case DEBUG_Summon:
+			if(const ClassDef *cls = ClassDef::FindClass(FName(cmd.ArgS, true)))
+			{
+				fixed distance = FixedMul(cls->GetDefault()->radius + players[player].mo->radius, 0x16A0A); // sqrt(2)
+				AActor *newobj = AActor::Spawn(cls,
+					players[player].mo->x + FixedMul(distance, finecosine[players[player].mo->angle>>ANGLETOFINESHIFT]),
+					players[player].mo->y - FixedMul(distance, finesine[players[player].mo->angle>>ANGLETOFINESHIFT]),
+					0, 0);
+				newobj->angle = players[player].mo->angle;
+			}
+			break;
+
+		case DEBUG_Warp:
+			if(GameMap::CheckMapExists(cmd.ArgS))
+			{
+				strncpy(gamestate.mapname, cmd.ArgS, 8);
+				gamestate.mapname[8] = 0;
+				playstate = ex_warped;
+			}
+			break;
+	}
 }

@@ -3,6 +3,8 @@
 
 #include "wl_def.h"
 #include "a_playerpawn.h"
+#include "id_vl.h"
+#include "tmemory.h"
 #include "weaponslots.h"
 
 /*
@@ -15,7 +17,8 @@
 
 extern  AActor   *LastAttacker;
 
-void    SpawnPlayer (int tilex, int tiley, int dir);
+void    CheckSpawnPlayer (bool setup=false);
+void    SpawnPlayer (int num);
 
 //
 // Status bar interface
@@ -64,6 +67,8 @@ extern class player_t
 
 		void	BobWeapon(fixed_t *x, fixed_t *y);
 		void	BringUpWeapon();
+		void	DeathFade();
+		void	DeathFadeClear();
 		AActor	*FindTarget();
 		inline unsigned int GetPlayerNum() const;
 		void	GiveExtraMan(int amount);
@@ -102,9 +107,12 @@ extern class player_t
 		TObjPtr<AActor>	camera;
 		TObjPtr<AActor>	killerobj;
 
+		TUniquePtr<FFader> ScreenFader;
+
 		int32_t		oldscore,score,nextextra;
-		short		lives;
 		int32_t		health;
+		int32_t		frags;
+		short		lives;
 		float		FOV, DesiredFOV;
 
 		int32_t		thrustspeed;
@@ -128,6 +136,7 @@ extern class player_t
 		bool		attackheld;
 		short		extralight;
 
+		int32_t		RespawnEligible;
 		int32_t		flags;
 		State		state;
 } players[];

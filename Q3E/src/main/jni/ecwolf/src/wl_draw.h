@@ -25,11 +25,12 @@ extern	int r_extralight;
 
 extern  unsigned screenloc[3];
 
-extern  bool fizzlein, fpscounter;
+extern  bool fpscounter;
 
 extern  fixed   viewx,viewy;                    // the focal point
 extern  fixed   viewsin,viewcos;
 
+void    ThreeDStartFadeIn ();
 void    ThreeDRefresh (void);
 
 typedef struct

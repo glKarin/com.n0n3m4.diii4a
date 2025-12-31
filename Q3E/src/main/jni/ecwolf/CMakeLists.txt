@@ -6,7 +6,6 @@ if(_DIII4A)
 	set(ECWOLF_PREFIX "ecwolf_")
 	add_definitions(-D_DIII4A)
 	include_directories(${DIII4A_DEPEND_COMMON_PATH})
-	#set(LIBRETRO True)
 endif()
 # build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -58,9 +57,10 @@ endif()
 
 # Multiarch support
 if(UNIX AND NOT APPLE)
-	# We are in the games section
-	set(CMAKE_INSTALL_BINDIR "games")
-
+	# Default to "games" as per the Debian packaging guidelines
+	# However, it can be overridden for other distributions or as needed
+	set(CMAKE_INSTALL_BINDIR "games" CACHE STRING "Installation directory for binaries")
+	# Include GNUInstallDirs to get standard install directories
 	include(GNUInstallDirs)
 	if(CPACK_PACKAGE_NAME)
 		# Match this to package name instead of project name
@@ -68,7 +68,7 @@ if(UNIX AND NOT APPLE)
 	endif()
 	# GNUInstallDirs doesn't provide this, but we could use share/product_name
 	set(CMAKE_INSTALL_DATAPRODUCTDIR "${CMAKE_INSTALL_DATADIR}/${PRODUCT_DIRECTORY}")
-elseif(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+else()
 	# CMAKE_ prefix used here to match the variable set by GNUInstallDirs.
 	# Value currently doesn't matter outside of Linux these are more or less
 	# to keep the script working where values are expected.
@@ -93,15 +93,20 @@ elseif(NOT DEFINED CMAKE_INSTALL_LIBDIR)
 		set(CMAKE_INSTALL_DATAPRODUCTDIR ".")
 		set(CMAKE_INSTALL_DOCDIR ".")
 	endif()
+
+	# Vendored libraries might include GNUInstallDirs so do so now
+	include(GNUInstallDirs)
 endif()
 
 # Support cross compiling
+option(TOOLS_ONLY "Only build the tools, not ecwolf itself (useful for cross-compiling)" OFF)
+
 option( FORCE_CROSSCOMPILE "Turn on cross compiling." NO )
 if( FORCE_CROSSCOMPILE )
 	set( CMAKE_CROSSCOMPILING TRUE )
 endif()
 
-if(CMAKE_CROSSCOMPILING AND NOT LIBRETRO AND NOT _DIII4A)
+if(CMAKE_CROSSCOMPILING AND NOT _DIII4A)
 	set(IMPORT_EXECUTABLES "IMPORTFILE-NOTFOUND" CACHE FILEPATH "Export file from native build.")
 	include(${IMPORT_EXECUTABLES})
 endif()
@@ -129,13 +134,7 @@ function( add_pk3 PK3_NAME PK3_DIR )
 
 	# Touch the zipdir executable here so that the pk3s are forced to rebuild
 	# each time since their dependecy has "changed."
-	if( LIBRETRO )
-		set(TARGET_DIR "$<TARGET_FILE_DIR:ecwolf_libretro>")
-		add_custom_target( ${PK3_TARGET} ALL
-			COMMAND zipdir -udf $<TARGET_FILE_DIR:ecwolf_libretro>/${PK3_NAME} ${PK3_DIR}
-			DEPENDS zipdir )
-		install(FILES ${TARGET_DIR}/${PK3_NAME} DESTINATION "${CMAKE_INSTALL_DATAPRODUCTDIR}")
-	elseif( NOT ANDROID )
+	if( NOT ANDROID )
 		set(TARGET_DIR "$<TARGET_FILE_DIR:engine>")
 		add_custom_target( ${PK3_TARGET} ALL
 			COMMAND zipdir -udf $<TARGET_FILE_DIR:engine>/${PK3_NAME} ${PK3_DIR}
@@ -159,7 +158,7 @@ option(INTERNAL_ZLIB "Force build with internal zlib" OFF)
 option(INTERNAL_BZIP2 "Force build with internal bzip2" OFF)
 option(INTERNAL_JPEG "Force build with internal libjpeg" OFF)
 
-if(LIBRETRO OR _DIII4A)
+if(_DIII4A)
 	set(INTERNAL_JPEG ON)
 	set(INTERNAL_BZIP2 ON)
 	set(INTERNAL_ZLIB ON)
@@ -194,6 +193,7 @@ else()
 	message(STATUS "Using system libbz2, includes found at ${BZIP2_INCLUDE_DIR}")
 endif()
 
+if(NOT TOOLS_ONLY)
 if(NOT JPEG_FOUND OR INTERNAL_JPEG)
 	message(STATUS "Using internal libjpeg")
 	set(JPEG_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/jpeg-6b)
@@ -204,7 +204,6 @@ else()
 	message(STATUS "Using system libjpeg, includes found at ${JPEG_INCLUDE_DIR}")
 endif()
 
-if(NOT LIBRETRO)
 	include(LocateSDL2.cmake)
 endif()
 
@@ -214,18 +213,16 @@ endif()
 
 if(NOT _DIII4A)
 add_subdirectory(tools/zipdir)
-add_subdirectory(tools/updaterevision)
 endif()
 
-if(NOT LIBRETRO)
-        add_subdirectory(deps/gdtoa)
-endif()
+add_subdirectory(deps/gdtoa)
 add_subdirectory(deps/lzma)
+
 if(GPL AND USE_LIBTEXTSCREEN)
 	add_subdirectory(deps/textscreen)
 endif()
 
-if(ANDROID AND NOT LIBRETRO AND NOT _DIII4A)
+if(ANDROID AND NOT _DIII4A)
 	set(LIBPNG_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android-libs)
 	set(LIBPNG_LIBRARY png16_static)
 
@@ -237,7 +234,7 @@ if(ANDROID AND NOT LIBRETRO AND NOT _DIII4A)
 endif()
 
 add_subdirectory(src)
-if (NOT CMAKE_CROSSCOMPILING OR NOT LIBRETRO)
+if (NOT CMAKE_CROSSCOMPILING)
     add_subdirectory(wadsrc)
 endif()
 
@@ -248,6 +245,8 @@ if(USE_CPACK AND NOT APPLE)
 		install(FILES docs/copyright DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 		install(FILES docs/changelog DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 		install(FILES docs/ecwolf.6 DESTINATION "${CMAKE_INSTALL_MANDIR}/man6")
+		# this installs the Appstream Metainfo file (used by Flatpak)
+		install(FILES docs/org.ecwolf.ECWolf.metainfo.xml DESTINATION "${CMAKE_INSTALL_DATADIR}/metainfo")
 
 		# Lintian requires that man pages in deb packages are compressed.
 		find_program(GZIP_BINARY NAMES gzip DOC "gzip program for man page compression.")

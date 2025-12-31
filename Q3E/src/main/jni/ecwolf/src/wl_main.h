@@ -2,6 +2,7 @@
 #define __WL_MAIN_H__
 
 #include "id_vl.h"
+#include "name.h"
 
 /*
 =============================================================================
@@ -31,7 +32,6 @@ extern  int      mousexadjustment;
 extern  int      mouseyadjustment;
 extern  int      panxadjustment;
 extern  int      panyadjustment;
-extern  int      shootdelta;
 extern  unsigned screenofs;
 
 extern  bool     startgame;
@@ -46,7 +46,7 @@ extern  int      param_joystickhat;
 extern  int      param_samplerate;
 extern  int      param_audiobuffer;
 
-void            NewGame (int difficulty,const class FString &map,bool displayBriefing,const class ClassDef *playerClass=NULL);
+void            NewGame (int difficulty,class FString map,bool displayBriefing,FName playerClass=NAME_None);
 void            CalcProjection (int32_t focal);
 void			CalcVisibility (fixed vis);
 int				CheckRatio (int width, int height, int *trueratio=NULL);

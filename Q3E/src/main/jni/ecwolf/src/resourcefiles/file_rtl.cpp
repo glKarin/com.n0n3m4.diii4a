@@ -108,7 +108,7 @@ bool FRtlFile::Open(bool quiet)
 		// Map marker
 		FMapLump &markerLump = Lumps[i*NUM_MAP_LUMPS];
 		char lumpname[6];
-		sprintf(lumpname, "MAP%02d", i != 99 ? i+1 : 0);
+		mysnprintf(lumpname, 6, "MAP%02d", i != 99 ? i+1 : 0);
 		markerLump.Owner = this;
 		markerLump.LumpNameSetup(lumpname);
 		markerLump.Namespace = ns_global;

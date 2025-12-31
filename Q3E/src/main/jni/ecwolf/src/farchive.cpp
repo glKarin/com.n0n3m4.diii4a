@@ -146,9 +146,7 @@ void FCompressedFile::BeEmpty ()
 	m_BufferSize = 0;
 	m_MaxBufferSize = 0;
 	m_Buffer = NULL;
-#ifndef LIBRETRO
 	m_File = NULL;
-#endif
 	m_NoCompress = false;
 	m_Mode = ENotOpen;
 }
@@ -191,8 +189,6 @@ FCompressedFile::FCompressedFile ()
 	BeEmpty ();
 }
 
-#ifndef LIBRETRO
-
 FCompressedFile::FCompressedFile (const char *name, EOpenMode mode, bool dontCompress)
 {
 	BeEmpty ();
@@ -212,14 +208,10 @@ FCompressedFile::FCompressedFile (FILE *file, EOpenMode mode, bool dontCompress,
 	}
 }
 
-#endif
-
 FCompressedFile::~FCompressedFile ()
 {
 	Close ();
 }
-
-#ifndef LIBRETRO
 
 bool FCompressedFile::Open (const char *name, EOpenMode mode)
 {
@@ -265,11 +257,9 @@ void FCompressedFile::PostOpen ()
 		}
 	}
 }
-#endif
 
 void FCompressedFile::Close ()
 {
-#ifndef LIBRETRO
 	if (m_File)
 	{
 		if (m_Mode == EWriting)
@@ -281,7 +271,6 @@ void FCompressedFile::Close ()
 		fclose (m_File);
 		m_File = NULL;
 	}
-#endif
 	if (m_Buffer)
 	{
 		M_Free (m_Buffer);
@@ -299,12 +288,10 @@ FFile::EOpenMode FCompressedFile::Mode () const
 	return m_Mode;
 }
 
-#ifndef LIBRETRO
 bool FCompressedFile::IsOpen () const
 {
 	return !!m_File;
 }
-#endif
 
 FFile &FCompressedFile::Write (const void *mem, unsigned int len)
 {
@@ -422,8 +409,9 @@ void FCompressedFile::Implode ()
 	m_Buffer = (BYTE *)M_Malloc (m_BufferSize + 8);
 	m_Pos = 0;
 
-	WriteBigLong(m_Buffer, (unsigned int)outlen);
-	WriteBigLong(m_Buffer + 4, (unsigned int)len);
+	DWORD *lens = (DWORD *)(m_Buffer);
+	lens[0] = BigLong((unsigned int)outlen);
+	lens[1] = BigLong((unsigned int)len);
 
 	if (outlen == 0)
 		memcpy (m_Buffer + 8, oldbuf, len);
@@ -441,8 +429,9 @@ void FCompressedFile::Explode ()
 
 	if (m_Buffer)
 	{
-		cprlen = ReadBigLong(m_Buffer);
-		expandsize = ReadBigLong(m_Buffer + 4);
+		unsigned int *ints = (unsigned int *)(m_Buffer);
+		cprlen = BigLong(ints[0]);
+		expandsize = BigLong(ints[1]);
 
 		expand = (unsigned char *)M_Malloc (expandsize);
 		if (cprlen)
@@ -492,7 +481,6 @@ FCompressedMemFile::~FCompressedMemFile ()
 	}
 }
 
-#ifndef LIBRETRO
 bool FCompressedMemFile::Open (const char *name, EOpenMode mode)
 {
 	if (mode == EWriting)
@@ -518,7 +506,6 @@ bool FCompressedMemFile::Open (const char *name, EOpenMode mode)
 	}
 	return false;
 }
-#endif
 
 bool FCompressedMemFile::Open (void *memblock)
 {
@@ -539,18 +526,6 @@ bool FCompressedMemFile::Open ()
 	m_MaxBufferSize = 16384;
 	m_Buffer = (unsigned char *)M_Malloc (16384);
 	m_Pos = 0;
-	return true;
-}
-
-bool FCompressedMemFile::OpenNoCompress ()
-{
-	Close ();
-	m_Mode = EWriting;
-	m_BufferSize = 0;
-	m_MaxBufferSize = 16384;
-	m_Buffer = (unsigned char *)M_Malloc (16384);
-	m_Pos = 0;
-	m_NoCompress = true;
 	return true;
 }
 
@@ -589,34 +564,6 @@ void FCompressedMemFile::Close ()
 	}
 }
 
-int FCompressedMemFile::GetSerializedSize()
-{
-	if (m_ImplodedBuffer == NULL)
-	{
-		I_Error ("FCompressedMemFile must be compressed before storing");
-	}
-
-	DWORD sizes[2];
-	sizes[0] = ReadBigLong (m_ImplodedBuffer);
-	sizes[1] = ReadBigLong (m_ImplodedBuffer + 4);
-	return (sizes[0] ? sizes[0] : sizes[1])+8;
-}
-
-void FCompressedMemFile::SerializeToBuffer(void *buffer)
-{
-	if (m_ImplodedBuffer == NULL)
-	{
-		I_Error ("FCompressedMemFile must be compressed before storing");
-	}
-
-	DWORD sizes[2];
-	sizes[0] = ReadBigLong (m_ImplodedBuffer);
-	sizes[1] = ReadBigLong (m_ImplodedBuffer+4);
-	DWORD size = (sizes[0] ? sizes[0] : sizes[1])+8;
-
-	memcpy ((char *) buffer, m_ImplodedBuffer, size);
-}
-
 void FCompressedMemFile::Serialize (FArchive &arc)
 {
 	if (arc.IsStoring ())
@@ -628,8 +575,8 @@ void FCompressedMemFile::Serialize (FArchive &arc)
 		arc.Write (ZSig, 4);
 
 		DWORD sizes[2];
-		sizes[0] = ReadBigLong (m_ImplodedBuffer);
-		sizes[1] = ReadBigLong (m_ImplodedBuffer+4);
+		sizes[0] = SWAP_DWORD (((DWORD *)m_ImplodedBuffer)[0]);
+		sizes[1] = SWAP_DWORD (((DWORD *)m_ImplodedBuffer)[1]);
 		arc.Write (m_ImplodedBuffer, (sizes[0] ? sizes[0] : sizes[1])+8);
 	}
 	else
@@ -649,8 +596,8 @@ void FCompressedMemFile::Serialize (FArchive &arc)
 		DWORD len = sizes[0] == 0 ? sizes[1] : sizes[0];
 
 		m_Buffer = (BYTE *)M_Malloc (len+8);
-		WriteBigLong(m_Buffer, sizes[0]);
-		WriteBigLong(m_Buffer + 4, sizes[1]);
+		((DWORD *)m_Buffer)[0] = SWAP_DWORD(sizes[0]);
+		((DWORD *)m_Buffer)[1] = SWAP_DWORD(sizes[1]);
 		arc.Read (m_Buffer+8, len);
 		m_ImplodedBuffer = m_Buffer;
 		m_Buffer = NULL;
@@ -667,8 +614,8 @@ void FCompressedMemFile::GetSizes(unsigned int &compressed, unsigned int &uncomp
 {
 	if (m_ImplodedBuffer != NULL)
 	{
-		compressed = ReadBigLong(m_ImplodedBuffer);
-		uncompressed = ReadBigLong(m_ImplodedBuffer + 4);
+		compressed = BigLong(*(unsigned int *)m_ImplodedBuffer);
+		uncompressed = BigLong(*(unsigned int *)(m_ImplodedBuffer + 4));
 	}
 	else
 	{
@@ -676,8 +623,6 @@ void FCompressedMemFile::GetSizes(unsigned int &compressed, unsigned int &uncomp
 		uncompressed = m_BufferSize;
 	}
 }
-
-#ifndef LIBRETRO
 
 FPNGChunkFile::FPNGChunkFile (FILE *file, DWORD id)
 	: FCompressedFile (file, EWriting, true, false), m_ChunkID (id)
@@ -737,8 +682,6 @@ FPNGChunkArchive::~FPNGChunkArchive ()
 	// destroyed before the FArchive is destroyed.
 	Close ();
 }
-
-#endif
 
 //============================================
 //
@@ -887,7 +830,7 @@ void FArchive::WriteName (const char *name)
 
 const char *FArchive::ReadName ()
 {
-	BYTE id;
+	BYTE id = 0;
 
 	operator<< (id);
 	if (id == NIL_NAME)
@@ -1214,7 +1157,7 @@ FArchive &FArchive::WriteObject (DObject *obj)
 
 FArchive &FArchive::ReadObject (DObject* &obj, const ClassDef *wanttype)
 {
-	BYTE objHead;
+	BYTE objHead = 0;
 	const ClassDef *type;
 	BYTE playerNum;
 	DWORD index;

@@ -26,7 +26,6 @@
 */
 
 #include "thingdef/thingdef_type.h"
-#include "m_swap.h"
 
 Type::Type(const FName &name, const Type *parent) : parent(parent), status(FORWARD), name(name)
 {
@@ -101,15 +100,12 @@ VariableSymbol::VariableSymbol(const FName &var, const TypeRef &type, const int 
 
 void VariableSymbol::FillValue(ExpressionNode::Value &val, AActor *self) const
 {
-	int32_t intval = ReadNativeLong((uint8_t*)self+offset);
 	if(GetType() == TypeHierarchy::staticTypes.GetType(TypeHierarchy::INT))
-		val = int64_t(intval);
+		val = int64_t(*(int32_t*)((uint8_t*)self+offset));
 	else if(GetType() == TypeHierarchy::staticTypes.GetType(TypeHierarchy::ANGLE_T))
-		val = double(((angle_t)intval) * 90.0 / ANGLE_90); // ANGLE_1 is not exact
+		val = double((*(angle_t*)((uint8_t*)self+offset)) * 90.0 / ANGLE_90); // ANGLE_1 is not exact
 	else
-		val = double((fixed)intval)/FRACUNIT;
-	assert(sizeof(fixed) == 4);
-	assert(sizeof(angle_t) == 4);
+		val = double(*(fixed*)((uint8_t*)self+offset))/FRACUNIT;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

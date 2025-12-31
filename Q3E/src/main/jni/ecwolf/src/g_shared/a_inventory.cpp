@@ -41,6 +41,7 @@
 #include "wl_def.h"
 #include "wl_agent.h"
 #include "wl_game.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "wl_loadsave.h"
 
@@ -53,6 +54,12 @@ void AInventory::AttachToOwner(AActor *owner)
 	this->owner = owner;
 }
 
+void AInventory::BeginPlay()
+{
+	// Default to marking items as dropped
+	itemFlags |= IF_DROPPED;
+}
+
 // This is so we can handle certain things (flags) without requiring all of
 // TryPickup to be called.
 bool AInventory::CallTryPickup(AActor *toucher)
@@ -62,7 +69,7 @@ bool AInventory::CallTryPickup(AActor *toucher)
 
 	bool ret = TryPickup(toucher);
 
-	if(!ret && (itemFlags & IF_ALWAYSPICKUP))
+	if(!ret && (itemFlags & IF_ALWAYSPICKUP) && !ShouldStay())
 	{
 		ret = true;
 		GoAwayAndDie();
@@ -112,14 +119,27 @@ void AInventory::GoAwayAndDie()
 // this actor is safe to be placed in an inventory.
 bool AInventory::GoAway()
 {
-	const Frame *hide = FindState(NAME_Hide);
-	if(hide && IsThinking()) // Only hide actors that are thinking
+	if(itemFlags & IF_DROPPED)
+		return false;
+
+	bool respawn = ShouldRespawn();
+	if(respawn)
+		respawnTimer = 30*TICRATE; // ROTT uses 30 second timer by default
+
+	if(IsThinking()) // Only hide actors that are thinking
 	{
-		itemFlags |= IF_INACTIVE;
-		SetState(hide);
-		return true;
+		if(ShouldStay())
+			return true;
+
+		if(const Frame *hide = FindState(NAME_Hide))
+		{
+			itemFlags |= IF_INACTIVE;
+			SetState(hide);
+			return true;
+		}
 	}
-	return false;
+
+	return respawn;
 }
 
 // Returns true if the pickup was handled by an already existing inventory item.
@@ -143,6 +163,21 @@ bool AInventory::HandlePickup(AInventory *item, bool &good)
 	return false;
 }
 
+void AInventory::ItemFog()
+{
+	if(const ClassDef *cls = ClassDef::FindClass("ItemFog"))
+	{
+		AActor *fog = Spawn(cls, x, y, 0, SPAWN_AllowReplacement);
+		fog->angle = angle;
+		fog->target = this;
+	}
+}
+
+void AInventory::LevelSpawned()
+{
+	itemFlags &= ~IF_DROPPED;
+}
+
 void AInventory::Serialize(FArchive &arc)
 {
 	arc << itemFlags
@@ -153,7 +188,37 @@ void AInventory::Serialize(FArchive &arc)
 		<< interhubamount
 		<< icon;
 
+	if(GameSave::SaveVersion > 1672116695)
+		arc << respawnTimer;
+
 	Super::Serialize(arc);
+}
+
+bool AInventory::ShouldRespawn()
+{
+	return Net::RespawnItems();
+}
+
+bool AInventory::ShouldStay()
+{
+	return false;
+}
+
+void AInventory::Tick()
+{
+	Super::Tick();
+
+	if(respawnTimer > 0)
+	{
+		if(--respawnTimer == 0)
+		{
+			flags |= FL_PICKUP;
+			itemFlags &= ~IF_INACTIVE;
+			PlaySoundLocActor("misc/spawn", this);
+			ItemFog();
+			SetState(SpawnState);
+		}
+	}
 }
 
 void AInventory::Touch(AActor *toucher)
@@ -259,7 +324,7 @@ bool AHealth::TryPickup(AActor *toucher)
 			toucher->health = max;
 	}
 
-	Destroy();
+	GoAwayAndDie();
 	return true;
 }
 
@@ -462,7 +527,7 @@ public:
 	{
 		if(Super::TryPickup(toucher))
 		{
-			Dialog::StartConversation(this);
+			Dialog::StartConversation(this, toucher);
 			return true;
 		}
 		return false;
@@ -507,7 +572,7 @@ void AWeapon::AttachToOwner(AActor *owner)
 	owner->player->PendingWeapon = this;
 
 	// Grin
-	if(!(weaponFlags & WF_NOGRIN) && owner->player->mo == players[0].camera)
+	if(!(weaponFlags & WF_NOGRIN) && owner->player->mo == players[ConsolePlayer].camera)
 		StatusBar->WeaponGrin();
 }
 
@@ -614,7 +679,7 @@ bool AWeapon::HandlePickup(AInventory *item, bool &good)
 		good = static_cast<AWeapon *>(item)->UseForAmmo(this);
 
 		// Grin any way
-		if(weaponFlags & WF_ALWAYSGRIN)
+		if((weaponFlags & WF_ALWAYSGRIN) && owner->player->mo == players[ConsolePlayer].camera && (good || !ShouldStay()))
 			StatusBar->WeaponGrin();
 		return true;
 	}
@@ -644,6 +709,9 @@ void AWeapon::Serialize(FArchive &arc)
 
 bool AWeapon::UseForAmmo(AWeapon *owned)
 {
+	if(ShouldStay())
+		return false;
+
 	bool used = false;
 	for(unsigned int i = 0;i < 2;++i)
 	{
@@ -661,6 +729,11 @@ bool AWeapon::UseForAmmo(AWeapon *owned)
 		}
 	}
 	return used;
+}
+
+bool AWeapon::ShouldStay()
+{
+	return Net::InitVars.mode != Net::MODE_SinglePlayer && !(itemFlags & IF_DROPPED);
 }
 
 ACTION_FUNCTION(A_ReFire)
@@ -722,6 +795,11 @@ class AWeaponGiver : public AWeapon
 	DECLARE_NATIVE_CLASS(WeaponGiver, Weapon)
 
 	protected:
+		bool ShouldStay()
+		{
+			return Net::InitVars.mode != Net::MODE_SinglePlayer && !(itemFlags & IF_DROPPED);
+		}
+
 		bool TryPickup(AActor *toucher)
 		{
 			bool pickedup = true;
@@ -740,7 +818,7 @@ class AWeaponGiver : public AWeapon
 					continue;
 
 				AWeapon *weap = static_cast<AWeapon *>(AActor::Spawn(cls, 0, 0, 0, 0));
-				weap->itemFlags &= ~IF_ALWAYSPICKUP;
+				weap->itemFlags &= ~(IF_ALWAYSPICKUP|IF_DROPPED);
 				weap->RemoveFromWorld();
 
 				if(noammo)
@@ -766,12 +844,24 @@ class AWeaponGiver : public AWeapon
 						break;
 					}
 				}
-				else if(!noammo)
+				else
 				{
-					// Main weapon picked up!
-					GoAwayAndDie();
-					if(toucher->player->PendingWeapon == weap)
-						switchTo = weap;
+					// If we didn't insert our spawned object into inventory
+					// then we should destroy it now.
+					if(weap->owner != toucher)
+						weap->Destroy();
+
+					if(!noammo)
+					{
+						// Main weapon picked up!
+						GoAwayAndDie();
+
+						AWeapon *pending = toucher->player->PendingWeapon;
+						// The second part can't be "pending == weap"
+						// because pending might be a copy.
+						if(pending == WP_NOCHANGE || pending->GetClass() == weap->GetClass())
+							switchTo = toucher->player->PendingWeapon;
+					}
 				}
 			}
 

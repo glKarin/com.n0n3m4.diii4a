@@ -107,11 +107,11 @@ private:
 			Stream.AvailIn -= 2;
 
 #ifndef MACWOLF
-			WORD pos = ReadBigShort(Stream.In);
+			WORD pos = BigShort(*(WORD*)Stream.In);
 			BYTE len = (pos & 0xF)+1;
 			pos >>= 4;
 #else
-			WORD pos = BigEndian ? ReadBigShort(Stream.In) : ReadLittleShort(Stream.In);
+			WORD pos = BigEndian ? BigShort(*(WORD*)Stream.In) : LittleShort(*(WORD*)Stream.In);
 			BYTE len = ((pos>>12) & 0xF)+3;
 			pos = 0xFFF-(pos&0xFFF);
 #endif

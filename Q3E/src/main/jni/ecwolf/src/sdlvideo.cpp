@@ -236,6 +236,11 @@ void I_InitGraphics ()
 		return;
 	}
 
+#ifdef __ANDROID__
+	extern void Android_InitGraphics();
+	Android_InitGraphics();
+#endif
+
 	Video = new SDLVideo (0);
 	if (Video == NULL)
 		I_FatalError ("Failed to initialize display");
@@ -404,6 +409,7 @@ static MiniModeInfo WinModes[] =
 	{ 848, 480 },	// 16:9
 	{ 960, 600 },	// 16:10
 	{ 960, 720 },
+	{ 1024, 288 },  // 32:9
 	{ 1024, 576 },	// 16:9
 	{ 1024, 600 },	// 17:10
 	{ 1024, 640 },	// 16:10
@@ -412,6 +418,7 @@ static MiniModeInfo WinModes[] =
 	{ 1152, 648 },	// 16:9
 	{ 1152, 720 },	// 16:10
 	{ 1152, 864 },
+	{ 1280, 360 },  // 32:9
 	{ 1280, 540 },  // 64:27 (~21:9)
 	{ 1280, 720 },	// 16:9
 	{ 1280, 854 },
@@ -431,20 +438,29 @@ static MiniModeInfo WinModes[] =
 	{ 1600, 1200 },
 	{ 1680, 1050 },	// 16:10
 	{ 1720, 720 },  // 43:18 (~21:9)
+	{ 1920, 540 },  // 32:9
 	{ 1920, 1080 },
 	{ 1920, 1200 },
 	{ 2048, 864 }, // 64:27 (~21:9)
 	{ 2048, 1536 },
+	{ 2240, 1400 }, // 16:10
+	{ 2304, 1440 }, // 16:10
+	{ 2560, 720 },  // 32:9
 	{ 2560, 1080 }, // 64:27 (~21:9)
 	{ 2560, 1440 },
 	{ 2560, 1600 },
 	{ 2560, 2048 },
 	{ 2880, 1800 },
+	{ 3072, 1920 }, // 16:10
 	{ 3200, 1800 },
 	{ 3440, 1440 }, // 43:18 (~21:9)
+	{ 3840, 1080 }, // 32:9
 	{ 3840, 2160 },
 	{ 3840, 2400 },
 	{ 4096, 2160 },
+	{ 4096, 2304 }, // 16:9
+	{ 4480, 2520 }, // 16:9
+	{ 5120, 1440 }, // 32:9
 	{ 5120, 2880 }
 };
 
@@ -464,12 +480,14 @@ void ScaleWithAspect (int &w, int &h, int Width, int Height)
 	double yratio;
 	switch(resRatio)
 	{
-		case 0: yratio = 4./3.; break;
-		case 1: yratio = 16./9.; break;
-		case 2: yratio = 16./10.; break;
-		case 3: yratio = 17./10.; break;
-		case 4: yratio = 5./4.; break;
-		case 5: yratio = 64./27.; break;
+		case ASPECT_NONE: yratio = 4./3.; break;
+		case ASPECT_16_9: yratio = 16./9.; break;
+		case ASPECT_16_10: yratio = 16./10.; break;
+		case ASPECT_17_10: yratio = 17./10.; break;
+		case ASPECT_5_4: yratio = 5./4.; break;
+		case ASPECT_4_3: yratio = 4./3.; break;
+		case ASPECT_64_27: yratio = 64./27.; break;
+		case ASPECT_32_9: yratio = 32./9.; break;
 		default: return;
 	}
 	double y = w/yratio;
@@ -647,7 +665,6 @@ void SDLVideo::SetWindowedScale (float scale)
 
 // FrameBuffer implementation -----------------------------------------------
 
-extern bool usedoublebuffering;
 #if SDL_VERSION_ATLEAST(2,0,0)
 SDLFB::SDLFB (int width, int height, bool fullscreen, SDL_Window *oldwin)
 #else
@@ -694,8 +711,8 @@ SDLFB::SDLFB (int width, int height, bool fullscreen)
 	ResetSDLRenderer ();
 
 #ifdef __ANDROID__
-	extern void PostSDLInit(SDL_Window *);
-	PostSDLInit(Screen);
+	extern void PostSDLCreateRenderer(SDL_Window *);
+	PostSDLCreateRenderer(Screen);
 #endif
 
 	for (i = 0; i < 256; i++)
@@ -717,9 +734,6 @@ SDLFB::SDLFB (int width, int height, bool fullscreen)
 
 	if (Screen == NULL)
 		return;
-
-	if((Screen->flags & SDL_DOUBLEBUF) != SDL_DOUBLEBUF)
-		usedoublebuffering = false;
 
 	for (i = 0; i < 256; i++)
 	{
@@ -807,6 +821,22 @@ void SDLFB::Update ()
 
 	DrawRateStuff ();
 
+	if (NeedGammaUpdate)
+	{
+		bool Windowed = false;
+		NeedGammaUpdate = false;
+		CalcGamma ((Windowed || rgamma == 0.f) ? Gamma : (Gamma * rgamma), GammaTable[0]);
+		CalcGamma ((Windowed || ggamma == 0.f) ? Gamma : (Gamma * ggamma), GammaTable[1]);
+		CalcGamma ((Windowed || bgamma == 0.f) ? Gamma : (Gamma * bgamma), GammaTable[2]);
+		NeedPalUpdate = true;
+	}
+
+	if (NeedPalUpdate)
+	{
+		NeedPalUpdate = false;
+		UpdateColors ();
+	}
+
 #if 0
 #ifndef __APPLE__
 	if(vid_maxfps && !cl_capfps)
@@ -870,13 +900,11 @@ void SDLFB::Update ()
 		SDL_RenderClear(Renderer);
 		SDL_RenderCopy(Renderer, Texture, NULL, NULL);
 
-//#if !defined(_DIII4A) //karin: don't draw controls
 #ifdef __ANDROID__
 		// Hack control overlay in
 		extern void frameControls();
 		frameControls();
 #endif
-//#endif
 
 		SDL_RenderPresent(Renderer);
 		//SDLFlipCycles.Unclock();
@@ -931,22 +959,6 @@ void SDLFB::Update ()
 #endif
 
 	//BlitCycles.Unclock();
-
-	if (NeedGammaUpdate)
-	{
-		bool Windowed = false;
-		NeedGammaUpdate = false;
-		CalcGamma ((Windowed || rgamma == 0.f) ? Gamma : (Gamma * rgamma), GammaTable[0]);
-		CalcGamma ((Windowed || ggamma == 0.f) ? Gamma : (Gamma * ggamma), GammaTable[1]);
-		CalcGamma ((Windowed || bgamma == 0.f) ? Gamma : (Gamma * bgamma), GammaTable[2]);
-		NeedPalUpdate = true;
-	}
-	
-	if (NeedPalUpdate)
-	{
-		NeedPalUpdate = false;
-		UpdateColors ();
-	}
 }
 
 void SDLFB::UpdateColors ()

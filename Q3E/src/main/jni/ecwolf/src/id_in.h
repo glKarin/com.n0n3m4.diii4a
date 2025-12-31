@@ -12,13 +12,7 @@
 #define	__DEBUG_InputMgr__
 #endif
 
-typedef	int		ScanCode;
-
-#ifndef LIBRETRO
-
-#include <SDL.h>
-
-#if !SDL_VERSION_ATLEAST(1,3,0)
+#if !SDL_VERSION_ATLEAST(2,0,0)
 #define SDLK_A SDLK_a
 #define SDLK_B SDLK_b
 #define SDLK_C SDLK_c
@@ -51,6 +45,7 @@ typedef	int		ScanCode;
 #define SDLx_SCANCODE(x) SDL_SCANCODE_##x
 #endif
 
+typedef	int		ScanCode;
 #define	sc_None			0
 #define	sc_Bad			0xff
 #define	sc_Return		SDLx_SCANCODE(RETURN)
@@ -89,6 +84,7 @@ typedef	int		ScanCode;
 
 #define sc_ScrollLock		SDLx_SCANCODE(SCROLLOCK)
 #define sc_PrintScreen		SDLx_SCANCODE(PRINT)
+#define sc_Pause			SDLx_SCANCODE(PAUSE)
 
 #define	sc_1			SDLx_SCANCODE(1)
 #define	sc_2			SDLx_SCANCODE(2)
@@ -135,9 +131,14 @@ typedef	int		ScanCode;
 #define sc_Peroid		SDLx_SCANCODE(PERIOD)
 
 #define sc_Grave		SDLx_SCANCODE(GRAVE)
-#endif
 
 #define	key_None		0
+
+enum AckType {
+	ACK_Local, // No network sync
+	ACK_Any, // Any player can ack
+	ACK_Block, // Local player can ack others must wait
+};
 
 enum Demo {
 	demo_Off,demo_Record,demo_Playback,demo_PlayDone
@@ -186,7 +187,6 @@ extern JoystickSens *JoySensitivity;
 extern bool Keyboard[];
 extern bool MousePresent;
 extern bool MouseWheel[4];
-extern unsigned short Paused;
 extern char LastASCII;
 extern ScanCode LastScan;
 extern int JoyNumButtons;
@@ -202,10 +202,8 @@ void IN_ClearWheel();
 void IN_ReadControl(int,ControlInfo *);
 void IN_GetJoyAbs(word joy,word *xp,word *yp);
 void IN_SetupJoy(word joy,word minx,word maxx,word miny,word maxy);
-void IN_StopDemo();
-void IN_FreeDemoBuffer();
-void IN_Ack();
-bool IN_UserInput(longword delay);
+void IN_Ack(AckType type);
+bool IN_UserInput(longword delay, AckType type);
 char IN_WaitForASCII();
 ScanCode IN_WaitForKey();
 word IN_GetJoyButtonsDB(word joy);
@@ -226,7 +224,7 @@ int IN_JoyAxes (void);
 void IN_GetJoyDelta(int *dx,int *dy);
 int IN_GetJoyAxis(int axis);
 
-void IN_StartAck(void);
+void IN_StartAck(AckType type);
 bool IN_CheckAck (void);
 bool IN_IsInputGrabbed();
 void IN_CenterMouse();

@@ -1105,7 +1105,7 @@ void FString::ReallocBuffer (size_t newlen)
 // Under Windows, use the system heap functions for managing string memory.
 // Under other OSs, use ordinary memory management instead.
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #define DWORD W32_DWORD
 #include <windows.h>
@@ -1120,7 +1120,7 @@ FStringData *FStringData::Alloc (size_t strlen)
 	strlen += 1 + sizeof(FStringData);	// Add space for header and terminating null
 	strlen = (strlen + 7) & ~7;			// Pad length up
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#ifdef _WIN32
 	if (StringHeap == NULL)
 	{
 		StringHeap = HeapCreate (0, STRING_HEAP_SIZE, 0);
@@ -1151,7 +1151,7 @@ FStringData *FStringData::Realloc (size_t newstrlen)
 	newstrlen += 1 + sizeof(FStringData);	// Add space for header and terminating null
 	newstrlen = (newstrlen + 7) & ~7;		// Pad length up
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#ifdef _WIN32
 	FStringData *block = (FStringData *)HeapReAlloc (StringHeap, 0, this, newstrlen);
 #else
 	FStringData *block = (FStringData *)realloc (this, newstrlen);
@@ -1168,7 +1168,7 @@ void FStringData::Dealloc ()
 {
 	assert (RefCount <= 0);
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#ifdef _WIN32
 	HeapFree (StringHeap, 0, this);
 #else
 	free (this);

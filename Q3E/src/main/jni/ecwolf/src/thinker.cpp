@@ -93,26 +93,31 @@ void ThinkerList::Tick()
 		if(gamestate.victoryflag && i > VICTORY)
 			break;
 
-		Iterator iter = thinkers[i].Head();
-		while(iter)
+		Tick(static_cast<Priority>(i));
+	}
+}
+
+void ThinkerList::Tick(Priority list)
+{
+	Iterator iter = thinkers[list].Head();
+	while(iter)
+	{
+		Thinker *thinker = iter;
+		nextThinker = ++iter;
+
+		if(thinker->ObjectFlags & OF_JustSpawned)
 		{
-			Thinker *thinker = iter;
-			nextThinker = ++iter;
-
-			if(thinker->ObjectFlags & OF_JustSpawned)
-			{
-				thinker->ObjectFlags &= ~OF_JustSpawned;
-				thinker->PostBeginPlay();
-			}
-
-			if(!(thinker->ObjectFlags & OF_EuthanizeMe))
-			{
-				thinker->Tick();
-				GC::CheckGC();
-			}
-
-			iter = nextThinker;
+			thinker->ObjectFlags &= ~OF_JustSpawned;
+			thinker->PostBeginPlay();
 		}
+
+		if(!(thinker->ObjectFlags & OF_EuthanizeMe))
+		{
+			thinker->Tick();
+			GC::CheckGC();
+		}
+
+		iter = nextThinker;
 	}
 }
 

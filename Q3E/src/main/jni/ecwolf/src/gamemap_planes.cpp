@@ -48,6 +48,7 @@
 #include "wl_shade.h"
 
 static const char* const FeatureFlagNames[] = {
+	"globalflat",
 	"globalmeta",
 	"lightlevels",
 	"planedepth",
@@ -76,10 +77,11 @@ public:
 
 	enum EFeatureFlags
 	{
-		FF_GLOBALMETA = 1,
-		FF_LIGHTLEVELS = 2,
-		FF_PLANEDEPTH = 4,
-		FF_ZHEIGHTS = 8
+		FF_GLOBALFLAT = 1,
+		FF_GLOBALMETA = 2,
+		FF_LIGHTLEVELS = 4,
+		FF_PLANEDEPTH = 8,
+		FF_ZHEIGHTS = 16
 	};
 
 	struct ThingXlat
@@ -313,7 +315,8 @@ public:
 
 		// The player has a weird rotation pattern. It's 450-angle.
 		bool playerRotation = false;
-		if(thing.type == SpecialThingNames[SMT_Player1Start])
+		ESpecialThings st = SpecialThingNamesLookup(thing.type);
+		if(st >= SMT_Player1Start && st <= SMT_DeathmatchStart)
 			playerRotation = true;
 
 		if(type.angles)
@@ -670,6 +673,7 @@ private:
 };
 static Xlat xlat;
 
+static WORD DecodeROTTSplit(WORD num);
 static int FindAdjacentDoor(MapSpot spot, MapTrigger *&trigger);
 
 struct HolowallProducer
@@ -750,6 +754,9 @@ void GameMap::ReadMacData()
 	// Setup header
 	header.width = 64;
 	header.height = 64;
+	header.tileSize = 64;
+	header.sky.SetInvalid();
+	header.skyHorizonOffset = 0;
 
 	Plane &mapPlane = NewPlane();
 	mapPlane.depth = 64;
@@ -774,8 +781,6 @@ void GameMap::ReadMacData()
 
 	WORD numSpawn, spawnListOfs;
 	lump >> numSpawn >> spawnListOfs;
-	numSpawn = LittleShort(numSpawn);
-	spawnListOfs = LittleShort(spawnListOfs);
 	// Followed by 2 more WORDs for numNodes and nodeListOfs. If we had a BSP
 	// renderer, we'd care about those.
 
@@ -787,10 +792,9 @@ void GameMap::ReadMacData()
 	wallListLump.Read(&walltexs[0], walltexs.Size()*2);
 	for(unsigned int i = 0;i < walltexs.Size();++i)
 		walltexs[i] = BigShort(walltexs[i]);
-		
 
 	// Find used tiles
-	MacTile wallsused[TEX_MASK+1+5];
+	MacTile wallsused[TEX_MASK+1+5] = {};
 	for(unsigned int i = 0;i < 64*64;++i)
 		wallsused[tilemap[i]&TEX_MASK].used = true;
 
@@ -807,8 +811,8 @@ void GameMap::ReadMacData()
 		wallsused[i].wallnum2 = walltexs[(i-1)*2+1]&0x3FFF;
 
 		char name[2][9];
-		sprintf(name[0], "WALL%04X", wallsused[i].wallnum1);
-		sprintf(name[1], "WALL%04X", wallsused[i].wallnum2);
+		mysnprintf(name[0], 9, "WALL%04X", wallsused[i].wallnum1);
+		mysnprintf(name[1], 9, "WALL%04X", wallsused[i].wallnum2);
 
 		Tile tile;
 		tile.texture[1] = tile.texture[3] =
@@ -824,8 +828,8 @@ void GameMap::ReadMacData()
 	for(unsigned int i = 0;i < 4;++i)
 	{
 		char name[2][9];
-		sprintf(name[0], "WALL%04X", walltexs[59+i]&0x3FFF);
-		sprintf(name[1], "WALL%04X", walltexs[63]&0x3FFF);
+		mysnprintf(name[0], 9, "WALL%04X", walltexs[59+i]&0x3FFF);
+		mysnprintf(name[1], 9, "WALL%04X", walltexs[63]&0x3FFF);
 
 		Tile tile1, tile2;
 		tile1.texture[1] = tile1.texture[3] =
@@ -888,7 +892,7 @@ void GameMap::ReadMacData()
 				MapSpot spot = &mapPlane.map[y*64+x];
 				if(trigger.action == Specials::Door_Open || trigger.action == Specials::Door_Elevator)
 				{
-					const unsigned int tex = type/2 != 96/2 ? firstdoor+MIN<int32_t>(trigger.arg[3], 3)*2 : firstdoor+6;
+					const unsigned int tex = type/2 != 96/2 ? firstdoor+MIN(trigger.arg[3], 3)*2 : firstdoor+6;
 					spot->SetTile(&tilePalette[tex+!(trigger.arg[4]&1)]);
 				}
 
@@ -942,6 +946,8 @@ void GameMap::ReadPlanesData()
 
 	// Old format maps always have a tile size of 64
 	header.tileSize = UNIT;
+	header.sky.SetInvalid();
+	header.skyHorizonOffset = 0;
 
 	// Xlat loaded, see if we have a Mac format map.
 	char magic[6];
@@ -1139,6 +1145,26 @@ void GameMap::ReadPlanesData()
 					}
 				}
 
+				if(FeatureFlags & Xlat::FF_GLOBALFLAT)
+				{
+					const WORD floornum = oldplane[0]-0xB4;
+					defaultFloor = xlat.TranslateFlat(floornum, Sector::Floor, levelInfo->DefaultTexture[Sector::Floor]);
+
+					const WORD ceilingnum = oldplane[1]-0xD8;
+					if(ceilingnum >= 18)
+					{
+						FString skyTexture;
+						skyTexture.Format("SKY%d", ceilingnum-17);
+						header.sky = TexMan.CheckForTexture(skyTexture, FTexture::TEX_Wall);
+						if(!header.sky.isValid())
+							Printf("Error: Sky texture %s does not exist!\n", skyTexture.GetChars());
+						else
+							defaultCeiling.SetInvalid();
+					}
+					else
+						defaultCeiling = xlat.TranslateFlat(ceilingnum, Sector::Ceiling, levelInfo->DefaultTexture[Sector::Ceiling]);
+				}
+
 				if(FeatureFlags & Xlat::FF_LIGHTLEVELS)
 				{
 					// Visibility is roughly exponential
@@ -1188,12 +1214,19 @@ void GameMap::ReadPlanesData()
 
 					if(i == 0 && (FeatureFlags & Xlat::FF_PLANEDEPTH))
 					{
-						if(oldplane[0] >= 0x5A && oldplane[0] <= 0x61)
-							mapPlane.depth = UNIT*(oldplane[i]-0x5A+1);
-						else if(oldplane[0] >= 0x1C2 && oldplane[0] <= 0x1C9)
-							mapPlane.depth = UNIT*(oldplane[i]-0x1C2+9);
+						if(WORD depth = DecodeROTTSplit(oldplane[0]))
+							mapPlane.depth = UNIT*depth;
 						else // ROTT would error if this is invalid.
-							printf("Error: Map height specifier %X not in range!\n", oldplane[i]);
+							Printf("Error: Map height specifier %X not in expected range!\n", oldplane[i]);
+						continue;
+					}
+
+					if(i == 1 && (FeatureFlags & Xlat::FF_GLOBALFLAT))
+					{
+						if(WORD offset = DecodeROTTSplit(oldplane[1]))
+							header.skyHorizonOffset = (offset-8)*6; // Most maps use offset of 8
+						else if(header.sky.isValid()) // ROTT only complained if a sky was in use
+							Printf("Error: Sky horizon specifier %X not in expected range!\n", oldplane[i]);
 						continue;
 					}
 
@@ -1447,6 +1480,15 @@ void GameMap::ReadPlanesData()
 				*lastNext = swtchTag;
 		}
 	}
+}
+
+static WORD DecodeROTTSplit(WORD num)
+{
+	if(num >= 0x5A && num <= 0x61)
+		return num-0x5A+1;
+	else if(num >= 0x1C2 && num <= 0x1C9)
+		return num-0x1C2+9;
+	return 0;
 }
 
 static int FindAdjacentDoor(MapSpot spot, MapTrigger *&trigger)

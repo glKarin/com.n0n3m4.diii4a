@@ -57,6 +57,7 @@
 #include "wl_loadsave.h"
 #include "wl_main.h"
 #include "wl_menu.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "textures/textures.h"
 
@@ -68,9 +69,6 @@ namespace GameSave {
 
 unsigned long long SaveVersion = GetSaveVersion();
 DWORD SaveProdVersion = SAVEPRODVER;
-
-#ifndef LIBRETRO
-
 bool param_foreginsave = false;
 
 static const char* const NEW_SAVE = "    - NEW SAVE -";
@@ -262,6 +260,15 @@ static void DrawLSAction (int which)
 	VW_UpdateScreen ();
 }
 
+// ECWolf <1.4.2 for Windows saved full filepaths due to ZDoom code expecting
+// all file paths to have Unix path separators. Look for Windows path
+// separators and strip the paths.
+static const char* NormalizeSavedFilename(const char* filename)
+{
+	const char* backslash = strrchr(filename, '\\');
+	return backslash ? backslash + 1 : filename;
+}
+
 ////////////////////////////////////////////////////////////////////
 //
 // SEE WHICH SAVE GAME FILES ARE AVAILABLE & READ STRING IN
@@ -322,7 +329,7 @@ bool SetupSaveGames()
 				char* checkFile = M_GetPNGText(png, "Map WAD");
 				if(checkFile)
 				{
-					if(Wads.CheckIfWadLoaded(checkFile) < 0 && !param_foreginsave)
+					if(Wads.CheckIfWadLoaded(NormalizeSavedFilename(checkFile)) < 0 && !param_foreginsave)
 						sFile.hasFiles = false;
 					delete[] checkFile;
 				}
@@ -338,7 +345,7 @@ bool SetupSaveGames()
 					do
 					{
 						nextIndex = checkString.IndexOf(';', lastIndex);
-						if(Wads.CheckIfWadLoaded(checkString.Mid(lastIndex, nextIndex-lastIndex)) < 0 && !param_foreginsave)
+						if(Wads.CheckIfWadLoaded(NormalizeSavedFilename(checkString.Mid(lastIndex, nextIndex-lastIndex))) < 0 && !param_foreginsave)
 						{
 							sFile.hide = true;
 							break;
@@ -445,7 +452,7 @@ MENU_LISTENER(PerformSaveGame)
 		saveGame.setCurrentPosition(saveGame.getNumItems()-1);
 		loadGame.setCurrentPosition(saveGame.getNumItems()-1);
 
-		mainMenu[2]->setEnabled(true);
+		mainMenu[2]->setEnabled(Net::InitVars.mode == Net::MODE_SinglePlayer);
 	}
 	else
 	{
@@ -490,7 +497,7 @@ MENU_LISTENER(LoadSaveGame)
 
 void InitMenus()
 {
-	bool canLoad = SetupSaveGames();
+	bool canLoad = SetupSaveGames() && Net::InitVars.mode == Net::MODE_SinglePlayer;
 
 	loadGame.setHeadPicture("M_LOADGM");
 	saveGame.setHeadPicture("M_SAVEGM");
@@ -519,9 +526,8 @@ void QuickLoadOrSave(bool load)
 
 	ShowMenu(load ? loadGame : saveGame);
 }
-#endif
 
-void Serialize(FArchive &arc)
+static void Serialize(FArchive &arc)
 {
 	short difficulty;
 	if(arc.IsStoring())
@@ -535,8 +541,16 @@ void Serialize(FArchive &arc)
 		gamestate.difficulty = &SkillInfo::GetSkill(difficulty);
 	}
 
-	arc << gamestate.playerClass
-		<< gamestate.secretcount
+	unsigned int maxPlayers = Net::InitVars.numPlayers;
+
+	arc << gamestate.playerClass[0];
+	if(SaveVersion >= 1599444347)
+	{
+		arc << maxPlayers;
+		for(unsigned int i = 1;i < maxPlayers;++i)
+			arc << gamestate.playerClass[i];
+	}
+	arc << gamestate.secretcount
 		<< gamestate.treasurecount
 		<< gamestate.killcount
 		<< gamestate.secrettotal
@@ -558,10 +572,9 @@ void Serialize(FArchive &arc)
 
 	arc << map;
 
-	players[0].Serialize(arc);
+	for(unsigned int i = 0;i < (SaveVersion >= 1656330251 ? maxPlayers : 1);++i)
+		players[i].Serialize(arc);
 }
-
-#ifndef LIBRETRO
 
 #define SNAP_ID MAKE_ID('s','n','A','p')
 
@@ -573,7 +586,7 @@ bool Load(const FString &filename)
 		Message(language["STR_FAILREAD"]);
 		printf("Could not open %s for reading.\n", GetFullSaveFileName(filename).GetChars());
 		IN_ClearKeysDown ();
-		IN_Ack ();
+		IN_Ack (ACK_Local);
 		return false;
 	}
 
@@ -631,7 +644,7 @@ void SaveScreenshot(FILE *file)
 
 	vid_aspect = ASPECT_16_10;
 	NewViewSize(21, SAVEPICWIDTH, SAVEPICHEIGHT);
-	CalcProjection(players[0].mo->radius);
+	CalcProjection(players[ConsolePlayer].mo->radius);
 	R_RenderView();
 
 	M_CreatePNG(file, vbuf, GPalette.BaseColors, SS_PAL, SAVEPICWIDTH, SAVEPICHEIGHT, vbufPitch);
@@ -651,7 +664,7 @@ bool Save(const FString &filename, const FString &title)
 		Message(language["STR_FAILWRITE"]);
 		printf("Could not open %s for writing.\n", GetFullSaveFileName(filename).GetChars());
 		IN_ClearKeysDown ();
-		IN_Ack ();
+		IN_Ack (ACK_Local);
 		return false;
 	}
 
@@ -675,7 +688,7 @@ bool Save(const FString &filename, const FString &title)
 	M_AppendPNGText(fileh, "ECWolf Save Version", GetSaveSignature());
 	{
 		char saveprodver[11];
-		sprintf(saveprodver, "%u", SAVEPRODVER);
+		mysnprintf(saveprodver, 11, "%u", SAVEPRODVER);
 		M_AppendPNGText(fileh, "ECWolf Save Product Version", saveprodver);
 	}
 	M_AppendPNGText(fileh, "Title", title);
@@ -721,5 +734,5 @@ bool Save(const FString &filename, const FString &title)
 	fclose(fileh);
 	return true;
 }
-#endif
+
 /* end namespace */ }

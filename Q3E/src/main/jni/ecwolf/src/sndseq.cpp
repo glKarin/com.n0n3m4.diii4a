@@ -249,7 +249,7 @@ SndSeqPlayer::~SndSeqPlayer()
 
 // SD_SoundPlaying() seems to intentionally be for adlib/pc speaker only. At
 // least it has been like that since the beginning of ECWolf.
-extern FString SoundPlaying;
+extern SoundIndex SoundPlaying;
 void SndSeqPlayer::Tick()
 {
 	if(!Playing || (Delay != 0 && --Delay > 0))
@@ -257,7 +257,7 @@ void SndSeqPlayer::Tick()
 
 	if(WaitForDone)
 	{
-		if(SoundPlaying.IsNotEmpty())
+		if(!SoundPlaying.IsNull())
 			return;
 		else
 			WaitForDone = false;

@@ -48,6 +48,7 @@
 #include "wl_agent.h"
 #include "wl_draw.h"
 #include "wl_game.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "wl_state.h"
 
@@ -193,7 +194,7 @@ ACTION_FUNCTION(A_BossDeath)
 		if(!deathcam)
 		{
 			ADeathCam *dc = (ADeathCam*)AActor::Spawn(NATIVE_CLASS(DeathCam), 0, 0, 0, SPAWN_AllowReplacement);
-			dc->SetupDeathCam(self, players[0].mo);
+			dc->SetupDeathCam(self, self->target);
 		}
 		else
 		{
@@ -216,9 +217,12 @@ ACTION_FUNCTION(A_BossDeath)
 
 		if(deathcam && playstate == ex_stillplaying)
 		{
-			// Return the camera to the player if we're still going
-			players[0].camera = players[0].mo;
-			players[0].BringUpWeapon();
+			// Return the camera to the players if we're still going
+			for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+			{
+				players[i].camera = players[i].mo;
+				players[i].BringUpWeapon();
+			}
 			gamestate.victoryflag = false;
 		}
 	}
@@ -329,7 +333,7 @@ ACTION_FUNCTION(A_Explode)
 		AActor * const target = iter;
 
 		// Calculate distance from origin to outer bound of target actor
-		const fixed dist = MAX<fixed>(0, MAX(abs(target->x - self->x), abs(target->y - self->y)) - target->radius) >> (FRACBITS - 6);
+		const fixed dist = MAX(0, MAX(abs(target->x - self->x), abs(target->y - self->y)) - target->radius) >> (FRACBITS - 6);
 
 		// First check if the target is in range (also don't mess with ourself)
 		if(dist >= radius || target == self || !(target->flags & FL_SHOOTABLE))

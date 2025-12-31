@@ -39,6 +39,10 @@ extern "C"
 #define boolean jboolean
 #include <jpeglib.h>
 #undef boolean
+
+// Minor conflict between jpeg and SDL header in some situations
+#undef HAVE_STDDEF_H
+#undef HAVE_STDLIB_H
 }
 
 #include "wl_def.h"

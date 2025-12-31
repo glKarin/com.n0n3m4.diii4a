@@ -381,7 +381,7 @@ unsigned int FRandom::GenRand32()
 */
 QWORD FRandom::GenRand64()
 {
-#if defined(BIG_ENDIAN64) && !defined(ONLY64) || defined(__mips__)
+#if defined(BIG_ENDIAN64) && !defined(ONLY64)
 	DWORD r1, r2;
 #else
 	QWORD r;
@@ -395,7 +395,7 @@ QWORD FRandom::GenRand64()
 		GenRandAll();
 		idx = 0;
 	}
-#if defined(BIG_ENDIAN64) && !defined(ONLY64) || defined(__mips__)
+#if defined(BIG_ENDIAN64) && !defined(ONLY64)
 	r1 = sfmt.u[idx];
 	r2 = sfmt.u[idx + 1];
 	idx += 2;

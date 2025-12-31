@@ -76,7 +76,6 @@
 // stored in the WAD. The lumps are referenced by number, and patched into
 // the rectangular texture space using origin and possibly other attributes.
 //
-PACK_START
 struct mappatch_t
 {
 	SWORD	originx;
@@ -84,14 +83,12 @@ struct mappatch_t
 	SWORD	patch;
 	SWORD	stepdir;
 	SWORD	colormap;
-} PACKED;
-PACK_END
+};
 
 //
 // A wall texture is a list of patches which are to be combined in a
 // predefined order.
 //
-PACK_START
 struct maptexture_t
 {
 	BYTE		name[8];
@@ -103,8 +100,7 @@ struct maptexture_t
 	BYTE		columndirectory[4];	// OBSOLETE
 	SWORD		patchcount;
 	mappatch_t	patches[1];
-} PACKED;
-PACK_END
+};
 
 #define MAPTEXF_WORLDPANNING	0x8000
 
@@ -157,6 +153,7 @@ class FMultiPatchTexture : public FTexture
 public:
 	FMultiPatchTexture (const void *texdef, FPatchLookup *patchlookup, int maxpatchnum, bool strife, int deflump);
 	FMultiPatchTexture (Scanner &sc, int usetype);
+	FMultiPatchTexture (int skynum, FTexture *lower, FTexture *upper); // ROTT Sky
 	~FMultiPatchTexture ();
 
 	const BYTE *GetColumn (unsigned int column, const Span **spans_out);
@@ -305,6 +302,44 @@ FMultiPatchTexture::FMultiPatchTexture (const void *texdef, FPatchLookup *patchl
 	}
 
 	DefinitionLump = deflumpnum;
+}
+
+//==========================================================================
+//
+// FMultiPatchTexture :: FMultiPatchTexture
+// ROTT Sky
+//
+//==========================================================================
+
+FMultiPatchTexture::FMultiPatchTexture (int skynum, FTexture *lower, FTexture *upper)
+: Pixels (0), Spans(0), Parts(NULL), Inits(NULL), bRedirect(false), bTranslucentPatches(false)
+{
+	bMultiPatch = true;
+
+	UseType = FTexture::TEX_Wall;
+	Width = lower->GetWidth();
+	if(upper->GetWidth() != Width)
+		I_Error ("ROTT sky patches %s and %s must have identical widths.", lower->Name.GetChars(), upper->Name.GetChars());
+	Height = lower->GetHeight() + upper->GetHeight();
+	NumParts = 2;
+	Parts = new TexPart[2];
+	Inits = new TexInit[2];
+	Name.Format("SKY%d", skynum);
+	CalcBitSize ();
+
+	xScale = FRACUNIT;
+	yScale = FRACUNIT;
+
+	Parts[0].OriginY = upper->GetHeight();
+	Parts[0].Texture = lower;
+	Inits[0].TexName = lower->Name;
+
+	Parts[1].Texture = upper;
+	Inits[1].TexName = upper->Name;
+
+	Inits[0].UseType = Inits[1].UseType = TEX_WallPatch;
+
+	DefinitionLump = -1;
 }
 
 //==========================================================================
@@ -904,7 +939,7 @@ void FTextureManager::AddTexturesLump (const void *lumpdata, int lumpsize, int d
 
 		// There is bizzarely a Doom editing tool that writes to the
 		// first two elements of columndirectory, so I can't check those.
-		if (SAFESHORT(tex->patchcount) < 0 ||
+		if ((short)SAFESHORT(tex->patchcount) < 0 ||
 			tex->columndirectory[2] != 0 ||
 			tex->columndirectory[3] != 0)
 		{
@@ -982,6 +1017,37 @@ void FTextureManager::AddTexturesLumps (int lump1, int lump2, int patcheslump)
 	}
 }
 
+
+//==========================================================================
+//
+// FTextureManager :: AddRottSkies
+//
+//==========================================================================
+
+void FTextureManager::AddRottSkies (int wadnum)
+{
+	int firsttx = Wads.GetFirstLump(wadnum);
+	int lasttx = Wads.GetLastLump(wadnum);
+
+	int skynum = 1;
+
+	// Must be at least two textures
+	while (firsttx+1 <= lasttx)
+	{
+		if (Wads.GetLumpNamespace(firsttx) == ns_rottsky && Wads.GetLumpNamespace(firsttx)+1)
+		{
+			FTexture *lower = operator[](CreateTexture (firsttx, FTexture::TEX_WallPatch));
+			FTexture *upper = operator[](CreateTexture (firsttx+1, FTexture::TEX_WallPatch));
+
+			TexMan.AddTexture (new FMultiPatchTexture (skynum++, lower, upper));
+
+			firsttx += 2;
+			//StartScreen->Progress();
+		}
+		else
+			++firsttx;
+	}
+}
 
 //==========================================================================
 //
@@ -1145,7 +1211,7 @@ void FMultiPatchTexture::ParsePatch(Scanner &sc, TexPart & part, TexInit &init)
 			else if (sc->str.CompareNoCase("alpha") == 0)
 			{
 				sc.MustGetToken(TK_FloatConst);
-				part.Alpha = clamp<fixed>(FLOAT2FIXED(sc->decimal), 0, FRACUNIT);
+				part.Alpha = clamp(FLOAT2FIXED(sc->decimal), 0, FRACUNIT);
 				// bComplex is not set because it is only needed when the style is not OP_COPY.
 			}
 			else if (sc->str.CompareNoCase("style") == 0)
@@ -1343,11 +1409,11 @@ void FMultiPatchTexture::ResolvePatches()
 				TArray<FTextureID> list;
 				TexMan.ListTextures(Inits[i].TexName, list, true);
 				// ListTextures should give the newest texture first. Could probably skip zero here, but why micro-optimize?
-				for (unsigned int j = 0; j < list.Size(); ++j)
+				for (unsigned int ii = 0; ii < list.Size(); ++ii)
 				{
-					if (list[j] != id && !TexMan[list[j]]->bMultiPatch)
+					if (list[ii] != id && !TexMan[list[ii]]->bMultiPatch)
 					{
-						texno = list[j];
+						texno = list[ii];
 						break;
 					}
 				}

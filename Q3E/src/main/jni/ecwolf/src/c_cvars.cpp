@@ -61,7 +61,7 @@ bool alwaysrun;
 bool mouseenabled, mouseyaxisdisabled, joystickenabled;
 float localDesiredFOV = 90.0f;
 
-#if SDL_VERSION_ATLEAST(1,3,0)
+#if SDL_VERSION_ATLEAST(2,0,0)
 // Convert SDL1 keycode to SDL2 scancode
 static const SDL_Scancode SDL2ConversionTable[323] = {
 	SDL_SCANCODE_UNKNOWN,SDL_SCANCODE_UNKNOWN,SDL_SCANCODE_UNKNOWN,SDL_SCANCODE_UNKNOWN,SDL_SCANCODE_UNKNOWN,SDL_SCANCODE_UNKNOWN,SDL_SCANCODE_UNKNOWN,SDL_SCANCODE_UNKNOWN,
@@ -155,7 +155,7 @@ void FinalReadConfig()
 	SD_SetMusicMode(sm);
 	SD_SetSoundMode(sd);
 	SD_SetDigiDevice(sds);
-	N3DTempoEmulation = config.GetSetting("N3DTempoEmulation")->GetInteger();
+	N3DTempoEmulation = !!config.GetSetting("N3DTempoEmulation")->GetInteger();
 
 	AM_UpdateFlags();
 
@@ -220,10 +220,10 @@ void ReadConfig(void)
 	joystickenabled = config.GetSetting("JoystickEnabled")->GetInteger() != 0;
 	for(unsigned int i = 0;controlScheme[i].button != bt_nobutton;i++)
 	{
-		sprintf(joySettingName, "Joystick_%s", controlScheme[i].name);
-		sprintf(keySettingBugName, "Keybaord_%s", controlScheme[i].name);
-		sprintf(keySettingName, "Keyboard_%s", controlScheme[i].name);
-		sprintf(mseSettingName, "Mouse_%s", controlScheme[i].name);
+		mysnprintf(joySettingName, 50, "Joystick_%s", controlScheme[i].name);
+		mysnprintf(keySettingBugName, 50, "Keybaord_%s", controlScheme[i].name);
+		mysnprintf(keySettingName, 50, "Keyboard_%s", controlScheme[i].name);
+		mysnprintf(mseSettingName, 50, "Mouse_%s", controlScheme[i].name);
 		for(unsigned int j = 0;j < 50;j++)
 		{
 			if(joySettingName[j] == ' ')
@@ -256,7 +256,6 @@ void ReadConfig(void)
 	mouseyaxisdisabled = config.GetSetting("MouseYAxisDisabled")->GetInteger() != 0;
 	alwaysrun = config.GetSetting("AlwaysRun")->GetInteger() != 0;
 	AdlibVolume = config.GetSetting("SoundVolume")->GetInteger();
-	SD_UpdatePCSpeakerVolume();
 	MusicVolume = config.GetSetting("MusicVolume")->GetInteger();
 	SoundVolume = config.GetSetting("DigitizedVolume")->GetInteger();
 	vid_fullscreen = config.GetSetting("Vid_FullScreen")->GetInteger() != 0;
@@ -295,10 +294,10 @@ void ReadConfig(void)
 	char hsGraphic[50];
 	for(unsigned int i = 0;i < MaxScores;i++)
 	{
-		sprintf(hsName, "HighScore%u_Name", i);
-		sprintf(hsScore, "HighScore%u_Score", i);
-		sprintf(hsCompleted, "HighScore%u_Completed", i);
-		sprintf(hsGraphic, "HighScore%u_Graphic", i);
+		mysnprintf(hsName, 50, "HighScore%u_Name", i);
+		mysnprintf(hsScore, 50, "HighScore%u_Score", i);
+		mysnprintf(hsCompleted, 50, "HighScore%u_Completed", i);
+		mysnprintf(hsGraphic, 50, "HighScore%u_Graphic", i);
 
 		config.CreateSetting(hsName, Scores[i].name);
 		config.CreateSetting(hsScore, Scores[i].score);
@@ -357,8 +356,9 @@ void ReadConfig(void)
 		screenWidth = windowedScreenWidth;
 	}
 
-		// Propogate localDesiredFOV to players[0]
-	players[0].SetFOV(localDesiredFOV);
+	// Propogate localDesiredFOV to players
+	for(unsigned int i = 0;i < MAXPLAYERS;++i)
+		players[i].SetFOV(localDesiredFOV);
 }
 
 /*
@@ -382,9 +382,9 @@ void WriteConfig(void)
 	config.GetSetting("JoystickEnabled")->SetValue(joystickenabled);
 	for(unsigned int i = 0;controlScheme[i].button != bt_nobutton;i++)
 	{
-		sprintf(joySettingName, "Joystick_%s", controlScheme[i].name);
-		sprintf(keySettingName, "Keyboard_%s", controlScheme[i].name);
-		sprintf(mseSettingName, "Mouse_%s", controlScheme[i].name);
+		mysnprintf(joySettingName, 50, "Joystick_%s", controlScheme[i].name);
+		mysnprintf(keySettingName, 50, "Keyboard_%s", controlScheme[i].name);
+		mysnprintf(mseSettingName, 50, "Mouse_%s", controlScheme[i].name);
 		for(unsigned int j = 0;j < 50;j++)
 		{
 			if(joySettingName[j] == ' ')
@@ -437,10 +437,10 @@ void WriteConfig(void)
 	char hsGraphic[50];
 	for(unsigned int i = 0;i < MaxScores;i++)
 	{
-		sprintf(hsName, "HighScore%u_Name", i);
-		sprintf(hsScore, "HighScore%u_Score", i);
-		sprintf(hsCompleted, "HighScore%u_Completed", i);
-		sprintf(hsGraphic, "HighScore%u_Graphic", i);
+		mysnprintf(hsName, 50, "HighScore%u_Name", i);
+		mysnprintf(hsScore, 50, "HighScore%u_Score", i);
+		mysnprintf(hsCompleted, 50, "HighScore%u_Completed", i);
+		mysnprintf(hsGraphic, 50, "HighScore%u_Graphic", i);
 
 		config.GetSetting(hsName)->SetValue(Scores[i].name);
 		config.GetSetting(hsScore)->SetValue(Scores[i].score);

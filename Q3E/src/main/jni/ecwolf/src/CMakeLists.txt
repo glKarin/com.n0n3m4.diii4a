@@ -1,28 +1,23 @@
-if (NOT LIBRETRO AND NOT _DIII4A)
-	add_custom_target(revision_check ALL
-		COMMAND updaterevision ${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h
-		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-		DEPENDS updaterevision
-	)
+if (NOT _DIII4A)
+add_custom_target(revision_check ALL
+	COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/tools/updaterevision/UpdateRevision.cmake" "${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h"
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
 endif()
 
-if(LIBRETRO)
-        set(ENGINE_TARGET ecwolf_libretro)
-elseif(_DIII4A)
+if(_DIII4A)
 		set(ENGINE_TARGET ecwolf)
 else()
         set(ENGINE_TARGET engine)
 endif()
 
-set(DISABLE_ADLIB OFF)      
+set(DISABLE_ADLIB OFF)  
 
 # The ability to start with an empty target was added in CMake 3.11 so since
 # for Android we use a shared library we need to use a macro to determine which
 # function to call.
 macro(initial_sources TARGET)
-	if(LIBRETRO AND LIBRETRO_STATIC)
-    		add_library(${ENGINE_TARGET} STATIC ${ARGV})
-	elseif(ANDROID OR LIBRETRO)
+	if(ANDROID)
 		add_library(${ENGINE_TARGET} SHARED ${ARGV})
 	else()
 		add_executable(${ENGINE_TARGET} WIN32 ${ARGV})
@@ -99,16 +94,25 @@ initial_sources(
 	am_map.cpp
 	colormatcher.cpp
 	config.cpp
+	c_cvars.cpp
 	dobject.cpp
 	dobjgc.cpp
 	farchive.cpp
 	files.cpp
+	filesys.cpp
+	filesys_steam.cpp
 	g_conversation.cpp
+	g_intermission.cpp
 	g_mapinfo.cpp
 	gamemap.cpp
 	gamemap_planes.cpp
 	gamemap_uwmf.cpp
+	gitinfo.cpp
 	id_ca.cpp
+	id_in.cpp
+	id_sd.cpp
+	id_sd_n3dmus.cpp
+	id_us_1.cpp
 	id_vh.cpp
 	id_vl.cpp
 	language.cpp
@@ -122,6 +126,7 @@ initial_sources(
 	p_switch.cpp
 	r_sprites.cpp
 	scanner.cpp
+	sdlvideo.cpp
 	sndinfo.cpp
 	sndseq.cpp
 	thinker.cpp
@@ -137,101 +142,26 @@ initial_sources(
 	wl_agent.cpp
 	wl_atmos.cpp
 	wl_cloudsky.cpp
+	wl_debug.cpp
 	wl_dir3dspr.cpp
 	wl_draw.cpp
 	wl_floorceiling.cpp
+	wl_game.cpp
+	wl_inter.cpp
 	wl_iwad.cpp
 	wl_loadsave.cpp
+	wl_main.cpp
 	wl_menu.cpp
+	wl_net.cpp
 	wl_parallax.cpp
+	wl_play.cpp
 	wl_state.cpp
+	wl_text.cpp
 	zstrformat.cpp
 	zstring.cpp
 )
       
-if(LIBRETRO)
-  target_sources(${ENGINE_TARGET} PRIVATE
-    libretro/libretro.cpp
-    libretro/libretro-vfs.cpp
-    libretro/id_in.cpp
-    libretro/id_sd.cpp
-    libretro/id_us_1.cpp
-    libretro/wl_play.cpp
-    libretro/wl_game.cpp
-    libretro/wl_inter.cpp
-    libretro/wl_main.cpp
-    libretro/wl_text.cpp
-    libretro/g_conversation.cpp
-    libretro/g_intermission.cpp)
-  if(PS2)
-    set(DISABLE_ADLIB ON)
-  endif()
-  if(RS90) # TODO: Autodetect when we compile for RS90
-    set(DISABLE_ADLIB ON)
-    target_compile_definitions(${ENGINE_TARGET} PRIVATE -DRS90=1)
-  endif()
-  if(NOT DISABLE_ADLIB)
-    target_sources(${ENGINE_TARGET} PRIVATE
-      libretro/id_sd_adlib.cpp
-      libretro/id_sd_n3dmus.cpp)
-  else()
-    target_compile_definitions(${ENGINE_TARGET} PRIVATE -DDISABLE_ADLIB=1)
-  endif()
-
-  if(NOT LIBRETRO_STATIC)
-	set(ENGINE_BINARY_NAME "ecwolf_libretro${LIBRETRO_SUFFIX}")
-  endif()
-  # Set the libretro core name.
-  set_target_properties(${ENGINE_TARGET} PROPERTIES PREFIX "")
-  if(ANDROID)
-    set(ENGINE_BINARY_NAME "ecwolf_libretro_android")
-  endif()
-  set_target_properties(${ENGINE_TARGET} PROPERTIES LIBRARY_OUTPUT_NAME "${ENGINE_BINARY_NAME}")
-  # Output the library to CMake's build directory.
-  set_target_properties(${ENGINE_TARGET} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
-if(WIN32)
-  target_sources(${ENGINE_TARGET} PRIVATE
-    libretro/w32_random.cpp)
-endif()
-if(NOT LIBRETRO_STATIC)
-target_sources(${ENGINE_TARGET} PRIVATE
-	libretro/libretro-common/compat/compat_posix_string.c
-	libretro/libretro-common/compat/compat_snprintf.c
-	libretro/libretro-common/compat/compat_strl.c 
-	libretro/libretro-common/compat/fopen_utf8.c 
-	libretro/libretro-common/encodings/encoding_utf.c
-	libretro/libretro-common/file/file_path.c
-	libretro/libretro-common/file/retro_dirent.c
-	libretro/libretro-common/streams/file_stream.c
-	libretro/libretro-common/string/stdstring.c
-	libretro/libretro-common/time/rtime.c
-	libretro/libretro-common/vfs/vfs_implementation.c)
-endif()
-
-  target_include_directories(${ENGINE_TARGET} PRIVATE libretro/libretro-common/include)
-else()
-  target_sources(${ENGINE_TARGET} PRIVATE
-      c_cvars.cpp
-      filesys.cpp
-      filesys_steam.cpp
-      id_in.cpp
-      id_sd.cpp
-      id_sd_n3dmus.cpp
-      id_us_1.cpp
-      wl_debug.cpp
-      gitinfo.cpp
-      g_intermission.cpp
-      wl_play.cpp
-      wl_game.cpp
-      wl_main.cpp
-      sdlvideo.cpp
-      wl_text.cpp
-      wl_inter.cpp
-      wl_net.cpp)
-endif()
-
-
-if(ANDROID AND NOT LIBRETRO AND NOT _DIII4A)
+if(ANDROID AND NOT _DIII4A)
 	# On Android we build a shared object so create a dummy program so we can
 	# get link errors.
 	add_executable(link-test android/link-test.cpp)
@@ -244,28 +174,6 @@ include(CheckCXXSourceCompiles)
 include(CheckFunctionExists)
 include(FindPkgConfig)
 
-if(LIBRETRO)
-	target_compile_definitions(${ENGINE_TARGET} PRIVATE -DLIBRETRO=1 -DNO_STORE=1 -DDISABLE_GDTOA=1)
-	if(WIN32)
-		target_compile_definitions(${ENGINE_TARGET} PRIVATE -DUSE_WINDOWS_DWORD=1)
-	endif()
-endif()
-
-if(LIBRETRO_STATIC)
-	set_target_properties(${ENGINE_TARGET} PROPERTIES SUFFIX "_partial.a")
-        if(EMSCRIPTEN)
-		set(LIBRETRO_EXTENSION "bc")
-		set(ZLIB_NAME "libz")
-        else()
-		set(LIBRETRO_EXTENSION "a")
-		set(ZLIB_NAME "libzlibstatic")
-        endif()
-        add_custom_command(TARGET ${ENGINE_TARGET}
-               POST_BUILD
-                   COMMAND ${CMAKE_SOURCE_DIR}/src/libretro/merge_static.sh $(AR) ${CMAKE_BINARY_DIR}/ecwolf_libretro${LIBRETRO_SUFFIX}.${LIBRETRO_EXTENSION} ${CMAKE_BINARY_DIR}/src/ecwolf_partial.a ${CMAKE_BINARY_DIR}/deps/bzip2/libbz2.a ${CMAKE_BINARY_DIR}/deps/lzma/liblzma.a ${CMAKE_BINARY_DIR}/deps/jpeg-6b/libjpeg.a ${CMAKE_BINARY_DIR}/deps/zlib/${ZLIB_NAME}.a)
-	target_compile_definitions(${ENGINE_TARGET} PRIVATE -DSeqInStream_Read2=ecwolf_SeqInStream_Read2 -DSeqInStream_Read=ecwolf_SeqInStream_Read -DSeqInStream_ReadByte=ecwolf_SeqInStream_ReadByte -DLookInStream_SeekTo=ecwolf_LookInStream_SeekTo -DLookInStream_LookRead=ecwolf_LookInStream_LookRead -DLookInStream_Read2=ecwolf_LookInStream_Read2 -DLookInStream_Read=ecwolf_LookInStream_Read -DSecToLook_CreateVTable=ecwolf_SecToLook_CreateVTable -DSecToRead_CreateVTable=ecwolf_SecToRead_CreateVTable -DCrcGenerateTable=ecwolf_CrcGenerateTable -DCrcUpdateT1=ecwolf_CrcUpdateT1 -Dg_CrcUpdate=ecwolf_g_CrcUpdate -Dg_CrcTable=ecwolf_g_CrcTable -DCrcUpdate=ecwolf_CrcUpdate -Dk7zSignature=ecwolf_k7zSignature -DSzArEx_GetFileNameUtf16=ecwolf_SzArEx_GetFileNameUtf16 -DSzAr_DecodeFolder=ecwolf_SzAr_DecodeFolder -DSzArEx_Extract=ecwolf_SzArEx_Extract -DBuf_Free=ecwolf_Buf_Free -DBuf_Init=ecwolf_Buf_Init -DBuf_Create=ecwolf_Buf_Create -DCrcCalc=ecwolf_CrcCalc -DSzArEx_Open=ecwolf_SzArEx_Open -DSzAr_GetFolderUnpackSize=ecwolf_SzAr_GetFolderUnpackSize -DSzGetNextFolderItem=ecwolf_SzGetNextFolderItem -DSzArEx_Free=ecwolf_SzArEx_Free -DSzArEx_Init=ecwolf_SzArEx_Init -DSzBitUi64s_Free=ecwolf_SzBitUi64s_Free -DSzBitUi32s_Free=ecwolf_SzBitUi32s_Free -Dg_CrcUpdateT4=ecwolf_g_CrcUpdateT4 -Dg_CrcUpdateT8=ecwolf_g_CrcUpdateT8 -DCrcUpdateT4=ecwolf_CrcUpdateT4 -DCrcUpdateT8=ecwolf_CrcUpdateT8 -DLzmaDec_InitDicAndState=ecwolf_LzmaDec_InitDicAndState -DLzmaDec_Init=ecwolf_LzmaDec_Init -DLzmaDec_DecodeToDic=ecwolf_LzmaDec_DecodeToDic -DLzmaDec_DecodeToBuf=ecwolf_LzmaDec_DecodeToBuf -DLzmaDec_FreeProbs=ecwolf_LzmaDec_FreeProbs -DLzmaDec_Free=ecwolf_LzmaDec_Free -DLzmaProps_Decode=ecwolf_LzmaProps_Decode -DLzmaDec_AllocateProbs=ecwolf_LzmaDec_AllocateProbs -DLzmaDec_Allocate=ecwolf_LzmaDec_Allocate -DLzmaDecode=ecwolf_LzmaDecode -DLzma2Dec_AllocateProbs=ecwolf_Lzma2Dec_AllocateProbs -DLzma2Dec_Init=ecwolf_Lzma2Dec_Init -DLzma2Dec_DecodeToDic=ecwolf_Lzma2Dec_DecodeToDic -DBcj2Dec_Init=ecwolf_Bcj2Dec_Init -DBcj2Dec_Decode=ecwolf_Bcj2Dec_Decode -DDelta_Init=ecwolf_Delta_Init -DDelta_Encode=ecwolf_Delta_Encode -DDelta_Decode=ecwolf_Delta_Decode -DLzma2Dec_Allocate=ecwolf_Lzma2Dec_Allocate -DLzma2Dec_DecodeToBuf=ecwolf_Lzma2Dec_DecodeToBuf -DLzma2Decode=ecwolf_Lzma2Decode -DIA64_Convert=ecwolf_IA64_Convert -DSPARC_Convert=ecwolf_SPARC_Convert -Dx86_Convert=ecwolf_x86_Convert -DPPC_Convert=ecwolf_PPC_Convert -DARMT_Convert=ecwolf_ARMT_Convert -DARM_Convert=ecwolf_ARM_Convert)
-endif()
-      
 if(GPL)
 	target_compile_definitions(${ENGINE_TARGET} PRIVATE -DUSE_GPL)
 	if(NOT DISABLE_ADLIB)
@@ -280,21 +188,9 @@ else()
 	target_sources(${ENGINE_TARGET} PRIVATE mame/fmopl.cpp)
 endif()
 
-if(LIBRETRO_STATIC)
-	set(STRICMP_EXISTS NO)
-	set(STRNICMP_EXISTS NO)
-	set(ATOLL_EXISTS YES)
-else()
-	check_function_exists(stricmp STRICMP_EXISTS)
-	check_function_exists(strnicmp STRNICMP_EXISTS)
-	check_function_exists(atoll ATOLL_EXISTS)
-endif()
-
-check_function_exists(malloc_usable_size MALLOC_USABLE_SIZE)
-if(MALLOC_USABLE_SIZE)
-	target_compile_definitions(${ENGINE_TARGET} PRIVATE -DHAS_MALLOC_USABLE_SIZE=1)
-endif()
-
+check_function_exists(stricmp STRICMP_EXISTS)
+check_function_exists(strnicmp STRNICMP_EXISTS)
+check_function_exists(atoll ATOLL_EXISTS)
 if(NOT STRICMP_EXISTS)
 	target_compile_definitions(${ENGINE_TARGET} PRIVATE -Dstricmp=strcasecmp)
 endif()
@@ -322,6 +218,10 @@ if( NOT HAS_VA_COPY )
 endif()
 
 if( ZD_CMAKE_COMPILER_IS_GNUCXX_COMPATIBLE )
+	if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0 )
+		# Remove after switching to C++11
+		target_compile_options(${ENGINE_TARGET} PRIVATE -Wno-class-memaccess)
+	endif()
 	if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0 )
 		target_compile_options(${ENGINE_TARGET} PRIVATE -Wno-implicit-fallthrough)
 	endif()
@@ -331,9 +231,7 @@ if( ZD_CMAKE_COMPILER_IS_GNUCXX_COMPATIBLE )
 	target_compile_options(${ENGINE_TARGET} PRIVATE -Wall -Wextra -Wno-unused -Wno-unused-parameter -Wno-missing-field-initializers)
 endif()
 
-if(LIBRETRO)
-        set(NO_GTK ON)
-elseif(WIN32)
+if(WIN32)
 	set(NO_GTK ON)
 	target_link_libraries(${ENGINE_TARGET} PRIVATE comctl32)
 	target_compile_definitions(${ENGINE_TARGET} PRIVATE -DNO_STDIO_REDIRECT)
@@ -378,7 +276,7 @@ if(NO_GTK)
 	target_compile_definitions(${ENGINE_TARGET} PRIVATE -DNO_GTK=1)
 endif()
 
-if(APPLE AND NOT LIBRETRO)
+if(APPLE)
 	target_sources(${ENGINE_TARGET} PRIVATE
 		macosx/filesys.mm
 		macosx/i_main.mm
@@ -408,7 +306,7 @@ elseif(_DIII4A)
 	# Aarch64 linker seems to be setup improperly and requires these to be
 	# public for link-test
 	target_link_libraries(${ENGINE_TARGET} PUBLIC android log )
-elseif(ANDROID AND NOT LIBRETRO)
+elseif(ANDROID)
 	target_sources(${ENGINE_TARGET} PRIVATE
 		android/android-jni.cpp
 		android/in_android.cpp
@@ -444,46 +342,29 @@ file(GLOB HEADER_FILES
 list(APPEND HEADER_FILES ${CMAKE_CURRENT_BINARY_DIR}/versiondefs.h)
 target_sources(${ENGINE_TARGET} PRIVATE ${HEADER_FILES})
 
-if (LIBRETRO)
-	if(NOT LIBRETRO_STATIC)
+if(_DIII4A)
 		target_link_libraries(${ENGINE_TARGET} PRIVATE
-			${BZIP2_LIBRARIES}
-			${JPEG_LIBRARIES}
-			lzma
-			ZLIB::ZLIB
-			)
-	else()
-		target_include_directories(${ENGINE_TARGET} PRIVATE
-		  ${CMAKE_SOURCE_DIR}/deps/lzma/C
-		  ${CMAKE_SOURCE_DIR}/deps/zlib
-		  ${CMAKE_BINARY_DIR}/deps/zlib)
-		add_dependencies(${ENGINE_TARGET} bz2 jpeg lzma zlibstatic)
-	endif()
+				SDL2_mixer
+				SDL2_net
+				SDL2
+				${BZIP2_LIBRARIES}
+				${JPEG_LIBRARIES}
+				${ECWOLF_PREFIX}lzma
+				${ECWOLF_PREFIX}gdtoa
+				${ECWOLF_PREFIX}ZLIB::ZLIB
+				)
 else()
-	if(_DIII4A)
-			target_link_libraries(${ENGINE_TARGET} PRIVATE
-					SDL2_mixer
-					SDL2_net
-					SDL2
-					${BZIP2_LIBRARIES}
-					${JPEG_LIBRARIES}
-					${ECWOLF_PREFIX}lzma
-					${ECWOLF_PREFIX}gdtoa
-					${ECWOLF_PREFIX}ZLIB::ZLIB
-					)
-		else()
-		add_dependencies(${ENGINE_TARGET} revision_check)
+	add_dependencies(${ENGINE_TARGET} revision_check)
 	target_link_libraries(${ENGINE_TARGET} PRIVATE
-		SDL2::SDL2_mixer
-		SDL2::SDL2_net
-		SDL2::SDL2
-		${BZIP2_LIBRARIES}
-		${JPEG_LIBRARIES}
-		lzma
-		gdtoa
-		ZLIB::ZLIB
-	)
-		endif()
+	SDL2_mixer::SDL2_mixer
+	SDL2_net::SDL2_net
+	SDL2::SDL2
+	${BZIP2_LIBRARIES}
+	${JPEG_LIBRARIES}
+	lzma
+	gdtoa
+	ZLIB::ZLIB
+)
 endif()
 target_include_directories(${ENGINE_TARGET} PRIVATE
 	${BZIP2_INCLUDE_DIR}
@@ -497,18 +378,56 @@ set_target_properties(${ENGINE_TARGET} PROPERTIES
 	CXX_STANDARD 98
 	OUTPUT_NAME "${ENGINE_BINARY_NAME}"
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
-)
-
-if ("${CMAKE_OSX_DEPLOYMENT_TARGET}" STREQUAL "" OR "${CMAKE_OSX_DEPLOYMENT_TARGET}" VERSION_GREATER "10.4.16")
-set_target_properties(${ENGINE_TARGET} PROPERTIES
 	# On Linux look for any libraries we link against in the executable directory.
 	INSTALL_RPATH "\$ORIGIN"
-	BUILD_WITH_INSTALL_RPATH ON)
+	BUILD_WITH_INSTALL_RPATH ON
+)
+
+# Windows console wrapper
+if(WIN32)
+	add_executable(engine-console win32/console-wrapper.c)
+	set_target_properties(engine-console PROPERTIES
+		OUTPUT_NAME "${ENGINE_BINARY_NAME}-console"
+		RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
+	)
+	target_link_libraries(engine-console PRIVATE shlwapi)
+
+	if(MSVC)
+		# This program doesn't actually need the C runtime
+		if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
+			target_compile_options(engine-console PRIVATE /GS-)
+			target_link_options(engine-console PRIVATE /NODEFAULTLIB /ENTRY:wmain)
+			set_target_properties(engine-console PROPERTIES MSVC_RUNTIME_CHECKS "")
+		else()
+			target_compile_options(engine-console PRIVATE $<$<NOT:$<CONFIG:Debug>>:/GS->)
+			if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+				target_link_options(engine-console PRIVATE $<$<NOT:$<CONFIG:Debug>>:/NODEFAULTLIB> $<$<NOT:$<CONFIG:Debug>>:/ENTRY:wmain>)
+			else()
+				set_target_properties(engine-console PROPERTIES
+					LINK_FLAGS_RELEASE "/NODEFAULTLIB /ENTRY:wmain"
+					LINK_FLAGS_RELWITHDEBINFO "/NODEFAULTLIB /ENTRY:wmain"
+					LINK_FLAGS_MINSIZEREL "/NODEFAULTLIB /ENTRY:wmain"
+				)
+			endif()
+		endif()
+
+		# Legacy Visual C++ has terrible C support
+		if(MSVC_VERSION LESS 1900)
+			set_source_files_properties(win32/console-wrapper.c PROPERTIES LANGUAGE CXX)
+		endif()
+	else()
+		target_link_options(engine-console PRIVATE -municode)
+		# Workarounds for static linking MinGW runtimes interfere with our ability to trim down this binary
+		if(NOT CMAKE_EXE_LINKER_FLAGS MATCHES "--whole-archive")
+			target_link_options(engine-console PRIVATE -nodefaultlibs -nostartfiles --entry=_wmain)
+		endif()
 endif()
       
+	install(TARGETS engine-console BUNDLE DESTINATION ${OUTPUT_DIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
+endif()
 
 # Install
-if(NOT ANDROID AND NOT LIBRETRO)
+if(NOT ANDROID)
 	install(TARGETS ${ENGINE_TARGET} BUNDLE DESTINATION ${OUTPUT_DIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
 
 	if(NOT WIN32 AND NOT APPLE)

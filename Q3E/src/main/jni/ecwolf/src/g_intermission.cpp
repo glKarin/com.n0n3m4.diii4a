@@ -47,6 +47,7 @@
 #include "wl_game.h"
 #include "wl_inter.h"
 #include "wl_menu.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "thingdef/thingdef.h"
 
@@ -86,12 +87,12 @@ static bool WaitIntermission(unsigned int time)
 {
 	if(time)
 	{
-		return IN_UserInput(time);
+		return IN_UserInput(time, ACK_Any);
 	}
 	else
 	{
 		IN_ClearKeysDown ();
-		IN_Ack ();
+		IN_Ack (ACK_Any);
 		return true;
 	}
 }
@@ -151,7 +152,8 @@ static bool ShowImage(IntermissionAction *image, bool drawonly)
 				FinishTravel();
 				AActor::FinishSpawningActors();
 				// Drop weapon
-				players[0].SetPSprite(NULL, player_t::ps_weapon);
+				for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+					players[i].SetPSprite(NULL, player_t::ps_weapon);
 				PreloadGraphics(true);
 				gamestate.victoryflag = true;
 			}

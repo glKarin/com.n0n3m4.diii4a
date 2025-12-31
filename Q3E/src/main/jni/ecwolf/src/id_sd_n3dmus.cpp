@@ -32,7 +32,7 @@ static byte  carriers[9] =  {3, 4, 5,11,12,13,19,20,21},
 
 volatile    bool   midiOn;
 static volatile    int32_t midiError = 0;
-static float       midiTimeScale = 1.86;
+static double      midiTimeScale = 1.86;
 const byte        *midiData, *midiDataStart;
 static byte        midiRunningStatus;
 static longword    midiLength, midiDeltaTime;
@@ -443,7 +443,7 @@ MIDI_IRQService(void)
 		return;
 	}
 
-	midiDeltaTime = midiDeltaTime * midiTimeScale;
+	midiDeltaTime = static_cast<longword>(midiDeltaTime * midiTimeScale);
 }
 
 // MIDI startup code

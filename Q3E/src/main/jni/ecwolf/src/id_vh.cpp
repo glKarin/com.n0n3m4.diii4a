@@ -1,6 +1,7 @@
 #include "wl_def.h"
 #include "wl_play.h"
 #include "am_map.h"
+#include "colormatcher.h"
 #include "id_in.h"
 #include "id_vl.h"
 #include "id_vh.h"
@@ -115,7 +116,7 @@ void VW_MeasurePropString (FFont *font, const char *string, word &width, word &h
 
 =============================================================================
 */
-#ifndef LIBRETRO
+
 #if SDL_VERSION_ATLEAST(2,0,0)
 void Blit8BitSurfaceToTexture(SDL_Texture *tex, SDL_Surface *surf)
 {
@@ -144,7 +145,6 @@ void Blit8BitSurfaceToTexture(SDL_Texture *tex, SDL_Surface *surf)
 	else
 		Printf("Can't lock texture!\n");
 }
-#endif
 #endif
 
 void VH_UpdateScreen()
@@ -192,8 +192,8 @@ static const uint32_t rndmasks[] = {
 	0x01200000,     // 25   25,22      (this is enough for 8191x4095)
 };
 
-unsigned int rndbits_y;
-unsigned int rndmask;
+static unsigned int rndbits_y;
+static unsigned int rndmask;
 
 // Returns the number of bits needed to represent the given value
 static int log2_ceil(uint32_t x)
@@ -224,113 +224,113 @@ void VH_Startup()
 	AM_ChangeResolution();
 }
 
-byte *fizzleSurface = NULL;
-void FizzleFadeStart()
+FFizzleFader::FFizzleFader(int x1, int y1, unsigned width, unsigned height, unsigned frames, bool staticframes)
+: srcptr(NULL), x1(x1), y1(y1), width(width), height(height),
+  fadems(TICS2MS(frames)), startms(SDL_GetTicks()),
+  pixcovered(0), rndval(0), staticframes(staticframes)
+{
+	destptr = new byte[SCREENHEIGHT*SCREENPITCH];
+	srcptr = new byte[SCREENHEIGHT*SCREENPITCH];
+
+	memset(srcptr.Get(), 0, SCREENHEIGHT*SCREENPITCH);
+	if(staticframes)
+		CaptureFrame();
+	else
+		memset(destptr.Get(), 0, SCREENHEIGHT*SCREENPITCH);
+}
+
+void FFizzleFader::CaptureFrame()
 {
 	screen->Lock(false);
-	fizzleSurface = new byte[SCREENHEIGHT*SCREENPITCH];
-	memcpy(fizzleSurface, screen->GetBuffer(), SCREENHEIGHT*SCREENPITCH);
+	memcpy(destptr.Get(), screen->GetBuffer(), SCREENHEIGHT*SCREENPITCH);
 	screen->Unlock();
 }
-bool FizzleFade (int x1, int y1,
-	unsigned width, unsigned height, unsigned frames, bool abortable)
+
+void FFizzleFader::FadeToColor(int red, int green, int blue)
 {
-	unsigned x, y, frame, pixperframe;
-	int32_t  rndval=0;
+	byte* srcbuf = new byte[SCREENHEIGHT*SCREENPITCH];
+	memset(srcbuf, 0, SCREENHEIGHT*SCREENPITCH);
+	srcptr = srcbuf;
 
-	assert(fizzleSurface != NULL);
+	int color = ColorMatcher.Pick(red,green,blue);
+	unsigned yend = y1 + height;
+	for(unsigned y = y1; y < yend; ++y)
+		memset(srcptr.Get() +  (y * SCREENPITCH) + x1, color, width);
+}
 
-	pixperframe = width * height / frames;
-
-	IN_StartAck ();
-
-	frame = GetTimeCount();
-	screen->Lock(false);
-	byte * const srcptr = new byte[SCREENHEIGHT*SCREENPITCH];
-	memcpy(srcptr, screen->GetBuffer(), SCREENHEIGHT*SCREENPITCH);
-	screen->Unlock();
-
-	do
+bool FFizzleFader::Update()
+{
+	if(staticframes)
 	{
-		IN_ProcessEvents();
+		// Screen buffer won't be refreshed so we need to capture instead of
+		// making our overlay transparent
+		screen->Lock(false);
+		memcpy(srcptr.Get(), screen->GetBuffer(), SCREENHEIGHT*SCREENPITCH);
+		screen->Unlock();
 
-		if(abortable && IN_CheckAck ())
+		staticframes = false;
+	}
+
+	unsigned p = pixcovered;
+	pixcovered = (width * height) * (SDL_GetTicks() - startms) / fadems;
+
+	unsigned yend = y1 + height;
+	bool complete = true;
+	for(; p < pixcovered; p++)
+	{
+		//
+		// seperate random value into x/y pair
+		//
+
+		unsigned x = rndval >> rndbits_y;
+		unsigned y = rndval & ((1 << rndbits_y) - 1);
+
+		//
+		// advance to next random element
+		//
+
+		rndval = (rndval >> 1) ^ (rndval & 1 ? 0 : rndmask);
+
+		if(x >= width || y >= yend)
 		{
-			VH_UpdateScreen();
-			delete[] fizzleSurface;
-			delete[] srcptr;
-			fizzleSurface = NULL;
-			return true;
+			if(rndval == 0)     // entire sequence has been completed
+				goto finished;
+			p--;
+			continue;
 		}
 
-		byte *destptr = fizzleSurface;
+		//
+		// copy one pixel
+		//
+		destptr[(y1 + y) * SCREENPITCH + x1 + x]
+			= srcptr[(y1 + y) * SCREENPITCH + x1 + x];
 
-		if(destptr != NULL)
-		{
-			for(unsigned p = 0; p < pixperframe; p++)
-			{
-				//
-				// seperate random value into x/y pair
-				//
-
-				x = rndval >> rndbits_y;
-				y = rndval & ((1 << rndbits_y) - 1);
-
-				//
-				// advance to next random element
-				//
-
-				rndval = (rndval >> 1) ^ (rndval & 1 ? 0 : rndmask);
-
-				if(x >= width || y >= height)
-				{
-					if(rndval == 0)     // entire sequence has been completed
-						goto finished;
-					p--;
-					continue;
-				}
-
-				//
-				// copy one pixel
-				//
-				*(destptr + (y1 + y) * SCREENPITCH + x1 + x)
-					= *(srcptr + (y1 + y) * SCREENPITCH + x1 + x);
-
-				if(rndval == 0)		// entire sequence has been completed
-					goto finished;
-			}
-
-			memcpy(screen->GetBuffer(), destptr, SCREENHEIGHT*SCREENPITCH);
-			VH_UpdateScreen();
-		}
-		else
-		{
-			// No surface, so only enhance rndval
-			for(unsigned p = 0; p < pixperframe; p++)
-			{
-				rndval = (rndval >> 1) ^ (rndval & 1 ? 0 : rndmask);
-				if(rndval == 0)
-					goto finished;
-			}
-		}
-
-		frame++;
-		Delay(frame - GetTimeCount());        // don't go too fast
-	} while (1);
+		if(rndval == 0)		// entire sequence has been completed
+			goto finished;
+	}
+	complete = false;
 
 finished:
-	for (y = y1; y < (y1 + height); ++y)
+	byte* vbuf = screen->GetBuffer();
+	for (unsigned y = y1; y < (y1 + height); ++y)
 	{
-		memcpy(fizzleSurface + (y * SCREENPITCH) + x1,
-					srcptr + (y * SCREENPITCH) + x1,
-					width); 
+		for (unsigned pixel = (y * SCREENPITCH) + x1, pend = pixel + width; pixel < pend; ++pixel)
+		{
+			if (destptr[pixel])
+				vbuf[pixel] = destptr[pixel];
+		}
 	}
-	memcpy(screen->GetBuffer(), fizzleSurface, SCREENHEIGHT * SCREENPITCH);
+	return complete;
+}
+
+void FizzleFade (FFader &fader)
+{
+	while(!fader.Update())
+	{
+		VH_UpdateScreen();
+		IN_ProcessEvents();
+	}
 	VH_UpdateScreen();
-	delete[] fizzleSurface;
-	delete[] srcptr;
-	fizzleSurface = NULL;
-	return false;
 }
 
 //==========================================================================

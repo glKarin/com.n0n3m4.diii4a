@@ -1,5 +1,3 @@
-cmake_minimum_required( VERSION 3.5.0 )
-
 if(NOT CMAKE_CROSSCOMPILING)
 	add_executable( zipdir
 		zipdir.c )

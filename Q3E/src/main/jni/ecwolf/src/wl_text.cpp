@@ -265,7 +265,7 @@ static void HandleCommand (bool helphack)
 				fontcolor = 255;
 				const BYTE *colorname = (const BYTE *)(text);
 				textcolor = V_ParseFontColor(colorname, CR_UNTRANSLATED, CR_UNTRANSLATED+1);
-				while(*text++ != ']');
+				while(*text++ != ']') {}
 			}
 			else
 			{
@@ -675,7 +675,7 @@ static void ShowBriefing(FString str)
 	DrawMultiLineText(str, font, textcolor, alignment, anchor);
 
 	VL_FadeIn(0,255,10);
-	IN_Ack();
+	IN_Ack(ACK_Any);
 }
 
 void DrawMultiLineText(const FString str, FFont *font, EColorRange color, ETSAlignment align, ETSAnchor anchor)
@@ -860,7 +860,7 @@ static bool ShowText(const FString exitText, const FString flat, const FString m
 			Message (exitText);
 
 			IN_ClearKeysDown ();
-			IN_Ack ();
+			IN_Ack (ACK_Any);
 			return false;
 	
 		case ClusterInfo::EXIT_LUMP:

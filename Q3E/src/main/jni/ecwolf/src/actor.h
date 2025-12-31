@@ -99,6 +99,7 @@ class AActor : public Thinker,
 		virtual void	BeginPlay() {}
 		void			ClearCounters();
 		void			ClearInventory();
+		bool			CheckVisibility(const AActor *check, angle_t fov=ANGLE_45) const;
 		virtual void	Destroy();
 		virtual void	Die();
 		void			EnterZone(const MapZone *zone);
@@ -112,10 +113,12 @@ class AActor : public Thinker,
 		bool			GiveInventory(const ClassDef *cls, int amount=0, bool allowreplacement=true);
 		bool			InStateSequence(const Frame *basestate) const;
 		bool			IsFast() const;
+		virtual void	LevelSpawned() {}
 		virtual void	PostBeginPlay() {}
 		void			RemoveFromWorld();
 		virtual void	RemoveInventory(AInventory *item);
 		void			Serialize(FArchive &arc);
+		void			SetIdle();
 		void			SetState(const Frame *state, bool norun=false);
 		void			SpawnFog();
 		static AActor	*Spawn(const ClassDef *type, fixed x, fixed y, fixed z, int flags);
@@ -135,6 +138,7 @@ class AActor : public Thinker,
 		int32_t	distance; // if negative, wait for that door to open
 		dirtype	dir;
 
+#pragma pack(push, 1)
 // MSVC and older versions of GCC don't support constant union parts
 // We do this instead of just using a regular word since writing to tilex/y
 // indicates an error.
@@ -143,7 +147,6 @@ class AActor : public Thinker,
 #else
 #define COORD_PART word
 #endif
-PACK_START
 		union
 		{
 			fixed x;
@@ -152,7 +155,7 @@ PACK_START
 #else
 			struct { COORD_PART fracx; COORD_PART tilex; };
 #endif
-		} PACKED;
+		};
 		union
 		{
 			fixed y;
@@ -161,8 +164,8 @@ PACK_START
 #else
 			struct { COORD_PART fracy; COORD_PART tiley; };
 #endif
-		} PACKED;
-PACK_END
+		};
+#pragma pack(pop)
 		fixed z;
 		fixed	velx, vely;
 
@@ -170,7 +173,7 @@ PACK_END
 		angle_t pitch;
 		int32_t	health;
 		int32_t	speed, runspeed;
-		int32_t		points;
+		int		points;
 		fixed	radius;
 		fixed	projectilepassheight;
 

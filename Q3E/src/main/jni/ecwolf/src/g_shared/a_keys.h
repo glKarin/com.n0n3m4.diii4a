@@ -10,6 +10,9 @@ class AKey : public AInventory
 
 	public:
 		unsigned int	KeyNumber;
+
+	protected:
+		bool ShouldStay();
 };
 
 void P_InitKeyMessages();

@@ -42,8 +42,10 @@
 #include "lnspec.h"
 #include "actor.h"
 #include "thingdef/thingdef.h"
+#include "wl_act.h"
 #include "wl_agent.h"
 #include "wl_game.h"
+#include "wl_net.h"
 #include "wl_play.h"
 #include "r_sprites.h"
 #include "resourcefiles/resourcefile.h"
@@ -53,8 +55,29 @@
 #include "g_mapinfo.h"
 
 const FName SpecialThingNames[SMT_NumThings] = {
-	"$Player1Start"
+	"$Player1Start",
+	"$Player2Start",
+	"$Player3Start",
+	"$Player4Start",
+	"$Player5Start",
+	"$Player6Start",
+	"$Player7Start",
+	"$Player8Start",
+	"$Player9Start",
+	"$Player10Start",
+	"$Player11Start",
+	"$DeathmatchStart"
 };
+
+ESpecialThings SpecialThingNamesLookup(FName name)
+{
+	for(unsigned int i = 0;i < SMT_NumThings;++i)
+	{
+		if(SpecialThingNames[i] == name)
+			return static_cast<ESpecialThings>(i);
+	}
+	return SMT_NumThings;
+}
 
 GameMap::GameMap(const FString &map) : map(map), valid(false), isUWMF(false),
 	file(NULL), zoneTraversed(NULL), zoneLinks(NULL)
@@ -230,8 +253,6 @@ void GameMap::ClearVisibility()
 
 bool GameMap::CheckMapExists(const FString &map)
 {
-	if (Wads.CheckNumForName(map) < 0)
-		return false;
 	try
 	{
 		GameMap gm(map);
@@ -322,6 +343,66 @@ void GameMap::GetHitlist(BYTE* hitlist) const
 			}
 		}
 	}
+}
+
+const GameMap::PlayerSpawn *GameMap::GetPlayerSpawn(int player) const
+{
+	if(Net::InitVars.gameMode == Net::GM_Battle)
+	{
+		if(deathmatchStarts.Size() == 0)
+			return NULL;
+
+		// Spawn farthest
+		unsigned int best = 0;
+		fixed distance = 0;
+
+		for(unsigned int i = 0;i < deathmatchStarts.Size();++i)
+		{
+			PlayerSpawn &spot = deathmatchStarts[i];
+
+			fixed closest = INT_MAX;
+			for(unsigned int p = 0;p < Net::InitVars.numPlayers;++p)
+			{
+				if(!players[p].mo && players[p].health <= 0)
+					continue;
+
+				fixed player_distance = P_AproxDistance(players[p].mo->x - spot.x, players[p].mo->y - spot.y);
+				if(player_distance < closest)
+					closest = player_distance;
+			}
+
+			if(closest > distance)
+			{
+				best = i;
+				distance = closest;
+			}
+		}
+
+		return &deathmatchStarts[best];
+	}
+
+	if(const PlayerSpawn *spawn = playerStarts.CheckKey(player))
+		return spawn;
+
+	if(playerStarts.CountUsed() == 0)
+		return NULL;
+
+	// No direct spawn, so overlap with another player, but if possible divide
+	// amongst any additional spawn points available
+	unsigned int alt = player % playerStarts.CountUsed();
+	const PlayerSpawn *best = NULL;
+	for(unsigned int i = 0;i < MAXPLAYERS;++i)
+	{
+		if(const PlayerSpawn *spawn = playerStarts.CheckKey(i))
+		{
+			best = spawn;
+			if(alt == 0)
+				break;
+			--alt;
+		}
+	}
+
+	return best;
 }
 
 // Looks up the MapSpot by tag number.  If spot is NULL then the first spot
@@ -481,15 +562,16 @@ void GameMap::SetSpotTag(MapSpot spot, unsigned int tag)
 
 void GameMap::SetupLinks()
 {
-	const unsigned int zdSize = ((zonePalette.Size()*(zonePalette.Size()+1))>>1);
-	zoneTraversed = new bool[zonePalette.Size()];
-	memset(zoneTraversed, 0, zonePalette.Size() * sizeof (zoneTraversed[0]));
-	zptrBack = new unsigned short[zdSize];
-	memset(zptrBack, 0, sizeof(zptrBack[0]) * zdSize);	
+	// Allocate as one large block for locality.
+	const unsigned int zdSize = sizeof(bool)*zonePalette.Size()
+		+ sizeof(unsigned short)*((zonePalette.Size()*(zonePalette.Size()+1))>>1);
+	byte* zoneData = new byte[zdSize + sizeof(unsigned short*)*zonePalette.Size()];
+	memset(zoneData, 0, zdSize);
+	zoneTraversed = reinterpret_cast<bool*>(zoneData);
 
 	// Set up the table
-	unsigned short* ptr = zptrBack;
-	zoneLinks = new unsigned short* [zonePalette.Size()];
+	unsigned short* ptr = reinterpret_cast<unsigned short*>(zoneData + sizeof(bool)*zonePalette.Size());
+	zoneLinks = reinterpret_cast<unsigned short**>(zoneData+zdSize);
 	for(unsigned int i = 0;i < zonePalette.Size();++i)
 	{
 		zoneLinks[i] = ptr;
@@ -499,20 +581,34 @@ void GameMap::SetupLinks()
 }
 
 extern FRandom pr_spawnmobj;
-void GameMap::SpawnThings() const
+void GameMap::SpawnThings()
 {
 #if 0
 	// Debug code - Show the number of things spawned at map start.
 	printf("Spawning %d things\n", things.Size());
 #endif
+
+	playerStarts.Clear();
+	deathmatchStarts.Clear();
+
+	// Since vanilla didn't have deathmatch we can collect monster spawn points as a fallback.
+	TArray<PlayerSpawn> deathmatchFallbackStarts;
+
 	for(unsigned int i = 0;i < things.Size();++i)
 	{
 		Thing &thing = things[i];
 		if(!thing.skill[gamestate.difficulty->SpawnFilter])
 			continue;
 
-		if(thing.type == SpecialThingNames[SMT_Player1Start])
-			SpawnPlayer(thing.x>>FRACBITS, thing.y>>FRACBITS, thing.angle);
+		ESpecialThings st = SpecialThingNamesLookup(thing.type);
+		if(st != SMT_NumThings)
+		{
+			PlayerSpawn spawn = {thing.x, thing.y, thing.angle};
+			if(st >= SMT_Player1Start && st <= SMT_Player11Start)
+				playerStarts.Insert(st - SMT_Player1Start, spawn);
+			else
+				deathmatchStarts.Push(spawn);
+		}
 		else
 		{
 			static const ClassDef *unknownClass = ClassDef::FindClass("Unknown");
@@ -522,6 +618,13 @@ void GameMap::SpawnThings() const
 			{
 				cls = unknownClass;
 				printf("Unknown thing %s @ (%d, %d)\n", thing.type.GetChars(), thing.x>>FRACBITS, thing.y>>FRACBITS);
+			}
+
+			if(Net::NoMonsters() && (cls->GetDefault()->flags & FL_ISMONSTER))
+			{
+				PlayerSpawn spawn = {thing.x, thing.y, thing.angle};
+				deathmatchFallbackStarts.Push(spawn);
+				continue;
 			}
 
 			AActor *actor = AActor::Spawn(cls, thing.x, thing.y, thing.z, SPAWN_AllowReplacement|(thing.patrol ? SPAWN_Patrol : 0));
@@ -535,6 +638,8 @@ void GameMap::SpawnThings() const
 			if(thing.holo)
 				actor->flags &= ~(FL_SOLID);
 
+			actor->LevelSpawned();
+
 			// Check for valid frames
 			if(!actor->state || !R_CheckSpriteValid(actor->sprite))
 			{
@@ -543,6 +648,28 @@ void GameMap::SpawnThings() const
 
 				printf("%s at (%d, %d) has no frames\n", cls->GetName().GetChars(), thing.x>>FRACBITS, thing.y>>FRACBITS);
 			}
+		}
+	}
+
+	// If map doesn't have deathmatch starts and we require them find a fallback
+	if(deathmatchStarts.Size() == 0 && Net::InitVars.gameMode == Net::GM_Battle)
+	{
+		if(deathmatchFallbackStarts.Size() != 0)
+		{
+			deathmatchStarts = deathmatchFallbackStarts;
+			if(PlayerSpawn *spawn = playerStarts.CheckKey(0))
+			{
+				// Player 1 start should be a good candidate. Generally co-op
+				// starts are near to each other so no need to add the others
+				deathmatchStarts.Push(*spawn);
+			}
+		}
+		else
+		{
+			// If the map has no monsters and no deathmatch starts, use the co-op starts
+			TMap<unsigned int, PlayerSpawn>::Pair *pair;
+			for(TMap<unsigned int, PlayerSpawn>::Iterator iter(playerStarts);iter.NextPair(pair);)
+				deathmatchStarts.Push(pair->Value);
 		}
 	}
 }
@@ -555,11 +682,8 @@ void GameMap::UnloadLinks()
 
 	// zoneTraversed holds the base address for our single allocation.
 	delete[] zoneTraversed;
-	delete[] zptrBack;
-	delete[] zoneLinks;
 	zoneTraversed = NULL;
 	zoneLinks = NULL;
-	zptrBack = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -625,6 +749,12 @@ FArchive &operator<< (FArchive &arc, GameMap *&gm)
 		<< gm->header.width
 		<< gm->header.height
 		<< gm->header.tileSize;
+
+	if(GameSave::SaveVersion >= 1599444347)
+	{
+		arc << gm->header.sky
+		    << gm->header.skyHorizonOffset;
+	}
 
 	// zoneLinks
 	if(GameSave::SaveVersion >= 1383348286)

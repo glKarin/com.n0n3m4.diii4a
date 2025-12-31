@@ -46,6 +46,7 @@
 //
 //==========================================================================
 
+template<int TWidth, int THeight, bool RowMajor>
 class FRawPageTexture : public FTexture
 {
 public:
@@ -70,9 +71,10 @@ protected:
 //
 //==========================================================================
 
+template<DWORD Size>
 static bool CheckIfRaw(FileReader & data)
 {
-	if (data.GetLength() != 64000) return false;
+	if (data.GetLength() != Size) return false;
 
 	// This is probably a raw page graphic, but do some checking to be sure
 	patch_t *foo;
@@ -102,7 +104,7 @@ static bool CheckIfRaw(FileReader & data)
 			{
 				gapAtStart = false;
 			}
-			else if (ofs >= 64000-1)	// Need one byte for an empty column
+			else if (ofs >= Size-1)	// Need one byte for an empty column
 			{
 				free (foo);
 				return true;
@@ -111,7 +113,7 @@ static bool CheckIfRaw(FileReader & data)
 			{
 				// Ensure this column does not extend beyond the end of the patch
 				const BYTE *foo2 = (const BYTE *)foo;
-				while (ofs < 64000)
+				while (ofs < Size)
 				{
 					if (foo2[ofs] == 255)
 					{
@@ -120,7 +122,7 @@ static bool CheckIfRaw(FileReader & data)
 					}
 					ofs += foo2[ofs+1] + 4;
 				}
-				if (ofs >= 64000)
+				if (ofs >= Size)
 				{
 					free (foo);
 					return true;
@@ -150,8 +152,12 @@ static bool CheckIfRaw(FileReader & data)
 
 FTexture *RawPageTexture_TryCreate(FileReader & file, int lumpnum)
 {
-	if (!CheckIfRaw(file)) return NULL;
-	return new FRawPageTexture(lumpnum);
+	if (!CheckIfRaw<320*200>(file))
+	{
+		if(!CheckIfRaw<256*200>(file)) return NULL;
+		return new FRawPageTexture<256, 200, false>(lumpnum);
+	}
+	return new FRawPageTexture<320, 200, true>(lumpnum);
 }
 
 
@@ -161,9 +167,10 @@ FTexture *RawPageTexture_TryCreate(FileReader & file, int lumpnum)
 //
 //==========================================================================
 
-const FTexture::Span FRawPageTexture::DummySpans[2] =
+template<int TWidth, int THeight, bool RowMajor>
+const FTexture::Span FRawPageTexture<TWidth, THeight, RowMajor>::DummySpans[2] =
 {
-	{ 0, 200 }, { 0, 0 }
+	{ 0, THeight }, { 0, 0 }
 };
 
 //==========================================================================
@@ -172,11 +179,12 @@ const FTexture::Span FRawPageTexture::DummySpans[2] =
 //
 //==========================================================================
 
-FRawPageTexture::FRawPageTexture (int lumpnum)
+template<int TWidth, int THeight, bool RowMajor>
+FRawPageTexture<TWidth, THeight, RowMajor>::FRawPageTexture (int lumpnum)
 : FTexture(NULL, lumpnum), Pixels(0)
 {
-	Width = 320;
-	Height = 200;
+	Width = TWidth;
+	Height = THeight;
 	WidthBits = 8;
 	HeightBits = 8;
 	WidthMask = 255;
@@ -188,7 +196,8 @@ FRawPageTexture::FRawPageTexture (int lumpnum)
 //
 //==========================================================================
 
-FRawPageTexture::~FRawPageTexture ()
+template<int TWidth, int THeight, bool RowMajor>
+FRawPageTexture<TWidth, THeight, RowMajor>::~FRawPageTexture ()
 {
 	Unload ();
 }
@@ -199,7 +208,8 @@ FRawPageTexture::~FRawPageTexture ()
 //
 //==========================================================================
 
-void FRawPageTexture::Unload ()
+template<int TWidth, int THeight, bool RowMajor>
+void FRawPageTexture<TWidth, THeight, RowMajor>::Unload ()
 {
 	if (Pixels != NULL)
 	{
@@ -214,7 +224,8 @@ void FRawPageTexture::Unload ()
 //
 //==========================================================================
 
-const BYTE *FRawPageTexture::GetColumn (unsigned int column, const Span **spans_out)
+template<int TWidth, int THeight, bool RowMajor>
+const BYTE *FRawPageTexture<TWidth, THeight, RowMajor>::GetColumn (unsigned int column, const Span **spans_out)
 {
 	if (Pixels == NULL)
 	{
@@ -222,7 +233,7 @@ const BYTE *FRawPageTexture::GetColumn (unsigned int column, const Span **spans_
 	}
 	if ((unsigned)column >= (unsigned)Width)
 	{
-		column %= 320;
+		column %= TWidth;
 	}
 	if (spans_out != NULL)
 	{
@@ -237,7 +248,8 @@ const BYTE *FRawPageTexture::GetColumn (unsigned int column, const Span **spans_
 //
 //==========================================================================
 
-const BYTE *FRawPageTexture::GetPixels ()
+template<int TWidth, int THeight, bool RowMajor>
+const BYTE *FRawPageTexture<TWidth, THeight, RowMajor>::GetPixels ()
 {
 	if (Pixels == NULL)
 	{
@@ -252,7 +264,8 @@ const BYTE *FRawPageTexture::GetPixels ()
 //
 //==========================================================================
 
-void FRawPageTexture::MakeTexture ()
+template<int TWidth, int THeight, bool RowMajor>
+void FRawPageTexture<TWidth, THeight, RowMajor>::MakeTexture ()
 {
 	FMemLump lump = Wads.ReadLump (SourceLump);
 	const BYTE *source = (const BYTE *)lump.GetMem();
@@ -263,15 +276,29 @@ void FRawPageTexture::MakeTexture ()
 	dest_p = Pixels;
 
 	// Convert the source image from row-major to column-major format
-	for (int y = 200; y != 0; --y)
+	if(RowMajor)
 	{
-		for (int x = 320; x != 0; --x)
+		for (int y = THeight; y != 0; --y)
 		{
-			*dest_p = GPalette.Remap[*source_p];
-			dest_p += 200;
-			source_p++;
+			for (int x = TWidth; x != 0; --x)
+			{
+				*dest_p = GPalette.Remap[*source_p];
+				dest_p += THeight;
+				source_p++;
+			}
+			dest_p -= THeight*TWidth-1;
 		}
-		dest_p -= 200*320-1;
+	}
+	else
+	{
+		for (int y = THeight; y != 0; --y)
+		{
+			for (int x = TWidth; x != 0; --x)
+			{
+				*dest_p++ = GPalette.Remap[*source_p];
+				source_p++;
+			}
+		}
 	}
 }
 

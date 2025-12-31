@@ -345,7 +345,7 @@ void STACK_ARGS DCanvas::DrawTextureV(FTexture *img, double x, double y, uint32 
 #endif
 }
 
-bool DCanvas::ParseDrawTextureTags (FTexture *img, double x, double y, uint32 tag, va_list tags, DrawParms *parms, bool hw) const
+bool DCanvas::ParseDrawTextureTags (FTexture *img, double x, double y, DWORD tag, va_list tags, DrawParms *parms, bool hw) const
 {
 	INTBOOL boolval;
 	int intval;
@@ -1210,7 +1210,7 @@ void DCanvas::FillSimplePoly(FTexture *tex, FVector2 *points, int npoints,
 
 		// Setup constant texture mapping parameters.
 		R_SetupSpanBits(tex);
-		R_SetSpanColormap(colormap != NULL ? &colormap->Maps[clamp<int>(shade >> FRACBITS, 0, NUMCOLORMAPS-1) * 256] : identitymap);
+		R_SetSpanColormap(colormap != NULL ? &colormap->Maps[clamp(shade >> FRACBITS, 0, NUMCOLORMAPS-1) * 256] : identitymap);
 		R_SetSpanSource(tex->GetPixels());
 		scalex = double(1u << (32 - ds_xbits)) / scalex;
 		scaley = double(1u << (32 - ds_ybits)) / scaley;

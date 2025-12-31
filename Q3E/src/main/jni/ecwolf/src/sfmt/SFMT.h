@@ -86,9 +86,7 @@ union w128_t {
 /** 128-bit data structure */
 union w128_t {
     DWORD u[4];
-#ifndef __mips__
 	QWORD u64[2];
-#endif
 };
 
 #endif

@@ -102,6 +102,7 @@ extern void Q3E_MotionEvent(float dx, float dy);
 
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <android/native_window.h>
 #include <android/native_window_jni.h>

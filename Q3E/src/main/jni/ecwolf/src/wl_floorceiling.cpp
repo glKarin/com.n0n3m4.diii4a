@@ -19,11 +19,12 @@ static void R_DrawPlane(byte *vbuf, unsigned vbufPitch, int min_wallheight, int 
 	fixed tex_step;                            // global step per one screen pixel
 	fixed gu, gv, du, dv;                      // global texture coordinates
 	const byte *tex = NULL;
-	int texwidth, texheight;
-	fixed texxscale, texyscale;
+	int texwidth = 0, texheight = 0;
+	fixed texxscale = 0, texyscale = 0;
 	FTextureID lasttex;
 	byte *tex_offset;
 	bool useOptimized = false;
+	bool isMasked = false;
 
 	if(planeheight == 0) // Eye level
 		return;
@@ -99,13 +100,14 @@ static void R_DrawPlane(byte *vbuf, unsigned vbufPitch, int min_wallheight, int 
 					oldmapy = cury;
 					const MapSpot spot = map->GetSpot(oldmapx%mapwidth, oldmapy%mapheight, 0);
 
-					if(spot->sector)
+					FTextureID curtex = spot->sector ? spot->sector->texture[floor ? MapSector::Floor : MapSector::Ceiling] : FNullTextureID();
+
+					if (curtex != lasttex)
 					{
-						FTextureID curtex = spot->sector->texture[floor ? MapSector::Floor : MapSector::Ceiling];
-						if (curtex != lasttex && curtex.isValid())
+						lasttex = curtex;
+						if(curtex.isValid())
 						{
 							FTexture * const texture = TexMan(curtex);
-							lasttex = curtex;
 							tex = texture->GetPixels();
 							texwidth = texture->GetWidth();
 							texheight = texture->GetHeight();
@@ -113,26 +115,36 @@ static void R_DrawPlane(byte *vbuf, unsigned vbufPitch, int min_wallheight, int 
 							texyscale = -texture->yScale>>10;
 
 							useOptimized = texwidth == 64 && texheight == 64 && texxscale == FRACUNIT>>10 && texyscale == -FRACUNIT>>10;
+							isMasked = texture->bMasked;
 						}
+						else
+							tex = NULL;
 					}
-					else
-						tex = NULL;
 				}
 
 				if(tex)
 				{
+					unsigned texoffs;
 					if(useOptimized)
 					{
 						const int u = (gu>>18) & 63;
 						const int v = (-gv>>18) & 63;
-						const unsigned texoffs = (u * 64) + v;
-						*tex_offset = curshades[tex[texoffs]];
+						texoffs = (u * 64) + v;
 					}
 					else
 					{
 						const int u = (FixedMul((viewxTile<<16)+(gu>>8)-512, texxscale)) & (texwidth-1);
-						const int v = (FixedMul((viewyTile<<16)+(gv>>8)+512, texyscale)) & (texheight-1);
-						const unsigned texoffs = (u * texheight) + v;
+						const int v = (FixedMul((viewyTile<<16)-(gv>>8)+512, texyscale)) & (texheight-1);
+						texoffs = (u * texheight) + v;
+					}
+
+					if(isMasked)
+					{
+						if(const byte c = tex[texoffs])
+							*tex_offset = curshades[c];
+					}
+					else
+					{
 						*tex_offset = curshades[tex[texoffs]];
 					}
 				}

@@ -27,7 +27,6 @@
 #include "g_mapinfo.h"
 #include "a_inventory.h"
 #include "am_map.h"
-#include "wl_iwad.h"
 
 /*
 =============================================================================
@@ -51,7 +50,6 @@ bool madenoise;              // true when shooting or screaming
 
 exit_t playstate;
 
-static int DebugOk;
 #ifdef __ANDROID__
 extern bool ShadowingEnabled;
 #endif
@@ -60,6 +58,7 @@ bool noclip, ammocheat, mouselook = false;
 int godmode, singlestep;
 bool notargetmode = false;
 unsigned int extravbls = 0; // to remove flicker (gray stuff at the bottom)
+unsigned short Paused;
 
 //
 // replacing refresh manager
@@ -106,6 +105,7 @@ ControlScheme controlScheme[] =
 	{ bt_zoom,				"Zoom",			-1,			-1,				-1, CS_AxisDigital, 0 },
 	{ bt_automap,			"Automap",		-1,			-1,				-1, CS_AxisDigital, 0 },
 	{ bt_showstatusbar,		"Show Status",	-1,			sc_Tab,			-1,	CS_AxisDigital, 0 },
+	{ bt_pause,				"Pause",		-1,			sc_Pause,		-1, CS_AxisDigital, 0 },
 
 	// End of List
 	{ bt_nobutton,			NULL, -1, -1, -1, CS_AxisDigital, 0 }
@@ -190,7 +190,7 @@ static int32_t lasttimecount;
 
 int32_t GetTimeCount()
 {
-	return SDL_GetTicks()*7/100;
+	return MS2TICS(SDL_GetTicks());
 }
 
 /*
@@ -216,14 +216,14 @@ void CalcTics()
 		ResetTimeCount();
 
 	uint32_t curtime = SDL_GetTicks();
-	tics = (curtime * 7) / 100 - lasttimecount;
+	tics = MS2TICS(curtime) - lasttimecount;
 	if(!tics)
 	{
 		// wait until end of current tic
-		SDL_Delay(((lasttimecount + 1) * 100) / 7 - curtime);
+		SDL_Delay(TICS2MS(lasttimecount + 1) - curtime);
 		tics = 1;
 	}
-	else if(noadaptive)
+	else if(noadaptive || Net::IsBlocked())
 		tics = 1;
 
 	lasttimecount += tics;
@@ -240,7 +240,7 @@ void ResetTimeCount()
 void Delay(int wolfticks)
 {
 	if(wolfticks>0)
-		SDL_Delay(wolfticks * 100 / 7);
+		SDL_Delay(TICS2MS(wolfticks));
 }
 
 /*
@@ -308,7 +308,7 @@ void PollMouseButtons (void)
 		if (controlScheme[i].mouse == -1)
 			continue;
 
-		bool &state = control[ConsolePlayer].buttonstate[controlScheme[i].button];
+		BYTE &state = control[ConsolePlayer].buttonstate[controlScheme[i].button];
 		switch(controlScheme[i].mouse)
 		{
 		case ControlScheme::MWheel_Left:
@@ -615,6 +615,29 @@ void PollControls (bool absolutes)
 	{
 		AM_CheckKeys();
 	}
+
+	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+	{
+		if(control[i].buttonstate[bt_pause] && !control[i].buttonheld[bt_pause])
+		{
+			Paused ^= 1;
+
+			static int lastoffs;
+			if(Paused & 1)
+			{
+				lastoffs = StopMusic();
+				IN_ReleaseMouse();
+			}
+			else
+			{
+				IN_GrabMouse();
+				ContinueMusic(lastoffs);
+				if (MousePresent && IN_IsInputGrabbed())
+					IN_CenterMouse();     // Clear accumulated mouse movement
+				ResetTimeCount();
+			}
+		}
+	}
 }
 
 // This should be called once per frame
@@ -630,12 +653,12 @@ void ProcessEvents()
 		// wait up to DEMOTICS Wolf tics
 		uint32_t curtime = SDL_GetTicks();
 		lasttimecount += DEMOTICS;
-		int32_t timediff = (lasttimecount * 100) / 7 - curtime;
+		int32_t timediff = TICS2MS(lasttimecount) - curtime;
 		if(timediff > 0)
 			SDL_Delay(timediff);
 
 		if(timediff < -2 * DEMOTICS)       // more than 2-times DEMOTICS behind?
-			lasttimecount = (curtime * 7) / 100;    // yes, set to current timecount
+			lasttimecount = MS2TICS(curtime);    // yes, set to current timecount
 
 		tics = DEMOTICS;
 	}
@@ -657,8 +680,7 @@ void BumpGamma()
 	msg.Format("Gamma: %g", screenGamma);
 	US_PrintCentered (msg);
 	VW_UpdateScreen();
-	VW_UpdateScreen();
-	IN_Ack();
+	IN_Ack(ACK_Block);
 }
 
 /*
@@ -666,12 +688,15 @@ void BumpGamma()
 =
 = CheckKeys
 =
+= This should only cover control panel keys, debug mode key checks have been
+= moved to CheckDebugKeys.
+=
 =====================
 */
 
-bool changeSize = true;
 void CheckKeys (void)
 {
+	static bool changeSize = true;
 	ScanCode scan;
 
 
@@ -701,87 +726,6 @@ void CheckKeys (void)
 	if(Keyboard[sc_Alt] && Keyboard[sc_Enter])
 		VL_ToggleFullscreen();
 
-	if(IWad::CheckGameFilter(NAME_Wolf3D))
-	{
-		//
-		// SECRET CHEAT CODE: TAB-G-F10
-		//
-		if (Keyboard[sc_Tab] && Keyboard[sc_G] && Keyboard[sc_F10])
-		{
-			DebugGod(false);
-			return;
-		}
-
-		//
-		// SECRET CHEAT CODE: 'MLI'
-		//
-		if (Keyboard[sc_M] && Keyboard[sc_L] && Keyboard[sc_I])
-			DebugMLI();
-
-		//
-		// TRYING THE KEEN CHEAT CODE!
-		//
-		if (Keyboard[sc_B] && Keyboard[sc_A] && Keyboard[sc_T])
-		{
-			ClearSplitVWB ();
-
-			Message ("Commander Keen is also\n"
-					"available from Apogee, but\n"
-					"then, you already know\n" "that - right, Cheatmeister?!");
-
-			IN_ClearKeysDown ();
-			IN_Ack ();
-
-			if (viewsize < 18)
-				StatusBar->RefreshBackground ();
-		}
-	}
-	else if(IWad::CheckGameFilter(NAME_Noah))
-	{
-		//
-		// Secret cheat code: JIM
-		//
-		if (Keyboard[sc_J] && Keyboard[sc_I] && Keyboard[sc_M])
-		{
-			DebugGod(true);
-		}
-	}
-
-	//
-	// OPEN UP DEBUG KEYS
-	//
-	if (Keyboard[sc_BackSpace] && Keyboard[sc_LShift] && Keyboard[sc_Alt])
-	{
-		ClearSplitVWB ();
-
-		Message ("Debugging keys are\nnow available!");
-		IN_ClearKeysDown ();
-		IN_Ack ();
-
-		DrawPlayBorderSides ();
-		DebugOk = 1;
-	}
-
-//
-// pause key weirdness can't be checked as a scan code
-//
-	if(control[ConsolePlayer].buttonstate[bt_pause]) Paused |= 1;
-	if(Paused & 1)
-	{
-		int lastoffs = StopMusic();
-		IN_ReleaseMouse();
-		VWB_DrawGraphic(TexMan("PAUSED"), (20 - 4)*8, 80 - 2*8);
-		VH_UpdateScreen();
-		IN_Ack ();
-		IN_GrabMouse();
-		Paused &= ~1;
-		ContinueMusic(lastoffs);
-		if (MousePresent && IN_IsInputGrabbed())
-			IN_CenterMouse();     // Clear accumulated mouse movement
-		ResetTimeCount();
-		return;
-	}
-
 //
 // F1-F7/ESC to enter control panel
 //
@@ -794,6 +738,9 @@ void CheckKeys (void)
 		DrawPlayBorderSides ();
 
 		IN_ClearKeysDown ();
+
+		if(screenfaded && Net::IsBlocked())
+			PlayFrame();
 		return;
 	}
 
@@ -804,9 +751,10 @@ void CheckKeys (void)
 
 		US_ControlPanel (control[ConsolePlayer].buttonstate[bt_esc] ? sc_Escape : scan);
 
+		IN_ClearKeysDown ();
+
 		if(screenfaded)
 		{
-			IN_ClearKeysDown ();
 			if (!startgame && !loadedgame)
 			{
 				VW_FadeOut();
@@ -816,13 +764,16 @@ void CheckKeys (void)
 			}
 			if (loadedgame)
 				playstate = ex_abort;
-			ResetTimeCount();
 			if (MousePresent && IN_IsInputGrabbed())
 				IN_CenterMouse();     // Clear accumulated mouse movement
+
+			// If another player is blocking the play sim we may need to refresh
+			// the frame now before we wait for input.
+			if (Net::IsBlocked())
+				PlayFrame();
 		}
 		else
 		{
-			IN_ClearKeysDown();
 			ContinueMusic (lastoffs);
 		}
 		return;
@@ -832,42 +783,6 @@ void CheckKeys (void)
 	{
 		BumpGamma();
 		return;
-	}
-
-//
-// TAB-? debug keys
-//
-	if (DebugOk)
-	{
-		// Jam debug sequence if we're trying to open the automap
-		// We really only need to check for the automap control since it's
-		// likely to be put in the Tab space and be tapped while using other controls
-		bool keyDown = Keyboard[sc_Tab] || Keyboard[sc_BackSpace] || Keyboard[sc_Grave];
-		if ((schemeAutomapKey.keyboard == sc_Tab || schemeAutomapKey.keyboard == sc_BackSpace || schemeAutomapKey.keyboard == sc_Grave)
-			&& (control[ConsolePlayer].buttonstate[bt_automap] || control[ConsolePlayer].buttonheld[bt_automap]))
-			keyDown = false;
-
-#if !defined(_DIII4A) //karin: raw input
-#ifdef __ANDROID__
-		// Soft keyboard
-		if (ShadowingEnabled)
-			keyDown = true;
-#endif
-#endif
-
-		if (keyDown)
-		{
-			if (DebugKeys ())
-			{
-				if (viewsize < 20)
-					StatusBar->RefreshBackground ();       // dont let the blue borders flash
-
-				if (MousePresent && IN_IsInputGrabbed())
-					IN_CenterMouse();     // Clear accumulated mouse movement
-
-				ResetTimeCount();
-			}
-		}
 	}
 }
 
@@ -915,7 +830,8 @@ void StartMusic ()
 void ContinueMusic (int offs)
 {
 	SD_MusicOff ();
-	SD_ContinueMusic(levelInfo->GetMusic(map), offs);
+	if(!(Paused & 1))
+		SD_ContinueMusic(levelInfo->GetMusic(map), offs);
 }
 
 /*
@@ -1050,6 +966,9 @@ void UpdatePaletteShifts (void)
 
 void FinishPaletteShifts (void)
 {
+	damagecount = 0;
+	bonuscount = 0;
+
 	if (palshifted)
 	{
 		V_SetBlend(0, 0, 0, 0);
@@ -1070,6 +989,47 @@ void FinishPaletteShifts (void)
 /*
 ===================
 =
+= PlayFrame
+=
+===================
+*/
+
+void PlayFrame()
+{
+	UpdatePaletteShifts ();
+
+	ThreeDRefresh ();
+
+	if(automap && !gamestate.victoryflag)
+		BasicOverhead();
+	if(Paused & 1)
+		VWB_DrawGraphic(TexMan("PAUSED"), (20 - 4)*8, 80 - 2*8);
+
+	if(Net::IsBlocked())
+	{
+		ClearSplitVWB();
+		Message("Waiting for players to return");
+	}
+
+	if (!loadedgame)
+	{
+		StatusBar->Tick();
+		if ((gamestate.TimeCount & 1) || !(tics & 1))
+			StatusBar->DrawStatusBar();
+	}
+
+	if (screenfaded)
+	{
+		VW_FadeIn ();
+		ResetTimeCount();
+	}
+
+	VH_UpdateScreen();
+}
+
+/*
+===================
+=
 = PlayLoop
 =
 ===================
@@ -1079,16 +1039,9 @@ int32_t funnyticount;
 
 void PlayLoop (void)
 {
-#if defined(USE_FEATUREFLAGS) && defined(USE_CLOUDSKY)
+#if 0 // USE_CLOUDSKY
 	if(GetFeatureFlags() & FF_CLOUDSKY)
 		InitSky();
-#endif
-
-#if !defined(_DIII4A) //karin: raw input
-#ifdef __ANDROID__
-	if (ShadowingEnabled)
-		DebugOk = 1;
-#endif
 #endif
 
 	playstate = ex_stillplaying;
@@ -1111,7 +1064,7 @@ void PlayLoop (void)
 		IN_CenterMouse();         // Clear accumulated mouse movement
 
 	if (demoplayback)
-		IN_StartAck ();
+		IN_StartAck (ACK_Local);
 
 	StatusBar->NewGame();
 
@@ -1131,33 +1084,31 @@ void PlayLoop (void)
 		madenoise = false;
 
 		// Run tics
-		if(Paused & 2)
+		for (unsigned int i = 0;i < tics;++i)
 		{
-			static bool absolutes = false;
+			PollControls(!i);
 
-			// If paused due to the automap, continue polling controls but don't tick anything.
-			PollControls(absolutes);
+			// Net code may require this loop to abort early
+			if(playstate != ex_stillplaying)
+				break;
 
-			absolutes = !absolutes;
-		}
-		else
+			if(!Paused)
 		{
-			for (unsigned int i = 0;i < tics;++i)
-			{
-				PollControls(!i);
-
 				++gamestate.TimeCount;
+
+				CheckSpawnPlayer();
+
+				// In single player if the player dies only tick the pawn
+				if(Net::InitVars.mode != Net::MODE_SinglePlayer || players[0].state != player_t::PST_DEAD)
 				thinkerList.Tick();
+				else
+					thinkerList.Tick(ThinkerList::PLAYER);
+
 				AActor::FinishSpawningActors();
 			}
 		}
 
-		UpdatePaletteShifts ();
-
-		ThreeDRefresh ();
-
-		if(automap && !gamestate.victoryflag)
-			BasicOverhead();
+		PlayFrame();
 
 		//
 		// MAKE FUNNY FACE IF BJ DOESN'T MOVE FOR AWHILE
@@ -1168,21 +1119,10 @@ void PlayLoop (void)
 		GC::CheckGC();
 
 		UpdateSoundLoc ();      // JAB
-		if (screenfaded)
-		{
-			VW_FadeIn ();
-			ResetTimeCount();
-		}
 
 		CheckKeys ();
-		if (!loadedgame)
-		{
-			StatusBar->Tick();
-			if ((gamestate.TimeCount & 1) || !(tics & 1))
-				StatusBar->DrawStatusBar();
-		}
+		CheckDebugKeys ();
 
-		VH_UpdateScreen();
 //
 // debug aids
 //

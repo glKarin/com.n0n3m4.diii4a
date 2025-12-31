@@ -41,7 +41,7 @@ struct FRemapTable
 
 	BYTE *Remap;				// For the software renderer
 	PalEntry *Palette;			// The ideal palette this maps to
-	SDWORD NumEntries;				// # of elements in this table (usually 256)
+	int NumEntries;				// # of elements in this table (usually 256)
 	bool Inactive;				// This table is inactive and should be treated as if it was passed as NULL
 
 private:

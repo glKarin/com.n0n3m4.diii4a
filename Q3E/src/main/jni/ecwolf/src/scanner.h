@@ -67,10 +67,6 @@ enum
 	TK_NoToken = -1
 };
 
-#ifdef __MINGW32__
-#undef ERROR
-#endif
-
 class Scanner
 {
 	public:
@@ -95,7 +91,7 @@ class Scanner
 			int				number;
 			double			decimal;
 			bool			boolean;
-			signed char			token;
+			char			token;
 			unsigned int	tokenLine;
 			unsigned int	tokenLinePosition;
 			unsigned int	scanPos;

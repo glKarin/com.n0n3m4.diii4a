@@ -58,7 +58,7 @@
 #include "zstring.h"
 
 #ifndef MAX_PATH
-#define MAX_PATH 260
+#define MAX_PATH PATH_MAX
 #endif
 
 namespace FileSys {
@@ -97,7 +97,10 @@ static void FullFileName(const char* filename, char* dest)
 	ConvertName(fullpath, dest);
 #else
 	if(realpath(filename, dest) == NULL)
-		strncpy(dest, filename, MAX_PATH);
+	{
+		strncpy(dest, filename, MAX_PATH-1);
+		dest[MAX_PATH-1] = 0;
+	}
 #endif
 }
 
@@ -134,8 +137,6 @@ static bool CreateDirectoryIfNeeded(const char* path)
 	return true;
 #endif
 }
-
-#ifndef LIBRETRO
 void SetupPaths(int argc, const char * const *argv)
 {
 	FString &progDir = SpecialPaths[DIR_Program];
@@ -375,7 +376,6 @@ void SetupPaths(int argc, const char * const *argv)
 	if(!CreateDirectoryIfNeeded(screenshotsDir))
 		screenshotsDir = configDir;
 }
-#endif
 
 }
 
@@ -472,14 +472,13 @@ void File::init(FString filename)
 			directory = true;
 
 			// Populate a base list.
-			DIR *direct = opendir(filename);
-			if(direct != NULL)
+			if(DIR *direct = opendir(filename))
 			{
 				dirent *file = NULL;
 				while((file = readdir(direct)) != NULL)
 					files.Push(file->d_name);
+				closedir(direct);
 			}
-			closedir(direct);
 		}
 
 		// Check writable

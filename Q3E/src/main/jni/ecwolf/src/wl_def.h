@@ -13,22 +13,10 @@
 #	include <stdint.h>
 #	include <string.h>
 #	include <stdarg.h>
-#elif defined(__GNUC__) || defined(__LIBRETRO__)
+#elif defined(__GNUC__)
 #	include <stdint.h>
 #endif
-#ifdef __MINGW32__
-#include <minwindef.h>
-#endif
-
-#ifdef _MSC_VER
-#define PACKED
-#define PACK_START __pragma(pack(push, 1))
-#define PACK_END __pragma(pack(pop))
-#else
-#define PACKED __attribute__ ((__packed__))
-#define PACK_START
-#define PACK_END
-#endif
+#include <SDL.h>
 
 #if !defined O_BINARY
 #	define O_BINARY 0
@@ -107,6 +95,10 @@ typedef SDWORD int32;
 #define TICRATE 70
 #define MAXTICS 10
 #define DEMOTICS        4
+
+// Milliseconds/tics conversion with extra precision
+static inline uint32_t MS2TICS(uint32_t ms) { return ms * 7 / 100; }
+static inline uint32_t TICS2MS(uint32_t tics) { return tics * 100 / 7; }
 
 //
 // tile constants
@@ -192,7 +184,6 @@ typedef uint32_t angle_t;
 enum ActorFlag
 {
 	FL_SHOOTABLE        = 0x00000001,
-	FL_VISABLE          = 0x00000008,
 	FL_ATTACKMODE       = 0x00000010,
 	FL_FIRSTATTACK      = 0x00000020,
 	FL_AMBUSH           = 0x00000040,
@@ -224,6 +215,7 @@ enum ItemFlag
 	IF_INVBAR			= 0x00000002,
 	IF_ALWAYSPICKUP		= 0x00000004,
 	IF_INACTIVE			= 0x00000008, // For picked up items that remain on the map
+	IF_DROPPED			= 0x00000010,
 };
 
 enum WeaponFlag
@@ -400,19 +392,12 @@ static inline fixed FixedDiv(fixed a, fixed b)
 	return (fixed)(((((int64_t)a)<<32) / b) >> 16);
 }
 
-
 #define CHECKMALLOCRESULT(x) if(!(x)) I_FatalError("Out of memory at %s:%i", __FILE__, __LINE__)
 
-#if !defined(_WIN32) && !defined(LIBRETRO)
+#ifndef _WIN32
 	static inline char* itoa(int value, char* string, int radix)
 	{
-		sprintf(string, "%d", value);
-		return string;
-	}
-
-	static inline char* ltoa(long value, char* string, int radix)
-	{
-		sprintf(string, "%ld", value);
+		snprintf(string, 13, "%d", value);
 		return string;
 	}
 #endif
@@ -435,51 +420,5 @@ static inline longword READLONGWORD(byte *&ptr)
 	ptr += 4;
 	return val;
 }
-
-
-/*
-=============================================================================
-
-						FEATURE DEFINITIONS
-
-=============================================================================
-*/
-
-#ifdef USE_FEATUREFLAGS
-	// The currently available feature flags
-	#define FF_STARSKY      0x0001
-	#define FF_PARALLAXSKY  0x0002
-	#define FF_CLOUDSKY     0x0004
-	#define FF_RAIN         0x0010
-	#define FF_SNOW         0x0020
-
-	// The ffData... variables contain the 16-bit values of the according corners of the current level.
-	// The corners are overwritten with adjacent tiles after initialization in SetupGameLevel
-	// to avoid interpretation as e.g. doors.
-	extern int ffDataTopLeft, ffDataTopRight, ffDataBottomLeft, ffDataBottomRight;
-
-	/*************************************************************
-	* Current usage of ffData... variables:
-	* ffDataTopLeft:     lower 8-bit: ShadeDefID
-	* ffDataTopRight:    FeatureFlags
-	* ffDataBottomLeft:  CloudSkyDefID or ParallaxStartTexture
-	* ffDataBottomRight: unused
-	*************************************************************/
-
-	// The feature flags are stored as a wall in the upper right corner of each level
-	static inline word GetFeatureFlags()
-	{
-		return ffDataTopRight;
-	}
-
-#endif
-
-#ifdef USE_PARALLAX
-	void DrawParallax(byte *vbuf, unsigned vbufPitch);
-#endif
-
-#ifdef USE_DIR3DSPR
-	void Scale3DShape(byte *vbuf, unsigned vbufPitch, statobj_t *ob);
-#endif
 
 #endif

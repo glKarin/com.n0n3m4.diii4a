@@ -34,13 +34,11 @@ MenuItem::MenuItem(const char string[80], MENU_LISTENER_PROTOTYPE(activateListen
 	setText(string);
 }
 
-#ifndef LIBRETRO
 void MenuItem::activate()
 {
 	if(activateListener != NULL)
 		activateListener(menu->getCurrentPosition());
 }
-#endif
 
 void MenuItem::draw()
 {
@@ -96,13 +94,11 @@ BooleanMenuItem::BooleanMenuItem(const char string[36], bool &value, MENU_LISTEN
 {
 }
 
-#ifndef LIBRETRO
 void BooleanMenuItem::activate()
 {
 	value ^= 1;
 	MenuItem::activate();
 }
-#endif
 
 void BooleanMenuItem::draw()
 {
@@ -118,7 +114,6 @@ MenuSwitcherMenuItem::MenuSwitcherMenuItem(const char string[36], Menu &menu, ME
 {
 }
 
-#ifndef LIBRETRO
 void MenuSwitcherMenuItem::activate()
 {
 	// If there is an activateListener then use it to determine if the menu should switch
@@ -133,7 +128,6 @@ void MenuSwitcherMenuItem::activate()
 		}
 	}
 }
-#endif
 
 SliderMenuItem::SliderMenuItem(int &value, int width, int max, const char begString[36], const char endString[36], MENU_LISTENER_PROTOTYPE(activateListener)) : MenuItem(endString, activateListener), value(value), width(width), max(max)
 {
@@ -268,7 +262,6 @@ TextInputMenuItem::TextInputMenuItem(const FString &text, unsigned int max, MENU
 	setValue(text);
 }
 
-#ifndef LIBRETRO
 void TextInputMenuItem::activate()
 {
 	if(preeditListener == NULL || preeditListener(menu->getCurrentPosition()))
@@ -295,7 +288,6 @@ void TextInputMenuItem::activate()
 		}
 	}
 }
-#endif
 
 void TextInputMenuItem::draw()
 {
@@ -322,7 +314,7 @@ static const char* const KeyNames[512] =
 	"H","I","J","K","L","M","N","O",                                //  72
 	"P","Q","R","S","T","U","V","W",                                //  80
 	"X","Y","Z","[","\\","]","^","_",                               //  88
-	"`","a","b","c","d","e","f","h",                                //  96
+	"`","a","b","c","d","e","f","g",                                //  96
 	"h","i","j","k","l","m","n","o",                                // 104
 	"p","q","r","s","t","u","v","w",                                // 112
 	"x","y","z","{","|","}","~","Del",                              // 120
@@ -343,7 +335,7 @@ static const char* const KeyNames[512] =
 	"?","?","?","?","?","?","?","?",                                // 240
 	"?","?","?","?","?","?","?","?",                                // 248
 	"KP0","KP1","KP2","KP3","KP4","KP5","KP6","KP7",                // 256
-	"KP8","KP9","Perd","Divd","Mult","Plus","Mins","Entr",          // 264
+	"KP8","KP9","Perd","Divd","Mult","Mins","Plus","Entr",          // 264
 	"Equl","Up","Down","Rght","Left","Ins","Home","End",            // 272
 	"PgUp","PgDn","F1","F2","F3","F4","F5","F6",                    // 280
 	"F7","F8","F9","F10","F11","F12","F13","F14",                   // 288
@@ -361,7 +353,6 @@ ControlMenuItem::ControlMenuItem(ControlScheme &button) : MenuItem(button.name),
 {
 }
 
-#ifndef LIBRETRO
 void ControlMenuItem::activate()
 {
 	if(mouseenabled)
@@ -529,7 +520,6 @@ void ControlMenuItem::draw()
 
 	PrintX = menu->getX() + menu->getIndent();
 }
-#endif
 
 void ControlMenuItem::left()
 {
@@ -543,7 +533,6 @@ void ControlMenuItem::right()
 		column++;
 }
 
-#ifndef LIBRETRO
 void Menu::drawGunHalfStep(int x, int y)
 {
 	if(MenuStyle != MENUSTYLE_Blake)
@@ -551,10 +540,9 @@ void Menu::drawGunHalfStep(int x, int y)
 		VWB_DrawGraphic (cursor, x, y-2, MENU_CENTER);
 		VW_UpdateScreen ();
 		SD_PlaySound ("menu/move1");
-		SDL_Delay (8 * 100 / 7);
+		SDL_Delay (TICS2MS(8));
 	}
 }
-#endif
 
 void Menu::eraseGun(int x, int y)
 {
@@ -601,8 +589,7 @@ void Menu::closeMenus(bool close)
 	if(close)
 	{
 		MenuFadeOut();
-		VWB_Clear(ColorMatcher.Pick(RPART(gameinfo.MenuFadeColor), GPART(gameinfo.MenuFadeColor), BPART(gameinfo.MenuFadeColor)),
-			0, 0, screenWidth, screenHeight);
+		VL_FadeClear();
 	}
 
 	Menu::close = close;
@@ -763,12 +750,9 @@ void Menu::draw() const
 
 	if(cursor && !isAnimating() && countItems() > 0)
 		VWB_DrawGraphic (cursor, x - 4, y + getHeight(curPos) - 2, MENU_CENTER);
-#ifndef LIBRETRO
 	VW_UpdateScreen ();
-#endif
 }
 
-#ifndef LIBRETRO
 int Menu::handle()
 {
 	char key;
@@ -1039,7 +1023,6 @@ int Menu::handle()
 
 	return 0;                   // JUST TO SHUT UP THE ERROR MESSAGES!
 }
-#endif
 
 void Menu::setCurrentPosition(int position)
 {
@@ -1106,7 +1089,6 @@ void Menu::setHeadText(const char text[36], bool drawInStripes)
 	headTextInStripes = drawInStripes;
 }
 
-#ifndef LIBRETRO
 void Menu::show()
 {
 	if(Menu::areMenusClosed())
@@ -1124,12 +1106,11 @@ void Menu::show()
 	WaitKeyUp();
 
 	int item = 0;
-	while((item = handle()) != -1);
+	while((item = handle()) != -1) {}
 
 	if(!Menu::areMenusClosed())
 		MenuFadeOut ();
 }
-#endif
 
 void Menu::validateCurPos()
 {

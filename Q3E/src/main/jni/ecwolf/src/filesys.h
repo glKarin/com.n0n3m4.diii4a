@@ -64,6 +64,11 @@ namespace FileSys
 		APP_SpearOfDestiny,
 		APP_ThrowbackPack,
 		APP_NoahsArk,
+		APP_AliensOfGold,
+		APP_PlanetStrike,
+		APP_RiseOfTheTriad,
+		APP_Corridor7,
+		APP_OperationBodyCount,
 
 		NUM_STEAM_APPS
 	};

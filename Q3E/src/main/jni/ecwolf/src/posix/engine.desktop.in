@@ -4,5 +4,5 @@ Type=Application
 Name=@PRODUCT_NAME@
 Comment=Advanced Wolfenstein 3D source port
 Exec=@ENGINE_BINARY_NAME@
-Icon=@ENGINE_BINARY_NAME@
+Icon=@PRODUCT_IDENTIFIER@
 Categories=Game

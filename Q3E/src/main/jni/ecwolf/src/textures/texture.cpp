@@ -95,6 +95,7 @@ FTexture * FTexture::CreateTexture (int lumpnum, int usetype)
 		{ PCXTexture_TryCreate,			TEX_Any },
 		{ TGATexture_TryCreate,			TEX_Any },
 		{ RawPageTexture_TryCreate,		TEX_MiscPatch },
+		{ RawPageTexture_TryCreate,		TEX_WallPatch }, // Rott sky
 		{ RottFlatTexture_TryCreate,	TEX_Flat },
 		{ FlatTexture_TryCreate,		TEX_Flat },
 		{ PatchTexture_TryCreate,		TEX_Any },

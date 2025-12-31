@@ -1,3 +1,116 @@
+ecwolf (1.4.2) stable; urgency=low
+
+  * Fixed issues with (quick) load/save shortcuts with screen faders.
+  * Fixed fizzle fader didn't cover entire view window if viewy wasn't 0.
+  * Fixed floor/ceiling texture change didn't allow a switch to the null
+    texture (useful for skies).
+  * Fixed fullscreen pillar boxing aspect ratio in some cases was wrong.
+  * Fixed typos in KeyNames table.
+  * Fixed crash from division by zero when map has no player starts.
+  * Fixed crash in specific setups due to needlessly calling SDL_ShowCursor
+    with SDL2.
+  * Fixed cases of duplication of stand alone game files in game picker.
+  * Adjust macbin detection to be tolerant of files missing file type/creator
+    information.
+  * Fixed loading a Mac Wolf3D save would often result in a tile palette
+    mismatch.
+  * Windows game saves should no longer encode the full path to game files
+    making them portable between systems.
+  * Windows build now ships with a console subsystem wrapper executable to
+    ease access to debug messages and improve experience when running from
+    terminal/command prompt.
+  * Vendored SDL dependencies updated to SDL 2.32.10 and SDL_mixer 2.8.1. Per
+    changes to defaults in upstream, libmodplug has been replaced with libxmp
+    and stb_vorbis replaces libvorbis.
+  * Packaging improvements to conform to FlatHub requirements.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Sun, 14 Sep 2025 00:00:00 -0500
+
+ecwolf (1.4.1) stable; urgency=high
+
+  * Fixed crash when picking up Chaingun while already holding a Chaingun.
+  * Fake Hitler actor can no longer open doors, no longer erroneously backs away
+    from the player, and continues to "dodge" when out of sight.
+  * Fixed support for gray scale PNGs.
+  * Added support for 32:9 aspect ratio displays and additional resolutions.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Thu, 02 Feb 2023 00:00:00 -0500
+
+ecwolf (1.4.0) stable; urgency=low
+
+  * LAN multiplayer for up to 11 players.
+  * Actors now track their current target instead of assuming the one and only
+    player.
+  * Visibility for attacks is determined by geometric checks instead of renderer
+    feedback.
+  * The "DoomEdNum" has been deprecated and all places where they were used now
+    accept actor class names directly.
+  * Support for BILLBOARD flag for "3D sprites", compared to Wolf4SDL the angle
+    of the actor is used allowing arbitrary angles.
+  * Added parallax skies compatible with ROTT through sky1 in MAPINFO/Map
+    definition (mostly incompatible with LZWolf's parallaxsky definition)
+  * Added support for Wolfstone 3D and Elite Hans: Die Neue Ordnung.
+  * Added pageindextext to MAPINFO/Gameinfo.
+  * Added $musicalias to SNDINFO.
+  * Added Super 3-D Noah's Ark MIDI->OPL code (Thanks NY00123).
+  * Fading has been reworked to allow overlaying fades over game play.
+  * Support for blend and alpha mixing in TEXTURES.
+  * Support for colormaps with 64 light levels like Blake Stone.
+  * Partial support for Blake Stone map meta data.
+  * Support for Blake Stone's level name strings as LEVELDSC.
+  * Support for Macintosh Wolf3D's MAPLIST.
+  * Added support for offset() in DECORATE states.
+  * Pickups support Hide state to allow spent pickups to be visible.
+  * Added Idle state for actors to return to if they lose their target.
+  * Files can be autoloaded though ecwolf.cfg.
+  * Added game based content filtering for PK3s from ZDoom.
+  * Default FOV can be changed through DesiredFOV in ecwolf.cfg.
+  * Added Pushwall_MoveNoStop line special which allows moving pushwalls through
+    walls like Mac Wolf and ROTT.
+  * Added Teleport_Relative line special which works similarly to ROTT elevators
+    without the theatrics.
+  * Wall and plane drawing has been modified to generally have better precision.
+  * Added trackhighscores property to MAPINFO/Gameinfo.
+  * Added resethealth and resetinventory to MAPINFO/Map definition.
+  * Enemies can now accept health items.
+  * Added A_Wander.
+  * Added SmartAnimation actor to support Blake Stone's "smart animation"
+    system.
+  * Added --foreignsaves option to force saves to load even if game data check
+    fails.
+  * Added --skill option to select skill level by number particularly for when
+    more than 4 skill levels are present.
+  * Added ROTT style tall walls and ROTT's map height marker with feature flag
+    "planedepth".
+  * Actor z-heights are now rendered and can be set in info plane with
+    "zheights" enabled in map translator (compatible with ROTT).
+  * ROTT map loader no longer synthesizes a third plane but instead relies on
+    the map translator flag "globalflat".
+  * Support for ROTT's song numbers in map translator
+  * Partial support for booting Macintosh Wolfenstein 3D, Blake Stone: Planet
+    Strike, and Rise of the Triad.
+  * Includes support for several new data formats most of which have no
+    practical use outside of loading vanilla compatible data.
+  * Macintosh Wolfenstein 3D data is supported through macbin format.
+  * Feature is hidden behind ShowPreviewGames in ecwolf.cfg as they're not yet
+    supported or fully playable.
+  * Improvements in holowall support.
+  * Fixed some long standing minor memory leaks.
+  * New icon/logo by NeuralStunner.
+  * Support for more ultrawide aspect ratios.
+  * Automap panning speed is now dependent on zoom level.
+  * Fixed crash if no sound device was present.
+  * Fixed cases where adaptive frame rate would fail and game would run too
+    fast.
+  * Vendored SDL dependencies updated to SDL 2.26.2, SDL_mixer 2.6.2, and
+    SDL_net 2.2.0.
+  * Customized SDL_mixer is still suggested but no longer required for full
+    functionality as the only feature missing is support for alternate spelling
+    of LOOP_START and LOOP_END tags.
+  * Steam and GOG support updated to support new releases.
+
+ -- Braden Obrzut <admin@maniacsvault.net>  Tue, 17 Jan 2023 00:00:00 -0500
+
 ecwolf (1.3.3) stable; urgency=medium
 
   * Windows build is now built with Visual Studio 2015 fixing issue with the
@@ -138,7 +251,8 @@ ecwolf (1.2.3) stable; urgency=low
   * Fixed crash when inheriting from actors with relative state jumps.
   * OPL instruments are cleared when changing songs.
   * Control improvements.
-  * Using include in xlat will now allow you to replace entries in the thing table.
+  * Using include in xlat will now allow you to replace entries in the thing
+    table.
 
  -- Braden Obrzut <admin@maniacsvault.net>  Wed, 24 Dec 2013 00:00:00 -0500
 

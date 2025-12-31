@@ -187,7 +187,6 @@ bool FZipFile::Open(bool quiet)
 	// Load the entire central directory. Too bad that this contains variable length entries...
 	int dirsize = LittleLong(info.DirectorySize);
 	void *directory = malloc(dirsize);
-	CHECKMALLOCRESULT(directory);
 	Reader->Seek(LittleLong(info.DirectoryOffset), SEEK_SET);
 	Reader->Read(directory, dirsize);
 
@@ -222,9 +221,7 @@ bool FZipFile::Open(bool quiet)
 		zip_fh->Method = LittleShort(zip_fh->Method);
 		if (zip_fh->Method != METHOD_STORED &&
 			zip_fh->Method != METHOD_DEFLATE &&
-#ifdef HAVE_LZMA
 			zip_fh->Method != METHOD_LZMA &&
-#endif
 			zip_fh->Method != METHOD_BZIP2 &&
 			zip_fh->Method != METHOD_IMPLODE &&
 			zip_fh->Method != METHOD_SHRINK)
@@ -364,13 +361,11 @@ int FZipLump::FillCache()
 		}
 
 		case METHOD_LZMA:
-#ifdef HAVE_LZMA
 		{
 			FileReaderLZMA frz(*Owner->Reader, LumpSize, true);
 			frz.Read(Cache, LumpSize);
-      }
-#endif
 			break;
+		}
 
 		case METHOD_IMPLODE:
 		{

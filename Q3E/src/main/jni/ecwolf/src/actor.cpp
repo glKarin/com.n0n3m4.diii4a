@@ -176,6 +176,19 @@ void AActor::AddInventory(AInventory *item)
 	}
 }
 
+// This checks if this can see the specified actor. It replaces FL_VISABLE checks.
+bool AActor::CheckVisibility(const AActor *check, angle_t fov) const
+{
+	float angle = (float) atan2 ((float) (check->y - y), (float) (check->x - x));
+	if (angle<0)
+		angle = (float) (M_PI*2+angle);
+	angle_t iangle = 0-(angle_t)(angle*ANGLE_180/M_PI);
+	angle_t lowerAngle = MIN(iangle, this->angle);
+	angle_t upperAngle = MAX(iangle, this->angle);
+
+	return MIN(upperAngle - lowerAngle, lowerAngle - upperAngle) <= fov && CheckLine(check, this);
+}
+
 void AActor::ClearCounters()
 {
 	if(flags & FL_COUNTITEM)
@@ -439,13 +452,10 @@ void AActor::Serialize(FArchive &arc)
 	arc << dir;
 	this->dir = static_cast<dirtype>(dir);
 
-	SDWORD xt = x, yt = y;
 	arc << flags
 		<< distance
-		<< xt
-		<< yt;
-	x = xt;
-	y = yt;
+		<< x
+		<< y;
 	if(GameSave::SaveProdVersion >= 0x001003FF && GameSave::SaveVersion >= 1507591295)
 		arc << z;
 	arc << velx
@@ -498,6 +508,14 @@ void AActor::Serialize(FArchive &arc)
 		actors.Remove(this);
 
 	Super::Serialize(arc);
+}
+
+void AActor::SetIdle()
+{
+	if(const Frame *idle = FindState(NAME_Idle))
+		SetState(idle);
+	else
+		SetState(SpawnState);
 }
 
 void AActor::SetState(const Frame *state, bool norun)
@@ -774,24 +792,25 @@ void FinishTravel ()
 
 		if(actor->IsKindOf(NATIVE_CLASS(PlayerPawn)))
 		{
-			APlayerPawn *player = static_cast<APlayerPawn *>(actor);
+			APlayerPawn *pawn = static_cast<APlayerPawn *>(actor);
+			player_t *player = pawn->player;
 
 			// The player_t::mo has been replaced with a newly spawned player
 			// we want to transfer properties from the new player object onto
 			// the old one and then put the old one in place of the new one.
-			APlayerPawn *playertmp = player->player->mo;
-			player->x = playertmp->x;
-			player->y = playertmp->y;
-			player->angle = playertmp->angle;
-			player->EnterZone(playertmp->GetZone());
+			APlayerPawn *tmppawn = player->mo;
+			pawn->x = tmppawn->x;
+			pawn->y = tmppawn->y;
+			pawn->angle = tmppawn->angle;
+			pawn->EnterZone(tmppawn->GetZone());
 
-			players[0].mo = player;
-			players[0].camera = player;
-			playertmp->Destroy();
+			player->mo = pawn;
+			player->camera = pawn;
+			tmppawn->Destroy();
 
 			// We must move the linked list iterator here since we'll
 			// transfer to the new linked list at the SetPriority call
-			player->SetPriority(ThinkerList::PLAYER);
+			pawn->SetPriority(ThinkerList::PLAYER);
 			continue;
 		}
 	}

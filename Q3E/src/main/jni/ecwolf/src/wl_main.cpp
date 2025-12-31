@@ -97,7 +97,6 @@ int      statusbarx;
 int      statusbary1, statusbary2;
 short    centerx;
 short    centerxwide;
-int      shootdelta;           // pixels away from centerx a target can be
 fixed    scale;
 fixed    pspritexscale;
 fixed    pspriteyscale;
@@ -140,17 +139,22 @@ extern bool GLimp_CheckGLInitialized(void);
 =====================
 */
 
-void NewGame (int difficulty, const FString &map, bool displayBriefing, const ClassDef *playerClass)
+void NewGame (int difficulty, FString map, bool displayBriefing, FName playerClass)
 {
-	if(!playerClass)
-		playerClass = ClassDef::FindClass(gameinfo.PlayerClasses[0]);
-
 	// void cast can be removed when we move to C++11
 	memset ((void*)&gamestate,0,sizeof(gamestate));
+
+	FName playerClassNames[MAXPLAYERS];
+	playerClassNames[ConsolePlayer] = playerClass != NAME_None ? playerClass : gameinfo.PlayerClasses[0];
+
+	Net::NewGame(difficulty, map, playerClassNames);
+
 	gamestate.difficulty = &SkillInfo::GetSkill(difficulty);
 	strncpy(gamestate.mapname, map, 8);
 	gamestate.mapname[8] = 0;
-	gamestate.playerClass = playerClass;
+	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+		gamestate.playerClass[i] = ClassDef::FindClass(playerClassNames[i]);
+
 	levelInfo = &LevelInfo::Find(map);
 
 	if(displayBriefing)
@@ -160,7 +164,8 @@ void NewGame (int difficulty, const FString &map, bool displayBriefing, const Cl
 	LevelRatios.killratio = LevelRatios.secretsratio = LevelRatios.treasureratio =
 		LevelRatios.numLevels = LevelRatios.time = 0;
 
-	players[0].state = player_t::PST_ENTER;
+	for(unsigned int i = 0;i < Net::InitVars.numPlayers;++i)
+		players[i].state = player_t::PST_ENTER;
 
 	Dialog::ClearConversations();
 
@@ -409,15 +414,15 @@ void I_ShutdownGraphics();
 static void InitGame()
 {
 	// initialize SDL
-#if SDL_VERSION_ATLEAST(2,0,0)
 	{
 		SDL_version ver;
+#if SDL_VERSION_ATLEAST(2,0,0)
 		SDL_GetVersion(&ver);
+#else
+		ver = *SDL_Linked_Version();
+#endif
 		printf("SDL_Init: Using SDL %d.%d.%d\n", ver.major, ver.minor, ver.patch);
 	}
-#else
-	printf("SDL_Init: Using SDL 1.2\n");
-#endif
 
 #if SDL_VERSION_ATLEAST(2,0,0)
 	if(SDL_Init(0) < 0)
@@ -427,8 +432,6 @@ static void InitGame()
 	{
 		I_FatalError("Unable to init SDL: %s", SDL_GetError());
 	}
-
-	SDL_ShowCursor(SDL_DISABLE);
 
 	//
 	// Mapinfo
@@ -501,11 +504,6 @@ static void InitGame()
 	CreateStatusBar();
 
 //
-// initialize the menusalcProjection
-	printf("CreateMenus: Preparing the menu system...\n");
-	CreateMenus();
-
-//
 // Load Noah's Ark quiz
 //
 	Dialog::LoadGlobalModule("NOAHQUIZ");
@@ -516,16 +514,21 @@ static void InitGame()
 	Net::Init(DrawStartupConsole);
 
 //
+// initialize the menusalcProjection
+	printf("CreateMenus: Preparing the menu system...\n");
+	CreateMenus();
+
+//
 // Finish signon screen
 //
 	VL_SetVGAPlaneMode();
 	if(DrawStartupConsole("Initialization complete"))
 	{
 		if (!param_nowait)
-			IN_UserInput(70*4);
+			IN_UserInput(70*4, ACK_Any);
 	}
 	else // Delay for a moment to allow the user to enter the jukebox if desired
-		IN_UserInput(16);
+		IN_UserInput(16, ACK_Any);
 
 //
 // HOLDING DOWN 'M' KEY?
@@ -598,8 +601,6 @@ static void SetViewSize (unsigned int screenWidth, unsigned int screenHeight)
 	viewheight = height&~1;
 	centerx = viewwidth/2-1;
 	centerxwide = AspectCorrection[r_ratio].isWide ? CorrectWidthFactor(centerx) : centerx;
-	// This should allow shooting within 9 degrees, but it's not perfect.
-	shootdelta = ((viewwidth<<FRACBITS)/AspectCorrection[r_ratio].viewGlobal)/10;
 	if((unsigned) viewheight == screenHeight)
 		viewscreenx = viewscreeny = screenofs = 0;
 	else
@@ -720,7 +721,7 @@ static void PG13 (void)
 	VW_UpdateScreen ();
 
 	VW_FadeIn ();
-	IN_UserInput (TICRATE * 7);
+	IN_UserInput (TICRATE * 7, ACK_Any);
 
 	VW_FadeOut ();
 }
@@ -755,7 +756,7 @@ static void NonShareware (void)
 
 	VW_UpdateScreen ();
 	VW_FadeIn ();
-	IN_Ack ();
+	IN_Ack (ACK_Any);
 }
 
 //===========================================================================
@@ -859,7 +860,11 @@ int CheckRatio (int width, int height, int *trueratio)
 			fakeratio = (height * 5/4 == width) ? 4 : 0;
 		}
 	}*/
-	if (abs (height * 64/27 - width) < 5 || abs (height * 43/18 - width) < 5)
+	if (abs (height * 32/9 - width) < 5)
+	{
+		ratio = ASPECT_32_9;
+	}
+	else if (abs (height * 64/27 - width) < 5 || abs (height * 43/18 - width) < 5)
 	{
 		ratio = ASPECT_64_27;
 	}
@@ -1012,8 +1017,6 @@ static const char* CheckParameters(int argc, char *argv[], TArray<FString> &file
 		}
 		else IFARG("--noadaptive")
 			noadaptive = true;
-		else IFARG("--nodblbuf")
-			usedoublebuffering = false;
 		else IFARG("--extravbls")
 		{
 			if(++i >= argc)
@@ -1116,6 +1119,10 @@ static const char* CheckParameters(int argc, char *argv[], TArray<FString> &file
 				Net::InitVars.joinAddress = argv[i];
 			}
 		}
+		else IFARG("--battle")
+		{
+			Net::InitVars.gameMode = Net::GM_Battle;
+		}
 		else IFARG("--debugnet")
 		{
 			DebugNetwork = true;
@@ -1160,7 +1167,6 @@ static const char* CheckParameters(int argc, char *argv[], TArray<FString> &file
 			" --bits <b>             Sets the screen color depth\n"
 			"                        (use this when you have palette/fading problems\n"
 			"                        allowed: 8, 16, 24, 32, default: \"best\" depth)\n"
-			" --nodblbuf             Don't use SDL's double buffering\n"
 			" --extravbls <vbls>     Sets a delay after each frame, which may help to\n"
 			"                        reduce flickering (unit is currently 8 ms, default: 0)\n"
 			" --joystick <index>     Use the index-th joystick if available\n"
@@ -1170,8 +1176,9 @@ static const char* CheckParameters(int argc, char *argv[], TArray<FString> &file
 			" --audiobuffer <size>   Sets the size of the audio buffer (-> sound latency)\n"
 			"                        (given in bytes, default: 2048 / (44100 / samplerate))\n"
 			" --host <number>        Sets up a network game with the given number of players.\n"
-			" --connect <address>    Connects to the given host.\n"
+			" --join <address>       Joins a network game coordinated by the given host.\n"
 			" --port <number>        Port number to use for network communications.\n"
+			" --battle               Player vs. player battle\n"
 			" --debugnet             Enable network debugging messages.\n"
 			" --foreignsave          Disable save game validity checking.\n"
 			, GetGameCaption(), defaultSampleRate
@@ -1301,6 +1308,10 @@ int WL_Main (int argc, char *argv[])
 
 			for(unsigned int i = 0;i < wadfiles.Size();++i)
 				files.Push(wadfiles[i]);
+
+			// Normalize path separators as ZDoom code expects
+			for(unsigned int i = 0;i < files.Size();++i)
+				files[i].ReplaceChars('\\', '/');
 
 			printf("W_Init: Init WADfiles.\n");
 			Wads.InitMultipleFiles(files);

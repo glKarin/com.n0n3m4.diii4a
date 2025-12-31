@@ -530,7 +530,7 @@ void R_InitColormaps ()
 
 			if (Wads.CheckNumForName (name, ns_colormaps) == (int)i)
 			{
-				strncpy(cm.name, name, 8);
+				memcpy(cm.name, name, 8);
 				cm.blend = 0;
 				cm.lump = i;
 				fakecmaps.Push(cm);

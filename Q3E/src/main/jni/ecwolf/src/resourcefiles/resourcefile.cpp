@@ -244,13 +244,17 @@ FResourceFile *FResourceFile::OpenResourceFile(const char *filename, FileReader 
 {
 	if (file == NULL)
 	{
-		file = FileReader::SafeOpen(filename);
-		if (file == NULL)
+		try
+		{
+			file = new FileReader(filename);
+		}
+		catch (CRecoverableError &)
+		{
 			return NULL;
+		}
 	}
 	else
 	{
-#ifndef LIBRETRO
 		// ECWolf HACK For embedded files, try to load a multi file type since
 		// the file parameter is forced to the wrong type.
 		const char* c = strchr(filename, ':');
@@ -266,7 +270,6 @@ FResourceFile *FResourceFile::OpenResourceFile(const char *filename, FileReader 
 				if (resfile != NULL) return resfile;
 			}
 		}
-#endif
 	}
 
 	for(size_t i = 0; i < COUNTOF_FUNCS; i++)
@@ -666,6 +669,7 @@ FExternalLump::~FExternalLump()
 // For external lumps this reopens the file each time it is accessed
 //
 //==========================================================================
+
 int FExternalLump::FillCache()
 {
 	Cache = new char[LumpSize];

@@ -105,7 +105,6 @@ CAPTION MAKE_STRING(RCGAMENAME,Very Fatal Error)
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     CONTROL         "",IDC_CRASHTAB,"SysTabControl32",WS_TABSTOP,4,4,404,280
-    PUSHBUTTON      "&Send Error Report",IDYES,146,289,91,14,WS_DISABLED
     PUSHBUTTON      "Save Report to Disk...",IDC_SAVEREPORT,242,289,91,14
     PUSHBUTTON      "&Discard Report",IDNO,338,289,70,14
 END

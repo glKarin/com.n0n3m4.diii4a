@@ -67,9 +67,7 @@ class MenuItem
 		void		setText(const char string[80]);
 		void		setVisible(bool visible=true) { this->visible = visible; }
 
-#ifndef LIBRETRO
 		virtual void	activate();
-#endif
 		virtual void	draw();
 		virtual void	left() {}
 		virtual void	right() {}
@@ -223,9 +221,6 @@ class Menu
 		void			drawMenu() const;
 		virtual void	draw() const;
 		int				handle();
-		bool			handleStep(struct wl_state_s *state, const struct wl_input_state_s *input);
-		void			prepareMenu();
-		bool			ClearMenu();
 		int				getCurrentPosition() const { return curPos; }
 		/**
 		 * @param position If not -1, returns the height to the specified position.
