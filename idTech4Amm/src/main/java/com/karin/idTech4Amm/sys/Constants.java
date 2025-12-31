@@ -31,6 +31,7 @@ public final class Constants
     {
         return new String[] {
                 "Add game main thread stack size config on Menu > Option > Advance.",
+				"Add `ECWolf`(ver 1.4.2) support, game standalone directory named `ecwolf`. More view in `" + TextHelper.GenLinkText("http://maniacsvault.net/ecwolf/", "ECWolf") + "`.",
         };
 	};
 

@@ -4259,7 +4259,7 @@ public class GameLauncher extends Activity
 	private void SetGameModToCommand(String mod)
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D || Q3EUtils.q3ei.isSource)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D || Q3EUtils.q3ei.isSource || Q3EUtils.q3ei.isWolf3D)
 			SetParam(arg, mod);
 		else if(Q3EUtils.q3ei.isDOOM)
 		{
@@ -4280,7 +4280,7 @@ public class GameLauncher extends Activity
 	private String GetGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D || Q3EUtils.q3ei.isSource)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D || Q3EUtils.q3ei.isSource || Q3EUtils.q3ei.isWolf3D)
 			return GetParam(arg);
 		else if(Q3EUtils.q3ei.isDOOM)
 			return GetParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);
@@ -4306,7 +4306,7 @@ public class GameLauncher extends Activity
 	private void RemoveGameModFromCommand()
 	{
 		String arg = Q3EUtils.q3ei.GetGameCommandParm();
-		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D || Q3EUtils.q3ei.isSource)
+		if(Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isXash3D || Q3EUtils.q3ei.isSource || Q3EUtils.q3ei.isWolf3D)
 			RemoveParam(arg);
 		else if(Q3EUtils.q3ei.isDOOM)
 			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, arg);

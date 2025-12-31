@@ -31,6 +31,7 @@ import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KidTech4Command;
 import com.n0n3m4.q3e.karin.KidTechCommand;
 import com.n0n3m4.q3e.karin.KidTechQuakeCommand;
+import com.n0n3m4.q3e.karin.KidTechWolf3DCommand;
 import com.n0n3m4.q3e.onscreen.Q3EControls;
 
 import java.util.ArrayList;
@@ -678,6 +679,8 @@ public class Q3EInterface
 			return KidTechCommand.ARG_PREFIX_QUAKETECH;
 		if(isDOOM)
 			return KidTechCommand.ARG_PREFIX_QUAKETECH + KidTechCommand.ARG_PREFIX_IDTECH;
+		if(isWolf3D)
+			return KidTechCommand.ARG_PREFIX_WOLFTECH;
 		else
 			return KidTechCommand.ARG_PREFIX_IDTECH;
 	}
@@ -691,6 +694,8 @@ public class Q3EInterface
 	{
 		if(isQ1 || isDOOM || isXash3D || isSource)
 			return new KidTechQuakeCommand(cmd);
+		if(isWolf3D)
+			return new KidTechWolf3DCommand(cmd);
 		else
 			return new KidTech4Command(cmd);
 	}
@@ -809,7 +814,7 @@ public class Q3EInterface
 		}
 		else if(isWolf3D)
 		{
-			//list.add("<base>/" + Q3EGameConstants.CONFIG_FILE_MOHAA);
+			list.add(Q3EGameConstants.CONFIG_FILE_WOLF3D);
 		}
 		else
 		{

@@ -69,7 +69,7 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_SOURCE   = "cfg/config.cfg";
     public static final String CONFIG_FILE_URT      = "q3config.cfg";
     public static final String CONFIG_FILE_MOHAA    = "configs/omconfig.cfg";
-    public static final String CONFIG_FILE_WOLF3D    = "configs/omconfig.cfg";
+    public static final String CONFIG_FILE_WOLF3D   = "ecwolf.cfg";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -314,7 +314,7 @@ public final class Q3EGameConstants
     public static final String XASH3D_VERSION                 = GAME_VERSION_XASH3D + ".3"; // 1: include cs16 resource
     public static final String SOURCE_ENGINE_VERSION          = GAME_VERSION_SOURCE + ".1"; // 1: init
     public static final String ETW_VERSION                    = GAME_VERSION_ETW + ".1"; // 1: init
-    public static final String WOLF3D_VERSION                 = GAME_VERSION_WOLF3D + ".1"; // 1: init
+    public static final String WOLF3D_VERSION                 = GAME_VERSION_WOLF3D + ".2"; // 1: unuse libretro
 
 
 
