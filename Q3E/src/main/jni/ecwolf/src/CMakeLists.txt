@@ -1,11 +1,11 @@
-if (NOT _DIII4A)
+if (NOT DIII4A)
 add_custom_target(revision_check ALL
 	COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/tools/updaterevision/UpdateRevision.cmake" "${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h"
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 endif()
 
-if(_DIII4A)
+if(DIII4A)
 		set(ENGINE_TARGET ecwolf)
 else()
         set(ENGINE_TARGET engine)
@@ -161,7 +161,7 @@ initial_sources(
 	zstring.cpp
 )
       
-if(ANDROID AND NOT _DIII4A)
+if(ANDROID AND NOT DIII4A)
 	# On Android we build a shared object so create a dummy program so we can
 	# get link errors.
 	add_executable(link-test android/link-test.cpp)
@@ -252,7 +252,7 @@ if(WIN32)
 	)
 elseif(APPLE OR ANDROID)
 	set(NO_GTK ON)
-	if(_DIII4A)
+	if(DIII4A)
 		target_sources(${ENGINE_TARGET} PRIVATE posix/i_main.cpp)
 	endif()
 else()
@@ -297,7 +297,7 @@ if(APPLE)
 			MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
 		)
 	endif(BUILD_BUNDLE)
-elseif(_DIII4A)
+elseif(DIII4A)
 	target_sources(${ENGINE_TARGET} PRIVATE
 			diii4a/in_android.cpp
 			diii4a/sys_android.cpp
@@ -342,7 +342,7 @@ file(GLOB HEADER_FILES
 list(APPEND HEADER_FILES ${CMAKE_CURRENT_BINARY_DIR}/versiondefs.h)
 target_sources(${ENGINE_TARGET} PRIVATE ${HEADER_FILES})
 
-if(_DIII4A)
+if(DIII4A)
 		target_link_libraries(${ENGINE_TARGET} PRIVATE
 				SDL2_mixer
 				SDL2_net

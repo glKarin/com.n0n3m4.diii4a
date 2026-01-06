@@ -140,7 +140,7 @@ endfunction()
 
 option(INTERNAL_SDL_MIXER_CODECS "Build SDL_mixer with vendored codec libraries" OFF)
 
-if(_DIII4A) #k: SDL
+if(DIII4A) #k: SDL
 	set(SDL2::SDL2 SDL2)
 	set(SDL2::SDL2_mixer SDL2_mixer)
 	set(SDL2::SDL2_net SDL2_net)
