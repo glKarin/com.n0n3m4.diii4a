@@ -1,3 +1,0 @@
-actor PatrolPoint 10 native
-{
-}
