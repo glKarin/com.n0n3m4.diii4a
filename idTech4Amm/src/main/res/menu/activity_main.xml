@@ -60,7 +60,7 @@
             <item
                 android:id="@+id/main_menu_game_doom"
                 android:title="@string/doom"
-                android:icon="@drawable/gzdoom_icon"
+                android:icon="@drawable/uzdoom_icon"
                 android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_etw"

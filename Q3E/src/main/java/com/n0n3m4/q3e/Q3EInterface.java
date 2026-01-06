@@ -26,7 +26,6 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KidTech4Command;
 import com.n0n3m4.q3e.karin.KidTechCommand;
@@ -201,7 +200,7 @@ public class Q3EInterface
 		else if(isD3BFG)
 			return Q3EGameConstants.GAME_ID_DOOM3BFG;
 		else if(isDOOM)
-			return Q3EGameConstants.GAME_ID_GZDOOM;
+			return Q3EGameConstants.GAME_ID_ZDOOM;
 		else if(isETW)
 			return Q3EGameConstants.GAME_ID_ETW;
 		else if(isRealRTCW)
@@ -272,8 +271,8 @@ public class Q3EInterface
 			SetupQuake1();
 		else if(Q3EGameConstants.GAME_DOOM3BFG.equalsIgnoreCase(name))
 			SetupDoom3BFG();
-		else if(Q3EGameConstants.GAME_GZDOOM.equalsIgnoreCase(name))
-			SetupGZDoom();
+		else if(Q3EGameConstants.GAME_ZDOOM.equalsIgnoreCase(name))
+			SetupZDoom();
 		else if(Q3EGameConstants.GAME_ETW.equalsIgnoreCase(name))
 			SetupETW();
 		else if(Q3EGameConstants.GAME_REALRTCW.equalsIgnoreCase(name))
@@ -394,7 +393,7 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
-	public void SetupGZDoom()
+	public void SetupZDoom()
 	{
 		ResetGameState();
 		isDOOM = true;
@@ -756,7 +755,7 @@ public class Q3EInterface
 		}
 		else if(isDOOM)
 		{
-			list.add(Q3EGameConstants.CONFIG_FILE_GZDOOM);
+			list.add(Q3EGameConstants.CONFIG_FILE_ZDOOM);
 		}
 		else if(isETW)
 		{
@@ -1091,9 +1090,9 @@ public class Q3EInterface
 
 		if (isDOOM)
 		{
-			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, true))
+			if(preferences.getBoolean(Q3EPreference.pref_harm_zdoom_load_lights_pk3, true))
 				extraCommand = GetGameCommandEngine(extraCommand).AddParam("file", "lights.pk3").toString();
-			if(preferences.getBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, true))
+			if(preferences.getBoolean(Q3EPreference.pref_harm_zdoom_load_brightmaps_pk3, true))
 				extraCommand = GetGameCommandEngine(extraCommand).AddParam("file", "brightmaps.pk3").toString();
 		}
 		return extraCommand.trim();

@@ -64,10 +64,10 @@ public enum Q3EGame
             Q3EKeyCodes.KeyCodesD3.class
     ),
 
-    GZDOOM(Q3EGameConstants.GAME_ID_GZDOOM, Q3EGameConstants.GAME_GZDOOM, Q3EGameConstants.LIB_ENGINE1_DOOM, Q3EGameConstants.GAME_NAME_GZDOOM, Q3EGameConstants.GAME_BASE_GZDOOM,
-            Q3EGameConstants.GAME_VERSION_GZDOOM, Q3EGameConstants.GAME_SUBDIR_GZDOOM, true, Q3EGameConstants.CONFIG_FILE_GZDOOM,
-            "iwad", null, null, ".config/gzdoom",
-            Q3EPreference.pref_harm_gzdoom_fs_game, Q3EPreference.pref_harm_gzdoom_user_mod, Q3EPreference.pref_harm_gzdoom_game_mod, Q3EPreference.pref_harm_gzdoom_game_lib, Q3EPreference.pref_params_gzdoom, Q3EPreference.pref_harm_gzdoom_command_record, null, Q3EPreference.pref_harm_gzdoom_env,
+    ZDOOM(Q3EGameConstants.GAME_ID_ZDOOM, Q3EGameConstants.GAME_ZDOOM, Q3EGameConstants.LIB_ENGINE1_DOOM, Q3EGameConstants.GAME_NAME_ZDOOM, Q3EGameConstants.GAME_BASE_ZDOOM,
+            Q3EGameConstants.GAME_VERSION_ZDOOM, Q3EGameConstants.GAME_SUBDIR_ZDOOM, true, Q3EGameConstants.CONFIG_FILE_ZDOOM,
+            "iwad", null, null, ".config/uzdoom",
+            Q3EPreference.pref_harm_zdoom_fs_game, Q3EPreference.pref_harm_zdoom_user_mod, Q3EPreference.pref_harm_zdoom_game_mod, Q3EPreference.pref_harm_zdoom_game_lib, Q3EPreference.pref_params_zdoom, Q3EPreference.pref_harm_zdoom_command_record, null, Q3EPreference.pref_harm_zdoom_env,
             Q3EKeyCodes.KeyCodesSDL.class
     ),
 

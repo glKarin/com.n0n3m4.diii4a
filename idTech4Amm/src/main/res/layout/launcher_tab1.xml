@@ -1037,8 +1037,8 @@
             android:visibility="gone"></include>
 
         <include
-            android:id="@+id/gzdoom_section"
-            layout="@layout/launcher_gzdoom"
+            android:id="@+id/zdoom_section"
+            layout="@layout/launcher_zdoom"
             android:visibility="gone"></include>
 
         <include

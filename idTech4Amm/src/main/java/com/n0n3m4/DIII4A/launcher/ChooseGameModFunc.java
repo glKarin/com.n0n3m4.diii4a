@@ -21,7 +21,6 @@ import com.n0n3m4.q3e.karin.KidTechCommand;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -274,7 +273,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         String lib;
         if(Q3EUtils.q3ei.isDOOM && file.type == FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY)
         {
-            List<FileBrowser.FileModel> fileModels = ChooseExtrasFileFunc.ListGZDOOMFiles(file.path);
+            List<FileBrowser.FileModel> fileModels = ChooseExtrasFileFunc.ListZDOOMFiles(file.path);
             List<String> wads = new ArrayList<>();
 
             for(FileBrowser.FileModel fileModel : fileModels)

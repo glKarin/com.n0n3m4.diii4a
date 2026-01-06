@@ -182,7 +182,7 @@ public final class TextHelper
             "1. idTech4 engine:",
             " e.g. `DOOM 3`, `DOOM 3 RoE`, `Quake 4`, `Prey(2006)`, `The Dark Mod`, `DOOM 3 BFG`, and some mods(e.g. `The Lost Mission`).",
             "2. Other idTech engine:",
-            " e.g. `Return to Castle Wolfenstein`, `Quake III`, `Quake II`, `Quake`, `GZDOOM`, `Wolfenstein: Enemy Territory`, `RealRTCW`, `OpenJK`, `Urban Terror`, `Medal of Honor: Allied Assault`.",
+            " e.g. `Return to Castle Wolfenstein`, `Quake III`, `Quake II`, `Quake`, `UZDOOM`, `Wolfenstein: Enemy Territory`, `RealRTCW`, `OpenJK`, `Urban Terror`, `Medal of Honor: Allied Assault`.",
             "3. Other open source engine:",
             " e.g. `Serious Sam Classic`.",
 /*            null,

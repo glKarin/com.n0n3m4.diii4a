@@ -11,6 +11,7 @@
     <color name="theme_tdm_main_color">#FF763F20</color>
     <color name="theme_d3bfg_main_color">#FFB54C13</color>
     <color name="theme_gzdoom_main_color">#FF0C377A</color>
+    <color name="theme_uzdoom_main_color">#FF237887</color>
     <color name="theme_etw_main_color">#FFA7605A</color>
     <color name="theme_realrtcw_main_color">#FFF20000</color>
     <color name="theme_fteqw_main_color">#FF8A74EB</color>

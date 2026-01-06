@@ -89,7 +89,7 @@ public final class CreateGameFolderFunc extends GameLauncherFunc
                 String gameDataDir = value.file;
                 String path = KStr.AppendPath(DataDir, subdir);
 
-                if(Q3EGameConstants.GAME_GZDOOM.equals(game))
+                if(Q3EGameConstants.GAME_ZDOOM.equals(game))
                 {
                     if(CreateFolder(path))
                         i++;

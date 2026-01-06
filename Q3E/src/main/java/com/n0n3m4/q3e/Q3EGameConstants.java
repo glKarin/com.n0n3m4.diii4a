@@ -14,7 +14,7 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE4_TDM      = "libTheDarkMod.so"; // TDM
     public static final String LIB_ENGINE1_QUAKE    = "libdarkplaces.so"; // Quake 1
     public static final String LIB_ENGINE4_D3BFG    = "libRBDoom3BFG.so"; // Doom3-BFG
-    public static final String LIB_ENGINE1_DOOM     = "libgzdoom.so"; // GZDOOM
+    public static final String LIB_ENGINE1_DOOM     = "libuzdoom.so"; // ZDOOM
     public static final String LIB_ENGINE3_ETW      = "libetl.so"; // ETW
     public static final String LIB_ENGINE3_REALRTCW = "libRealRTCW.so"; // RealRTCW
     public static final String LIB_ENGINE_FTEQW     = "libfteqw.so"; // FTEQW
@@ -57,7 +57,7 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_TDM      = "Darkmod.cfg";
     public static final String CONFIG_FILE_QUAKE1   = "config.cfg";
     public static final String CONFIG_FILE_DOOM3BFG = "D3BFGConfig.cfg";
-    public static final String CONFIG_FILE_GZDOOM   = "gzdoom.ini";
+    public static final String CONFIG_FILE_ZDOOM   = "uzdoom.ini";
     public static final String CONFIG_FILE_ETW      = "etconfig.cfg";
     public static final String CONFIG_FILE_REALRTCW = "realrtcwconfig.cfg";
     public static final String CONFIG_FILE_FTEQW    = "fte.cfg";
@@ -81,7 +81,7 @@ public final class Q3EGameConstants
     public static final String GAME_TDM      = "tdm";
     public static final String GAME_QUAKE1   = "quake1";
     public static final String GAME_DOOM3BFG = "doom3bfg";
-    public static final String GAME_GZDOOM   = "gzdoom";
+    public static final String GAME_ZDOOM    = "zdoom";
     public static final String GAME_ETW      = "etw";
     public static final String GAME_REALRTCW = "realrtcw";
     public static final String GAME_FTEQW    = "fteqw";
@@ -105,7 +105,7 @@ public final class Q3EGameConstants
     public static final String GAME_NAME_TDM      = "Dark mod"; // The Dark Mod
     public static final String GAME_NAME_QUAKE1   = "Quake 1";
     public static final String GAME_NAME_DOOM3BFG = "DOOM 3 BFG";
-    public static final String GAME_NAME_GZDOOM   = "GZDOOM";
+    public static final String GAME_NAME_ZDOOM    = "ZDOOM";
     public static final String GAME_NAME_ETW      = "ETW"; // "Wolfenstein: Enemy Territory";
     public static final String GAME_NAME_REALRTCW = "RealRTCW";
     public static final String GAME_NAME_FTEQW    = "FTEQW";
@@ -130,9 +130,9 @@ public final class Q3EGameConstants
     public static final String GAME_BASE_TDM        = ""; // the dark mod is standalone
     public static final String GAME_BASE_QUAKE1     = "darkplaces/id1"; // "darkplaces";
     public static final String GAME_BASE_QUAKE1_DIR = "id1";
-    public static final String GAME_BASE_DOOM3BFG   = "base"; // RBDoom3BFG always in doom3bfg folder
-    public static final String GAME_BASE_GZDOOM     = ""; // GZDOOM is standalone
-    public static final String GAME_BASE_ETW        = "etmain";
+    public static final String GAME_BASE_DOOM3BFG = "base"; // RBDoom3BFG always in doom3bfg folder
+    public static final String GAME_BASE_ZDOOM    = ""; // UZDOOM is standalone
+    public static final String GAME_BASE_ETW      = "etmain";
     public static final String GAME_BASE_REALRTCW   = "Main";
     public static final String GAME_BASE_FTEQW      = "";
     public static final String GAME_BASE_JA         = "base";
@@ -154,9 +154,9 @@ public final class Q3EGameConstants
     public static final String GAME_SUBDIR_RTCW     = "rtcw";
     public static final String GAME_SUBDIR_TDM      = "darkmod";
     public static final String GAME_SUBDIR_QUAKE1   = "quake1";
-    public static final String GAME_SUBDIR_DOOMBFG  = "doom3bfg";
-    public static final String GAME_SUBDIR_GZDOOM   = "gzdoom";
-    public static final String GAME_SUBDIR_ETW      = "etw";
+    public static final String GAME_SUBDIR_DOOMBFG = "doom3bfg";
+    public static final String GAME_SUBDIR_ZDOOM   = "uzdoom";
+    public static final String GAME_SUBDIR_ETW     = "etw";
     public static final String GAME_SUBDIR_REALRTCW = "realrtcw";
     public static final String GAME_SUBDIR_FTEQW    = "fteqw";
     public static final String GAME_SUBDIR_JA       = "openja";
@@ -179,7 +179,7 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_TDM      = "2.13";
     public static final String GAME_VERSION_QUAKE1   = "";
     public static final String GAME_VERSION_DOOM3BFG = "1.4.0";
-    public static final String GAME_VERSION_GZDOOM   = "4.14.2";
+    public static final String GAME_VERSION_ZDOOM    = "4.14.3";
     public static final String GAME_VERSION_ETW      = "2.83.2";
     public static final String GAME_VERSION_REALRTCW = "5.3";
     public static final String GAME_VERSION_FTEQW    = "1.05"; // ???
@@ -202,9 +202,9 @@ public final class Q3EGameConstants
     public static final int GAME_ID_QUAKE2   = 5;
     public static final int GAME_ID_QUAKE1   = 6;
     public static final int GAME_ID_DOOM3BFG = 7;
-    public static final int GAME_ID_TDM      = 8;
-    public static final int GAME_ID_GZDOOM   = 9;
-    public static final int GAME_ID_ETW      = 10;
+    public static final int GAME_ID_TDM   = 8;
+    public static final int GAME_ID_ZDOOM = 9;
+    public static final int GAME_ID_ETW   = 10;
     public static final int GAME_ID_REALRTCW = 11;
     public static final int GAME_ID_FTEQW    = 12;
     public static final int GAME_ID_JA       = 13;
@@ -299,7 +299,7 @@ public final class Q3EGameConstants
         DOOM3_SABOT, DOOM3_RIVENSIN_ORIGIANL_LEVELS, DOOM3_BFG_CHINESE_TRANSLATION,
         DOOM3BFG_HLSL_SHADER,
         TDM_GLSL_SHADER,
-        GZDOOM_RESOURCE,
+        ZDOOM_RESOURCE,
         XASH3D_EXTRAS, XASH3D_CS16_EXTRAS,
         SOURCE_ENGINE_EXTRAS,
         ET_LEGACY_EXTRAS,
@@ -310,7 +310,7 @@ public final class Q3EGameConstants
     public static final String TDM_GLSL_SHADER_VERSION        = GAME_VERSION_TDM + ".1"; // 1: init
     //public static final String TDM_2_12_GLSL_SHADER_VERSION   = "2.12.6"; // 6: fix a integer to float convert
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = GAME_VERSION_DOOM3BFG + ".1"; // 1: init
-    public static final String GZDOOM_VERSION                 = GAME_VERSION_GZDOOM + ".1"; // 1: init
+    public static final String ZDOOM_VERSION                  = GAME_VERSION_ZDOOM + ".1"; // 1: init
     public static final String XASH3D_VERSION                 = GAME_VERSION_XASH3D + ".3"; // 1: include cs16 resource
     public static final String SOURCE_ENGINE_VERSION          = GAME_VERSION_SOURCE + ".1"; // 1: init
     public static final String ETW_VERSION                    = GAME_VERSION_ETW + ".1"; // 1: init
@@ -323,7 +323,7 @@ public final class Q3EGameConstants
 
     public static final String[] FTEQW_VID_RENDERER = {"vk", "gl",};
 
-    public static final String[] GZDOOM_GL_VERSIONS       = {"0", "330", "420", "430", "450",};
+    public static final String[] ZDOOM_GL_VERSIONS        = {"0", "330", "420", "430", "450",};
     public static final String[] QUAKE2_RENDERER_BACKENDS = {"gles1", "gles3", "vk",};
 
     public static final String[] XASH3D_REFS   = {"gles1", "gl4es", "gles3compat", "soft",};

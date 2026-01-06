@@ -50,7 +50,7 @@
     <string name="rivensin_play_original_doom3_level">Rivensin на оригинальных уровнях DOOM3</string>
     <string name="rbdoom3_bfg_hlsl_shader">RBDOOM3-BFG HLSL шейдер</string>
     <string name="the_dark_mod_glsl_shader">The Dark Mod GLSL шейдер</string>
-    <string name="gzdoom_builtin_resource">Внутренний ресурс GZDOOM</string>
+    <string name="zdoom_builtin_resource">Внутренний ресурс UZDOOM</string>
     <string name="close">Закрыть</string>
     <string name="open">Открыть</string>
     <string name="exit_game">Выйти из игры</string>

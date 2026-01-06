@@ -31,7 +31,7 @@ OPTION(GAME_QUAKE2                  "Build Quake 2"                             
 OPTION(GAME_QUAKE1                  "Build Quake 1"                                 ON)
 OPTION(GAME_TDM                     "Build The Dark Mod"                            ON)
 OPTION(GAME_DOOM3BFG                "Build DOOM 3 BFG"                              ON)
-OPTION(GAME_DOOM                    "Build GZDOOM"                                  ON)
+OPTION(GAME_DOOM                    "Build UZDOOM"                                  ON)
 OPTION(GAME_ETW                     "Build Wolfenstein: Enemy Territory"            ON)
 OPTION(GAME_REALRTCW                "Build RealRTCW"                                ON)
 OPTION(GAME_JK                      "Build Jedi Knight"                             ON)
@@ -164,15 +164,12 @@ if(GAME_DOOM3BFG) # 1.4.0 | f81a8c1dd9b762774a233ba071837b2c7a374751 | Mar 6, 20
     add_subdirectory ( doom3bfg ) # RBDOOM3-BFG
 endif()
 
-if(GAME_DOOM) # g4.14.0 | ac58779e282f42093c2f7d47298db28203a58c15 | Feb 28, 2025 | - renormalize normals on scaled models
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8 #[[ OR TRUE]]) # GZDOOM only support 64bits system
-        message(STATUS "Build GZDOOM")
-        add_subdirectory ( gzdoom ) # GZDOOM
-
-        # g4.12.2 | 71c40432e5e893c629a1c9c76a523a0ab22bd56a | Apr 28, 2024 | Reworked clientside lerping
-        # g4.14.0 | 25ec8a689d5654a7f57869e09c0ce0d0892ba6a4 | Dec 18, 2024 | - language update
+if(GAME_DOOM) # g4.14.3 | 1cb7598afadbe7ffe753b2eaf1b887e58e988036 | Nov 29, 2025 | - This is 4.14.3
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8 #[[ OR TRUE]]) # UZDOOM only support 64bits system
+        message(STATUS "Build UZDOOM")
+        add_subdirectory ( zdoom ) # UZDOOM
     else()
-        message(WARNING "GZDOOM not support 32bits build!")
+        message(WARNING "UZDOOM not support 32bits build!")
     endif()
 endif()
 

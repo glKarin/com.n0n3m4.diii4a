@@ -64,12 +64,12 @@ public enum Game
     // Doom3 BFG
     D3BFG_BASE(Q3EGameConstants.GAME_DOOM3BFG, "base", "", "RBDoom3BFG", "", "base", false, R.string.d3bfg_base),
 
-    // GZDOOM
-    //GZDOOM_BASE(Q3EGameConstants.GAME_GZDOOM, "", "", "", false, R.string.doom_base),
-    GZDOOM_DOOM1(Q3EGameConstants.GAME_GZDOOM, "DOOM.WAD", "DOOM.WAD", "gzdoom", "", "DOOM.WAD", true, R.string.doom1_base),
-    GZDOOM_DOOM2(Q3EGameConstants.GAME_GZDOOM, "DOOM2.WAD", "DOOM2.WAD", "gzdoom", "", "DOOM2.WAD", true, R.string.doom2_base),
-    GZDOOM_FREEDOOM1(Q3EGameConstants.GAME_GZDOOM, "freedoom1.wad", "freedoom1.wad", "gzdoom", "", "freedoom1.wad", true, R.string.freedoom1_base),
-    GZDOOM_FREEDOOM2(Q3EGameConstants.GAME_GZDOOM, "freedoom2.wad", "freedoom2.wad", "gzdoom", "", "freedoom2.wad", true, R.string.freedoom2_base),
+    // ZDOOM
+    //ZDOOM_BASE(Q3EGameConstants.GAME_ZDOOM, "", "", "", false, R.string.doom_base),
+    ZDOOM_DOOM1(Q3EGameConstants.GAME_ZDOOM, "DOOM.WAD", "DOOM.WAD", "uzdoom", "", "DOOM.WAD", true, R.string.doom1_base),
+    ZDOOM_DOOM2(Q3EGameConstants.GAME_ZDOOM, "DOOM2.WAD", "DOOM2.WAD", "uzdoom", "", "DOOM2.WAD", true, R.string.doom2_base),
+    ZDOOM_FREEDOOM1(Q3EGameConstants.GAME_ZDOOM, "freedoom1.wad", "freedoom1.wad", "uzdoom", "", "freedoom1.wad", true, R.string.freedoom1_base),
+    ZDOOM_FREEDOOM2(Q3EGameConstants.GAME_ZDOOM, "freedoom2.wad", "freedoom2.wad", "uzdoom", "", "freedoom2.wad", true, R.string.freedoom2_base),
 
     // Wolfenstein: Enemy Territory
     ETW_BASE(Q3EGameConstants.GAME_ETW, "etmain", "", "etwgame", "", "etmain", false, R.string.etw_base),
@@ -119,7 +119,7 @@ public enum Game
     MOHAA_BASE(Q3EGameConstants.GAME_MOHAA, "main", "", "", "", "main", false, R.string.openmohaa_base),
 
     // Wolfenstein 3D
-    GZDOOM_WOLF3D(Q3EGameConstants.GAME_WOLF3D, "", "", "ecwolf", "", "", true, R.string.wolf3d_base),
+    WOLF3D_BASE(Q3EGameConstants.GAME_WOLF3D, "", "", "ecwolf", "", "", true, R.string.wolf3d_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

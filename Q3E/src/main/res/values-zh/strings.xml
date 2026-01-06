@@ -51,7 +51,7 @@
     <string name="rivensin_play_original_doom3_level">Rivensin加载原毁灭战士3关卡</string>
     <string name="rbdoom3_bfg_hlsl_shader">RBDOOM3-BFG HLSL着色器</string>
     <string name="the_dark_mod_glsl_shader">The Dark Mod GLSL着色器</string>
-    <string name="gzdoom_builtin_resource">GZDOOM内置资源</string>
+    <string name="zdoom_builtin_resource">UZDOOM内置资源</string>
     <string name="close">关闭</string>
     <string name="open">打开</string>
     <string name="exit_game">退出游戏</string>

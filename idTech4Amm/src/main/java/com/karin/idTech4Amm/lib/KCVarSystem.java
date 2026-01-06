@@ -323,7 +323,7 @@ public final class KCVarSystem
                         )
                 );
 
-        KCVar.Group GZDOOM_CVARS = new KCVar.Group("GZDOOM", true)
+        KCVar.Group ZDOOM_CVARS = new KCVar.Group("ZDOOM", true)
                 .AddCVar(
                         KCVar.CreateCVar("harm_gl_es", "integer", "0", "OpenGLES version", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
                                 "0", "Automatic",
@@ -379,7 +379,7 @@ public final class KCVarSystem
         _cvars.put("RealRTCW", REALRTCW_CVARS);
         _cvars.put("ETW", ETW_CVARS);
         _cvars.put("TDM", TDM_CVARS);
-        _cvars.put("GZDOOM", GZDOOM_CVARS);
+        _cvars.put("ZDOOM", ZDOOM_CVARS);
         _cvars.put("UrT", URT_CVARS);
         _cvars.put("Xash3D", XASH3D_CVARS);
         _cvars.put("Source", SOURCE_CVARS);
@@ -406,7 +406,7 @@ public final class KCVarSystem
         else if(Q3EUtils.q3ei.isD3BFG)
             res.add(_cvars.get("DOOM3BFG"));
         else if(Q3EUtils.q3ei.isDOOM)
-            res.add(_cvars.get("GZDOOM"));
+            res.add(_cvars.get("ZDOOM"));
         else if(Q3EUtils.q3ei.isETW)
             res.add(_cvars.get("ETW"));
         else if(Q3EUtils.q3ei.isRealRTCW)

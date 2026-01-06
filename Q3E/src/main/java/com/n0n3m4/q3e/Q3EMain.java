@@ -538,11 +538,11 @@ public class Q3EMain extends Activity
             Q3EUtils.RunLauncher(this);
             return false;
         }
-        else if(Q3EUtils.q3ei.isDOOM) // arm32 not support GZDOOM
+        else if(Q3EUtils.q3ei.isDOOM) // arm32 not support UZDOOM
         {
             if(!Q3EJNI.Is64())
             {
-                Toast.makeText(this, "GZDOOM not support on arm32 device!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "UZDOOM not support on arm32 device!", Toast.LENGTH_LONG).show();
                 finish();
                 Q3EUtils.RunLauncher(this);
                 return false;
@@ -550,7 +550,7 @@ public class Q3EMain extends Activity
             String iwad = KidTechCommand.GetParam("-+", Q3EUtils.q3ei.cmd, "iwad");
             if(KStr.IsBlank(iwad))
             {
-                Toast.makeText(this, "GZDOOM requires -iwad file!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "UZDOOM requires -iwad file!", Toast.LENGTH_LONG).show();
                 finish();
                 Q3EUtils.RunLauncher(this);
                 return false;

@@ -92,12 +92,12 @@ public class Q3EPatchResourceManager
         resourceList.add(rsc);
 
         rsc = new Q3EPatchResource_dirToDir(
-                Q3EGameConstants.PatchResource.GZDOOM_RESOURCE,
-                Q3ELang.tr(context, R.string.gzdoom_builtin_resource) + "(" + Q3EGameConstants.GAME_VERSION_GZDOOM + ")",
-                Q3EGameConstants.GZDOOM_VERSION,
-                Q3EGameConstants.GAME_GZDOOM,
+                Q3EGameConstants.PatchResource.ZDOOM_RESOURCE,
+                Q3ELang.tr(context, R.string.zdoom_builtin_resource) + "(" + Q3EGameConstants.GAME_VERSION_ZDOOM + ")",
+                Q3EGameConstants.ZDOOM_VERSION,
+                Q3EGameConstants.GAME_ZDOOM,
                 null,
-                "pak/gzdoom/" + Q3EGameConstants.GAME_VERSION_GZDOOM,
+                "pak/uzdoom/" + Q3EGameConstants.GAME_VERSION_ZDOOM,
                 ""
         );
         resourceList.add(rsc);

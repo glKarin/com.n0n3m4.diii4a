@@ -28,7 +28,7 @@ public enum LauncherGame
 
     TDM(Q3EGameConstants.GAME_ID_TDM, Q3EGameConstants.GAME_TDM, R.drawable.tdm_icon, R.string.tdm_base, R.color.theme_tdm_main_color, R.string.tdm),
 
-    GZDOOM(Q3EGameConstants.GAME_ID_GZDOOM, Q3EGameConstants.GAME_GZDOOM, R.drawable.gzdoom_icon, R.string.doom_base, R.color.theme_gzdoom_main_color, R.string.doom),
+    ZDOOM(Q3EGameConstants.GAME_ID_ZDOOM, Q3EGameConstants.GAME_ZDOOM, R.drawable.uzdoom_icon, R.string.doom_base, R.color.theme_uzdoom_main_color, R.string.doom),
 
     ETW(Q3EGameConstants.GAME_ID_ETW, Q3EGameConstants.GAME_ETW, R.drawable.etw_icon, R.string.etw_base, R.color.theme_etw_main_color, R.string.etw),
 

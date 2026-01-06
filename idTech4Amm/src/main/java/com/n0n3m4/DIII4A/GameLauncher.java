@@ -547,20 +547,20 @@ public class GameLauncher extends Activity
 					setProp("harm_ui_disableAndroidMacro", isChecked);
 			}
 
-			// GZDOOM
-			else if (id == R.id.gzdoom_load_lights_pk3)
+			// ZDOOM
+			else if (id == R.id.zdoom_load_lights_pk3)
 			{
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, isChecked)
+						.putBoolean(Q3EPreference.pref_harm_zdoom_load_lights_pk3, isChecked)
 						.commit();
-				SetupGZDOOMFiles("file", "lights.pk3", isChecked);
+				SetupZDOOMFiles("file", "lights.pk3", isChecked);
 			}
-			else if (id == R.id.gzdoom_load_brightmaps_pk3)
+			else if (id == R.id.zdoom_load_brightmaps_pk3)
 			{
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, isChecked)
+						.putBoolean(Q3EPreference.pref_harm_zdoom_load_brightmaps_pk3, isChecked)
 						.commit();
-				SetupGZDOOMFiles("file", "brightmaps.pk3", isChecked);
+				SetupZDOOMFiles("file", "brightmaps.pk3", isChecked);
 			}
 
 			// The Dark Mod
@@ -732,8 +732,8 @@ public class GameLauncher extends Activity
 				}
 			}
 
-			// GZDOOM
-			else if (rgId == R.id.gzdoom_vid_preferbackend)
+			// ZDOOM
+			else if (rgId == R.id.zdoom_vid_preferbackend)
 			{
 				if(Q3EUtils.q3ei.isDOOM)
 				{
@@ -742,7 +742,7 @@ public class GameLauncher extends Activity
 					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "vid_preferbackend", value2);
 				}
 			}
-			else if (rgId == R.id.gzdoom_gl_es)
+			else if (rgId == R.id.zdoom_gl_es)
 			{
 				if(Q3EUtils.q3ei.isDOOM)
 				{
@@ -753,12 +753,12 @@ public class GameLauncher extends Activity
 					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "harm_gl_es", value2);
 				}
 			}
-			else if (rgId == R.id.gzdoom_gl_version)
+			else if (rgId == R.id.zdoom_gl_version)
 			{
 				if(Q3EUtils.q3ei.isDOOM)
 				{
 					int value2 = GetRadioGroupSelectIndex(radioGroup, id);
-					String value = value2 >= 0 && value2 < Q3EGameConstants.GZDOOM_GL_VERSIONS.length ? Q3EGameConstants.GZDOOM_GL_VERSIONS[value2] : Q3EGameConstants.GZDOOM_GL_VERSIONS[0];
+					String value = value2 >= 0 && value2 < Q3EGameConstants.ZDOOM_GL_VERSIONS.length ? Q3EGameConstants.ZDOOM_GL_VERSIONS[value2] : Q3EGameConstants.ZDOOM_GL_VERSIONS[0];
 					RemovePropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
 					SetPropPrefix(KidTechCommand.ARG_PREFIX_IDTECH, "harm_gl_version", value);
 				}
@@ -890,7 +890,7 @@ public class GameLauncher extends Activity
 			{
 				OpenResourceFileDialog(false);
 			}
-			else if (id == R.id.gzdoom_choose_extras_file)
+			else if (id == R.id.zdoom_choose_extras_file)
 			{
 				OpenExtrasFileChooser();
 			}
@@ -1371,7 +1371,7 @@ public class GameLauncher extends Activity
 		}
 		else if(Q3EUtils.q3ei.isDOOM)
 		{
-			Updatehacktings_GZDOOM();
+			Updatehacktings_ZDOOM();
 		}
 		else if(Q3EUtils.q3ei.isTDM)
 		{
@@ -1477,18 +1477,18 @@ public class GameLauncher extends Activity
 		SyncCmdCheckbox(V.etw_ui_disableAndroidMacro, "harm_ui_disableAndroidMacro", false);
 	}
 
-	private void Updatehacktings_GZDOOM()
+	private void Updatehacktings_ZDOOM()
 	{
 		String str;
 
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend");
-		SyncCmdRadioGroup2(V.gzdoom_vid_preferbackend, "vid_preferbackend", str, 2);
+		SyncCmdRadioGroup2(V.zdoom_vid_preferbackend, "vid_preferbackend", str, 2);
 
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_es");
-		SyncCmdRadioGroup2(V.gzdoom_gl_es, "harm_gl_es", str, 1, 1, GetRadioGroupNum(V.gzdoom_gl_es));
+		SyncCmdRadioGroup2(V.zdoom_gl_es, "harm_gl_es", str, 1, 1, GetRadioGroupNum(V.zdoom_gl_es));
 
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
-		SyncCmdRadioGroup2V(V.gzdoom_gl_version, "harm_gl_version", str, Q3EGameConstants.GZDOOM_GL_VERSIONS);
+		SyncCmdRadioGroup2V(V.zdoom_gl_version, "harm_gl_version", str, Q3EGameConstants.ZDOOM_GL_VERSIONS);
 	}
 
 	private void Updatehacktings_FTEQW()
@@ -1884,8 +1884,8 @@ public class GameLauncher extends Activity
 		// ETW
 		SetupUI_ETW();
 
-		// GZDOOM
-		SetupUI_GZDOOM();
+		// ZDOOM
+		SetupUI_ZDOOM();
 
 		// The Dark Mod
 		SetupUI_TDM();
@@ -2162,29 +2162,29 @@ public class GameLauncher extends Activity
 		V.etw_ui_disableAndroidMacro.setOnCheckedChangeListener(m_checkboxChangeListener);
 	}
 
-	private void SetupUI_GZDOOM()
+	private void SetupUI_ZDOOM()
 	{
 		int index;
 		String str;
 
 		SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		boolean load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, true);
-		V.gzdoom_load_lights_pk3.setChecked(load);
+		boolean load = mPrefs.getBoolean(Q3EPreference.pref_harm_zdoom_load_lights_pk3, true);
+		V.zdoom_load_lights_pk3.setChecked(load);
 		if (load && (Q3EUtils.q3ei.isDOOM))
 			AddParam_temp("file", "lights.pk3");
-		V.gzdoom_load_lights_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.zdoom_load_lights_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);
 
-		load = mPrefs.getBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, true);
-		V.gzdoom_load_brightmaps_pk3.setChecked(load);
+		load = mPrefs.getBoolean(Q3EPreference.pref_harm_zdoom_load_brightmaps_pk3, true);
+		V.zdoom_load_brightmaps_pk3.setChecked(load);
 		if (load && (Q3EUtils.q3ei.isDOOM))
 			AddParam_temp("file", "brightmaps.pk3");
-		V.gzdoom_load_brightmaps_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.zdoom_load_brightmaps_pk3.setOnCheckedChangeListener(m_checkboxChangeListener);
 
 		/*List<String> file = GetParamList("file");
-		V.gzdoom_load_lights_pk3.setChecked(null != file && file.contains("lights.pk3"));*/
+		V.zdoom_load_lights_pk3.setChecked(null != file && file.contains("lights.pk3"));*/
 
-		V.gzdoom_choose_extras_file.setOnClickListener(m_buttonClickListener);
+		V.zdoom_choose_extras_file.setOnClickListener(m_buttonClickListener);
 
 		index = 2;
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "vid_preferbackend");
@@ -2192,8 +2192,8 @@ public class GameLauncher extends Activity
 		{
 			index = Q3EUtils.parseInt_s(str, 2);
 		}
-		SelectRadioGroup(V.gzdoom_vid_preferbackend, index);
-		V.gzdoom_vid_preferbackend.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		SelectRadioGroup(V.zdoom_vid_preferbackend, index);
+		V.zdoom_vid_preferbackend.setOnCheckedChangeListener(m_groupCheckChangeListener);
 
 		index = 0;
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_es");
@@ -2203,19 +2203,19 @@ public class GameLauncher extends Activity
 			if(index > 0)
 				index--;
 		}
-		SelectRadioGroup(V.gzdoom_gl_es, index);
-		V.gzdoom_gl_es.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		SelectRadioGroup(V.zdoom_gl_es, index);
+		V.zdoom_gl_es.setOnCheckedChangeListener(m_groupCheckChangeListener);
 
 		index = 0;
 		str = GetPropPrefix(KidTechCommand.ARG_PREFIX_ALL, "harm_gl_version");
 		if (str != null)
 		{
-			index = Utility.ArrayIndexOf(Q3EGameConstants.GZDOOM_GL_VERSIONS, str);
+			index = Utility.ArrayIndexOf(Q3EGameConstants.ZDOOM_GL_VERSIONS, str);
 			if(index < 0)
 				index = 0;
 		}
-		SelectRadioGroup(V.gzdoom_gl_version, index);
-		V.gzdoom_gl_version.setOnCheckedChangeListener(m_groupCheckChangeListener);
+		SelectRadioGroup(V.zdoom_gl_version, index);
+		V.zdoom_gl_version.setOnCheckedChangeListener(m_groupCheckChangeListener);
 	}
 
 	private void SetupUI_FTEQW()
@@ -2541,7 +2541,7 @@ public class GameLauncher extends Activity
 		menuGames.put(R.id.main_menu_game_rtcw, Q3EGameConstants.GAME_RTCW);
 		menuGames.put(R.id.main_menu_game_tdm, Q3EGameConstants.GAME_TDM);
 		menuGames.put(R.id.main_menu_game_doom3bfg, Q3EGameConstants.GAME_DOOM3BFG);
-		menuGames.put(R.id.main_menu_game_doom, Q3EGameConstants.GAME_GZDOOM);
+		menuGames.put(R.id.main_menu_game_doom, Q3EGameConstants.GAME_ZDOOM);
 		menuGames.put(R.id.main_menu_game_etw, Q3EGameConstants.GAME_ETW);
 		menuGames.put(R.id.main_menu_game_realrtcw, Q3EGameConstants.GAME_REALRTCW);
 		menuGames.put(R.id.main_menu_game_fteqw, Q3EGameConstants.GAME_FTEQW);
@@ -2879,7 +2879,7 @@ public class GameLauncher extends Activity
 					file.add(s);
 			}
 
-			// if(V.gzdoom_load_lights_pk3.isChecked() && !file.contains("lights.pk3")) file.add("light3.pk3");
+			// if(V.zdoom_load_lights_pk3.isChecked() && !file.contains("lights.pk3")) file.add("light3.pk3");
 
 			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "file");
 			RemoveParamPrefix(KidTechCommand.ARG_PREFIX_ALL, "deh");
@@ -2991,8 +2991,8 @@ public class GameLauncher extends Activity
 		mEdtr.putInt(Q3EPreference.pref_harm_r_autoAspectRatio, V.cb_r_autoAspectRatio.isChecked() ? 1 : 0);
 		mEdtr.putBoolean(PreferenceKey.COLLAPSE_MODS, V.collapse_mods.isChecked());
 
-		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, V.gzdoom_load_lights_pk3.isChecked());
-		mEdtr.putBoolean(Q3EPreference.pref_harm_gzdoom_load_brightmaps_pk3, V.gzdoom_load_brightmaps_pk3.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_zdoom_load_lights_pk3, V.zdoom_load_lights_pk3.isChecked());
+		mEdtr.putBoolean(Q3EPreference.pref_harm_zdoom_load_brightmaps_pk3, V.zdoom_load_brightmaps_pk3.isChecked());
 		mEdtr.putInt(Q3EPreference.pref_harm_max_console_height_frac, V.consoleHeightFracValue.getProgress());
 		mEdtr.putString(Q3EUtils.q3ei.GetGameUserModPreferenceKey(), V.edt_fs_game.getText().toString());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_gui_useD3BFGFont, V.cb_gui_useD3BFGFont.isChecked());
@@ -3633,7 +3633,7 @@ public class GameLauncher extends Activity
 		V.doom3bfg_section.setVisibility(Q3EUtils.q3ei.isD3BFG ? View.VISIBLE : View.GONE);
 		V.realrtcw_section.setVisibility(Q3EUtils.q3ei.isRealRTCW ? View.VISIBLE : View.GONE);
 		V.etw_section.setVisibility(Q3EUtils.q3ei.isETW ? View.VISIBLE : View.GONE);
-		V.gzdoom_section.setVisibility(Q3EUtils.q3ei.isDOOM ? View.VISIBLE : View.GONE);
+		V.zdoom_section.setVisibility(Q3EUtils.q3ei.isDOOM ? View.VISIBLE : View.GONE);
 		V.tdm_section.setVisibility(Q3EUtils.q3ei.isTDM ? View.VISIBLE : View.GONE);
 		V.fteqw_section.setVisibility(Q3EUtils.q3ei.isFTEQW ? View.VISIBLE : View.GONE);
 		V.xash3d_section.setVisibility(Q3EUtils.q3ei.isXash3D ? View.VISIBLE : View.GONE);
@@ -4212,7 +4212,7 @@ public class GameLauncher extends Activity
 				name = (String)value.name;
 			else
 				name = "";
-			if(Q3EGameConstants.GAME_GZDOOM.equalsIgnoreCase(value.type))
+			if(Q3EGameConstants.GAME_ZDOOM.equalsIgnoreCase(value.type))
 			{
 				name += " (" + /*subdir +*/ value.file + ")";
 			}
@@ -4342,10 +4342,10 @@ public class GameLauncher extends Activity
 			RemoveProp(arg);
 	}
 
-	private void SetupGZDOOMFiles(String name, String file, boolean checked)
+	private void SetupZDOOMFiles(String name, String file, boolean checked)
 	{
 		PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-				.putBoolean(Q3EPreference.pref_harm_gzdoom_load_lights_pk3, checked)
+				.putBoolean(Q3EPreference.pref_harm_zdoom_load_lights_pk3, checked)
 				.commit();
 		if (checked)
 			AddParam_temp(name, file);
@@ -4790,14 +4790,14 @@ public class GameLauncher extends Activity
 		public CheckBox etw_omnibot_enable;
 		public RadioGroup etw_shadows;
 		public CheckBox etw_stencilShadowPersonal;
-		public CheckBox etw_ui_disableAndroidMacro;
-		public LinearLayout gzdoom_section;
-		public CheckBox gzdoom_load_lights_pk3;
-		public CheckBox gzdoom_load_brightmaps_pk3;
-		public Button gzdoom_choose_extras_file;
-		public RadioGroup gzdoom_vid_preferbackend;
-		public RadioGroup gzdoom_gl_es;
-		public RadioGroup gzdoom_gl_version;
+		public CheckBox     etw_ui_disableAndroidMacro;
+		public LinearLayout zdoom_section;
+		public CheckBox zdoom_load_lights_pk3;
+		public CheckBox   zdoom_load_brightmaps_pk3;
+		public Button     zdoom_choose_extras_file;
+		public RadioGroup zdoom_vid_preferbackend;
+		public RadioGroup   zdoom_gl_es;
+		public RadioGroup   zdoom_gl_version;
 		public LinearLayout tdm_section;
 		public CheckBox tdm_useMediumPrecision;
 		public LinearLayout fteqw_section;
@@ -4997,13 +4997,13 @@ public class GameLauncher extends Activity
 			etw_shadows = findViewById(R.id.etw_shadows);
 			etw_stencilShadowPersonal = findViewById(R.id.etw_stencilShadowPersonal);
 			etw_ui_disableAndroidMacro = findViewById(R.id.etw_ui_disableAndroidMacro);
-			gzdoom_section = findViewById(R.id.gzdoom_section);
-			gzdoom_load_lights_pk3 = findViewById(R.id.gzdoom_load_lights_pk3);
-			gzdoom_load_brightmaps_pk3 = findViewById(R.id.gzdoom_load_brightmaps_pk3);
-			gzdoom_choose_extras_file = findViewById(R.id.gzdoom_choose_extras_file);
-			gzdoom_vid_preferbackend = findViewById(R.id.gzdoom_vid_preferbackend);
-			gzdoom_gl_es = findViewById(R.id.gzdoom_gl_es);
-			gzdoom_gl_version = findViewById(R.id.gzdoom_gl_version);
+			zdoom_section = findViewById(R.id.zdoom_section);
+			zdoom_load_lights_pk3 = findViewById(R.id.zdoom_load_lights_pk3);
+			zdoom_load_brightmaps_pk3 = findViewById(R.id.zdoom_load_brightmaps_pk3);
+			zdoom_choose_extras_file = findViewById(R.id.zdoom_choose_extras_file);
+			zdoom_vid_preferbackend = findViewById(R.id.zdoom_vid_preferbackend);
+			zdoom_gl_es = findViewById(R.id.zdoom_gl_es);
+			zdoom_gl_version = findViewById(R.id.zdoom_gl_version);
 			tdm_section = findViewById(R.id.tdm_section);
 			tdm_useMediumPrecision = findViewById(R.id.tdm_useMediumPrecision);
 			fteqw_section = findViewById(R.id.fteqw_section);

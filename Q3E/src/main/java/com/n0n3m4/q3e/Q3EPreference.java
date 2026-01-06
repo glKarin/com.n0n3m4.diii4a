@@ -132,18 +132,18 @@ public final class Q3EPreference
     public static final String pref_harm_d3bfg_command_record     = PREF_HARM_D3BFG_PREFIX + "command_record";
     public static final String pref_harm_d3bfg_env                = PREF_HARM_D3BFG_PREFIX + "env";
     public static final String pref_harm_d3bfg_game_mod           = PREF_HARM_D3BFG_PREFIX + "game_mod"; //k
-    public static final String pref_harm_d3bfg_rendererBackend    = PREF_HARM_D3BFG_PREFIX + "rendererBackend"; //k
-    // GZDOOM
-    public static final String PREF_HARM_GZDOOM_PREFIX            = "q3e_harm_gzdoom_";
-    public static final String pref_harm_gzdoom_fs_game           = PREF_HARM_GZDOOM_PREFIX + "fs_game"; //k
-    public static final String pref_harm_gzdoom_game_lib          = PREF_HARM_GZDOOM_PREFIX + "game_lib"; //k
-    public static final String pref_harm_gzdoom_user_mod          = PREF_HARM_GZDOOM_PREFIX + "user_mod"; //k
-    public static final String pref_params_gzdoom                 = PREF_HARM_GZDOOM_PREFIX + "params"; //k
-    public static final String pref_harm_gzdoom_command_record    = PREF_HARM_GZDOOM_PREFIX + "command_record";
-    public static final String pref_harm_gzdoom_env               = PREF_HARM_GZDOOM_PREFIX + "command_env";
-    public static final String pref_harm_gzdoom_game_mod          = PREF_HARM_GZDOOM_PREFIX + "game_mod"; //k
+    public static final String pref_harm_d3bfg_rendererBackend = PREF_HARM_D3BFG_PREFIX + "rendererBackend"; //k
+    // ZDOOM
+    public static final String PREF_HARM_ZDOOM_PREFIX         = "q3e_harm_uzdoom_";
+    public static final String pref_harm_zdoom_fs_game        = PREF_HARM_ZDOOM_PREFIX + "fs_game"; //k
+    public static final String pref_harm_zdoom_game_lib       = PREF_HARM_ZDOOM_PREFIX + "game_lib"; //k
+    public static final String pref_harm_zdoom_user_mod       = PREF_HARM_ZDOOM_PREFIX + "user_mod"; //k
+    public static final String pref_params_zdoom              = PREF_HARM_ZDOOM_PREFIX + "params"; //k
+    public static final String pref_harm_zdoom_command_record = PREF_HARM_ZDOOM_PREFIX + "command_record";
+    public static final String pref_harm_zdoom_env            = PREF_HARM_ZDOOM_PREFIX + "command_env";
+    public static final String pref_harm_zdoom_game_mod       = PREF_HARM_ZDOOM_PREFIX + "game_mod"; //k
     // ETW
-    public static final String PREF_HARM_ETW_PREFIX               = "q3e_harm_etw_";
+    public static final String PREF_HARM_ETW_PREFIX     = "q3e_harm_etw_";
     public static final String pref_harm_etw_fs_game              = PREF_HARM_ETW_PREFIX + "fs_game"; //k
     public static final String pref_harm_etw_game_lib             = PREF_HARM_ETW_PREFIX + "game_lib"; //k
     public static final String pref_harm_etw_user_mod             = PREF_HARM_ETW_PREFIX + "user_mod"; //k
@@ -288,10 +288,10 @@ public final class Q3EPreference
     public static final String pref_ratiox                            = "harm_q3e_ratiox";
     public static final String pref_ratioy                            = "harm_q3e_ratioy";
     public static final String pref_ratio_use_custom_resolution       = "harm_q3e_ratio_use_custom_resolution";
-    public static final String pref_harm_r_shadowMapPerforatedShadow  = "q3e_harm_r_shadowMapPerforatedShadow"; //k
-    public static final String pref_harm_gzdoom_load_lights_pk3       = "harm_gzdoom_load_lights_pk3";
-    public static final String pref_harm_gzdoom_load_brightmaps_pk3   = "harm_gzdoom_load_brightmaps_pk3";
-    public static final String pref_harm_max_console_height_frac      = "q3e_harm_max_console_height_frac"; //k
+    public static final String pref_harm_r_shadowMapPerforatedShadow = "q3e_harm_r_shadowMapPerforatedShadow"; //k
+    public static final String pref_harm_zdoom_load_lights_pk3     = "harm_uzdoom_load_lights_pk3";
+    public static final String pref_harm_zdoom_load_brightmaps_pk3 = "harm_uzdoom_load_brightmaps_pk3";
+    public static final String pref_harm_max_console_height_frac   = "q3e_harm_max_console_height_frac"; //k
     public static final String pref_harm_r_occlusionCulling           = "q3e_harm_r_occlusionCulling"; //k
     public static final String pref_harm_gui_useD3BFGFont             = "q3e_harm_gui_useD3BFGFont"; //k
     public static final String pref_harm_r_shadowMapCombine           = "q3e_harm_r_shadowMapCombine"; //k

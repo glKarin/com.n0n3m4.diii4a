@@ -20,9 +20,7 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Build;
@@ -629,24 +627,23 @@ public class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
-    public void ExtractGZDOOMResource()
+    public void ExtractZDOOMResource()
     {
-        Q3EGameConstants.PatchResource gzdoomResource;
+        Q3EGameConstants.PatchResource zdoomResource;
         String versionCheckFile;
         //String versionName = "4.14.0";
 
         versionCheckFile = "idtech4amm.version";
-        gzdoomResource = Q3EGameConstants.PatchResource.GZDOOM_RESOURCE;
+        zdoomResource = Q3EGameConstants.PatchResource.ZDOOM_RESOURCE;
 
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
-        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_GZDOOM, versionCheckFile);
-        //final String engineVersionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, "gzdoom", "idtech4amm.gzdoom.version");
-        final String version = Q3EGameConstants.GZDOOM_VERSION;
-        String name = Q3ELang.tr(m_context, R.string.gzdoom_builtin_resource);
+        final String versionFile = KStr.AppendPath(Q3EUtils.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_ZDOOM, versionCheckFile);
+        final String version = Q3EGameConstants.ZDOOM_VERSION;
+        String name = Q3ELang.tr(m_context, R.string.zdoom_builtin_resource);
 
         //boolean change = CheckExtractResourceVersion(engineVersionFile, versionName, name);
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
-        if(manager.Fetch(gzdoomResource, overwrite) != null)
+        if(manager.Fetch(zdoomResource, overwrite) != null)
         {
             if (overwrite)
             {
@@ -770,7 +767,7 @@ public class Q3EGameHelper
         else if(Q3EUtils.q3ei.IsIdTech4BFG()) // if game is D3BFG, extract hlsl shader
             ExtractDOOM3BFGHLSLShaderSource();
         else if(Q3EUtils.q3ei.isDOOM) // pk3
-            ExtractGZDOOMResource();
+            ExtractZDOOMResource();
         else if(Q3EUtils.q3ei.isXash3D) // extras.pk3
             ExtractXash3DResource();
         else if(Q3EUtils.q3ei.isSource) // fonts

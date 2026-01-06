@@ -54,7 +54,7 @@ public final class ChooseExtrasFileFunc extends GameLauncherFunc
 
     public void run()
     {
-        List<FileBrowser.FileModel> fileModels = ListGZDOOMFiles(m_path);
+        List<FileBrowser.FileModel> fileModels = ListZDOOMFiles(m_path);
 
         final List<CharSequence> items = new ArrayList<>();
         final List<String> files = new ArrayList<>();
@@ -145,7 +145,7 @@ public final class ChooseExtrasFileFunc extends GameLauncherFunc
         dialog.show();
     }
 
-    public static List<FileBrowser.FileModel> ListGZDOOMFiles(String path)
+    public static List<FileBrowser.FileModel> ListZDOOMFiles(String path)
     {
         FileBrowser fileBrowser = new FileBrowser();
         fileBrowser.SetExtension(".wad", ".pk3", ".ipk3", ".deh", ".bex");
