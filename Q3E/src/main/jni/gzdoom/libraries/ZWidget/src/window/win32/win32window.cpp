@@ -407,6 +407,7 @@ void Win32Window::PresentBitmap(int width, int height, const uint32_t* pixels)
 LRESULT Win32Window::OnWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	LPARAM result = 0;
+
 	if (DwmDefWindowProc(WindowHandle, msg, wparam, lparam, &result))
 		return result;
 

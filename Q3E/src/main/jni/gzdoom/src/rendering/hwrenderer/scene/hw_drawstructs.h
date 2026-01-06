@@ -393,7 +393,6 @@ public:
 	TArray<lightlist_t> *lightlist;
 	DRotator Angles;
 
-
 	void SplitSprite(HWDrawInfo *di, sector_t * frontsector, bool translucent);
 	void PerformSpriteClipAdjustment(AActor *thing, const DVector2 &thingpos, float spriteheight);
 	bool CalculateVertices(HWDrawInfo *di, FVector3 *v, DVector3 *vp);

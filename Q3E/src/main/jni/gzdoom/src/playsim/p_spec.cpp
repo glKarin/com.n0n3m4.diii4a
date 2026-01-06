@@ -260,6 +260,7 @@ bool P_TestActivateLine (line_t *line, AActor *mo, int side, int activationType,
 		if ((mo->Pos().Z > mo->floorz) && !(mo->flags2 & MF2_ONMOBJ))
 			return false;
 	}
+
 	if (lineActivation & SPAC_UseThrough)
 	{
 		lineActivation |= SPAC_Use;
@@ -691,8 +692,6 @@ void P_ActorOnSpecialFlat (AActor *victim, int floorType)
 		}
 	}
 }
-
-
 
 //
 // P_UpdateSpecials
