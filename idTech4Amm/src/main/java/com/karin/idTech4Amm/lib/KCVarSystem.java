@@ -364,8 +364,8 @@ public final class KCVarSystem
                                 "dod", "Day of Defeat: Source",
                                 "episodic", "Half-Life 2: Episodic 1 & 2",
                                 "hl2mp", "Half-Life 2: Deathmatch",
-                                "hl1", "Half-Life 1: Source",
-                                "hl1mp", "Half-Life 1 Deathmatch: Source"
+                                "hl1", "Half-Life 1: Source"/*,
+                                "hl1mp", "Half-Life 1 Deathmatch: Source"*/
                         )
                 );
 

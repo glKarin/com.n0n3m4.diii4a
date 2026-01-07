@@ -110,7 +110,7 @@ public enum Game
     SOURCE_EP2(Q3EGameConstants.GAME_SOURCE, "ep2", "ep2", "source", "", "ep2", true, R.string.halflife_2_ep2_base),
     SOURCE_HL2MP(Q3EGameConstants.GAME_SOURCE, "hl2mp", "hl2mp", "source", "", "hl2mp", false, R.string.halflife_2_mp_base),
     SOURCE_HL1(Q3EGameConstants.GAME_SOURCE, "hl1", "hl1", "source", "", "hl1", false, R.string.halflife_1_source_base),
-    SOURCE_HL1MP(Q3EGameConstants.GAME_SOURCE, "hl1mp", "hl1mp", "source", "", "hl1mp", false, R.string.halflife_1_mp_source_base),
+    //SOURCE_HL1MP(Q3EGameConstants.GAME_SOURCE, "hl1mp", "hl1mp", "source", "", "hl1mp", false, R.string.halflife_1_mp_source_base),
 
     // Urban Terror
     URT_BASE(Q3EGameConstants.GAME_URT, "q3ut4", "", "", "", "q3ut4", false, R.string.urbanterror_base),

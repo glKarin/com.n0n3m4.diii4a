@@ -57,7 +57,7 @@ option(BUILD_SOURCE_DOD "Build DOD: Source" ON)
 option(BUILD_SOURCE_HL2MP "Build Half-Life 2 Deathmatch" ON)
 option(BUILD_SOURCE_EPISODIC "Build Half-Life 2 Episodic" ON)
 option(BUILD_SOURCE_HL1 "Build Half-Life 1" ON)
-option(BUILD_SOURCE_HL1MP "Build Half-Life 1 Deathmatch" ON)
+option(BUILD_SOURCE_HL1MP "Build Half-Life 1 Deathmatch" OFF)
 
 add_subdirectory(tier0)
 add_subdirectory(tier1)
