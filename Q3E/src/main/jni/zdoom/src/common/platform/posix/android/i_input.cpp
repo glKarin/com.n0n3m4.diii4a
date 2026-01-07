@@ -33,6 +33,8 @@
 #include "m_argv.h"
 #include "v_video.h"
 
+#include "sdl_compat.h"
+
 #include "d_eventbase.h"
 #include "d_gui.h"
 #include "c_buttons.h"
@@ -45,7 +47,6 @@
 #include "engineerrors.h"
 #include "i_interface.h"
 
-#include "sdl_compat.h"
 
 static void I_CheckGUICapture ();
 static void I_CheckNativeMouse ();
@@ -315,7 +316,6 @@ void MessagePump (const Q3E_Event_t *sev)
 
 				switch (sev->key)
 				{
-					//case SDL_BUTTON_LEFT:
 					case SDLK_KP_ENTER:	event.data1 = GK_RETURN;	break;
 					case SDLK_PAGEUP:	event.data1 = GK_PGUP;		break;
 					case SDLK_PAGEDOWN:	event.data1 = GK_PGDN;		break;

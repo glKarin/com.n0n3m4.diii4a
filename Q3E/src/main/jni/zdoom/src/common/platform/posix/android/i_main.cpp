@@ -34,23 +34,23 @@
 
 // HEADER FILES ------------------------------------------------------------
 
-#include <unistd.h>
-#include <signal.h>
-#include <new>
-#include <sys/param.h>
+#include <csignal>
 #include <locale.h>
+#include <new>
+#include <signal.h>
+#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
+#include <unistd.h>
 
-#include "engineerrors.h"
-#include "m_argv.h"
 #include "c_console.h"
-#include "version.h"
 #include "cmdlib.h"
 #include "engineerrors.h"
-#include "i_system.h"
 #include "i_interface.h"
+#include "i_system.h"
+#include "m_argv.h"
 #include "printf.h"
+#include "version.h"
 
 // MACROS ------------------------------------------------------------------
 
@@ -151,7 +151,7 @@ void I_DetectOS()
 void I_StartupJoysticks();
 //extern void ZMusic_SetDLLPath(const char *path);
 
-// GZDOOM game main thread loop
+// ZDOOM game main thread loop
 int main(int argc, char **argv)
 {
 	//ZMusic_SetDLLPath(Sys_DLLDefaultPath());

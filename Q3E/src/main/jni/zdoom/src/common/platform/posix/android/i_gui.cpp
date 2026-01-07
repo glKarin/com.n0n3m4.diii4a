@@ -3,6 +3,7 @@
 **
 **---------------------------------------------------------------------------
 ** Copyright 2008 Randy Heit
+** Copyright 2017-2025 GZDoom Maintainers and Contributors
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without

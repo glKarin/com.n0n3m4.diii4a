@@ -270,7 +270,7 @@ void GLimp_AndroidInit(volatile ANativeWindow *w)
 		if (!I_CreateVulkanSurface(sdl_video->_fb->device->Instance->Instance, &surfacehandle))
 			VulkanError("I_CreateVulkanSurface failed");
 
-	    Printf("Create Vulkan surface: %zu.\n", surfacehandle);
+	    Printf("Create Vulkan surface: %zu.\n", (uintptr_t)surfacehandle);
 		sdl_video->surface->Surface = surfacehandle;
 		sdl_video->_fb->device->Surface = sdl_video->surface;
 	    Printf("VulkanSwapChain::AcquireImage.\n");

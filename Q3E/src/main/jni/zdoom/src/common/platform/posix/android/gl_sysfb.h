@@ -44,4 +44,3 @@ protected:
 };
 
 #endif // __POSIX_SDL_GL_SYSFB_H__
-
