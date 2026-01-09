@@ -63,7 +63,7 @@ endif()
 #set(urbanterrorclient_libs ${urbanterrorclient_libs} curl)
 # -fshort-enums
 
-set(UT_CFLAGS "-pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wno-format-zero-length -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Werror-implicit-function-declaration -Qunused-arguments
+set(UT_CFLAGS "-pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wno-format-zero-length -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization -fno-stack-protector") # -Werror-implicit-function-declaration -Qunused-arguments
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${UT_CFLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UT_CFLAGS}")
