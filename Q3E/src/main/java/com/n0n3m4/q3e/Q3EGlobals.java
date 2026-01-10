@@ -143,6 +143,10 @@ public final class Q3EGlobals
     public static final int SCREEN_CUSTOM = 3;
     public static final int SCREEN_FIXED_RATIO = 4;
 
+    // gyroscope
+    public static final float GYROSCOPE_X_AXIS_SENS = 18;
+    public static final float GYROSCOPE_Y_AXIS_SENS = 18;
+
     public static final String[] CONTROLS_NAMES = {
             "Joystick",
             "Shoot",

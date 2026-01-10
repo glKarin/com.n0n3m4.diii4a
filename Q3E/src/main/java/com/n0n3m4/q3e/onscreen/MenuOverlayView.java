@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.n0n3m4.q3e.Q3EEditButtonHandler;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUiView;
@@ -41,14 +42,14 @@ public class MenuOverlayView implements UiViewOverlay
     private       TextView     sizeTextView;
     private       TextView     alphaTextView;
     private       LinearLayout mainLayout;
-    private final Q3EUiView    uiView;
+    private final Q3EEditButtonHandler    uiView;
     private       int          posX;
     private       int          posY;
     private final int          layoutWidth;
     private final ViewGroup    layout;
     private       FingerUi     fngr;
 
-    public MenuOverlayView(int width, ViewGroup layout, Q3EUiView uiView)
+    public MenuOverlayView(int width, ViewGroup layout, Q3EEditButtonHandler uiView)
     {
         this.uiView = uiView;
         this.context = uiView.getContext();
@@ -419,5 +420,10 @@ public class MenuOverlayView implements UiViewOverlay
             Paint(null);
         }
         return res;
+    }
+
+    public int Type()
+    {
+        return -1;
     }
 }

@@ -57,7 +57,7 @@ public class Q3ECallbackObj
         inConsole = (newstate & Q3EGlobals.STATE_CONSOLE) == Q3EGlobals.STATE_CONSOLE;
         notinmenu = ((newstate & Q3EGlobals.STATE_GAME) == Q3EGlobals.STATE_GAME) && !inConsole;
         inLoading = (newstate & Q3EGlobals.STATE_LOADING) == Q3EGlobals.STATE_LOADING;
-        vw.setState(newstate);
+        //vw.setState(newstate);
     }
 
     public void pause()

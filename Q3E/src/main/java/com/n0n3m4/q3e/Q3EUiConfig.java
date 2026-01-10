@@ -63,7 +63,6 @@ public class Q3EUiConfig extends Activity
     //k
     private boolean   m_hideNav  = true;
     private boolean   m_autoSave = false;
-    private String    m_game     = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -73,7 +72,7 @@ public class Q3EUiConfig extends Activity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        m_game = getIntent().getStringExtra("game");
+        String m_game = getIntent().getStringExtra("game");
         KLog.i("Config button layout", "Edit %s layout", null != m_game ? m_game : "common");
         m_onScreenButtonFriendlyEdge = preferences.getBoolean(Q3EPreference.FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE);
 
@@ -104,9 +103,9 @@ public class Q3EUiConfig extends Activity
 
         params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         vw = new Q3EUiView(this);
+        vw.SetEditGame(m_game);
 		//vw.setZOrderOnTop();
 		vw.setZOrderMediaOverlay(true);
-        vw.SetLayout(mainLayout);
         mainLayout.addView(vw, params);
 
         int px = Q3EUtils.dip2px(this, 48);
@@ -569,10 +568,5 @@ public class Q3EUiConfig extends Activity
     public boolean FriendlyEdge()
     {
         return m_onScreenButtonFriendlyEdge;
-    }
-
-    public String EditGame()
-    {
-        return m_game;
     }
 }

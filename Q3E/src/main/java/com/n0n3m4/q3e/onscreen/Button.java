@@ -282,4 +282,9 @@ public class Button extends Paintable implements TouchListener
             return 0.5f;
         return 1.0f;
     }
+
+    public int Type()
+    {
+        return Q3EGlobals.TYPE_BUTTON;
+    }
 }

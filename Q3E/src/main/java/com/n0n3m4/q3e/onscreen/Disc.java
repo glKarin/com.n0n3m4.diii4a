@@ -514,4 +514,9 @@ public class Disc extends Paintable implements TouchListener
         m_fanVertexArray.put(tmp2);
         m_fanVertexArray.position(0);
     }
+
+    public int Type()
+    {
+        return Q3EGlobals.TYPE_DISC;
+    }
 }

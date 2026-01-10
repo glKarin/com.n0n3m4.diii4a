@@ -74,7 +74,7 @@ public final class EditConfigFileFunc extends GameLauncherFunc
 
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(R.string.edit_config_file);
-        builder.setSingleChoiceItems(list.toArray(new String[0]), -1, new DialogInterface.OnClickListener() {
+        builder.setItems(list.toArray(new String[0]), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which)
             {

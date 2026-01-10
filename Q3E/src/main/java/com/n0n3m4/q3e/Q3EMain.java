@@ -21,6 +21,7 @@ package com.n0n3m4.q3e;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -35,6 +36,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -69,6 +71,10 @@ public class Q3EMain extends Activity
 
     private       Q3EKeyboard keyboard;
     private static final int VIEW_BASE_Z = 100;
+    private static final int TOOLBAR_Z = VIEW_BASE_Z + 4;
+    private static final int VKB_Z = VIEW_BASE_Z + 3;
+    private static final int MEM_DEBUG_Z = VIEW_BASE_Z + 2;
+    private static final int SETTING_Z = VIEW_BASE_Z + 1;
 
     public final Q3EPermissionRequest permissionRequest = new Q3EPermissionRequest();
 
@@ -323,8 +329,6 @@ public class Q3EMain extends Activity
         if(m_initView)
             return;
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         if(mGLSurfaceView == null)
             mGLSurfaceView = new Q3EView(this);
         Q3E.gameView = mGLSurfaceView;
@@ -332,11 +336,6 @@ public class Q3EMain extends Activity
             mControlGLSurfaceView = new Q3EControlView(this);
         Q3E.controlView = mControlGLSurfaceView;
         mAudio.vw = mControlGLSurfaceView;
-        mControlGLSurfaceView.EnableGyroscopeControl(Q3EUtils.q3ei.view_motion_control_gyro);
-        float gyroXSens = preferences.getFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS);
-        float gyroYSens = preferences.getFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
-        if(Q3EUtils.q3ei.view_motion_control_gyro && (gyroXSens != 0.0f || gyroYSens != 0.0f))
-            mControlGLSurfaceView.SetGyroscopeSens(gyroXSens, gyroYSens);
         mControlGLSurfaceView.RenderView(mGLSurfaceView);
 
         if(m_portrait)
@@ -400,14 +399,14 @@ public class Q3EMain extends Activity
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
             View key_toolbar = keyboard.CreateToolbar();
             mainLayout.addView(key_toolbar, params);
-            Q3EUtils.SetViewZ(key_toolbar, VIEW_BASE_Z + 3);
+            Q3EUtils.SetViewZ(key_toolbar, TOOLBAR_Z);
         }
         if(Q3EUtils.q3ei.builtin_virtual_keyboard)
         {
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             View vkb = keyboard.CreateBuiltInVKB();
             mainLayout.addView(vkb, params);
-            Q3EUtils.SetViewZ(vkb, VIEW_BASE_Z + 2);
+            Q3EUtils.SetViewZ(vkb, VKB_Z);
         }
 
         if(m_renderMemStatus > 0) //k
@@ -415,9 +414,10 @@ public class Q3EMain extends Activity
             memoryUsageText = new KDebugTextView(mainLayout.getContext());
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             mainLayout.addView(memoryUsageText, params);
-            Q3EUtils.SetViewZ(memoryUsageText, VIEW_BASE_Z + 1);
+            Q3EUtils.SetViewZ(memoryUsageText, MEM_DEBUG_Z);
             memoryUsageText.setTypeface(Typeface.MONOSPACE);
         }
+        SetupSettingGate();
     }
 
     @SuppressLint("ResourceType")
@@ -490,14 +490,14 @@ public class Q3EMain extends Activity
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
             View key_toolbar = keyboard.CreateToolbar();
             mainLayout.addView(key_toolbar, params);
-            Q3EUtils.SetViewZ(key_toolbar, VIEW_BASE_Z + 3);
+            Q3EUtils.SetViewZ(key_toolbar, TOOLBAR_Z);
         }
         if(Q3EUtils.q3ei.builtin_virtual_keyboard)
         {
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             View vkb = keyboard.CreateBuiltInVKB();
             mainLayout.addView(vkb, params);
-            Q3EUtils.SetViewZ(vkb, VIEW_BASE_Z + 2);
+            Q3EUtils.SetViewZ(vkb, VKB_Z);
         }
 
         if(m_renderMemStatus > 0) //k
@@ -508,11 +508,12 @@ public class Q3EMain extends Activity
             params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
             mainLayout.addView(memoryUsageText, params);
-            Q3EUtils.SetViewZ(memoryUsageText, VIEW_BASE_Z + 1);
+            Q3EUtils.SetViewZ(memoryUsageText, MEM_DEBUG_Z);
             memoryUsageText.setTypeface(Typeface.MONOSPACE);
 
             memoryUsageText.Start(m_renderMemStatus * 1000);
         }
+        SetupSettingGate();
 
         keyboard.onAttachedToWindow(m_offsetY);
     }
@@ -695,5 +696,38 @@ public class Q3EMain extends Activity
                 permissionRequest.notifyAll();
             }
         }
+    }
+
+    private void SetupSettingGate()
+    {
+        if(m_portrait)
+            return;
+
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false))
+            return;
+
+        int px = Q3EUtils.dip2px(this, 48);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(px, px);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP | RelativeLayout.CENTER_HORIZONTAL);
+        if(m_portrait)
+        {
+            params.addRule(RelativeLayout.BELOW, mGLSurfaceView.getId());
+            //params.topMargin = m_offsetY;
+        }
+
+        ImageView btn = new ImageView(this);
+        btn.setAlpha(0.2f);
+        btn.setFocusable(false);
+        btn.setFocusableInTouchMode(false);
+        btn.setImageDrawable(getResources().getDrawable(R.drawable.icon_m_settings));
+        mainLayout.addView(btn, params);
+        Q3EUtils.SetViewZ(btn, SETTING_Z);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mControlGLSurfaceView.ToggleMode();
+            }
+        });
     }
 }

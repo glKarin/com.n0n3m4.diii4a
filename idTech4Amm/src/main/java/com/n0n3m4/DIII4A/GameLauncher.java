@@ -1948,16 +1948,16 @@ public class GameLauncher extends Activity
 		V.launcher_tab2_volume_up_map_config_keys.setOnItemSelectedListener(m_spinnerItemSelectedListener);
 		V.launcher_tab2_volume_down_map_config_keys.setOnItemSelectedListener(m_spinnerItemSelectedListener);
 		V.launcher_tab2_enable_gyro.setOnCheckedChangeListener(m_checkboxChangeListener);
-		V.launcher_tab2_gyro_x_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
-		V.launcher_tab2_gyro_y_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
+		V.launcher_tab2_gyro_x_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EGlobals.GYROSCOPE_X_AXIS_SENS));
+		V.launcher_tab2_gyro_y_axis_sens.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EGlobals.GYROSCOPE_Y_AXIS_SENS));
 		UpdateEnableGyro(V.launcher_tab2_enable_gyro.isChecked());
 		V.launcher_tab2_gyro_x_axis_sens.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count) {}
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			public void afterTextChanged(Editable s) {
-				String value = s.length() == 0 ? "" + Q3EControlView.GYROSCOPE_X_AXIS_SENS : s.toString();
+				String value = s.length() == 0 ? "" + Q3EGlobals.GYROSCOPE_X_AXIS_SENS : s.toString();
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EUtils.parseFloat_s(value, Q3EControlView.GYROSCOPE_Y_AXIS_SENS))
+						.putFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EUtils.parseFloat_s(value, Q3EGlobals.GYROSCOPE_Y_AXIS_SENS))
 						.commit();
 			}
 		});
@@ -1965,9 +1965,9 @@ public class GameLauncher extends Activity
 			public void onTextChanged(CharSequence s, int start, int before, int count) {}
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			public void afterTextChanged(Editable s) {
-				String value = s.length() == 0 ? "" + Q3EControlView.GYROSCOPE_Y_AXIS_SENS : s.toString();
+				String value = s.length() == 0 ? "" + Q3EGlobals.GYROSCOPE_Y_AXIS_SENS : s.toString();
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
-						.putFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EUtils.parseFloat_s(value, Q3EControlView.GYROSCOPE_Y_AXIS_SENS))
+						.putFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EUtils.parseFloat_s(value, Q3EGlobals.GYROSCOPE_Y_AXIS_SENS))
 						.commit();
 			}
 		});
@@ -2965,8 +2965,8 @@ public class GameLauncher extends Activity
         mEdtr.putBoolean(Q3EUtils.q3ei.GetEnableModPreferenceKey(), V.fs_game_user.isChecked());
         mEdtr.putString(Q3EPreference.pref_harm_game, Q3EUtils.q3ei.game);
         mEdtr.putBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, V.launcher_tab2_enable_gyro.isChecked());
-        mEdtr.putFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EUtils.parseFloat_s(V.launcher_tab2_gyro_x_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_X_AXIS_SENS));
-        mEdtr.putFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EUtils.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
+        mEdtr.putFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EUtils.parseFloat_s(V.launcher_tab2_gyro_x_axis_sens.getText().toString(), Q3EGlobals.GYROSCOPE_X_AXIS_SENS));
+        mEdtr.putFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EUtils.parseFloat_s(V.launcher_tab2_gyro_y_axis_sens.getText().toString(), Q3EGlobals.GYROSCOPE_Y_AXIS_SENS));
         mEdtr.putBoolean(Q3EPreference.pref_harm_auto_quick_load, V.auto_quick_load.isChecked());
 		mEdtr.putBoolean(Q3EPreference.pref_harm_skip_intro, V.skip_intro.isChecked());
         mEdtr.putBoolean(Q3EPreference.pref_harm_multithreading, V.multithreading.isChecked());
@@ -3540,9 +3540,9 @@ public class GameLauncher extends Activity
 	{
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.edit_type);
-		builder.setSingleChoiceItems(new String[] {
+		builder.setItems(new String[] {
 				Q3ELang.tr(this, R.string.common), Q3ELang.tr(this, R.string.current_game)
-		}, -1, new DialogInterface.OnClickListener() {
+		}, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which)
 			{
@@ -3950,8 +3950,8 @@ public class GameLauncher extends Activity
     {
         // V.launcher_tab2_enable_gyro_layout.setVisibility(on ? View.VISIBLE : View.GONE); // always visible
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
-        V.launcher_tab2_gyro_x_axis_sens.setText(Q3EPreference.GetStringFromFloat(preference, Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS));
-        V.launcher_tab2_gyro_y_axis_sens.setText(Q3EPreference.GetStringFromFloat(preference, Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS));
+        V.launcher_tab2_gyro_x_axis_sens.setText(Q3EPreference.GetStringFromFloat(preference, Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EGlobals.GYROSCOPE_X_AXIS_SENS));
+        V.launcher_tab2_gyro_y_axis_sens.setText(Q3EPreference.GetStringFromFloat(preference, Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EGlobals.GYROSCOPE_Y_AXIS_SENS));
 		// only disable
 		V.launcher_tab2_gyro_x_axis_sens.setEnabled(on);
 		V.launcher_tab2_gyro_y_axis_sens.setEnabled(on);

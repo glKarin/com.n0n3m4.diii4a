@@ -580,5 +580,6 @@
     <string name="clean_dalvik_crash_log_files">Clean dalvik crash log files</string>
     <string name="crash">crash</string>
     <string name="backtrace">backtrace</string>
+    <string name="use_multithread_command_to_switch_single_multi_threading_in_game_if_enabled">Use `multithread` command to switch single/multi threading in game if enabled</string>
 
 </resources>

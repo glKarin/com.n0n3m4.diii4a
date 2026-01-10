@@ -459,4 +459,9 @@ public class Slider extends Paintable implements TouchListener
             sh = size;*/
         return 1.0f;
     }
+
+    public int Type()
+    {
+        return Q3EGlobals.TYPE_SLIDER;
+    }
 }

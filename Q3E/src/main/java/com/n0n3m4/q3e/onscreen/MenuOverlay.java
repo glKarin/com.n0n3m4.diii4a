@@ -9,6 +9,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Toast;
 
+import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUiView;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -123,8 +124,8 @@ public class MenuOverlay extends Paintable implements UiViewOverlay
 
     public void show(int x, int y, FingerUi fn)
     {
-        x = Math.min(Math.max(width / 2, x), ((Q3EUiView) view).width - width / 2);
-        y = Math.min(Math.max(height / 2 + ((Q3EUiView) view).yoffset, y), ((Q3EUiView) view).height + ((Q3EUiView) view).yoffset - height / 2);
+        x = Math.min(Math.max(width / 2, x), ((Q3EUiView) view).Width() - width / 2);
+        y = Math.min(Math.max(height / 2 + ((Q3EUiView) view).handler.yoffset, y), ((Q3EUiView) view).Height() + ((Q3EUiView) view).handler.yoffset - height / 2);
         cx = x;
         cy = y;
         fngr = new FingerUi(fn.target, 9000);
@@ -153,7 +154,7 @@ public class MenuOverlay extends Paintable implements UiViewOverlay
     public boolean tgtresize(boolean dir)
     {
         Q3EUiView uiView = (Q3EUiView) view;
-        boolean res = UiViewOverlay.Resize(dir, uiView.step, fngr, uiView);
+        boolean res = UiViewOverlay.Resize(dir, uiView.handler.step, fngr, uiView.handler);
         if(res)
             PrintInfo(fngr);
         return res;
@@ -339,5 +340,10 @@ public class MenuOverlay extends Paintable implements UiViewOverlay
             m_info.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 0);
             m_info.show();
         }
+    }
+
+    public int Type()
+    {
+        return -1;
     }
 }

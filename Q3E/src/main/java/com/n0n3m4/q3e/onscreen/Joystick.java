@@ -812,4 +812,9 @@ public class Joystick extends Paintable implements TouchListener
             m_innerVertexBuffer.position(0);
         }
     }
+
+    public int Type()
+    {
+        return Q3EGlobals.TYPE_JOYSTICK;
+    }
 }
