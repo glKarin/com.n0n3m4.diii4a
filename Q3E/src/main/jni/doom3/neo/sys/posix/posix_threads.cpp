@@ -184,7 +184,13 @@ void Sys_CreateThread(xthread_t function, void *parms, xthreadPriority priority,
 		common->Error("ERROR: pthread_attr_setdetachstate %s failed\n", name);
 	}
 
+#ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
+	info.threadCancel = false;
+#endif
 	if (pthread_create((pthread_t *)&info.threadHandle, &attr, function, parms) != 0) {
+#ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
+		info.threadCancel = true;
+#endif
 		common->Error("ERROR: pthread_create %s failed\n", name);
 	}
 
@@ -198,9 +204,6 @@ void Sys_CreateThread(xthread_t function, void *parms, xthreadPriority priority,
 		common->DPrintf("WARNING: MAX_THREADS reached\n");
 	}
 
-#ifdef _NO_PTHREAD_CANCEL //karin: no pthread_cancel on Android
-	info.threadCancel = false;
-#endif
 	Sys_LeaveCriticalSection();
 }
 
