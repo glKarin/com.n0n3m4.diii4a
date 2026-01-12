@@ -905,3 +905,34 @@ void GLimp_Startup(void)
 #endif
 #endif
 }
+
+idCVar sys_videoRam("sys_videoRam", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INTEGER,
+                    "Texture memory on the video card (in megabytes) - 0: autodetect", 0, 512);
+/*
+================
+Sys_GetVideoRam
+returns in megabytes
+open your own display connection for the query and close it
+using the one shared with GLimp_Init is not stable
+================
+*/
+int Sys_GetVideoRam(void)
+{
+    static int run_once = 0;
+    int major, minor, value;
+
+    if (run_once) {
+        return run_once;
+    }
+
+    if (sys_videoRam.GetInteger()) {
+        run_once = sys_videoRam.GetInteger();
+        return sys_videoRam.GetInteger();
+    }
+
+    // try a few strategies to guess the amount of video ram
+    common->Printf("guessing video ram ( use +set sys_videoRam to force ) ..\n");
+
+    run_once = 512;
+    return run_once;
+}

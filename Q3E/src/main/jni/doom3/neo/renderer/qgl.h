@@ -267,7 +267,11 @@ typedef void (*GLExtension_t)(void);
 #ifdef GL_ES_VERSION_3_0 // GLES3.1
 typedef void (GL_APIENTRY  *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam);
 #endif
+#ifdef ID_DEDICATED
+#define QGLPROC(name, rettype, args) rettype q##name args;
+#else
 #define QGLPROC(name, rettype, args) extern rettype (GL_APIENTRYP q##name) args;
+#endif
 #include "qgl_proc.h"
 #endif
 

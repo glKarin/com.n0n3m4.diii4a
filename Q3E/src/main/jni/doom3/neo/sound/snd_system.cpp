@@ -209,7 +209,7 @@ void ListSounds_f(const idCmdArgs &args)
 	common->Printf("%8d total samples loaded\n", totalSamples);
 	common->Printf("%8d kB total system memory used\n", totalMemory >> 10);
 #if ID_OPENAL
-	common->Printf("%8d kB total OpenAL audio memory used\n", (alGetInteger(alGetEnumValue((ALubyte *)"AL_EAX_RAM_SIZE")) - alGetInteger(alGetEnumValue((ALubyte *)"AL_EAX_RAM_FREE"))) >> 10);
+	common->Printf("%8d kB total OpenAL audio memory used\n", (alGetInteger(alGetEnumValue((ALchar *)"AL_EAX_RAM_SIZE")) - alGetInteger(alGetEnumValue((ALchar *)"AL_EAX_RAM_FREE"))) >> 10);
 #endif
 }
 
@@ -538,10 +538,10 @@ void idSoundSystemLocal::Init()
             }
 
             common->Printf("Setup OpenAL device and context... ");
-            ALubyte *device = NULL;
+            ALchar *device = NULL;
             if(deviceName && deviceName[0])
             {
-                device = (ALubyte *)deviceName;
+                device = (ALchar *)deviceName;
                 notDefault = true;
             }
             openalDevice = alcOpenDevice(device);

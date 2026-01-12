@@ -16,8 +16,13 @@ extern bool Sys_ShutdownRenderThread(void);
 extern void GLimp_ActivateContext();
 extern void GLimp_DeactivateContext();
 extern void GLimp_AndroidOpenWindow(volatile ANativeWindow *win);
+#ifdef ID_DEDICATED
+void GLimp_AndroidInit(volatile ANativeWindow *win) {}
+void GLimp_AndroidQuit(void) {}
+#else
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit(void);
+#endif
 extern void ShutdownGame(void);
 
 
@@ -304,16 +309,16 @@ void Q3E_Start(void)
     main_thread = pthread_self();
     q3e_running = true;
 
-    GLimp_AndroidOpenWindow(window);
+	GLimp_AndroidOpenWindow(window);
 }
 
 void Q3E_End(void)
 {
-    q3e_running = false;
-    GLimp_AndroidQuit();
-    window = NULL;
-    main_thread = 0;
-    Sys_Printf("Leave " GAME_NAME " main thread.\n");
+	q3e_running = false;
+	GLimp_AndroidQuit();
+	window = NULL;
+	main_thread = 0;
+	Sys_Printf("Leave " GAME_NAME " main thread.\n");
 }
 
 
@@ -321,54 +326,73 @@ void Q3E_End(void)
 /* Functions of wrap JNI callback */
 void Android_GrabMouseCursor(bool grabIt)
 {
+#if !defined(ID_DEDICATED)
     //if(mouse_available/* && grab_mouse*/)
         grab_mouse(grabIt);
+#endif
 }
 
 void Android_PollInput(void)
 {
+#if !defined(ID_DEDICATED)
     //if(pull_input_event)
     pull_input_event(-1);
+#endif
 }
 
 void Android_ClearEvents(void)
 {
+#if !defined(ID_DEDICATED)
     //if(pull_input_event)
     pull_input_event(0);
+#endif
 }
 
 int Android_PollEvents(int num)
 {
+#if !defined(ID_DEDICATED)
     //if(pull_input_event)
     return pull_input_event(num);
+#else
+	return 0;
+#endif
 }
 
 void Android_EnableSmoothJoystick(bool enable)
 {
     // if(smooth_joystick != enable)
     {
+#if !defined(ID_DEDICATED)
         setup_smooth_joystick(enable);
+#endif
         smooth_joystick = enable;
     }
 }
 
 FILE * Sys_tmpfile(void)
 {
+#if !defined(ID_DEDICATED)
     FILE *f = /*itmpfile ? */itmpfile()/* : NULL*/;
     if (!f) {
         common->Warning("JNI::tmpfile failed: %s", strerror(errno));
     }
     return f;
+#else
+	return tmpfile();
+#endif
 }
 
 void Android_SetClipboardData(const char *text)
 {
+#if !defined(ID_DEDICATED)
     // if(copy_to_clipboard)
     copy_to_clipboard(text);
+#endif
 }
 
 char * Android_GetClipboardData(void)
 {
+#if !defined(ID_DEDICATED)
 /*    if(!get_clipboard_text)
         return NULL;*/
     char *text = get_clipboard_text();
@@ -380,48 +404,67 @@ char * Android_GetClipboardData(void)
     ptr[len] = '\0';
     free(text);
     return ptr;
+#else
+	return NULL;
+#endif
 }
 
 void Android_OpenURL(const char *url)
 {
+#if !defined(ID_DEDICATED)
     //if(open_url)
     open_url(url);
+#endif
 }
 
 int Android_OpenDialog(const char *title, const char *message, int num, const char *buttons[])
 {
+#if !defined(ID_DEDICATED)
     //if(open_dialog)
     return open_dialog(title, message, num, buttons);
+#else
+	return 0;
+#endif
 }
 
 void Android_OpenKeyboard(void)
 {
+#if !defined(ID_DEDICATED)
     //if(open_keyboard)
     open_keyboard();
+#endif
 }
 
 void Android_CloseKeyboard(void)
 {
+#if !defined(ID_DEDICATED)
     //if(close_keyboard)
     close_keyboard();
+#endif
 }
 
 void Android_ShowInfo(const char *info)
 {
+#if !defined(ID_DEDICATED)
     //if(show_toast)
     show_toast(info);
+#endif
 }
 
 void Android_ExitFinish(void)
 {
+#if !defined(ID_DEDICATED)
     //if(exit_finish)
     exit_finish();
+#endif
 }
 
 void Android_ShowCursor(int on)
 {
+#if !defined(ID_DEDICATED)
     //if(show_cursor)
     show_cursor(on);
+#endif
 }
 
 float Android_GetConsoleMaxHeightFrac(float frac)
@@ -458,6 +501,7 @@ const char * Sys_ApplicationHomePath(void)
 /* Functions of JNI call */
 void Sys_SyncState(void)
 {
+#if !defined(ID_DEDICATED)
     static int prev_state = -1;
     static int state = -1;
     // if (setState)
@@ -485,6 +529,7 @@ void Sys_SyncState(void)
             prev_state = state;
         }
     }
+#endif
 }
 
 static bool ctrl_state = false;

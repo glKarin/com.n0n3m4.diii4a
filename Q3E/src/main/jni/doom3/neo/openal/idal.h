@@ -2,8 +2,14 @@
 // C:\Python23\Lib\idlelib\idle.pyw
 // Mon Mar 28 12:31:26 2005
 
+#if !defined(ID_DEDICATED)
+
 #if !defined(_K_CLANG)
 #define ALvoid void
+#else
+#if !defined(ALvoid)
+#define ALvoid void
+#endif
 #endif
 extern ALenum(ALAPIENTRY *idalGetError)(ALvoid);
 extern ALvoid(ALAPIENTRY *idalGenBuffers)(ALsizei, ALuint *);
@@ -18,12 +24,12 @@ extern ALCvoid(ALAPIENTRY *idalcDestroyContext)(ALCcontext *);
 extern ALCubyte *(ALAPIENTRY *idalcGetString)(ALCdevice *, ALCenum);
 extern ALvoid(ALAPIENTRY *idalBufferData)(ALuint, ALenum, ALvoid *, ALsizei, ALsizei);
 extern ALvoid(ALAPIENTRY *idalDeleteBuffers)(ALsizei, ALuint *);
-extern ALboolean(ALAPIENTRY *idalIsExtensionPresent)(ALubyte *);
+extern ALboolean(ALAPIENTRY *idalIsExtensionPresent)(const ALchar *);
 extern ALvoid(ALAPIENTRY *idalDeleteSources)(ALsizei, ALuint *);
-extern ALenum(ALAPIENTRY *idalGetEnumValue)(ALubyte *);
-extern ALvoid *(ALAPIENTRY *idalGetProcAddress)(ALubyte *);
+extern ALenum(ALAPIENTRY *idalGetEnumValue)(const ALchar *);
+extern ALvoid *(ALAPIENTRY *idalGetProcAddress)(const ALchar *);
 extern ALCcontext *(ALAPIENTRY *idalcCreateContext)(ALCdevice *, ALCint *);
-extern ALCdevice *(ALAPIENTRY *idalcOpenDevice)(ALubyte *);
+extern ALCdevice *(ALAPIENTRY *idalcOpenDevice)(const ALchar *);
 extern ALvoid(ALAPIENTRY *idalListenerfv)(ALenum, ALfloat *);
 extern ALvoid(ALAPIENTRY *idalSourceQueueBuffers)(ALuint, ALsizei, ALuint *);
 extern ALvoid(ALAPIENTRY *idalSourcei)(ALuint, ALenum, ALint);
@@ -85,4 +91,6 @@ extern ALvoid(ALAPIENTRY *idalSource3i)(ALuint, ALenum, ALint, ALint, ALint);
 #undef alGetError
 extern ALenum iddalGetError(ALvoid);
 #define alGetError iddalGetError
+#endif
+
 #endif

@@ -93,11 +93,13 @@ static void GLimp_HandleError(const char *func, bool exit = true)
 		common->Printf("EGL error %s: 0x%04x: %s\n", func, err, GLimp_StringErrors[err - EGL_SUCCESS]);
 }
 
+#if !defined(ID_DEDICATED)
 bool GLimp_CheckGLInitialized(void)
 {
 	// Not need do anything
     return true;
 }
+#endif
 
 void GLimp_WakeBackEnd(void *a)
 {

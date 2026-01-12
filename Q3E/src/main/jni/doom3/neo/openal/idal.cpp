@@ -15,12 +15,12 @@ ALCvoid(ALAPIENTRY *idalcDestroyContext)(ALCcontext *) = NULL;
 ALCubyte *(ALAPIENTRY *idalcGetString)(ALCdevice *, ALCenum) = NULL;
 ALvoid(ALAPIENTRY *idalBufferData)(ALuint, ALenum, ALvoid *, ALsizei, ALsizei) = NULL;
 ALvoid(ALAPIENTRY *idalDeleteBuffers)(ALsizei, ALuint *) = NULL;
-ALboolean(ALAPIENTRY *idalIsExtensionPresent)(ALubyte *) = NULL;
+ALboolean(ALAPIENTRY *idalIsExtensionPresent)(const ALchar *) = NULL;
 ALvoid(ALAPIENTRY *idalDeleteSources)(ALsizei, ALuint *) = NULL;
-ALenum(ALAPIENTRY *idalGetEnumValue)(ALubyte *) = NULL;
-ALvoid *(ALAPIENTRY *idalGetProcAddress)(ALubyte *) = NULL;
+ALenum(ALAPIENTRY *idalGetEnumValue)(const ALchar *) = NULL;
+ALvoid *(ALAPIENTRY *idalGetProcAddress)(const ALchar *) = NULL;
 ALCcontext *(ALAPIENTRY *idalcCreateContext)(ALCdevice *, ALCint *) = NULL;
-ALCdevice *(ALAPIENTRY *idalcOpenDevice)(ALubyte *) = NULL;
+ALCdevice *(ALAPIENTRY *idalcOpenDevice)(const ALchar *) = NULL;
 ALvoid(ALAPIENTRY *idalListenerfv)(ALenum, ALfloat *) = NULL;
 ALvoid(ALAPIENTRY *idalSourceQueueBuffers)(ALuint, ALsizei, ALuint *) = NULL;
 ALvoid(ALAPIENTRY *idalSourcei)(ALuint, ALenum, ALint) = NULL;
@@ -119,7 +119,7 @@ const char *InitializeIDAL(HMODULE h)
 		return "alDeleteBuffers";
 	}
 
-	idalIsExtensionPresent = (ALboolean(ALAPIENTRY *)(ALubyte *))GetProcAddress(h, "alIsExtensionPresent");
+	idalIsExtensionPresent = (ALboolean(ALAPIENTRY *)(const ALchar *))GetProcAddress(h, "alIsExtensionPresent");
 
 	if (!idalIsExtensionPresent) {
 		return "alIsExtensionPresent";
@@ -131,13 +131,13 @@ const char *InitializeIDAL(HMODULE h)
 		return "alDeleteSources";
 	}
 
-	idalGetEnumValue = (ALenum(ALAPIENTRY *)(ALubyte *))GetProcAddress(h, "alGetEnumValue");
+	idalGetEnumValue = (ALenum(ALAPIENTRY *)(const ALchar *))GetProcAddress(h, "alGetEnumValue");
 
 	if (!idalGetEnumValue) {
 		return "alGetEnumValue";
 	}
 
-	idalGetProcAddress = (ALvoid * (ALAPIENTRY *)(ALubyte *))GetProcAddress(h, "alGetProcAddress");
+	idalGetProcAddress = (ALvoid * (ALAPIENTRY *)(const ALchar *))GetProcAddress(h, "alGetProcAddress");
 
 	if (!idalGetProcAddress) {
 		return "alGetProcAddress";
@@ -149,7 +149,7 @@ const char *InitializeIDAL(HMODULE h)
 		return "alcCreateContext";
 	}
 
-	idalcOpenDevice = (ALCdevice * (ALAPIENTRY *)(ALubyte *))GetProcAddress(h, "alcOpenDevice");
+	idalcOpenDevice = (ALCdevice * (ALAPIENTRY *)(const ALchar *))GetProcAddress(h, "alcOpenDevice");
 
 	if (!idalcOpenDevice) {
 		return "alcOpenDevice";

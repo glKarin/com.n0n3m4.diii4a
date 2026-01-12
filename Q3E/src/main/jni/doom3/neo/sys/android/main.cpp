@@ -679,10 +679,12 @@ static pthread_t				main_thread;
 // app exit
 volatile bool q3e_running = false;
 
+#if !defined(ID_DEDICATED)
 bool GLimp_CheckGLInitialized(void)
 {
 	return Q3E_CheckNativeWindowChanged();
 }
+#endif
 
 /*
 ===============
@@ -690,6 +692,10 @@ main
 ===============
 */
 int main(int argc, const char **argv) {
+#ifdef ID_DEDICATED
+    main_thread = pthread_self();
+    q3e_running = true;
+#endif
 #ifdef ID_MCHECK
 	// must have -lmcheck linkage
 	mcheck(abrt_func);
@@ -728,7 +734,9 @@ void ShutdownGame(void)
     if(q3e_running && common->IsInitialized())
     {
         common->Quit();
+#if !defined(ID_DEDICATED)
 		Q3E_WindowChanged(NULL, WINDOW_CHANGE_THREAD_MAIN);
+#endif
 		q3e_running = false;
     }
 }

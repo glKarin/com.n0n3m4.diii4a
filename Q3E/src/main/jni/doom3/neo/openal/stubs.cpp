@@ -28,6 +28,14 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #include "../sound/snd_local.h"
 
+#ifdef AL_API
+#undef AL_API
+#define AL_API
+#endif
+#ifdef ALC_API
+#undef ALC_API
+#define ALC_API
+#endif
 AL_API ALenum AL_APIENTRY alGetError()
 {
 	return AL_NO_ERROR;
@@ -89,19 +97,6 @@ ALC_API const ALCchar *ALC_APIENTRY alcGetString(ALCdevice *deviceHandle, ALCenu
 	return NULL;
 }
 
-AL_API void AL_APIENTRY alBufferData(ALuint   buffer,
-                                     ALenum   format,
-                                     ALvoid    *data,
-                                     ALsizei  size,
-                                     ALsizei  freq) { }
-
-AL_API void AL_APIENTRY alDeleteBuffers(ALsizei n, ALuint *buffers) { }
-
-AL_API ALboolean AL_APIENTRY alIsExtensionPresent(ALubyte *fname)
-{
-	return AL_FALSE;
-}
-
 AL_API void AL_APIENTRY alDeleteSources(ALsizei n, const ALuint *sources) { }
 
 AL_API ALenum AL_APIENTRY alGetEnumValue(const ALchar *ename)
@@ -116,11 +111,6 @@ AL_API void *AL_APIENTRY alGetProcAddress(const ALchar *fname)
 
 ALC_API ALCcontext *ALC_APIENTRY alcCreateContext(ALCdevice *dev,
                 const ALCint *attrlist)
-{
-	return NULL;
-}
-
-ALC_API ALCdevice *ALC_APIENTRY alcOpenDevice(ALubyte *tokstr)
 {
 	return NULL;
 }
@@ -153,3 +143,10 @@ AL_API void AL_APIENTRY alSourcef(ALuint sid, ALenum param, ALfloat value) { }
 AL_API void AL_APIENTRY alSourceUnqueueBuffers(ALuint sid, ALsizei numEntries, ALuint *bids) { }
 
 AL_API void AL_APIENTRY alSourcePlay(ALuint sid) { }
+
+const ALchar * alGetString(ALenum) { return ""; }
+
+#ifdef _OPENAL_EFX
+ALCboolean alcIsExtensionPresent(ALCdevice *, const ALCchar *) { return AL_FALSE; }
+ALvoid alSource3i(ALuint, ALenum, ALint, ALint, ALint) {}
+#endif

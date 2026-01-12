@@ -65,57 +65,18 @@
 #define GL_TEXTURE_1D				0x0DE0
 #endif
 
-
-void glDisableClientState(GLenum e);
-void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
-void glLoadMatrixf(const GLfloat matrix[16]);
-void glBegin(GLenum t);
-void glEnd(void);
-void glVertex3f(GLfloat x, GLfloat y, GLfloat z);
-
-void glVertex3fv(const GLfloat v[3]);
-void glTexCoord2f(GLfloat s, GLfloat t);
-void glTexCoord2fv(const GLfloat st[2]);
-void glEnableClientState(GLenum e);
-void glColor3f(GLfloat r, GLfloat g, GLfloat b);
-void glVertex2f(GLfloat x, GLfloat y);
-void glMatrixMode(GLenum mode);
-void glLoadIdentity(void);
-void glOrtho(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat nearZ, GLfloat farZ);
-void glPushMatrix(void);
-void glPopMatrix(void);
-void glColor3fv(const GLfloat v[3]);
-void glColor4fv(const GLfloat v[4]);
-void glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
-void glTranslatef(GLfloat x, GLfloat y, GLfloat z);
-void glRectf(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2);
-void glPopAttrib(void);
-void glPushAttrib(GLint mask);
-void glPolygonMode(GLenum face, GLenum mode);
-void glVertex2fv(const GLfloat v[2]);
-
 typedef void GLUquadricObj;
-void gluSphere(GLUquadricObj *, float r, int lats, int longs);
 
-void glColor4ubv(const GLubyte v[4]);
-void glArrayElement(GLint index);
-void glMultMatrixf(const GLfloat matrix[16]);
-void glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-void glRasterPos2f(GLfloat x, GLfloat y);
-void glRasterPos3f(GLfloat x, GLfloat y, GLfloat z);
-void glRasterPos3fv(GLfloat p[3]);
-void glCallLists( GLsizei n, GLenum type, const GLvoid *lists );
-void glDrawPixels(GLint width, GLint height, GLenum format, GLenum dataType, const void *data);
+#define QGLCOMPATPROC(name, rettype, args) rettype name args;
+#include "qgl_proc_compat.h"
 
 void glesGetFloatv(GLenum pname, GLfloat *data);
 void glesGetIntegerv(GLenum pname, GLint *data);
 void glesEnable(GLenum pname);
 void glesDisable(GLenum pname);
 void glesReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void * data, GLsizei align = 1);
-GLenum glesPushIdentityMatrix(void);
-void glesPopIdentityMatrix(GLenum m);
-
-void glesShutdown(void);
-
+void glrbShutdown(void);
+//GLenum glesPushIdentityMatrix(void);
+//void glesPopIdentityMatrix(GLenum m);
 
 #endif

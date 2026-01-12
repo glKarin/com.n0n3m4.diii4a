@@ -38,7 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../externlibs/openal-soft/include/AL/alc.h"
 #include "../externlibs/openal-soft/include/AL/efx.h"
 #include "../openal/idal.h"
-#define ID_ALCHAR (ALubyte *)
+#define ID_ALCHAR // (ALubyte *)
 #else
 #include "../openal/include/al.h"
 #include "../openal/include/alc.h"
@@ -55,7 +55,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../externlibs/openal-soft/include/AL/alc.h"
 #include "../externlibs/openal-soft/include/AL/efx.h"
 #include "../openal/idal.h"
-#define ID_ALCHAR (ALubyte *)
+#define ID_ALCHAR // (ALubyte *)
 #else
 #include <AL/al.h>
 #include <AL/alc.h>

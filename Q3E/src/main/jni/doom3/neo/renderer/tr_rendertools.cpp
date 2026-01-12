@@ -3265,7 +3265,7 @@ void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 		// some can render in 2D view
 		GL_State(GLS_DEFAULT);
 		RB_TestImage();
-#ifdef GL_ES_VERSION_2_0
+#if defined(GL_ES_VERSION_2_0) && defined(DEBUG_RENDER_COMPAT)
 		DEBUG_RENDER_COMPAT
 #endif
 		return;
@@ -3313,7 +3313,7 @@ void RB_RenderDebugTools(drawSurf_t **drawSurfs, int numDrawSurfs)
 	RB_ShowDebugText();
 	RB_ShowDebugPolygons();
 	RB_ShowTrace(drawSurfs, numDrawSurfs);
-#ifdef GL_ES_VERSION_2_0
+#if defined(GL_ES_VERSION_2_0) && defined(DEBUG_RENDER_COMPAT)
 	DEBUG_RENDER_COMPAT
 #endif
 }
@@ -3340,7 +3340,7 @@ void RB_ShutdownDebugTools(void)
 #endif
 //#endif
 
-    glesShutdown();
+    glrbShutdown();
 }
 
 #ifdef _MULTITHREAD

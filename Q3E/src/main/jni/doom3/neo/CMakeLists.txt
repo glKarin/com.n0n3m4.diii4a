@@ -221,7 +221,7 @@ if(OPENGLES3)
 endif()
 
 if(EXTRAS_TOOLS)
-	add_definitions(-D_EXTRAS_TOOLS)
+	set(CORE_DEFINES "${CORE_DEFINES};_EXTRAS_TOOLS")
 	message(STATUS "Build extras engine tools support")
 endif()
 
@@ -772,7 +772,7 @@ if(D3BFG_OCCLUSION_CULLING)
 	message(STATUS "Add DOOM3-BFG occlusion culling support")
 endif()
 if(D3BFG_NEW_FONT)
-	add_definitions(-D_D3BFG_FONT)
+	set(CORE_DEFINES "${CORE_DEFINES};_D3BFG_FONT")
 	message(STATUS "Add DOOM3-BFG new font support")
 	set(WIDE_CHARACTER_LANGUAGE ON)
 endif()
@@ -787,7 +787,7 @@ if(GLSL_PROGRAM)
 	message(STATUS "Add GLSL program on new material stage support")
 endif()
 if(GLOBAL_ILLUMINATION)
-	add_definitions(-D_GLOBAL_ILLUMINATION)
+	set(CORE_DEFINES "${CORE_DEFINES};_GLOBAL_ILLUMINATION")
 	message(STATUS "Add global illumination support")
 endif()
 if(RETRO_POSTPROCESS)
@@ -1643,7 +1643,7 @@ set(src_core
 	${src_dmap}
 )
 
-set(src_stub_openal		sys/stub/openal_stub.cpp)
+set(src_stub_openal		openal/stubs.cpp)
 set(src_stub_gl			sys/stub/stub_gl.cpp)
 
 
@@ -1663,6 +1663,8 @@ set(src_tools
 )
 
 # TODO: add_globbed_headers(src_tools "tools/guied")
+
+set(DED_CORE_DEFINES "${CORE_DEFINES};ID_DEDICATED")
 
 # Begin normal tools code
 if(TOOLS)
@@ -1754,6 +1756,7 @@ else()
 endif()
 endif()
 
+if(ANDROID)
 set(src_sys_base
 	sys/linux/stack.cpp
 	sys/stub/util_stub.cpp
@@ -1763,10 +1766,8 @@ set(src_sys_base
 	sys/posix/posix_threads.cpp
 	sys/posix/posix_signal.cpp
 	sys/posix/posix_input.cpp
-	sys/linux/gl_extensions.cpp
 )
 
-if(ANDROID)
 	set(src_sys_base
 		${src_sys_base}
 		sys/android/main.cpp
@@ -1775,6 +1776,7 @@ if(ANDROID)
 	)
 	set(src_sys_core
 		sys/android/glimp.cpp
+		sys/linux/gl_extensions.cpp
 	)
 elseif(WIN32)
 	set(src_sys_base
@@ -1827,8 +1829,20 @@ else()
 		)
 		set(src_sys_core
 			sys/sdl/glimp.cpp
+			sys/linux/gl_extensions.cpp
 		)
 	else()
+		set(src_sys_base
+			sys/linux/stack.cpp
+			sys/stub/util_stub.cpp
+			sys/sys_local.cpp
+			sys/posix/posix_net.cpp
+			sys/posix/posix_main.cpp
+			sys/posix/posix_threads.cpp
+			sys/posix/posix_signal.cpp
+			sys/posix/posix_input.cpp
+		)
+
 		set(src_sys_base
 			${src_sys_base}
 			sys/linux/main.cpp
@@ -1983,13 +1997,35 @@ message(STATUS "-l(static): ${local_libs}")
 message(STATUS "pointer size: ${CMAKE_SIZEOF_VOID_P}")
 message(STATUS "CORE_DEFINES: ${CORE_DEFINES}")
 message(STATUS "ldflags: ${ldflags}")
+if(DEDICATED)
+	message(STATUS "DED_CORE_DEFINES: ${DED_CORE_DEFINES}")
+endif()
 message(STATUS "=================================")
 
 # message(FATAL_ERROR "STOP") # For debug output
 
 if(CORE)
+	if(DEDICATED)
+		set(DOOM3BINARY "Doom3")
+		add_executable(${DOOM3BINARY}ded WIN32 MACOSX_BUNDLE
+			${src_core}
+			${src_stub_openal}
+			${src_stub_gl}
+			${src_sys_base}
+		)
+		source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_stub_openal} ${src_stub_gl})
+
+		set_target_properties(${DOOM3BINARY}ded PROPERTIES COMPILE_DEFINITIONS "${DED_CORE_DEFINES};__DOOM_DLL__")
+		set_target_properties(${DOOM3BINARY}ded PROPERTIES LINK_FLAGS "${ldflags}")
+		target_link_libraries(${DOOM3BINARY}ded
+			idlib
+			${sys_libs}
+			${local_libs}
+		)
+	endif()
+
 	if(ANDROID)
-		set(DOOM3BINARY doom3)
+		set(DOOM3BINARY "doom3")
 		add_library(${DOOM3BINARY} SHARED
 				${src_core}
 				${src_sys_base}

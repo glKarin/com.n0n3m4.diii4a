@@ -9,7 +9,7 @@ static idRenderThread renderThreadInstance;
 idRenderThread *renderThread = &renderThreadInstance;
 
 static idCVar r_multithread("r_multithread",
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(ID_DEDICATED)
         "0"
 #else
         "1"
