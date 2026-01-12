@@ -325,6 +325,9 @@ idRenderModel *idRenderModelMD3::InstantiateDynamicModel(const struct renderEnti
 		delete cachedModel;
 		cachedModel = NULL;
 	}
+	// keep a black box
+	if (!ent || !md3)
+		return NULL;
 
 	staticModel = new idRenderModelStatic;
 	staticModel->bounds.Clear();
