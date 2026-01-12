@@ -1829,7 +1829,6 @@ else()
 		)
 		set(src_sys_core
 			sys/sdl/glimp.cpp
-			sys/linux/gl_extensions.cpp
 		)
 	else()
 		set(src_sys_base
@@ -1852,6 +1851,7 @@ else()
 		)
 		set(src_sys_core
 			sys/linux/glimp.cpp
+			sys/linux/gl_extensions.cpp
 		)
 	endif()
 
