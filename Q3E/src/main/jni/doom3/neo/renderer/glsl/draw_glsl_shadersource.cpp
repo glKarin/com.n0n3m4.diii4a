@@ -79,6 +79,7 @@ static void RB_GLSL_ExpandMacros(idStr &res, const char *source, const char *mac
         res.Replace("precision lowp float;", "precision highp float;");
         idStr samplerPrecision = "precision highp sampler2D;\n"
                                  "precision highp samplerCube;\n";
+#ifdef _OPENGLES3
         if(USING_GLES3)
         {
             idStr ver = RB_GLSL_GetGLSLSourceVersion(res);
@@ -89,6 +90,7 @@ static void RB_GLSL_ExpandMacros(idStr &res, const char *source, const char *mac
                 );
             }
         }
+#endif
         RB_GLSL_InsertGlobalDefines(res, samplerPrecision.c_str());
 
         if(highp > 1)

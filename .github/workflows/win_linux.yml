@@ -148,7 +148,7 @@ jobs:
           cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Doom3 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
           cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Quake4 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
           cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Prey ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Doom3Ded ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Doom3ded ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
           tar zcvf idTech4A++-testing_${{ steps.current_datetime.outputs.time }}_${{ steps.strings.outputs.name }}.tar.gz ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
 
       - uses: actions/upload-artifact@v4

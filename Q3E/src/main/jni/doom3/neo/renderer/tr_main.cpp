@@ -37,6 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <xmmintrin.h>
 #elif ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) )
 #include <xmmintrin.h>
+#include <emmintrin.h>
 #elif ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON)
 #include "sse2neon/sse2neon.h"
 #endif

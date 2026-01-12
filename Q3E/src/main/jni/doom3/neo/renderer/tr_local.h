@@ -1771,7 +1771,6 @@ DRAW_GLSL
 
 ============================================================
 */
-
 #define MAX_UNIFORM_PARMS 8
 #define MAX_MEGATEXTURE_PARMS 9
 #define HARM_SHADER_NAME_LENGTH 64
