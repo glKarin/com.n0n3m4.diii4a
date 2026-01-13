@@ -16,7 +16,7 @@ set DIRECTXSDK_INCLUDE_PATH="%VCPKG_PATH%/packages/directxsdk_%BUILD_ARCH%-windo
 rem Setup build type: Release | Debug
 set BUILD_TYPE=Release
 
-set PROJECT_PATH=Q3E\src\main\jni\doom3\neo
+set PROJECT_PATH=doom3\neo
 
 set WORK_DIR=build\win_%BUILD_ARCH%
 

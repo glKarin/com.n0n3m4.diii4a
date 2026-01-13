@@ -48,7 +48,7 @@
 #define INIT_SDL()
 #endif
 
-#include "doom3/neo/sys/android/sys_android.h"
+#include "q3e_interface.h"
 
 #define LOG_TAG "Q3E::JNI"
 

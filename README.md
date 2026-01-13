@@ -527,26 +527,26 @@ finish();
 
 > ### Full-body-awareness on DOOM3/Quake4/Prey(2006)
 1. Make full-body-awareness mode(view player model like first-person view)
-[DOOM 3 example](Q3E/src/main/jni/doom3/base/full_body_awareness.cfg ':include')  
-[Quake 4 example](Q3E/src/main/jni/doom3/q4base/full_body_awareness.cfg ':include')  
-[Prey(2006) example](Q3E/src/main/jni/doom3/preybase/full_body_awareness.cfg ':include')  
+[DOOM 3 example](doom3/base/full_body_awareness.cfg ':include')  
+[Quake 4 example](doom3/q4base/full_body_awareness.cfg ':include')  
+[Prey(2006) example](doom3/preybase/full_body_awareness.cfg ':include')  
 
 2. Make third-person mode and use crosshair(different from `pm_thirdPerson`)
-[DOOM 3 example](Q3E/src/main/jni/doom3/base/full_body_awareness_third_persion.cfg ':include')  
-[Quake 4 example](Q3E/src/main/jni/doom3/q4base/full_body_awareness_third_persion.cfg ':include')  
-[Prey(2006) example](Q3E/src/main/jni/doom3/preybase/full_body_awareness_third_persion.cfg ':include') 
+[DOOM 3 example](doom3/base/full_body_awareness_third_persion.cfg ':include')  
+[Quake 4 example](doom3/q4base/full_body_awareness_third_persion.cfg ':include')  
+[Prey(2006) example](doom3/preybase/full_body_awareness_third_persion.cfg ':include') 
 
 ----------------------------------------------------------------------------------
 
 > ### Player view flashlight on DOOM3
-[Point flashlight example](Q3E/src/main/jni/doom3/base/show_view_point_flashlight.cfg ':include')  
-[Spot flashlight example](Q3E/src/main/jni/doom3/base/show_view_spot_flashlight.cfg ':include')  
+[Point flashlight example](doom3/base/show_view_point_flashlight.cfg ':include')  
+[Spot flashlight example](doom3/base/show_view_spot_flashlight.cfg ':include')  
 
 ----------------------------------------------------------------------------------
 
 > ### Player body view on DOOM3/Quake4
-[DOOM 3 example](Q3E/src/main/jni/doom3/base/def/player_viewbody.cfg ':include')  
-[Quake 4 example](Q3E/src/main/jni/doom3/q4base/def/player_viewbody.cfg ':include')  
+[DOOM 3 example](doom3/base/def/player_viewbody.cfg ':include')  
+[Quake 4 example](doom3/q4base/def/player_viewbody.cfg ':include')  
 	
 ----------------------------------------------------------------------------------
 
@@ -554,7 +554,7 @@ finish();
 
 ##### master:
 * /idTech4Amm: frontend source
-* /Q3E /Q3E/src/main/jni/doom3: game source
+* /Q3E /doom3: game source
 * /CHECK_FOR_UPDATE.json: Check for update config JSON
 
 ##### free:

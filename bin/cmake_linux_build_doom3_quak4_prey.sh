@@ -7,7 +7,7 @@
 # Setup build type: Release | Debug
 BUILD_TYPE=Release
 
-PROJECT_PATH=Q3E/src/main/jni/doom3/neo
+PROJECT_PATH=doom3/neo
 
 WORK_DIR=build
 

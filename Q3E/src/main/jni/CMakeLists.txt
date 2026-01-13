@@ -71,6 +71,7 @@ option(BUILD_TESTING "Build tests" OFF)
 set(DIII4A_DEPEND_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deplibs")
 set(DIII4A_DEPEND_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/depincs")
 set(DIII4A_DEPEND_COMMON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
+set(DIII4A_DOOM3_NEO_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../../doom3")
 
 # backtrace for debug
 add_subdirectory ( common/bt )
@@ -110,7 +111,7 @@ endif()
 
 if(GAME_DOOM3)
     message(STATUS "Build DOOM 3/Quake 4/Prey(2006)")
-    add_subdirectory ( doom3/neo ) # DOOM3 | RoE, Quake4, Prey(2006)
+    add_subdirectory ( ${DIII4A_DOOM3_NEO_PATH}/neo "doom3/neo" ) # DOOM3 | RoE, Quake4, Prey(2006)
 endif()
 
 if(DIII4A_BUILD_COMMON)
@@ -120,7 +121,7 @@ endif()
 
 if(NOT GAME_DOOM3 AND DIII4A_BUILD_OPENAL)
     message(STATUS "Build OpenAL alone")
-    add_subdirectory(doom3/neo/externlibs/openal-soft)
+    add_subdirectory(${DIII4A_DOOM3_NEO_PATH}/neo/externlibs/openal-soft "doom3/neo/externlibs/openal-soft")
 endif()
 
 if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SOURCE OR GAME_WOLF3D)

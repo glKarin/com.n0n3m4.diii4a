@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "doom3/neo/sys/android/sys_android.h"
+#include "q3e_interface.h"
 
 #ifdef __cplusplus
 extern "C" {
