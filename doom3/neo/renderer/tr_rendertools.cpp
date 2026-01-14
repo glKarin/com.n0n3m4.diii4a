@@ -3428,3 +3428,19 @@ void RB_DrawElementsImmediate( const srfTriangles_t *tri ) {
 	}
 	glEnd();
 }
+
+#include "rb/DepthStencilRenderer.cpp"
+
+#ifdef _EXTRAS_TOOLS
+#include "model/Model_def.cpp"
+#include "model/Model_md5edit.cpp"
+
+#include "model/Model_test.cpp"
+#include "model/Model_light.cpp"
+#endif
+
+#ifdef _IMGUI
+#include "imgui/r_imgui.cpp"
+#include "imgui/r_imgui_event.cpp"
+#include "imgui/r_imgui_settings.cpp"
+#endif

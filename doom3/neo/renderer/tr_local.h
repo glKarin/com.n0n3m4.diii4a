@@ -1047,6 +1047,13 @@ extern idCVar r_useETC1Cache;				// use ETC1 cache
 extern idCVar r_useDXT;					// DXT compression
 #ifdef _OPENGLES3
 extern idCVar r_useETC2;				// ETC2 compression
+
+extern idCVar harm_r_useFenceSync;
+extern void RB_FenceSync(void);
+#endif
+//#define DEBUG_SYNC_MIN_INTERVAL 1
+#ifdef DEBUG_SYNC_MIN_INTERVAL
+extern idCVar r_showSwapBuffers;
 #endif
 
 extern idCVar r_finish;					// force a call to glFinish() every frame

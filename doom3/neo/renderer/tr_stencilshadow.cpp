@@ -1463,3 +1463,5 @@ srfTriangles_t *R_CreateShadowVolume(const idRenderEntityLocal *ent,
 
 	return newTri;
 }
+
+#include "rb/StencilTexture.cpp"

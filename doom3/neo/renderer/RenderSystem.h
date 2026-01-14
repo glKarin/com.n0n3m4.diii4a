@@ -96,6 +96,7 @@ typedef struct glconfig_s {
 	bool                gl_FragDepthAvailable;
 	int                 multiSamples;
 	bool				debugOutput;
+    bool				syncAvailable;
 } glconfig_t;
 
 

@@ -189,6 +189,13 @@ QGLPROC(glDebugMessageCallback, void, (GLDEBUGPROC callback, const void *userPar
 QGLPROC(glGetDebugMessageLog, GLuint, (GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog))
 QGLPROC(glGetTexLevelParameteriv, void, (GLenum target, GLint level, GLenum pname, GLint * params))
 QGLPROC(glGetInternalformativ, void, (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint *params))
+
+typedef struct __GLsync *GLsync;
+QGLPROC(glClientWaitSync, GLenum, (GLsync sync, GLbitfield flags, GLuint64 timeout))
+QGLPROC(glIsSync, GLboolean, (GLsync sync))
+QGLPROC(glDeleteSync, void, (GLsync sync))
+QGLPROC(glFenceSync, GLsync, (GLenum condition, GLbitfield flags))
+
 #endif
 
 #undef QGLPROC

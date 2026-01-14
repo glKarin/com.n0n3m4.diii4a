@@ -196,6 +196,11 @@ void qglDebugMessageCallback (GLDEBUGPROC callback, const void *userParam) {}
 GLuint qglGetDebugMessageLog (GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog) { return 0; }
 void qglGetTexLevelParameteriv (GLenum target, GLint level, GLenum pname, GLint * params) {}
 void qglGetInternalformativ (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint *params) {}
+
+GLsync qglFenceSync (GLenum condition, GLbitfield flags) { return 0; }
+GLboolean qglIsSync (GLsync sync) { return GL_FALSE; }
+void qglDeleteSync (GLsync sync) {}
+GLenum qglClientWaitSync (GLsync sync, GLbitfield flags, GLuint64 timeout) { return GL_ALREADY_SIGNALED; }
 #endif
 
 

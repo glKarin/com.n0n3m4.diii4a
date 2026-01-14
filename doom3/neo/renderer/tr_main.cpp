@@ -1329,3 +1329,6 @@ void R_RenderView(viewDef_t *parms)
 	// restore view in case we are a subview
 	tr.viewDef = oldView;
 }
+
+#include "matrix/RenderMatrix.cpp"
+#include "matrix/GLMatrix.cpp"

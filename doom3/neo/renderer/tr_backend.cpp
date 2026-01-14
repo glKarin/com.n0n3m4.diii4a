@@ -604,7 +604,22 @@ const void	RB_SwapBuffers(const void *data)
 #endif
 
 	// force a gl sync if requested
-	if (r_finish.GetBool()) {
+	if (r_finish.GetBool()
+#ifdef _OPENGLES3
+        && !harm_r_useFenceSync.GetBool()
+#endif
+    ) {
+#ifdef DEBUG_SYNC_MIN_INTERVAL
+        if( r_showSwapBuffers.GetBool() )
+        {
+            const int start = Sys_Milliseconds();
+            qglFinish();
+            const int end = Sys_Milliseconds();
+            if(end - start > DEBUG_SYNC_MIN_INTERVAL)
+                common->Printf( "%i msec to glFinish\n", end - start );
+        }
+        else
+#endif
 		qglFinish();
 	}
 
@@ -614,6 +629,13 @@ const void	RB_SwapBuffers(const void *data)
 	if (!r_frontBuffer.GetBool()) {
 		GLimp_SwapBuffers();
 	}
+
+#ifdef _OPENGLES3
+    // force a gl sync if requested
+    if (r_finish.GetBool() && glConfig.syncAvailable && harm_r_useFenceSync.GetBool()) {
+        RB_FenceSync();
+    }
+#endif
 }
 
 /*
@@ -714,4 +736,13 @@ void RB_ExecuteBackEndCommands(const emptyCommand_t *cmds)
 		backEnd.c_copyFrameBuffer = 0;
 	}
 }
+
+#ifdef _POSTPROCESS
+#include "rb/rb_postprocess.cpp"
+#endif
+
+#include "rb/rb_debug.cpp"
+#ifdef _OPENGLES3
+#include "rb/rb_fencesync.cpp"
+#endif
 

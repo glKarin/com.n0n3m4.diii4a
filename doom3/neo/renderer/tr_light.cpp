@@ -1711,8 +1711,15 @@ void R_RemoveUnecessaryViewLights(void)
 #endif
 }
 
-#ifdef _RAVEN // particle
+#ifdef _SHADOW_MAPPING
+#include "tr/tr_shadowmapping.cpp"
+#endif
 
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
+#include "tr/tr_lightmatrix.cpp"
+#endif
+
+#ifdef _RAVEN // particle
 #ifdef _RAVEN_BSE
 idRenderModel * R_EffectDefDynamicModel(rvRenderEffectLocal *def)
 {
