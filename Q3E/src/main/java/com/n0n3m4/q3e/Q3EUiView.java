@@ -41,6 +41,14 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
 {
     public final Q3EEditButtonHandler handler;
 
+    private final Handler mHandler = new Handler();
+
+    private final FingerUi[] fingers = new FingerUi[10];
+    private final ArrayList<TouchListener> touch_elements = new ArrayList<>(0);
+    private final ArrayList<Paintable> paint_elements = new ArrayList<>(0);
+
+    private boolean mInit = false;
+
     public Q3EUiView(Context context)
     {
         super(context);
@@ -59,27 +67,17 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
         handler.OnDrawFrame(gl);
     }
 
-    Handler mHandler = new Handler();
-
-    public FingerUi[] fingers = new FingerUi[10];
-    public final ArrayList<TouchListener> touch_elements = new ArrayList<>(0);
-    public final ArrayList<Paintable> paint_elements = new ArrayList<>(0);
-
-    boolean mInit = false;
-
     public void SaveAll()
     {
         handler.SaveAll();
     }
-
-    UiLoader      uildr;
 
     @Override
     public void onSurfaceChanged(GL10 gl, int w, int h)
     {
         if (!mInit)
         {
-            uildr = new UiLoader(this, gl, w, h, Q3EUtils.q3ei.defaults_table);
+            UiLoader uildr = new UiLoader(this, gl, w, h, Q3EUtils.q3ei.defaults_table);
 
             for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
             {

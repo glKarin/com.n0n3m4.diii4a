@@ -34,6 +34,7 @@ public final class Constants
                 "Support edit on-screen buttons in gaming.",
 				"Add `ECWolf`(ver 1.4.2) support, game standalone directory named `ecwolf`. More view in `" + TextHelper.GenLinkText("http://maniacsvault.net/ecwolf/", "ECWolf") + "`.",
                 "Add `UZDoom`(ver 4.14.3) arm64 support, game standalone directory named `uzdoom`. More view in `" + TextHelper.GenLinkText("https://github.com/UZDoom/UZDoom", "UZDoom") + "`. And GZDoom is removed.",
+                "Fix some GUIs in Quake 4/Prey(2006).",
         };
 	};
 

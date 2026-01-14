@@ -67,7 +67,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     private Button actbutton;
     private Button kickbutton;
     */
-    private Q3EView m_renderView;
 
     // render
     private final boolean hideonscr;
@@ -241,11 +240,6 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public void QueueEvent(Runnable r)
     {
         Q3EUtils.q3ei.callbackObj.PushEvent(r);
-    }
-
-    public void RenderView(Q3EView view)
-    {
-        m_renderView = view;
     }
 
     @Override

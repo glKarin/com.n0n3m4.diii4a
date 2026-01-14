@@ -336,7 +336,6 @@ public class Q3EMain extends Activity
             mControlGLSurfaceView = new Q3EControlView(this);
         Q3E.controlView = mControlGLSurfaceView;
         mAudio.vw = mControlGLSurfaceView;
-        mControlGLSurfaceView.RenderView(mGLSurfaceView);
 
         if(m_portrait)
             InitPortraitGUI();
