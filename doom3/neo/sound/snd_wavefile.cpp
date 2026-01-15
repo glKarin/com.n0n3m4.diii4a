@@ -97,15 +97,19 @@ int idWaveFile::Open(const char *strFileName, waveformatex_t *pwfx)
 		return OpenOGG(name, pwfx);
 	}
 
-#ifdef _SND_MP3 //karin: wav first, and then mp3
+#if defined(_SND_MP3) //karin: wav first, and then mp3
 	name.SetFileExtension(".wav");
 
 	if (fileSystem->ReadFile(name, NULL, NULL) == -1) {
+#endif
+#ifdef _SND_MP3
 		name.SetFileExtension(".mp3");
 	
 		if (fileSystem->ReadFile(name, NULL, NULL) != -1) {
 			return OpenMP3(name, pwfx);
 		}
+#endif
+#if defined(_SND_MP3) //karin: wav first, and then mp3
 	}
 #endif
 

@@ -504,17 +504,28 @@ bool idSoundShader::ParseShader(idLexer &src)
 							token = work;
 							parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
 						}
+#if defined(_SND_MP3)
+                        else
+                        {
+                            const char *exts[] = {
+#endif
 #ifdef _SND_MP3
-						else
-						{
-							// also try to find it with the .mp3 extension
-							work.SetFileExtension(".mp3");
+                                    ".mp3",
+#endif
+#if defined(_SND_MP3)
+                            };
+                            for(int e = 0; e < sizeof(exts) / sizeof(exts[0]); e++)
+                            {
+                                // also try to find it with the .xxx extension
+                                work.SetFileExtension(exts[e]);
 
-							if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
-								token = work;
-								parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
-							}
-						}
+                                if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+                                    token = work;
+                                    parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
+                                    break;
+                                }
+                            }
+                        }
 #endif
 					}
 				}
@@ -537,17 +548,28 @@ bool idSoundShader::ParseShader(idLexer &src)
 							token = work;
 							parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
 						}
+#if defined(_SND_MP3)
+                        else
+                        {
+                            const char *exts[] = {
+#endif
 #ifdef _SND_MP3
-						else
-						{
-							// also try to find it with the .mp3 extension
-							work.SetFileExtension(".mp3");
+                                    ".mp3",
+#endif
+#if defined(_SND_MP3)
+                            };
+                            for(int e = 0; e < sizeof(exts) / sizeof(exts[0]); e++)
+                            {
+                                // also try to find it with the .xxx extension
+                                work.SetFileExtension(exts[e]);
 
-							if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
-								token = work;
-								parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
-							}
-						}
+                                if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+                                    token = work;
+                                    parms.shakes = 0.0f; //k: set bo shakes, otherelse make a warning
+                                    break;
+                                }
+                            }
+                        }
 #endif
 					}
 				}
@@ -575,16 +597,27 @@ bool idSoundShader::ParseShader(idLexer &src)
 					if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
 						token = work;
 					}
+#if defined(_SND_MP3)
+                    else
+                    {
+                        const char *exts[] = {
+#endif
 #ifdef _SND_MP3
-					else
-					{
-						// also try to find it with the .mp3 extension
-						work.SetFileExtension(".mp3");
+                                ".mp3",
+#endif
+#if defined(_SND_MP3)
+                        };
+                        for(int e = 0; e < sizeof(exts) / sizeof(exts[0]); e++)
+                        {
+                            // also try to find it with the .xxx extension
+                            work.SetFileExtension(exts[e]);
 
-						if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
-							token = work;
-						}
-					}
+                            if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+                                token = work;
+                                break;
+                            }
+                        }
+                    }
 #endif
 				}
 
@@ -617,16 +650,27 @@ bool idSoundShader::ParseShader(idLexer &src)
 						if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
 							token = work;
 						}
+#if defined(_SND_MP3)
+                        else
+                        {
+                            const char *exts[] = {
+#endif
 #ifdef _SND_MP3
-						else
-						{
-							// also try to find it with the .mp3 extension
-							work.SetFileExtension(".mp3");
+                                    ".mp3",
+#endif
+#if defined(_SND_MP3)
+                            };
+                            for(int e = 0; e < sizeof(exts) / sizeof(exts[0]); e++)
+                            {
+                                // also try to find it with the .xxx extension
+                                work.SetFileExtension(exts[e]);
 
-							if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
-								token = work;
-							}
-						}
+                                if (fileSystem->ReadFile(work, NULL, NULL) > 0) {
+                                    token = work;
+                                    break;
+                                }
+                            }
+                        }
 #endif
 					}
 				}

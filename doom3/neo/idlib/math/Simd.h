@@ -207,4 +207,17 @@ class idSIMDProcessor
 // pointer to SIMD processor
 extern idSIMDProcessor *SIMDProcessor;
 
+#define TEST_TIMER_SIMD(callx, print, fmt, ...) { \
+	static idCVar _ttt("ttt", "0", CVAR_INTEGER, ""); \
+    struct timespec _ts; \
+    clock_gettime(CLOCK_REALTIME, &_ts); \
+	uint64_t _startts = _ts.tv_sec * 1000000000LL + _ts.tv_nsec; \
+	for(int x = 0; x < _ttt.GetInteger(); x++) { \
+	callx \
+	} \
+    clock_gettime(CLOCK_REALTIME, &_ts); \
+	uint64_t _endts = _ts.tv_sec * 1000000000LL + _ts.tv_nsec; \
+	if(_ttt.GetBool()) \
+	print("TTT: " fmt " = %lld\n", __VA_ARGS__, _endts - _startts); \
+	}
 #endif /* !__MATH_SIMD_H__ */
