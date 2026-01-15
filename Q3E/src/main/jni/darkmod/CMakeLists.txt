@@ -309,7 +309,6 @@ find_package(glfw REQUIRED)]]
 
 set(DEPLIBS_PATH "${PROJECT_SOURCE_DIR}/../deplibs")
 set(DEPINCS_PATH "${PROJECT_SOURCE_DIR}/ThirdParty/include")
-set(D3_DEPLIBS_PATH "${PROJECT_SOURCE_DIR}/../doom3/neo/externlibs")
 # ogg headers
 set(OGG_CONFIG_TYPES_HEADER_PATH ${DEPINCS_PATH})
 include(${DEPLIBS_PATH}/libogg/cmake/GenerateConfigTypesHeader.cmake)
@@ -319,7 +318,7 @@ include_directories(
 		"${PROJECT_SOURCE_DIR}"
 		"${PROJECT_SOURCE_DIR}/idlib"
         "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/doctest/include"
-        "${D3_DEPLIBS_PATH}/openal-soft"
+        "${DIII4A_DEPEND_INCLUDE_PATH}/openal"
         "${DEPLIBS_PATH}"
         "${DEPLIBS_PATH}/curl/include"
         "${DEPLIBS_PATH}/libjpeg/libjpeg"
