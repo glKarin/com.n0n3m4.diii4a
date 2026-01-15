@@ -65,6 +65,7 @@ void RB_DrawElementsWithCounters(const srfTriangles_t *tri)
 		}
 	}
 
+    // commit
 	if (tri->indexCache) {
 		qglDrawElements(GL_TRIANGLES,
 		                r_singleTriangle.GetBool() ? 3 : tri->numIndexes,
@@ -96,6 +97,7 @@ void RB_DrawShadowElementsWithCounters(const srfTriangles_t *tri, int numIndexes
 	backEnd.pc.c_shadowIndexes += numIndexes;
 	backEnd.pc.c_shadowVertexes += tri->numVerts;
 
+    // commit
 	if (tri->indexCache) {
 		qglDrawElements(GL_TRIANGLES,
 		                r_singleTriangle.GetBool() ? 3 : numIndexes,

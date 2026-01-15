@@ -35,7 +35,7 @@ enum {
     VBO_TOTAL = 2,
 };
 
-const int NUM_VERTEX_FRAMES = 2;
+const int NUM_VERTEX_FRAMES = NUM_FRAME_DATA;
 
 typedef enum {
 	TAG_FREE,

@@ -67,6 +67,49 @@ static bool shaderRequired = true;
 
 static idStr RB_GLSL_GetExternalShaderSourcePath(void);
 
+void R_InitShaderProgram(shaderProgram_t *program)
+{
+    memset(program, 0, sizeof(*program));
+}
+
+
+static idStr _2shl(int n) {
+    if(n < 64)
+        return va("%lld", (long long int)(2ll << (long long int)n));
+
+    long double d = powl(2, n);
+    idStr str = va("%.0LF", d);
+    return str;
+}
+
+static void RB_CheckGLSLSourceCompiler(GLenum shaderType, GLenum precisionType, const char *shaderTypeName, const char *precisionTypeName)
+{
+    GLint range[2] = { 0 };
+    GLint precision = 0;
+    qglGetShaderPrecisionFormat(shaderType, precisionType, range, &precision);
+    idStr minV = _2shl(range[0]/* - 1*/);
+    idStr maxV = _2shl(range[1]);
+    if(precision) // float
+        Sys_Printf("%s shader %s: range=(-2^%d - 2^%d -> -%s ~ %s), precision=%d\n", shaderTypeName, precisionTypeName, range[0], range[1], minV.c_str(), maxV.c_str(), precision);
+    else
+        Sys_Printf("%s shader %s: range=(-2^%d - 2^%d -> -%s ~ %s)\n", shaderTypeName, precisionTypeName, range[0], range[1], minV.c_str(), maxV.c_str());
+}
+
+static void RB_CheckGLSLSourceCompiler(GLenum shaderType, const char *shaderTypeName)
+{
+    const GLenum precisionTypes[] = { GL_LOW_FLOAT, GL_MEDIUM_FLOAT, GL_HIGH_FLOAT, GL_LOW_INT, GL_MEDIUM_INT, GL_HIGH_INT };
+    const char *precisionTypeNames[] = { "lowp float", "mediump float", "highp float", "lowp int", "mediump int", "highp int" };
+    for(int i = 0; i < sizeof(precisionTypes) / sizeof(precisionTypes[0]); i++)
+        RB_CheckGLSLSourceCompiler(shaderType, precisionTypes[i], shaderTypeName, precisionTypeNames[i]);
+}
+
+static void RB_CheckGLSLSourceCompiler(void)
+{
+    Sys_Printf("Check GLSL source compiler\n");
+    RB_CheckGLSLSourceCompiler(GL_VERTEX_SHADER, "Vertex");
+    RB_CheckGLSLSourceCompiler(GL_FRAGMENT_SHADER, "Fragment");
+}
+
 #ifdef _MULTITHREAD
 void RB_GLSL_HandleShaders(void)
 {
@@ -375,7 +418,7 @@ void idGLSLShaderManager::ActuallyLoad(void)
 
 		// create shader on heap
 		shaderProgram_t *shader = (shaderProgram_t *)malloc(sizeof(*shader));
-		memset(shader, 0, sizeof(*shader));
+        R_InitShaderProgram(shader);
         idStr::Copynz(shader->name, prop.name.c_str(), sizeof(shader->name));
 		shader->type = SHADER_CUSTOM;
 		prop.program = shader;
@@ -387,7 +430,7 @@ void idGLSLShaderManager::ActuallyLoad(void)
 		}
 		else
 		{
-			memset(prop.program, 0, sizeof(*prop.program));
+            R_InitShaderProgram(prop.program);
 			common->Warning("GLSL shader manager::ActuallyLoad shader '%s' error!", prop.name.c_str());
 		}
 	}
@@ -737,6 +780,12 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 		idStr::snPrintf(buffer, sizeof(buffer), "u_vertexParm%d", i);
 		shader->u_vertexParm[i] = GL_GetUniformLocation(shader->program, buffer);
 	}
+#if 1 // defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+    for (i = 0; i < MAX_FRAGMENT_PARMS; i++) {
+        idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentParm%d", i);
+		shader->u_fragmentParm[i] = GL_GetUniformLocation(shader->program, buffer);
+    }
+#endif
 
 	for (i = 0; i < MAX_FRAGMENT_IMAGES; i++) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentMap%d", i);
@@ -744,13 +793,6 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 		if(shader->u_fragmentMap[i] != -1)
 			qglUniform1i(shader->u_fragmentMap[i], i);
 	}
-#if 1 // defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
-	for (i = 0; i < MAX_FRAGMENT_PARMS; i++) {
-		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentParm%d", i);
-		shader->u_fragmentParm[i] = GL_GetUniformLocation(shader->program, buffer);
-	}
-#endif
-
 	//k: add cubemap texture units
 	for ( i = 0; i < MAX_FRAGMENT_IMAGES; i++ ) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentCubeMap%d", i);
@@ -962,6 +1004,8 @@ void R_ReloadGLSLPrograms_f(const idCmdArgs &args)
 
     if(!glslInitialized)
     {
+        RB_CheckGLSLSourceCompiler();
+
         if (!RB_GLSL_InitShaders()) {
             common->Printf("GLSL shaders failed to init.\n");
         }
@@ -1031,7 +1075,7 @@ void RB_GLSL_DeleteShaderProgram(shaderProgram_t *shaderProgram, bool deleteProg
 
     // keep name
     idStr name = shaderProgram->name;
-	memset(shaderProgram, 0, sizeof(shaderProgram_t));
+    R_InitShaderProgram(shaderProgram);
     idStr::Copynz(shaderProgram->name, name.c_str(), sizeof(shaderProgram->name));
 
 	if(!deleteProgram)
@@ -1177,7 +1221,7 @@ int RB_GLSL_LoadShaderProgram(
         GLSL_LOAD_EXTERNAL_BINARY = 3,
         GLSL_LOAD_BUILT_IN_BINARY = 4,
     };
-	// memset(program, 0, sizeof(shaderProgram_t));
+    // R_InitShaderProgram(program)
 
 	common->Printf("\nLoad GLSL shader program: %s -> %d\n", name, type);
     int step = 1;

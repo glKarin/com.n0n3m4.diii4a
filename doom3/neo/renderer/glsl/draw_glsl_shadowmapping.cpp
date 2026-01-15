@@ -584,6 +584,7 @@ static void RB_DrawShadowElementsWithCounters_shadowMapping(const srfTriangles_t
         }
     }
 
+    // commit
     if (tri->indexCache) {
         qglDrawElements(GL_TRIANGLES,
                        r_singleTriangle.GetBool() ? 3 : numIndexes,

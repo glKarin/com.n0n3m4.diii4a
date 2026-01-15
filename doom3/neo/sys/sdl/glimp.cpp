@@ -687,7 +687,7 @@ GLimp_SetScreenParms
 ===================
 */
 bool GLimp_SetScreenParms(glimpParms_t parms) {
-    common->DPrintf("TODO: GLimp_ActivateContext\n");
+    common->DPrintf("TODO: GLimp_SetScreenParms\n");
     return true;
 }
 

@@ -701,10 +701,12 @@ void R_InitOpenGL(void)
 #ifdef _MULTITHREAD
 	if(multithreadActive)
 	{
-		int vertexCacheFrame = vertexCache.GetNextListNum();
-		vertexCache.BeginBackEnd(vertexCacheFrame);
-		vertexCache.EndBackEnd(vertexCacheFrame);
-		vertexCache.EndFrame();
+        for(int vertexCacheFrame = vertexCache.GetNextListNum(); vertexCacheFrame < NUM_FRAME_DATA; vertexCacheFrame++)
+        {
+			vertexCache.BeginBackEnd(vertexCacheFrame);
+			vertexCache.EndBackEnd(vertexCacheFrame);
+			vertexCache.EndFrame();
+        }
 
 		cmdSystem->AddCommand("multithread", /*idRenderThread::*/R_EnableRenderThread_f, CMD_FL_RENDERER, "enable/disable multi-threading rendering");
 		multithreadEnable = true; // enable default

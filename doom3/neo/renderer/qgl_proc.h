@@ -190,6 +190,15 @@ QGLPROC(glGetDebugMessageLog, GLuint, (GLuint count, GLsizei bufSize, GLenum *so
 QGLPROC(glGetTexLevelParameteriv, void, (GLenum target, GLint level, GLenum pname, GLint * params))
 QGLPROC(glGetInternalformativ, void, (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint *params))
 
+#ifdef _UBO
+QGLPROC(glGetUniformIndices, void, (GLuint program, GLsizei uniformCount, const GLchar *const*uniformNames, GLuint *uniformIndices))
+QGLPROC(glGetUniformBlockIndex, GLint, (GLuint program, const GLchar *uniformBlockName))
+QGLPROC(glGetActiveUniformBlockiv, void, (GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint *params))
+QGLPROC(glGetActiveUniformsiv, void, (GLuint program, GLsizei uniformCount, const GLuint *uniformIndices, GLenum pname, GLint *params))
+QGLPROC(glBindBufferBase, void, (GLenum target, GLuint index, GLuint buffer))
+QGLPROC(glUniformBlockBinding, void, (GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding))
+#endif
+
 typedef struct __GLsync *GLsync;
 QGLPROC(glClientWaitSync, GLenum, (GLsync sync, GLbitfield flags, GLuint64 timeout))
 QGLPROC(glIsSync, GLboolean, (GLsync sync))

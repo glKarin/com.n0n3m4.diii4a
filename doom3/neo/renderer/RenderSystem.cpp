@@ -179,7 +179,7 @@ ID_INLINE static void R_OnlyMainThreadRunningAndRenderThreadWaiting(void)
 static void RenderCommands(renderCrop_t *pc = NULL, byte *pix = NULL)
 {
 	renderThread->BackendThreadWait();
-	renderThread->vertListToRender = vertexCache.GetListNum();
+	renderThread->vertListToRender = vertexCache.GetListNum(); // current frontend used index
 	renderThread->fdToRender = frameData;
 
 	//Save the potential pixel
@@ -1245,3 +1245,5 @@ void idRenderSystemLocal::EndFrame(byte *data, int *frontEndMsec, int *backEndMs
 
 #include "rb/RenderThread.cpp"
 #endif
+
+#include "rb/Framebuffer.cpp"

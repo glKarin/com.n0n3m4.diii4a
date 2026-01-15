@@ -114,9 +114,22 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 			qglBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
 #endif
 			// k
-			int clearVBO = harm_r_clearVertexBuffer.GetInteger();
-			if(clearVBO != VBO_CLEAR_NONE)
-			{ // clear vertex buffer on graphics memory.
+			const int clearVBO = harm_r_clearVertexBuffer.GetInteger();
+			if(clearVBO == VBO_CLEAR_DELETE) // clear vertex buffer on graphics memory.
+			{
+#ifdef _MULTITHREAD
+                if(!multithreadActive)
+                {
+#endif
+					qglDeleteBuffers(1, &block->vbo);
+					//block->vbo = VBO_INVALID_HANDLE;
+                    qglGenBuffers(1, &block->vbo); //karin: re-gen buffer handle
+#ifdef _MULTITHREAD
+                }
+#endif
+            }
+            else if(clearVBO == VBO_CLEAR_ZERO)
+            {
 				if(block->indexBuffer)
 				{
 					qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
@@ -129,15 +142,7 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 					qglBufferData(GL_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW); // GL_DYNAMIC_DRAW
 					qglBindBuffer(GL_ARRAY_BUFFER, 0);
 				}
-#ifdef _MULTITHREAD
-				if(!multithreadActive && clearVBO == VBO_CLEAR_DELETE)
-#endif
-                {
-					qglDeleteBuffers(1, &block->vbo);
-                    //block->vbo = VBO_INVALID_HANDLE;
-                    qglGenBuffers(1, &block->vbo); //karin: re-gen buffer handle
-                }
-			}
+            }
 		} else if (block->virtMem) {
 			Mem_Free(block->virtMem);
 			block->virtMem = NULL;
@@ -433,7 +438,7 @@ void idVertexCache::Alloc(void *data, int size, vertCache_t **buffer, bool index
 #ifdef _MULTITHREAD
 	if(multithreadActive)
 	{
-		if(allocatingTempBuffer)
+/*		if(allocatingTempBuffer)
 		{
 			block->virtMem = Mem_Alloc(size);
 			block->virtMemDirty = false;
@@ -442,34 +447,38 @@ void idVertexCache::Alloc(void *data, int size, vertCache_t **buffer, bool index
 			qglBufferData(GL_ARRAY_BUFFER, (GLsizei)size, 0, GL_STREAM_DRAW);
 		}
 		else
-		{
+		{*/
 			if( block->virtMem )
 				Mem_Free(block->virtMem);
 			block->virtMem = Mem_Alloc(size);
 			SIMDProcessor->Memcpy(block->virtMem, data, size);
 			block->virtMemDirty = true;
+/*		}*/
 		}
-		return;
-	}
+    else
+    {
 #endif
-	// copy the data
-	if (block->vbo VBO_IS_VALID) {
-		if (indexBuffer) {
-			qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
-			qglBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizei)size, data, GL_STATIC_DRAW);
-		} else {
-			qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-
-			if (allocatingTempBuffer) {
-				qglBufferData(GL_ARRAY_BUFFER, (GLsizei)size, data, GL_STREAM_DRAW);
+		// copy the data
+		if (block->vbo VBO_IS_VALID) {
+			if (indexBuffer) {
+				qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+				qglBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizei)size, data, GL_STATIC_DRAW);
 			} else {
-				qglBufferData(GL_ARRAY_BUFFER, (GLsizei)size, data, GL_STATIC_DRAW);
+				qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+	
+				if (allocatingTempBuffer) {
+					qglBufferData(GL_ARRAY_BUFFER, (GLsizei)size, data, GL_STREAM_DRAW);
+				} else {
+					qglBufferData(GL_ARRAY_BUFFER, (GLsizei)size, data, GL_STATIC_DRAW);
+				}
 			}
+		} else {
+			block->virtMem = Mem_Alloc(size);
+			SIMDProcessor->Memcpy(block->virtMem, data, size);
 		}
-	} else {
-		block->virtMem = Mem_Alloc(size);
-		SIMDProcessor->Memcpy(block->virtMem, data, size);
-	}
+#ifdef _MULTITHREAD
+    }
+#endif
 }
 
 /*
@@ -771,29 +780,39 @@ void  idVertexCache::BeginBackEnd(int which)
 void idVertexCache::EndBackEnd(int which)
 {
 	// Clear deferred free data's GPU memory
-	int clearVBO = harm_r_clearVertexBuffer.GetInteger();
+	const int clearVBO = harm_r_clearVertexBuffer.GetInteger();
 	if(multithreadActive && clearVBO != VBO_CLEAR_NONE)
 	{
-		for (vertCache_t *block = deferredFreeLists[which].next; block && block != &deferredFreeLists[which]; block = block->next) {
-			// temp blocks are in a shared space that won't be freed
-			if (block->tag != TAG_TEMP) {
-				if (block->vbo VBO_IS_VALID) {
-					if(block->indexBuffer)
-					{
-						qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
-						qglBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW);
-						qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-					}
-					else
-					{
-						qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
-						qglBufferData(GL_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW);
-						qglBindBuffer(GL_ARRAY_BUFFER, 0);
-					}
-					if(clearVBO == VBO_CLEAR_DELETE)
-					{
-						qglDeleteBuffers(1, &block->vbo);
-						block->vbo = VBO_INVALID_HANDLE;
+        if(clearVBO == VBO_CLEAR_DELETE)
+        {
+			for (vertCache_t *block = deferredFreeLists[which].next; block && block != &deferredFreeLists[which]; block = block->next) {
+				// temp blocks are in a shared space that won't be freed
+				if (block->tag != TAG_TEMP) {
+					if (block->vbo VBO_IS_VALID) {
+                        qglDeleteBuffers(1, &block->vbo);
+                        block->vbo = VBO_INVALID_HANDLE;
+                    }
+                }
+            }
+        }
+        else if(clearVBO == VBO_CLEAR_ZERO)
+        {
+            for (vertCache_t *block = deferredFreeLists[which].next; block && block != &deferredFreeLists[which]; block = block->next) {
+                // temp blocks are in a shared space that won't be freed
+                if (block->tag != TAG_TEMP) {
+                    if (block->vbo VBO_IS_VALID) {
+						if(block->indexBuffer)
+						{
+							qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+							qglBufferData(GL_ELEMENT_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW);
+							qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+						}
+						else
+						{
+							qglBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+							qglBufferData(GL_ARRAY_BUFFER, 0, 0, GL_STREAM_DRAW);
+							qglBindBuffer(GL_ARRAY_BUFFER, 0);
+						}
 					}
 				}
 			}

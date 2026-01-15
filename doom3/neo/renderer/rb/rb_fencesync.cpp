@@ -11,7 +11,7 @@ static int		swapIndex;		// 0 or 1 into renderSync
 static GLsync	renderSync[2];
 
 #if 1
-#define GL_IsSync(x) ( x /*&& qglIsSync(x)*/ )
+#define GL_IsSync(x) ( x && qglIsSync(x) )
 #define GL_DeleteSync(x) { qglDeleteSync(x); x = 0; }
 #else
 #define GL_IsSync(x) qglIsSync(x)

@@ -3,12 +3,18 @@
 
 #include "QueueList.h"
 
-#define NUM_FRAME_DATA 2
+#define NUM_FRAME_DATA 2 // 3
 
 #define RENDER_THREAD_NAME "render_thread"
 
 extern bool multithreadActive;
 extern bool multithreadEnable;
+
+#if 1
+#define HARM_MT_DEBUG(...)
+#else
+#define HARM_MT_DEBUG(...) Sys_Printf("[MT]: " __VA_ARGS__)
+#endif
 
 typedef struct ActuallyLoadImage_data_s
 {
@@ -35,9 +41,9 @@ public:
     xthreadInfo				render_thread;
     volatile bool           render_thread_finished;
     volatile bool           backendFinished;
+    volatile int			vertListToRender;
 
     volatile frameData_t	*fdToRender;
-    volatile int			vertListToRender;
 // These are set if the backend should save pixels
     volatile renderCrop_t	*pixelsCrop;
     volatile byte           *pixels;

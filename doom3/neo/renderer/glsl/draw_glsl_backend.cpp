@@ -80,12 +80,12 @@ void GL_Uniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 GL_Uniform4f
 ====================
 */
-void GL_Uniform1i(GLint location, GLint w)
+void GL_Uniform1i(GLint location, GLint value)
 {
     HARM_CHECK_SHADER("GL_Uniform1i");
 
     HARM_CHECK_SHADER_INDEX(location);
-    qglUniform1i(*(GLint *)((char *)backEnd.glState.currentProgram + location), w);
+    qglUniform1i(*(GLint *)((char *)backEnd.glState.currentProgram + location), value);
 
     HARM_CHECK_SHADER_ERROR("GL_Uniform1i");
 }

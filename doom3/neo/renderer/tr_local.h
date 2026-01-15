@@ -1862,6 +1862,7 @@ typedef struct shaderProgram_s {
 #define SHADER_PARMS_ADDR(prop, i) ((GLint)(offsetof(shaderProgram_t, prop)) + i * (GLint)sizeof(GLuint))
 #define SHADER_PARM_HANDLE(index) (*(GLint *)((char *)backEnd.glState.currentProgram + index))
 #define SHADER_NOT_VALID(shader) (shader.program == 0)
+void R_InitShaderProgram(shaderProgram_t *program);
 
 struct GLSLShaderProp
 {

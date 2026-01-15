@@ -612,6 +612,7 @@ GLRB_PRIV void glesImmediateModeRender(void)
             GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), oneModulate);
             GL_Uniform4f(SHADER_PARM_ADDR(glColor), 1.0f, 1.0f, 1.0f, 1.0f);
 
+            // commit
             if(gl_IndexList.Num())
             {
                 qglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -650,6 +651,7 @@ GLRB_PRIV void glesImmediateModeRender(void)
             GL_Uniform4fv(SHADER_PARM_ADDR(glColor), gl_Color);
         }
 
+        // commit
         qglDrawElements(gl_RenderType, numIndex, GL_INDEX_TYPE, &gl_IndexList[0]);
     }
 }
@@ -1396,6 +1398,7 @@ GLRB_API void glesDrawElements(GLenum mode, GLsizei count, GLenum type, const vo
         GL_Uniform1fv(SHADER_PARM_ADDR(colorModulate), zero);
         GL_Uniform4fv(SHADER_PARM_ADDR(glColor), gl_Color);
     }
+    // commit
     qglDrawElements(mode, count, type, indices);
 }
 
