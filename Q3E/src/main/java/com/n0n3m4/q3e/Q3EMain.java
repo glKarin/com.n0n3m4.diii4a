@@ -21,7 +21,8 @@ package com.n0n3m4.q3e;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -30,8 +31,12 @@ import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -67,7 +72,12 @@ public class Q3EMain extends Activity
     private       int            m_offsetY         = 0;
     private       int            m_offsetX         = 0;
     @SuppressLint("StaticFieldLeak")
-    public static Q3EGameHelper  gameHelper;
+    public static Q3EGameHelper gameHelper;
+    private MenuItem            editButtonMenu;
+    private MenuItem            backMenu;
+    private ImageView menuButton;
+    private final Handler handler = new Handler();
+    private Runnable backCallback;
 
     private       Q3EKeyboard keyboard;
     private static final int VIEW_BASE_Z = 100;
@@ -75,6 +85,9 @@ public class Q3EMain extends Activity
     private static final int VKB_Z = VIEW_BASE_Z + 3;
     private static final int MEM_DEBUG_Z = VIEW_BASE_Z + 2;
     private static final int SETTING_Z = VIEW_BASE_Z + 1;
+
+    private static final float MENU_ICON_ALPHA = 0.5f;
+    private static final int MENU_ICON_HIDE_DELAY = 10;
 
     public final Q3EPermissionRequest permissionRequest = new Q3EPermissionRequest();
 
@@ -699,9 +712,6 @@ public class Q3EMain extends Activity
 
     private void SetupSettingGate()
     {
-        if(m_portrait)
-            return;
-
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         if(mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false))
             return;
@@ -715,18 +725,145 @@ public class Q3EMain extends Activity
             //params.topMargin = m_offsetY;
         }
 
-        ImageView btn = new ImageView(this);
-        btn.setAlpha(0.2f);
-        btn.setFocusable(false);
-        btn.setFocusableInTouchMode(false);
-        btn.setImageDrawable(getResources().getDrawable(R.drawable.icon_m_settings));
-        mainLayout.addView(btn, params);
-        Q3EUtils.SetViewZ(btn, SETTING_Z);
-        btn.setOnClickListener(new View.OnClickListener() {
+        menuButton = new ImageView(this);
+        menuButton.setAlpha(MENU_ICON_ALPHA);
+        menuButton.setFocusable(false);
+        menuButton.setFocusableInTouchMode(false);
+        menuButton.setImageDrawable(getResources().getDrawable(R.drawable.icon_m_settings));
+        mainLayout.addView(menuButton, params);
+        Q3EUtils.SetViewZ(menuButton, SETTING_Z);
+        menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mControlGLSurfaceView.ToggleMode();
+                OpenMenu();
             }
         });
+        ShowMenuIcon(1.0f, 60);
+    }
+
+    private void OpenMenu()
+    {
+        ShowMenuIcon(-1.0f, -1);
+        openOptionsMenu();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+
+        editButtonMenu = menu.findItem(R.id.main_edit_button_layout);
+        backMenu = menu.findItem(R.id.main_quit);
+        if(m_portrait)
+        {
+            menu.findItem(R.id.main_edit_button_layout).setVisible(false);
+        }
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int itemId = item.getItemId();
+        if (itemId == R.id.main_edit_button_layout)
+        {
+            ToggleButtonEditor();
+            return true;
+        }
+        else if (itemId == R.id.main_quit)
+        {
+            if(null != backCallback)
+            {
+                backCallback.run();
+                backCallback = null;
+            }
+            else
+                Q3E.activity.Quit();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void ToggleButtonEditor()
+    {
+        boolean editMode = mControlGLSurfaceView.IsEditMode();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                mControlGLSurfaceView.ToggleMode(new Runnable() {
+                    @Override
+                    public void run() {
+                        ShowMenuIcon(-1.0f, -1);
+                        backCallback = null;
+                        UpdateMenu();
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        ShowMenuIcon(1.0f, 0);
+                        UpdateMenu();
+                    }
+                });
+            }
+        };
+        runnable.run();
+        if(!editMode)
+            backCallback = runnable;
+        else
+            backCallback = null;
+    }
+
+    private final Runnable hideMenuIcon_f = new Runnable() {
+        @Override
+        public void run()
+        {
+            if(null != menuButton)
+                menuButton.setAlpha(0.0f);
+        }
+    };
+
+    private void ShowMenuIcon(float alpha, int autoHide)
+    {
+        handler.removeCallbacks(hideMenuIcon_f);
+        if(null != menuButton)
+        {
+            menuButton.setAlpha(alpha < 0.0f ? MENU_ICON_ALPHA : alpha);
+            if(autoHide > 0)
+                handler.postDelayed(hideMenuIcon_f, autoHide * 1000L);
+            else if(autoHide < 0)
+                handler.postDelayed(hideMenuIcon_f, MENU_ICON_HIDE_DELAY * 1000L);
+        }
+    }
+
+    private void UpdateMenu()
+    {
+        if(null != mControlGLSurfaceView && mControlGLSurfaceView.IsEditMode())
+            editButtonMenu.setTitle(R.string.finish_editing);
+        else
+            editButtonMenu.setTitle(R.string.edit_buttons_layout);
+
+        if(null != backCallback)
+            backMenu.setTitle(R.string.back);
+        else
+            backMenu.setTitle(R.string.quit);
+    }
+
+    public void Quit()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.exit_game);
+        builder.setMessage(R.string.are_you_sure_exit_game);
+        builder.setCancelable(true);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int v)
+            {
+                dialog.dismiss();
+                Q3E.Shutdown();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.create().show();
     }
 }

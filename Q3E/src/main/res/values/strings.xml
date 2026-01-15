@@ -67,4 +67,7 @@
     <string name="etlegacy_extras">ET: Legacy extras</string>
     <string name="extract_files_fail">Extract %1$s files fail!</string>
     <string name="ecwolf_builtin_resource">ECWolf built-in resource</string>
+    <string name="quit">Quit</string>
+    <string name="edit_buttons_layout">Edit buttons layout</string>
+    <string name="finish_editing">Finish editing</string>
 </resources>

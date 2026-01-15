@@ -61,6 +61,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     // render
     private boolean mInit = false;
 
+    private Runnable afterToGameMode;
+    private Runnable afterToEditMode;
+
 
     //RTCW4A-specific
     /*
@@ -199,7 +202,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     {
         if (keyCode == KeyEvent.KEYCODE_BACK && !gameMode)
         {
-            ToggleMode();
+            ToggleMode(afterToGameMode, afterToEditMode);
             return true;
         }
         return handler.OnKeyUp(keyCode, event);
@@ -327,8 +330,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         }
     }
 
-    final Object modeGLLock = new Object();
-    public void EditMode()
+    private void EditMode(Runnable after)
     {
         boolean isCreated = null == editHandler;
         if(isCreated)
@@ -370,6 +372,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                         }
                         handler = editHandler;
                         gameMode = false;
+                        if(null != after)
+                            after.run();
                         KLog.I("Switch to edit mode");
                     }
                 });
@@ -377,7 +381,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         });
     }
 
-    public void GameMode()
+    private void GameMode(Runnable after)
     {
         queueEvent(new Runnable() {
             @Override
@@ -398,6 +402,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                         }
                         handler = gameHandler;
                         gameMode = true;
+                        if(null != after)
+                            after.run();
                         KLog.I("Switch to game mode");
                     }
                 });
@@ -405,13 +411,39 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         });
     }
 
-    public void ToggleMode()
+    public boolean ToggleMode(Runnable gameAfter, Runnable editAfter)
     {
         if(hideonscr || Q3E.activity.IsPortrait())
-            return;
+            return false;
+        afterToGameMode = gameAfter;
+        afterToEditMode = editAfter;
         if(gameMode)
-            EditMode();
+            EditMode(new Runnable() {
+                @Override
+                public void run() {
+                    if(null != afterToEditMode)
+                    {
+                        afterToEditMode.run();
+                        afterToEditMode = null;
+                    }
+                }
+            });
         else
-            GameMode();
+            GameMode(new Runnable() {
+                @Override
+                public void run() {
+                    if(null != afterToGameMode)
+                    {
+                        afterToGameMode.run();
+                        afterToGameMode = null;
+                    }
+                }
+            });
+        return true;
+    }
+
+    public boolean IsEditMode()
+    {
+        return !gameMode;
     }
 }

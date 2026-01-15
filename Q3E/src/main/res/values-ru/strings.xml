@@ -65,4 +65,7 @@
     <string name="etlegacy_extras">ET: Legacy дополнительные ресурсы</string>
     <string name="extract_files_fail">Извлечение %1$s файлов не удалось!</string>
     <string name="ecwolf_builtin_resource">ECWolf built-in resource</string>
+    <string name="quit">Quit</string>
+    <string name="edit_buttons_layout">Edit buttons layout</string>
+    <string name="finish_editing">Finish editing</string>
 </resources>

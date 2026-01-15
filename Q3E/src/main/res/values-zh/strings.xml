@@ -66,4 +66,7 @@
     <string name="etlegacy_extras">ET: Legacy额外资源</string>
     <string name="extract_files_fail">提取%1$s文件失败!</string>
     <string name="ecwolf_builtin_resource">ECWolf内置资源</string>
+    <string name="quit">退出</string>
+    <string name="edit_buttons_layout">编辑按键布局</string>
+    <string name="finish_editing">编辑完成</string>
 </resources>

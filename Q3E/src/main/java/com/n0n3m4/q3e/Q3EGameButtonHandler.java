@@ -425,19 +425,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             Toast.makeText(getContext(), R.string.click_back_again_to_exit, Toast.LENGTH_LONG).show();
         else if (m_pressBackCount == Q3EGlobals.CONST_DOUBLE_PRESS_BACK_TO_EXIT_COUNT)
         {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle(R.string.exit_game);
-            builder.setMessage(R.string.are_you_sure_exit_game);
-            builder.setCancelable(true);
-            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int v)
-                {
-                    dialog.dismiss();
-                    Q3E.Shutdown();
-                }
-            });
-            builder.setNegativeButton(R.string.cancel, null);
-            builder.create().show();
+            Q3E.activity.Quit();
             return true;
         }
         return res;
