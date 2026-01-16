@@ -4,10 +4,10 @@ import android.graphics.Point;
 
 public class UiElement
 {
-    int cx;
-    int cy;
-    int size;
-    int alpha;
+    public int cx;
+    public int cy;
+    public int size;
+    public int alpha;
 
     public UiElement(int incx, int incy, int insize, int inalpha)
     {

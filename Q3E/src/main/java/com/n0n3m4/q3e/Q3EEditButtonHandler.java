@@ -1,7 +1,9 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.hardware.Sensor;
@@ -58,6 +60,7 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
     private String m_game = null;
     private boolean portrait = false;
     private boolean writeToDefault = false;
+    private boolean saveChanges = false;
     private final ArrayList<TouchListener> touch_elements = new ArrayList<>(0);
     private final ArrayList<Paintable> paint_elements = new ArrayList<>(0);
 
@@ -341,13 +344,51 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
         yoffset = 0;
         if(IsModified())
         {
-            SaveAll();
-            if(writeToDefault)
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    SaveAll();
+                    if(writeToDefault)
+                    {
+                        Q3EUtils.q3ei.LoadLayoutTablePreference(getContext(), portrait);
+                        KLog.I("Setup layout");
+                    }
+                    KLog.I("Save game buttons");
+                }
+            };
+
+            if(saveChanges)
             {
-                Q3EUtils.q3ei.LoadLayoutTablePreference(getContext(), portrait);
-                KLog.I("Setup layout");
+                runnable.run();
             }
-            KLog.I("Save game buttons");
+            else
+            {
+                DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        switch(which)
+                        {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                runnable.run();
+                                dialog.dismiss();
+                                break;
+                            case DialogInterface.BUTTON_NEGATIVE:
+                            default:
+                                Recover();
+                                dialog.dismiss();
+                                break;
+                        }
+                    }
+                };
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle(R.string.warning);
+                builder.setMessage(R.string.button_setting_has_changed_can_you_save_it);
+                builder.setCancelable(false);
+                builder.setPositiveButton(R.string.yes, listener);
+                builder.setNegativeButton(R.string.no, listener);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
         }
     }
 
@@ -925,6 +966,11 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
         this.writeToDefault = writeToDefault;
     }
 
+    public void SetSaveChanges(boolean saveChanges)
+    {
+        this.saveChanges = saveChanges;
+    }
+
     void UpdateUsedTouches()
     {
         if(NoTouchElements())
@@ -948,5 +994,91 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
         paint_elements.addAll(paints);
 
         KLog.I("Total buttons = %d, edit buttons = %d, non-paint buttons = %d", total_paint_elements.size(), paint_elements.size(), total_paint_elements.size() - paint_elements.size());
+    }
+
+    void Recover()
+    {
+        synchronized (paint_elements)
+        {
+            List<Paintable> updateList = new ArrayList<>();
+            for (int i = 0; i < paint_elements.size(); i++)
+            {
+                String def = Q3EUtils.q3ei.defaults_table[i];
+                UiElement uiElement = new UiElement(def, width, height);
+
+                Paintable p = paint_elements.get(i);
+
+                // recover position
+                int x = uiElement.cx;
+                int y = uiElement.cy;
+                if (p instanceof Slider)
+                {
+                    Slider tmp = (Slider) p;
+                    tmp.SetPosition(x, y);
+                }
+                else if (p instanceof Button)
+                {
+                    Button tmp = (Button) p;
+                    tmp.SetPosition(x, y);
+                }
+                else if (p instanceof Joystick)
+                {
+                    Joystick tmp = (Joystick) p;
+                    tmp.SetPosition(x, y);
+                }
+                else if (p instanceof Disc)
+                {
+                    Disc tmp = (Disc) p;
+                    tmp.SetPosition(x, y);
+                }
+
+                // recover alpha
+                p.alpha = (float)uiElement.alpha / 100.0f;
+
+                // recover size
+                if (p instanceof Slider)
+                {
+                    Slider tmp = (Slider) p;
+                    int width = uiElement.size;
+                    int height = Slider.HeightForWidth(width, Q3EUtils.q3ei.arg_table[i * 4 + 3]);
+                    tmp.Resize(width, height);
+                    updateList.add(p);
+                }
+                else if (p instanceof Button)
+                {
+                    Button tmp = (Button) p;
+                    int width = uiElement.size;
+                    int height = width;
+                    tmp.Resize(width, height);
+                    updateList.add(p);
+                }
+                else if (p instanceof Joystick)
+                {
+                    Joystick tmp = (Joystick) p;
+                    int radius = uiElement.size;
+                    tmp.Resize(radius);
+                    updateList.add(p);
+                }
+                else if (p instanceof Disc)
+                {
+                    Disc tmp = (Disc) p;
+                    int radius = uiElement.size;
+                    tmp.Resize(radius);
+                    updateList.add(p);
+                }
+            }
+
+            surfaceView.queueEvent(new Runnable() {
+                @Override
+                public void run() {
+                    for (Paintable p : updateList)
+                    {
+                        p.AsBuffer((GL11) gl);
+                    }
+                }
+            });
+
+            m_edited = false;
+        }
     }
 }

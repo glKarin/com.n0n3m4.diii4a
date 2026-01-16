@@ -789,28 +789,29 @@ public class Q3EMain extends Activity
     private void ToggleButtonEditor()
     {
         boolean editMode = mControlGLSurfaceView.IsEditMode();
-        Runnable runnable = new Runnable() {
+
+        mControlGLSurfaceView.ToggleMode(new Runnable() {
             @Override
             public void run() {
-                mControlGLSurfaceView.ToggleMode(new Runnable() {
-                    @Override
-                    public void run() {
-                        ShowMenuIcon(-1.0f, -1);
-                        backCallback = null;
-                        UpdateMenu();
-                    }
-                }, new Runnable() {
-                    @Override
-                    public void run() {
-                        ShowMenuIcon(1.0f, 0);
-                        UpdateMenu();
-                    }
-                });
+                ShowMenuIcon(-1.0f, -1);
+                backCallback = null;
+                UpdateMenu();
             }
-        };
-        runnable.run();
+        }, new Runnable() {
+            @Override
+            public void run() {
+                ShowMenuIcon(1.0f, 0);
+                UpdateMenu();
+            }
+        });
+
         if(!editMode)
-            backCallback = runnable;
+            backCallback = new Runnable() {
+                @Override
+                public void run() {
+                    mControlGLSurfaceView.ExitEditMode(false);
+                }
+            };
         else
             backCallback = null;
     }

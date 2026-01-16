@@ -152,21 +152,21 @@ public class MenuOverlayView implements UiViewOverlay
             }
         });
 
+        button = AddButton(R.string.reset, sublayout, 0, 0, LinearLayout.LayoutParams.MATCH_PARENT, 0.3f);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                uiView.ResetOnScreenButtonSize(fngr.target);
+            }
+        });
+
         button = AddButton(" + ", sublayout, 32, 0, LinearLayout.LayoutParams.MATCH_PARENT, 0.35f);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
                 tgtresize(true);
-            }
-        });
-
-        button = AddButton(R.string.reset, mainLayout, 0, LinearLayout.LayoutParams.MATCH_PARENT, 64, 0.0f);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v)
-            {
-                uiView.ResetOnScreenButtonSize(fngr.target);
             }
         });
 

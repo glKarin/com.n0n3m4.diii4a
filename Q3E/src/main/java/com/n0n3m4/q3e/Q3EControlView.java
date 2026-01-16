@@ -342,6 +342,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             editHandler.SetPortrait(Q3E.activity.IsPortrait());
             editHandler.SetWriteToDefault(true);
         }
+        editHandler.SetSaveChanges(true);
         queueEvent(new Runnable() {
             @Override
             public void run()
@@ -440,6 +441,30 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
                 }
             });
         return true;
+    }
+
+    public void ExitEditMode(boolean save)
+    {
+        if(hideonscr || Q3E.activity.IsPortrait())
+            return;
+
+        if(gameMode)
+            return;
+
+        if(null == editHandler)
+            return;
+
+        editHandler.SetSaveChanges(save);
+        GameMode(new Runnable() {
+            @Override
+            public void run() {
+                if(null != afterToGameMode)
+                {
+                    afterToGameMode.run();
+                    afterToGameMode = null;
+                }
+            }
+        });
     }
 
     public boolean IsEditMode()
