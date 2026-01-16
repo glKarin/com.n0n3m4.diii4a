@@ -43,6 +43,81 @@ If you have questions concerning this license or the applicable additional terms
 // #define ID_VERBOSE_PTHREADS
 #endif
 
+#include <dlfcn.h>
+typedef int (*PROC_pthread_getattr_np)(pthread_t __pthread, pthread_attr_t* __attr);
+typedef int (*PROC_pthread_setname_np)(pthread_t __pthread, const char* __name);
+// __ANDROID_API__ >= 26
+typedef int (*PROC_pthread_getname_np)(pthread_t __pthread, char* __buf, size_t __n);
+static PROC_pthread_getattr_np pthread_getattr_np_f;
+static PROC_pthread_setname_np pthread_setname_np_f;
+static PROC_pthread_getname_np pthread_getname_np_f;
+
+static void Posix_InitPthreadProc(void)
+{
+#define PTHREAD_GETPROC(x) x##_f = (PROC_##x)dlsym(RTLD_DEFAULT, #x); \
+	if(x##_f) printf("pthread proc " #x ": %p\n", x##_f); \
+	else printf("pthread proc " #x ": not found\n");
+
+	PTHREAD_GETPROC(pthread_getattr_np)
+	PTHREAD_GETPROC(pthread_setname_np)
+	PTHREAD_GETPROC(pthread_getname_np)
+
+#undef PTHREAD_GETPROC
+}
+
+ID_INLINE static int qpthread_getattr_np(pthread_t pid, pthread_attr_t *attr)
+{
+	if(pthread_getattr_np_f)
+		return pthread_getattr_np_f(pid, attr);
+	else
+	{
+		Sys_Printf("pthread_getattr_np not support\n");
+		return -1;
+	}
+}
+
+ID_INLINE static int qpthread_setname_np(pthread_t pid, const char *name)
+{
+	if(pthread_setname_np_f)
+		return pthread_setname_np_f(pid, name);
+	else
+	{
+		Sys_Printf("pthread_setname_np not support\n");
+		return -1;
+	}
+}
+
+ID_INLINE static int qpthread_getname_np(pthread_t pid, char *name, size_t n)
+{
+	if(pthread_getname_np_f)
+		return pthread_getname_np_f(pid, name, n);
+	else
+	{
+		Sys_Printf("pthread_getname_np not support\n");
+		return -1;
+	}
+}
+
+int Posix_GetStackSize(const pthread_t *pid)
+{
+	pthread_t id = pid ? *pid : pthread_self();
+	pthread_attr_t attr;
+	int res;
+
+	if((res = qpthread_getattr_np(id, &attr)) == 0)
+	{
+		size_t size = 0;
+		pthread_attr_getstacksize(&attr, &size);
+		pthread_attr_destroy(&attr);
+		return size;
+	}
+	else
+	{
+		Sys_Printf("Get thread stack size fail: %d.\n", res);
+		return 0;
+	}
+}
+
 /*
 ======================================================
 locks
@@ -198,6 +273,12 @@ void Sys_CreateThread(xthread_t function, void *parms, xthreadPriority priority,
 	info.name = name;
 	info.threadId = XTHREAD_HANDLE_WRAP(info.threadHandle);
 
+	int stackSize = Posix_GetStackSize((pthread_t *)&info.threadHandle);
+	if(stackSize > 0)
+		common->Printf("Thread %s stack size: %d\n", name, stackSize);
+
+	qpthread_setname_np(XTHREAD_HANDLE_UNWRAP(info.threadHandle), name);
+
 	if (*thread_count < MAX_THREADS) {
 		threads[(*thread_count)++ ] = &info;
 	} else {
@@ -339,6 +420,8 @@ void Posix_InitPThreads()
 	for (i = 0; i < MAX_THREADS; i++) {
 		g_threads[ i ] = NULL;
 	}
+
+	Posix_InitPthreadProc();
 }
 
 #ifdef _MULTITHREAD

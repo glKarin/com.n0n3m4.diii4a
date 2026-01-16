@@ -1441,3 +1441,13 @@ int Sys_UnsetEnv(const char *name)
 {
     return unsetenv(name);
 }
+
+/*
+==============
+Sys_GetProcAddress
+==============
+*/
+void * Sys_GetProcAddress(const char *name)
+{
+	return dlsym(RTLD_DEFAULT, name);
+}

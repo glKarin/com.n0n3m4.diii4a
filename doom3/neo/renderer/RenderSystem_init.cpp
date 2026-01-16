@@ -709,6 +709,7 @@ void R_InitOpenGL(void)
         }
 
 		cmdSystem->AddCommand("multithread", /*idRenderThread::*/R_EnableRenderThread_f, CMD_FL_RENDERER, "enable/disable multi-threading rendering");
+		common->Printf("Multi-threading is actived, using `multithread` command to enable/disable it.\n");
 		multithreadEnable = true; // enable default
 	}
 #endif

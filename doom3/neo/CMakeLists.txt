@@ -148,6 +148,7 @@ option(SUPPORT_IQM							"Support iqm animation/static model"										ON)
 option(SUPPORT_SMD							"Support Source engine smd animation/static model"							ON)
 option(SUPPORT_GLTF							"Support Khronos gltf/glb animation/static model"							ON)
 option(SUPPORT_FBX							"Support Autodesk fbx animation/static model"								ON)
+#option(FLAC_SUPPORT							"Add FLAC sound support(don't support realtime decoding)"					OFF)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -430,7 +431,7 @@ if(MSVC)
 	if(TOOLS)
 		# This is required for tools on windows.
 		find_package(MFC)
-	
+
 		if(TOOLS AND NOT MFC_FOUND)
 			message(SEND_ERROR "MFC ('Microsoft Foundation Classes for C++') couldn't be found, but is needed for TOOLS!")
 			message(FATAL_ERROR "If you're using VS2013, you'll also need the 'Multibyte MFC Library for Visual Studio 2013': https://www.microsoft.com/en-us/download/details.aspx?id=40770 (VS2015 and 2017 include that in the default MFC package)")
@@ -661,8 +662,8 @@ else() #TODO linux
 		if(SDL2_FOUND)
 			set(LINUX_SDL TRUE)
 			set(LINUX_X11 FALSE)
-                message(STATUS "use system SDL2")
-                include_directories(${SDL2_INCLUDE_DIRS})
+			message(STATUS "use system SDL2")
+			include_directories(${SDL2_INCLUDE_DIRS})
 			set(SDLx_LIBRARY ${SDL2_LIBRARIES})
 			add_definitions(-D_SDL)
 			set(sys_libs ${sys_libs} ${SDLx_LIBRARY})
@@ -846,6 +847,10 @@ if(USE_SSE)
 	add_definitions(-D_USE_SSE)
 	message(STATUS "Build MMX/SSE/SSE2 on x64 support")
 endif()
+#[[if(FLAC_SUPPORT)
+	set(CORE_DEFINES "${CORE_DEFINES};_SND_FLAC")
+	message(STATUS "flac sound support(don't support realtime decoding)")
+endif()]]
 
 if(OPENAL)
 	if(ANDROID)
@@ -904,7 +909,7 @@ set(src_jpeg
 		externlibs/jpeg-8d/jquant1.c
 		externlibs/jpeg-8d/jquant2.c
 		externlibs/jpeg-8d/jutils.c
-		)
+)
 
 add_globbed_headers(src_jpeg "externlibs/jpeg-8d")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/externlibs/jpeg-8d")
