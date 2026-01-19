@@ -100,7 +100,7 @@ public final class KeyCodesJK
     public static final int J_DPAD_UP = 170;
     public static final int J_DPAD_DOWN = 171;
     public static final int J_DPAD_LEFT = 172;
-    public static final int J_DPAD_RIGHT = 174;
+    public static final int J_DPAD_RIGHT = 173;
     public static final int J_DPAD_CENTER = J_BUTTON_A;
     public static final int J_BUTTON_L2 = 267;
     public static final int J_BUTTON_R2 = 268;

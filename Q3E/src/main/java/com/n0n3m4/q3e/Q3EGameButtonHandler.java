@@ -263,7 +263,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
     {
         if(null != mouseControl && mouseControl.OnGenericMotionEvent(event))
             return true;
-        return (null != mouseControl && controllerControl.OnGenericMotionEvent(event));
+        return (null != controllerControl && controllerControl.OnGenericMotionEvent(event));
     }
 
     @Override
