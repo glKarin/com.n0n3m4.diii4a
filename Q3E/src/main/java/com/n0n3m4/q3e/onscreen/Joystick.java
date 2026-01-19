@@ -9,6 +9,7 @@ import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.KGLBitmapTexture;
 import com.n0n3m4.q3e.gl.Q3EGLVertexBuffer;
+import com.n0n3m4.q3e.keycode.KeyCodesGeneric;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -44,7 +45,7 @@ public class Joystick extends Paintable implements TouchListener
     private boolean dotjoyenabled = false;
 
     //private final int[] codes = { Q3EKeyCodes.KeyCodesGeneric.J_UP, Q3EKeyCodes.KeyCodesGeneric.J_RIGHT, Q3EKeyCodes.KeyCodesGeneric.J_DOWN, Q3EKeyCodes.KeyCodesGeneric.J_LEFT };
-    private final int[] Menu_Codes = { Q3EKeyCodes.KeyCodesGeneric.K_UPARROW, Q3EKeyCodes.KeyCodesGeneric.K_RIGHTARROW, Q3EKeyCodes.KeyCodesGeneric.K_DOWNARROW, Q3EKeyCodes.KeyCodesGeneric.K_LEFTARROW };
+    private final int[] Menu_Codes = { KeyCodesGeneric.K_UPARROW, KeyCodesGeneric.K_RIGHTARROW, KeyCodesGeneric.K_DOWNARROW, KeyCodesGeneric.K_LEFTARROW };
     private final boolean[] keys = {false, false, false, false};
     private final boolean[] enarr = new boolean[4];
 

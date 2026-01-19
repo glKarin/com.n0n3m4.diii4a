@@ -75,6 +75,7 @@ enum
 	Q3E_EVENT_KEY = 1,
 	Q3E_EVENT_MOUSE = 2,
 	Q3E_EVENT_MOTION = 3,
+    Q3E_EVENT_JOY = 4,
 };
 typedef struct Q3E_Event_s
 {
@@ -97,6 +98,7 @@ static float mouse_delta_y = 0;
 #define Q3E_KEY_EVENT(state, key, character) { q3e_event.type = Q3E_EVENT_KEY; q3e_event.state = state; q3e_event.key = key; q3e_event.character = character; }
 #define Q3E_MOTION_EVENT(dx, dy, _x, _y) { q3e_event.type = Q3E_EVENT_MOTION; q3e_event.dx = dx; q3e_event.dy = dy; q3e_event.x = _x; q3e_event.y = _y; }
 #define Q3E_MOUSE_EVENT(state, btn, _x, _y) { q3e_event.type = Q3E_EVENT_MOUSE; q3e_event.key = btn; q3e_event.state = state; q3e_event.x = _x; q3e_event.y = _y; }
+#define Q3E_JOY_EVENT(state, key) { q3e_event.type = Q3E_EVENT_JOY; q3e_event.state = state; q3e_event.key = -key - 1; }
 #define Q3E_NONE_EVENT() { q3e_event.type = Q3E_EVENT_NONE; }
 #define Q3E_HAS_EVENT() (q3e_event.type != Q3E_EVENT_NONE)
 
@@ -462,6 +464,107 @@ void MessagePump (const Q3E_Event_t *sev)
 				}
 			}
 			break;
+
+        case Q3E_EVENT_JOY:
+            if (!GUICapture)
+            {
+                switch (sev->key)
+                {
+                    case SDL_CONTROLLER_BUTTON_A:	event.data1 = KEY_PAD_A;	break;
+                    case SDL_CONTROLLER_BUTTON_B:	event.data1 = KEY_PAD_B;		break;
+                    case SDL_CONTROLLER_BUTTON_X:	event.data1 = KEY_PAD_X;		break;
+                    case SDL_CONTROLLER_BUTTON_Y:		event.data1 = KEY_PAD_Y;		break;
+                    case SDL_CONTROLLER_BUTTON_BACK:		event.data1 = KEY_PAD_BACK;		break;
+                    case SDL_CONTROLLER_BUTTON_START:		event.data1 = KEY_PAD_START;		break;
+                    case SDL_CONTROLLER_BUTTON_LEFTSTICK:	event.data1 = KEY_PAD_LTHUMB;		break;
+                    case SDL_CONTROLLER_BUTTON_RIGHTSTICK:		event.data1 = KEY_PAD_RTHUMB;		break;
+                    case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:		event.data1 = KEY_PAD_LSHOULDER;		break;
+                    case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:	event.data1 = KEY_PAD_RSHOULDER;		break;
+                    case SDL_CONTROLLER_BUTTON_DPAD_UP:		event.data1 = KEY_PAD_DPAD_UP;		break;
+                    case SDL_CONTROLLER_BUTTON_DPAD_DOWN:		event.data1 = KEY_PAD_DPAD_DOWN;		break;
+                    case SDL_CONTROLLER_BUTTON_DPAD_LEFT:		event.data1 = KEY_PAD_DPAD_LEFT;		break;
+                    case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:		event.data1 = KEY_PAD_DPAD_RIGHT;		break;
+                    case 15:		event.data1 = KEY_PAD_LTRIGGER;		break;
+                    case 16:		event.data1 = KEY_PAD_RTRIGGER;		break;
+                    case 17:		event.data1 = KEY_JOY1;		break;
+                    case 18:		event.data1 = KEY_JOY2;		break;
+                    case 20:		event.data1 = KEY_JOY1;		break;
+                    case 21:		event.data1 = KEY_JOY2;		break;
+                    case 22:		event.data1 = KEY_JOY3;		break;
+                    case 23:		event.data1 = KEY_JOY4;		break;
+                    case 24:		event.data1 = KEY_JOY5;		break;
+                    case 25:		event.data1 = KEY_JOY6;		break;
+                    case 26:		event.data1 = KEY_JOY7;		break;
+                    case 27:		event.data1 = KEY_JOY8;		break;
+                    case 28:		event.data1 = KEY_JOY14;		break;
+                    case 29:		event.data1 = KEY_JOY15;		break;
+                    case 30:		event.data1 = KEY_JOY3;		break;
+                    case 31:		event.data1 = KEY_JOY4;		break;
+                    case 32:		event.data1 = KEY_JOY5;		break;
+                    case 33:		event.data1 = KEY_JOY6;		break;
+                    case 34:		event.data1 = KEY_JOY7;		break;
+                    case 35:		event.data1 = KEY_JOY8;		break;
+                    case 36:		event.data1 = KEY_JOY14;		break;
+                    default:
+                        return;
+                }
+                event.type = sev->state ? EV_KeyDown : EV_KeyUp;
+
+                event.data2 = 0;
+                event.data3 = 0;
+
+                D_PostEvent (&event);
+            }
+            else
+            {
+                switch (sev->key)
+                {
+                    case SDL_CONTROLLER_BUTTON_A:	event.data1 = GK_RETURN;	break;
+                    case SDL_CONTROLLER_BUTTON_B:	event.data1 = GK_RETURN;		break;
+                    case SDL_CONTROLLER_BUTTON_X:	event.data1 = GK_RETURN;		break;
+                    case SDL_CONTROLLER_BUTTON_Y:		event.data1 = GK_RETURN;		break;
+                    case SDL_CONTROLLER_BUTTON_BACK:		event.data1 = GK_ESCAPE;		break;
+                    case SDL_CONTROLLER_BUTTON_START:		event.data1 = GK_RETURN;		break;
+                    case SDL_CONTROLLER_BUTTON_LEFTSTICK:	event.data1 = GK_HOME;		break;
+                    case SDL_CONTROLLER_BUTTON_RIGHTSTICK:		event.data1 = GK_END;		break;
+                    case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:		event.data1 = GK_HOME;		break;
+                    case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:	event.data1 = GK_END;		break;
+                    case SDL_CONTROLLER_BUTTON_DPAD_UP:		event.data1 = GK_UP;		break;
+                    case SDL_CONTROLLER_BUTTON_DPAD_DOWN:		event.data1 = GK_DOWN;		break;
+                    case SDL_CONTROLLER_BUTTON_DPAD_LEFT:		event.data1 = GK_LEFT;		break;
+                    case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:		event.data1 = GK_RIGHT;		break;
+                    case 15:		event.data1 = GK_PGUP;		break;
+                    case 16:		event.data1 = GK_PGDN;		break;
+                    case 17:		event.data1 = GK_RETURN;		break;
+                    case 18:		event.data1 = GK_RETURN;		break;
+                    case 20:		event.data1 = GK_F1;		break;
+                    case 21:		event.data1 = GK_F2;		break;
+                    case 22:		event.data1 = GK_F3;		break;
+                    case 23:		event.data1 = GK_F4;		break;
+                    case 24:		event.data1 = GK_F5;		break;
+                    case 25:		event.data1 = GK_F6;		break;
+                    case 26:		event.data1 = GK_F7;		break;
+                    case 27:		event.data1 = GK_F8;		break;
+                    case 28:		event.data1 = GK_F9;		break;
+                    case 29:		event.data1 = GK_F10;		break;
+                    case 30:		event.data1 = GK_F11;		break;
+                    case 31:		event.data1 = GK_F12;		break;
+                    case 32:		event.data1 = GK_DEL;		break;
+                    case 33:		event.data1 = GK_TAB;		break;
+                    case 34:		event.data1 = GK_BACKSPACE;		break;
+                    case 35:		event.data1 = GK_BACK;		break;
+                    case 36:		event.data1 = GK_VTAB;		break;
+                    default:
+                        return;
+                }
+                event.type = EV_GUI_Event;
+                event.subtype = sev->state ? EV_GUI_KeyDown : EV_GUI_KeyUp;
+                event.data3 = 0;
+
+                D_PostEvent (&event);
+            }
+            break;
+
 		default:
 			break;
 	}
@@ -501,6 +604,10 @@ void Q3E_KeyEvent(int state, int key, int character)
 	{
 		Q3E_KEY_EVENT(state, key, character);
 	}
+    else if(key < 0)
+    {
+        Q3E_JOY_EVENT(state, key);
+    }
 	else
 	{
 		Q3E_MOUSE_EVENT(state, key, mouse_x, mouse_y);

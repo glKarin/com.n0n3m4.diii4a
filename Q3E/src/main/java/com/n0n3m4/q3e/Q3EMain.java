@@ -738,7 +738,7 @@ public class Q3EMain extends Activity
                 OpenMenu();
             }
         });
-        ShowMenuIcon(1.0f, 60);
+        ShowMenuIcon(0.8f, 30);
     }
 
     private void OpenMenu()
