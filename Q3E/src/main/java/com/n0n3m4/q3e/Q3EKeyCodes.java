@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import com.n0n3m4.q3e.control.Q3EControllerControl;
 import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.keycode.KeyCodesD3;
 import com.n0n3m4.q3e.keycode.KeyCodesGeneric;
@@ -249,8 +250,7 @@ public class Q3EKeyCodes
             codes[i] = Q3EKeyCodes.GetRealKeyCode(codes[i]);
     }
 
-
-    public static int convertKeyCode(int keyCode, int uchar)
+    public static int convertKeyCode(int keyCode, int uchar, KeyEvent event)
     {
         switch(keyCode)
         {
@@ -318,18 +318,18 @@ public class Q3EKeyCodes
                 return KeyCodes.K_PGDN;
             case KeyEvent.KEYCODE_PAGE_UP:
                 return KeyCodes.K_PGUP;
-            // Controller
-            // dpad
+            // keyboard arrow / dpad
             case KeyEvent.KEYCODE_DPAD_UP:
-                return KeyCodes.J_DPAD_UP;
+                return Q3EControllerControl.IsGamePadDevice(event) ? KeyCodes.J_DPAD_UP : KeyCodes.K_UPARROW;
             case KeyEvent.KEYCODE_DPAD_DOWN:
-                return KeyCodes.J_DPAD_DOWN;
+                return Q3EControllerControl.IsGamePadDevice(event) ? KeyCodes.J_DPAD_DOWN : KeyCodes.K_DOWNARROW;
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                return KeyCodes.J_DPAD_LEFT;
+                return Q3EControllerControl.IsGamePadDevice(event) ? KeyCodes.J_DPAD_LEFT : KeyCodes.K_LEFTARROW;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                return KeyCodes.J_DPAD_RIGHT;
+                return Q3EControllerControl.IsGamePadDevice(event) ? KeyCodes.J_DPAD_RIGHT : KeyCodes.K_RIGHTARROW;
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                return KeyCodes.J_DPAD_CENTER;
+                return Q3EControllerControl.IsGamePadDevice(event) ? KeyCodes.J_DPAD_CENTER : KeyCodes.K_ENTER;
+            // Controller
             // a b c x y z
             case KeyEvent.KEYCODE_BUTTON_A:
                 return KeyCodes.J_BUTTON_A;

@@ -20,25 +20,22 @@
  along with Q3E.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.n0n3m4.q3e;
+package com.n0n3m4.q3e.control;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorManager;
 import android.preference.PreferenceManager;
-import android.view.Display;
 import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.Surface;
-import android.view.WindowManager;
 
+import com.n0n3m4.q3e.Q3EControlView;
+import com.n0n3m4.q3e.Q3EKeyCodes;
+import com.n0n3m4.q3e.Q3EPreference;
+import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KLog;
 
-import javax.microedition.khronos.opengles.GL10;
-
-final class Q3EControllerControl
+public final class Q3EControllerControl
 {
     private final Q3EControlView controlView;
 
@@ -58,7 +55,7 @@ final class Q3EControllerControl
 //    private float m_lastRightTriggerAxis = 0.0f;
 //    private float triggerSensitivity = 1.0f;
 
-    Q3EControllerControl(Q3EControlView controlView)
+    public Q3EControllerControl(Q3EControlView controlView)
     {
         this.controlView = controlView;
     }
@@ -68,7 +65,7 @@ final class Q3EControllerControl
         return controlView.getContext();
     }
 
-    void Init()
+    public void Init()
     {
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(controlView.getContext());
 
@@ -83,7 +80,7 @@ final class Q3EControllerControl
         KLog.I("Controller right joystick sensitivity: " + rightJoystickSensitivity);
     }
 
-    void Update()
+    public void Update()
     {
         long t = System.currentTimeMillis();
         float delta = t - oldtime;
@@ -96,7 +93,7 @@ final class Q3EControllerControl
             Q3EUtils.q3ei.callbackObj.sendMotionEvent(delta * last_joystick_x, delta * last_joystick_y);
     }
 
-    boolean OnGenericMotionEvent(MotionEvent event)
+    public boolean OnGenericMotionEvent(MotionEvent event)
     {
         int action = event.getAction();
 
@@ -104,7 +101,6 @@ final class Q3EControllerControl
         {
             int source = event.getSource();
             InputDevice inputDevice = event.getDevice();
-            if (((source == InputDevice.SOURCE_JOYSTICK) || (source == InputDevice.SOURCE_GAMEPAD)) && (action == MotionEvent.ACTION_MOVE));
             if ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK)
             {
                 // left as movement event
@@ -261,7 +257,7 @@ final class Q3EControllerControl
         Q3EUtils.q3ei.callbackObj.sendAnalog((Math.abs(x) > leftJoystickDeadRange) || (Math.abs(y) > leftJoystickDeadRange), x, -y);
     }
 
-    private boolean IsGamePadDevice(int deviceId) {
+    private static boolean IsGamePadDevice(int deviceId) {
         InputDevice device = InputDevice.getDevice(deviceId);
         if ((device == null) || (deviceId < 0)) {
             return false;
@@ -272,5 +268,9 @@ final class Q3EControllerControl
                 ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD) ||
                 ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
         );
+    }
+
+    public static boolean IsGamePadDevice(KeyEvent event) {
+        return IsGamePadDevice(event.getDeviceId());
     }
 }

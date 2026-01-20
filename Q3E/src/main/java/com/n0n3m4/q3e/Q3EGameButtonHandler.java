@@ -1,8 +1,6 @@
 package com.n0n3m4.q3e;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -15,6 +13,10 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
+import com.n0n3m4.q3e.control.Q3EControllerControl;
+import com.n0n3m4.q3e.control.Q3EGyroscopeControl;
+import com.n0n3m4.q3e.control.Q3EMouseControl;
+import com.n0n3m4.q3e.control.Q3ETrackballControl;
 import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.onscreen.Finger;
 import com.n0n3m4.q3e.onscreen.Paintable;
@@ -45,12 +47,12 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
     private int m_pressBackCount = 0;
 
     /// gyroscope function
-    private Q3EGyroscopeControl gyroscopeControl = null;
+    private Q3EGyroscopeControl  gyroscopeControl  = null;
     /// MOUSE
-    private Q3EMouseControl     mouseControl     = null;
+    private Q3EMouseControl      mouseControl      = null;
     /// MOUSE
-    private Q3EControllerControl     controllerControl     = null;
-    private Q3ETrackballControl trackballControl;
+    private Q3EControllerControl controllerControl = null;
+    private Q3ETrackballControl  trackballControl;
 
     //private boolean usesCSAA = false;
 
@@ -133,7 +135,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
                 qKeyCode = Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE;
                 break;
             default:
-                qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0));
+                qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0), event);
                 break;
         }
         Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, qKeyCode, getCharacter(keyCode, event));
@@ -159,7 +161,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
                 qKeyCode = Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE;
                 break;
             default:
-                qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0));
+                qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0), event);
                 break;
         }
         int t = getCharacter(keyCode, event);
@@ -450,7 +452,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             if(gyroXSens != 0.0f || gyroYSens != 0.0f)
                 gyroscopeControl.SetGyroscopeSens(gyroXSens, gyroYSens);
 
-            KLog.I("Enable gyroscope control: x=%f, y=%f", gyroscopeControl.m_xAxisGyroSens, gyroscopeControl.m_yAxisGyroSens);
+            KLog.I("Enable gyroscope control: x=%f, y=%f", gyroscopeControl.XAxisGyroSens(), gyroscopeControl.YAxisGyroSens());
         }
     }
 
@@ -466,7 +468,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             if(!mouseControl.Init())
                 mouseControl = null;
             else
-                KLog.I("Enable mouse control: " + (mouseControl.m_usingMouse ? "mouse event" : "mouse device"));
+                KLog.I("Enable mouse control: " + (mouseControl.IsUsingMouseEvent() ? "mouse event" : "mouse device"));
         }
     }
 
@@ -515,7 +517,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
 
     boolean IsUsingMouseEvent()
     {
-        return null != mouseControl && mouseControl.m_usingMouse;
+        return null != mouseControl && mouseControl.IsUsingMouseEvent();
     }
 
     void UpdateUsedTouches()

@@ -20,22 +20,21 @@
  along with Q3E.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.n0n3m4.q3e;
+package com.n0n3m4.q3e.control;
 
 import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorManager;
 import android.os.Build;
-import android.view.Display;
 import android.view.InputDevice;
 import android.view.MotionEvent;
-import android.view.Surface;
-import android.view.WindowManager;
 
+import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EControlView;
+import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EKeyCodes;
+import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
 
-final class Q3EMouseControl
+public final class Q3EMouseControl
 {
     private final Q3EControlView controlView;
 
@@ -44,14 +43,14 @@ final class Q3EMouseControl
 
     private boolean m_allowGrabMouse = false;
     private int m_requestGrabMouse = 0;
-    boolean m_usingMouse = false;
+    private boolean m_usingMouse = false;
 
     private float m_lastTouchPadPosX = -1;
     private float m_lastTouchPadPosY = -1;
     private float m_lastMousePosX = -1;
     private float m_lastMousePosY = -1;
 
-    Q3EMouseControl(Q3EControlView controlView)
+    public Q3EMouseControl(Q3EControlView controlView)
     {
         this.controlView = controlView;
     }
@@ -61,7 +60,7 @@ final class Q3EMouseControl
         return controlView.getContext();
     }
 
-    void GrabMouse()
+    public void GrabMouse()
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && m_usingMouse)
         {
@@ -80,7 +79,7 @@ final class Q3EMouseControl
         }
     }
 
-    void UnGrabMouse()
+    public void UnGrabMouse()
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && m_usingMouse)
         {
@@ -99,7 +98,7 @@ final class Q3EMouseControl
         }
     }
 
-    void OnWindowFocusChanged(boolean hasWindowFocus)
+    public void OnWindowFocusChanged(boolean hasWindowFocus)
     {
         if(!m_usingMouse)
             return;
@@ -119,12 +118,17 @@ final class Q3EMouseControl
         }
     }
 
-    boolean IsUsingMouse()
+    public boolean IsUsingMouse()
     {
         return m_usingMouse || m_usingMouseDevice;
     }
 
-    boolean Init()
+    public boolean IsUsingMouseEvent()
+    {
+        return m_usingMouse;
+    }
+
+    public boolean Init()
     {
         int mouse = Q3EUtils.SupportMouse();
         if(mouse == Q3EGlobals.MOUSE_EVENT)
@@ -134,7 +138,7 @@ final class Q3EMouseControl
         return m_usingMouse || m_usingMouseDevice;
     }
 
-    boolean OnCapturedPointerEvent(MotionEvent event)
+    public boolean OnCapturedPointerEvent(MotionEvent event)
     {
         if(m_usingMouse)
         {
@@ -262,7 +266,7 @@ final class Q3EMouseControl
         return true;
     }
 
-    boolean OnGenericMotionEvent(MotionEvent event)
+    public boolean OnGenericMotionEvent(MotionEvent event)
     {
         int source = event.getSource();
 
@@ -326,7 +330,7 @@ final class Q3EMouseControl
         return false;
     }
 
-    void Start()
+    public void Start()
     {
         if(null != m_mouseDevice)
             m_mouseDevice.Start();

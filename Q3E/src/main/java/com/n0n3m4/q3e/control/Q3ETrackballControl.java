@@ -20,19 +20,22 @@
  along with Q3E.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.n0n3m4.q3e;
+package com.n0n3m4.q3e.control;
 
 import android.content.Context;
 import android.view.MotionEvent;
 
-final class Q3ETrackballControl
+import com.n0n3m4.q3e.Q3EControlView;
+import com.n0n3m4.q3e.Q3EJNI;
+
+public final class Q3ETrackballControl
 {
     private final Q3EControlView controlView;
 
     private float last_trackball_x = 0;
     private float last_trackball_y = 0;
 
-    Q3ETrackballControl(Q3EControlView controlView)
+    public Q3ETrackballControl(Q3EControlView controlView)
     {
         this.controlView = controlView;
     }
@@ -42,7 +45,7 @@ final class Q3ETrackballControl
         return controlView.getContext();
     }
 
-    boolean OnTrackballEvent(MotionEvent event)
+    public boolean OnTrackballEvent(MotionEvent event)
     {
         float x = event.getX();
         float y = event.getY();

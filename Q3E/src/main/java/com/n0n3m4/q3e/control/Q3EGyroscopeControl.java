@@ -20,7 +20,7 @@
  along with Q3E.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.n0n3m4.q3e;
+package com.n0n3m4.q3e.control;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -30,7 +30,11 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
-final class Q3EGyroscopeControl
+import com.n0n3m4.q3e.Q3EControlView;
+import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EUtils;
+
+public final class Q3EGyroscopeControl
 {
     private final Q3EControlView controlView;
 
@@ -39,11 +43,11 @@ final class Q3EGyroscopeControl
     private SensorManager m_sensorManager = null;
     private Sensor m_gyroSensor = null;
     private boolean m_enableGyro = false;
-    float m_xAxisGyroSens = Q3EGlobals.GYROSCOPE_X_AXIS_SENS;
-    float m_yAxisGyroSens = Q3EGlobals.GYROSCOPE_Y_AXIS_SENS;
+    private float m_xAxisGyroSens = Q3EGlobals.GYROSCOPE_X_AXIS_SENS;
+    private float m_yAxisGyroSens = Q3EGlobals.GYROSCOPE_Y_AXIS_SENS;
     private Display m_display;
 
-    Q3EGyroscopeControl(Q3EControlView controlView)
+    public Q3EGyroscopeControl(Q3EControlView controlView)
     {
         this.controlView = controlView;
     }
@@ -53,12 +57,22 @@ final class Q3EGyroscopeControl
         return controlView.getContext();
     }
 
-    void EnableGyroscopeControl(boolean b)
+    public void EnableGyroscopeControl(boolean b)
     {
         m_enableGyro = b;
     }
 
-    void SetGyroscopeSens(float x, float y)
+    public float XAxisGyroSens()
+    {
+        return m_xAxisGyroSens;
+    }
+
+    public float YAxisGyroSens()
+    {
+        return m_yAxisGyroSens;
+    }
+
+    public void SetGyroscopeSens(float x, float y)
     {
         m_xAxisGyroSens = x;
         m_yAxisGyroSens = y;
@@ -90,7 +104,7 @@ final class Q3EGyroscopeControl
             m_sensorManager.unregisterListener(controlView, m_gyroSensor);
     }
 
-    void OnSensorChanged(SensorEvent event)
+    public void OnSensorChanged(SensorEvent event)
     {
         if (m_enableGyro && Q3EUtils.q3ei.callbackObj.notinmenu && !Q3EUtils.q3ei.callbackObj.inLoading)
         {
@@ -116,13 +130,13 @@ final class Q3EGyroscopeControl
 
     void OnAccuracyChanged(Sensor sensor, int accuracy) {}
 
-    void Pause()
+    public void Pause()
     {
         if (m_enableGyro)
             StopGyroscope();
     }
 
-    void Resume()
+    public void Resume()
     {
         if (m_enableGyro)
             StartGyroscope();
