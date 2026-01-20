@@ -657,9 +657,6 @@ void Q3E_SetInitialContext(const void *context)
     app_home_dir = strdup(ptr->appHomeDir ? ptr->appHomeDir : "");
     redirect_output_to_file = ptr->redirectOutputToFile ? true : false;
     no_handle_signals = ptr->noHandleSignals ? true : false;
-#ifdef _MULTITHREAD
-    multithreadActive = ptr->multithread ? true : false;
-#endif
     continue_when_no_gl_context = ptr->continueWhenNoGLContext ? true : false;
     mouse_available = ptr->mouseAvailable ? true : false;
     refresh_rate = ptr->refreshRate <= 0 ? 60 : ptr->refreshRate;

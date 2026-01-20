@@ -11,7 +11,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject
   (JNIEnv *, jclass, jobject);
 
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init
-  (JNIEnv *, jclass, jstring, jstring, jint, jint, jstring, jstring, jstring, jobject, jint, jint, jint, jint, jboolean, jint, jboolean, jboolean, jint, jstring, jboolean, jint, jboolean, jint, jboolean);
+  (JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint depthBits, jint msaa, jint glVersion, jboolean redirectOutputToFile, jint signalsHandler, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jint consoleMaxHeightFrac, jboolean usingExternalLibs, jint sdlAudioDriver, jboolean bContinueNoGLContext);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent
   (JNIEnv *, jclass, jint, jint, jint);

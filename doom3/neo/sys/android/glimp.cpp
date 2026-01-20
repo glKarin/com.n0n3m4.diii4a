@@ -1018,8 +1018,6 @@ int Sys_GetVideoRam(void)
 
 void GLimp_Startup(void)
 {
-#if 0
-
 #ifdef _MULTITHREAD
     multithreadActive = cvarSystem->GetCVarBool("r_multithread");
     if(multithreadActive)
@@ -1037,18 +1035,14 @@ void GLimp_Startup(void)
         {
             gl_version = GL_VERSION_GL_ES2;
             USING_GLES3 = false;
-            USING_GL = false;
             Sys_Printf("Using OpenGL ES2\n");
         }
         else // GL_VERSION_NAME_GL_ES3
         {
             gl_version = GL_VERSION_GL_ES32;
             USING_GLES3 = true;
-            USING_GL = false;
             Sys_Printf("Using OpenGL ES3\n");
         }
     }
-#endif
-
 #endif
 }

@@ -101,7 +101,6 @@ public class Q3EInterface
     public boolean view_motion_control_gyro = false;
     public String start_temporary_extra_command = "";
 	public String cmd = Q3EGameConstants.GAME_EXECUABLE;
-	public boolean multithread = false;
 	public boolean function_key_toolbar = false;
 	public boolean joystick_unfixed = false;
 	public boolean joystick_smooth          = true; // Q3EView::analog

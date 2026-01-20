@@ -48,7 +48,6 @@ public class Q3EJNI {
             int glVersion, // OpenGLES verison: 0x00020000, 0x00030000
             boolean redirect_output_to_file, // save runtime log to file
             int no_handle_signals, // not handle signals
-            boolean multithread, // enable multithread
             boolean usingMouse, // using mouse
 			int refreshRate, // refresh rate,
 			String appHome, // app home path

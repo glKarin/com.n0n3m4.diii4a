@@ -492,7 +492,7 @@ static void setup_Q3E_callback(void)
 	setCallbacks(&callback);
 }
 
-JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint depthBits, jint msaa, jint glVersion, jboolean redirectOutputToFile, jint signalsHandler, jboolean bMultithread, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jint consoleMaxHeightFrac, jboolean usingExternalLibs, jint sdlAudioDriver, jboolean bContinueNoGLContext)
+JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint depthBits, jint msaa, jint glVersion, jboolean redirectOutputToFile, jint signalsHandler, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jint consoleMaxHeightFrac, jboolean usingExternalLibs, jint sdlAudioDriver, jboolean bContinueNoGLContext)
 {
     char **argv;
     int argc;
@@ -580,7 +580,6 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	context.appHomeDir = app_home_dir;
 	context.redirectOutputToFile = redirectOutputToFile ? 1 : 0;
 	context.noHandleSignals = signalsHandler ? 1 : 0;
-	context.multithread = bMultithread ? 1 : 0;
 	context.mouseAvailable = mouseAvailable ? 1 : 0;
 	context.continueWhenNoGLContext = bContinueNoGLContext ? 1 : 0;
 	context.gameDataDir = game_data_dir;

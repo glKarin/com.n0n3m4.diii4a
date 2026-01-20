@@ -49,7 +49,6 @@ typedef struct
     const char *nativeLibraryDir; // game library directory after apk installed
     int redirectOutputToFile; // stdout/stderr redirect output to file
     int noHandleSignals; // don't handle signals
-    int multithread; // enable multi-threading rendering
     int mouseAvailable; // using mouse
     int continueWhenNoGLContext; // Continue when missing OpenGL context
     const char *gameDataDir; // game data directory

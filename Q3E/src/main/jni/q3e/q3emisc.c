@@ -133,7 +133,6 @@ void Q3E_PrintInitialContext(const Q3E_InitialContext_t *context)
 	LOGI("    Native library directory: %s", context->nativeLibraryDir);
 	LOGI("    Redirect output to file: %d", context->redirectOutputToFile);
 	LOGI("    No handle signals: %d", context->noHandleSignals);
-	LOGI("    Multi-thread: %d", context->multithread);
 	LOGI("    Using mouse: %d", context->mouseAvailable);
 	LOGI("    Game data directory: %s", context->gameDataDir);
 	LOGI("    Application home directory: %s", context->appHomeDir);

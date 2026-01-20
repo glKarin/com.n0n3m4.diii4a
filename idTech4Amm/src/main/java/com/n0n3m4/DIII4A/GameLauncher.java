@@ -1751,7 +1751,7 @@ public class GameLauncher extends Activity
 		V.auto_quick_load.setChecked(autoQuickLoad);
 		if (autoQuickLoad && (Q3EUtils.q3ei.IsIdTech4() || Q3EUtils.q3ei.isRTCW || Q3EUtils.q3ei.isRealRTCW))
 			SetParam_temp("loadGame", "QuickSave");
-		boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, false);
+		boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, true);
 		V.multithreading.setChecked(multithreading);
 //		V.rg_r_autoAspectRatio.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		int consoleHeightFrac = mPrefs.getInt(Q3EPreference.pref_harm_max_console_height_frac, 0);

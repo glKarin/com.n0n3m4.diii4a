@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.widget.Toast;
 
+import com.n0n3m4.q3e.gl.Q3EGLConstants;
 import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KidTechCommand;
@@ -183,7 +184,6 @@ public class Q3EGameHelper
 
         Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
         Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false);
-        Q3EUtils.q3ei.multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, false);
         Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EPreference.pref_harm_function_key_toolbar, true);
         Q3EUtils.q3ei.builtin_virtual_keyboard = preferences.getBoolean(Q3EPreference.BUILTIN_VIRTUAL_KEYBOARD, false);
         Q3EUtils.q3ei.joystick_unfixed = preferences.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
@@ -226,6 +226,24 @@ public class Q3EGameHelper
             cmd = preferences.getString(Q3EUtils.q3ei.GetGameCommandPreferenceKey(), Q3EGameConstants.GAME_EXECUABLE);
         if(null == cmd)
             cmd = Q3EGameConstants.GAME_EXECUABLE;
+
+        if(Q3EUtils.q3ei.IsIdTech4())
+        {
+            boolean multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, true);
+            if(multithread)
+            {
+                KidTechCommand command = Q3EUtils.q3ei.GetGameCommandEngine(cmd);
+                command.SetProp("r_multithread", "1");
+                cmd = command.toString();
+            }
+            int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, Q3EGLConstants.GetPreferOpenGLESVersion());
+            if(glVersion != 0)
+            {
+                KidTechCommand command = Q3EUtils.q3ei.GetGameCommandEngine(cmd);
+                command.SetProp("harm_r_openglVersion", glVersion == Q3EGLConstants.OPENGLES20 ? "GLES2" : "GLES3.0");
+                cmd = command.toString();
+            }
+        }
 
         if(!useUserCommand)
         {
@@ -1141,7 +1159,7 @@ public class Q3EGameHelper
         int signalsHandler = Q3EPreference.GetIntFromString(m_context, Q3EPreference.SIGNALS_HANDLER, Q3EGlobals.SIGNALS_HANDLER_GAME);
         // final boolean noHandleSignals = signalsHandler != Q3EGlobals.SIGNALS_HANDLER_GAME;
         int runBackground = Q3EUtils.parseInt_s(preferences.getString(Q3EPreference.RUN_BACKGROUND, "0"), 0);
-        int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, 0x00020000);
+        int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, Q3EGLConstants.GetPreferOpenGLESVersion());
         boolean usingMouse = preferences.getBoolean(Q3EPreference.pref_harm_using_mouse, false) && Q3EUtils.SupportMouse() == Q3EGlobals.MOUSE_EVENT;
         boolean useExternalLibPath = preferences.getBoolean(Q3EPreference.USE_EXTERNAL_LIB_PATH, false);
         int consoleMaxHeightFrac = preferences.getInt(Q3EPreference.pref_harm_max_console_height_frac, 0);
@@ -1208,7 +1226,6 @@ public class Q3EGameHelper
                 msaa, glVersion,
                 redirectOutputToFile,
                 signalsHandler, // noHandleSignals,
-                Q3EUtils.q3ei.multithread,
                 usingMouse,
                 refreshRate,
                 appHome,
