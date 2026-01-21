@@ -759,6 +759,9 @@ public class Q3EMain extends Activity
         {
             menu.findItem(R.id.main_edit_button_layout).setVisible(false);
         }
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if(preferences.getBoolean(Q3EPreference.BUILTIN_VIRTUAL_KEYBOARD, false))
+            menu.findItem(R.id.main_choose_input_method).setVisible(false);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -770,6 +773,11 @@ public class Q3EMain extends Activity
         if (itemId == R.id.main_edit_button_layout)
         {
             ToggleButtonEditor();
+            return true;
+        }
+        else if (itemId == R.id.main_choose_input_method)
+        {
+            Q3EUtils.ChooseInputMethod(this);
             return true;
         }
         else if (itemId == R.id.main_quit)

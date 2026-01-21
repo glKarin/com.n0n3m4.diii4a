@@ -1606,4 +1606,17 @@ public class Q3EUtils
         }
         return new int[]{x, y, w, h, mask};
     }
+
+    public static void ChooseInputMethod(Context context)
+    {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        try
+        {
+            imm.showInputMethodPicker();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
