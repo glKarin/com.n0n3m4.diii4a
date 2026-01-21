@@ -108,6 +108,11 @@
             android:title="@string/open_documents"
             android:summary="@string/open_system_file_browser"
             android:persistent="false"/>
+        <Preference
+            android:key="test_event"
+            android:title="Event testing"
+            android:summary="Debug event"
+            android:persistent="false"/>
     </PreferenceCategory>
     
 </PreferenceScreen>

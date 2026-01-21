@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.Toast;
 
+import com.karin.idTech4Amm.EventTestActivity;
 import com.karin.idTech4Amm.LogcatActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
@@ -74,6 +75,10 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
             String path = Q3EUtils.GetAppStoragePath(context, "/" + Q3EGlobals.FOLDER_BACKTRACE_LOG);
             CleanFolder(path, Q3ELang.tr(context, R.string.backtrace));
         }
+        else if("test_event".equals(key))
+        {
+            OpenEventTesting();
+        }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
 
@@ -132,6 +137,12 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
     {
         Context activity = ContextUtility.GetContext(this);
         activity.startActivity(new Intent(activity, LogcatActivity.class));
+    }
+
+    private void OpenEventTesting()
+    {
+        Context activity = ContextUtility.GetContext(this);
+        activity.startActivity(new Intent(activity, EventTestActivity.class));
     }
 
     private void ShowPreference()

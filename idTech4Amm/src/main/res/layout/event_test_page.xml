@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:id="@+id/eventTestRoot"
+	android:orientation="vertical">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:id="@+id/eventTestButtons"
+		>
+		<Button
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.5"
+			android:text="Open soft input method"
+			android:onClick="ShowSoftInputMethod"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			/>
+		<Button
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.5"
+			android:text="Close soft input method"
+			android:onClick="HideSoftInputMethod"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			/>
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_below="@id/eventTestButtons"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:focusable="false"
+		android:focusableInTouchMode="false">
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:gravity="center"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="Event"
+			/>
+		<TextView
+			android:id="@+id/eventResult"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			android:text=""
+			/>
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:gravity="center"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:text="Device"
+			/>
+		<TextView
+			android:id="@+id/eventDeviceResult"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			android:text=""
+			/>
+	</LinearLayout>
+
+</RelativeLayout>
+

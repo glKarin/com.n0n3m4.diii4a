@@ -7,43 +7,34 @@ import com.n0n3m4.q3e.Q3EGlobals;
 // Log utils
 public class KLog
 {
-    public static String Str(Object fmt, Object...args)
-    {
-        if(null == fmt)
-            return "(null)";
-        if(fmt instanceof String)
-            return String.format((String)fmt, args);
-        else
-            return fmt.toString();
-    }
 
     public static void v(String tag, Object fmt, Object...args)
     {
-        String str = Str(fmt, args);
+        String str = KStr.Format(fmt, args);
         Log.v(tag, str);
     }
 
     public static void d(String tag, Object fmt, Object...args)
     {
-        String str = Str(fmt, args);
+        String str = KStr.Format(fmt, args);
         Log.d(tag, str);
     }
 
     public static void i(String tag, Object fmt, Object...args)
     {
-        String str = Str(fmt, args);
+        String str = KStr.Format(fmt, args);
         Log.i(tag, str);
     }
 
     public static void w(String tag, Object fmt, Object...args)
     {
-        String str = Str(fmt, args);
+        String str = KStr.Format(fmt, args);
         Log.w(tag, str);
     }
 
     public static void e(String tag, Object fmt, Object...args)
     {
-        String str = Str(fmt, args);
+        String str = KStr.Format(fmt, args);
         Log.e(tag, str);
     }
 

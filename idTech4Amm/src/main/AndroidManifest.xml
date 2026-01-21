@@ -25,6 +25,7 @@
     <uses-feature android:name="android.hardware.type.pc" android:required="false" />
     <!-- Audio -->
     <uses-feature android:name="android.hardware.audio.low_latency" android:required="false" />
+    <uses-feature android:name="android.software.input_methods" android:required="false" />
 
 
     <uses-sdk
@@ -96,37 +97,44 @@
         <activity android:label="@string/app_name"
             android:screenOrientation="landscape"
             android:launchMode="singleTask"
-            android:exported="true"
+            android:exported="false"
             android:name="com.n0n3m4.q3e.Q3EUiConfig"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity> 
 
         <activity android:label="@string/config_editor_name"
             android:launchMode="standard"
-            android:exported="true"
+            android:exported="false"
             android:name="com.karin.idTech4Amm.ConfigEditorActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
         <activity android:label="@string/key_config_page_name"
             android:launchMode="standard"
-            android:exported="true"
+            android:exported="false"
             android:name="com.karin.idTech4Amm.OnScreenButtonConfigActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
         <activity android:label="Logcat"
             android:launchMode="standard"
-            android:exported="true"
+            android:exported="false"
             android:name="com.karin.idTech4Amm.LogcatActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
         <activity android:label="@string/controller_configure"
             android:launchMode="standard"
-            android:exported="true"
+            android:exported="false"
             android:name="com.karin.idTech4Amm.ControllerConfigActivity"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+        </activity>
+        <activity android:label="Event testing"
+            android:screenOrientation="landscape"
+            android:launchMode="singleTask"
+            android:exported="false"
+            android:name="com.karin.idTech4Amm.EventTestActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
 
