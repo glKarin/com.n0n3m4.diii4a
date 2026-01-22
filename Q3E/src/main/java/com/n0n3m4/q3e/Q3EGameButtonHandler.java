@@ -200,7 +200,8 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
     {
         if(null != mouseControl && event.getSource() == InputDevice.SOURCE_MOUSE && (mouseControl.IsUsingMouse()/* || hideonscr*/))
         {
-            event.setAction(MotionEvent.ACTION_CANCEL);
+            if(!mouseControl.OnTouchEvent(event))
+                event.setAction(MotionEvent.ACTION_CANCEL);
             return true;
         }
 

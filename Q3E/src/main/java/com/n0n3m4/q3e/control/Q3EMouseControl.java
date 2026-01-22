@@ -33,6 +33,10 @@ import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
+import com.n0n3m4.q3e.onscreen.Finger;
+import com.n0n3m4.q3e.onscreen.TouchListener;
+
+import java.util.Arrays;
 
 public final class Q3EMouseControl
 {
@@ -316,6 +320,30 @@ public final class Q3EMouseControl
             return true;
         }
 
+        return false;
+    }
+
+    public boolean OnTouchEvent(MotionEvent event)
+    {
+        if(m_usingMouse/* && source == InputDevice.SOURCE_MOUSE*/) {
+            int action = event.getAction();
+            int actionIndex = event.getActionIndex();
+            float x = event.getX(actionIndex);
+            float y = event.getY(actionIndex);
+            if (m_lastMousePosX < 0)
+                m_lastMousePosX = x;
+            if (m_lastMousePosY < 0)
+                m_lastMousePosY = y;
+            float deltaX = x - m_lastMousePosX;
+            float deltaY = y - m_lastMousePosY;
+            m_lastMousePosX = x;
+            m_lastMousePosY = y;
+            if (action == MotionEvent.ACTION_MOVE) {
+                Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
+                Q3EUtils.q3ei.callbackObj.sendMouseEvent(x, y);
+            }
+            return true;
+        }
         return false;
     }
 
