@@ -201,10 +201,15 @@ public class Q3ECallbackObj
     {
         try
         {
-            if (grab)
-                vw.GrabMouse();
-            else
-                vw.UnGrabMouse();
+            if(vw.IsUsingMouse())
+            {
+                if (grab)
+                    vw.GrabMouse();
+                else
+                    vw.UnGrabMouse();
+            }
+            if(null != Q3E.virtualMouse)
+                Q3E.virtualMouse.SetRelativeMode(grab);
         }
         catch (Exception e)
         {
@@ -299,16 +304,24 @@ public class Q3ECallbackObj
     public void InitGUIInterface(Activity context)
     {
         gui = new Q3EGUI(context);
-        int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
-        if(eventQueue == Q3EGlobals.EVENT_QUEUE_TYPE_JAVA)
+        if(Q3EUtils.q3ei.IsUsingSDL())
         {
-            Log.i(TAG, "Using java event queue");
-            eventEngine = new Q3EEventEngineJava();
+            Log.i(TAG, "Using SDL event queue");
+            eventEngine = new Q3EEventEngineSDL();
         }
         else
         {
-            Log.i(TAG, "Using native event queue");
-            eventEngine = new Q3EEventEngineNative();
+            int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
+            if(eventQueue == Q3EGlobals.EVENT_QUEUE_TYPE_JAVA)
+            {
+                Log.i(TAG, "Using java event queue");
+                eventEngine = new Q3EEventEngineJava();
+            }
+            else
+            {
+                Log.i(TAG, "Using native event queue");
+                eventEngine = new Q3EEventEngineNative();
+            }
         }
     }
 
@@ -370,7 +383,7 @@ public class Q3ECallbackObj
         if(null == Q3E.activity || Q3E.activity.isFinishing())
             return;
         Q3E.running = false;
-        Q3E.activity.runOnUiThread(new Runnable() {
+        Q3E.runOnUiThread(new Runnable() {
             @Override
             public void run()
             {
@@ -390,16 +403,6 @@ public class Q3ECallbackObj
     public void SetupSmoothJoystick(boolean enable)
     {
         Q3EUtils.q3ei.joystick_smooth = enable;
-    }
-
-    public void SetMouseCursorVisible(boolean on)
-    {
-        gui.SetMouseCursorVisible(on);
-    }
-
-    public void SetMouseCursorPosition(int x, int y)
-    {
-        gui.SetMouseCursorPosition(x, y);
     }
 
     public void ShowCursor(boolean on)
@@ -422,7 +425,7 @@ public class Q3ECallbackObj
         synchronized(Q3E.activity.permissionRequest) {
             try
             {
-                Q3E.activity.runOnUiThread(new Runnable() {
+                Q3E.runOnUiThread(new Runnable() {
                     @Override
                     public void run()
                     {

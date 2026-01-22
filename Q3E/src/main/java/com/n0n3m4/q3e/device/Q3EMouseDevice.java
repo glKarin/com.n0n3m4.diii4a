@@ -112,7 +112,7 @@ public class Q3EMouseDevice
                     @Override
                     public void run()
                     {
-                        Q3EJNI.sendMotionEvent(readmouse_dx, readmouse_dy);
+                        Q3EUtils.q3ei.callbackObj.sendMotionEvent(readmouse_dx, readmouse_dy);
                         readmouse_dx = 0;
                         readmouse_dy = 0;
                         qevnt_available = true;
@@ -123,7 +123,7 @@ public class Q3EMouseDevice
                     @Override
                     public void run()
                     {
-                        Q3EJNI.sendKeyEvent(readmouse_keystate, readmouse_keycode, 0);
+                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(readmouse_keystate != 0, readmouse_keycode, 0);
                     }
                 };
                 while (fis.read(arr, 0, sizeofstruct) != -1)

@@ -35,6 +35,7 @@ import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KidTechCommand;
 import com.n0n3m4.q3e.keycode.KeyCodesGeneric;
+import com.n0n3m4.q3e.sdl.Q3ESDL;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,18 +51,18 @@ import java.util.zip.ZipInputStream;
 
 public class Q3EGameHelper
 {
-    private Context m_context;
+    private Activity m_context;
 
     public Q3EGameHelper()
     {
     }
 
-    public Q3EGameHelper(Context context)
+    public Q3EGameHelper(Activity context)
     {
         this.m_context = context;
     }
 
-    public void SetContext(Context context)
+    public void SetContext(Activity context)
     {
         this.m_context = context;
     }
@@ -1175,6 +1176,8 @@ public class Q3EGameHelper
         int eventQueue = Q3EPreference.GetIntFromString(preferences, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
         int gameThread = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD, Q3EGlobals.GAME_THREAD_TYPE_NATIVE);
         int threadStackSize = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD_STACK_SIZE, 0);
+        if(Q3EUtils.q3ei.IsUsingSDL())
+            eventQueue = Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE;
         Q3EJNI.PreInit(eventQueue, gameThread, threadStackSize);
 
         String libpath;
@@ -1236,21 +1239,32 @@ public class Q3EGameHelper
                 runBackground > 0
         );
         if(res)
+        {
+            Q3ESDL.usingSDL = Q3ESDL.UsingSDL();
+            if(Q3EUtils.q3ei.IsUsingSDL())
+                Q3E.controlView.EnableSDL();
+
+            m_context.runOnUiThread(new Runnable() {
+                @Override
+                public void run()
+                {
+                    Q3E.activity.MakeMouseCursor();
+                    // Q3EUtils.RunLauncher(activity);
+                }
+            });
+
             Q3E.Start();
+        }
         else
         {
-            if(m_context instanceof Activity)
-            {
-                Activity activity = (Activity)m_context;
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run()
-                    {
-                        activity.finish();
-                        // Q3EUtils.RunLauncher(activity);
-                    }
-                });
-            }
+            m_context.runOnUiThread(new Runnable() {
+                @Override
+                public void run()
+                {
+                    m_context.finish();
+                    // Q3EUtils.RunLauncher(activity);
+                }
+            });
         }
 
         return res;

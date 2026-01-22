@@ -257,7 +257,7 @@ public final class Q3EControllerControl
         Q3EUtils.q3ei.callbackObj.sendAnalog((Math.abs(x) > leftJoystickDeadRange) || (Math.abs(y) > leftJoystickDeadRange), x, -y);
     }
 
-    private static boolean IsGamePadDevice(int deviceId) {
+    public static boolean IsGamePadDevice(int deviceId) {
         InputDevice device = InputDevice.getDevice(deviceId);
         if ((device == null) || (deviceId < 0)) {
             return false;

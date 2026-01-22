@@ -38,9 +38,6 @@ public final class Q3EMouseControl
 {
     private final Q3EControlView controlView;
 
-    private boolean        m_usingMouseDevice = false;
-    private Q3EMouseDevice m_mouseDevice      = null;
-
     private boolean m_allowGrabMouse = false;
     private int m_requestGrabMouse = 0;
     private boolean m_usingMouse = false;
@@ -120,11 +117,6 @@ public final class Q3EMouseControl
 
     public boolean IsUsingMouse()
     {
-        return m_usingMouse || m_usingMouseDevice;
-    }
-
-    public boolean IsUsingMouseEvent()
-    {
         return m_usingMouse;
     }
 
@@ -133,9 +125,7 @@ public final class Q3EMouseControl
         int mouse = Q3EUtils.SupportMouse();
         if(mouse == Q3EGlobals.MOUSE_EVENT)
             m_usingMouse = true;
-        else if(mouse == Q3EGlobals.MOUSE_DEVICE)
-            m_usingMouseDevice = true;
-        return m_usingMouse || m_usingMouseDevice;
+        return m_usingMouse;
     }
 
     public boolean OnCapturedPointerEvent(MotionEvent event)
@@ -246,7 +236,6 @@ public final class Q3EMouseControl
                     }
                 }
                 Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
-                Q3EUtils.q3ei.callbackObj.sendMouseEvent(deltaX, deltaY);
                 break;
             case MotionEvent.ACTION_SCROLL:
                 // float scrollX = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
@@ -308,7 +297,7 @@ public final class Q3EMouseControl
 //                case MotionEvent.ACTION_HOVER_EXIT: break;
                 case MotionEvent.ACTION_HOVER_MOVE:
                     Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
-                    Q3EUtils.q3ei.callbackObj.sendMouseEvent(Q3E.PhysicsToLogicalX(x), Q3E.PhysicsToLogicalY(y));
+                    Q3EUtils.q3ei.callbackObj.sendMouseEvent(x, y);
                     break;
                 case MotionEvent.ACTION_SCROLL:
                     float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
@@ -332,7 +321,5 @@ public final class Q3EMouseControl
 
     public void Start()
     {
-        if(null != m_mouseDevice)
-            m_mouseDevice.Start();
     }
 }

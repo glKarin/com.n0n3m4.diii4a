@@ -40,6 +40,7 @@
 #include "q3ethread.h"
 #include "q3eutility.h"
 #include "q3emisc.h"
+#include "q3eenv.h"
 #ifdef _Q3E_SDL
 #include "q3esdl2.h"
 #else
@@ -75,16 +76,16 @@ static void (*qexit)(void);
 
 // Android function
 static int pull_input_event(int num);
-static void grab_mouse(int grab);
+void grab_mouse(int grab);
 static FILE * android_tmpfile(void);
-static void copy_to_clipboard(const char *text);
-static char * get_clipboard_text(void);
-static void show_toast(const char *text);
+void copy_to_clipboard(const char *text);
+char * get_clipboard_text(void);
+void show_toast(const char *text);
 static void open_keyboard(void);
 static void close_keyboard(void);
 static void setup_smooth_joystick(int enable);
-static void open_url(const char *url);
-static int open_dialog(const char *title, const char *message, int num, const char *buttons[]);
+void open_url(const char *url);
+int open_dialog(const char *title, const char *message, int num, const char *buttons[]);
 static void finish(void);
 static void show_cursor(int on);
 static char * copy_dll_to_cache(const char *dll_path, const char *file_name);
@@ -93,8 +94,8 @@ static char * copy_dll_to_cache(const char *dll_path, const char *file_name);
 static char *game_data_dir = NULL;
 static char *arg_str = NULL;
 
-static void *libdl;
-static ANativeWindow *window = NULL;
+void *libdl;
+ANativeWindow *window = NULL;
 static int usingNativeEventQueue = 1;
 static int usingNativeThread = 1;
 static int threadStackSize = 0;
@@ -104,9 +105,9 @@ static int resultCode = -1;
 static int backtrace_exit = 0;
 
 // Java object ref
-static JavaVM *jVM;
+JavaVM *jVM;
 static jobject audioBuffer=0;
-static jobject q3eCallbackObj=0;
+jobject q3eCallbackObj=0;
 static const jbyte *audio_track_buffer = NULL;
 static int mouse_available = 0;
 
@@ -135,11 +136,7 @@ static jmethodID android_Finish_method;
 static jmethodID android_Backtrace_method;
 static jmethodID android_ShowCursor_method;
 
-#ifdef _Q3E_SDL
-static jmethodID android_SetCursorVisible_method;
-static jmethodID android_SetCursorPosition_method;
-static jmethodID android_RequestPermission_method;
-#endif
+
 
 #define ATTACH_JNI(env) \
 	JNIEnv *env = 0; \
@@ -148,12 +145,18 @@ static jmethodID android_RequestPermission_method;
 		(*jVM)->AttachCurrentThread(jVM, &env, NULL); \
 	}
 
-static void Android_AttachThread(void)
+#define GET_JNI(env) JNIEnv *env = Q3E_GetEnv();
+
+void Android_AttachThread(void)
 {
-	ATTACH_JNI(env)
+    JNIEnv *env = 0;
+	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) < 0 )
+	{
+		(*jVM)->AttachCurrentThread(jVM, &env, NULL);
+	}
 }
 
-static void Android_DetachThread(void)
+void Android_DetachThread(void)
 {
 	JNIEnv *env = 0;
 	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) >= 0 ) {
@@ -163,8 +166,6 @@ static void Android_DetachThread(void)
 
 static int backtrace_after_caught_signal(int signnum)
 {
-	ATTACH_JNI(env)
-
 	LOGI("idTech4A++ caught signal: %d, application exiting......", signnum);
 	Q3E_BT_Shutdown();
 	if(!backtrace_exit)
@@ -179,7 +180,7 @@ static int backtrace_after_caught_signal(int signnum)
 
 static void backtrace_signal_caughted(int num, int pid, int tid, int mask, const char *cfi, const char *fp, const char *eh)
 {
-	ATTACH_JNI(env)
+	GET_JNI(env)
 
 	LOGI("Backtrace dialog: %d", num);
 
@@ -283,7 +284,7 @@ void initAudio(void *buffer, int size)
 {
 	jobject tmp;
 
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	LOGI("Q3E AudioTrack initialization");
 #ifdef AUDIOTRACK_BYTEBUFFER
@@ -309,7 +310,7 @@ int writeAudio(int offset, int length)
 		return 0;
 #endif
 
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 #ifdef AUDIOTRACK_BYTEBUFFER
     return (*env)->CallIntMethod(env, q3eCallbackObj, android_writeAudio, audioBuffer, offset, length);
@@ -334,7 +335,7 @@ void closeAudio()
 	if (!audioBuffer)
 		return;
 
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	LOGI("Q3E AudioTrack shutdown");
 	jobject ab = audioBuffer;
@@ -344,7 +345,7 @@ void closeAudio()
 
 void setState(int state)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
     (*env)->CallVoidMethod(env, q3eCallbackObj, android_setState, state);
 }
@@ -452,9 +453,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
 	android_CopyDLLToCache_method = (*env)->GetMethodID(env, q3eCallbackClass, "CopyDLLToCache", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
 #ifdef _Q3E_SDL
-	android_SetCursorVisible_method = (*env)->GetMethodID(env, q3eCallbackClass, "SetMouseCursorVisible", "(Z)V");
-	android_SetCursorPosition_method = (*env)->GetMethodID(env, q3eCallbackClass, "SetMouseCursorPosition", "(II)V");
-	android_RequestPermission_method = (*env)->GetMethodID(env, q3eCallbackClass, "RequestPermission", "(Ljava/lang/String;I)Z");
+    Q3E_InitSDLJava(env, q3eCallbackClass);
 #endif
 }
 
@@ -512,9 +511,10 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 		return JNI_FALSE; // init fail
 	}
 
+    Q3E_InitEnvKey();
+
     INIT_SDL();
 	EXEC_SDL(Q3E_SDL_SetAudioDriver, sdlAudioDriver);
-	EXEC_SDL(Q3E_SDL_SetWindowSize, width, height);
 
 	const char *dir = (*env)->GetStringUTFChars(env, GameDir, &iscopy);
     game_data_dir = strdup(dir);
@@ -619,7 +619,6 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent(JNIEnv *env, jclass c, jint state, jint key, jint chr)
 {
     onKeyEvent(state,key,chr);
-	EXEC_SDL(Q3E_SDL_KeyEvent, key, state, chr);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y)
@@ -630,33 +629,22 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendAnalog(JNIEnv *env, jclass
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent(JNIEnv *env, jclass c, jfloat x, jfloat y)
 {
     onMotionEvent(x, y);
-    if(!mouse_available)
-    {
-        EXEC_SDL(Q3E_SDL_MotionEvent, x, y);
-    }
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMouseEvent(JNIEnv *env, jclass c, jfloat x, jfloat y)
 {
-    if(mouse_available)
-    {
-        EXEC_SDL(Q3E_SDL_MouseEvent, x, y);
-    }
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendTextEvent(JNIEnv *env, jclass c, jstring text)
 {
-	EXEC_SDL(Q3E_SDL_TextEvent, env, text);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendCharEvent(JNIEnv *env, jclass clazz, jint ch)
 {
-	EXEC_SDL(Q3E_SDL_CharEvent, ch);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendWheelEvent(JNIEnv *env, jclass clazz, jfloat x, jfloat y)
 {
-	EXEC_SDL(Q3E_SDL_WheelEvent, x, y);
 }
 
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Is64(JNIEnv *env, jclass c)
@@ -706,7 +694,7 @@ Java_com_n0n3m4_q3e_Q3EJNI_SetSurface(JNIEnv *env, jclass clazz, jobject view) {
 
 void finish(void)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	LOGI("Finish");
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_Finish_method);
@@ -816,7 +804,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_shutdown(JNIEnv *env, jclass c
 
 int pull_input_event(int num)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
     jint jres = (*env)->CallIntMethod(env, q3eCallbackObj, android_PullEvent_method, (jint)num);
 	if(usingNativeEventQueue)
@@ -827,16 +815,15 @@ int pull_input_event(int num)
 
 void grab_mouse(int grab)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
-	if(mouse_available)
+	//if(mouse_available)
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_GrabMouse_method, (jboolean)grab);
-	EXEC_SDL(Q3E_SDL_SetRelativeMouseMode, grab);
 }
 
 void copy_to_clipboard(const char *text)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	if(!text)
 	{
@@ -853,7 +840,7 @@ void copy_to_clipboard(const char *text)
 
 char * get_clipboard_text(void)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	jstring str = (*env)->CallObjectMethod(env, q3eCallbackObj, android_GetClipboardText_method);
 	if(!str)
@@ -873,7 +860,7 @@ void show_toast(const char *text)
 	if(!text)
 		return;
 
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	LOGI("Toast: %s", text);
 	jstring str = (*env)->NewStringUTF(env, text);
@@ -884,7 +871,7 @@ void show_toast(const char *text)
 
 void open_keyboard(void)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	LOGI("Open keyboard");
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_OpenVKB_method);
@@ -892,7 +879,7 @@ void open_keyboard(void)
 
 void close_keyboard(void)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	LOGI("Close keyboard");
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_CloseVKB_method);
@@ -900,7 +887,7 @@ void close_keyboard(void)
 
 void open_url(const char *url)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	if(!url)
 	{
@@ -916,7 +903,7 @@ void open_url(const char *url)
 
 int open_dialog(const char *title, const char *message, int num, const char *buttons[])
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	if(!title || !message)
 	{
@@ -961,14 +948,14 @@ int open_dialog(const char *title, const char *message, int num, const char *but
 
 void setup_smooth_joystick(int enable)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_SetupSmoothJoystick_method, (jboolean)enable);
 }
 
 void show_cursor(int on)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	LOGI("Show cursor: %d", on);
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_ShowCursor_method, on ? JNI_TRUE : JNI_FALSE);
@@ -976,7 +963,7 @@ void show_cursor(int on)
 
 char * copy_dll_to_cache(const char *dll_path, const char *file_name)
 {
-	ATTACH_JNI(env)
+    GET_JNI(env)
 
 	LOGI("Copy DLL: %s -> %s", dll_path, file_name);
 
@@ -1053,39 +1040,27 @@ FILE * android_tmpfile(void)
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushKeyEvent(JNIEnv *env, jclass clazz, jint down, jint keycode, jint charcode)
 {
     Q3E_PushKeyEvent(down, keycode, charcode);
-	EXEC_SDL(Q3E_SDL_KeyEvent, keycode, down, charcode);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMotionEvent(JNIEnv *env, jclass clazz, jfloat deltax, jfloat deltay)
 {
     Q3E_PushMotionEvent(deltax, deltay);
-    if(!mouse_available)
-    {
-        EXEC_SDL(Q3E_SDL_MotionEvent, deltax, deltay);
-    }
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMouseEvent(JNIEnv *env, jclass clazz, jfloat x, jfloat y)
 {
-    if(mouse_available)
-    {
-        EXEC_SDL(Q3E_SDL_MouseEvent, x, y);
-    }
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushTextEvent(JNIEnv *env, jclass clazz, jstring text)
 {
-	EXEC_SDL(Q3E_SDL_TextEvent, env, text);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushCharEvent(JNIEnv *env, jclass clazz, jint ch)
 {
-	EXEC_SDL(Q3E_SDL_CharEvent, ch);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushWheelEvent(JNIEnv *env, jclass clazz, jfloat x, jfloat y)
 {
-	EXEC_SDL(Q3E_SDL_WheelEvent, x, y);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y)
@@ -1118,38 +1093,3 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Setenv(
 	(*env)->ReleaseStringUTFChars(env, name, utfname);
 	(*env)->ReleaseStringUTFChars(env, value, utfvalue);
 }
-
-#ifdef _Q3E_SDL
-static void set_mouse_cursor_visible(int visible)
-{
-    ATTACH_JNI(env)
-
-    //LOGI("Mouse cursor visible: %d", visible);
-    (*env)->CallVoidMethod(env, q3eCallbackObj, android_SetCursorVisible_method, visible ? JNI_TRUE : JNI_FALSE);
-}
-
-static void set_mouse_cursor_position(int x, int y)
-{
-    ATTACH_JNI(env)
-
-    //LOGI("Mouse cursor position: %d, %d", x, y);
-    (*env)->CallVoidMethod(env, q3eCallbackObj, android_SetCursorPosition_method, x, y);
-}
-
-static int request_permission(const char *perm, int code)
-{
-	ATTACH_JNI(env)
-
-	if(!perm)
-		return Q3E_FALSE;
-
-	LOGI("Request permission: %s(%d)", perm, code);
-	jstring str = (*env)->NewStringUTF(env, perm);
-	jstring nstr = (*env)->NewWeakGlobalRef(env, str);
-	(*env)->DeleteLocalRef(env, str);
-	jboolean res = (*env)->CallBooleanMethod(env, q3eCallbackObj, android_RequestPermission_method, nstr, code);
-	return res ? Q3E_TRUE : Q3E_FALSE;
-}
-
-#include "q3esdl2.c"
-#endif

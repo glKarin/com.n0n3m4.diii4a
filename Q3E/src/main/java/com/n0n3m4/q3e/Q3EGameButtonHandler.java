@@ -14,8 +14,11 @@ import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.control.Q3EControllerControl;
+import com.n0n3m4.q3e.control.Q3EEventControl;
 import com.n0n3m4.q3e.control.Q3EGyroscopeControl;
 import com.n0n3m4.q3e.control.Q3EMouseControl;
+import com.n0n3m4.q3e.control.Q3ERawControl;
+import com.n0n3m4.q3e.control.Q3ESDLControl;
 import com.n0n3m4.q3e.control.Q3ETrackballControl;
 import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.onscreen.Finger;
@@ -52,7 +55,8 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
     private Q3EMouseControl      mouseControl      = null;
     /// MOUSE
     private Q3EControllerControl controllerControl = null;
-    private Q3ETrackballControl  trackballControl;
+    private Q3ETrackballControl trackballControl = null;
+    private Q3EEventControl     eventControl;
 
     //private boolean usesCSAA = false;
 
@@ -62,6 +66,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
     {
         super(surfaceView, touch_elements, paint_elements, fingers);
         this.controlView = (Q3EControlView)surfaceView;
+        eventControl = new Q3ERawControl(this.controlView);
     }
 
     @Override
@@ -112,6 +117,12 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
         /*        }*/
     }
 
+    public int getCharacter(int keyCode, KeyEvent event)
+    {
+        if (keyCode == KeyEvent.KEYCODE_DEL) return '\b';
+        return event.getUnicodeChar();
+    }
+
     @Override
     boolean OnKeyUp(int keyCode, KeyEvent event)
     {
@@ -138,8 +149,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
                 qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0), event);
                 break;
         }
-        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, qKeyCode, getCharacter(keyCode, event));
-        return true;
+        return eventControl.OnKeyUp(qKeyCode, event, getCharacter(keyCode, event));
     }
 
     @Override
@@ -164,9 +174,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
                 qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0), event);
                 break;
         }
-        int t = getCharacter(keyCode, event);
-        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, qKeyCode, t);
-        return true;
+        return eventControl.OnKeyDown(qKeyCode, event, getCharacter(keyCode, event));
     }
 
     @Override
@@ -433,12 +441,6 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
         return res;
     }
 
-    public int getCharacter(int keyCode, KeyEvent event)
-    {
-        if (keyCode == KeyEvent.KEYCODE_DEL) return '\b';
-        return event.getUnicodeChar();
-    }
-
     private void SetupGyroscope()
     {
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
@@ -468,7 +470,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             if(!mouseControl.Init())
                 mouseControl = null;
             else
-                KLog.I("Enable mouse control: " + (mouseControl.IsUsingMouseEvent() ? "mouse event" : "mouse device"));
+                KLog.I("Enable mouse control: " + (mouseControl.IsUsingMouse() ? "physical" : "virtual"));
         }
     }
 
@@ -515,11 +517,6 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
         return null != mouseControl && mouseControl.IsUsingMouse();
     }
 
-    boolean IsUsingMouseEvent()
-    {
-        return null != mouseControl && mouseControl.IsUsingMouseEvent();
-    }
-
     void UpdateUsedTouches()
     {
         if(NoTouchElements())
@@ -556,5 +553,10 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
         paint_elements.addAll(paints);
 
         KLog.I("Total buttons = %d, paint buttons = %d, invisible buttons = %d", total_paint_elements.size(), paint_elements.size(), total_paint_elements.size() - paint_elements.size());
+    }
+
+    public void EnableSDL()
+    {
+        eventControl = new Q3ESDLControl(this.controlView);
     }
 }

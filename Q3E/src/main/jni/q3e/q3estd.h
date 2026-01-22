@@ -12,6 +12,9 @@
 #define LOGW(fmt, args...) do { printf("[" LOG_TAG "/W]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_WARN, LOG_TAG, fmt, ##args); } while(0);
 #define LOGE(fmt, args...) do { printf("[" LOG_TAG "/E]" fmt "\n", ##args); __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##args); } while(0);
 
+#define Q3E_TRUE 1
+#define Q3E_FALSE 0
+
 #if 1
 #define ASSERT(x)
 #else

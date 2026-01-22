@@ -319,7 +319,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
     public void ShowCursor(boolean on)
     {
-        if(!handler.IsUsingMouseEvent())
+        if(!handler.IsUsingMouse())
             return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
         {
@@ -470,5 +470,10 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     public boolean IsEditMode()
     {
         return !gameMode;
+    }
+
+    public void EnableSDL()
+    {
+        gameHandler.EnableSDL();
     }
 }

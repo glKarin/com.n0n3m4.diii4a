@@ -46,10 +46,10 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.device.Q3EOuya;
+import com.n0n3m4.q3e.device.Q3EVirtualMouse;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.karin.KDebugTextView;
 import com.n0n3m4.q3e.karin.KLog;
-import com.n0n3m4.q3e.karin.KMouseCursor;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTechCommand;
@@ -59,10 +59,9 @@ public class Q3EMain extends Activity
 {
     private       Q3ECallbackObj mAudio;
     private       Q3EView        mGLSurfaceView;
-    private       RelativeLayout mainLayout;
-    private       KMouseCursor   mouseCursor;
+    private RelativeLayout  mainLayout;
     // k
-    private       boolean        m_hideNav         = true;
+    private boolean         m_hideNav         = true;
     private       int            m_runBackground   = 1;
     private       int            m_renderMemStatus = 0;
     private       Q3EControlView mControlGLSurfaceView;
@@ -616,41 +615,17 @@ public class Q3EMain extends Activity
         }
     }
 
-    private void MakeMouseCursor()
+    public void MakeMouseCursor()
     {
-        if(null == mouseCursor)
+        if(null == Q3E.virtualMouse)
         {
-            mouseCursor = new KMouseCursor(this);
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(KMouseCursor.WIDTH, KMouseCursor.HEIGHT);
-            mainLayout.addView(mouseCursor, params);
-        }
-    }
-
-    public void SetMouseCursorVisible(boolean visible)
-    {
-        if(mControlGLSurfaceView.IsUsingMouse())
-        {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                mControlGLSurfaceView.ShowCursor(visible);
+            Q3E.virtualMouse = new Q3EVirtualMouse(this);
+            Q3E.virtualMouse.SetOffset(m_offsetX, m_offsetY);
+            Q3E.virtualMouse.SetRange(Q3E.surfaceWidth, Q3E.surfaceHeight);
+            if(!Q3EUtils.q3ei.IsUsingSDL() || mControlGLSurfaceView.IsUsingMouse())
+            {
+                Q3E.virtualMouse.SetCursorVisible(false);
             }
-        }
-        else
-        {
-            MakeMouseCursor();
-            mouseCursor.SetVisible(visible);
-        }
-    }
-
-    public void SetMouseCursorPosition(int x, int y)
-    {
-        if(mControlGLSurfaceView.IsUsingMouse())
-            return;
-        MakeMouseCursor();
-        if(Q3E.IsOriginalSize())
-            mouseCursor.SetPosition(x + m_offsetX, y + m_offsetY);
-        else
-        {
-            mouseCursor.SetPosition(Q3E.LogicalToPhysicsX(x) + m_offsetX, Q3E.LogicalToPhysicsY(y) + m_offsetY);
         }
     }
 
