@@ -624,6 +624,7 @@ public class Q3EMain extends Activity
             Q3E.virtualMouse.SetRange(Q3E.surfaceWidth, Q3E.surfaceHeight);
             if(!Q3EUtils.q3ei.IsUsingSDL() || mControlGLSurfaceView.IsUsingMouse())
             {
+                Q3E.virtualMouse.DisableCursor(true);
                 Q3E.virtualMouse.SetCursorVisible(false);
             }
         }

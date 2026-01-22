@@ -22,6 +22,7 @@ public class Q3EVirtualMouse
     private float deltaY;
     private float width = 640;
     private float height = 480;
+    private boolean disableCursor = false;
 
     private final Runnable show = new Runnable() {
         @Override
@@ -81,6 +82,8 @@ public class Q3EVirtualMouse
 
     public void SetCursorVisible(boolean visible)
     {
+        if(disableCursor)
+            return;
         activity.runOnUiThread(visible ? show : hide);
     }
 
@@ -93,6 +96,8 @@ public class Q3EVirtualMouse
 
     public void UpdateCursorPosition()
     {
+        if(disableCursor)
+            return;
         activity.runOnUiThread(updatePosition);
     }
 
@@ -204,5 +209,10 @@ public class Q3EVirtualMouse
     public float GetY()
     {
         return relativeMode ? deltaY : posY;
+    }
+
+    public void DisableCursor(boolean d)
+    {
+        disableCursor = d;
     }
 }
