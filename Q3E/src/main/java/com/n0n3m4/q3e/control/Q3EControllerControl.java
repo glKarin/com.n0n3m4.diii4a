@@ -252,9 +252,9 @@ public final class Q3EControllerControl
                 x = getCenteredAxis(event, inputDevice, MotionEvent.AXIS_HAT_X/*, historyPos*/);
             if(y == 0.0f)
                 y = getCenteredAxis(event, inputDevice, MotionEvent.AXIS_HAT_Y/*, historyPos*/);
-        }
 
-        Q3EUtils.q3ei.callbackObj.sendAnalog((Math.abs(x) > leftJoystickDeadRange) || (Math.abs(y) > leftJoystickDeadRange), x, -y);
+            Q3EUtils.q3ei.callbackObj.sendAnalog((Math.abs(x) > leftJoystickDeadRange) || (Math.abs(y) > leftJoystickDeadRange), x, -y);
+        }
     }
 
     public static boolean IsGamePadDevice(int deviceId) {
@@ -270,7 +270,7 @@ public final class Q3EControllerControl
         );
     }
 
-    public static boolean IsGamePadDevice(KeyEvent event) {
-        return IsGamePadDevice(event.getDeviceId());
+    public static boolean IsGamePadKeyEvent(KeyEvent event) {
+        return (event.getSource() & (InputDevice.SOURCE_JOYSTICK | InputDevice.SOURCE_GAMEPAD)) != 0;
     }
 }

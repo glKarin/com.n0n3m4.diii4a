@@ -321,15 +321,15 @@ public class Q3EKeyCodes
                 return KeyCodes.K_PGUP;
             // keyboard arrow / dpad
             case KeyEvent.KEYCODE_DPAD_UP:
-                return (event.getSource() & InputDevice.SOURCE_JOYSTICK) != 0 ? KeyCodes.J_DPAD_UP : KeyCodes.K_UPARROW;
+                return Q3EControllerControl.IsGamePadKeyEvent(event) ? KeyCodes.J_DPAD_UP : KeyCodes.K_UPARROW;
             case KeyEvent.KEYCODE_DPAD_DOWN:
-                return (event.getSource() & InputDevice.SOURCE_JOYSTICK) != 0 ? KeyCodes.J_DPAD_DOWN : KeyCodes.K_DOWNARROW;
+                return Q3EControllerControl.IsGamePadKeyEvent(event) ? KeyCodes.J_DPAD_DOWN : KeyCodes.K_DOWNARROW;
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                return (event.getSource() & InputDevice.SOURCE_JOYSTICK) != 0 ? KeyCodes.J_DPAD_LEFT : KeyCodes.K_LEFTARROW;
+                return Q3EControllerControl.IsGamePadKeyEvent(event) ? KeyCodes.J_DPAD_LEFT : KeyCodes.K_LEFTARROW;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                return (event.getSource() & InputDevice.SOURCE_JOYSTICK) != 0 ? KeyCodes.J_DPAD_RIGHT : KeyCodes.K_RIGHTARROW;
+                return Q3EControllerControl.IsGamePadKeyEvent(event) ? KeyCodes.J_DPAD_RIGHT : KeyCodes.K_RIGHTARROW;
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                return (event.getSource() & InputDevice.SOURCE_JOYSTICK) != 0 ? KeyCodes.J_DPAD_CENTER : KeyCodes.K_ENTER;
+                return Q3EControllerControl.IsGamePadKeyEvent(event) ? KeyCodes.J_DPAD_CENTER : KeyCodes.K_ENTER;
             // Controller
             // a b c x y z
             case KeyEvent.KEYCODE_BUTTON_A:
