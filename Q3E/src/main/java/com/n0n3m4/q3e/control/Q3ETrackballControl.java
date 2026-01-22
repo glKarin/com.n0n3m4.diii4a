@@ -27,6 +27,7 @@ import android.view.MotionEvent;
 
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EJNI;
+import com.n0n3m4.q3e.Q3EUtils;
 
 public final class Q3ETrackballControl
 {
@@ -56,7 +57,7 @@ public final class Q3ETrackballControl
         }
         final float deltaX = x - last_trackball_x;
         final float deltaY = y - last_trackball_y;
-        Q3EJNI.sendMotionEvent(deltaX, deltaY);
+        Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
         last_trackball_x = x;
         last_trackball_y = y;
         return true;
