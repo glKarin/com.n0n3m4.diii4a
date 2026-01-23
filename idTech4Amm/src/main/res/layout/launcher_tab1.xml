@@ -1236,14 +1236,30 @@
                         android:text="@string/env"
                         android:textAllCaps="false" />
                 </LinearLayout>
+            </LinearLayout>
 
+        </LinearLayout> <!-- end general section -->
 
-                <LinearLayout
+        <LinearLayout
+                android:id="@+id/other_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/layout_border"
+                android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp">
+
+            <com.karin.idTech4Amm.widget.Divider
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    myapp:label="@string/other"
+                    myapp:lineColor="@color/launcher_divider_color" />
+
+            <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <Button
+                <Button
                         android:id="@+id/launcher_tab1_change_game"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -1251,14 +1267,13 @@
                         android:text="@string/change_game"
                         android:textAllCaps="false" />
 
-                    <Button
+                <Button
                         android:id="@+id/launcher_tab1_open_menu"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:text="@string/open_menu"
                         android:textAllCaps="false" />
-                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout> <!-- end general section -->

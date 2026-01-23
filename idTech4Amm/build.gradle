@@ -18,8 +18,9 @@ android {
             caitlyn: the Sheriff of Piltover on LOL, for netlizard-game at 2017
             lindaiyu: Red at 2025
             luyiping: The Rain at 2002
+            whip: The King of Fighter character at 2019
          */
-        versionNameSuffix 'lindaiyu'
+        versionNameSuffix 'whip'
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "int", "BUILD_SDK_VERSION", 30 + ""
     }
