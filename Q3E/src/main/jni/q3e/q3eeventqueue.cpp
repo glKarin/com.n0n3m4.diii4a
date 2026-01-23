@@ -50,7 +50,7 @@ typedef union Event_s
     MotionEvent_t motion;
 } Event_t;
 
-typedef std::list<Event_t *> EventQueue_t;
+typedef std::list<Event_t> EventQueue_t;
 
 
 #define LOCK() const std::lock_guard<std::mutex> _lock(lockMutex);
@@ -83,27 +83,19 @@ private:
 };
 
 idEventManager::idEventManager()
-/*        : sendKey(nullptr),
-          sendMotion(nullptr),
-          sendAnalog(nullptr)*/
 {
 }
 
 idEventManager::~idEventManager()
 {
-    while (!queue.empty())
-    {
-        auto &ev = queue.front();
-        free(ev);
-        queue.pop_front();
-    }
+    queue.clear();
 }
 
 inline void idEventManager::PushKeyEvent(bool down, int keycode, int charcode)
 {
     LOCK();
-    Event_t *event = (Event_t *)malloc(sizeof(Event_t));
-    KeyEvent_t *ev = &event->key;
+    Event_t event;
+    KeyEvent_t *ev = &event.key;
     ev->type = Event_Key;
     ev->down = down;
     ev->keycode = keycode;
@@ -114,8 +106,8 @@ inline void idEventManager::PushKeyEvent(bool down, int keycode, int charcode)
 inline void idEventManager::PushMotionEvent(float deltax, float deltay)
 {
     LOCK();
-    Event_t *event = (Event_t *)malloc(sizeof(Event_t));
-    MotionEvent_t *ev = &event->motion;
+    Event_t event;
+    MotionEvent_t *ev = &event.motion;
     ev->type = Event_Motion;
     ev->deltax = deltax;
     ev->deltay = deltay;
@@ -125,8 +117,8 @@ inline void idEventManager::PushMotionEvent(float deltax, float deltay)
 inline void idEventManager::PushAnalogEvent(bool down, float x, float y)
 {
     LOCK();
-    Event_t *event = (Event_t *)malloc(sizeof(Event_t));
-    AnalogEvent_t *ev = &event->analog;
+    Event_t event;
+    AnalogEvent_t *ev = &event.analog;
     ev->type = Event_Analog;
     ev->down = down;
     ev->x = x;
@@ -137,12 +129,7 @@ inline void idEventManager::PushAnalogEvent(bool down, float x, float y)
 inline void idEventManager::Clear()
 {
     LOCK();
-    while (!queue.empty())
-    {
-        auto &ev = queue.front();
-        free(ev);
-        queue.pop_front();
-    }
+    queue.clear();
 }
 
 inline int idEventManager::Num()
@@ -186,8 +173,7 @@ int idEventManager::PullEvent(int num)
         while (!queue.empty())
         {
             auto &ev = queue.front();
-            SendEvent(ev);
-            free(ev);
+            SendEvent(&ev);
             queue.pop_front();
         }
         return i;
@@ -198,8 +184,7 @@ int idEventManager::PullEvent(int num)
         while (!queue.empty())
         {
             auto &ev = queue.front();
-            SendEvent(ev);
-            free(ev);
+            SendEvent(&ev);
             queue.pop_front();
             i++;
             if(i >= num)
@@ -211,8 +196,6 @@ int idEventManager::PullEvent(int num)
     {
         while (!queue.empty())
         {
-            auto &ev = queue.front();
-            free(ev);
             queue.pop_front();
         }
         return 0;

@@ -8,7 +8,6 @@
 extern "C" {
 #endif
 
-#ifdef _Q3E_SDL
 #define SDL_JAVA_PREFIX                               com_n0n3m4_q3e_sdl
 #define CONCAT1(prefix, class, function)              CONCAT2(prefix, class, function)
 #define CONCAT2(prefix, class, function)              Java_##prefix##_##class##_##function
@@ -72,7 +71,6 @@ JNIEXPORT void JNICALL SDL_JAVA_INTERFACE_INPUT_CONNECTION(nativeCommitText)(
     jstring text, jint newCursorPosition);
 
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_sdl_Q3ESDL_UsingSDL(JNIEnv *env, jclass cls);
-#endif
 
 #ifdef __cplusplus
 }

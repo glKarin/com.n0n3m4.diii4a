@@ -1,5 +1,3 @@
-#ifdef _Q3E_SDL
-
 #include "q3esdljni.h"
 
 #define CALL_SDL_JAVA_INTERFACE(function) function
@@ -205,6 +203,4 @@ void SDL_Register(JNIEnv *env)
     //register_methods(env, Q3ESDL_CLASS, SDLAudioManager_tab, sizeof(SDLAudioManager_tab) / sizeof(SDLAudioManager_tab[0]));
     register_methods(env, Q3ESDL_CLASS, SDLControllerManager_tab, sizeof(SDLControllerManager_tab) / sizeof(SDLControllerManager_tab[0]));
 }
-#endif
-
 #endif
