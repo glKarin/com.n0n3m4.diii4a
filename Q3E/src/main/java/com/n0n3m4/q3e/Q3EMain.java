@@ -618,13 +618,13 @@ public class Q3EMain extends Activity
         }
     }
 
-    public void MakeMouseCursor()
+    public void MakeMouseCursor(int fullWidth, int fullHeight)
     {
         if(null == Q3E.virtualMouse)
         {
             Q3E.virtualMouse = new Q3EVirtualMouse(this);
-            Q3E.virtualMouse.SetOffset(m_offsetX, m_offsetY);
-            Q3E.virtualMouse.SetRange(Q3E.surfaceWidth, Q3E.surfaceHeight);
+            Q3E.virtualMouse.SetPhysicalGeometry(m_offsetX, m_offsetY, fullWidth, fullHeight);
+            Q3E.virtualMouse.SetLogicalSize(Q3E.surfaceWidth, Q3E.surfaceHeight);
             if(!Q3EUtils.q3ei.IsUsingSDL() || Q3E.m_usingMouse)
             {
                 Q3E.virtualMouse.DisableCursor(true);

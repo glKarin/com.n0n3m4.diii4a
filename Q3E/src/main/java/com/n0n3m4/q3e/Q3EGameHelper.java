@@ -1313,7 +1313,7 @@ public class Q3EGameHelper
                 @Override
                 public void run()
                 {
-                    Q3E.activity.MakeMouseCursor();
+                    Q3E.activity.MakeMouseCursor(surfaceWidth, surfaceHeight);
                     // Q3EUtils.RunLauncher(activity);
                 }
             });
