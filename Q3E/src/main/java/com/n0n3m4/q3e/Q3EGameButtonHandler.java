@@ -21,6 +21,7 @@ import com.n0n3m4.q3e.control.Q3ERawControl;
 import com.n0n3m4.q3e.control.Q3ESDLControl;
 import com.n0n3m4.q3e.control.Q3ETrackballControl;
 import com.n0n3m4.q3e.karin.KLog;
+import com.n0n3m4.q3e.keycode.KeyCodesGeneric;
 import com.n0n3m4.q3e.onscreen.Finger;
 import com.n0n3m4.q3e.onscreen.Paintable;
 import com.n0n3m4.q3e.onscreen.TouchListener;
@@ -66,7 +67,6 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
     {
         super(surfaceView, touch_elements, paint_elements, fingers);
         this.controlView = (Q3EControlView)surfaceView;
-        eventControl = new Q3ERawControl(this.controlView);
     }
 
     @Override
@@ -136,19 +136,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
                 return true;
             Q3EUtils.ToggleToolbar(false);
         }
-        int qKeyCode;
-        switch (keyCode)
-        {
-            case KeyEvent.KEYCODE_VOLUME_UP:
-                qKeyCode = Q3EUtils.q3ei.VOLUME_UP_KEY_CODE;
-                break;
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                qKeyCode = Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE;
-                break;
-            default:
-                qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0), event);
-                break;
-        }
+        int qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0), event);
         return eventControl.OnKeyUp(qKeyCode, event, getCharacter(keyCode, event));
     }
 
@@ -161,19 +149,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
         {
             return true;
         }
-        int qKeyCode;
-        switch (keyCode)
-        {
-            case KeyEvent.KEYCODE_VOLUME_UP:
-                qKeyCode = Q3EUtils.q3ei.VOLUME_UP_KEY_CODE;
-                break;
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                qKeyCode = Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE;
-                break;
-            default:
-                qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0), event);
-                break;
-        }
+        int qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0), event);
         return eventControl.OnKeyDown(qKeyCode, event, getCharacter(keyCode, event));
     }
 
@@ -198,7 +174,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
     @Override
     boolean OnTouchEvent(MotionEvent event)
     {
-        if(null != mouseControl && event.getSource() == InputDevice.SOURCE_MOUSE && (mouseControl.IsUsingMouse()/* || hideonscr*/))
+        if(null != mouseControl && event.getSource() == InputDevice.SOURCE_MOUSE /*&& (Q3E.m_usingMouse || hideonscr)*/)
         {
             if(!mouseControl.OnTouchEvent(event))
                 event.setAction(MotionEvent.ACTION_CANCEL);
@@ -410,6 +386,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
         mapvol = mPrefs.getBoolean(Q3EPreference.pref_mapvol, false);
         m_mapBack = mPrefs.getInt(Q3EPreference.pref_harm_mapBack, Q3EGlobals.ENUM_BACK_ALL); //k
 
+        eventControl = new Q3ERawControl(this.controlView);
         SetupGyroscope();
         SetupMouse();
         SetupController();
@@ -445,8 +422,9 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
     private void SetupGyroscope()
     {
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+        boolean view_motion_control_gyro = mPrefs.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false);
 
-        if(Q3EUtils.q3ei.view_motion_control_gyro)
+        if(view_motion_control_gyro)
         {
             gyroscopeControl = new Q3EGyroscopeControl(controlView);
             gyroscopeControl.EnableGyroscopeControl(true);
@@ -467,12 +445,21 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
 
         if(usingMouse)
         {
-            mouseControl = new Q3EMouseControl(controlView);
-            if(!mouseControl.Init())
-                mouseControl = null;
+            if(Q3EUtils.HasMouseDevice())
+            {
+                int mouse = Q3EUtils.SupportMouse();
+                if(mouse == Q3EGlobals.MOUSE_EVENT)
+                {
+                    mouseControl = new Q3EMouseControl(controlView);
+                    Q3E.m_usingMouse = true;
+                }
+                KLog.I("Enable mouse control: " + (Q3E.m_usingMouse ? "physical" : "virtual"));
+            }
             else
-                KLog.I("Enable mouse control: " + (mouseControl.IsUsingMouse() ? "physical" : "virtual"));
+                KLog.I("No mouse device found");
         }
+        else
+            KLog.I("Disable mouse device");
     }
 
     private void SetupController()
@@ -511,11 +498,6 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
         {
             mouseControl.UnGrabMouse();
         }
-    }
-
-    boolean IsUsingMouse()
-    {
-        return null != mouseControl && mouseControl.IsUsingMouse();
     }
 
     void UpdateUsedTouches()
@@ -558,6 +540,6 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
 
     public void EnableSDL()
     {
-        eventControl = new Q3ESDLControl(this.controlView);
+        //eventControl = new Q3ESDLControl(this.controlView);
     }
 }

@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.preference.PreferenceManager;
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EPreference;
@@ -58,7 +59,8 @@ public class UiLoader
                 boolean showDot = preferences.getBoolean(Q3EPreference.pref_harm_hide_joystick_center, false);
                 float joystick_release_range = preferences.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
                 float joystick_inner_dead_zone = preferences.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
-                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, joystick_release_range, joystick_inner_dead_zone, !Q3EUtils.q3ei.joystick_unfixed, !editMode, visibleMode, !showDot, Q3EUtils.q3ei.texture_table[id]);
+                boolean joystick_unfixed = preferences.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
+                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, joystick_release_range, joystick_inner_dead_zone, !joystick_unfixed, !editMode, visibleMode, !showDot, Q3EUtils.q3ei.texture_table[id]);
             }
             case Q3EGlobals.TYPE_SLIDER:
                 int sliderDelay = preferences.getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);

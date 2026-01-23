@@ -41,6 +41,11 @@ public final class Q3E
     public static float widthRatio = 1.0f;
     public static float heightRatio = 1.0f;
 
+    public static boolean joystick_smooth          = true; // Q3EView::analog
+    public static boolean function_key_toolbar = false;
+    public static boolean builtin_virtual_keyboard = false;
+    public static boolean m_usingMouse = false;
+    public static int supportDevices = 0;
 
     public static void runOnUiThread(Runnable action) {
         if(null != activity)

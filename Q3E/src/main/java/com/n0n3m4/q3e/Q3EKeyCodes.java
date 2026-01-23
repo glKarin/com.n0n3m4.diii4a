@@ -40,6 +40,10 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class Q3EKeyCodes
 {
+    //k volume key map
+    public static int VOLUME_UP_KEY_CODE = KeyCodesGeneric.K_F3;
+    public static int VOLUME_DOWN_KEY_CODE = KeyCodesGeneric.K_F2;
+
     // KARIN_NEW_GAME_BOOKMARK: add key code converter
 
     public static class KeyCodes
@@ -259,9 +263,9 @@ public class Q3EKeyCodes
                 return KeyCodes.K_F1;
             // volume keys
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-                return KeyCodes.K_F2;
+                return VOLUME_DOWN_KEY_CODE;
             case KeyEvent.KEYCODE_VOLUME_UP:
-                return KeyCodes.K_F3;
+                return VOLUME_UP_KEY_CODE;
             case KeyEvent.KEYCODE_ENTER:
                 return KeyCodes.K_ENTER;
             case KeyEvent.KEYCODE_BACK:

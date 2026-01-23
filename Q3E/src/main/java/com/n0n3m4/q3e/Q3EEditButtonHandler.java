@@ -415,9 +415,6 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
     @Override
     boolean onCapturedPointerEvent(MotionEvent event) { return false; }
 
-    @Override
-    boolean IsUsingMouse() { return false; }
-
     void UiOnTouchEvent(FingerUi fn, MotionEvent event)
     {
         int act = 0;

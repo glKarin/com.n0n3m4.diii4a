@@ -44,7 +44,6 @@ public final class Q3EMouseControl
 
     private boolean m_allowGrabMouse = false;
     private int m_requestGrabMouse = 0;
-    private boolean m_usingMouse = false;
 
     private float m_lastTouchPadPosX = -1;
     private float m_lastTouchPadPosY = -1;
@@ -63,7 +62,7 @@ public final class Q3EMouseControl
 
     public void GrabMouse()
     {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && m_usingMouse)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Q3E.m_usingMouse)
         {
             Runnable runnable = new Runnable() {
                 @Override
@@ -82,7 +81,7 @@ public final class Q3EMouseControl
 
     public void UnGrabMouse()
     {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && m_usingMouse)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Q3E.m_usingMouse)
         {
             Runnable runnable = new Runnable() {
                 @Override
@@ -101,7 +100,7 @@ public final class Q3EMouseControl
 
     public void OnWindowFocusChanged(boolean hasWindowFocus)
     {
-        if(!m_usingMouse)
+        if(!Q3E.m_usingMouse)
             return;
         m_allowGrabMouse = hasWindowFocus;
         if(hasWindowFocus)
@@ -119,22 +118,9 @@ public final class Q3EMouseControl
         }
     }
 
-    public boolean IsUsingMouse()
-    {
-        return m_usingMouse;
-    }
-
-    public boolean Init()
-    {
-        int mouse = Q3EUtils.SupportMouse();
-        if(mouse == Q3EGlobals.MOUSE_EVENT)
-            m_usingMouse = true;
-        return m_usingMouse;
-    }
-
     public boolean OnCapturedPointerEvent(MotionEvent event)
     {
-        if(m_usingMouse)
+        if(Q3E.m_usingMouse)
         {
             switch (event.getSource())
             {
@@ -263,7 +249,7 @@ public final class Q3EMouseControl
     {
         int source = event.getSource();
 
-        if(m_usingMouse && source == InputDevice.SOURCE_MOUSE)
+        if(Q3E.m_usingMouse && source == InputDevice.SOURCE_MOUSE)
         {
             int action = event.getAction();
             int actionIndex = event.getActionIndex();
@@ -325,7 +311,7 @@ public final class Q3EMouseControl
 
     public boolean OnTouchEvent(MotionEvent event)
     {
-        if(m_usingMouse/* && source == InputDevice.SOURCE_MOUSE*/) {
+        if(Q3E.m_usingMouse/* && source == InputDevice.SOURCE_MOUSE*/) {
             int action = event.getAction();
             int actionIndex = event.getActionIndex();
             float x = event.getX(actionIndex);

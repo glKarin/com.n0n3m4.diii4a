@@ -201,7 +201,7 @@ public class Q3ECallbackObj
     {
         try
         {
-            if(vw.IsUsingMouse())
+            if(Q3E.m_usingMouse)
             {
                 if (grab)
                     vw.GrabMouse();
@@ -402,7 +402,7 @@ public class Q3ECallbackObj
 
     public void SetupSmoothJoystick(boolean enable)
     {
-        Q3EUtils.q3ei.joystick_smooth = enable;
+        Q3E.joystick_smooth = enable;
     }
 
     public void ShowCursor(boolean on)

@@ -27,6 +27,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.Surface;
 import android.widget.Toast;
 
@@ -75,6 +76,72 @@ public class Q3EGameHelper
     public void ShowMessage(int resId)
     {
         Toast.makeText(m_context, resId, Toast.LENGTH_LONG).show();
+    }
+
+    public int CheckDevices()
+    {
+        int[] deviceIds = InputDevice.getDeviceIds();
+        KLog.I("Support devices: " + deviceIds.length);
+        int mask = 0;
+        for(int i = 0; i < deviceIds.length; i++)
+        {
+            int deviceId = deviceIds[i];
+            InputDevice device = InputDevice.getDevice(deviceId);
+
+            if(null == device)
+                continue;
+
+            int sources = device.getSources();
+            if ((sources & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE)
+                mask |= Q3EGlobals.DEVICE_MOUSE;
+
+            if ((sources & InputDevice.SOURCE_TOUCHSCREEN) == InputDevice.SOURCE_TOUCHSCREEN)
+                mask |= Q3EGlobals.DEVICE_TOUCHSCREEN;
+
+            if ((sources & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD)
+                mask |= Q3EGlobals.DEVICE_KEYBOARD;
+
+            if ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK)
+                mask |= Q3EGlobals.DEVICE_JOYSTICK;
+
+            if ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
+                mask |= Q3EGlobals.DEVICE_GAMEPAD;
+
+            if ((sources & InputDevice.SOURCE_TRACKBALL) == InputDevice.SOURCE_TRACKBALL)
+                mask |= Q3EGlobals.DEVICE_TRACKBALL;
+
+            if ((sources & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD)
+                mask |= Q3EGlobals.DEVICE_TOUCHPAD;
+
+            final Object[] Sources = {
+                    InputDevice.SOURCE_KEYBOARD, "keyboard",
+                    InputDevice.SOURCE_DPAD, "DPad",
+                    InputDevice.SOURCE_GAMEPAD, "game pad",
+                    InputDevice.SOURCE_TOUCHSCREEN, "touch screen",
+                    InputDevice.SOURCE_MOUSE, "mouse",
+                    InputDevice.SOURCE_STYLUS, "stylus",
+                    InputDevice.SOURCE_BLUETOOTH_STYLUS, "Bluetooth stylus",
+                    InputDevice.SOURCE_TRACKBALL, "trackball",
+                    InputDevice.SOURCE_MOUSE_RELATIVE, "relative mouse",
+                    InputDevice.SOURCE_TOUCHPAD, "touch pad",
+                    InputDevice.SOURCE_TOUCH_NAVIGATION, "touch navigation",
+                    InputDevice.SOURCE_ROTARY_ENCODER, "rotary encoder",
+                    InputDevice.SOURCE_JOYSTICK, "joystick",
+                    InputDevice.SOURCE_HDMI, "HDMI",
+                    InputDevice.SOURCE_ANY, "any",
+            };
+            List<String> sourceList = new ArrayList<>();
+            for(int m = 0; m < Sources.length; m+=2)
+            {
+                if(Q3EUtils.IncludeBit(sources, (Integer) Sources[m])) sourceList.add((String)Sources[m+1]);
+            }
+
+            String source = String.join(", ", sourceList);
+
+            KLog.I("%d: ID=%d, name=%s, type=%s", i, deviceId, device.getName(), source);
+        }
+
+        return mask;
     }
 
     private void LoadControllerKeymap()
@@ -184,13 +251,11 @@ public class Q3EGameHelper
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Run " + Q3EUtils.q3ei.game_name);
 
         Q3EUtils.q3ei.SetupEngineLib(); //k setup engine library here again
-        Q3EUtils.q3ei.view_motion_control_gyro = preferences.getBoolean(Q3EPreference.pref_harm_view_motion_control_gyro, false);
-        Q3EUtils.q3ei.function_key_toolbar = preferences.getBoolean(Q3EPreference.pref_harm_function_key_toolbar, true);
-        Q3EUtils.q3ei.builtin_virtual_keyboard = preferences.getBoolean(Q3EPreference.BUILTIN_VIRTUAL_KEYBOARD, false);
-        Q3EUtils.q3ei.joystick_unfixed = preferences.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
-        Q3EUtils.q3ei.joystick_smooth = preferences.getBoolean(Q3EPreference.pref_analog, true);
-        Q3EUtils.q3ei.VOLUME_UP_KEY_CODE = Q3EKeyCodes.GetRealKeyCode(preferences.getInt(Q3EPreference.VOLUME_UP_KEY, KeyCodesGeneric.K_F3));
-        Q3EUtils.q3ei.VOLUME_DOWN_KEY_CODE = Q3EKeyCodes.GetRealKeyCode(preferences.getInt(Q3EPreference.VOLUME_DOWN_KEY, KeyCodesGeneric.K_F2));
+        Q3E.function_key_toolbar = preferences.getBoolean(Q3EPreference.pref_harm_function_key_toolbar, true);
+        Q3E.builtin_virtual_keyboard = preferences.getBoolean(Q3EPreference.BUILTIN_VIRTUAL_KEYBOARD, false);
+        Q3E.joystick_smooth = preferences.getBoolean(Q3EPreference.pref_analog, true);
+        Q3EKeyCodes.VOLUME_UP_KEY_CODE = Q3EKeyCodes.GetRealKeyCode(preferences.getInt(Q3EPreference.VOLUME_UP_KEY, KeyCodesGeneric.K_F3));
+        Q3EKeyCodes.VOLUME_DOWN_KEY_CODE = Q3EKeyCodes.GetRealKeyCode(preferences.getInt(Q3EPreference.VOLUME_DOWN_KEY, KeyCodesGeneric.K_F2));
 
         // DOOM 3: Hardscorps and Quake4: hardqore mod template disable smooth joystick
 /*        if(Q3EUtils.q3ei.joystick_smooth)
@@ -1232,7 +1297,7 @@ public class Q3EGameHelper
                 usingMouse,
                 refreshRate,
                 appHome,
-                Q3EUtils.q3ei.joystick_smooth,
+                Q3E.joystick_smooth,
                 consoleMaxHeightFrac,
                 useExternalLibPath,
                 sdlAudioDriver,

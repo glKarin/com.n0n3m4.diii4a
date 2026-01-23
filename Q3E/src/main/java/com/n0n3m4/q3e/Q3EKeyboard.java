@@ -40,7 +40,7 @@ public class Q3EKeyboard
 
     public View CreateToolbar()
     {
-        if(Q3EUtils.q3ei.function_key_toolbar)
+        if(Q3E.function_key_toolbar)
         {
             Context context = m_context;
             m_keyToolbar = new KKeyToolBar(context);
@@ -69,7 +69,7 @@ public class Q3EKeyboard
 
     public void ToggleToolbar(boolean b)
     {
-        if(null != m_keyToolbar && Q3EUtils.q3ei.function_key_toolbar)
+        if(null != m_keyToolbar && Q3E.function_key_toolbar)
         {
             m_toolbarActive = b;
             m_keyToolbar.SetVisible(m_toolbarActive);
@@ -89,7 +89,7 @@ public class Q3EKeyboard
 
     public void OpenBuiltInVKB()
     {
-        if(null != vkb && Q3EUtils.q3ei.builtin_virtual_keyboard)
+        if(null != vkb && Q3E.builtin_virtual_keyboard)
         {
             vkbActive = true;
             vkb.Open();
@@ -98,7 +98,7 @@ public class Q3EKeyboard
 
     public void CloseBuiltInVKB()
     {
-        if(null != vkb && Q3EUtils.q3ei.builtin_virtual_keyboard)
+        if(null != vkb && Q3E.builtin_virtual_keyboard)
         {
             vkbActive = false;
             vkb.Close();
@@ -107,7 +107,7 @@ public class Q3EKeyboard
 
     public void ToggleBuiltInVKB()
     {
-        if(null != vkb && Q3EUtils.q3ei.builtin_virtual_keyboard)
+        if(null != vkb && Q3E.builtin_virtual_keyboard)
         {
             vkbActive = !vkbActive;
             vkb.SetVisible(vkbActive);

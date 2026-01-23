@@ -40,6 +40,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.InputDevice;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowInsets;
@@ -128,10 +129,10 @@ public class Q3EUtils
     public static void togglevkbd(View vw)
     {
         InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (q3ei.function_key_toolbar)
+        if (Q3E.function_key_toolbar)
         {
             boolean changed;
-            if(q3ei.builtin_virtual_keyboard)
+            if(Q3E.builtin_virtual_keyboard)
             {
                 Q3E.activity.GetKeyboard().ToggleBuiltInVKB();
                 changed = Q3E.activity.GetKeyboard().IsBuiltInVKBVisible();
@@ -152,7 +153,7 @@ public class Q3EUtils
         }
         else
         {
-            if(q3ei.builtin_virtual_keyboard)
+            if(Q3E.builtin_virtual_keyboard)
                 Q3E.activity.GetKeyboard().ToggleBuiltInVKB();
             else
                 imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
@@ -169,7 +170,7 @@ public class Q3EUtils
         if (null != vw)
         {
             InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if(q3ei.builtin_virtual_keyboard)
+            if(Q3E.builtin_virtual_keyboard)
                 Q3E.activity.GetKeyboard().OpenBuiltInVKB();
             else
             {
@@ -177,7 +178,7 @@ public class Q3EUtils
                 imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
             }
         }
-        if (Q3EUtils.q3ei.function_key_toolbar)
+        if (Q3E.function_key_toolbar)
             Q3EUtils.ToggleToolbar(true);
     }
 
@@ -185,7 +186,7 @@ public class Q3EUtils
     {
         if (null != vw)
         {
-            if(q3ei.builtin_virtual_keyboard)
+            if(Q3E.builtin_virtual_keyboard)
             {
                 Q3E.activity.GetKeyboard().CloseBuiltInVKB();
             }
@@ -195,7 +196,7 @@ public class Q3EUtils
                 imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
             }
         }
-        if (Q3EUtils.q3ei.function_key_toolbar)
+        if (Q3E.function_key_toolbar)
             Q3EUtils.ToggleToolbar(false);
     }
 
@@ -1618,5 +1619,25 @@ public class Q3EUtils
         {
             e.printStackTrace();
         }
+    }
+
+    public static boolean HasMouseDevice()
+    {
+        int[] deviceIds = InputDevice.getDeviceIds();
+        for(int deviceId : deviceIds)
+        {
+            InputDevice device = InputDevice.getDevice(deviceId);
+
+            if(null == device)
+                continue;
+            if ((device.getSources() & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE)
+                return true;
+        }
+        return false;
+    }
+
+    public static boolean IncludeBit(int a, int b)
+    {
+        return (a & b) == b;
     }
 }

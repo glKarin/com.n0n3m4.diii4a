@@ -312,14 +312,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         handler.OnWindowFocusChanged(hasWindowFocus);
     }
 
-    public boolean IsUsingMouse()
-    {
-        return handler.IsUsingMouse();
-    }
-
     public void ShowCursor(boolean on)
     {
-        if(!handler.IsUsingMouse())
+        if(!Q3E.m_usingMouse)
             return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
         {

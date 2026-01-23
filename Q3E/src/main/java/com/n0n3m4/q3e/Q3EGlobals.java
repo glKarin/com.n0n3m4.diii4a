@@ -147,6 +147,15 @@ public final class Q3EGlobals
     public static final float GYROSCOPE_X_AXIS_SENS = 18;
     public static final float GYROSCOPE_Y_AXIS_SENS = 18;
 
+    // device
+    public static final int DEVICE_TOUCHSCREEN = 1;
+    public static final int DEVICE_KEYBOARD = 1 << 1;
+    public static final int DEVICE_MOUSE = 1 << 2;
+    public static final int DEVICE_JOYSTICK = 1 << 3;
+    public static final int DEVICE_GAMEPAD = 1 << 4;
+    public static final int DEVICE_TRACKBALL = 1 << 5;
+    public static final int DEVICE_TOUCHPAD = 1 << 6;
+
     public static final String[] CONTROLS_NAMES = {
             "Joystick",
             "Shoot",
