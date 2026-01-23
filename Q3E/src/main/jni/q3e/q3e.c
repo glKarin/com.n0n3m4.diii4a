@@ -56,6 +56,12 @@
 #define Q3E_MAX_ARGS 512 // 255
 #define GAME_MAIN_THREAD_NAME "Q3EMain"
 
+enum {
+    SIGNAL_HANDLER_GAME = 0,
+    SIGNAL_HANDLER_DISABLE = 1,
+    SIGNAL_HANDLER_BT = 2,
+};
+
 //#define AUDIOTRACK_BYTEBUFFER 1
 
 // call DOOM3
@@ -497,7 +503,9 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
     int argc;
 	jboolean iscopy;
 
-	if(signalsHandler == 2) // using backtrace
+    Q3E_InitEnvKey();
+
+	if(signalsHandler == SIGNAL_HANDLER_BT) // using backtrace
 	{
 		setup_backtrace();
 	}
