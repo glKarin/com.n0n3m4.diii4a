@@ -98,13 +98,8 @@ public class Q3EInterface
 
 	public Q3ECallbackObj callbackObj;
 
-    public boolean view_motion_control_gyro = false;
     public String start_temporary_extra_command = "";
 	public String cmd = Q3EGameConstants.GAME_EXECUABLE;
-	public boolean function_key_toolbar = false;
-	public boolean joystick_unfixed = false;
-	public boolean joystick_smooth          = true; // Q3EView::analog
-	public boolean builtin_virtual_keyboard = false;
 
 	public String app_storage_path = "/sdcard/diii4a";
 	
@@ -113,10 +108,6 @@ public class Q3EInterface
 	public final int RTCW4A_UI_ACTION=6;
 	public final int RTCW4A_UI_KICK=7;
 	 */
-
-	//k volume key map
-	public int VOLUME_UP_KEY_CODE = KeyCodesGeneric.K_F3;
-	public int VOLUME_DOWN_KEY_CODE = KeyCodesGeneric.K_F2;
 
 	public String EngineLibName()
 	{

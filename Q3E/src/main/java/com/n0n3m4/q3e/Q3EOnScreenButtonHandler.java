@@ -76,8 +76,6 @@ abstract class Q3EOnScreenButtonHandler
     abstract void GrabMouse();
     abstract void UnGrabMouse();
     abstract boolean onCapturedPointerEvent(MotionEvent event);
-    abstract boolean IsUsingMouse();
-    abstract boolean IsUsingMouseEvent();
     abstract void GLBegin();
     abstract void GLEnd();
     abstract void Begin();

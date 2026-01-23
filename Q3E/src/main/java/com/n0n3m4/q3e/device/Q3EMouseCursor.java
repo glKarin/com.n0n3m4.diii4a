@@ -1,22 +1,14 @@
-package com.n0n3m4.q3e.karin;
+package com.n0n3m4.q3e.device;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.R;
 
-public class KMouseCursor extends View
+public class Q3EMouseCursor extends View
 {
     private int    m_x     = -1;
     private int    m_y     = -1;
@@ -24,19 +16,19 @@ public class KMouseCursor extends View
     public static final int WIDTH = 64;
     public static final int HEIGHT = 64;
 
-    public KMouseCursor(Context context)
+    public Q3EMouseCursor(Context context)
     {
         super(context);
         Setup();
     }
 
-    public KMouseCursor(Context context, AttributeSet attrs)
+    public Q3EMouseCursor(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         Setup();
     }
 
-    public KMouseCursor(Context context, AttributeSet attrs, int defStyle)
+    public Q3EMouseCursor(Context context, AttributeSet attrs, int defStyle)
     {
         super(context, attrs, defStyle);
         Setup();

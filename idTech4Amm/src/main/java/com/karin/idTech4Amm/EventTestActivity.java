@@ -166,11 +166,6 @@ public class EventTestActivity extends Activity
         AppendLine("Vendor: " + device.getVendorId());
     }
 
-    private boolean TestBit(int a, int b)
-    {
-        return (a & b) == b;
-    }
-
     private void HandleSource(int source)
     {
         AppendLine("Source: source=" + HexString(source) + " class=" + HexString(source & InputDevice.SOURCE_CLASS_MASK));
@@ -195,7 +190,7 @@ public class EventTestActivity extends Activity
         List<String> sourceList = new ArrayList<>();
         for(int i = 0; i < Sources.length; i+=2)
         {
-            if(TestBit(source, (Integer) Sources[i])) sourceList.add((String)Sources[i+1]);
+            if(Q3EUtils.IncludeBit(source, (Integer) Sources[i])) sourceList.add((String)Sources[i+1]);
         }
 
         final Object[] Classes = {
@@ -208,7 +203,7 @@ public class EventTestActivity extends Activity
         List<String> classList = new ArrayList<>();
         for(int i = 0; i < Classes.length; i+=2)
         {
-            if(TestBit(source, (Integer) Classes[i])) classList.add((String)Classes[i+1]);
+            if(Q3EUtils.IncludeBit(source, (Integer) Classes[i])) classList.add((String)Classes[i+1]);
         }
         if(classList.isEmpty())
             classList.add("none");
@@ -280,7 +275,7 @@ public class EventTestActivity extends Activity
         List<String> sourceList = new ArrayList<>();
         for(int i = 0; i < Sources.length; i+=2)
         {
-            if(TestBit(modifiers, (Integer) Sources[i])) sourceList.add((String)Sources[i+1]);
+            if(Q3EUtils.IncludeBit(modifiers, (Integer) Sources[i])) sourceList.add((String)Sources[i+1]);
         }
         AppendLine("Modifiers: " + HexString(modifiers) + " -> " + String.join(", ", sourceList));
     }
@@ -323,7 +318,7 @@ public class EventTestActivity extends Activity
         List<String> sourceList = new ArrayList<>();
         for(int i = 0; i < Sources.length; i+=2)
         {
-            if(TestBit(state, (Integer) Sources[i])) sourceList.add((String)Sources[i+1]);
+            if(Q3EUtils.IncludeBit(state, (Integer) Sources[i])) sourceList.add((String)Sources[i+1]);
         }
         AppendLine("ButtonState: " + HexString(state) + " -> " + String.join(", ", sourceList));
     }

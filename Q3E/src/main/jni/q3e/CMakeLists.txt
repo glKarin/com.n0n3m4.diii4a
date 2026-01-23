@@ -31,6 +31,7 @@ set(q3e_src
         q3ethread.c
         q3emisc.c
         q3eutility.c
+        q3eenv.c
         )
 
 set(q3e_lib
@@ -38,6 +39,9 @@ set(q3e_lib
         android
         q3e_bt
         )
+if(Q3E_SDL)
+        set(q3e_src ${q3e_src} q3esdl2.c)
+endif()
 
 add_library( # Sets the name of the library.
         q3eloader

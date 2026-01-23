@@ -22,6 +22,7 @@ package com.n0n3m4.q3e;
 import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -39,6 +40,10 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class Q3EKeyCodes
 {
+    //k volume key map
+    public static int VOLUME_UP_KEY_CODE = KeyCodesGeneric.K_F3;
+    public static int VOLUME_DOWN_KEY_CODE = KeyCodesGeneric.K_F2;
+
     // KARIN_NEW_GAME_BOOKMARK: add key code converter
 
     public static class KeyCodes
@@ -258,9 +263,9 @@ public class Q3EKeyCodes
                 return KeyCodes.K_F1;
             // volume keys
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-                return KeyCodes.K_F2;
+                return VOLUME_DOWN_KEY_CODE;
             case KeyEvent.KEYCODE_VOLUME_UP:
-                return KeyCodes.K_F3;
+                return VOLUME_UP_KEY_CODE;
             case KeyEvent.KEYCODE_ENTER:
                 return KeyCodes.K_ENTER;
             case KeyEvent.KEYCODE_BACK:
@@ -320,15 +325,15 @@ public class Q3EKeyCodes
                 return KeyCodes.K_PGUP;
             // keyboard arrow / dpad
             case KeyEvent.KEYCODE_DPAD_UP:
-                return Q3EControllerControl.IsGamePadDevice(event) ? KeyCodes.J_DPAD_UP : KeyCodes.K_UPARROW;
+                return Q3EControllerControl.IsGamePadKeyEvent(event) ? KeyCodes.J_DPAD_UP : KeyCodes.K_UPARROW;
             case KeyEvent.KEYCODE_DPAD_DOWN:
-                return Q3EControllerControl.IsGamePadDevice(event) ? KeyCodes.J_DPAD_DOWN : KeyCodes.K_DOWNARROW;
+                return Q3EControllerControl.IsGamePadKeyEvent(event) ? KeyCodes.J_DPAD_DOWN : KeyCodes.K_DOWNARROW;
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                return Q3EControllerControl.IsGamePadDevice(event) ? KeyCodes.J_DPAD_LEFT : KeyCodes.K_LEFTARROW;
+                return Q3EControllerControl.IsGamePadKeyEvent(event) ? KeyCodes.J_DPAD_LEFT : KeyCodes.K_LEFTARROW;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                return Q3EControllerControl.IsGamePadDevice(event) ? KeyCodes.J_DPAD_RIGHT : KeyCodes.K_RIGHTARROW;
+                return Q3EControllerControl.IsGamePadKeyEvent(event) ? KeyCodes.J_DPAD_RIGHT : KeyCodes.K_RIGHTARROW;
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                return Q3EControllerControl.IsGamePadDevice(event) ? KeyCodes.J_DPAD_CENTER : KeyCodes.K_ENTER;
+                return Q3EControllerControl.IsGamePadKeyEvent(event) ? KeyCodes.J_DPAD_CENTER : KeyCodes.K_ENTER;
             // Controller
             // a b c x y z
             case KeyEvent.KEYCODE_BUTTON_A:

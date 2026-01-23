@@ -23,20 +23,15 @@
 package com.n0n3m4.q3e.control;
 
 import android.content.Context;
-import android.view.MotionEvent;
+import android.view.KeyEvent;
 
 import com.n0n3m4.q3e.Q3EControlView;
-import com.n0n3m4.q3e.Q3EJNI;
-import com.n0n3m4.q3e.Q3EUtils;
 
-public final class Q3ETrackballControl
+public abstract class Q3EEventControl
 {
-    private final Q3EControlView controlView;
+    protected final Q3EControlView controlView;
 
-    private float last_trackball_x = 0;
-    private float last_trackball_y = 0;
-
-    public Q3ETrackballControl(Q3EControlView controlView)
+    public Q3EEventControl(Q3EControlView controlView)
     {
         this.controlView = controlView;
     }
@@ -46,20 +41,6 @@ public final class Q3ETrackballControl
         return controlView.getContext();
     }
 
-    public boolean OnTrackballEvent(MotionEvent event)
-    {
-        float x = event.getX();
-        float y = event.getY();
-        if (event.getAction() == MotionEvent.ACTION_DOWN)
-        {
-            last_trackball_x = x;
-            last_trackball_y = y;
-        }
-        final float deltaX = x - last_trackball_x;
-        final float deltaY = y - last_trackball_y;
-        Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
-        last_trackball_x = x;
-        last_trackball_y = y;
-        return true;
-    }
+    public abstract boolean OnKeyUp(int keyCode, KeyEvent event, int unicodeChar);
+    public abstract boolean OnKeyDown(int keyCode, KeyEvent event, int unicodeChar);
 }

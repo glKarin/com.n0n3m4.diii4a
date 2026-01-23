@@ -3,6 +3,7 @@ package com.n0n3m4.q3e.onscreen;
 import android.graphics.Rect;
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -388,7 +389,7 @@ public class Joystick extends Paintable implements TouchListener
         {
             if (Q3EUtils.q3ei.callbackObj.notinmenu)
             {
-                if (Q3EUtils.q3ei.joystick_smooth)
+                if (Q3E.joystick_smooth)
                 {
                     dotjoyenabled = true;
                     dotx = deltax;
@@ -457,7 +458,7 @@ public class Joystick extends Paintable implements TouchListener
         else
         {
             m_pressed = false;
-            if (Q3EUtils.q3ei.joystick_smooth)
+            if (Q3E.joystick_smooth)
             {
                 dotjoyenabled = false;
                 Q3EUtils.q3ei.callbackObj.sendAnalog(false, 0, 0);
@@ -514,7 +515,7 @@ public class Joystick extends Paintable implements TouchListener
                 {
                     if (Q3EUtils.q3ei.callbackObj.notinmenu)
                     {
-                        if (Q3EUtils.q3ei.joystick_smooth)
+                        if (Q3E.joystick_smooth)
                         {
                             dotjoyenabled = true;
                             dotx = deltax;
@@ -576,7 +577,7 @@ public class Joystick extends Paintable implements TouchListener
             case ACT_RELEASE:
                 m_pressed = false;
 
-                if (Q3EUtils.q3ei.joystick_smooth)
+                if (Q3E.joystick_smooth)
                 {
                     dotjoyenabled = false;
                     Q3EUtils.q3ei.callbackObj.sendAnalog(false, 0, 0);

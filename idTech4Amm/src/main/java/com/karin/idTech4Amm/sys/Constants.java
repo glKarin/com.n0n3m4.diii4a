@@ -10,7 +10,7 @@ import com.karin.idTech4Amm.misc.TextHelper;
 public final class Constants
 {
     public static final int    CONST_UPDATE_RELEASE = 70;
-    public static final String CONST_RELEASE = "2025-12-21"; // 02-12; 05-08
+    public static final String CONST_RELEASE = "2025-12-31"; // 02-12; 05-08
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -26,7 +26,7 @@ public final class Constants
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
     public static final String CONST_TESTING_URL = "https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/android_testing";
-    public static final String CONST_CODE_ALIAS = "Lin Daiyu"; // Natasha; Verena; Caitlyn; Lin Daiyu; Lu Yiping
+    public static final String CONST_CODE_ALIAS = "Whip"; // Natasha; Verena; Caitlyn; Lin Daiyu; Lu Yiping; Whip
 	public static String[] CONST_CHANGES()
     {
         return new String[] {

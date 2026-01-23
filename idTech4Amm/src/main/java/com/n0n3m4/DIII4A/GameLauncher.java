@@ -77,6 +77,7 @@ import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.karin.Theme;
 import com.karin.idTech4Amm.ui.ChangelogView;
 import com.karin.idTech4Amm.ui.DebugDialog;
@@ -290,7 +291,6 @@ public class GameLauncher extends Activity
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_joystick_unfixed, isChecked)
 						.commit();
-				Q3EUtils.q3ei.joystick_unfixed = isChecked;
 			}
 			else if (id == R.id.using_mouse)
 			{
@@ -1140,8 +1140,6 @@ public class GameLauncher extends Activity
 		//q3ei.LoadTypeAndArgTablePreference(this);
 
         Q3EUtils.q3ei = q3ei;
-
-		Q3EUtils.q3ei.joystick_unfixed = mPrefs.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
     }
 
 	@Override

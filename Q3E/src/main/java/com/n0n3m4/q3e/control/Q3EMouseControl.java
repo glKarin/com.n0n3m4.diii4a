@@ -33,17 +33,17 @@ import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.device.Q3EMouseDevice;
+import com.n0n3m4.q3e.onscreen.Finger;
+import com.n0n3m4.q3e.onscreen.TouchListener;
+
+import java.util.Arrays;
 
 public final class Q3EMouseControl
 {
     private final Q3EControlView controlView;
 
-    private boolean        m_usingMouseDevice = false;
-    private Q3EMouseDevice m_mouseDevice      = null;
-
     private boolean m_allowGrabMouse = false;
     private int m_requestGrabMouse = 0;
-    private boolean m_usingMouse = false;
 
     private float m_lastTouchPadPosX = -1;
     private float m_lastTouchPadPosY = -1;
@@ -62,7 +62,7 @@ public final class Q3EMouseControl
 
     public void GrabMouse()
     {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && m_usingMouse)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Q3E.m_usingMouse)
         {
             Runnable runnable = new Runnable() {
                 @Override
@@ -81,7 +81,7 @@ public final class Q3EMouseControl
 
     public void UnGrabMouse()
     {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && m_usingMouse)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Q3E.m_usingMouse)
         {
             Runnable runnable = new Runnable() {
                 @Override
@@ -100,7 +100,7 @@ public final class Q3EMouseControl
 
     public void OnWindowFocusChanged(boolean hasWindowFocus)
     {
-        if(!m_usingMouse)
+        if(!Q3E.m_usingMouse)
             return;
         m_allowGrabMouse = hasWindowFocus;
         if(hasWindowFocus)
@@ -118,29 +118,9 @@ public final class Q3EMouseControl
         }
     }
 
-    public boolean IsUsingMouse()
-    {
-        return m_usingMouse || m_usingMouseDevice;
-    }
-
-    public boolean IsUsingMouseEvent()
-    {
-        return m_usingMouse;
-    }
-
-    public boolean Init()
-    {
-        int mouse = Q3EUtils.SupportMouse();
-        if(mouse == Q3EGlobals.MOUSE_EVENT)
-            m_usingMouse = true;
-        else if(mouse == Q3EGlobals.MOUSE_DEVICE)
-            m_usingMouseDevice = true;
-        return m_usingMouse || m_usingMouseDevice;
-    }
-
     public boolean OnCapturedPointerEvent(MotionEvent event)
     {
-        if(m_usingMouse)
+        if(Q3E.m_usingMouse)
         {
             switch (event.getSource())
             {
@@ -246,7 +226,6 @@ public final class Q3EMouseControl
                     }
                 }
                 Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
-                Q3EUtils.q3ei.callbackObj.sendMouseEvent(deltaX, deltaY);
                 break;
             case MotionEvent.ACTION_SCROLL:
                 // float scrollX = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
@@ -270,7 +249,7 @@ public final class Q3EMouseControl
     {
         int source = event.getSource();
 
-        if(m_usingMouse && source == InputDevice.SOURCE_MOUSE)
+        if(Q3E.m_usingMouse && source == InputDevice.SOURCE_MOUSE)
         {
             int action = event.getAction();
             int actionIndex = event.getActionIndex();
@@ -308,7 +287,7 @@ public final class Q3EMouseControl
 //                case MotionEvent.ACTION_HOVER_EXIT: break;
                 case MotionEvent.ACTION_HOVER_MOVE:
                     Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
-                    Q3EUtils.q3ei.callbackObj.sendMouseEvent(Q3E.PhysicsToLogicalX(x), Q3E.PhysicsToLogicalY(y));
+                    Q3EUtils.q3ei.callbackObj.sendMouseEvent(x, y);
                     break;
                 case MotionEvent.ACTION_SCROLL:
                     float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
@@ -330,9 +309,31 @@ public final class Q3EMouseControl
         return false;
     }
 
+    public boolean OnTouchEvent(MotionEvent event)
+    {
+        if(Q3E.m_usingMouse/* && source == InputDevice.SOURCE_MOUSE*/) {
+            int action = event.getAction();
+            int actionIndex = event.getActionIndex();
+            float x = event.getX(actionIndex);
+            float y = event.getY(actionIndex);
+            if (m_lastMousePosX < 0)
+                m_lastMousePosX = x;
+            if (m_lastMousePosY < 0)
+                m_lastMousePosY = y;
+            float deltaX = x - m_lastMousePosX;
+            float deltaY = y - m_lastMousePosY;
+            m_lastMousePosX = x;
+            m_lastMousePosY = y;
+            if (action == MotionEvent.ACTION_MOVE) {
+                Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
+                Q3EUtils.q3ei.callbackObj.sendMouseEvent(x, y);
+            }
+            return true;
+        }
+        return false;
+    }
+
     public void Start()
     {
-        if(null != m_mouseDevice)
-            m_mouseDevice.Start();
     }
 }

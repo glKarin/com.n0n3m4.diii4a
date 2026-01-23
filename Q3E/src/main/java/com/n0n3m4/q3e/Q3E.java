@@ -4,6 +4,7 @@ import android.view.Surface;
 import android.util.Log;
 import android.os.Build;
 
+import com.n0n3m4.q3e.device.Q3EVirtualMouse;
 import com.n0n3m4.q3e.event.Q3EExitEvent;
 import com.n0n3m4.q3e.event.Q3EQuitEvent;
 import com.n0n3m4.q3e.karin.KLog;
@@ -23,7 +24,8 @@ public final class Q3E
 
     public static          Q3EView        gameView;
     public static          Q3EControlView controlView;
-    public static volatile boolean        running = false;
+    public static volatile boolean         running = false;
+    public static          Q3EVirtualMouse virtualMouse;
 
 
     // surface size
@@ -38,6 +40,17 @@ public final class Q3E
     // ratio
     public static float widthRatio = 1.0f;
     public static float heightRatio = 1.0f;
+
+    public static boolean joystick_smooth          = true; // Q3EView::analog
+    public static boolean function_key_toolbar = false;
+    public static boolean builtin_virtual_keyboard = false;
+    public static boolean m_usingMouse = false;
+    public static int supportDevices = 0;
+
+    public static void runOnUiThread(Runnable action) {
+        if(null != activity)
+            activity.runOnUiThread(action);
+    }
 
     public static int LogicalToPhysicsX(int x)
     {
