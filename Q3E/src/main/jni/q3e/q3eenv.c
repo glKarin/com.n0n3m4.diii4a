@@ -23,6 +23,7 @@ static void Q3E_SetEnv(JNIEnv *env)
         LOGE("[SDL]: Failed pthread_setspecific() in Q3E_SetEnv() (err=%d)", status);
     }
     return status;*/
+    //LOGD("[SDL]: Set JNIEnv thread key %zu: %p -> %d", (uintptr_t)env_thread_key, env, status);
 }
 
 /* Get local storage value */
@@ -42,7 +43,7 @@ JNIEnv * Q3E_GetEnv(void)
 
         /* Attach the current thread to the JVM and get a JNIEnv.
          * It will be detached by pthread_create destructor 'Android_JNI_ThreadDestroyed' */
-        if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) < 0 )
+        if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_Version)) < 0 )
         {
             /*status = */(*jVM)->AttachCurrentThread(jVM, &env, NULL);
         }
@@ -54,6 +55,7 @@ JNIEnv * Q3E_GetEnv(void)
         /* Save JNIEnv into the Thread local storage */
         Q3E_SetEnv(env);
     }
+    //else LOGD("[SDL]: Get JNIEnv thread key %zu: %p", (uintptr_t)env_thread_key, env);
 
     return env;
 }
@@ -66,6 +68,7 @@ static void Q3E_ThreadDestroyed(void *value)
     if (env) {
         (*jVM)->DetachCurrentThread(jVM);
         Q3E_SetEnv(NULL);
+        //LOGD("[SDL]: Destroy JNIEnv thread key %zu: %p", (uintptr_t)env_thread_key, env);
     }
 }
 
@@ -76,6 +79,7 @@ static void Q3E_CreateEnvKey(void)
     if (status < 0) {
         LOGE("[SDL]: Error initializing JNIEnv thread key with pthread_key_create() (err=%d)", status);
     }
+    //else LOGD("[SDL]: Initializing JNIEnv thread key with pthread_key_create");
 }
 
 void Q3E_InitEnvKey(void)
@@ -85,4 +89,14 @@ void Q3E_InitEnvKey(void)
     if (status < 0) {
         LOGE("[SDL]: Error initializing JNIEnv thread key with pthread_once() (err=%d)", status);
     }
+    //else LOGD("[SDL]: Initializing JNIEnv thread key with pthread_once()");
+}
+
+void Q3E_DestroyEnvKey(void)
+{
+    int status = pthread_key_delete(env_thread_key);
+    if (status < 0) {
+        LOGE("[SDL]: Error destroy JNIEnv thread key with pthread_key_delete() (err=%d)", status);
+    }
+    //else LOGD("[SDL]: Destroy JNIEnv thread key with pthread_key_delete()");
 }

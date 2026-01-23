@@ -53,7 +53,6 @@
 
 #define LOG_TAG "Q3E::JNI"
 
-#define JNI_Version JNI_VERSION_1_4
 #define Q3E_MAX_ARGS 512 // 255
 #define GAME_MAIN_THREAD_NAME "Q3EMain"
 
@@ -140,7 +139,7 @@ static jmethodID android_ShowCursor_method;
 
 #define ATTACH_JNI(env) \
 	JNIEnv *env = 0; \
-	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) < 0 ) \
+	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_Version)) < 0 ) \
 	{ \
 		(*jVM)->AttachCurrentThread(jVM, &env, NULL); \
 	}
@@ -150,7 +149,7 @@ static jmethodID android_ShowCursor_method;
 void Android_AttachThread(void)
 {
     JNIEnv *env = 0;
-	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) < 0 )
+	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_Version)) < 0 )
 	{
 		(*jVM)->AttachCurrentThread(jVM, &env, NULL);
 	}
@@ -159,7 +158,7 @@ void Android_AttachThread(void)
 void Android_DetachThread(void)
 {
 	JNIEnv *env = 0;
-	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4)) >= 0 ) {
+	if ( ((*jVM)->GetEnv(jVM, (void**) &env, JNI_Version)) >= 0 ) {
 		(*jVM)->DetachCurrentThread(jVM);
 	}
 }
@@ -376,16 +375,17 @@ static void q3e_exit(void)
 		libdl = NULL;
 	    LOGI("Unload game library");
 	}
-	Q3E_CloseRedirectOutput();
 
 	EXEC_SDL(Q3E_ShutdownSDL);
+    //Q3E_DestroyEnvKey();
+    Q3E_CloseRedirectOutput();
 }
 
 int JNI_OnLoad(JavaVM* vm, void* reserved)
 {
     JNIEnv *env;
     jVM = vm;
-    if((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK)
+    if((*vm)->GetEnv(vm, (void**) &env, JNI_Version) != JNI_OK)
     {
         LOGE("JNI fatal error");
         return -1;
@@ -427,7 +427,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject(JNIEnv *env,
     q3eCallbackObj = obj;
     jclass q3eCallbackClass;
 
-    (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+    (*jVM)->GetEnv(jVM, (void**) &env, JNI_Version);
     q3eCallbackObj = (jobject)(*env)->NewGlobalRef(env, obj);
     q3eCallbackClass = (*env)->GetObjectClass(env, q3eCallbackObj);
     
@@ -510,8 +510,6 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 		(*env)->ReleaseStringUTFChars(env, LibPath, engineLibPath);
 		return JNI_FALSE; // init fail
 	}
-
-    Q3E_InitEnvKey();
 
     INIT_SDL();
 	EXEC_SDL(Q3E_SDL_SetAudioDriver, sdlAudioDriver);
