@@ -193,6 +193,21 @@ public class Q3EVirtualMouse
 
     public void SetAbsPosition(float x, float y)
     {
+        if(x < rect.left) {
+            x = 0;
+        } else if(x >= rect.right) {
+            x = width - 1;
+        } else {
+            x = x - rect.left;
+        }
+
+        if(y < rect.top) {
+            y = 0;
+        } else if(y >= rect.bottom) {
+            y = height - 1;
+        } else {
+            y = y - rect.top;
+        }
         SetPosition(Q3E.PhysicsToLogicalX(x), Q3E.PhysicsToLogicalY(y));
     }
 
