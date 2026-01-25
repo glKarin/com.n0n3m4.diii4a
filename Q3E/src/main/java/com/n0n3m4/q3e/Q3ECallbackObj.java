@@ -38,7 +38,6 @@ public class Q3ECallbackObj
 {
     private static final String TAG = "Q3ECallbackObj";
     public Q3EAudioTrack mAudioTrack;
-    public Q3EControlView vw;
     public int state = Q3EGlobals.STATE_NONE;
     private final Object m_audioLock = new Object();
     public static boolean reqThreadrunning = false;
@@ -204,9 +203,9 @@ public class Q3ECallbackObj
             if(Q3E.m_usingMouse)
             {
                 if (grab)
-                    vw.GrabMouse();
+                    Q3E.controlView.GrabMouse();
                 else
-                    vw.UnGrabMouse();
+                    Q3E.controlView.UnGrabMouse();
             }
             if(null != Q3E.virtualMouse)
                 Q3E.virtualMouse.SetRelativeMode(grab);
@@ -333,20 +332,20 @@ public class Q3ECallbackObj
 
     public void CloseVKB()
     {
-        vw.post(new Runnable() {
+        Q3E.post(new Runnable() {
             @Override
             public void run() {
-                Q3EUtils.CloseVKB(vw);
+                Q3EUtils.CloseVKB(Q3E.controlView);
             }
         });
     }
 
     public void OpenVKB()
     {
-        vw.post(new Runnable() {
+        Q3E.post(new Runnable() {
             @Override
             public void run() {
-                Q3EUtils.OpenVKB(vw);
+                Q3EUtils.OpenVKB(Q3E.controlView);
             }
         });
     }
@@ -359,14 +358,14 @@ public class Q3ECallbackObj
 
     public void OpenURL(String url)
     {
-        vw.post(new Runnable() {
+        Q3E.post(new Runnable() {
             @Override
             public void run()
             {
                 Uri uri = Uri.parse(url);
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-                vw.getContext().startActivity(intent);
+                Q3E.activity.startActivity(intent);
             }
         });
     }
@@ -407,10 +406,10 @@ public class Q3ECallbackObj
 
     public void ShowCursor(boolean on)
     {
-        vw.post(new Runnable() {
+        Q3E.post(new Runnable() {
             @Override
             public void run() {
-                vw.ShowCursor(on);
+                Q3E.controlView.ShowCursor(on);
             }
         });
     }

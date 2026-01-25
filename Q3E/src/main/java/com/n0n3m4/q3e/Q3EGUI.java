@@ -39,7 +39,7 @@ public class Q3EGUI
         synchronized(lock) {
             try
             {
-                Q3EUtils.q3ei.callbackObj.vw.post(new Runnable() {
+                Q3E.post(new Runnable() {
                     @Override
                     public void run()
                     {
@@ -110,7 +110,7 @@ public class Q3EGUI
         synchronized(lock) {
             try
             {
-                Q3EUtils.q3ei.callbackObj.vw.post(new Runnable() {
+                Q3E.post(new Runnable() {
                     @Override
                     public void run()
                     {

@@ -52,6 +52,10 @@ public final class Q3E
             activity.runOnUiThread(action);
     }
 
+    public static void post(Runnable action) {
+        controlView.post(action);
+    }
+
     public static int LogicalToPhysicsX(int x)
     {
         return Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth ? x : (int) ((float) x * Q3E.widthRatio);
