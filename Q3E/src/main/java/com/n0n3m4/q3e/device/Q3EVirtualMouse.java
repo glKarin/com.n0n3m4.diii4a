@@ -209,7 +209,6 @@ public class Q3EVirtualMouse
         } else {
             y = y - physicalRect.top;
         }
-        Toast.makeText(activity, physicalRect.toString(), Toast.LENGTH_SHORT).show();
         SetPosition(Q3E.PhysicsToLogicalX(x), Q3E.PhysicsToLogicalY(y));
     }
 
