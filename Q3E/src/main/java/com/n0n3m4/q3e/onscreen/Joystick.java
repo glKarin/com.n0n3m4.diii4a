@@ -347,7 +347,7 @@ public class Joystick extends Paintable implements TouchListener
         {
             keys[ind] = b;
             // Q3EUtils.q3ei.callbackObj.sendKeyEvent(b, (Q3EUtils.q3ei.callbackObj.notinmenu ? codes : Menu_Codes)[ind], 0);
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(b, Menu_Codes[ind], 0); // always bind arrow keys
+            Q3E.sendKeyEvent(b, Menu_Codes[ind], 0); // always bind arrow keys
         }
     }
 
@@ -387,7 +387,7 @@ public class Joystick extends Paintable implements TouchListener
             m_pressed = true;
         if (res && act != ACT_RELEASE)
         {
-            if (Q3EUtils.q3ei.callbackObj.notinmenu)
+            if (Q3E.callbackObj.notinmenu)
             {
                 if (Q3E.joystick_smooth)
                 {
@@ -410,12 +410,12 @@ public class Joystick extends Paintable implements TouchListener
                     if(NotInDeadZone(deltax, deltay))
                     {
                         //m_pressed = true;
-                        Q3EUtils.q3ei.callbackObj.sendAnalog(true, analogx, analogy);
+                        Q3E.sendAnalog(true, analogx, analogy);
                     }
                     else
                     {
                         //m_pressed = false;
-                        Q3EUtils.q3ei.callbackObj.sendAnalog(false, 0, 0);
+                        Q3E.sendAnalog(false, 0, 0);
                     }
                 }
                 else
@@ -461,7 +461,7 @@ public class Joystick extends Paintable implements TouchListener
             if (Q3E.joystick_smooth)
             {
                 dotjoyenabled = false;
-                Q3EUtils.q3ei.callbackObj.sendAnalog(false, 0, 0);
+                Q3E.sendAnalog(false, 0, 0);
             }
             dot_pos = CONST_INVALID_DIRECTION;
                 enarr[0] = false;
@@ -513,7 +513,7 @@ public class Joystick extends Paintable implements TouchListener
                 else // if(res)
                 */
                 {
-                    if (Q3EUtils.q3ei.callbackObj.notinmenu)
+                    if (Q3E.callbackObj.notinmenu)
                     {
                         if (Q3E.joystick_smooth)
                         {
@@ -534,9 +534,9 @@ public class Joystick extends Paintable implements TouchListener
                             }
                             */
                             if(NotInDeadZone(deltax, deltay))
-                                Q3EUtils.q3ei.callbackObj.sendAnalog(true, analogx, analogy);
+                                Q3E.sendAnalog(true, analogx, analogy);
                             else
-                                Q3EUtils.q3ei.callbackObj.sendAnalog(false, 0, 0);
+                                Q3E.sendAnalog(false, 0, 0);
                         }
                         else
                         {
@@ -580,7 +580,7 @@ public class Joystick extends Paintable implements TouchListener
                 if (Q3E.joystick_smooth)
                 {
                     dotjoyenabled = false;
-                    Q3EUtils.q3ei.callbackObj.sendAnalog(false, 0, 0);
+                    Q3E.sendAnalog(false, 0, 0);
                 }
                 dot_pos = CONST_INVALID_DIRECTION;
             enarr[0] = false;

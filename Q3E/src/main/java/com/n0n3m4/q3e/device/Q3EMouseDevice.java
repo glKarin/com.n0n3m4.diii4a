@@ -3,6 +3,7 @@ package com.n0n3m4.q3e.device;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3ECallbackObj;
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EJNI;
@@ -112,7 +113,7 @@ public class Q3EMouseDevice
                     @Override
                     public void run()
                     {
-                        Q3EUtils.q3ei.callbackObj.sendMotionEvent(readmouse_dx, readmouse_dy);
+                        Q3E.sendMotionEvent(readmouse_dx, readmouse_dy);
                         readmouse_dx = 0;
                         readmouse_dy = 0;
                         qevnt_available = true;
@@ -123,7 +124,7 @@ public class Q3EMouseDevice
                     @Override
                     public void run()
                     {
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(readmouse_keystate != 0, readmouse_keycode, 0);
+                        Q3E.sendKeyEvent(readmouse_keystate != 0, readmouse_keycode, 0);
                     }
                 };
                 while (fis.read(arr, 0, sizeofstruct) != -1)
@@ -141,7 +142,7 @@ public class Q3EMouseDevice
                         if (qevnt_available)
                         {
                             qevnt_available = false;
-                            Q3EUtils.q3ei.callbackObj.PushEvent(qevnt_runnable);
+                            Q3E.callbackObj.PushEvent(qevnt_runnable);
                         }
                         fout.write(narr);
                     }
@@ -161,7 +162,7 @@ public class Q3EMouseDevice
 
                         readmouse_keystate = arr[sizeofstruct - 4];
                         if (readmouse_keycode != 0)
-                            Q3EUtils.q3ei.callbackObj.PushEvent(qkeyevnt_runnable);
+                            Q3E.callbackObj.PushEvent(qkeyevnt_runnable);
                     }
 
                     if (arr[sizeofstruct - 8] == 2)
@@ -175,10 +176,10 @@ public class Q3EMouseDevice
                             else
                                 readmouse_keycode = Q3EKeyCodes.KeyCodes.K_MWHEELDOWN;
                             readmouse_keystate = 1;
-                            Q3EUtils.q3ei.callbackObj.PushEvent(qkeyevnt_runnable);
+                            Q3E.callbackObj.PushEvent(qkeyevnt_runnable);
                             Thread.sleep(25);
                             readmouse_keystate = 0;
-                            Q3EUtils.q3ei.callbackObj.PushEvent(qkeyevnt_runnable);
+                            Q3E.callbackObj.PushEvent(qkeyevnt_runnable);
                         }
                     }
                 }

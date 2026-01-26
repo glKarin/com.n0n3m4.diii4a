@@ -89,7 +89,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             gl.glClear(GLES11.GL_COLOR_BUFFER_BIT);
 
         //k: not render in game loading
-        if (Q3EUtils.q3ei.callbackObj.inLoading)
+        if (Q3E.callbackObj.inLoading)
             return;
 
         //Onscreen buttons:
@@ -163,9 +163,9 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             {
                 int length = characters.length();
                 if(length == 1)
-                    Q3EUtils.q3ei.callbackObj.sendCharEvent(characters.charAt(0));
+                    Q3E.sendCharEvent(characters.charAt(0));
                 else if(length > 1)
-                    Q3EUtils.q3ei.callbackObj.sendTextEvent(characters);
+                    Q3E.sendTextEvent(characters);
             }
         }
         return controlView.onKeyMultiple(keyCode, repeatCount, event);

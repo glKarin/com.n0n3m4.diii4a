@@ -2,6 +2,7 @@ package com.n0n3m4.q3e.onscreen;
 
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -135,13 +136,13 @@ public class Button extends Paintable implements TouchListener
             {
                 if (!heldarr.contains(keycode))
                 {
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, keycode, 0);
+                    Q3E.sendKeyEvent(true, keycode, 0);
                     heldarr.add(keycode);
                     alpha = Math.min(initalpha * 2, 1f);
                 }
                 else
                 {
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, keycode, 0);
+                    Q3E.sendKeyEvent(false, keycode, 0);
                     heldarr.remove(Integer.valueOf(keycode));
                     alpha = initalpha;
                 }
@@ -160,24 +161,24 @@ public class Button extends Paintable implements TouchListener
         {
             lx = x;
             ly = y;
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, keycode, 0);
+            Q3E.sendKeyEvent(true, keycode, 0);
         }
         else if (act == -1)
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, keycode, 0);
+            Q3E.sendKeyEvent(false, keycode, 0);
 
         if(allowMouseButtonMotion)
         {
         if (keycode == Q3EKeyCodes.KeyCodes.K_MOUSE1 || keycode == Q3EKeyCodes.KeyCodes.K_MOUSE2)
         {
-            if (Q3EUtils.q3ei.callbackObj.notinmenu)
+            if (Q3E.callbackObj.notinmenu)
             {
-                Q3EUtils.q3ei.callbackObj.sendMotionEvent(x - lx, y - ly);
+                Q3E.sendMotionEvent(x - lx, y - ly);
                 lx = x;
                 ly = y;
             }
             else
             {
-                Q3EUtils.q3ei.callbackObj.sendMotionEvent(0, 0);//???
+                Q3E.sendMotionEvent(0, 0);//???
             }
         }
         }

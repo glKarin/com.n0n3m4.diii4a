@@ -77,7 +77,7 @@ class Q3EEventEngineJava implements Q3EEventEngine
                 Q3EJNI.sendKeyEvent(down ? 1 : 0, keycode, charcode);
             }
         });*/
-		Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EKeyEvent(down, keycode, charcode));
+		Q3E.callbackObj.PushEvent(new Q3EKeyEvent(down, keycode, charcode));
 	}
 
 	@Override
@@ -91,7 +91,7 @@ class Q3EEventEngineJava implements Q3EEventEngine
                 Q3EJNI.sendMotionEvent(deltax, deltay);
             }
         });*/
-		Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EMotionEvent(deltax, deltay));
+		Q3E.callbackObj.PushEvent(new Q3EMotionEvent(deltax, deltay));
 	}
 
 	@Override
@@ -105,7 +105,7 @@ class Q3EEventEngineJava implements Q3EEventEngine
                 Q3EJNI.sendAnalog(down ? 1 : 0, x, y);
             }
         });*/
-		Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EAnalogEvent(down, x, y));
+		Q3E.callbackObj.PushEvent(new Q3EAnalogEvent(down, x, y));
 	}
 
 	@Override

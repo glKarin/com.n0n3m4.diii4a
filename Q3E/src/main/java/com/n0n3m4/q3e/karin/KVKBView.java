@@ -682,7 +682,7 @@ public class KVKBView extends RelativeLayout
                             String d = group == 1 ? data2 : data;
                             int uchar = KStr.NotEmpty(d) ? d.charAt(0) : 0;
                             code = Q3EKeyCodes.convertKeyCode(code, uchar, null);
-                            Q3EUtils.q3ei.callbackObj.sendKeyEvent(down, code, uchar);
+                            Q3E.sendKeyEvent(down, code, uchar);
                         }
                         break;
                     case TYPE_SWITCH:

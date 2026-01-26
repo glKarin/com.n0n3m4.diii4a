@@ -29,6 +29,7 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EPreference;
@@ -90,7 +91,7 @@ public final class Q3EControllerControl
 
         delta *= rightJoystickSensitivity;
         if ((last_joystick_x != 0) || (last_joystick_y != 0))
-            Q3EUtils.q3ei.callbackObj.sendMotionEvent(delta * last_joystick_x, delta * last_joystick_y);
+            Q3E.sendMotionEvent(delta * last_joystick_x, delta * last_joystick_y);
     }
 
     public boolean OnGenericMotionEvent(MotionEvent event)
@@ -152,7 +153,7 @@ public final class Q3EControllerControl
             }
             else if ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
             {
-                if(dpadAsArrowKey || !Q3EUtils.q3ei.callbackObj.notinmenu)
+                if(dpadAsArrowKey || !Q3E.callbackObj.notinmenu)
                 {
                     HandleDPadMotionEvent(event);
                     return true;
@@ -179,22 +180,22 @@ public final class Q3EControllerControl
 
         if(leftPressed != directionPressed[2])
         {
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(leftPressed, Q3EKeyCodes.KeyCodes.K_LEFTARROW, 0);
+            Q3E.sendKeyEvent(leftPressed, Q3EKeyCodes.KeyCodes.K_LEFTARROW, 0);
             directionPressed[2] = leftPressed;
         }
         if(rightPressed != directionPressed[3])
         {
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(rightPressed, Q3EKeyCodes.KeyCodes.K_RIGHTARROW, 0);
+            Q3E.sendKeyEvent(rightPressed, Q3EKeyCodes.KeyCodes.K_RIGHTARROW, 0);
             directionPressed[3] = rightPressed;
         }
         if(upPressed != directionPressed[0])
         {
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(upPressed, Q3EKeyCodes.KeyCodes.K_UPARROW, 0);
+            Q3E.sendKeyEvent(upPressed, Q3EKeyCodes.KeyCodes.K_UPARROW, 0);
             directionPressed[0] = upPressed;
         }
         if(downPressed != directionPressed[1])
         {
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(downPressed, Q3EKeyCodes.KeyCodes.K_DOWNARROW, 0);
+            Q3E.sendKeyEvent(downPressed, Q3EKeyCodes.KeyCodes.K_DOWNARROW, 0);
             directionPressed[1] = downPressed;
         }
     }
@@ -242,7 +243,7 @@ public final class Q3EControllerControl
         float x = getCenteredAxis(event, inputDevice, MotionEvent.AXIS_X/*, historyPos*/);
         float y = getCenteredAxis(event, inputDevice, MotionEvent.AXIS_Y/*, historyPos*/);
 
-        if(dpadAsArrowKey || !Q3EUtils.q3ei.callbackObj.notinmenu)
+        if(dpadAsArrowKey || !Q3E.callbackObj.notinmenu)
         {
             HandleDPadMotionEvent(event);
         }
@@ -253,7 +254,7 @@ public final class Q3EControllerControl
             if(y == 0.0f)
                 y = getCenteredAxis(event, inputDevice, MotionEvent.AXIS_HAT_Y/*, historyPos*/);
 
-            Q3EUtils.q3ei.callbackObj.sendAnalog((Math.abs(x) > leftJoystickDeadRange) || (Math.abs(y) > leftJoystickDeadRange), x, -y);
+            Q3E.sendAnalog((Math.abs(x) > leftJoystickDeadRange) || (Math.abs(y) > leftJoystickDeadRange), x, -y);
         }
     }
 

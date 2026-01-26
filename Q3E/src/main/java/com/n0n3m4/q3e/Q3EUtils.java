@@ -162,7 +162,7 @@ public class Q3EUtils
 
     public static void ToggleToolbar(boolean on)
     {
-        q3ei.callbackObj.ToggleToolbar(on);
+        Q3E.callbackObj.ToggleToolbar(on);
     }
 
     public static void OpenVKB(View vw)

@@ -1,8 +1,10 @@
 package com.n0n3m4.q3e;
 
+import android.content.Context;
 import android.view.Surface;
 import android.util.Log;
 import android.os.Build;
+import android.view.View;
 
 import com.n0n3m4.q3e.device.Q3EVirtualMouse;
 import com.n0n3m4.q3e.event.Q3EExitEvent;
@@ -18,9 +20,14 @@ import java.util.List;
 
 public final class Q3E
 {
+    private static final String TAG = "Q3E";
+
     public static Q3EMain       activity;
     public static Surface       surface;
     public static Q3EGameThread gameThread;
+
+    public static Q3ECallbackObj callbackObj;
+    public static Q3EEventEngine eventEngine = new Q3EEventEngineJava();
 
     public static          Q3EView        gameView;
     public static          Q3EControlView controlView;
@@ -94,6 +101,71 @@ public final class Q3E
         KLog.i("Q3EView", "Surface: view physical size=%d x %d, game logical size=%d x %d, ratio=%f, %f", Q3E.GAME_VIEW_WIDTH, Q3E.GAME_VIEW_HEIGHT, Q3E.surfaceWidth, Q3E.surfaceHeight, Q3E.widthRatio, Q3E.heightRatio);
     }
 
+    public static void sendAnalog(boolean down, float x, float y)
+    {
+        eventEngine.SendAnalogEvent(down, x, y);
+    }
+
+    public static void sendKeyEvent(boolean down, int keycode, int charcode)
+    {
+        eventEngine.SendKeyEvent(down, keycode, charcode);
+    }
+
+    public static void sendMotionEvent(float deltax, float deltay)
+    {
+        eventEngine.SendMotionEvent(deltax, deltay);
+    }
+
+    public static void sendMouseEvent(float x, float y)
+    {
+        eventEngine.SendMouseEvent(x, y);
+    }
+
+    public static void sendTextEvent(String text)
+    {
+        eventEngine.SendTextEvent(text);
+    }
+
+    public static void sendCharEvent(int ch)
+    {
+        eventEngine.SendCharEvent(ch);
+    }
+
+    public static void sendWheelEvent(float x, float y)
+    {
+        eventEngine.SendWheelEvent(x, y);
+    }
+
+    public static void sendAnalogDelayed(boolean down, float x, float y, View view, int delay)
+    {
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                eventEngine.SendAnalogEvent(down, x, y);
+            }
+        }, delay);
+    }
+
+    public static void sendKeyEventDelayed(boolean down, int keycode, int charcode, View view, int delay)
+    {
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                eventEngine.SendKeyEvent(down, keycode, charcode);
+            }
+        }, delay);
+    }
+
+    public static void sendMotionEventDelayed(float deltax, float deltay, View view, int delay)
+    {
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                eventEngine.SendMotionEvent(deltax, deltay);
+            }
+        }, delay);
+    }
+
     public static void Finish()
     {
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Finish activity......");
@@ -133,6 +205,9 @@ public final class Q3E
                 Q3E.gameThread = null;
             }
             Q3EGameThread.Sleep(100);
+
+            if(null != Q3E.callbackObj)
+                Q3E.callbackObj.OnDestroy();
         }
     }
 
@@ -151,7 +226,7 @@ public final class Q3E
         if(Q3E.running)
         {
             Q3E.running = false;
-            Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EQuitEvent());
+            Q3E.callbackObj.PushEvent(new Q3EQuitEvent());
             Q3EGameThread.Sleep(100);
             if(null != Q3E.gameThread)
             {
@@ -172,7 +247,7 @@ public final class Q3E
                 Q3EJNI.OnPause();
             }
         };
-        Q3EUtils.q3ei.callbackObj.PushEvent(runnable);
+        Q3E.callbackObj.PushEvent(runnable);
     }
 
     public static void Resume()
@@ -184,7 +259,7 @@ public final class Q3E
                 Q3EJNI.OnResume();
             }
         };
-        Q3EUtils.q3ei.callbackObj.PushEvent(runnable);
+        Q3E.callbackObj.PushEvent(runnable);
     }
 
 
@@ -274,5 +349,28 @@ public final class Q3E
             CopyDLLToCache(file.getAbsolutePath(), subDir, file.getName());
         }
         return GetDLLCachePath(subDir);
+    }
+
+    public static void SetupEventEngine(Context context)
+    {
+        if(Q3EUtils.q3ei.IsUsingSDL())
+        {
+            Log.i(TAG, "Using SDL event queue");
+            eventEngine = new Q3EEventEngineSDL();
+        }
+        else
+        {
+            int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
+            if(eventQueue == Q3EGlobals.EVENT_QUEUE_TYPE_JAVA)
+            {
+                Log.i(TAG, "Using java event queue");
+                eventEngine = new Q3EEventEngineJava();
+            }
+            else
+            {
+                Log.i(TAG, "Using native event queue");
+                eventEngine = new Q3EEventEngineNative();
+            }
+        }
     }
 }

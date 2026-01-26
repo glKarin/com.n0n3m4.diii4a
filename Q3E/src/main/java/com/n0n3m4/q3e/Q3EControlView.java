@@ -242,7 +242,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
 
     public void QueueEvent(Runnable r)
     {
-        Q3EUtils.q3ei.callbackObj.PushEvent(r);
+        Q3E.callbackObj.PushEvent(r);
     }
 
     @Override

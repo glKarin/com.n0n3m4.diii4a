@@ -43,7 +43,6 @@ public class Q3ECallbackObj
     public static boolean reqThreadrunning = false;
 
     private Q3EGUI gui;
-    private Q3EEventEngine eventEngine = new Q3EEventEngineJava();
 
     private final LinkedList<Runnable> m_eventQueue = new LinkedList<>();
     public boolean notinmenu = true; // inGaming
@@ -235,93 +234,10 @@ public class Q3ECallbackObj
         return Q3EUtils.GetClipboardText(Q3EMain.gameHelper.GetContext());
     }
 
-    public void sendAnalog(boolean down, float x, float y)
-    {
-        eventEngine.SendAnalogEvent(down, x, y);
-    }
-
-    public void sendKeyEvent(boolean down, int keycode, int charcode)
-    {
-        eventEngine.SendKeyEvent(down, keycode, charcode);
-    }
-
-    public void sendMotionEvent(float deltax, float deltay)
-    {
-        eventEngine.SendMotionEvent(deltax, deltay);
-    }
-
-    public void sendMouseEvent(float x, float y)
-    {
-        eventEngine.SendMouseEvent(x, y);
-    }
-
-    public void sendTextEvent(String text)
-    {
-        eventEngine.SendTextEvent(text);
-    }
-
-    public void sendCharEvent(int ch)
-    {
-        eventEngine.SendCharEvent(ch);
-    }
-
-    public void sendWheelEvent(float x, float y)
-    {
-        eventEngine.SendWheelEvent(x, y);
-    }
-
-    public void sendAnalogDelayed(boolean down, float x, float y, View view, int delay)
-    {
-        view.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                eventEngine.SendAnalogEvent(down, x, y);
-            }
-        }, delay);
-    }
-
-    public void sendKeyEventDelayed(boolean down, int keycode, int charcode, View view, int delay)
-    {
-        view.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                eventEngine.SendKeyEvent(down, keycode, charcode);
-            }
-        }, delay);
-    }
-
-    public void sendMotionEventDelayed(float deltax, float deltay, View view, int delay)
-    {
-        view.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                eventEngine.SendMotionEvent(deltax, deltay);
-            }
-        }, delay);
-    }
-
     public void InitGUIInterface(Activity context)
     {
         gui = new Q3EGUI(context);
-        if(Q3EUtils.q3ei.IsUsingSDL())
-        {
-            Log.i(TAG, "Using SDL event queue");
-            eventEngine = new Q3EEventEngineSDL();
-        }
-        else
-        {
-            int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
-            if(eventQueue == Q3EGlobals.EVENT_QUEUE_TYPE_JAVA)
-            {
-                Log.i(TAG, "Using java event queue");
-                eventEngine = new Q3EEventEngineJava();
-            }
-            else
-            {
-                Log.i(TAG, "Using native event queue");
-                eventEngine = new Q3EEventEngineNative();
-            }
-        }
+        Q3E.SetupEventEngine(context);
     }
 
     public void ShowToast(String text)

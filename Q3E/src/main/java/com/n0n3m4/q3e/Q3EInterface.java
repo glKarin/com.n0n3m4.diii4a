@@ -96,8 +96,6 @@ public class Q3EInterface
 	public int game_id;
 	public String game_version;
 
-	public Q3ECallbackObj callbackObj;
-
     public String start_temporary_extra_command = "";
 	public String cmd = Q3EGameConstants.GAME_EXECUABLE;
 

@@ -57,7 +57,6 @@ import com.n0n3m4.q3e.karin.Theme;
 
 public class Q3EMain extends Activity
 {
-    private       Q3ECallbackObj mAudio;
     private       Q3EView        mGLSurfaceView;
     private RelativeLayout  mainLayout;
     // k
@@ -201,8 +200,6 @@ public class Q3EMain extends Activity
             mGLSurfaceView.Shutdown();*/
 
         super.onDestroy();
-        if(null != mAudio)
-            mAudio.OnDestroy();
     }
 
     @Override
@@ -215,10 +212,10 @@ public class Q3EMain extends Activity
             memoryUsageText.Stop();
 
         if(m_runBackground < 2)
-            if(mAudio != null)
-            {
-                mAudio.pause();
-            }
+        {
+            if(Q3E.callbackObj != null)
+                Q3E.callbackObj.pause();
+        }
 
         Q3E.Pause();
 
@@ -248,9 +245,9 @@ public class Q3EMain extends Activity
         }
 
         //k if(m_runBackground < 2)
-        if(mAudio != null)
+        if(Q3E.callbackObj != null)
         {
-            mAudio.resume();
+            Q3E.callbackObj.resume();
         }
     }
 
@@ -323,11 +320,10 @@ public class Q3EMain extends Activity
         if(!Q3EOuya.Init(this))
             Q3EUtils.isOuya = false;
 
-        if(mAudio == null)
-            mAudio = new Q3ECallbackObj();
-        mAudio.InitGUIInterface(this);
-        Q3EUtils.q3ei.callbackObj = mAudio;
-        Q3EJNI.setCallbackObject(mAudio);
+        if(Q3E.callbackObj == null)
+            Q3E.callbackObj = new Q3ECallbackObj();
+        Q3E.callbackObj.InitGUIInterface(this);
+        Q3EJNI.setCallbackObject(Q3E.callbackObj);
 
         mainLayout = new RelativeLayout(this);
 
