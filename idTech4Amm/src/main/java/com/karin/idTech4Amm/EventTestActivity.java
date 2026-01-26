@@ -2,6 +2,8 @@ package com.karin.idTech4Amm;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.InputDevice;
@@ -84,7 +86,7 @@ public class EventTestActivity extends Activity
     private void SetupUI()
     {
         //V.logtext.setTextColor(Theme.BlackColor(this));
-        View view = new View(this) {
+        V.view = new View(this) {
             @Override
             public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event)
             {
@@ -133,10 +135,12 @@ public class EventTestActivity extends Activity
 
         RelativeLayout root = findViewById(R.id.eventTestRoot);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        root.addView(view, params);
-        Q3EUtils.SetViewZ(view, 5);
+        V.view.setBackgroundColor(Color.TRANSPARENT);
+        root.addView(V.view, params);
+        Q3EUtils.SetViewZ(V.view, 5);
 
-        Q3EUtils.SetViewZ(findViewById(R.id.eventTestButtons), 10);
+        Q3EUtils.SetViewZ(findViewById(R.id.eventTestButtons1), 10);
+        Q3EUtils.SetViewZ(findViewById(R.id.eventTestButtons2), 10);
     }
 
     private void StartHandleEvent(String type)
@@ -170,6 +174,28 @@ public class EventTestActivity extends Activity
     {
         AppendLine("Source: source=" + HexString(source) + " class=" + HexString(source & InputDevice.SOURCE_CLASS_MASK));
 
+        int SOURCE_BLUETOOTH_STYLUS;
+        int SOURCE_MOUSE_RELATIVE;
+        int SOURCE_ROTARY_ENCODER;
+        int SOURCE_HDMI;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            SOURCE_MOUSE_RELATIVE = InputDevice.SOURCE_MOUSE_RELATIVE;
+            SOURCE_ROTARY_ENCODER = InputDevice.SOURCE_ROTARY_ENCODER;
+        } else {
+            SOURCE_MOUSE_RELATIVE = 0x00020000 | InputDevice.SOURCE_CLASS_TRACKBALL;
+            SOURCE_ROTARY_ENCODER = 0x00400000 | InputDevice.SOURCE_CLASS_NONE;
+        }
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            SOURCE_HDMI = InputDevice.SOURCE_HDMI;
+        } else {
+            SOURCE_HDMI = 0x02000000 | InputDevice.SOURCE_CLASS_BUTTON;
+        }
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            SOURCE_BLUETOOTH_STYLUS = InputDevice.SOURCE_BLUETOOTH_STYLUS;
+        } else {
+            SOURCE_BLUETOOTH_STYLUS = 0x00008000 | InputDevice.SOURCE_STYLUS;
+        }
+
         final Object[] Sources = {
             InputDevice.SOURCE_KEYBOARD, "keyboard",
             InputDevice.SOURCE_DPAD, "DPad",
@@ -177,14 +203,14 @@ public class EventTestActivity extends Activity
             InputDevice.SOURCE_TOUCHSCREEN, "touch screen",
             InputDevice.SOURCE_MOUSE, "mouse",
             InputDevice.SOURCE_STYLUS, "stylus",
-            InputDevice.SOURCE_BLUETOOTH_STYLUS, "Bluetooth stylus",
+            SOURCE_BLUETOOTH_STYLUS, "Bluetooth stylus",
             InputDevice.SOURCE_TRACKBALL, "trackball",
-            InputDevice.SOURCE_MOUSE_RELATIVE, "relative mouse",
+            SOURCE_MOUSE_RELATIVE, "relative mouse",
             InputDevice.SOURCE_TOUCHPAD, "touch pad",
             InputDevice.SOURCE_TOUCH_NAVIGATION, "touch navigation",
-            InputDevice.SOURCE_ROTARY_ENCODER, "rotary encoder",
+            SOURCE_ROTARY_ENCODER, "rotary encoder",
             InputDevice.SOURCE_JOYSTICK, "joystick",
-            InputDevice.SOURCE_HDMI, "HDMI",
+            SOURCE_HDMI, "HDMI",
             InputDevice.SOURCE_ANY, "any",
         };
         List<String> sourceList = new ArrayList<>();
@@ -306,14 +332,23 @@ public class EventTestActivity extends Activity
 
     private void HandleButtonState(int state)
     {
+        int BUTTON_STYLUS_PRIMARY;
+        int BUTTON_STYLUS_SECONDARY;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            BUTTON_STYLUS_PRIMARY = MotionEvent.BUTTON_STYLUS_PRIMARY;
+            BUTTON_STYLUS_SECONDARY = MotionEvent.BUTTON_STYLUS_SECONDARY;
+        } else {
+            BUTTON_STYLUS_PRIMARY = 1 << 5;
+            BUTTON_STYLUS_SECONDARY = 1 << 6;
+        }
         final Object[] Sources = {
                 MotionEvent.BUTTON_PRIMARY, "primary",
                 MotionEvent.BUTTON_SECONDARY, "secondary",
                 MotionEvent.BUTTON_TERTIARY, "tertiary",
                 MotionEvent.BUTTON_BACK, "back",
                 MotionEvent.BUTTON_FORWARD, "forward",
-                MotionEvent.BUTTON_STYLUS_PRIMARY, "stylus primary",
-                MotionEvent.BUTTON_STYLUS_SECONDARY, "stylus secondary",
+                BUTTON_STYLUS_PRIMARY, "stylus primary",
+                BUTTON_STYLUS_SECONDARY, "stylus secondary",
         };
         List<String> sourceList = new ArrayList<>();
         for(int i = 0; i < Sources.length; i+=2)
@@ -347,7 +382,9 @@ public class EventTestActivity extends Activity
         AppendLine("Position: " + event.getX() + "," + event.getY());
         AppendLine("ActionIndex: " + event.getActionIndex());
         AppendLine("PointerId: " + event.getPointerId(event.getActionIndex()));
-        AppendLine("ActionButton: " + HexString(event.getActionButton()));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            AppendLine("ActionButton: " + HexString(event.getActionButton()));
+        }
         AppendLine("ActionMasked: " + HexString(event.getActionMasked()));
         HandleButtonState(event.getButtonState());
 
@@ -396,10 +433,25 @@ public class EventTestActivity extends Activity
         imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
     }
 
+    public void CapturePointer(View vw)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            V.view.requestPointerCapture();
+        }
+    }
+
+    public void ReleasePointer(View vw)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            V.view.releasePointerCapture();
+        }
+    }
+
     private class ViewHolder
     {
         private TextView eventResult;
         private TextView eventDeviceResult;
+        private View view;
 
         public void SetupUI()
         {
