@@ -758,6 +758,16 @@ public class Q3EMain extends Activity
             Q3EUtils.ChooseInputMethod(this);
             return true;
         }
+        else if (itemId == R.id.main_open_input_method)
+        {
+            mControlGLSurfaceView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Q3EUtils.OpenVKB(mControlGLSurfaceView);
+                }
+            }, 250);
+            return true;
+        }
         else if (itemId == R.id.main_quit)
         {
             if(null != backCallback)

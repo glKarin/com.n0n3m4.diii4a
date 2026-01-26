@@ -69,4 +69,5 @@
     <string name="edit_buttons_layout">Edit buttons layout</string>
     <string name="finish_editing">Finish editing</string>
     <string name="choose_input_method">Choose input method</string>
+    <string name="open_input_method">Open input method</string>
 </resources>
