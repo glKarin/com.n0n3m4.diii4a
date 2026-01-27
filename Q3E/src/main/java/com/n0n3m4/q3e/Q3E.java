@@ -121,9 +121,9 @@ public final class Q3E
         eventEngine.SendMotionEvent(deltax, deltay);
     }
 
-    public static void sendMouseEvent(float x, float y)
+    public static void sendMouseEvent(float x, float y/*, boolean relativeMode*/)
     {
-        eventEngine.SendMouseEvent(x, y);
+        eventEngine.SendMouseEvent(x, y, false);
     }
 
     public static void sendTextEvent(String text)
@@ -358,24 +358,27 @@ public final class Q3E
 
     public static void SetupEventEngine(Context context)
     {
-        if(q3ei.IsUsingSDL())
+        int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
+        if(eventQueue == Q3EGlobals.EVENT_QUEUE_TYPE_JAVA)
         {
-            Log.i(TAG, "Using SDL event queue");
-            eventEngine = new Q3EEventEngineSDL();
+            Log.i(TAG, "Using java event queue");
+            eventEngine = new Q3EEventEngineJava();
         }
         else
         {
-            int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
-            if(eventQueue == Q3EGlobals.EVENT_QUEUE_TYPE_JAVA)
-            {
-                Log.i(TAG, "Using java event queue");
-                eventEngine = new Q3EEventEngineJava();
-            }
-            else
-            {
-                Log.i(TAG, "Using native event queue");
-                eventEngine = new Q3EEventEngineNative();
-            }
+            Log.i(TAG, "Using native event queue");
+            eventEngine = new Q3EEventEngineNative();
+        }
+
+        if(q3ei.IsUsingSDL())
+        {
+            Log.i(TAG, "Using SDL event queue");
+            eventEngine = new Q3EEventEngineSDL(eventEngine);
+        }
+        else if(q3ei.IsUsingVirtualMouse())
+        {
+            Log.i(TAG, "Using Sam event queue");
+            eventEngine = new Q3EEventEngineSam(eventEngine);
         }
     }
 

@@ -92,6 +92,13 @@
 #define dp_strlcpy strncpy
 #endif
 
+#if !defined(Q3E_USING_MOUSEEVENT)
+#define Q3E_MOUSEEVENT_CALLBACK NULL
+#else
+extern void Q3E_MouseEvent(float x, float y, int relativeMode);
+#define Q3E_MOUSEEVENT_CALLBACK &Q3E_MouseEvent
+#endif
+
 // if need init threads, define this
 // #define Q3E_REQUIRE_THREAD
 
@@ -139,8 +146,8 @@ extern void Q3E_MotionEvent(float dx, float dy);
 // Android files default path
 //#define _ANDROID_PACKAGE_NAME "com.n0n3m4.DIII4A"
 #define _ANDROID_PACKAGE_NAME "com.karin.idTech4Amm"
-#define _ANDROID_DLL_PATH ""
-#define _ANDROID_GAME_DATA_PATH "/sdcard/diii4a"
+#define _ANDROID_DLL_PATH "/data/data/" _ANDROID_PACKAGE_NAME "/lib/"
+#define _ANDROID_GAME_DATA_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME
 #define _ANDROID_APP_HOME_PATH "/sdcard/Android/data/" _ANDROID_PACKAGE_NAME "/files"
 
 
@@ -191,6 +198,9 @@ void (*exit_finish)(void);
 
 // Show cursor
 void (*show_cursor)(int on);
+
+// Android log
+void (*log_print)(const char *tag, const char *fmt, ...);
 
 
 
@@ -386,7 +396,7 @@ void Q3E_SetGLContext(ANativeWindow *w)
     // if engine has started, w is null, means Surfece destroyed, w not null, means Surface has changed.
     if(Q3E_IS_INITIALIZED)
     {
-        Q3E_PRINTF("[Harmattan]: ANativeWindow changed: %p\n", w);
+        Q3E_PRINTF("ANativeWindow changed: %p\n", w);
         if(w) // set window is null, and wait game main thread deactive OpenGL render context.
         {
 			Q3E_WindowChanged(w, WINDOW_CHANGE_THREAD_SURFACE_VIEW);
@@ -429,12 +439,12 @@ volatile ANativeWindow * Android_GetWindow(void)
 static void game_exit(void)
 {
     Q3E_AT_EXIT;
-	Q3E_PRINTF("[Harmattan]: " Q3E_GAME_NAME " exit.\n");
+	Q3E_PRINTF(Q3E_GAME_NAME " exit.\n");
 }
 
 void Q3E_Start(void)
 {
-    Q3E_PRINTF("[Harmattan]: Enter " Q3E_GAME_NAME " main thread.\n");
+    Q3E_PRINTF("Enter " Q3E_GAME_NAME " main thread.\n");
 
     INIT_Q3E_THREADS;
 	atexit(game_exit);
@@ -460,7 +470,7 @@ void Q3E_End(void)
     
     Q3E_POST_END;
 
-    Q3E_PRINTF("[Harmattan]: Leave " Q3E_GAME_NAME " main thread.\n");
+    Q3E_PRINTF("Leave " Q3E_GAME_NAME " main thread.\n");
 }
 
 
@@ -572,6 +582,18 @@ void Android_ShowCursor(int on)
     show_cursor(on);
 }
 
+#if 0
+void Android_LogPrint(const char *tag, const char *fmt, ...)
+{
+    char text[4096];
+    va_list args;
+    va_start(args, fmt);
+    snprintf(text, sizeof(text), fmt, args);
+    va_end(args);
+    log_print(Q3E_GAME_NAME, text);
+}
+#endif
+
 float Android_GetConsoleMaxHeightFrac(float frac)
 {
     return console_max_height_frac > 0.0f && console_max_height_frac < frac ? console_max_height_frac : frac;
@@ -630,7 +652,7 @@ char * Sys_MakeDLLPath(const char *libname, char path[], int max_length)
 		snprintf(path, max_length - 1, "%s/%s", dllDefaultPath, dllName);
 	else
 		snprintf(path, max_length - 1, "%s", dllName);
-	Q3E_PRINTF("[Harmattan]: Make library path -> %s\n", path);
+	Q3E_PRINTF("Make library path -> %s\n", path);
 	return path;
 #undef HARM_MAX_OSPATH
 }
@@ -668,7 +690,7 @@ void Q3E_exit(void)
         native_window = NULL;
     Q3E_QUIT_WINDOW();
     main_thread = 0;
-    Q3E_PRINTF("[Harmattan]: " Q3E_GAME_NAME " exit.\n");
+    Q3E_PRINTF(Q3E_GAME_NAME " exit.\n");
     // Android_ExitFinish();
 }
 
@@ -710,6 +732,7 @@ void Q3E_SetCallbacks(const void *callbacks)
     open_dialog = ptr->Gui_openDialog;
 
     setState = ptr->set_state;
+    log_print = ptr->Log_Print;
 }
 
 // Setup initial environment variants
@@ -760,6 +783,7 @@ void GetIDTechAPI(void *d3interface) {
     ptr->keyEvent = &Q3E_KeyEvent;
     ptr->analogEvent = &Q3E_Analog;
     ptr->motionEvent = &Q3E_MotionEvent;
+    ptr->mouseEvent = Q3E_MOUSEEVENT_CALLBACK;
 }
 #pragma GCC visibility pop
 #ifdef __cplusplus

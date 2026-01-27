@@ -60,7 +60,7 @@ public class Q3EJNI {
 	public static native void sendKeyEvent(int state,int key,int character);
 	public static native void sendAnalog(int enable,float x,float y);
 	public static native void sendMotionEvent(float x, float y);
-	public static native void sendMouseEvent(float x, float y);
+	public static native void sendMouseEvent(float x, float y, int relativeMode);
 	public static native void sendTextEvent(String text);
 	public static native void sendCharEvent(int ch);
 	public static native void sendWheelEvent(float x, float y);
@@ -72,7 +72,7 @@ public class Q3EJNI {
 	public static native void PushKeyEvent(int state, int key, int character);
 	public static native void PushAnalogEvent(int enable, float x, float y);
 	public static native void PushMotionEvent(float x, float y);
-	public static native void PushMouseEvent(float x, float y);
+	public static native void PushMouseEvent(float x, float y, int relativeMode);
 	public static native void PushTextEvent(String text);
 	public static native void PushCharEvent(int ch);
 	public static native void PushWheelEvent(float x, float y);

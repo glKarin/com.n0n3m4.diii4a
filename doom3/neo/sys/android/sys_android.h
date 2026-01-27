@@ -34,6 +34,7 @@ typedef struct
 
     // Other
     void (*set_state)(int st); // Tell Android game current state
+    void (*Log_Print)(const char *tag, const char *fmt, ...); // call Android log
 } Q3E_Callback_t;
 
 // Android::JNI call DOOM3 before main()
@@ -83,7 +84,8 @@ typedef struct
     // DOOM3 main thread(C/C++)
     void (*keyEvent)(int state, int key, int chr); // mouse-click/keyboard event
     void (*analogEvent)(int enable, float x, float y); // analog event
-    void (*motionEvent)(float x, float y); // mouse-motion event
+    void (*motionEvent)(float deltax, float deltay); // mouse-motion event
+    void (*mouseEvent)(float x, float y, int relativeMode); // mouse-position event
 
 } Q3E_Interface_t;
 

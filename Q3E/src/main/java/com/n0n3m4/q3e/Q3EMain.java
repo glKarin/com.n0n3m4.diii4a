@@ -28,11 +28,13 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.SizeF;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -614,14 +616,18 @@ public class Q3EMain extends Activity
         if(null == Q3E.virtualMouse)
         {
             Q3E.virtualMouse = new Q3EVirtualMouse(this);
-            Q3E.virtualMouse.SetPhysicalGeometry(m_offsetX, m_offsetY, fullWidth, fullHeight);
-            Q3E.virtualMouse.SetLogicalSize(Q3E.surfaceWidth, Q3E.surfaceHeight);
-            if(!Q3E.q3ei.IsUsingSDL() || Q3E.m_usingMouse)
-            {
-                Q3E.virtualMouse.DisableCursor(true);
-                Q3E.virtualMouse.SetCursorVisible(false);
-            }
         }
+
+        Q3E.virtualMouse.SetPhysicalGeometry(m_offsetX, m_offsetY, fullWidth, fullHeight);
+        Q3E.virtualMouse.SetLogicalSize(Q3E.surfaceWidth, Q3E.surfaceHeight);
+        if(!Q3E.q3ei.IsUsingSDL() || Q3E.m_usingMouse)
+        {
+            Q3E.virtualMouse.DisableCursor(true);
+            Q3E.virtualMouse.SetCursorVisible(false);
+        }
+        RectF physicalGeometry = Q3E.virtualMouse.PhysicalGeometry();
+        SizeF logicalSize = Q3E.virtualMouse.LogicalSize();
+        KLog.I("Virtual mouse initialization: physical geometry=(%f, %f, %f, %f), logical size=(%f, %f), cursor=%s", physicalGeometry.left, physicalGeometry.top, physicalGeometry.right, physicalGeometry.bottom, logicalSize.getWidth(), logicalSize.getHeight(), Q3E.virtualMouse.IsDisableCursor() ? "disabled" : "enabled");
     }
 
     public RelativeLayout GetMainLayout()

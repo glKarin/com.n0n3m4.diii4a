@@ -1,6 +1,7 @@
 package com.n0n3m4.q3e.device;
 
 import android.graphics.RectF;
+import android.util.SizeF;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -62,12 +63,22 @@ public class Q3EVirtualMouse
         physicalRect.bottom = physicalRect.top + physicalHeight;
     }
 
+    public RectF PhysicalGeometry()
+    {
+        return physicalRect;
+    }
+
     public void SetLogicalSize(float w, float h)
     {
         width = w;
         height = h;
         deltaX = width / 2;
         deltaY = height / 2;
+    }
+
+    public SizeF LogicalSize()
+    {
+        return new SizeF(width, height);
     }
 
     public void InitCursor()
@@ -230,5 +241,10 @@ public class Q3EVirtualMouse
     public void DisableCursor(boolean d)
     {
         disableCursor = d;
+    }
+
+    public boolean IsDisableCursor()
+    {
+        return disableCursor;
     }
 }

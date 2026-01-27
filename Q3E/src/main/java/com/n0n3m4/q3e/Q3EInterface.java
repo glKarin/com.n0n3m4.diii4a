@@ -546,6 +546,11 @@ public class Q3EInterface
 		return isXash3D || isSource || isWolf3D;
 	}
 
+	public boolean IsUsingVirtualMouse()
+	{
+		return isSamTFE || isSamTSE;
+	}
+
 	public boolean IsUsingOpenAL()
 	{
 		return isD3 || isQ4 || isPrey

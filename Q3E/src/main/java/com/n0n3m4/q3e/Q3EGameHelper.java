@@ -1241,8 +1241,6 @@ public class Q3EGameHelper
         int eventQueue = Q3EPreference.GetIntFromString(preferences, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
         int gameThread = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD, Q3EGlobals.GAME_THREAD_TYPE_NATIVE);
         int threadStackSize = Q3EPreference.GetIntFromString(preferences, Q3EPreference.GAME_THREAD_STACK_SIZE, 0);
-        if(Q3E.q3ei.IsUsingSDL())
-            eventQueue = Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE;
         Q3EJNI.PreInit(eventQueue, gameThread, threadStackSize);
 
         String libpath;

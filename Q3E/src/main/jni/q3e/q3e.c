@@ -74,7 +74,8 @@ static void (*request_thread_quit)(void);
 static int  (*qmain)(int argc, char **argv);
 static void (*onKeyEvent)(int state, int key,int chr);
 static void (*onAnalog)(int enable, float x, float y);
-static void (*onMotionEvent)(float x, float y);
+static void (*onMotionEvent)(float deltax, float deltay);
+static void (*onMouseEvent)(float x, float y, int relativeMode);
 static void (*on_pause)(void);
 static void (*on_resume)(void);
 static void (*qexit)(void);
@@ -94,6 +95,7 @@ int open_dialog(const char *title, const char *message, int num, const char *but
 static void finish(void);
 static void show_cursor(int on);
 static char * copy_dll_to_cache(const char *dll_path, const char *file_name);
+static void log_print(const char *tag, const char *fmt, ...);
 
 // data
 static char *game_data_dir = NULL;
@@ -281,6 +283,7 @@ static int loadLib(const char* libpath)
 	onKeyEvent = d3interface.keyEvent;
 	onAnalog = d3interface.analogEvent;
 	onMotionEvent = d3interface.motionEvent;
+    onMouseEvent = d3interface.mouseEvent;
 
 	return 0;
 }
@@ -491,6 +494,7 @@ static void setup_Q3E_callback(void)
 
 	callback.Gui_ShowToast = &show_toast;
 	callback.Gui_openDialog = &open_dialog;
+    callback.Log_Print = &log_print;
 
 	Q3E_PrintCallbacks(&callback);
 
@@ -609,7 +613,7 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 	Q3E_SetInitialContext(&context);
 
 	if(usingNativeEventQueue)
-    	Q3E_InitEventManager(onKeyEvent, onMotionEvent, onAnalog);
+    	Q3E_InitEventManager(onKeyEvent, onMotionEvent, onAnalog, onMouseEvent);
 
     // qmain(argc, argv);
 
@@ -637,8 +641,10 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent(JNIEnv *env, j
     onMotionEvent(x, y);
 }
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMouseEvent(JNIEnv *env, jclass c, jfloat x, jfloat y)
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMouseEvent(JNIEnv *env, jclass c, jfloat x, jfloat y, jint relativeMode)
 {
+    if(onMouseEvent)
+    onMouseEvent(x, y, relativeMode);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendTextEvent(JNIEnv *env, jclass c, jstring text)
@@ -952,6 +958,22 @@ int open_dialog(const char *title, const char *message, int num, const char *but
 	return res;
 }
 
+void log_print(const char *tag, const char *fmt, ...)
+{
+    GET_JNI(env)
+
+    if(!fmt)
+        return;
+
+    if(!tag)
+        tag = LOG_TAG;
+
+    va_list args;
+    va_start(args, fmt);
+    __android_log_vprint(ANDROID_LOG_DEBUG, tag, fmt, args);
+    va_end(args);
+}
+
 void setup_smooth_joystick(int enable)
 {
     GET_JNI(env)
@@ -963,7 +985,7 @@ void show_cursor(int on)
 {
     GET_JNI(env)
 
-	LOGI("Show cursor: %d", on);
+	//LOGI("Show cursor: %d", on);
 	(*env)->CallVoidMethod(env, q3eCallbackObj, android_ShowCursor_method, on ? JNI_TRUE : JNI_FALSE);
 }
 
@@ -1053,8 +1075,10 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMotionEvent(JNIEnv *env, j
     Q3E_PushMotionEvent(deltax, deltay);
 }
 
-JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMouseEvent(JNIEnv *env, jclass clazz, jfloat x, jfloat y)
+JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMouseEvent(JNIEnv *env, jclass clazz, jfloat x, jfloat y, jint relativeMode)
 {
+    if(onMouseEvent)
+    Q3E_PushMouseEvent(x, y, relativeMode);
 }
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushTextEvent(JNIEnv *env, jclass clazz, jstring text)
