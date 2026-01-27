@@ -5,6 +5,7 @@ import android.view.Surface;
 import android.util.Log;
 import android.os.Build;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.device.Q3EVirtualMouse;
@@ -68,40 +69,40 @@ public final class Q3E
 
     public static int LogicalToPhysicsX(int x)
     {
-        return Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth ? x : (int) ((float) x * Q3E.widthRatio);
+        return GAME_VIEW_WIDTH == surfaceWidth ? x : (int) ((float) x * widthRatio);
     }
 
     public static int LogicalToPhysicsY(int y)
     {
-        return Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight ? y : (int) ((float) y * Q3E.heightRatio);
+        return GAME_VIEW_HEIGHT == surfaceHeight ? y : (int) ((float) y * heightRatio);
     }
 
     public static float PhysicsToLogicalX(float x)
     {
-        return Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth ? x : (x / Q3E.widthRatio);
+        return GAME_VIEW_WIDTH == surfaceWidth ? x : (x / widthRatio);
     }
 
     public static float PhysicsToLogicalY(float y)
     {
-        return Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight ? y : (y / Q3E.heightRatio);
+        return GAME_VIEW_HEIGHT == surfaceHeight ? y : (y / heightRatio);
     }
 
     public static boolean IsOriginalSize()
     {
-        return Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth && Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight;
+        return GAME_VIEW_WIDTH == surfaceWidth && GAME_VIEW_HEIGHT == surfaceHeight;
     }
 
     public synchronized static void CalcRatio()
     {
-        if(Q3E.GAME_VIEW_WIDTH == Q3E.surfaceWidth)
-            Q3E.widthRatio = 1.0f;
+        if(GAME_VIEW_WIDTH == surfaceWidth)
+            widthRatio = 1.0f;
         else
-            Q3E.widthRatio = (float) Q3E.GAME_VIEW_WIDTH / (float) Q3E.surfaceWidth;
-        if(Q3E.GAME_VIEW_HEIGHT == Q3E.surfaceHeight)
-            Q3E.heightRatio = 1.0f;
+            widthRatio = (float) GAME_VIEW_WIDTH / (float) surfaceWidth;
+        if(GAME_VIEW_HEIGHT == surfaceHeight)
+            heightRatio = 1.0f;
         else
-            Q3E.heightRatio = (float) Q3E.GAME_VIEW_HEIGHT / (float) Q3E.surfaceHeight;
-        KLog.i("Q3EView", "Surface: view physical size=%d x %d, game logical size=%d x %d, ratio=%f, %f", Q3E.GAME_VIEW_WIDTH, Q3E.GAME_VIEW_HEIGHT, Q3E.surfaceWidth, Q3E.surfaceHeight, Q3E.widthRatio, Q3E.heightRatio);
+            heightRatio = (float) GAME_VIEW_HEIGHT / (float) surfaceHeight;
+        KLog.i("Q3EView", "Surface: view physical size=%d x %d, game logical size=%d x %d, ratio=%f, %f", GAME_VIEW_WIDTH, GAME_VIEW_HEIGHT, surfaceWidth, surfaceHeight, widthRatio, heightRatio);
     }
 
     public static void sendAnalog(boolean down, float x, float y)
@@ -185,32 +186,32 @@ public final class Q3E
 
     public static void Start()
     {
-        int gameThread = Q3EPreference.GetIntFromString(activity, Q3EPreference.GAME_THREAD, Q3EGlobals.GAME_THREAD_TYPE_NATIVE);
+        int gameThreadImpl = Q3EPreference.GetIntFromString(activity, Q3EPreference.GAME_THREAD, Q3EGlobals.GAME_THREAD_TYPE_NATIVE);
         int threadStackSize = Q3EPreference.GetIntFromString(activity, Q3EPreference.GAME_THREAD_STACK_SIZE, 0);
-        Q3E.gameThread = gameThread == Q3EGlobals.GAME_THREAD_TYPE_JAVA
+        gameThread = gameThreadImpl == Q3EGlobals.GAME_THREAD_TYPE_JAVA
                 ? (threadStackSize > 0 ? new Q3EGameThreadJava(Q3EJNI.AlignedStackSize(threadStackSize)) : new Q3EGameThreadJava() )
         : new Q3EGameThreadNative();
-        Q3E.gameThread.Start();
-        Q3E.running = true;
+        gameThread.Start();
+        running = true;
     }
 
     // activity onDestroyed
     public static void Stop()
     {
-        if(Q3E.running)
+        if(running)
         {
-            Q3E.running = false;
+            running = false;
             new Q3EExitEvent().run();
             Q3EGameThread.Sleep(100);
-            if(null != Q3E.gameThread)
+            if(null != gameThread)
             {
-                Q3E.gameThread.Stop();
-                Q3E.gameThread = null;
+                gameThread.Stop();
+                gameThread = null;
             }
             Q3EGameThread.Sleep(100);
 
-            if(null != Q3E.callbackObj)
-                Q3E.callbackObj.OnDestroy();
+            if(null != callbackObj)
+                callbackObj.OnDestroy();
         }
     }
 
@@ -226,15 +227,15 @@ public final class Q3E
                     andThen.run();
             }
         });*/
-        if(Q3E.running)
+        if(running)
         {
-            Q3E.running = false;
-            Q3E.callbackObj.PushEvent(new Q3EQuitEvent());
+            running = false;
+            callbackObj.PushEvent(new Q3EQuitEvent());
             Q3EGameThread.Sleep(100);
-            if(null != Q3E.gameThread)
+            if(null != gameThread)
             {
-                Q3E.gameThread.Stop();
-                Q3E.gameThread = null;
+                gameThread.Stop();
+                gameThread = null;
             }
             Q3EGameThread.Sleep(100);
         }
@@ -243,26 +244,26 @@ public final class Q3E
 
     public static void Pause()
     {
-        if(!Q3E.running)
+        if(!running)
             return;
         Runnable runnable = new KOnceRunnable() {
             @Override public void Run() {
                 Q3EJNI.OnPause();
             }
         };
-        Q3E.callbackObj.PushEvent(runnable);
+        callbackObj.PushEvent(runnable);
     }
 
     public static void Resume()
     {
-        if(!Q3E.running)
+        if(!running)
             return;
         Runnable runnable = new KOnceRunnable() {
             @Override public void Run() {
                 Q3EJNI.OnResume();
             }
         };
-        Q3E.callbackObj.PushEvent(runnable);
+        callbackObj.PushEvent(runnable);
     }
 
 
@@ -356,7 +357,7 @@ public final class Q3E
 
     public static void SetupEventEngine(Context context)
     {
-        if(Q3E.q3ei.IsUsingSDL())
+        if(q3ei.IsUsingSDL())
         {
             Log.i(TAG, "Using SDL event queue");
             eventEngine = new Q3EEventEngineSDL();
@@ -377,8 +378,82 @@ public final class Q3E
         }
     }
 
+    public static void togglevkbd()
+    {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (function_key_toolbar)
+        {
+            boolean changed;
+            if(builtin_virtual_keyboard)
+            {
+                activity.GetKeyboard().ToggleBuiltInVKB();
+                changed = activity.GetKeyboard().IsBuiltInVKBVisible();
+                ToggleToolbar(changed);
+            }
+            else
+            {
+                changed = imm.hideSoftInputFromWindow(controlView.getWindowToken(), 0);
+                if (changed) // im from open to close
+                    ToggleToolbar(false);
+                else // im is closed
+                {
+                    //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                    ToggleToolbar(true);
+                }
+            }
+        }
+        else
+        {
+            if(builtin_virtual_keyboard)
+                activity.GetKeyboard().ToggleBuiltInVKB();
+            else
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+        }
+    }
+
+    public static void ToggleToolbar(boolean on)
+    {
+        callbackObj.ToggleToolbar(on);
+    }
+
+    public static void OpenVKB()
+    {
+        if (null != controlView)
+        {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if(builtin_virtual_keyboard)
+                activity.GetKeyboard().OpenBuiltInVKB();
+            else
+            {
+                //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }
+        }
+        if (function_key_toolbar)
+            ToggleToolbar(true);
+    }
+
+    public static void CloseVKB()
+    {
+        if (null != controlView)
+        {
+            if(builtin_virtual_keyboard)
+            {
+                activity.GetKeyboard().CloseBuiltInVKB();
+            }
+            else
+            {
+                InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(controlView.getWindowToken(), 0);
+            }
+        }
+        if (function_key_toolbar)
+            ToggleToolbar(false);
+    }
+
     static
     {
-        Q3E.isOuya = Q3EOuya.IsValid();
+        isOuya = Q3EOuya.IsValid();
     }
 }

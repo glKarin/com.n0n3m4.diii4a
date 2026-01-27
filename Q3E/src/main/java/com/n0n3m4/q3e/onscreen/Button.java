@@ -153,7 +153,7 @@ public class Button extends Paintable implements TouchListener
         if (keycode == Q3EKeyCodes.K_VKBD)
         {
             if (act == 1)
-                Q3EUtils.togglevkbd(this.view);
+                Q3E.togglevkbd();
             return true;
         }
 

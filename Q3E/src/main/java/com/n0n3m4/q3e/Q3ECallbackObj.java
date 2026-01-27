@@ -250,7 +250,7 @@ public class Q3ECallbackObj
         Q3E.post(new Runnable() {
             @Override
             public void run() {
-                Q3EUtils.CloseVKB(Q3E.controlView);
+                Q3E.CloseVKB();
             }
         });
     }
@@ -260,7 +260,7 @@ public class Q3ECallbackObj
         Q3E.post(new Runnable() {
             @Override
             public void run() {
-                Q3EUtils.OpenVKB(Q3E.controlView);
+                Q3E.OpenVKB();
             }
         });
     }

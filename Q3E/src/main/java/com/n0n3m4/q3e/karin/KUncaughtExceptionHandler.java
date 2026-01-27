@@ -9,10 +9,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Process;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 
 /**
@@ -265,6 +268,35 @@ public class KUncaughtExceptionHandler implements Thread.UncaughtExceptionHandle
             else
                 _instance.Unregister();
             _instance.Register(context);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private static boolean _dumpPID = false;
+    public static void DumpPID(Context context)
+    {
+        if(_dumpPID || !BuildConfig.DEBUG )
+            return;
+        try
+        {
+            String text = "" + Process.myPid();
+            final String[] Paths;
+            Paths = new String[]{
+                    PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.pref_datapath, ""),
+                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ? context.getDataDir().getAbsolutePath() : context.getCacheDir().getAbsolutePath()
+            };
+            for (String dir : Paths)
+            {
+                if(null == dir || dir.isEmpty())
+                    continue;
+                String path = dir + "/.idtech4amm.pid";
+                Q3EUtils.file_put_contents(path, text);
+                KLog.I("DumpPID " + text + " to " + path);
+                _dumpPID = true;
+            }
         }
         catch (Exception e)
         {

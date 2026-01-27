@@ -1592,7 +1592,7 @@ public class GameLauncher extends Activity
         super.onCreate(savedInstanceState);
 
 		default_gamedata = Q3EUtils.GetDefaultGameDirectory(this);
-		Q3EUtils.DumpPID(this);
+		KUncaughtExceptionHandler.DumpPID(this);
         Q3ELang.Locale(this);
 
         //k

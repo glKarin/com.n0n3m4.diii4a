@@ -152,7 +152,7 @@ public class Q3EMain extends Activity
         if(!CheckStart())
             return;
 
-        Q3EUtils.DumpPID(this);
+        KUncaughtExceptionHandler.DumpPID(this);
 
         // setup language environment
         Q3ELang.Locale(this);
@@ -224,7 +224,7 @@ public class Q3EMain extends Activity
             mControlGLSurfaceView.Pause();
         }
         if(m_initView)
-            Q3EUtils.CloseVKB(mGLSurfaceView);
+            Q3E.CloseVKB();
         keyboard.OnPause();
     }
 
@@ -759,7 +759,7 @@ public class Q3EMain extends Activity
             mControlGLSurfaceView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Q3EUtils.OpenVKB(mControlGLSurfaceView);
+                    Q3E.OpenVKB();
                 }
             }, 250);
             return true;

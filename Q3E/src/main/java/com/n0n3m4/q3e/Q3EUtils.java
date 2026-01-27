@@ -80,8 +80,6 @@ import java.util.zip.ZipOutputStream;
 
 public class Q3EUtils
 {
-    private static final String TAG = "Q3EUtils";
-
     public static boolean isAppInstalled(Activity ctx, String nm)
     {
         try
@@ -113,80 +111,6 @@ public class Q3EUtils
         while (candidate < x)
             candidate *= 2;
         return candidate;
-    }
-
-    public static void togglevkbd(View vw)
-    {
-        InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (Q3E.function_key_toolbar)
-        {
-            boolean changed;
-            if(Q3E.builtin_virtual_keyboard)
-            {
-                Q3E.activity.GetKeyboard().ToggleBuiltInVKB();
-                changed = Q3E.activity.GetKeyboard().IsBuiltInVKBVisible();
-                ToggleToolbar(changed);
-            }
-            else
-            {
-                changed = imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
-                if (changed) // im from open to close
-                    ToggleToolbar(false);
-                else // im is closed
-                {
-                    //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
-                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-                    ToggleToolbar(true);
-                }
-            }
-        }
-        else
-        {
-            if(Q3E.builtin_virtual_keyboard)
-                Q3E.activity.GetKeyboard().ToggleBuiltInVKB();
-            else
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-        }
-    }
-
-    public static void ToggleToolbar(boolean on)
-    {
-        Q3E.callbackObj.ToggleToolbar(on);
-    }
-
-    public static void OpenVKB(View vw)
-    {
-        if (null != vw)
-        {
-            InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if(Q3E.builtin_virtual_keyboard)
-                Q3E.activity.GetKeyboard().OpenBuiltInVKB();
-            else
-            {
-                //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-            }
-        }
-        if (Q3E.function_key_toolbar)
-            Q3EUtils.ToggleToolbar(true);
-    }
-
-    public static void CloseVKB(View vw)
-    {
-        if (null != vw)
-        {
-            if(Q3E.builtin_virtual_keyboard)
-            {
-                Q3E.activity.GetKeyboard().CloseBuiltInVKB();
-            }
-            else
-            {
-                InputMethodManager imm = (InputMethodManager) vw.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(vw.getWindowToken(), 0);
-            }
-        }
-        if (Q3E.function_key_toolbar)
-            Q3EUtils.ToggleToolbar(false);
     }
 
     public static int[] GetNormalScreenSize(Activity activity)
@@ -934,34 +858,6 @@ public class Q3EUtils
         }
     }
 
-    private static boolean _dumpPID = false;
-    public static void DumpPID(Context context)
-    {
-        if(_dumpPID || !BuildConfig.DEBUG )
-            return;
-        try
-        {
-            String text = "" + Process.myPid();
-            final String[] Paths;
-            Paths = new String[]{
-                    PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.pref_datapath, ""),
-                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ? context.getDataDir().getAbsolutePath() : context.getCacheDir().getAbsolutePath()
-            };
-            for (String dir : Paths)
-            {
-                if(null == dir || dir.isEmpty())
-                    continue;
-                String path = dir + "/.idtech4amm.pid";
-                file_put_contents(path, text);
-                Log.i(TAG, "DumpPID " + text + " to " + path);
-                _dumpPID = true;
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
     public static float GetRefreshRate(Context context)
     {
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
