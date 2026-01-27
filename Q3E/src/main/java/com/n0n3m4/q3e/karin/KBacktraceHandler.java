@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
 
@@ -154,7 +155,7 @@ public class KBacktraceHandler
         try
         {
             String fileName = String.format("%s_%s.backtrace.log", Q3EGlobals.CONST_APP_NAME, new SimpleDateFormat("yyyy-MM-dd HH-mm-ss-SSS").format(new Date()));
-            String logPath = KStr.AppendPath(Q3EUtils.q3ei.app_storage_path, Q3EGlobals.FOLDER_BACKTRACE_LOG);
+            String logPath = KStr.AppendPath(Q3E.q3ei.app_storage_path, Q3EGlobals.FOLDER_BACKTRACE_LOG);
             File dir = new File(logPath);
             if(!dir.exists())
                 dir.mkdirs();

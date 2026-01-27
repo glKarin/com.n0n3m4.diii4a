@@ -120,9 +120,9 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
             Q3E.orig_height = h;
             //Q3E.activity.SetupGameViewSize(w, h, false);
 
-            UiLoader uildr = new UiLoader(this, gl, Q3E.orig_width, Q3E.orig_height, Q3EUtils.q3ei.defaults_table);
+            UiLoader uildr = new UiLoader(this, gl, Q3E.orig_width, Q3E.orig_height, Q3E.q3ei.defaults_table);
 
-            for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
+            for (int i = 0; i < Q3E.q3ei.UI_SIZE; i++)
             {
 /*                boolean visible = uildr.CheckVisible(i);
                 Log.i("Q3EControlView", "On-screen button " + i + " -> " + (visible ? "show" : "hide"));
@@ -331,7 +331,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         if(isCreated)
         {
             editHandler = new Q3EEditButtonHandler(this, touch_elements, paint_elements, fingers);
-            editHandler.SetEditGame(Q3EUtils.q3ei.game);
+            editHandler.SetEditGame(Q3E.q3ei.game);
             editHandler.OnCreate(getContext());
             editHandler.TransparentBackground(true);
             editHandler.SetPortrait(Q3E.activity.IsPortrait());

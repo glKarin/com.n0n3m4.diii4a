@@ -32,7 +32,7 @@ public abstract class Q3EPatchResource
 
     protected String MakeOutPath(String... fsgame)
     {
-        String path = Q3EInterface.GetStandaloneDirectory(Q3EUtils.q3ei.standalone, game);
+        String path = Q3EInterface.GetStandaloneDirectory(Q3E.q3ei.standalone, game);
         if(null == fsPath)
             path = KStr.AppendPath(path, null != fsgame && fsgame.length > 0 ? fsgame[0] : null);
         else if(fsPath.isEmpty())
@@ -40,7 +40,7 @@ public abstract class Q3EPatchResource
         else
             path = KStr.AppendPath(path, fsPath);
 
-        return KStr.AppendPath(Q3EUtils.q3ei.datadir, path);
+        return KStr.AppendPath(Q3E.q3ei.datadir, path);
     }
 }
 

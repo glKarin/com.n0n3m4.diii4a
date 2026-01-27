@@ -36,7 +36,6 @@ import java.util.LinkedList;
 
 public class Q3ECallbackObj
 {
-    private static final String TAG = "Q3ECallbackObj";
     public Q3EAudioTrack mAudioTrack;
     public int state = Q3EGlobals.STATE_NONE;
     private final Object m_audioLock = new Object();
@@ -332,7 +331,7 @@ public class Q3ECallbackObj
 
     public String CopyDLLToCache(String dllPath, String name)
     {
-        return Q3E.CopyDLLToCache(dllPath, Q3EUtils.q3ei.game, name);
+        return Q3E.CopyDLLToCache(dllPath, Q3E.q3ei.game, name);
     }
 
     public boolean RequestPermission(String permission, int requestCode)

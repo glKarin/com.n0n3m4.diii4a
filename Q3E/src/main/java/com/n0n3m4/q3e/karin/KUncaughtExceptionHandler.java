@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
 
@@ -207,7 +208,7 @@ public class KUncaughtExceptionHandler implements Thread.UncaughtExceptionHandle
         try
         {
             String fileName = String.format("%s_%s.crash.log", Q3EGlobals.CONST_APP_NAME, new SimpleDateFormat("yyyy-MM-dd HH-mm-ss-SSS").format(new Date()));
-            String logPath = KStr.AppendPath(Q3EUtils.q3ei.app_storage_path, Q3EGlobals.FOLDER_CRASH_LOG);
+            String logPath = KStr.AppendPath(Q3E.q3ei.app_storage_path, Q3EGlobals.FOLDER_CRASH_LOG);
             File dir = new File(logPath);
             if(!dir.exists())
                 dir.mkdirs();

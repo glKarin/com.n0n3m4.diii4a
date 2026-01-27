@@ -63,10 +63,9 @@ public class Q3EAudioTrack extends AudioTrack
         play();
     }
 
-    // KARIN_NEW_GAME_BOOKMARK: if using audio track
     public static Q3EAudioTrack Instance(int size)
     {
-        if (Q3EUtils.q3ei.isQ3 || Q3EUtils.q3ei.isRTCW || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isQ2|| Q3EUtils.q3ei.isETW || Q3EUtils.q3ei.isRealRTCW || Q3EUtils.q3ei.isFTEQW || Q3EUtils.q3ei.isJA || Q3EUtils.q3ei.isJO || Q3EUtils.q3ei.isUrT || Q3EUtils.q3ei.isMOHAA)
+        if (Q3E.q3ei.NeedAudioTrack())
             size /= 8;
 
         int sampleFreq = 44100;

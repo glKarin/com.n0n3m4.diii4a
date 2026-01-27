@@ -77,9 +77,9 @@ public class Q3EUiView extends GLSurfaceView implements GLSurfaceView.Renderer
     {
         if (!mInit)
         {
-            UiLoader uildr = new UiLoader(this, gl, w, h, Q3EUtils.q3ei.defaults_table);
+            UiLoader uildr = new UiLoader(this, gl, w, h, Q3E.q3ei.defaults_table);
 
-            for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
+            for (int i = 0; i < Q3E.q3ei.UI_SIZE; i++)
             {
                 Object o = uildr.LoadElement(i, true);
                 touch_elements.add((TouchListener) o);

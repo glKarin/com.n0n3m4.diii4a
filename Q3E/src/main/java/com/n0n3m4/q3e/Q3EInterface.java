@@ -688,6 +688,12 @@ public class Q3EInterface
 			return new KidTech4Command(cmd);
 	}
 
+    // KARIN_NEW_GAME_BOOKMARK: if using audio track
+    public boolean NeedAudioTrack()
+    {
+        return isQ3 || isRTCW || isQ1 || isQ2|| isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA;
+    }
+
 	// KARIN_NEW_GAME_BOOKMARK: add config file list
 	public String[] GetGameConfigFiles()
 	{

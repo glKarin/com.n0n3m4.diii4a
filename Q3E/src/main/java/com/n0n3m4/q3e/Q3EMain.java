@@ -541,14 +541,14 @@ public class Q3EMain extends Activity
 
     private boolean CheckStart()
     {
-        if(Q3EUtils.q3ei.IsDisabled()) // disabled or removed games
+        if(Q3E.q3ei.IsDisabled()) // disabled or removed games
         {
-            Toast.makeText(this, Q3EUtils.q3ei.game_name + " is disabled or removed!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, Q3E.q3ei.game_name + " is disabled or removed!", Toast.LENGTH_LONG).show();
             finish();
             Q3EUtils.RunLauncher(this);
             return false;
         }
-        else if(Q3EUtils.q3ei.isDOOM) // arm32 not support UZDOOM
+        else if(Q3E.q3ei.isDOOM) // arm32 not support UZDOOM
         {
             if(!Q3EJNI.Is64())
             {
@@ -557,7 +557,7 @@ public class Q3EMain extends Activity
                 Q3EUtils.RunLauncher(this);
                 return false;
             }
-            String iwad = KidTechCommand.GetParam("-+", Q3EUtils.q3ei.cmd, "iwad");
+            String iwad = KidTechCommand.GetParam("-+", Q3E.q3ei.cmd, "iwad");
             if(KStr.IsBlank(iwad))
             {
                 Toast.makeText(this, "UZDOOM requires -iwad file!", Toast.LENGTH_LONG).show();
@@ -568,14 +568,14 @@ public class Q3EMain extends Activity
         }
         else if(Q3EGlobals.IsFDroidVersion())
         {
-            if(Q3EUtils.q3ei.isXash3D)
+            if(Q3E.q3ei.isXash3D)
             {
                 Toast.makeText(this, "F-Droid version not support Xash3D, you can install Github version!", Toast.LENGTH_LONG).show();
                 finish();
                 Q3EUtils.RunLauncher(this);
                 return false;
             }
-            else if(Q3EUtils.q3ei.isSource)
+            else if(Q3E.q3ei.isSource)
             {
                 Toast.makeText(this, "F-Droid version not support Source-Engine game, you can install Github version!", Toast.LENGTH_LONG).show();
                 finish();
@@ -620,7 +620,7 @@ public class Q3EMain extends Activity
             Q3E.virtualMouse = new Q3EVirtualMouse(this);
             Q3E.virtualMouse.SetPhysicalGeometry(m_offsetX, m_offsetY, fullWidth, fullHeight);
             Q3E.virtualMouse.SetLogicalSize(Q3E.surfaceWidth, Q3E.surfaceHeight);
-            if(!Q3EUtils.q3ei.IsUsingSDL() || Q3E.m_usingMouse)
+            if(!Q3E.q3ei.IsUsingSDL() || Q3E.m_usingMouse)
             {
                 Q3E.virtualMouse.DisableCursor(true);
                 Q3E.virtualMouse.SetCursorVisible(false);

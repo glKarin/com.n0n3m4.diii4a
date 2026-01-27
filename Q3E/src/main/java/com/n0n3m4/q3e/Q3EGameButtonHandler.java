@@ -508,9 +508,9 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
         List<TouchListener> touchs = new ArrayList<>(0);
         List<Paintable> paints = new ArrayList<>(0);
 
-        UiLoader uildr = new UiLoader(controlView, gl, Q3E.orig_width, Q3E.orig_height, Q3EUtils.q3ei.defaults_table);
+        UiLoader uildr = new UiLoader(controlView, gl, Q3E.orig_width, Q3E.orig_height, Q3E.q3ei.defaults_table);
 
-        for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
+        for (int i = 0; i < Q3E.q3ei.UI_SIZE; i++)
         {
             boolean visible = uildr.CheckVisible(i);
             Log.i("Q3EControlView", "On-screen button " + i + " -> " + (visible ? "show" : "hide"));
@@ -520,7 +520,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             paints.add(total_paint_elements.get(i));
         }
 
-        for(int i = Q3EUtils.q3ei.UI_SIZE; i < total_touch_elements.size(); i++)
+        for(int i = Q3E.q3ei.UI_SIZE; i < total_touch_elements.size(); i++)
         {
             TouchListener touchListener = total_touch_elements.get(i);
             touchs.add(touchListener);

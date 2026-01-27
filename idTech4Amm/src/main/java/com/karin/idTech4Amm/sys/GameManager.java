@@ -1,5 +1,6 @@
 package com.karin.idTech4Amm.sys;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EUtils;
 
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public final class GameManager
         if (null == game)
             game = "";
 
-        List<GameProp> list = GameProps.get(Q3EUtils.q3ei.game);
+        List<GameProp> list = GameProps.get(Q3E.q3ei.game);
 
         GameProp res = null;
         for (GameProp prop : list)
@@ -138,7 +139,7 @@ public final class GameManager
 
     public static int GetGameIcon()
     {
-        return LauncherGame.Find(Q3EUtils.q3ei.game_id).ICON_ID;
+        return LauncherGame.Find(Q3E.q3ei.game_id).ICON_ID;
     }
 
     public static int GetGameIcon(String game)
@@ -148,7 +149,7 @@ public final class GameManager
 
     public static int GetGameName()
     {
-        return LauncherGame.Find(Q3EUtils.q3ei.game_id).NAME_ID;
+        return LauncherGame.Find(Q3E.q3ei.game_id).NAME_ID;
     }
 
     public static int GetGameNameRS(String game)
@@ -158,7 +159,7 @@ public final class GameManager
 
     public static int GetGameThemeColor()
     {
-        return LauncherGame.Find(Q3EUtils.q3ei.game_id).COLOR_ID;
+        return LauncherGame.Find(Q3E.q3ei.game_id).COLOR_ID;
     }
 
     public static int GetGameThemeColor(String game)

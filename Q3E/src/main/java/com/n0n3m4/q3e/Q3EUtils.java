@@ -81,7 +81,6 @@ import java.util.zip.ZipOutputStream;
 public class Q3EUtils
 {
     private static final String TAG = "Q3EUtils";
-    public static Q3EInterface q3ei = new Q3EInterface(); //k: new
     public static boolean isOuya = false;
     public static int UI_FULLSCREEN_HIDE_NAV_OPTIONS = 0;
     public static int UI_FULLSCREEN_OPTIONS = 0;
@@ -393,8 +392,8 @@ public class Q3EUtils
     public static String GetDataPath(String filename)
     {
         String path = "";
-        if(null != q3ei.datadir)
-            path += q3ei.datadir;
+        if(null != Q3E.q3ei.datadir)
+            path += Q3E.q3ei.datadir;
         if(KStr.NotEmpty(filename))
             path += filename;
         return path;

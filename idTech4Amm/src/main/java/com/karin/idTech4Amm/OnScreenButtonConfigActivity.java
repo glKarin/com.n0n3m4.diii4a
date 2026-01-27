@@ -14,6 +14,7 @@ import android.preference.PreferenceManager;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.Theme;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
@@ -132,7 +133,7 @@ public class OnScreenButtonConfigActivity extends Activity
                 continue;
             int[] arr = new int[4];
             System.arraycopy(argTable, i * 4, arr, 0, arr.length);
-            m_list.add(new OnScreenButton(i, type, arr, Q3EUtils.q3ei.texture_table[i], Q3EGlobals.CONTROLS_NAMES[i]));
+            m_list.add(new OnScreenButton(i, type, arr, Q3E.q3ei.texture_table[i], Q3EGlobals.CONTROLS_NAMES[i]));
         }
         m_adapter.notifyDataSetChanged();
     }

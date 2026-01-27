@@ -28,6 +28,7 @@ public final class Q3E
 
     public static Q3ECallbackObj callbackObj;
     public static Q3EEventEngine eventEngine = new Q3EEventEngineJava();
+    public static Q3EInterface q3ei = new Q3EInterface(); //k: new
 
     public static          Q3EView        gameView;
     public static          Q3EControlView controlView;
@@ -353,7 +354,7 @@ public final class Q3E
 
     public static void SetupEventEngine(Context context)
     {
-        if(Q3EUtils.q3ei.IsUsingSDL())
+        if(Q3E.q3ei.IsUsingSDL())
         {
             Log.i(TAG, "Using SDL event queue");
             eventEngine = new Q3EEventEngineSDL();

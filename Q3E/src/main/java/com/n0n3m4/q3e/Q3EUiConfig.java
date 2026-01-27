@@ -90,8 +90,8 @@ public class Q3EUiConfig extends Activity
         m_hideNav = preferences.getBoolean(Q3EPreference.HIDE_NAVIGATION_BAR, true);
         SetupUIFlags();
 
-        Q3EUtils.q3ei.LoadTypeAndArgTablePreference(this);
-        Q3EUtils.q3ei.LoadLayoutTablePreference(this, m_game, false);
+        Q3E.q3ei.LoadTypeAndArgTablePreference(this);
+        Q3E.q3ei.LoadLayoutTablePreference(this, m_game, false);
 
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
