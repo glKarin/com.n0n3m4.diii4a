@@ -203,9 +203,9 @@ public class Q3EUiConfig extends Activity
     {
         final View decorView = getWindow().getDecorView();
         if (m_hideNav)
-            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
+            decorView.setSystemUiVisibility(Q3EGUI.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
         else
-            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_OPTIONS);
+            decorView.setSystemUiVisibility(Q3EGUI.UI_FULLSCREEN_OPTIONS);
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.os.Build;
 import android.view.View;
 
+import com.n0n3m4.q3e.device.Q3EOuya;
 import com.n0n3m4.q3e.device.Q3EVirtualMouse;
 import com.n0n3m4.q3e.event.Q3EExitEvent;
 import com.n0n3m4.q3e.event.Q3EQuitEvent;
@@ -374,5 +375,10 @@ public final class Q3E
                 eventEngine = new Q3EEventEngineNative();
             }
         }
+    }
+
+    static
+    {
+        Q3E.isOuya = Q3EOuya.IsValid();
     }
 }
