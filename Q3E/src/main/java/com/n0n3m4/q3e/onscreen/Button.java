@@ -3,6 +3,7 @@ package com.n0n3m4.q3e.onscreen;
 import android.view.View;
 
 import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -86,7 +87,7 @@ public class Button extends Paintable implements TouchListener
     @Override
     public void loadtex(GL10 gl)
     {
-        tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), tex_androidid));
+        tex_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(view.getContext(), tex_androidid));
     }
 
     @Override

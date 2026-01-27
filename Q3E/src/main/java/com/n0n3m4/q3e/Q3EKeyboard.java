@@ -81,7 +81,7 @@ public class Q3EKeyboard
         if(null == vkb)
         {
             vkb = new KVKBView(m_context);
-            vkb.Init(Q3EUtils.asset_get_contents(m_context, "keyboard/generic.json"));
+            vkb.Init(Q3EContextUtils.asset_get_contents(m_context, "keyboard/generic.json"));
             vkb.Close();
         }
         return vkb;
@@ -125,11 +125,11 @@ public class Q3EKeyboard
         {
             if(m_context.IsCoverEdges())
             {
-                int x = Q3EUtils.GetEdgeHeight(m_context, true);
+                int x = Q3EContextUtils.GetEdgeHeight(m_context, true);
                 if(x != 0)
                     m_keyToolbar.setX(x);
             }
-            int[] size = Q3EUtils.GetNormalScreenSize(m_context);
+            int[] size = Q3EContextUtils.GetNormalScreenSize(m_context);
             ViewGroup.LayoutParams layoutParams = m_keyToolbar.getLayoutParams();
             layoutParams.width = size[0];
             m_keyToolbar.setLayoutParams(layoutParams);
@@ -140,11 +140,11 @@ public class Q3EKeyboard
         {
             if(m_context.IsCoverEdges())
             {
-                int x = Q3EUtils.GetEdgeHeight(m_context, true);
+                int x = Q3EContextUtils.GetEdgeHeight(m_context, true);
                 if(x != 0)
                     vkb.setX(x);
             }
-            int[] size = Q3EUtils.GetNormalScreenSize(m_context);
+            int[] size = Q3EContextUtils.GetNormalScreenSize(m_context);
             ViewGroup.LayoutParams layoutParams = vkb.getLayoutParams();
             layoutParams.width = size[0];
             vkb.setLayoutParams(layoutParams);
@@ -160,7 +160,7 @@ public class Q3EKeyboard
     {
         if(m_keyToolbar != null)
         {
-            int[] size = Q3EUtils.GetNormalScreenSize(m_context);
+            int[] size = Q3EContextUtils.GetNormalScreenSize(m_context);
             ViewGroup.LayoutParams layoutParams = m_keyToolbar.getLayoutParams();
             layoutParams.width = size[0];
             m_keyToolbar.setLayoutParams(layoutParams);
@@ -169,7 +169,7 @@ public class Q3EKeyboard
 
         if(vkb != null)
         {
-            int[] size = Q3EUtils.GetNormalScreenSize(m_context);
+            int[] size = Q3EContextUtils.GetNormalScreenSize(m_context);
             ViewGroup.LayoutParams layoutParams = vkb.getLayoutParams();
             layoutParams.width = size[0];
             vkb.setLayoutParams(layoutParams);

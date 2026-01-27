@@ -938,7 +938,7 @@ public class Q3EGameHelper
 
     private int[] GetFrameSize(int w, int h)
     {
-        int[] size = Q3EUtils.GetSurfaceViewSize(m_context, w, h);
+        int[] size = Q3EContextUtils.GetSurfaceViewSize(m_context, w, h);
         KLog.i("Q3EView", "Game surface view size: %d x %d", size[0], size[1]);
         return size;
     }
@@ -1090,7 +1090,7 @@ public class Q3EGameHelper
 
     private String GetDefaultLibrariesPath()
     {
-        return Q3EUtils.GetGameLibDir(m_context);
+        return Q3EContextUtils.GetGameLibDir(m_context);
     }
 
     private String GetExternalLocalLibPath()
@@ -1113,7 +1113,7 @@ public class Q3EGameHelper
         Q3EUtils.rmdir_r(dir);
 
         String arch = GetArchName();
-        String localPath = Q3EUtils.GetDataPath(File.separator + "lib" + File.separator + arch);
+        String localPath = Q3E.GetDataPath(File.separator + "lib" + File.separator + arch);
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Find local external libraries: " + localPath);
         File file = new File(localPath);
         if(!file.isDirectory())
@@ -1234,8 +1234,8 @@ public class Q3EGameHelper
 
         String subdatadir = Q3E.q3ei.subdatadir;
 
-        int refreshRate = (int)Q3EUtils.GetRefreshRate(m_context);
-        String appHome = Q3EUtils.GetAppInternalSearchPath(m_context, null);
+        int refreshRate = (int)Q3EContextUtils.GetRefreshRate(m_context);
+        String appHome = Q3EContextUtils.GetAppInternalSearchPath(m_context, null);
 		appHome = KStr.AppendPath(appHome, subdatadir);
 
         int eventQueue = Q3EPreference.GetIntFromString(preferences, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);

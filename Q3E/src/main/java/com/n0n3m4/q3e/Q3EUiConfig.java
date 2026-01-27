@@ -108,7 +108,7 @@ public class Q3EUiConfig extends Activity
 		vw.setZOrderMediaOverlay(true);
         mainLayout.addView(vw, params);
 
-        int px = Q3EUtils.dip2px(this, 48);
+        int px = Q3EContextUtils.dip2px(this, 48);
 		params = new RelativeLayout.LayoutParams(px, px);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP | RelativeLayout.CENTER_HORIZONTAL);
 		ImageView btn = new ImageView(this);

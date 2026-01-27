@@ -11,7 +11,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Process;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import com.n0n3m4.q3e.BuildConfig;
 
 import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGlobals;

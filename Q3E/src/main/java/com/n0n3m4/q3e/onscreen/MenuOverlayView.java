@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EEditButtonHandler;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
@@ -209,7 +210,7 @@ public class MenuOverlayView implements UiViewOverlay
         if(null != mainLayout)
             return;
 
-        Q3EUtils.RunOnUiThread(context, new Runnable() {
+        Q3EContextUtils.RunOnUiThread(context, new Runnable() {
                 @Override
                 public void run()
                 {
@@ -319,7 +320,7 @@ public class MenuOverlayView implements UiViewOverlay
 
     public void Show()
     {
-        Q3EUtils.RunOnUiThread(context, new Runnable() {
+        Q3EContextUtils.RunOnUiThread(context, new Runnable() {
                 @Override
                 public void run()
                 {
@@ -330,7 +331,7 @@ public class MenuOverlayView implements UiViewOverlay
 
     public void hide()
     {
-        Q3EUtils.RunOnUiThread(context, new Runnable() {
+        Q3EContextUtils.RunOnUiThread(context, new Runnable() {
                 @Override
                 public void run()
                 {
@@ -341,7 +342,7 @@ public class MenuOverlayView implements UiViewOverlay
 
     public void Paint(GL11 gl)
     {
-        Q3EUtils.RunOnUiThread(context, new Runnable() {
+        Q3EContextUtils.RunOnUiThread(context, new Runnable() {
                 @Override
                 public void run()
                 {
@@ -372,13 +373,13 @@ public class MenuOverlayView implements UiViewOverlay
     {
         SetTouchItem(fn.target);
 
-        Q3EUtils.RunOnUiThread(context, new Runnable() {
+        Q3EContextUtils.RunOnUiThread(context, new Runnable() {
             @Override
             public void run()
             {
                 Show();
 
-                Q3EUtils.Post(context, new Runnable() {
+                Q3EContextUtils.Post(context, new Runnable() {
                     @Override
                     public void run()
                     {

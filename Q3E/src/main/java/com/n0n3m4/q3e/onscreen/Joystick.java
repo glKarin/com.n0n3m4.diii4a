@@ -4,6 +4,7 @@ import android.graphics.Rect;
 import android.view.View;
 
 import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -322,12 +323,12 @@ public class Joystick extends Paintable implements TouchListener
 
         final int[] color = {255, 255, 255, 255};
         if(null != m_textures && m_textures.length > 0)
-            tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
+            tex_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
         if(tex_ind == 0)
             tex_ind = KGLBitmapTexture.GenCircleRingTexture(gl, size, CalcRingWidth(), color);
 
         if(null != m_textures && m_textures.length > 1)
-            texd_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[1]));
+            texd_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(view.getContext(), m_textures[1]));
         if(texd_ind == 0)
             texd_ind = KGLBitmapTexture.GenCircleTexture(gl, dot_size, color);
 

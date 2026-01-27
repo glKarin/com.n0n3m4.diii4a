@@ -134,7 +134,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
                 return true;
             if ((m_mapBack & Q3EGlobals.ENUM_BACK_EXIT) != 0 && HandleBackPress())
                 return true;
-            Q3EUtils.ToggleToolbar(false);
+            Q3E.ToggleToolbar(false);
         }
         int qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0), event);
         return eventControl.OnKeyUp(qKeyCode, event, getCharacter(keyCode, event));

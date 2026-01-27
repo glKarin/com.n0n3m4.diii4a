@@ -284,7 +284,7 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
         super.onDetachedFromWindow();
 
         if(null != Q3E.activity)
-            Q3E.activity.GetKeyboard().onDetachedFromWindow();
+            Q3E.keyboard.onDetachedFromWindow();
     }
 
     private void SortOnScreenButtons()

@@ -78,6 +78,7 @@ import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.karin.idTech4Amm.sys.PreferenceKey;
 import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.karin.Theme;
 import com.karin.idTech4Amm.ui.ChangelogView;
 import com.karin.idTech4Amm.ui.DebugDialog;
@@ -1591,7 +1592,7 @@ public class GameLauncher extends Activity
     {
         super.onCreate(savedInstanceState);
 
-		default_gamedata = Q3EUtils.GetDefaultGameDirectory(this);
+		default_gamedata = Q3EContextUtils.GetDefaultGameDirectory(this);
 		KUncaughtExceptionHandler.DumpPID(this);
         Q3ELang.Locale(this);
 
@@ -3257,9 +3258,9 @@ public class GameLauncher extends Activity
 
 	private void UpdateResolutionText()
 	{
-		int[] size = Q3EUtils.GetFullScreenSize(this);
+		int[] size = Q3EContextUtils.GetFullScreenSize(this);
 		int width, height;
-		if(Q3EUtils.ActiveIsLandscape(this))
+		if(Q3EContextUtils.ActiveIsLandscape(this))
 		{
 			width = size[0];
 			height = size[1];
@@ -3269,7 +3270,7 @@ public class GameLauncher extends Activity
 			width = size[1];
 			height = size[0];
 		}
-		size = Q3EUtils.GetSurfaceViewSize(this, width, height);
+		size = Q3EContextUtils.GetSurfaceViewSize(this, width, height);
 		V.tv_scrres_size.setText(size[0] + " x " + size[1]);
 	}
 

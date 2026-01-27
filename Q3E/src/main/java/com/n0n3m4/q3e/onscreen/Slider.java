@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
@@ -99,7 +100,7 @@ public class Slider extends Paintable implements TouchListener
             boolean suc = true;
             for(int i = 1; i <= 3; i++)
             {
-                Bitmap bitmap = Q3EUtils.ResourceToBitmap(context, split[i]);
+                Bitmap bitmap = Q3EContextUtils.ResourceToBitmap(context, split[i]);
                 if(null == bitmap)
                 {
                     suc = false;
@@ -159,12 +160,12 @@ public class Slider extends Paintable implements TouchListener
                     if(null != bs[i])
                         bs[i].recycle();
                 }
-                tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(context, split[0]));
+                tex_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(context, split[0]));
             }
         }
         else
         {
-            tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(context, split[0]));
+            tex_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(context, split[0]));
         }
     }
 

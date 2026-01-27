@@ -1064,7 +1064,7 @@ public class Q3EInterface
 
 	public void SetAppStoragePath(Context context)
 	{
-		app_storage_path = Q3EUtils.GetAppStoragePath(context, null);
+		app_storage_path = Q3EContextUtils.GetAppStoragePath(context, null);
 	}
 
 	public String MakeTempBaseCommand(Context context)

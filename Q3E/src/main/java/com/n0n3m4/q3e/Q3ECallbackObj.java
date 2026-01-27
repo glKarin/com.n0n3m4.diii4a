@@ -221,7 +221,7 @@ public class Q3ECallbackObj
             @Override
             public void run()
             {
-                Q3EUtils.CopyToClipboard(Q3EMain.gameHelper.GetContext(), text);
+                Q3EContextUtils.CopyToClipboard(Q3EMain.gameHelper.GetContext(), text);
             }
         };
         //Q3EMain.mGLSurfaceView.post(runnable);
@@ -230,7 +230,7 @@ public class Q3ECallbackObj
 
     public String GetClipboardText()
     {
-        return Q3EUtils.GetClipboardText(Q3EMain.gameHelper.GetContext());
+        return Q3EContextUtils.GetClipboardText(Q3EMain.gameHelper.GetContext());
     }
 
     public void InitGUIInterface(Activity context)
@@ -267,7 +267,7 @@ public class Q3ECallbackObj
 
     public void ToggleToolbar(boolean on)
     {
-        Q3E.activity.GetKeyboard().ToggleToolbar(on);
+        Q3E.keyboard.ToggleToolbar(on);
     }
 
 

@@ -7,6 +7,7 @@ import android.graphics.RectF;
 import android.view.View;
 
 import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -240,7 +241,7 @@ public class Disc extends Paintable implements TouchListener
         m_circleWidth = size / 2 - internalsize;
         final int[] color = {255, 255, 255, 255};
         if (null != m_textures && m_textures.length > 0)
-            tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
+            tex_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
         if (tex_ind == 0)
         {
             if(KStr.NotBlank(m_label))

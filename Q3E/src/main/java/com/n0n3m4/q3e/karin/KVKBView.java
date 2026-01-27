@@ -70,7 +70,7 @@ public class KVKBView extends RelativeLayout
         switch(action)
         {
             case "close":
-                Q3E.activity.GetKeyboard().CloseBuiltInVKB();
+                Q3E.keyboard.CloseBuiltInVKB();
                 break;
             default:
                 break;

@@ -16,6 +16,7 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.misc.Function;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.Theme;
@@ -246,7 +247,7 @@ public class LogcatActivity extends Activity
 
     private String LocalStorePath()
     {
-        return Q3EUtils.GetAppStoragePath(this, "/" + Q3EGlobals.FOLDER_LOGCAT_LOG);
+        return Q3EContextUtils.GetAppStoragePath(this, "/" + Q3EGlobals.FOLDER_LOGCAT_LOG);
     }
 
     private void ScrollToBottom()

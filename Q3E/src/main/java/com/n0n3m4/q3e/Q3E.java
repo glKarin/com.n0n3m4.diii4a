@@ -32,6 +32,7 @@ public final class Q3E
     public static Q3EEventEngine eventEngine = new Q3EEventEngineJava();
     public static Q3EInterface q3ei = new Q3EInterface(); //k: new
     public static boolean isOuya = false;
+    public static Q3EKeyboard keyboard = null;
 
     public static          Q3EView        gameView;
     public static          Q3EControlView controlView;
@@ -386,8 +387,8 @@ public final class Q3E
             boolean changed;
             if(builtin_virtual_keyboard)
             {
-                activity.GetKeyboard().ToggleBuiltInVKB();
-                changed = activity.GetKeyboard().IsBuiltInVKBVisible();
+                keyboard.ToggleBuiltInVKB();
+                changed = keyboard.IsBuiltInVKBVisible();
                 ToggleToolbar(changed);
             }
             else
@@ -406,7 +407,7 @@ public final class Q3E
         else
         {
             if(builtin_virtual_keyboard)
-                activity.GetKeyboard().ToggleBuiltInVKB();
+                keyboard.ToggleBuiltInVKB();
             else
                 imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         }
@@ -423,7 +424,7 @@ public final class Q3E
         {
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             if(builtin_virtual_keyboard)
-                activity.GetKeyboard().OpenBuiltInVKB();
+                keyboard.OpenBuiltInVKB();
             else
             {
                 //imm.showSoftInput(vw, InputMethodManager.SHOW_FORCED);
@@ -440,7 +441,7 @@ public final class Q3E
         {
             if(builtin_virtual_keyboard)
             {
-                activity.GetKeyboard().CloseBuiltInVKB();
+                keyboard.CloseBuiltInVKB();
             }
             else
             {
@@ -450,6 +451,16 @@ public final class Q3E
         }
         if (function_key_toolbar)
             ToggleToolbar(false);
+    }
+
+    public static String GetDataPath(String filename)
+    {
+        String path = "";
+        if(null != q3ei.datadir)
+            path += q3ei.datadir;
+        if(KStr.NotEmpty(filename))
+            path += filename;
+        return path;
     }
 
     static

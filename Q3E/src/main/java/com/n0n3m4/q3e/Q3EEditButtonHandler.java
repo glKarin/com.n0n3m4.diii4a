@@ -396,8 +396,8 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
     void OnCreate(Context context)
     {
         Q3EGL.usegles20 = false;
-        step = Q3EUtils.dip2px(getContext(), 5);
-        m_drawerHeight = Q3EUtils.dip2px(getContext(), 50) * 3 + Q3EUtils.dip2px(getContext(), 5);
+        step = Q3EContextUtils.dip2px(getContext(), 5);
+        m_drawerHeight = Q3EContextUtils.dip2px(getContext(), 50) * 3 + Q3EContextUtils.dip2px(getContext(), 5);
 
         String unit = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT, "0");
         if (null != unit)

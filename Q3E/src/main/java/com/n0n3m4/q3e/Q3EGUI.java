@@ -177,7 +177,7 @@ public class Q3EGUI
                             @Override
                             public void onClick(DialogInterface dialog, int which)
                             {
-                                Q3EUtils.CopyToClipboard(m_context, text);
+                                Q3EContextUtils.CopyToClipboard(m_context, text);
                                 dialog.dismiss();
                             }
                         });

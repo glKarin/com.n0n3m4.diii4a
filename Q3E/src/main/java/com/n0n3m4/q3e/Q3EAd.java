@@ -52,11 +52,11 @@ public class Q3EAd
         ArrayList<Integer> ids = new ArrayList<>(0);
         ArrayList<View> vws = new ArrayList<>(0);
         Display display = ctx.getWindowManager().getDefaultDisplay();
-        final int width = Q3EUtils.dip2px(ctx, 320);//Magic number
+        final int width = Q3EContextUtils.dip2px(ctx, 320);//Magic number
         final int dspwidth = display.getWidth();
         for (int i = 0; i < adpkgsn.length; i++)
         {
-            if (!Q3EUtils.isAppInstalled(ctx, adpkgsn[i]))
+            if (!Q3EContextUtils.isAppInstalled(ctx, adpkgsn[i]))
                 ids.add(i);
         }
         for (int i : ids)

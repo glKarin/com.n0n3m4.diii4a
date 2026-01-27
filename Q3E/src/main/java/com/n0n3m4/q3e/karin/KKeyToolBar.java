@@ -173,7 +173,7 @@ public class KKeyToolBar extends LinearLayout {
         m_closeView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Q3EUtils.ToggleToolbar(false);
+                Q3E.ToggleToolbar(false);
             }
         });
     }
