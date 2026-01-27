@@ -26,9 +26,15 @@ set(OpusFile_LINK_OPTIONS "${_opusfile_link_options}" CACHE STRING "Extra link f
 
 set(OpusFile_LINK_DIRECTORIES "${_opusfile_link_directories}" CACHE PATH "Extra link directories of opusfile")
 
+if(Q3E_SDL)
+set(OpusFile_FOUND True)
+set(OpusFile_LIBRARY opusfile)
+set(OpusFile_INCLUDE_PATH ${DIII4A_DEPEND_LIBRARY_PATH}/opusfile/include)
+else()
 find_package_handle_standard_args(OpusFile
     REQUIRED_VARS OpusFile_LIBRARY OpusFile_INCLUDE_PATH
 )
+endif()
 
 if (OpusFile_FOUND)
     set(OpusFile_dirs ${OpusFile_INCLUDE_PATH})
