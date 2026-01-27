@@ -1,6 +1,7 @@
 package com.karin.idTech4Amm.lib;
 
 import com.karin.idTech4Amm.misc.TextHelper;
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KStr;
 
@@ -391,33 +392,33 @@ public final class KCVarSystem
     {
         Map<String, KCVar.Group> _cvars = CVars();
         List<KCVar.Group> res = new ArrayList<>();
-        if(Q3EUtils.q3ei.isPrey)
+        if(Q3E.q3ei.isPrey)
         {
             res.add(_cvars.get("RENDERER"));
             res.add(_cvars.get("FRAMEWORK"));
         }
-        else if(Q3EUtils.q3ei.isQ4)
+        else if(Q3E.q3ei.isQ4)
         {
             res.add(_cvars.get("RENDERER"));
             res.add(_cvars.get("FRAMEWORK"));
         }
-        else if(Q3EUtils.q3ei.isTDM)
+        else if(Q3E.q3ei.isTDM)
             res.add(_cvars.get("TDM"));
-        else if(Q3EUtils.q3ei.isD3BFG)
+        else if(Q3E.q3ei.isD3BFG)
             res.add(_cvars.get("DOOM3BFG"));
-        else if(Q3EUtils.q3ei.isDOOM)
+        else if(Q3E.q3ei.isDOOM)
             res.add(_cvars.get("ZDOOM"));
-        else if(Q3EUtils.q3ei.isETW)
+        else if(Q3E.q3ei.isETW)
             res.add(_cvars.get("ETW"));
-        else if(Q3EUtils.q3ei.isRealRTCW)
+        else if(Q3E.q3ei.isRealRTCW)
             res.add(_cvars.get("RealRTCW"));
-        else if(Q3EUtils.q3ei.isXash3D)
+        else if(Q3E.q3ei.isXash3D)
             res.add(_cvars.get("Xash3D"));
-        else if(Q3EUtils.q3ei.isUrT)
+        else if(Q3E.q3ei.isUrT)
             res.add(_cvars.get("UrT"));
-        else if(Q3EUtils.q3ei.isSource)
+        else if(Q3E.q3ei.isSource)
             res.add(_cvars.get("Source"));
-        else if(Q3EUtils.q3ei.isD3)
+        else if(Q3E.q3ei.isD3)
         {
             res.add(_cvars.get("RENDERER"));
             res.add(_cvars.get("FRAMEWORK"));
@@ -425,11 +426,11 @@ public final class KCVarSystem
 
         if(null == game || game.isEmpty())
         {
-            if(Q3EUtils.q3ei.isPrey)
+            if(Q3E.q3ei.isPrey)
                 res.add(_cvars.get("preybase"));
-            else if(Q3EUtils.q3ei.isQ4)
+            else if(Q3E.q3ei.isQ4)
                 res.add(_cvars.get("q4base"));
-            else if(Q3EUtils.q3ei.isD3)
+            else if(Q3E.q3ei.isD3)
                 res.add(_cvars.get("base"));
         }
         else

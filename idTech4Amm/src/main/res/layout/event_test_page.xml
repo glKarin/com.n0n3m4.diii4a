@@ -10,13 +10,13 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal"
-		android:id="@+id/eventTestButtons"
+		android:id="@+id/eventTestButtons1"
 		>
 		<Button
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="0.5"
-			android:text="Open soft input method"
+			android:text="Open input method"
 			android:onClick="ShowSoftInputMethod"
 			android:focusable="false"
 			android:focusableInTouchMode="false"
@@ -26,7 +26,7 @@
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="0.5"
-			android:text="Close soft input method"
+			android:text="Close input method"
 			android:onClick="HideSoftInputMethod"
 			android:focusable="false"
 			android:focusableInTouchMode="false"
@@ -35,7 +35,36 @@
 	</LinearLayout>
 
 	<LinearLayout
-		android:layout_below="@id/eventTestButtons"
+		android:layout_below="@id/eventTestButtons1"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:id="@+id/eventTestButtons2"
+		>
+		<Button
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.5"
+			android:text="Capture pointer"
+			android:onClick="CapturePointer"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			/>
+		<Button
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.5"
+			android:text="Release pointer"
+			android:onClick="ReleasePointer"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			/>
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_below="@id/eventTestButtons2"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:orientation="vertical"

@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -103,7 +104,7 @@ public class KKeyToolBar extends LinearLayout {
             }
             post(m_updateToolBar);
             if(send)
-                Q3EUtils.q3ei.callbackObj.sendKeyEvent(down, key.keyCode, 0);
+                Q3E.sendKeyEvent(down, key.keyCode, 0);
             return true;
         }
     };
@@ -172,7 +173,7 @@ public class KKeyToolBar extends LinearLayout {
         m_closeView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Q3EUtils.ToggleToolbar(false);
+                Q3E.ToggleToolbar(false);
             }
         });
     }

@@ -15,6 +15,7 @@ import com.karin.idTech4Amm.LogcatActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -67,12 +68,12 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         }
         else if("clean_dalvik_crash_files".equals(key))
         {
-            String path = Q3EUtils.GetAppStoragePath(context, "/" + Q3EGlobals.FOLDER_CRASH_LOG);
+            String path = Q3EContextUtils.GetAppStoragePath(context, "/" + Q3EGlobals.FOLDER_CRASH_LOG);
             CleanFolder(path, Q3ELang.tr(context, R.string.crash));
         }
         else if("clean_backtrace_crash_files".equals(key))
         {
-            String path = Q3EUtils.GetAppStoragePath(context, "/" + Q3EGlobals.FOLDER_BACKTRACE_LOG);
+            String path = Q3EContextUtils.GetAppStoragePath(context, "/" + Q3EGlobals.FOLDER_BACKTRACE_LOG);
             CleanFolder(path, Q3ELang.tr(context, R.string.backtrace));
         }
         else if("test_event".equals(key))
@@ -116,7 +117,7 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         Context activity = ContextUtility.GetContext(this);
         final String PID = "" + Process.myPid();
         Toast.makeText(activity, getString(R.string.application_pid) + PID, Toast.LENGTH_LONG).show();
-        Q3EUtils.CopyToClipboard(activity, PID);
+        Q3EContextUtils.CopyToClipboard(activity, PID);
     }
 
     private void OpenDocumentsUI()
@@ -185,7 +186,7 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
                 @Override
                 public void onClick(DialogInterface dialog, int id)
                 {
-                    Q3EUtils.CopyToClipboard(activity, text);
+                    Q3EContextUtils.CopyToClipboard(activity, text);
                     Toast.makeText(activity, R.string.success, Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }

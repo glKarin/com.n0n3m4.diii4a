@@ -7,16 +7,18 @@ public class Q3EMouseEvent extends KOnceRunnable
 {
     public final float x;
     public final float y;
+    public final boolean relativeMode;
 
-    public Q3EMouseEvent(float x, float y)
+    public Q3EMouseEvent(float x, float y, boolean relativeMode)
     {
         this.x = x;
         this.y = y;
+        this.relativeMode = relativeMode;
     }
 
     @Override
     protected void Run()
     {
-        Q3EJNI.sendMouseEvent(x, y);
+        Q3EJNI.sendMouseEvent(x, y, relativeMode ? 1 : 0);
     }
 }

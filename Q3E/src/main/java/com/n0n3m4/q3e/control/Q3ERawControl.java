@@ -24,6 +24,7 @@ package com.n0n3m4.q3e.control;
 
 import android.view.KeyEvent;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.sdl.SDLActivity;
@@ -40,14 +41,14 @@ public final class Q3ERawControl extends Q3EEventControl
     @Override
     public boolean OnKeyUp(int keyCode, KeyEvent event, int unicodeChar)
     {
-        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, keyCode, unicodeChar);
+        Q3E.sendKeyEvent(false, keyCode, unicodeChar);
         return true;
     }
 
     @Override
     public boolean OnKeyDown(int keyCode, KeyEvent event, int unicodeChar)
     {
-        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, keyCode, unicodeChar);
+        Q3E.sendKeyEvent(true, keyCode, unicodeChar);
         return true;
     }
 

@@ -96,8 +96,6 @@ public class Q3EInterface
 	public int game_id;
 	public String game_version;
 
-	public Q3ECallbackObj callbackObj;
-
     public String start_temporary_extra_command = "";
 	public String cmd = Q3EGameConstants.GAME_EXECUABLE;
 
@@ -548,6 +546,11 @@ public class Q3EInterface
 		return isXash3D || isSource || isWolf3D;
 	}
 
+	public boolean IsUsingVirtualMouse()
+	{
+		return isSamTFE || isSamTSE;
+	}
+
 	public boolean IsUsingOpenAL()
 	{
 		return isD3 || isQ4 || isPrey
@@ -689,6 +692,12 @@ public class Q3EInterface
 		else
 			return new KidTech4Command(cmd);
 	}
+
+    // KARIN_NEW_GAME_BOOKMARK: if using audio track
+    public boolean NeedAudioTrack()
+    {
+        return isQ3 || isRTCW || isQ1 || isQ2|| isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA;
+    }
 
 	// KARIN_NEW_GAME_BOOKMARK: add config file list
 	public String[] GetGameConfigFiles()
@@ -1060,7 +1069,7 @@ public class Q3EInterface
 
 	public void SetAppStoragePath(Context context)
 	{
-		app_storage_path = Q3EUtils.GetAppStoragePath(context, null);
+		app_storage_path = Q3EContextUtils.GetAppStoragePath(context, null);
 	}
 
 	public String MakeTempBaseCommand(Context context)

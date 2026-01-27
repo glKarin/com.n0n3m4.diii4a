@@ -6,6 +6,8 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -239,7 +241,7 @@ public class Disc extends Paintable implements TouchListener
         m_circleWidth = size / 2 - internalsize;
         final int[] color = {255, 255, 255, 255};
         if (null != m_textures && m_textures.length > 0)
-            tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
+            tex_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
         if (tex_ind == 0)
         {
             if(KStr.NotBlank(m_label))
@@ -341,11 +343,11 @@ public class Disc extends Paintable implements TouchListener
                                 if (p.pressed)
                                 {
                                     has = true;
-                                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, p.keyCode, 0);
+                                    Q3E.sendKeyEvent(true, p.keyCode, 0);
                                     if(m_releaseDelay > 0)
-                                        Q3EUtils.q3ei.callbackObj.sendKeyEventDelayed(false, p.keyCode, 0, view, m_releaseDelay);
+                                        Q3E.sendKeyEventDelayed(false, p.keyCode, 0, view, m_releaseDelay);
                                     else
-                                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, p.keyCode, 0);
+                                        Q3E.sendKeyEvent(false, p.keyCode, 0);
                                 }
                             }
                             p.pressed = false;
@@ -421,7 +423,7 @@ public class Disc extends Paintable implements TouchListener
                                 {
                                     if (t >= p.start && t < p.end)
                                     {
-                                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, p.keyCode, 0);
+                                        Q3E.sendKeyEvent(true, p.keyCode, 0);
                                         has = true;
                                         b = true;
                                     }
@@ -445,7 +447,7 @@ public class Disc extends Paintable implements TouchListener
                     for (Part p : m_parts)
                     {
                         if (p.pressed)
-                            Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, p.keyCode, 0);
+                            Q3E.sendKeyEvent(false, p.keyCode, 0);
                         p.pressed = false;
                     }
                 }

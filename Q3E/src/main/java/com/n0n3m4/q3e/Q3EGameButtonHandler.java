@@ -89,7 +89,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             gl.glClear(GLES11.GL_COLOR_BUFFER_BIT);
 
         //k: not render in game loading
-        if (Q3EUtils.q3ei.callbackObj.inLoading)
+        if (Q3E.callbackObj.inLoading)
             return;
 
         //Onscreen buttons:
@@ -134,7 +134,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
                 return true;
             if ((m_mapBack & Q3EGlobals.ENUM_BACK_EXIT) != 0 && HandleBackPress())
                 return true;
-            Q3EUtils.ToggleToolbar(false);
+            Q3E.ToggleToolbar(false);
         }
         int qKeyCode = Q3EKeyCodes.convertKeyCode(keyCode, event.getUnicodeChar(0), event);
         return eventControl.OnKeyUp(qKeyCode, event, getCharacter(keyCode, event));
@@ -163,9 +163,9 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             {
                 int length = characters.length();
                 if(length == 1)
-                    Q3EUtils.q3ei.callbackObj.sendCharEvent(characters.charAt(0));
+                    Q3E.sendCharEvent(characters.charAt(0));
                 else if(length > 1)
-                    Q3EUtils.q3ei.callbackObj.sendTextEvent(characters);
+                    Q3E.sendTextEvent(characters);
             }
         }
         return controlView.onKeyMultiple(keyCode, repeatCount, event);
@@ -508,9 +508,9 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
         List<TouchListener> touchs = new ArrayList<>(0);
         List<Paintable> paints = new ArrayList<>(0);
 
-        UiLoader uildr = new UiLoader(controlView, gl, Q3E.orig_width, Q3E.orig_height, Q3EUtils.q3ei.defaults_table);
+        UiLoader uildr = new UiLoader(controlView, gl, Q3E.orig_width, Q3E.orig_height, Q3E.q3ei.defaults_table);
 
-        for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
+        for (int i = 0; i < Q3E.q3ei.UI_SIZE; i++)
         {
             boolean visible = uildr.CheckVisible(i);
             Log.i("Q3EControlView", "On-screen button " + i + " -> " + (visible ? "show" : "hide"));
@@ -520,7 +520,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             paints.add(total_paint_elements.get(i));
         }
 
-        for(int i = Q3EUtils.q3ei.UI_SIZE; i < total_touch_elements.size(); i++)
+        for(int i = Q3E.q3ei.UI_SIZE; i < total_touch_elements.size(); i++)
         {
             TouchListener touchListener = total_touch_elements.get(i);
             touchs.add(touchListener);

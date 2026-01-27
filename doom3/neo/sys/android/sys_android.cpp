@@ -106,6 +106,9 @@ void (*exit_finish)(void);
 // Show cursor
 void (*show_cursor)(int on);
 
+// Android log
+void (*log_print)(const char *tag, const char *fmt, ...);
+
 
 
 /* Global context variables */
@@ -116,11 +119,11 @@ int screen_height = 480;
 // Screen refresh rate
 int refresh_rate = 60;
 
-// Smooth joystick
-bool smooth_joystick = false;
-
 // max console height frac
 float console_max_height_frac = -1.0f;
+
+// Smooth joystick
+bool smooth_joystick = false;
 
 // Using mouse
 bool mouse_available = false;
@@ -467,6 +470,18 @@ void Android_ShowCursor(int on)
 #endif
 }
 
+#if 0
+void Android_LogPrint(const char *tag, const char *fmt, ...)
+{
+    char text[4096];
+    va_list args;
+    va_start(args, fmt);
+    snprintf(text, sizeof(text), fmt, args);
+    va_end(args);
+    log_print(Q3E_GAME_NAME, text);
+}
+#endif
+
 float Android_GetConsoleMaxHeightFrac(float frac)
 {
     return console_max_height_frac > 0.0f && console_max_height_frac < frac ? console_max_height_frac : frac;
@@ -635,6 +650,7 @@ void Q3E_SetCallbacks(const void *callbacks)
     open_dialog = ptr->Gui_openDialog;
 
     setState = ptr->set_state;
+    log_print = ptr->Log_Print;
 }
 
 // Setup initial environment variants
@@ -691,6 +707,7 @@ void GetIDTechAPI(void *d3interface)
     ptr->keyEvent = &Q3E_KeyEvent;
     ptr->analogEvent = &Q3E_Analog;
     ptr->motionEvent = &Q3E_MotionEvent;
+    ptr->mouseEvent = NULL;
 }
 
 #pragma GCC visibility pop

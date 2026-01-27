@@ -350,7 +350,7 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
                     SaveAll();
                     if(writeToDefault)
                     {
-                        Q3EUtils.q3ei.LoadLayoutTablePreference(getContext(), portrait);
+                        Q3E.q3ei.LoadLayoutTablePreference(getContext(), portrait);
                         KLog.I("Setup layout");
                     }
                     KLog.I("Save game buttons");
@@ -396,8 +396,8 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
     void OnCreate(Context context)
     {
         Q3EGL.usegles20 = false;
-        step = Q3EUtils.dip2px(getContext(), 5);
-        m_drawerHeight = Q3EUtils.dip2px(getContext(), 50) * 3 + Q3EUtils.dip2px(getContext(), 5);
+        step = Q3EContextUtils.dip2px(getContext(), 5);
+        m_drawerHeight = Q3EContextUtils.dip2px(getContext(), 50) * 3 + Q3EContextUtils.dip2px(getContext(), 5);
 
         String unit = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.CONTROLS_CONFIG_POSITION_UNIT, "0");
         if (null != unit)
@@ -973,7 +973,7 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
         List<TouchListener> touchs = new ArrayList<>(0);
         List<Paintable> paints = new ArrayList<>(0);
 
-        for (int i = 0; i < Q3EUtils.q3ei.UI_SIZE; i++)
+        for (int i = 0; i < Q3E.q3ei.UI_SIZE; i++)
         {
             TouchListener touchListener = total_touch_elements.get(i);
             if(!(touchListener instanceof Paintable))
@@ -997,7 +997,7 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
             List<Paintable> updateList = new ArrayList<>();
             for (int i = 0; i < paint_elements.size(); i++)
             {
-                String def = Q3EUtils.q3ei.defaults_table[i];
+                String def = Q3E.q3ei.defaults_table[i];
                 UiElement uiElement = new UiElement(def, width, height);
 
                 Paintable p = paint_elements.get(i);
@@ -1034,7 +1034,7 @@ public class Q3EEditButtonHandler extends Q3EOnScreenButtonHandler
                 {
                     Slider tmp = (Slider) p;
                     int width = uiElement.size;
-                    int height = Slider.HeightForWidth(width, Q3EUtils.q3ei.arg_table[i * 4 + 3]);
+                    int height = Slider.HeightForWidth(width, Q3E.q3ei.arg_table[i * 4 + 3]);
                     tmp.Resize(width, height);
                     updateList.add(p);
                 }

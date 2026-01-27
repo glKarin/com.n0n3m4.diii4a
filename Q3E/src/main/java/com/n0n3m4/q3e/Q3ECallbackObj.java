@@ -36,14 +36,12 @@ import java.util.LinkedList;
 
 public class Q3ECallbackObj
 {
-    private static final String TAG = "Q3ECallbackObj";
     public Q3EAudioTrack mAudioTrack;
     public int state = Q3EGlobals.STATE_NONE;
     private final Object m_audioLock = new Object();
     public static boolean reqThreadrunning = false;
 
     private Q3EGUI gui;
-    private Q3EEventEngine eventEngine = new Q3EEventEngineJava();
 
     private final LinkedList<Runnable> m_eventQueue = new LinkedList<>();
     public boolean notinmenu = true; // inGaming
@@ -223,7 +221,7 @@ public class Q3ECallbackObj
             @Override
             public void run()
             {
-                Q3EUtils.CopyToClipboard(Q3EMain.gameHelper.GetContext(), text);
+                Q3EContextUtils.CopyToClipboard(Q3EMain.gameHelper.GetContext(), text);
             }
         };
         //Q3EMain.mGLSurfaceView.post(runnable);
@@ -232,96 +230,13 @@ public class Q3ECallbackObj
 
     public String GetClipboardText()
     {
-        return Q3EUtils.GetClipboardText(Q3EMain.gameHelper.GetContext());
-    }
-
-    public void sendAnalog(boolean down, float x, float y)
-    {
-        eventEngine.SendAnalogEvent(down, x, y);
-    }
-
-    public void sendKeyEvent(boolean down, int keycode, int charcode)
-    {
-        eventEngine.SendKeyEvent(down, keycode, charcode);
-    }
-
-    public void sendMotionEvent(float deltax, float deltay)
-    {
-        eventEngine.SendMotionEvent(deltax, deltay);
-    }
-
-    public void sendMouseEvent(float x, float y)
-    {
-        eventEngine.SendMouseEvent(x, y);
-    }
-
-    public void sendTextEvent(String text)
-    {
-        eventEngine.SendTextEvent(text);
-    }
-
-    public void sendCharEvent(int ch)
-    {
-        eventEngine.SendCharEvent(ch);
-    }
-
-    public void sendWheelEvent(float x, float y)
-    {
-        eventEngine.SendWheelEvent(x, y);
-    }
-
-    public void sendAnalogDelayed(boolean down, float x, float y, View view, int delay)
-    {
-        view.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                eventEngine.SendAnalogEvent(down, x, y);
-            }
-        }, delay);
-    }
-
-    public void sendKeyEventDelayed(boolean down, int keycode, int charcode, View view, int delay)
-    {
-        view.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                eventEngine.SendKeyEvent(down, keycode, charcode);
-            }
-        }, delay);
-    }
-
-    public void sendMotionEventDelayed(float deltax, float deltay, View view, int delay)
-    {
-        view.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                eventEngine.SendMotionEvent(deltax, deltay);
-            }
-        }, delay);
+        return Q3EContextUtils.GetClipboardText(Q3EMain.gameHelper.GetContext());
     }
 
     public void InitGUIInterface(Activity context)
     {
         gui = new Q3EGUI(context);
-        if(Q3EUtils.q3ei.IsUsingSDL())
-        {
-            Log.i(TAG, "Using SDL event queue");
-            eventEngine = new Q3EEventEngineSDL();
-        }
-        else
-        {
-            int eventQueue = Q3EPreference.GetIntFromString(context, Q3EPreference.EVENT_QUEUE, Q3EGlobals.EVENT_QUEUE_TYPE_NATIVE);
-            if(eventQueue == Q3EGlobals.EVENT_QUEUE_TYPE_JAVA)
-            {
-                Log.i(TAG, "Using java event queue");
-                eventEngine = new Q3EEventEngineJava();
-            }
-            else
-            {
-                Log.i(TAG, "Using native event queue");
-                eventEngine = new Q3EEventEngineNative();
-            }
-        }
+        Q3E.SetupEventEngine(context);
     }
 
     public void ShowToast(String text)
@@ -335,7 +250,7 @@ public class Q3ECallbackObj
         Q3E.post(new Runnable() {
             @Override
             public void run() {
-                Q3EUtils.CloseVKB(Q3E.controlView);
+                Q3E.CloseVKB();
             }
         });
     }
@@ -345,14 +260,14 @@ public class Q3ECallbackObj
         Q3E.post(new Runnable() {
             @Override
             public void run() {
-                Q3EUtils.OpenVKB(Q3E.controlView);
+                Q3E.OpenVKB();
             }
         });
     }
 
     public void ToggleToolbar(boolean on)
     {
-        Q3E.activity.GetKeyboard().ToggleToolbar(on);
+        Q3E.keyboard.ToggleToolbar(on);
     }
 
 
@@ -416,7 +331,7 @@ public class Q3ECallbackObj
 
     public String CopyDLLToCache(String dllPath, String name)
     {
-        return Q3E.CopyDLLToCache(dllPath, Q3EUtils.q3ei.game, name);
+        return Q3E.CopyDLLToCache(dllPath, Q3E.q3ei.game, name);
     }
 
     public boolean RequestPermission(String permission, int requestCode)

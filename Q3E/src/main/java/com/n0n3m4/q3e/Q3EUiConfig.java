@@ -90,8 +90,8 @@ public class Q3EUiConfig extends Activity
         m_hideNav = preferences.getBoolean(Q3EPreference.HIDE_NAVIGATION_BAR, true);
         SetupUIFlags();
 
-        Q3EUtils.q3ei.LoadTypeAndArgTablePreference(this);
-        Q3EUtils.q3ei.LoadLayoutTablePreference(this, m_game, false);
+        Q3E.q3ei.LoadTypeAndArgTablePreference(this);
+        Q3E.q3ei.LoadLayoutTablePreference(this, m_game, false);
 
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
@@ -108,7 +108,7 @@ public class Q3EUiConfig extends Activity
 		vw.setZOrderMediaOverlay(true);
         mainLayout.addView(vw, params);
 
-        int px = Q3EUtils.dip2px(this, 48);
+        int px = Q3EContextUtils.dip2px(this, 48);
 		params = new RelativeLayout.LayoutParams(px, px);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP | RelativeLayout.CENTER_HORIZONTAL);
 		ImageView btn = new ImageView(this);
@@ -203,9 +203,9 @@ public class Q3EUiConfig extends Activity
     {
         final View decorView = getWindow().getDecorView();
         if (m_hideNav)
-            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
+            decorView.setSystemUiVisibility(Q3EGUI.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
         else
-            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_OPTIONS);
+            decorView.setSystemUiVisibility(Q3EGUI.UI_FULLSCREEN_OPTIONS);
     }
 
     @Override

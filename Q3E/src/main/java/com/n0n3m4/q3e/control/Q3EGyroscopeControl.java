@@ -30,6 +30,7 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -106,7 +107,7 @@ public final class Q3EGyroscopeControl
 
     public void OnSensorChanged(SensorEvent event)
     {
-        if (m_enableGyro && Q3EUtils.q3ei.callbackObj.notinmenu && !Q3EUtils.q3ei.callbackObj.inLoading)
+        if (m_enableGyro && Q3E.callbackObj.notinmenu && !Q3E.callbackObj.inLoading)
         {
             //if(event.values[0] != 0.0f || event.values[1] != 0.0f)
             {
@@ -123,7 +124,7 @@ public final class Q3EGyroscopeControl
                         break;
                 }
 
-                Q3EUtils.q3ei.callbackObj.sendMotionEvent(-x * m_xAxisGyroSens, y * m_yAxisGyroSens);
+                Q3E.sendMotionEvent(-x * m_xAxisGyroSens, y * m_yAxisGyroSens);
             }
         }
     }

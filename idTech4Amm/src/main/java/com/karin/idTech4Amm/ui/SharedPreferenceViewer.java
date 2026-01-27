@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EUtils;
 
 import java.util.HashSet;
@@ -112,7 +113,7 @@ public class SharedPreferenceViewer implements Runnable
                                 @Override
                                 public void onClick(DialogInterface dialog, int which)
                                 {
-                                    Q3EUtils.CopyToClipboard(context, value);
+                                    Q3EContextUtils.CopyToClipboard(context, value);
                                     Toast.makeText(context, R.string.success, Toast.LENGTH_SHORT).show();
                                     dialog.dismiss();
                                 }

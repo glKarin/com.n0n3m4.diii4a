@@ -70,4 +70,5 @@
     <string name="edit_buttons_layout">编辑按键布局</string>
     <string name="finish_editing">编辑完成</string>
     <string name="choose_input_method">切换输入法</string>
+    <string name="open_input_method">打开输入法</string>
 </resources>

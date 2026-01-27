@@ -32,7 +32,7 @@ public abstract class Q3EPatchResource
 
     protected String MakeOutPath(String... fsgame)
     {
-        String path = Q3EInterface.GetStandaloneDirectory(Q3EUtils.q3ei.standalone, game);
+        String path = Q3EInterface.GetStandaloneDirectory(Q3E.q3ei.standalone, game);
         if(null == fsPath)
             path = KStr.AppendPath(path, null != fsgame && fsgame.length > 0 ? fsgame[0] : null);
         else if(fsPath.isEmpty())
@@ -40,7 +40,7 @@ public abstract class Q3EPatchResource
         else
             path = KStr.AppendPath(path, fsPath);
 
-        return KStr.AppendPath(Q3EUtils.q3ei.datadir, path);
+        return KStr.AppendPath(Q3E.q3ei.datadir, path);
     }
 }
 
@@ -67,7 +67,7 @@ class Q3EPatchResource_fileToFile extends Q3EPatchResource
         if(KStr.NotEmpty(prefix))
             target = KStr.AppendPath(toPath, prefix + KStr.Filename(assetPath));
         KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying file '%s' to file '%s'", assetPath, target);
-        return Q3EUtils.ExtractCopyFile(context, assetPath, target, overwrite) ? target : null;
+        return Q3EContextUtils.ExtractCopyFile(context, assetPath, target, overwrite) ? target : null;
     }
 }
 
@@ -88,7 +88,7 @@ class Q3EPatchResource_fileToDir extends Q3EPatchResource
     {
         String toPath = MakeOutPath(fsgame);
         KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying file '%s' to directory '%s/'", assetPath, toPath);
-        return Q3EUtils.ExtractCopyFile(context, assetPath, toPath + "/", overwrite) ? toPath : null;
+        return Q3EContextUtils.ExtractCopyFile(context, assetPath, toPath + "/", overwrite) ? toPath : null;
     }
 }
 
@@ -119,7 +119,7 @@ class Q3EPatchResource_filesToDir extends Q3EPatchResource
     {
         String toPath = MakeOutPath(fsgame);
         KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying directory '%s' files '%s' to directory '%s/'", assetPath, Arrays.toString(assetFiles), toPath);
-        return Q3EUtils.ExtractCopyDirFiles(context, assetPath, toPath, overwrite, assetFiles) ? toPath : null;
+        return Q3EContextUtils.ExtractCopyDirFiles(context, assetPath, toPath, overwrite, assetFiles) ? toPath : null;
     }
 }
 
@@ -141,7 +141,7 @@ class Q3EPatchResource_zipToDir extends Q3EPatchResource
     {
         String toPath = MakeOutPath(fsgame);
         KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Extracting zip file '%s' to directory '%s/'", assetPath, toPath);
-        return Q3EUtils.ExtractZip(context, assetPath, toPath, overwrite) ? toPath : null;
+        return Q3EContextUtils.ExtractZip(context, assetPath, toPath, overwrite) ? toPath : null;
     }
 }
 
@@ -162,7 +162,7 @@ class Q3EPatchResource_dirToDir extends Q3EPatchResource
     {
         String toPath = MakeOutPath(fsgame);
         KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Copying directory '%s' to directory '%s/'", assetPath, toPath);
-        return Q3EUtils.ExtractCopyDir(context, assetPath, toPath, overwrite) ? toPath : null;
+        return Q3EContextUtils.ExtractCopyDir(context, assetPath, toPath, overwrite) ? toPath : null;
     }
 }
 
@@ -199,6 +199,6 @@ class Q3EPatchResource_zipToZip extends Q3EPatchResource
         if(KStr.NotEmpty(filename))
             target = KStr.AppendPath(toPath, filename);
         KLog.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Extracting zip file '%s' to zip '%s'", assetPath, target);
-        return Q3EUtils.ExtractZipToZip(context, assetPath, target, overwrite, files) ? toPath : null;
+        return Q3EContextUtils.ExtractZipToZip(context, assetPath, target, overwrite, files) ? toPath : null;
     }
 }

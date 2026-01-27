@@ -5,6 +5,7 @@ import android.view.MotionEvent;
 import com.n0n3m4.q3e.event.Q3EAnalogEvent;
 import com.n0n3m4.q3e.event.Q3EKeyEvent;
 import com.n0n3m4.q3e.event.Q3EMotionEvent;
+import com.n0n3m4.q3e.event.Q3EMouseEvent;
 import com.n0n3m4.q3e.sdl.Q3ESDL;
 
 public interface Q3EEventEngine
@@ -12,8 +13,7 @@ public interface Q3EEventEngine
 	public void SendKeyEvent(boolean down, int keycode, int charcode);
 	public void SendMotionEvent(float deltax, float deltay);
 	public void SendAnalogEvent(boolean down, float x, float y);
-	public void SendMouseEvent(float x, float y);
-
+	public void SendMouseEvent(float x, float y, boolean relativeMode);
 	public void SendTextEvent(String text);
 	public void SendCharEvent(int ch);
 	public void SendWheelEvent(float xaxis, float yaxis);
@@ -40,9 +40,9 @@ class Q3EEventEngineNative implements Q3EEventEngine
 	}
 
 	@Override
-	public void SendMouseEvent(float x, float y)
+	public void SendMouseEvent(float x, float y, boolean relativeMode)
 	{
-		//Q3EJNI.PushMouseEvent(x, y);
+		Q3EJNI.PushMouseEvent(x, y, relativeMode ? 1 : 0);
 	}
 
 	@Override
@@ -69,104 +69,70 @@ class Q3EEventEngineJava implements Q3EEventEngine
 	@Override
 	public void SendKeyEvent(boolean down, int keycode, int charcode)
 	{
-/*		Q3EUtils.q3ei.callbackObj.PushEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendKeyEvent(down ? 1 : 0, keycode, charcode);
-            }
-        });*/
-		Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EKeyEvent(down, keycode, charcode));
+		Q3E.callbackObj.PushEvent(new Q3EKeyEvent(down, keycode, charcode));
 	}
 
 	@Override
 	public void SendMotionEvent(float deltax, float deltay)
 	{
-/*        Q3EUtils.q3ei.callbackObj.PushEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendMotionEvent(deltax, deltay);
-            }
-        });*/
-		Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EMotionEvent(deltax, deltay));
+		Q3E.callbackObj.PushEvent(new Q3EMotionEvent(deltax, deltay));
 	}
 
 	@Override
 	public void SendAnalogEvent(boolean down, float x, float y)
 	{
-/*		Q3EUtils.q3ei.callbackObj.PushEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendAnalog(down ? 1 : 0, x, y);
-            }
-        });*/
-		Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EAnalogEvent(down, x, y));
+		Q3E.callbackObj.PushEvent(new Q3EAnalogEvent(down, x, y));
 	}
 
 	@Override
-	public void SendMouseEvent(float x, float y)
+	public void SendMouseEvent(float x, float y, boolean relativeMode)
 	{
-/*        Q3EUtils.q3ei.callbackObj.PushEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendMouseEvent(x, y);
-            }
-        });*/
-		//Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EMouseEvent(x, y));
+		Q3E.callbackObj.PushEvent(new Q3EMouseEvent(x, y, relativeMode));
 	}
 
 	@Override
 	public void SendTextEvent(String text)
 	{
-/*        Q3EUtils.q3ei.callbackObj.PushEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.Q3ETextEvent(text);
-            }
-        });*/
-		//Q3EUtils.q3ei.callbackObj.PushEvent(new Q3ETextEvent(text));
+		//Q3E.callbackObj.PushEvent(new Q3ETextEvent(text));
 	}
 
 	@Override
 	public void SendCharEvent(int ch)
 	{
-/*        Q3EUtils.q3ei.callbackObj.PushEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.Q3ECharEvent(ch);
-            }
-        });*/
-		//Q3EUtils.q3ei.callbackObj.PushEvent(new Q3ECharEvent(ch));
+		//Q3E.callbackObj.PushEvent(new Q3ECharEvent(ch));
 	}
 
 	@Override
 	public void SendWheelEvent(float x, float y)
 	{
-/*        Q3EUtils.q3ei.callbackObj.PushEvent(new KOnceRunnable()
-        {
-            @Override
-            public void Run()
-            {
-                Q3EJNI.sendWheelEvent(x, y);
-            }
-        });*/
-		//Q3EUtils.q3ei.callbackObj.PushEvent(new Q3EWheelEvent(x, y));
+		//Q3E.callbackObj.PushEvent(new Q3EWheelEvent(x, y));
 	}
 }
 
-class Q3EEventEngineSDL implements Q3EEventEngine
+abstract class Q3EEventEngineVirtualMouse implements Q3EEventEngine
 {
+	@Override
+	public void SendMotionEvent(float deltax, float deltay)
+	{
+		Q3E.virtualMouse.Motion(deltax, deltay);
+	}
+
+	@Override
+	public void SendMouseEvent(float x, float y, boolean relativeMode)
+	{
+		Q3E.virtualMouse.SetAbsPosition(x, y);
+	}
+}
+
+class Q3EEventEngineSDL extends Q3EEventEngineVirtualMouse
+{
+	private final Q3EEventEngine engine;
+
+	public Q3EEventEngineSDL(Q3EEventEngine engine)
+	{
+		this.engine = engine;
+	}
+
 	@Override
 	public void SendKeyEvent(boolean down, int keycode, int charcode)
 	{
@@ -195,20 +161,20 @@ class Q3EEventEngineSDL implements Q3EEventEngine
 	@Override
 	public void SendMotionEvent(float deltax, float deltay)
 	{
-		Q3E.virtualMouse.Motion(deltax, deltay);
+		super.SendMotionEvent(deltax, deltay);
 		Q3ESDL.onNativeMouse(0, MotionEvent.ACTION_MOVE, Q3E.virtualMouse.GetX(), Q3E.virtualMouse.GetY(), Q3E.virtualMouse.IsRelativeMode());
 	}
 
 	@Override
 	public void SendAnalogEvent(boolean down, float x, float y)
 	{
-		Q3EJNI.PushAnalogEvent(down ? 1 : 0, x, y);
+		engine.SendAnalogEvent(down, x, y);
 	}
 
 	@Override
-	public void SendMouseEvent(float x, float y)
+	public void SendMouseEvent(float x, float y, boolean relativeMode)
 	{
-		Q3E.virtualMouse.SetAbsPosition(x, y);
+		super.SendMouseEvent(x, y, relativeMode);
 		Q3ESDL.onNativeMouse(0, MotionEvent.ACTION_MOVE, Q3E.virtualMouse.GetX(), Q3E.virtualMouse.GetY(), Q3E.virtualMouse.IsRelativeMode());
 	}
 
@@ -229,5 +195,57 @@ class Q3EEventEngineSDL implements Q3EEventEngine
 	public void SendWheelEvent(float xaxis, float yaxis)
 	{
 		Q3ESDL.onNativeMouse(0, MotionEvent.ACTION_SCROLL, xaxis, yaxis, false);
+	}
+}
+
+class Q3EEventEngineSam extends Q3EEventEngineVirtualMouse
+{
+	private final Q3EEventEngine engine;
+
+	public Q3EEventEngineSam(Q3EEventEngine engine)
+	{
+		this.engine = engine;
+	}
+
+	@Override
+	public void SendKeyEvent(boolean down, int keycode, int charcode)
+	{
+		engine.SendKeyEvent(down, keycode, charcode);
+	}
+
+	@Override
+	public void SendMotionEvent(float deltax, float deltay)
+	{
+		super.SendMotionEvent(deltax, deltay);
+		engine.SendMotionEvent(deltax, deltay);
+		engine.SendMouseEvent(Q3E.virtualMouse.GetX(), Q3E.virtualMouse.GetY(), Q3E.virtualMouse.IsRelativeMode());
+	}
+
+	@Override
+	public void SendAnalogEvent(boolean down, float x, float y)
+	{
+		engine.SendAnalogEvent(down, x, y);
+	}
+
+	@Override
+	public void SendMouseEvent(float x, float y, boolean relativeMode)
+	{
+		super.SendMouseEvent(x, y, relativeMode);
+		engine.SendMouseEvent(Q3E.virtualMouse.GetX(), Q3E.virtualMouse.GetY(), Q3E.virtualMouse.IsRelativeMode());
+	}
+
+	@Override
+	public void SendTextEvent(String text)
+	{
+	}
+
+	@Override
+	public void SendCharEvent(int ch)
+	{
+	}
+
+	@Override
+	public void SendWheelEvent(float xaxis, float yaxis)
+	{
 	}
 }

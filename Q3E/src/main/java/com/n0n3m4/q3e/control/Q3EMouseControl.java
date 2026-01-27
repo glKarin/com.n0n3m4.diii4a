@@ -184,7 +184,7 @@ public final class Q3EMouseControl
                 int gameMouseButton = ConvMouseButton(event);
                 if(gameMouseButton != 0)
                 {
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, gameMouseButton, 0);
+                    Q3E.sendKeyEvent(true, gameMouseButton, 0);
                 }
                 m_lastTouchPadPosX = event.getAxisValue(MotionEvent.AXIS_X, actionIndex);
                 m_lastTouchPadPosY = event.getAxisValue(MotionEvent.AXIS_Y, actionIndex);
@@ -194,7 +194,7 @@ public final class Q3EMouseControl
                 int gameMouseButton = ConvMouseButton(event);
                 if(gameMouseButton != 0)
                 {
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, gameMouseButton, 0);
+                    Q3E.sendKeyEvent(false, gameMouseButton, 0);
                 }
                 m_lastTouchPadPosX = -1;
                 m_lastTouchPadPosY = -1;
@@ -225,20 +225,20 @@ public final class Q3EMouseControl
                         m_lastTouchPadPosY = y;
                     }
                 }
-                Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
+                Q3E.sendMotionEvent(deltaX, deltaY);
                 break;
             case MotionEvent.ACTION_SCROLL:
                 // float scrollX = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
                 float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
                 if(scrollY > 0)
                 {
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                    Q3E.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                    Q3E.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
                 }
                 else if(scrollY < 0)
                 {
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                    Q3E.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                    Q3E.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
                 }
                 break;
         }
@@ -269,7 +269,7 @@ public final class Q3EMouseControl
                     int gameMouseButton = ConvMouseButton(event);
                     if(gameMouseButton != 0)
                     {
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, gameMouseButton, 0);
+                        Q3E.sendKeyEvent(true, gameMouseButton, 0);
                     }
                 }
                 break;
@@ -277,7 +277,7 @@ public final class Q3EMouseControl
                     int gameMouseButton = ConvMouseButton(event);
                     if(gameMouseButton != 0)
                     {
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, gameMouseButton, 0);
+                        Q3E.sendKeyEvent(false, gameMouseButton, 0);
                     }
                     m_lastMousePosX = -1;
                     m_lastMousePosY = -1;
@@ -286,20 +286,20 @@ public final class Q3EMouseControl
 //                case MotionEvent.ACTION_HOVER_ENTER: break;
 //                case MotionEvent.ACTION_HOVER_EXIT: break;
                 case MotionEvent.ACTION_HOVER_MOVE:
-                    Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
-                    Q3EUtils.q3ei.callbackObj.sendMouseEvent(x, y);
+                    Q3E.sendMotionEvent(deltaX, deltaY);
+                    Q3E.sendMouseEvent(x, y);
                     break;
                 case MotionEvent.ACTION_SCROLL:
                     float scrollY = event.getAxisValue(MotionEvent.AXIS_VSCROLL, actionIndex);
                     if(scrollY > 0)
                     {
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                        Q3E.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
+                        Q3E.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELUP, 0);
                     }
                     else if(scrollY < 0)
                     {
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                        Q3E.sendKeyEvent(true, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
+                        Q3E.sendKeyEvent(false, Q3EKeyCodes.KeyCodes.K_MWHEELDOWN, 0);
                     }
                     break;
             }
@@ -325,8 +325,8 @@ public final class Q3EMouseControl
             m_lastMousePosX = x;
             m_lastMousePosY = y;
             if (action == MotionEvent.ACTION_MOVE) {
-                Q3EUtils.q3ei.callbackObj.sendMotionEvent(deltaX, deltaY);
-                Q3EUtils.q3ei.callbackObj.sendMouseEvent(x, y);
+                Q3E.sendMotionEvent(deltaX, deltaY);
+                Q3E.sendMouseEvent(x, y);
             }
             return true;
         }

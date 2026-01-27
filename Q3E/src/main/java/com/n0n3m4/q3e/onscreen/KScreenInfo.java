@@ -4,6 +4,7 @@ import static com.n0n3m4.q3e.Q3E.activity;
 
 import android.app.Activity;
 
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EUtils;
 
 public class KScreenInfo
@@ -23,17 +24,17 @@ public class KScreenInfo
 
     private KScreenInfo(Activity activity)
     {
-        LANDSCAPE = Q3EUtils.ActiveIsLandscape(activity);
-        PORTRAIT = Q3EUtils.ActiveIsPortrait(activity);
-        INVERT = Q3EUtils.ActiveIsInvert(activity);
-        int[] fullSize = Q3EUtils.GetFullScreenSize(activity);
-        int[] size = Q3EUtils.GetNormalScreenSize(activity);
+        LANDSCAPE = Q3EContextUtils.ActiveIsLandscape(activity);
+        PORTRAIT = Q3EContextUtils.ActiveIsPortrait(activity);
+        INVERT = Q3EContextUtils.ActiveIsInvert(activity);
+        int[] fullSize = Q3EContextUtils.GetFullScreenSize(activity);
+        int[] size = Q3EContextUtils.GetNormalScreenSize(activity);
         FULL_WIDTH = fullSize[0];
         FULL_HEIGHT = fullSize[1];
         DISPLAY_WIDTH = size[0];
         DISPLAY_HEIGHT = size[1];
-        EDGE_START_HEIGHT = Q3EUtils.GetEdgeHeight(activity, LANDSCAPE);
-        EDGE_END_HEIGHT = Q3EUtils.GetEndEdgeHeight(activity, LANDSCAPE);
+        EDGE_START_HEIGHT = Q3EContextUtils.GetEdgeHeight(activity, LANDSCAPE);
+        EDGE_END_HEIGHT = Q3EContextUtils.GetEndEdgeHeight(activity, LANDSCAPE);
         if(LANDSCAPE)
             NAV_BAR_HEIGHT = fullSize[0] - size[0] - EDGE_START_HEIGHT - EDGE_END_HEIGHT;
         else

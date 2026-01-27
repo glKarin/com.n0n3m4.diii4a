@@ -28,11 +28,13 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.SizeF;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,7 +59,6 @@ import com.n0n3m4.q3e.karin.Theme;
 
 public class Q3EMain extends Activity
 {
-    private       Q3ECallbackObj mAudio;
     private       Q3EView        mGLSurfaceView;
     private RelativeLayout  mainLayout;
     // k
@@ -104,6 +105,7 @@ public class Q3EMain extends Activity
         Q3E.activity = this;
 
         keyboard = new Q3EKeyboard(this);
+        Q3E.keyboard = keyboard;
 
         gameHelper = new Q3EGameHelper();
         gameHelper.SetContext(this);
@@ -153,7 +155,7 @@ public class Q3EMain extends Activity
         if(!CheckStart())
             return;
 
-        Q3EUtils.DumpPID(this);
+        KUncaughtExceptionHandler.DumpPID(this);
 
         // setup language environment
         Q3ELang.Locale(this);
@@ -176,7 +178,7 @@ public class Q3EMain extends Activity
         else
         {
             finish();
-            Q3EUtils.RunLauncher(this);
+            Q3EContextUtils.RunLauncher(this);
         }
     }
 
@@ -201,8 +203,6 @@ public class Q3EMain extends Activity
             mGLSurfaceView.Shutdown();*/
 
         super.onDestroy();
-        if(null != mAudio)
-            mAudio.OnDestroy();
     }
 
     @Override
@@ -215,10 +215,10 @@ public class Q3EMain extends Activity
             memoryUsageText.Stop();
 
         if(m_runBackground < 2)
-            if(mAudio != null)
-            {
-                mAudio.pause();
-            }
+        {
+            if(Q3E.callbackObj != null)
+                Q3E.callbackObj.pause();
+        }
 
         Q3E.Pause();
 
@@ -227,7 +227,7 @@ public class Q3EMain extends Activity
             mControlGLSurfaceView.Pause();
         }
         if(m_initView)
-            Q3EUtils.CloseVKB(mGLSurfaceView);
+            Q3E.CloseVKB();
         keyboard.OnPause();
     }
 
@@ -248,9 +248,9 @@ public class Q3EMain extends Activity
         }
 
         //k if(m_runBackground < 2)
-        if(mAudio != null)
+        if(Q3E.callbackObj != null)
         {
-            mAudio.resume();
+            Q3E.callbackObj.resume();
         }
     }
 
@@ -280,9 +280,9 @@ public class Q3EMain extends Activity
     {
         final View decorView = getWindow().getDecorView();
         if(m_hideNav)
-            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
+            decorView.setSystemUiVisibility(Q3EGUI.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
         else
-            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_OPTIONS);
+            decorView.setSystemUiVisibility(Q3EGUI.UI_FULLSCREEN_OPTIONS);
 /*        if(m_hideNav)
         {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -321,13 +321,12 @@ public class Q3EMain extends Activity
     private void InitGUI()
     {
         if(!Q3EOuya.Init(this))
-            Q3EUtils.isOuya = false;
+            Q3E.isOuya = false;
 
-        if(mAudio == null)
-            mAudio = new Q3ECallbackObj();
-        mAudio.InitGUIInterface(this);
-        Q3EUtils.q3ei.callbackObj = mAudio;
-        Q3EJNI.setCallbackObject(mAudio);
+        if(Q3E.callbackObj == null)
+            Q3E.callbackObj = new Q3ECallbackObj();
+        Q3E.callbackObj.InitGUIInterface(this);
+        Q3EJNI.setCallbackObject(Q3E.callbackObj);
 
         mainLayout = new RelativeLayout(this);
 
@@ -368,7 +367,7 @@ public class Q3EMain extends Activity
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         int scheme = mPrefs.getInt(Q3EPreference.pref_scrres_scheme, Q3EGlobals.SCREEN_FULL);
 
-        int[] size = Q3EUtils.GetGeometry(this, true, m_hideNav, m_coverEdges);
+        int[] size = Q3EContextUtils.GetGeometry(this, true, m_hideNav, m_coverEdges);
         if(scheme == Q3EGlobals.SCREEN_FIXED_RATIO)
         {
             int ratioX = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_ratiox, "0"));
@@ -436,7 +435,7 @@ public class Q3EMain extends Activity
     @SuppressLint("ResourceType")
     private void InitPortraitGUI()
     {
-        int[] size = Q3EUtils.GetGeometry(this, true, true, true);
+        int[] size = Q3EContextUtils.GetGeometry(this, true, true, true);
 
         float ratio = (float) size[3] / (float) size[2];
         int avaHeight = (int) ((float) size[3] * ratio);
@@ -545,49 +544,44 @@ public class Q3EMain extends Activity
 
     private boolean CheckStart()
     {
-        if(Q3EUtils.q3ei.IsDisabled()) // disabled or removed games
+        String msg = null;
+
+        if(Q3E.q3ei.IsDisabled()) // disabled or removed games
         {
-            Toast.makeText(this, Q3EUtils.q3ei.game_name + " is disabled or removed!", Toast.LENGTH_LONG).show();
-            finish();
-            Q3EUtils.RunLauncher(this);
-            return false;
+            msg =  Q3E.q3ei.game_name + " is disabled or removed!";
         }
-        else if(Q3EUtils.q3ei.isDOOM) // arm32 not support UZDOOM
+        else if(Q3E.q3ei.isDOOM) // arm32 not support UZDOOM
         {
             if(!Q3EJNI.Is64())
             {
-                Toast.makeText(this, "UZDOOM not support on arm32 device!", Toast.LENGTH_LONG).show();
-                finish();
-                Q3EUtils.RunLauncher(this);
-                return false;
+                msg = "UZDOOM not support on arm32 device!";
             }
-            String iwad = KidTechCommand.GetParam("-+", Q3EUtils.q3ei.cmd, "iwad");
-            if(KStr.IsBlank(iwad))
+            else if(KStr.IsBlank(KidTechCommand.GetParam("-+", Q3E.q3ei.cmd, "iwad")))
             {
-                Toast.makeText(this, "UZDOOM requires -iwad file!", Toast.LENGTH_LONG).show();
-                finish();
-                Q3EUtils.RunLauncher(this);
-                return false;
+                msg = "UZDOOM requires -iwad file!";
             }
         }
         else if(Q3EGlobals.IsFDroidVersion())
         {
-            if(Q3EUtils.q3ei.isXash3D)
+            if(Q3E.q3ei.isXash3D)
             {
-                Toast.makeText(this, "F-Droid version not support Xash3D, you can install Github version!", Toast.LENGTH_LONG).show();
-                finish();
-                Q3EUtils.RunLauncher(this);
-                return false;
+                msg = "F-Droid version not support Xash3D, you can install Github version!";
             }
-            else if(Q3EUtils.q3ei.isSource)
+            else if(Q3E.q3ei.isSource)
             {
-                Toast.makeText(this, "F-Droid version not support Source-Engine game, you can install Github version!", Toast.LENGTH_LONG).show();
-                finish();
-                Q3EUtils.RunLauncher(this);
-                return false;
+                msg = "F-Droid version not support Source-Engine game, you can install Github version!";
             }
         }
-        return true;
+
+        if(null != msg)
+        {
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+            finish();
+            Q3EContextUtils.RunLauncher(this);
+            return false;
+        }
+        else
+            return true;
     }
 
     private void SetupGame()
@@ -622,19 +616,18 @@ public class Q3EMain extends Activity
         if(null == Q3E.virtualMouse)
         {
             Q3E.virtualMouse = new Q3EVirtualMouse(this);
-            Q3E.virtualMouse.SetPhysicalGeometry(m_offsetX, m_offsetY, fullWidth, fullHeight);
-            Q3E.virtualMouse.SetLogicalSize(Q3E.surfaceWidth, Q3E.surfaceHeight);
-            if(!Q3EUtils.q3ei.IsUsingSDL() || Q3E.m_usingMouse)
-            {
-                Q3E.virtualMouse.DisableCursor(true);
-                Q3E.virtualMouse.SetCursorVisible(false);
-            }
         }
-    }
 
-    public Q3EKeyboard GetKeyboard()
-    {
-        return keyboard;
+        Q3E.virtualMouse.SetPhysicalGeometry(m_offsetX, m_offsetY, fullWidth, fullHeight);
+        Q3E.virtualMouse.SetLogicalSize(Q3E.surfaceWidth, Q3E.surfaceHeight);
+        if(!Q3E.q3ei.IsUsingSDL() || Q3E.m_usingMouse)
+        {
+            Q3E.virtualMouse.DisableCursor(true);
+            Q3E.virtualMouse.SetCursorVisible(false);
+        }
+        RectF physicalGeometry = Q3E.virtualMouse.PhysicalGeometry();
+        SizeF logicalSize = Q3E.virtualMouse.LogicalSize();
+        KLog.I("Virtual mouse initialization: physical geometry=(%f, %f, %f, %f), logical size=(%f, %f), cursor=%s", physicalGeometry.left, physicalGeometry.top, physicalGeometry.right, physicalGeometry.bottom, logicalSize.getWidth(), logicalSize.getHeight(), Q3E.virtualMouse.IsDisableCursor() ? "disabled" : "enabled");
     }
 
     public RelativeLayout GetMainLayout()
@@ -694,7 +687,7 @@ public class Q3EMain extends Activity
         if(mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false))
             return;
 
-        int px = Q3EUtils.dip2px(this, 48);
+        int px = Q3EContextUtils.dip2px(this, 48);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(px, px);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP | RelativeLayout.CENTER_HORIZONTAL);
         if(m_portrait)
@@ -755,7 +748,17 @@ public class Q3EMain extends Activity
         }
         else if (itemId == R.id.main_choose_input_method)
         {
-            Q3EUtils.ChooseInputMethod(this);
+            Q3EContextUtils.ChooseInputMethod(this);
+            return true;
+        }
+        else if (itemId == R.id.main_open_input_method)
+        {
+            mControlGLSurfaceView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Q3E.OpenVKB();
+                }
+            }, 250);
             return true;
         }
         else if (itemId == R.id.main_quit)
