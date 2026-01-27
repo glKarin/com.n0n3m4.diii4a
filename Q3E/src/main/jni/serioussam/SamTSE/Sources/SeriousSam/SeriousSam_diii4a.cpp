@@ -67,11 +67,14 @@ static SDL_Event event; // key/mouse/motion event
 static SDL_Event event_input; // text input event
 static mouse_pos_t in_deltaX = 0;
 static mouse_pos_t in_deltaY = 0;
+static mouse_pos_t in_dx = 0;
+static mouse_pos_t in_dy = 0;
 static uint8_t keyboardState[SDL_NUM_SCANCODES];
 static int8_t mouseState;
 static BOOL relativeMouseMode = FALSE;
 extern SDL_Scancode Q3E_GetScancodeFromKeycode(SDL_Keycode key);
-void Android_MouseMotionEvent(float dx, float dy);
+extern void (*log_print)(const char *tag, const char *fmt, ...);
+static BOOL alt_state = FALSE;
 
 int Q3E_GetMouseState(int *x, int *y)
 {
@@ -117,11 +120,14 @@ void Q3E_KeyEvent(int state,int key,int character)
 	}
 	else // keyboard event
 	{
+        if(key == SDLK_LALT || key == SDLK_RALT)
+            alt_state = state ? TRUE : FALSE;
 		event.type = state ? SDL_KEYDOWN : SDL_KEYUP;
 		event.key.state = state ? SDL_PRESSED : SDL_RELEASED;
 		event.key.keysym.sym = key;
 		auto scancode = Q3E_GetScancodeFromKeycode(key);
 		event.key.keysym.scancode = scancode;
+        event.key.keysym.mod = alt_state ? KMOD_ALT : 0;
 		keyboardState[scancode] = state ? TRUE : FALSE;
 
 		if(state && character) // text input event
@@ -135,24 +141,38 @@ void Q3E_KeyEvent(int state,int key,int character)
 
 void Q3E_MotionEvent(float dx, float dy)
 {
-	// mouse motion event
-	Android_MouseMotionEvent(dx, dy);
+    in_dx = dx;
+    in_dy = dy;
+}
 
-	if(!relativeMouseMode)
+void Q3E_MouseEvent(float x, float y, int relativeMode)
 	{
+    relativeMouseMode = relativeMode;
+    // mouse mouse event
+    if(relativeMouseMode)
+    {
+        in_deltaX = x;
+        in_deltaY = y;
+    }
+    else
+    {
+        in_positionX = x;
+        in_positionY = y;
 		event.type = SDL_MOUSEMOTION;
 		event.motion.x = (int)in_positionX;
 		event.motion.y = (int)in_positionY;
-		event.motion.xrel = (int)dx;
-		event.motion.yrel = (int)dy;
+        event.motion.xrel = (int)in_dx;
+        event.motion.yrel = (int)in_dy;
 	}
+    in_dx = 0;
+    in_dy = 0;
 }
 
 BOOL com_fullyInitialized = FALSE;
 
 #include "q3e/q3e_android.h"
 
-#define Q3E_GAME_NAME "Serious Sam"
+#define Q3E_GAME_NAME "Serious Sam: TSE"
 #define Q3E_IS_INITIALIZED (com_fullyInitialized)
 #define Q3E_PRINTF CPrintF
 #define Q3E_SHUTDOWN_GAME ShutdownGame()
@@ -163,6 +183,7 @@ BOOL com_fullyInitialized = FALSE;
 #define Q3E_INIT_WINDOW GLimp_AndroidOpenWindow
 #define Q3E_QUIT_WINDOW GLimp_AndroidQuit
 #define Q3E_CHANGE_WINDOW GLimp_AndroidInit
+#define Q3E_USING_MOUSEEVENT 1
 
 extern void GLimp_AndroidOpenWindow(volatile ANativeWindow *win);
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
@@ -171,25 +192,10 @@ extern void ShutdownGame(void);
 
 #include "q3e/q3e_android.inc"
 
-#define IN_WINDOW_WIDTH screen_width
-#define IN_WINDOW_HEIGHT screen_height
-
 void Q3E_SetRelativeMouseMode(BOOL on)
 {
 	relativeMouseMode = on;
 	Android_GrabMouseCursor(on);
-	if(on)
-	{
-		in_positionX = IN_WINDOW_WIDTH / 2;
-		in_positionY = IN_WINDOW_HEIGHT / 2;
-	}
-	else
-	{
-		in_positionX = 0;
-		in_positionY = 0;
-	}
-	in_deltaX = 0;
-	in_deltaY = 0;
 }
 
 BOOL Q3E_GetRelativeMouseMode(void)
@@ -199,8 +205,8 @@ BOOL Q3E_GetRelativeMouseMode(void)
 
 void Q3E_GetWindowSize(void *, int *winw, int *winh)
 {
-	*winw = IN_WINDOW_WIDTH;
-	*winh = IN_WINDOW_HEIGHT;
+	*winw = screen_width;
+	*winh = screen_height;
 }
 
 BOOL Q3E_PollEvent(SDL_Event *ev)
@@ -235,58 +241,6 @@ void ShutdownGame(void)
 	{
 		q3e_running = FALSE;
 		NOTIFY_EXIT;
-	}
-}
-
-void Android_MouseMotionEvent(float dx, float dy)
-{
-	if(relativeMouseMode)
-	{
-		mouse_pos_t x = dx;
-		mouse_pos_t y = dy;
-
-		int hw = IN_WINDOW_WIDTH / 2;
-		if(x < -hw) {
-			x = -hw;
-		} else if(x > hw) {
-			x = hw;
-		}
-
-		int hh = IN_WINDOW_HEIGHT / 2;
-		if(y < -hh) {
-			y = -hh;
-		} else if(y > hh) {
-			y = hh;
-		}
-
-		in_deltaX += x;
-		in_deltaY += y;
-
-		in_positionX = x;
-		in_positionY = y;
-	}
-	else
-	{
-		mouse_pos_t x = in_positionX + dx;
-		mouse_pos_t y = in_positionY + dy;
-
-		if(x < 0) {
-			x = 0;
-		} else if(x >= IN_WINDOW_WIDTH) {
-			x = IN_WINDOW_WIDTH - 1;
-		}
-
-		if(y < 0) {
-			y = 0;
-		} else if(y >= IN_WINDOW_HEIGHT) {
-			y = IN_WINDOW_HEIGHT - 1;
-		}
-
-		in_deltaX += (x - in_positionX);
-		in_deltaY += (y - in_positionY);
-
-		in_positionX = x;
-		in_positionY = y;
 	}
 }
 
