@@ -318,7 +318,7 @@ public class Q3EMain extends Activity
     private void InitGUI()
     {
         if(!Q3EOuya.Init(this))
-            Q3EUtils.isOuya = false;
+            Q3E.isOuya = false;
 
         if(Q3E.callbackObj == null)
             Q3E.callbackObj = new Q3ECallbackObj();

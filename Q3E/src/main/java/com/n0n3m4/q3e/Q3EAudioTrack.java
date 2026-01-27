@@ -70,7 +70,7 @@ public class Q3EAudioTrack extends AudioTrack
 
         int sampleFreq = 44100;
         int minBufferSize = AudioTrack.getMinBufferSize(sampleFreq, AudioFormat.CHANNEL_CONFIGURATION_STEREO, AudioFormat.ENCODING_PCM_16BIT);
-        int bufferSize = Math.max((Q3EUtils.isOuya) ? 0 : 3 * size, minBufferSize);
+        int bufferSize = Math.max((Q3E.isOuya) ? 0 : 3 * size, minBufferSize);
         //k bufferSize = size; //k set original buffer size
         bufferSize = Math.max(size, minBufferSize);
         //k Log.e(TAG, "" + size + " - " + minBufferSize);

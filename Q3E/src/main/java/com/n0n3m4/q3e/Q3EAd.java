@@ -45,7 +45,7 @@ public class Q3EAd
     {
         final LinearLayout ll = ctx.findViewById(R.id.adlayout_id);
         ll.removeAllViews();
-        if (Q3EUtils.isOuya) return;//No Google Play on ouya
+        if (Q3E.isOuya) return;//No Google Play on ouya
 
         Bitmap imagorig = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.adlist);
         //carousel

@@ -29,6 +29,7 @@ public final class Q3E
     public static Q3ECallbackObj callbackObj;
     public static Q3EEventEngine eventEngine = new Q3EEventEngineJava();
     public static Q3EInterface q3ei = new Q3EInterface(); //k: new
+    public static boolean isOuya = false;
 
     public static          Q3EView        gameView;
     public static          Q3EControlView controlView;

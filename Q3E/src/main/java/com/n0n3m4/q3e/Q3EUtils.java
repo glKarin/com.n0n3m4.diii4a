@@ -81,13 +81,12 @@ import java.util.zip.ZipOutputStream;
 public class Q3EUtils
 {
     private static final String TAG = "Q3EUtils";
-    public static boolean isOuya = false;
     public static int UI_FULLSCREEN_HIDE_NAV_OPTIONS = 0;
     public static int UI_FULLSCREEN_OPTIONS = 0;
 
     static
     {
-        Q3EUtils.isOuya = Q3EOuya.IsValid();
+        Q3E.isOuya = Q3EOuya.IsValid();
         UI_FULLSCREEN_HIDE_NAV_OPTIONS = GetFullScreenFlags(true);
         UI_FULLSCREEN_OPTIONS = GetFullScreenFlags(false);
     }
