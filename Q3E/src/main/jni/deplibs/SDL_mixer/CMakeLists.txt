@@ -168,11 +168,7 @@ if(SDL2MIXER_MIDI AND NOT (SDL2MIXER_MIDI_TIMIDITY OR SDL2MIXER_MIDI_NATIVE OR S
     message(FATAL_ERROR "MIDI support was enabled (SDL2MIXER_MIDI) but neither FluidSynth (SDL2MIXER_MIDI_FLUIDSYNTH), native (SDL2MIXER_MIDI_NATIVE) or timidity (SDL2MIXER_MIDI_TIMIDITY) was enabled")
 endif()
 
-if(Q3E_SDL)
-option(SDL2MIXER_OPUS "Enable Opus music" OFF)
-else()
 option(SDL2MIXER_OPUS "Enable Opus music" ON)
-endif()
 cmake_dependent_option(SDL2MIXER_OPUS_SHARED "Dynamically load libopus" "${SDL2MIXER_DEPS_SHARED}" SDL2MIXER_OPUS OFF)
 
 set(sdl2mixer_vorbis_strings STB TREMOR VORBISFILE)

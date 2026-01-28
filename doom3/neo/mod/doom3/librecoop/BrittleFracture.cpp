@@ -317,6 +317,7 @@ idBrittleFracture::RemoveShard
 void idBrittleFracture::RemoveShard( int index ) {
 	int i;
 
+    shards[index]->decals.DeleteContents( true );
 	delete shards[index];
 	shards.RemoveIndex( index );
 	physicsObj.RemoveIndex( index );

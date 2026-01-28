@@ -279,6 +279,7 @@ else()
 endif()
 
 add_library( crypto SHARED ${LIBSRC} ${OBJECTS_SRC} )
+add_library(OpenSSL::Crypto ALIAS crypto)
 
 target_include_directories( crypto PUBLIC ${PROJECT_BINARY_DIR}/include )
 

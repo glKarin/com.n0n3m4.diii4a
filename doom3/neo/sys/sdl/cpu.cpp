@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "sys/sys_public.h"
 
 #ifdef _USE_SSE // x86-64
-static idCVar harm_sys_useSSE("harm_sys_useSSE", "1", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "Use MMX/SSE/SSE2 SIMD on 64-bits device");
+static idCVar harm_sys_useSSE("harm_sys_useSSE", "0", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "Use MMX/SSE/SSE2 SIMD on 64-bits device");
 #endif
 #ifdef _ARM_SIMD_SSE2NEON // arm/arm64
 static idCVar harm_sys_sse2neon("harm_sys_sse2neon", "0", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "Emulate MMX/SSE/SSE2 SIMD by sse2neon on arm32/arm64 device");
