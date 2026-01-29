@@ -56,6 +56,11 @@
 #define Q3E_MAX_ARGS 512 // 255
 #define GAME_MAIN_THREAD_NAME "Q3EMain"
 
+#define Q3E_SETENV(name, value) Q3E_SetEnv("Q3E_" #name, value, 1)
+#define Q3E_SETENV_BOOL(name, value) Q3E_SETENV(name, value ? "1" : "0")
+#define Q3E_SETENV_VA(name, ...) Q3E_SetEnv_va("Q3E_" #name, 1, __VA_ARGS__)
+#define Q3E_SETENV_IF(name, value) Q3E_SetEnv("Q3E_" #name, value, 0)
+
 enum {
     SIGNAL_HANDLER_GAME = 0,
     SIGNAL_HANDLER_DISABLE = 1,
@@ -153,6 +158,36 @@ static jmethodID android_ShowCursor_method;
 	}
 
 #define GET_JNI(env) JNIEnv *env = Q3E_GetEnv();
+
+static int Q3E_IssetEnv(const char *name)
+{
+    const char *value = getenv(name);
+    return value && value[0] ? 1 : 0;
+}
+
+static void Q3E_SetEnv(const char *name, const char *value, int override)
+{
+    if(!override && Q3E_IssetEnv(name))
+        return;
+    if(!value)
+        value = "";
+    setenv(name, value, 1);
+    LOGI("setenv(%s,%s)", name, value);
+}
+
+static void Q3E_SetEnv_va(const char *name, int override, const char *value, ...)
+{
+    if(!override && Q3E_IssetEnv(name))
+        return;
+    if(!value)
+        value = "";
+    char text[1024];
+    va_list va;
+    va_start(va, value);
+    vsnprintf(text, sizeof(text), value, va);
+    va_end(va);
+    Q3E_SetEnv(name, text, 1);
+}
 
 void Android_AttachThread(void)
 {
@@ -530,22 +565,25 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
     game_data_dir = strdup(dir);
 	(*env)->ReleaseStringUTFChars(env, GameDir, dir);
 
+    char *game_type = NULL;
 	if(gameSubDir)
 	{
-		const char *game_type = (*env)->GetStringUTFChars(env, gameSubDir, &iscopy);
+        const char *gameSubDirStr = (*env)->GetStringUTFChars(env, gameSubDir, &iscopy);
+        game_type = strdup(gameSubDirStr);
+        (*env)->ReleaseStringUTFChars(env, gameSubDir, gameSubDirStr);
 		const int Len = strlen(game_data_dir) + 1 + strlen(game_type);
 		char *game_path = malloc(Len + 1);
 		sprintf(game_path, "%s/%s", game_data_dir, game_type);
 		game_path[Len] = '\0';
 		free(game_data_dir);
 		game_data_dir = game_path;
-		(*env)->ReleaseStringUTFChars(env, gameSubDir, game_type);
 	}
 	chdir(game_data_dir);
 
 	if(redirectOutputToFile)
 		Q3E_RedirectOutput();
 
+    char *engine_lib_path = strdup(engineLibPath);
 	LOGI("Load library(arm%d): %s", sizeof(void *) == 8 ? 64 : 32, engineLibPath);
 	(*env)->ReleaseStringUTFChars(env, LibPath, engineLibPath);
 	
@@ -619,6 +657,39 @@ JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init(JNIEnv *env, jclass c
 
 	LOGI("idTech4A++(arm%d) game data directory: %s", sizeof(void *) == 8 ? 64 : 32, game_data_dir);
 
+    Q3E_SETENV(ENGINE_LIB_PATH, engine_lib_path);
+    Q3E_SETENV_BOOL(USING_SDL, USING_SDL);
+    Q3E_SETENV(GAME_ROOT_DIR, game_data_dir);
+    Q3E_SETENV_IF(GAME_SUBDATA_DIR, game_type);
+    Q3E_SETENV(CWD, game_data_dir);
+    Q3E_SETENV(GAME_DATA_DIR, game_data_dir);
+    Q3E_SETENV(NATIVE_LIBRARY_PATH, doom3_path);
+    Q3E_SETENV(EVENT_QUEUE, usingNativeEventQueue ? "native" : "Java");
+    Q3E_SETENV(THREAD, usingNativeThread ? "pthread" : "Java");
+    Q3E_SETENV(APP_HOME_DIR, app_home_dir);
+    Q3E_SETENV_VA(OPENGL_FORMAT, "%x", format);
+    Q3E_SETENV_VA(OPENGL_DEPTH, "%d", depthBits);
+    Q3E_SETENV_VA(OPENGL_MSAA, "%d", msaa);
+    Q3E_SETENV_VA(OPENGL_VERSION, "%x", glVersion);
+    Q3E_SETENV_VA(SIGNAL_HANDLER, "%d", signalsHandler);
+    Q3E_SETENV_BOOL(USING_EXTERNAL_LIBRARY, usingExternalLibs);
+    Q3E_SETENV_VA(MAX_CONSOLE_HEIGHT_FRAC, "%d", consoleMaxHeightFrac);
+    Q3E_SETENV_BOOL(SMOOTH_JOYSTICK, smoothJoystick);
+    Q3E_SETENV_BOOL(MOUSE_AVAILABLE, mouseAvailable);
+    Q3E_SETENV_VA(SURFACE_WIDTH, "%d", width);
+    Q3E_SETENV_VA(SURFACE_HEIGHT, "%d", height);
+    Q3E_SETENV_VA(REFRESH_RATE, "%d", refreshRate);
+
+#if 0
+    Q3E_SetEnv("HOME", 0, game_data_dir);
+    Q3E_SetEnv("PATH", 0, doom3_path);
+    Q3E_SetEnv("LD_LIBRARY_PATH", 0, doom3_path);
+    Q3E_SetEnv("XDG_CONFIG_HOME", 0, game_data_dir);
+    Q3E_SetEnv("XDG_DATA_HOME", 0, game_data_dir);
+#endif
+
+    free(engine_lib_path);
+    free(game_type);
 	free(argv);
     free(doom3_path);
 	free(app_home_dir);
@@ -1117,8 +1188,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Setenv(
 	const char *utfname = (*env)->GetStringUTFChars(env, name, NULL);
 	const char *utfvalue = (*env)->GetStringUTFChars(env, value, NULL);
 
-	LOGI("setenv(%s, %s, 1)", utfname, utfvalue);
-	setenv(utfname, utfvalue, 1);
+	Q3E_SetEnv(utfname, utfvalue, 1);
 
 	(*env)->ReleaseStringUTFChars(env, name, utfname);
 	(*env)->ReleaseStringUTFChars(env, value, utfvalue);
