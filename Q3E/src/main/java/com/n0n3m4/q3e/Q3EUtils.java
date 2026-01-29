@@ -41,6 +41,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -621,5 +622,40 @@ public final class Q3EUtils
     public static boolean IncludeBit(int a, int b)
     {
         return (a & b) == b;
+    }
+
+    public static long parseLong_s(String str, long...def)
+    {
+        long defVal = null != def && def.length > 0 ? def[0] : 0;
+        if(null == str)
+            return defVal;
+        str = str.trim();
+        if(str.isEmpty())
+            return defVal;
+        try
+        {
+            return Long.parseLong(str);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return defVal;
+        }
+    }
+
+    public static String toFixed(double d, int num)
+    {
+        StringBuilder pattern = new StringBuilder("0");
+        if (num > 0) {
+            pattern.append(".");
+            for(int i = 0; i < num; i++)
+            {
+                pattern.append('0');
+            }
+        }
+
+        DecimalFormat df = new DecimalFormat(pattern.toString());
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return df.format(d);
     }
 }
