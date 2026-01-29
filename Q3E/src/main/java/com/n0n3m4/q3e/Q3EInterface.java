@@ -622,14 +622,17 @@ public class Q3EInterface
 	// KARIN_DISABLE_GAME_BOOKMARK: add isXXX state to disable games
 	public boolean IsDisabled()
 	{
-		return isFTEQW || isXash3D;
+		return
+				//isFTEQW ||
+						isXash3D
+				;
 	}
 
 	// KARIN_DISABLE_GAME_BOOKMARK: add game type to disable games
 	public static boolean IsDisabled(String game)
 	{
 		final String[] DisabledGames = {
-				Q3EGameConstants.GAME_FTEQW,
+				//Q3EGameConstants.GAME_FTEQW,
 				Q3EGameConstants.GAME_XASH3D,
 		};
 		for(String disabledGame : DisabledGames)

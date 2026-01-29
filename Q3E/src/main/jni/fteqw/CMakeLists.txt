@@ -3,7 +3,7 @@
 #It uses system libraries, so it will have dependancy issues with public releases where those dependancies are distro/version-specific.
 #Public builds are still built using the (overcomplicated) traditional (g)makefile.
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0...3.10)
 cmake_policy(SET CMP0063 NEW)
 
 PROJECT(FTEQuake)
@@ -14,11 +14,12 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 add_definitions(-D_DIII4A) # android
 add_definitions(-D_SIZEOFPTR=${CMAKE_SIZEOF_VOID_P})
+set(DIII4A True)
 
-if(ANDROID)
+if(DIII4A)
 set(FTEQW_DEPLIBS_NAME deplibs)
-set(FTEQW_DEPLIBS ${CMAKE_CURRENT_SOURCE_DIR}/../${FTEQW_DEPLIBS_NAME})
-set(FTEQW_DEPINCS ${CMAKE_CURRENT_SOURCE_DIR}/../depincs)
+set(FTEQW_DEPLIBS ${DIII4A_DEPEND_LIBRARY_PATH})
+set(FTEQW_DEPINCS ${DIII4A_DEPEND_INCLUDE_PATH})
 endif()
 
 INCLUDE_DIRECTORIES(
@@ -30,7 +31,7 @@ INCLUDE_DIRECTORIES(
 	engine
 )
 
-if(NOT ANDROID)
+if(NOT DIII4A)
 IF (EXISTS ${CMAKE_SOURCE_DIR}/.svn AND "${FTE_REVISON}" STREQUAL "")
 	EXECUTE_PROCESS(COMMAND
 		"svnversion"
@@ -102,7 +103,7 @@ IF (EXISTS ${CMAKE_SOURCE_DIR}/.git AND "${FTE_REVISON}" STREQUAL "")
 	SET(FTE_REVISON SVNREVISION=${SVNREVISION} SVNDATE=${FTE_DATE} FTE_BRANCH=${FTE_BRANCH})
 ENDIF()
 else()
-	SET(FTE_REVISON SVNREVISION=5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 SVNDATE=2025-02-02 FTE_BRANCH=master)
+	SET(FTE_REVISON SVNREVISION=c781d13255ce72fcd24e47567244f970e1ba7c50 SVNDATE=2025-09-27 FTE_BRANCH=master)
 endif()
 
 #plugins need visibility hidden in order to avoid conflicts with function names that match the engine.
@@ -131,13 +132,13 @@ ELSE()
 ENDIF()
 
 # Added these to solve some build issues I ran into - Brad
-if(ANDROID)
+if(DIII4A)
 if(CMAKE_CXX_BYTE_ORDER EQUAL BIG_ENDIAN)
-	ADD_DEFINITIONS(-DFTE_BIG_ENDIAN)
+	set(FTE_BIG_ENDIAN True)
 else()
-	ADD_DEFINITIONS(-DFTE_LITTLE_ENDIAN)
+	set(FTE_LITTLE_ENDIAN True)
 endif()
-else()
+endif()
 IF(FTE_BIG_ENDIAN)
 	ADD_DEFINITIONS(-DFTE_BIG_ENDIAN)
 ENDIF()
@@ -145,7 +146,6 @@ ENDIF()
 IF(FTE_LITTLE_ENDIAN)
 	ADD_DEFINITIONS(-DFTE_LITTLE_ENDIAN)
 ENDIF()
-endif()
 
 # libepoll-shim needs to be installed on the BSDs and Mac OSX to get 
 # some of the server code to compile and work correctly on those platforms - Brad
@@ -165,7 +165,7 @@ ENDIF()
 
 SET(FTE_BUILD_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/engine/common/config_fteqw.h CACHE FILEPATH "Which build config file to use to control supported features.")
 SET(FTE_LIB_DEFINES ${FTE_LIB_DEFINES};CONFIG_FILE_NAME=${FTE_BUILD_CONFIG})
-SET(FTE_USE_SDL false CACHE BOOL "Force the use of SDL instead of using native builds.")
+SET(FTE_USE_SDL false CACHE BOOL "Force the use of SDL2 instead of using native builds.")
 
 INCLUDE(GNUInstallDirs)
 SET(FTE_INSTALL_BINDIR games CACHE STRING "Binary dir to install to.")
@@ -194,8 +194,8 @@ ENDIF()
 
 SET(FTE_DEP_BZIP2 true CACHE BOOL "Link against libbzip2.")
 IF(FTE_DEP_BZIP2)
-if(ANDROID)
-set(BZIP2_FOUND TRUE)
+if(DIII4A)
+	set(BZIP2_FOUND TRUE)
 	INCLUDE_DIRECTORIES( ${FTEQW_DEPLIBS}/bzip2 )
 else()
 	FIND_PACKAGE(BZip2)
@@ -211,7 +211,7 @@ ELSE()
 ENDIF()
 
 SET(OpenGL_GL_PREFERENCE LEGACY)
-if(ANDROID)
+if(DIII4A)
 set(OpenGL_FOUND TRUE)
 else()
 FIND_PACKAGE(OpenGL)
@@ -225,7 +225,7 @@ ENDIF()
 
 SET(FTE_DEP_JPEG true CACHE BOOL "Link against libjpeg.")
 IF(FTE_DEP_JPEG)
-if(ANDROID)
+if(DIII4A)
     set(JPEG_FOUND TRUE)
     set(JPEG_INCLUDE_DIRS ${FTEQW_DEPLIBS}/libjpeg/libjpeg)
     set(JPEG_LIBRARIES jpeg)
@@ -261,7 +261,7 @@ endif()
 
 SET(FTE_DEP_PNG true CACHE BOOL "Link against libpng.")
 IF(FTE_DEP_PNG)
-if(ANDROID)
+if(DIII4A)
     set(PNG_FOUND TRUE)
     set(PNG_INCLUDE_DIRS ${FTEQW_DEPLIBS}/libpng ${CMAKE_BINARY_DIR}/${FTEQW_DEPLIBS_NAME}/libpng)
     set(PNG_LIBRARIES png)
@@ -281,7 +281,7 @@ ENDIF()
 
 SET(FTE_DEP_FREETYPE true CACHE BOOL "Link against libfreetype.")
 IF(FTE_DEP_FREETYPE)
-if(ANDROID)
+if(DIII4A)
     set(FREETYPE_FOUND TRUE)
     set(FREETYPE_INCLUDE_DIRS ${FTEQW_DEPLIBS}/freetype/include)
     set(FREETYPE_LIBRARIES freetype)
@@ -318,7 +318,7 @@ ENDIF()
 
 SET(FTE_DEP_VORBISFILE true CACHE BOOL "Link against libvorbisfile.")
 IF(FTE_DEP_VORBISFILE)
-if(ANDROID)
+if(DIII4A)
     set(VORBISFILE_INCLUDE_DIRS ${FTEQW_DEPLIBS}/libvorbis/include)
     set(VORBISFILE_LIBRARY vorbisfile)
 	INCLUDE_DIRECTORIES( ${VORBISFILE_INCLUDE_DIRS} )
@@ -369,7 +369,11 @@ IF(CMAKE_C_COMPILER_ID MATCHES "GNU")
 #	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wswitch-enum")					#to warn about omitted enums despite default.
 
 	#might as well do this, public builds use the regular Makefile.
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
+	IF(CMAKE_SYSTEM_PROCESSOR MATCHES "ppc64le" OR CMAKE_SYSTEM_PROCESSOR MATCHES "ppc64")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=native")
+	ELSE()
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
+	ENDIF()
 	IF(CMAKE_BUILD_TYPE MATCHES "Debug")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall ${FTE_WERROR_} -Wno-pointer-sign -Wno-unknown-pragmas -Wno-format-zero-length -Wno-strict-aliasing -Wno-error=cpp")
 	ELSE()
@@ -389,13 +393,13 @@ IF(CMAKE_BUILD_TYPE MATCHES "Debug")
 ENDIF()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FILE_OFFSET_BITS=64")
 
-if(NOT ANDROID)
+if(NOT DIII4A)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFTE_LIBRARY_PATH=${CMAKE_INSTALL_FULL_LIBDIR}/${FTE_INSTALL_LIBDIR} -DFTE_DATA_DIR=${CMAKE_INSTALL_FULL_DATAROOTDIR}")
 endif()
 
 FUNCTION(EMBED_PLUGIN_META PLUGNAME PLUGTITLE PLUGDESC)
 	SET_TARGET_PROPERTIES(plug_${PLUGNAME} PROPERTIES OUTPUT_NAME "${PLUGNAME}")
-	if(ANDROID) #k add lib prefix
+	if(DIII4A) #k add lib prefix
 		SET_TARGET_PROPERTIES(plug_${PLUGNAME} PROPERTIES PREFIX "libfteplug_")
 	else()
 		SET_TARGET_PROPERTIES(plug_${PLUGNAME} PROPERTIES PREFIX "fteplug_")
@@ -403,7 +407,7 @@ FUNCTION(EMBED_PLUGIN_META PLUGNAME PLUGTITLE PLUGDESC)
 	SET_TARGET_PROPERTIES(plug_${PLUGNAME} PROPERTIES LINK_FLAGS "-Wl,--no-undefined")
 	SET(INSTALLTARGS ${INSTALLTARGS} "plug_${PLUGNAME}" PARENT_SCOPE)
 	#sadly we need to use a temp zip file, because otherwise zip insists on using zip64 extensions which breaks zip -A (as well as any attempts to read any files).
-	if(NOT ANDROID)
+	if(NOT DIII4A)
 	ADD_CUSTOM_COMMAND(
 		TARGET plug_${PLUGNAME} POST_BUILD
 		COMMAND /bin/echo -e "{\\n	package fteplug_${PLUGNAME}\\n	ver \"${SVNREVISION}\"\\n	category Plugins\\n	title \"${PLUGTITLE}\"\\n	gamedir \"\"\\n	desc \"${PLUGDESC}\"\\n}" | zip -q -9 -fz- $<TARGET_FILE:plug_${PLUGNAME}>.zip -
@@ -440,7 +444,60 @@ IF(WIN32)
 	ENDIF()
 ENDIF()
 
-IF(${ANDROID})
+SET(FTE_DEP_SDL3 false CACHE BOOL "Use SDL3 if available (disabling many platform-specific behaviours).")
+IF(FTE_DEP_SDL3)
+	FIND_PACKAGE(SDL3 QUIET)
+ENDIF()
+IF(SDL3_FOUND)	#SDL3
+	MESSAGE(STATUS "SDL3 library found, woo, modern, for now.")
+
+#	FIND_PACKAGE(PkgConfig REQUIRED)
+#	PKG_SEARCH_MODULE(sdl3 REQUIRED sdl3)
+
+	FIND_PACKAGE(SDL3 REQUIRED)
+
+	INCLUDE_DIRECTORIES(${FREETYPE_INCLUDE_DIRS} ${SDL3_INCLUDE_DIRS})
+
+	SET(FTE_DEFINES ${FTE_DEFINES};FTE_SDL3;MULTITHREAD)
+	SET(FTE_LIBS ${FTE_LIBS} ${SYS_LIBS} ${CMAKE_DL_LIBS} ${SDL3_LIBRARIES})
+	SET(FTE_ARCH_FILES
+		engine/client/sys_sdl.c
+		engine/client/snd_al.c
+		engine/client/snd_sdl.c
+		engine/client/in_sdl.c
+		engine/client/cd_sdl.c
+		engine/gl/gl_vidsdl.c
+	)
+
+	SET(FTESV_DEFINES ${FTESV_DEFINES};MULTITHREAD)
+	SET(FTESV_LIBS ${FTESV_LIBS} ${SYS_LIBS} ${CMAKE_DL_LIBS} ${SDL3_LIBRARIES})
+
+	IF(WIN32)
+		SET(FTE_LIBS ${FTE_LIBS} wsock32 gdi32 ole32)
+		SET(FTE_DEFINES ${FTE_DEFINES})
+		SET(FTE_ARCH_FILES ${FTE_ARCH_FILES}
+			engine/client/winquake.rc
+			engine/common/net_ssl_winsspi.c
+			engine/common/fs_win32.c
+		)
+		SET(FTESV_ARCH_FILES ${FTESV_ARCH_FILES}
+			engine/client/winquake.rc
+			engine/common/net_ssl_winsspi.c
+			engine/common/fs_win32.c
+			engine/server/sv_sys_win.c
+		)
+	ELSE()
+		SET(FTE_ARCH_FILES ${FTE_ARCH_FILES}
+			engine/common/net_ssl_gnutls.c
+		)
+		SET(FTESV_ARCH_FILES ${FTESV_ARCH_FILES}
+			engine/common/net_ssl_gnutls.c
+			engine/common/sys_linux_threads.c
+			engine/server/sv_sys_unix.c
+		)
+		SET(FTESV_LIBS ${FTESV_LIBS} pthread)
+	ENDIF()
+ELSEIF(${ANDROID})
 #	FIND_PACKAGE(Freetype REQUIRED)
 
 #	INCLUDE_DIRECTORIES(	${FREETYPE_INCLUDE_DIRS} )
@@ -610,7 +667,7 @@ ELSEIF(UNIX AND NOT FTE_USE_SDL)	#linux(ish)
 	)
 	SET(FTESV_LIBS ${FTESV_LIBS} ${SYS_LIBS} ${CMAKE_DL_LIBS} pthread)
 
-ELSEIF(1)	#SDL
+ELSEIF(1)	#SDL2
 #	FIND_PACKAGE(Freetype REQUIRED)
 #	INCLUDE_DIRECTORIES(engine/libs engine/libs/freetype2/include)
 
@@ -642,10 +699,12 @@ ELSEIF(1)	#SDL
 		SET(FTE_ARCH_FILES ${FTE_ARCH_FILES}
 			engine/client/winquake.rc
 			engine/common/net_ssl_winsspi.c
+			engine/common/fs_win32.c
 		)
 		SET(FTESV_ARCH_FILES ${FTESV_ARCH_FILES}
 			engine/client/winquake.rc
 			engine/common/net_ssl_winsspi.c
+			engine/common/fs_win32.c
 			engine/server/sv_sys_win.c
 		)
 	ELSE()
@@ -1152,7 +1211,7 @@ IF(ANDROID)
 			${FTE_SERVER_FILES}
 		)
 		SET_TARGET_PROPERTIES(${FTE_ENGINE} PROPERTIES COMPILE_DEFINITIONS "${FTE_LIB_DEFINES};${FTE_DEFINES};${FTE_REVISON}")
-		TARGET_INCLUDE_DIRECTORIES(${FTE_ENGINE} PUBLIC ${FTE_INCLUDES} ../common)
+		TARGET_INCLUDE_DIRECTORIES(${FTE_ENGINE} PUBLIC ${FTE_INCLUDES} ${DIII4A_DEPEND_COMMON_PATH})
 		set(FTE_LIBS ${FTE_LIBS} oboeaudio)
 		TARGET_LINK_LIBRARIES(${FTE_ENGINE} ${FTE_LIBS} )
 		SET(INSTALLTARGS ${INSTALLTARGS} ${FTE_ENGINE})
@@ -1303,9 +1362,12 @@ ELSE()
 		SET(INSTALLTARGS ${INSTALLTARGS} qtv)
 	ENDIF()
 
+	IF(WIN32)
+		SET(FTE_TOOL_MASTER false CACHE BOOL "Compile master server.")
+	ELSE()
 	SET(FTE_TOOL_MASTER true CACHE BOOL "Compile master server.")
+	ENDIF()
 	IF(FTE_TOOL_MASTER)
-		IF(NOT WIN32)
 			ADD_EXECUTABLE(ftemaster
 				${FTESV_ARCH_FILES}
 				engine/server/sv_master.c
@@ -1328,7 +1390,6 @@ ELSE()
 			TARGET_LINK_LIBRARIES(ftemaster ${FTESV_LIBS})
 			SET(INSTALLTARGS ${INSTALLTARGS} ftemaster)
 		ENDIF()
-	ENDIF()
 
 	SET(FTE_TOOL_HTTPSV true CACHE BOOL "Compile small http server.")
 	IF(FTE_TOOL_HTTPSV)
@@ -1614,13 +1675,16 @@ IF(FTE_PLUG_HL2)
 		plugins/plugin.c
 		plugins/hl2/hl2.c
 		plugins/hl2/fs_vpk.c
+		plugins/hl2/fs_vpk_vtmb.c
+		plugins/hl2/fs_gma.c
+		plugins/hl2/img_tth.c
 		plugins/hl2/img_vtf.c
 		plugins/hl2/mod_hl2.c
 		plugins/hl2/mod_vbsp.c
 		plugins/hl2/mat_vmt.c
 	)
 	SET_TARGET_PROPERTIES(plug_hl2 PROPERTIES COMPILE_DEFINITIONS "FTEPLUGIN;MULTITHREAD;${FTE_LIB_DEFINES}")
-	TARGET_LINK_LIBRARIES(plug_hl2 ${SYS_LIBS})
+	TARGET_LINK_LIBRARIES(plug_hl2 ${SYS_LIBS} ${ZLIB_LIBRARIES})
 
 	EMBED_PLUGIN_META(hl2 "HalfLife2 Formats Plugin" "Adds support for reading various file formats used by HalfLife2. Requires mod support to be useful.")
 ENDIF()
@@ -1663,7 +1727,7 @@ ENDIF()
 #k SET(FTE_PLUG_FFMPEG true CACHE BOOL "Compile ffmpeg media plugin.")
 SET(FTE_PLUG_FFMPEG false)
 IF(FTE_PLUG_FFMPEG)
-	if(ANDROID) #karin: dl
+	if(DIII4A) #karin: dl
 		set(FTEQW_FFMPEG_INC_DIR ${FTEQW_DEPINCS}/ffmpeg/ffmpeg60/include)
 	set(AVCODEC_INCLUDE_DIR "${FTEQW_FFMPEG_INC_DIR}/libavcodec/avcodec.h")
 	set(AVFORMAT_INCLUDE_DIR "${FTEQW_FFMPEG_INC_DIR}/libavformat/avformat.h")
@@ -1676,7 +1740,7 @@ IF(FTE_PLUG_FFMPEG)
 	FIND_PATH(AVSWSCALE_INCLUDE_DIR libswscale/swscale.h)
 	endif()
 	IF((AVFORMAT_INCLUDE_DIR) AND (AVSWSCALE_INCLUDE_DIR))
-		if(NOT ANDROID)
+		if(NOT DIII4A)
 		FIND_LIBRARY(AVCODEC_LIBRARY avcodec)
 		FIND_LIBRARY(AVFORMAT_LIBRARY avformat)
 		FIND_LIBRARY(AVUTIL_LIBRARY avutil)
@@ -1689,7 +1753,7 @@ IF(FTE_PLUG_FFMPEG)
 			plugins/avplug/avdecode.c
 			plugins/avplug/avencode.c
 		)
-		if(ANDROID)
+		if(DIII4A)
 		TARGET_INCLUDE_DIRECTORIES(plug_ffmpeg PUBLIC ${FTEQW_FFMPEG_INC_DIR})
 		else()
 		TARGET_INCLUDE_DIRECTORIES(plug_ffmpeg PUBLIC ${AVCODEC_INCLUDE_DIR} ${AVFORMAT_INCLUDE_DIR} ${AVUTIL_INCLUDE_DIR} ${AVSWSCALE_INCLUDE_DIR})
@@ -1808,7 +1872,7 @@ IF(FTE_PLUG_CEF)
 				COMMAND cp ${CEF_PATH}/Resources/* ${CMAKE_BINARY_DIR}
 				)
 		ELSE()
-		    if(NOT ANDROID)
+		    if(NOT DIII4A)
 			IF(CMAKE_BUILD_TYPE MATCHES "Release")
 				#sigh, cef ain't stripped properly on linux.
 				ADD_CUSTOM_COMMAND(
@@ -1866,10 +1930,20 @@ INSTALL(TARGETS ${INSTALLTARGS}
 	LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/${FTE_INSTALL_LIBDIR}"
 )
 
+IF(UNIX AND NOT APPLE AND NOT ANDROID)
 INSTALL(FILES
-	fteqw.desktop
+		${CMAKE_SOURCE_DIR}/dist/linux/org.fteqw.fteqw.desktop
 	DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications/")
-
+	INSTALL(FILES
+		${CMAKE_SOURCE_DIR}/dist/org.fteqw.fteqw.svg
+		DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps/")
+	INSTALL(FILES
+		${CMAKE_SOURCE_DIR}/dist/linux/org.fteqw.fteqw.metainfo.xml
+		DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/metainfo/")
+	INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/games
+		DESTINATION "${CMAKE_INSTALL_PREFIX}/etc/xdg/fteqw"
+		FILES_MATCHING PATTERN "*.fmf")
+ENDIF()
 
 SET(FTE_MENU_SYS true CACHE BOOL "Compile System Menu.")
 IF(FTE_MENU_SYS)

@@ -1,0 +1,68 @@
+// First non-comment character must be # to use
+// "new style" progs.src
+#pragma PROGS_DAT qwprogs.dat
+
+// uncomment based on desired compile
+// #define NETQUAKE
+// #define FTE
+#define MONSTERS
+#define REPLACEMENTS
+
+// compile options
+#ifdef NETQUAKE
+// if netquake, use progs.dat file name
+#pragma PROGS_DAT progs.dat
+#endif
+
+#ifdef FTE
+// if FTE, use FTE style progs and use fteprogs.dat file name
+#pragma target fte
+#pragma PROGS_DAT fteprogs.dat
+#endif
+
+// includes
+#include "defs.qc"
+#include "subs.qc"
+#include "engine.qc"
+#include "effects.qc"
+#include "obituary.qc"
+#include "combat.qc"
+#include "items.qc"
+#include "proj.qc"
+#include "weapons.qc"
+#include "world.qc"
+#include "client.qc"
+#include "spectate.qc"
+#include "player.qc"
+#include "doors.qc"
+#include "buttons.qc"
+#include "triggers.qc"
+#include "plats.qc"
+#include "misc.qc"
+
+#ifdef MONSTERS
+#include "fight.qc"
+#include "ai.qc"
+#include "monsters.qc"
+#include "dog.qc"
+#include "soldier.qc"
+#include "enforcer.qc"
+#include "ogre.qc"
+#include "wizard.qc"
+#include "demon.qc"
+#include "knight.qc"
+#include "hknight.qc"
+#include "shalrath.qc"
+#include "shambler.qc"
+#include "fish.qc"
+#include "tarbaby.qc"
+#include "zombie.qc"
+#include "boss.qc"
+#include "oldone.qc"
+#else
+#include "nomonst.qc"
+#endif
+
+#ifdef REPLACEMENTS
+#include "replace.qc"
+#endif 

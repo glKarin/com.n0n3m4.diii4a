@@ -1,0 +1,42 @@
+Incomplete -
+Triggered kills (explobox, etc)
+Q2/Q3 ents
+HL ents
+
+Done -
+Cleanup warnings
+Fix QW bugs
+Heal decay (over maxhealth)
+INTEGER mod
+Nailgun frame seperation
+Body queue change
+Suicide timer limit
+Suicide backpack/quad/ring drop
+Condense bprint, sprint, centerprints
+te_explode sprite
+NQ/QW cross compatibility
+Track oldbutton presses/weaponstate
+Generic projectile spawning
+Usage of ammo_shells, etc as display
+
+In progress -
+Item fixing for SP
+Add monsters back
+
+Todo -
+Fix ammo_shells, etc for monsters/backpacks
+Samelevel 4 (exit acts as a spawnpoint teleporter)
+Effects/decal system
+Fix weird deathmatch modes, cvar checking
+Rogue/hipnotic weapons/monsters/hud stuffs
+H2 ents
+Coop friendly finale
+Add in shambler resistance in a better way
+
+Stray Ideas -
+Advanced heal decay (only decay health that the megahealth added?)
+Clean up backpack pickup prints?
+Decal system based on visibility from players?
+CSQC?
+Don't use newmis/spawn projectiles in front?
+sv_gravity change?

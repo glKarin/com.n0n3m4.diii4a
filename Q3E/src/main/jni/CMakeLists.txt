@@ -35,6 +35,7 @@ OPTION(GAME_DOOM                    "Build UZDOOM"                              
 OPTION(GAME_ETW                     "Build Wolfenstein: Enemy Territory"            ON)
 OPTION(GAME_REALRTCW                "Build RealRTCW"                                ON)
 OPTION(GAME_JK                      "Build Jedi Knight"                             ON)
+OPTION(GAME_FTEQW                   "Build FTEQW"                                   ON)
 OPTION(GAME_SERIOUSSAM              "Build Serious Sam"                             ON)
 OPTION(GAME_URT                     "Build Urbant Error"                            ON)
 OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"          ON)
@@ -46,7 +47,6 @@ endif()
 
 
 # Disabled
-OPTION(GAME_FTEQW                   "Build FTEQW"                                   OFF)
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_XASH3D                  "Build Xash3D"                                  OFF)
 endif()
@@ -187,7 +187,7 @@ if(GAME_REALRTCW) # 5.3 | Jul 26, 2025 | 32e574d19bc3d5fa92c3c67cfe168154a26ed21
     endif()]]
 endif()
 
-if(GAME_FTEQW) # 5662b3a23d3c16f5a3b5fe74efb88e77d8fc4da0 | engine/common/fs.c: Update game definitions
+if(GAME_FTEQW) # c781d13255ce72fcd24e47567244f970e1ba7c50 | Sep 27, 2025 | Improve Linux builds
     message(STATUS "Build FTEQW")
     add_subdirectory ( fteqw ) # FTEQW
 endif()

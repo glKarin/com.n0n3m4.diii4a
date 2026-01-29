@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+		package="com.fteqw"
+		android:versionCode="1"
+		android:versionName="1.05"
+		android:installLocation="auto">
+	<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="24"/>
+	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+	<uses-permission android:name="android.permission.VIBRATE"></uses-permission>
+	<uses-feature android:glEsVersion="0x00020000" android:required="true"/>
+
+<!--
+	<application android:icon="@drawable/icon" android:label="@string/app_name">
+		<activity android:name=".FTEDroidFooBar"
+			  android:label="@string/app_name"
+			  android:configChanges="keyboardHidden|orientation">
+-->
+<!-- hack the comments to enable only one of the xml blocks above or below this comment -->
+<!-- -->
+	<application android:icon="@drawable/icon" android:label="@string/app_name" android:hasCode="true">
+		<activity android:name="com.fteqw.FTENativeActivity"
+			  android:label="@string/app_name"
+			  android:configChanges="keyboardHidden|orientation|screenLayout">
+<!-- -->
+
+			<!-- launcher icon -->
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+
+			<!-- custom url scheme, because someone didn't like using mime types properly -->
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:scheme="qw" />
+			</intent-filter>			
+
+			<!-- mime types with unspecified schemes (please don't explode). one for each mime type. because I'm paranoid. -->
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:mimeType="application/x-qtv" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:mimeType="text/x-quaketvident" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:mimeType="application/x-ftemanifest" />
+			</intent-filter>
+
+			<!-- various file extensions for when people forgot the mime type or simply don't know it -->
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:scheme="http" android:host="*" android:pathPattern=".*\\.qtv" />
+				<data android:scheme="content" android:host="*" android:pathPattern=".*\\.qtv" />
+				<data android:scheme="file" android:host="*" android:pathPattern=".*\\.qtv" />
+				<data android:scheme="http" android:host="*" android:pathPattern=".*\\.mvd" />
+				<data android:scheme="content" android:host="*" android:pathPattern=".*\\.mvd" />
+				<data android:scheme="file" android:host="*" android:pathPattern=".*\\.mvd" />
+				<data android:scheme="http" android:host="*" android:pathPattern=".*\\.dem" />
+				<data android:scheme="content" android:host="*" android:pathPattern=".*\\.dem" />
+				<data android:scheme="file" android:host="*" android:pathPattern=".*\\.dem" />
+				<data android:scheme="http" android:host="*" android:pathPattern=".*\\.qwd" />
+				<data android:scheme="content" android:host="*" android:pathPattern=".*\\.qwd" />
+				<data android:scheme="file" android:host="*" android:pathPattern=".*\\.qwd" />
+				<data android:scheme="http" android:host="*" android:pathPattern=".*\\.pak" />
+				<data android:scheme="content" android:host="*" android:pathPattern=".*\\.pak" />
+				<data android:scheme="file" android:host="*" android:pathPattern=".*\\.pak" />
+				<data android:scheme="http" android:host="*" android:pathPattern=".*\\.pk3" />
+				<data android:scheme="content" android:host="*" android:pathPattern=".*\\.pk3" />
+				<data android:scheme="file" android:host="*" android:pathPattern=".*\\.pk3" />
+				<data android:scheme="http" android:host="*" android:pathPattern=".*\\.bsp" />
+				<data android:scheme="content" android:host="*" android:pathPattern=".*\\.bsp" />
+				<data android:scheme="file" android:host="*" android:pathPattern=".*\\.bsp" />
+				<data android:scheme="http" android:host="*" android:pathPattern=".*\\.fmf" />
+				<data android:scheme="content" android:host="*" android:pathPattern=".*\\.fmf" />
+				<data android:scheme="file" android:host="*" android:pathPattern=".*\\.fmf" />
+			</intent-filter>
+		</activity>
+	</application>
+</manifest>
+
