@@ -2554,6 +2554,12 @@ public class GameLauncher extends Activity
 		menuGames.put(R.id.main_menu_game_mohaa, Q3EGameConstants.GAME_MOHAA);
 		menuGames.put(R.id.main_menu_game_wolf3d, Q3EGameConstants.GAME_WOLF3D);
 
+		for(Map.Entry<Integer, String> entry : menuGames.entrySet())
+		{
+			if(Q3EInterface.IsDisabled(entry.getValue()))
+				menu.findItem(entry.getKey()).setVisible(false);
+		}
+
 		return res;
     }
 
