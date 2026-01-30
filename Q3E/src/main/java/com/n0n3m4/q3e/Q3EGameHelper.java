@@ -20,7 +20,9 @@
 package com.n0n3m4.q3e;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Build;
@@ -50,35 +52,35 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class Q3EGameHelper
+class Q3EGameHelper
 {
     private Activity m_context;
 
-    public Q3EGameHelper()
+    Q3EGameHelper()
     {
     }
 
-    public Q3EGameHelper(Activity context)
-    {
-        this.m_context = context;
-    }
-
-    public void SetContext(Activity context)
+    Q3EGameHelper(Activity context)
     {
         this.m_context = context;
     }
 
-    public void ShowMessage(String s)
+    void SetContext(Activity context)
+    {
+        this.m_context = context;
+    }
+
+    void ShowMessage(String s)
     {
         Toast.makeText(m_context, s, Toast.LENGTH_LONG).show();
     }
 
-    public void ShowMessage(int resId)
+    void ShowMessage(int resId)
     {
         Toast.makeText(m_context, resId, Toast.LENGTH_LONG).show();
     }
 
-    public int CheckDevices()
+    int CheckDevices()
     {
         int[] deviceIds = InputDevice.getDeviceIds();
         KLog.I("Support devices: " + deviceIds.length);
@@ -162,16 +164,43 @@ public class Q3EGameHelper
         }
     }
 
-    public boolean checkGameFiles()
+    boolean checkGameFiles()
     {
         String dataDir = Q3E.q3ei.GetGameDataDirectoryPath(null);
         if (!new File(dataDir).exists())
         {
-            ShowMessage(Q3ELang.tr(m_context, R.string.game_files_weren_t_found_put_game_files_to) + dataDir);
+            FatalError(Q3ELang.tr(m_context, R.string.game_files_weren_t_found_put_game_files_to) + dataDir);
             return false;
         }
 
         return true;
+    }
+    
+    void FatalError(String message)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(m_context);
+        builder.setTitle(R.string.error);
+        builder.setMessage(message);
+        builder.setPositiveButton(R.string.restart, new AlertDialog.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                Q3EContextUtils.RunLauncher(m_context);
+            }
+        });
+        builder.setNegativeButton(R.string.quit, new AlertDialog.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                m_context.finish();
+            }
+        });
+        builder.create().show();
     }
 
     private int GetSDLAudioDriverID(String sdlAudioDriverName)
@@ -214,7 +243,7 @@ public class Q3EGameHelper
         return String.join(",", drivers);
     }
 
-    public void InitGlobalEnv(String gameTypeName, String gameCommand)
+    void InitGlobalEnv(String gameTypeName, String gameCommand)
     {
         KLog.I("Game initial: " + gameTypeName + " -> " + gameCommand);
 
@@ -405,7 +434,7 @@ public class Q3EGameHelper
         return Q3E.CopyDLLToCache(p, Q3E.q3ei.game, Suffix);
     }
 
-    public void CleanDLLCachePath(String dir)
+    void CleanDLLCachePath(String dir)
     {
         String path = Q3E.GetDLLCachePath(dir);
         KLog.I("Clean external library cache directory: " + path);
@@ -671,7 +700,7 @@ public class Q3EGameHelper
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Write " + name + " file version is " + apkVersion);
     }
 
-    public void ExtractTDMGLSLShaderSource()
+    void ExtractTDMGLSLShaderSource()
     {
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3E.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_TDM, "glslprogs/idtech4amm.version");
@@ -692,7 +721,7 @@ public class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
-    public void ExtractDOOM3BFGHLSLShaderSource()
+    void ExtractDOOM3BFGHLSLShaderSource()
     {
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
         final String versionFile = KStr.AppendPath(Q3E.q3ei.datadir, Q3E.q3ei.subdatadir, "base", "renderprogs/idtech4amm.version");
@@ -712,7 +741,7 @@ public class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
-    public void ExtractZDOOMResource()
+    void ExtractZDOOMResource()
     {
         Q3EGameConstants.PatchResource zdoomResource;
         String versionCheckFile;
@@ -739,7 +768,7 @@ public class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
-    public void ExtractXash3DResource()
+    void ExtractXash3DResource()
     {
         Q3EGameConstants.PatchResource resource;
         String versionCheckFile;
@@ -769,7 +798,7 @@ public class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
-    public void ExtractETWResource()
+    void ExtractETWResource()
     {
         Q3EGameConstants.PatchResource resource;
         String versionCheckFile;
@@ -794,7 +823,7 @@ public class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
-    public void ExtractECWolfResource()
+    void ExtractECWolfResource()
     {
         Q3EGameConstants.PatchResource resource;
         String versionCheckFile;
@@ -819,7 +848,7 @@ public class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
-    public void ExtractSourceEngineResource()
+    void ExtractSourceEngineResource()
     {
         Q3EGameConstants.PatchResource resource;
         String versionCheckFile;
@@ -845,7 +874,7 @@ public class Q3EGameHelper
     }
 
     // KARIN_NEW_GAME_BOOKMARK: add patch resource extract
-    public void ExtractGameResource()
+    void ExtractGameResource()
     {
         if(Q3E.q3ei.IsTDMTech()) // if game is TDM, extract glsl shader
             ExtractTDMGLSLShaderSource();
@@ -878,7 +907,7 @@ public class Q3EGameHelper
         return msaa;
     }
 
-    public int GetPixelFormat()
+    int GetPixelFormat()
     {
         if (PreferenceManager.getDefaultSharedPreferences(m_context).getBoolean(Q3EPreference.pref_32bit, false))
         {
@@ -909,7 +938,7 @@ public class Q3EGameHelper
         }
     }
 
-    public int GetGLFormat()
+    int GetGLFormat()
     {
         int pixelFormat = GetPixelFormat();
         int glFormat = 0x8888;
@@ -1167,13 +1196,13 @@ public class Q3EGameHelper
         return targetPath;
     }
 
-    public String GetDefaultEngineLib()
+    String GetDefaultEngineLib()
     {
         String libname = Q3E.q3ei.GetEngineLibName();
         return /*Q3EUtils.GetGameLibDir(m_context) + "/" +*/ libname; // Q3E.q3ei.GetEngineLibName();
     }
 
-    public String GetEngineLib(String def)
+    String GetEngineLib(String def)
     {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
         String libname = Q3E.q3ei.GetEngineLibName();
@@ -1206,7 +1235,7 @@ public class Q3EGameHelper
         return libPath;
     }
 
-    public boolean Start(Surface surface, int surfaceWidth, int surfaceHeight)
+    boolean Start(Surface surface, int surfaceWidth, int surfaceHeight)
     {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
 
@@ -1333,7 +1362,7 @@ public class Q3EGameHelper
         return res;
     }
 
-    public Context GetContext()
+    Context GetContext()
     {
         return m_context;
     }

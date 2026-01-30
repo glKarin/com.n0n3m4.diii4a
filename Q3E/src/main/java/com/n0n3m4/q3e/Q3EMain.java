@@ -151,10 +151,6 @@ public class Q3EMain extends Activity
         // create
         super.onCreate(savedInstanceState);
 
-        // check start
-        if(!CheckStart())
-            return;
-
         KUncaughtExceptionHandler.DumpPID(this);
 
         // setup language environment
@@ -163,23 +159,18 @@ public class Q3EMain extends Activity
         // setup theme
         Theme.SetTheme(this, false);
 
-        // load game
-        if(gameHelper.checkGameFiles())
-        {
-            // extract game required resource in apk
-            gameHelper.ExtractGameResource();
+        // check start
+        if(!CheckStart())
+            return;
 
-            // check support devices
-            Q3E.supportDevices = gameHelper.CheckDevices();
+        // extract game required resource in apk
+        gameHelper.ExtractGameResource();
 
-            // init GUI component
-            InitGUI();
-        }
-        else
-        {
-            finish();
-            Q3EContextUtils.RunLauncher(this);
-        }
+        // check support devices
+        Q3E.supportDevices = gameHelper.CheckDevices();
+
+        // init GUI component
+        InitGUI();
     }
 
     @Override
@@ -575,13 +566,11 @@ public class Q3EMain extends Activity
 
         if(null != msg)
         {
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-            finish();
-            Q3EContextUtils.RunLauncher(this);
+            gameHelper.FatalError(msg);
             return false;
         }
         else
-            return true;
+            return gameHelper.checkGameFiles();
     }
 
     private void SetupGame()
