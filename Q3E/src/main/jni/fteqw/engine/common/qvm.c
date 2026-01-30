@@ -94,9 +94,19 @@ qboolean QVM_LoadDLL(vm_t *vm, const char *name, qboolean binroot, void **vmMain
 	*fname = 0;
 
 #ifdef _DIII4A //karin: load libq3*.so
-	if (!hVM && FS_SystemPath(va("%s" ARCH_DL_POSTFIX, name), FS_LIBRARYPATH, fname, sizeof(fname)))
+    const char *guess_fmts[] = {
+        "",
+        "q3",
+        NULL,
+    };
+    const char **guess_fmt = &guess_fmts[0];
+    while (!hVM && *guess_fmt)
 	{
-		hVM = Sys_LoadLibrary(name, funcs);
+        char guess_name[MAX_OSPATH];
+        Q_snprintfz(guess_name, sizeof(guess_name), "%s%s", *guess_fmt, name);
+        //if(FS_SystemPath(va("%s" ARCH_DL_POSTFIX, guess_name), FS_LIBRARYPATH, fname, sizeof(fname)))
+            hVM = Sys_LoadLibrary(guess_name, funcs);
+        guess_fmt++;
 	}
 #endif
 	if (binroot)

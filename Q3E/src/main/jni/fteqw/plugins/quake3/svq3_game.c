@@ -644,7 +644,14 @@ static void SVQ3_SetBrushModel(q3sharedEntity_t *ent, char *modelname)
 	int modelindex;
 	model_t *mod;
 	if (!modelname || *modelname != '*')
+#ifdef _DIII4Axxx //karin: modelname is NULL if load native *.so
+    {
+        Con_Printf("SVQ3_SetBrushModel: not an inline model '%s'\n", modelname);
+        return;
+    }
+#else
 		plugfuncs->EndGame("SVQ3_SetBrushModel: not an inline model");
+#endif
 	modelindex = atoi(modelname+1);
 	mod = Q3G_GetCModel(modelindex);
 	if (mod)

@@ -501,27 +501,44 @@ dllhandle_t *Sys_LoadLibrary(const char *name, dllfunction_t *funcs)
 	const char *lastSep = strrchr(name, '/');
 	const char *filename = lastSep ? lastSep + 1 : name;
 
-	if(lastSep && using_external_libs)
+	if(lastSep) // is absolution path
 	{
-		Sys_MakeDLLPath(filename, libname, MAX_OSPATH);
-		h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
+        if(using_external_libs) // if load from debug path
+        {
+            Sys_MakeDLLPath(filename, libname, MAX_OSPATH);
+            h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
+        }
+        else
+            h = dlopen(name, RTLD_LAZY|RTLD_LOCAL);
 	}
-	else
+	if(!h)// else // try filename only
 	{
-	snprintf(libname, sizeof(libname) - 1, "%s.so", filename);
-	h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
-	if (!h)
-	{
-		//Sys_Printf("try 1 dlopen('%s') error -> %s\n", libname, dlerror());
-		snprintf(libname, sizeof(libname) - 1, "%s", filename);
-		h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
-	}
-	if (!h)
-	{
-		//Sys_Printf("try 2 dlopen('%s') error -> %s\n", libname, dlerror());
-		snprintf(libname, sizeof(libname) - 1, "lib%s.so", filename);
-		h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
-	}
+        size_t libnameLength = strlen(filename);
+        const char *prefix = "";
+        if(libnameLength < 3 || (filename[0] != 'l' || filename[1] != 'i' || filename[2] != 'b'))
+            prefix = "lib";
+        const char *suffix = "";
+        if(libnameLength < 3 || (filename[libnameLength - 3] != '.' || filename[libnameLength - 2] != 's' || filename[libnameLength - 1] != 'o'))
+            suffix = ".so";
+
+        if(using_external_libs) // if load from debug path
+        {
+            char libname2[MAX_OSPATH] = { 0 };
+            snprintf(libname2, sizeof(libname2), "%s%s%s", prefix, filename, suffix);
+            Sys_MakeDLLPath(libname2, libname, MAX_OSPATH);
+            h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
+        }
+        if(!h)
+        {
+            snprintf(libname, sizeof(libname), "%s%s%s", prefix, filename, suffix);
+            h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
+            if (!h)
+            {
+                //Sys_Printf("try 1 dlopen('%s') error -> %s\n", libname, dlerror());
+                snprintf(libname, sizeof(libname), "%s", filename);
+                h = dlopen(libname, RTLD_LAZY|RTLD_LOCAL);
+            }
+        }
 	}
 
 	if (!h)
