@@ -204,7 +204,6 @@
     <string name="success">成功</string>
     <string name="fail">失败</string>
     <string name="network_for_github">正在请求GitHub......</string>
-    <string name="error">错误</string>
     <string name="close">关闭</string>
     <string name="no_update_release">无更新</string>
     <string name="current_version_is_newest">当前为最新版本.</string>

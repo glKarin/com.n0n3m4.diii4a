@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -115,7 +116,6 @@ import com.n0n3m4.DIII4A.launcher.StartGameFunc;
 import com.n0n3m4.DIII4A.launcher.SupportDeveloperFunc;
 import com.n0n3m4.DIII4A.launcher.TranslatorsFunc;
 import com.n0n3m4.DIII4A.launcher.UpdateCompatFunc;
-import com.n0n3m4.q3e.Q3EControlView;
 import com.n0n3m4.q3e.Q3EGame;
 import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EGlobals;
@@ -263,6 +263,7 @@ public class GameLauncher extends Activity
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3E.q3ei.GetEnableModPreferenceKey(), isChecked)
 						.commit();
+				UpdateGameModEditText();
 			}
 			else if (id == R.id.launcher_tab2_enable_gyro)
 			{
@@ -1645,6 +1646,7 @@ public class GameLauncher extends Activity
 		V.edt_mouse.setText(mPrefs.getString(Q3EPreference.pref_eventdev, "/dev/input/event???"));
 		V.edt_path.setText(mPrefs.getString(Q3EPreference.pref_datapath, default_gamedata));
 		m_edtPathFocused = V.edt_path.getText().toString();
+		V.edt_path.setTag(R.id.tag_color, V.edt_path.getCurrentTextColor());
 		if(ContextUtility.InScopedStorage())
 		{
 			V.edt_path.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -1793,7 +1795,9 @@ public class GameLauncher extends Activity
 		V.launcher_tab1_open_menu.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_edit_env.setOnClickListener(m_buttonClickListener);
 
+		V.edt_fs_game.setTag(R.id.tag_color, V.edt_fs_game.getCurrentTextColor());
 		boolean userMod = mPrefs.getBoolean(Q3E.q3ei.GetEnableModPreferenceKey(), false);
+		V.fs_game_user.setTag(R.id.tag_color, V.fs_game_user.getCurrentTextColor());
 		V.fs_game_user.setChecked(userMod);
 		String game = mPrefs.getString(Q3E.q3ei.GetGameModPreferenceKey(), "");
 		if (null == game)
@@ -1831,6 +1835,7 @@ public class GameLauncher extends Activity
 				if (V.fs_game_user.isChecked())
 					editor.putString(Q3E.q3ei.GetGameModPreferenceKey(), s.toString());
 				editor.commit();
+				UpdateGameModEditText();
 			}
 		});
 		V.launcher_tab1_game_lib_button.setOnClickListener(m_buttonClickListener);
@@ -1937,6 +1942,9 @@ public class GameLauncher extends Activity
 			@Override
 			public void run() {
 				Q3E.q3ei.datadir = V.edt_path.getText().toString();
+				UpdateWorkPathEditText();
+				UpdateGameList();
+				UpdateGameModEditText();
 			}
 		}));
 		V.edt_mouse.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_eventdev, "/dev/input/event???"));
@@ -2051,6 +2059,9 @@ public class GameLauncher extends Activity
 
 			public void afterTextChanged(Editable s) { }
 		});
+
+		UpdateWorkPathEditText();
+		UpdateGameModEditText();
 	}
 
 	private void SetupUI_SDL()
@@ -2586,6 +2597,15 @@ public class GameLauncher extends Activity
 		if(res)
 			return true;
 		return super.onContextItemSelected(item);
+	}
+
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		UpdateWorkPathEditText();
+		UpdateGameList();
+		UpdateGameModEditText();
 	}
 
 	public boolean SelectMenuItem(MenuItem item)
@@ -3305,6 +3325,7 @@ public class GameLauncher extends Activity
 		HandleGameProp(prop);
 
         preference.edit().putString(Q3E.q3ei.GetGameModPreferenceKey(), game).commit();
+		UpdateGameModEditText();
     }
 
 	private void SetGameVersion(String val)
@@ -4188,6 +4209,78 @@ public class GameLauncher extends Activity
 		}
 	}
 
+	private boolean CheckGameModExists(String subdir, String mod, boolean isFile)
+	{
+		String path = KStr.AppendPath(Q3E.q3ei.datadir, subdir, mod);
+		File file = new File(path);
+		if(!file.exists())
+			return false;
+		if(file.isFile() && isFile)
+			return true;
+		if(file.isDirectory() && !isFile)
+			return true;
+		return false;
+	}
+
+	private void UpdateWorkPathEditText()
+	{
+		Integer color = (Integer)V.edt_path.getTag(R.id.tag_color);
+		if(null == color)
+			color = Color.BLACK;
+		boolean exists = new File(V.edt_path.getText().toString()).isDirectory();
+		V.edt_path.setTextColor(exists ? color : Color.RED);
+	}
+
+	private void UpdateGameModEditText()
+	{
+		boolean userMod = V.fs_game_user.isChecked();
+		Integer color = (Integer)V.fs_game_user.getTag(R.id.tag_color);
+		if(null == color)
+			color = Color.BLACK;
+		if(userMod)
+		{
+			String subdir = Q3EInterface.GetStandaloneDirectory(Q3E.q3ei.standalone, Q3E.q3ei.game);
+			boolean isFile = Q3EGameConstants.GAME_ZDOOM.equalsIgnoreCase(Q3E.q3ei.game);
+			boolean exists = CheckGameModExists(subdir, V.edt_fs_game.getText().toString(), isFile);
+			V.fs_game_user.setTextColor(exists ? color : Color.RED);
+		}
+		else
+			V.fs_game_user.setTextColor(color);
+	}
+
+	private void UpdateGameList()
+	{
+		RadioButton radio;
+		RadioGroup group;
+
+		for(Map.Entry<String, RadioGroup> entry : groupRadios.entrySet())
+		{
+			group = entry.getValue();
+			String gameType = entry.getKey();
+			String subdir = Q3EInterface.GetStandaloneDirectory(Q3E.q3ei.standalone, gameType);
+			for(int i = 0; i < group.getChildCount(); i++)
+			{
+				radio = (RadioButton)group.getChildAt(i);
+				String mod = (String)radio.getTag();
+				boolean isFile = Q3EGameConstants.GAME_ZDOOM.equalsIgnoreCase(gameType);
+				Game game = Game.GetGameMod(gameType, mod);
+				boolean exists = CheckGameModExists(subdir, game.file, isFile);
+				if(exists)
+				{
+					Integer color = (Integer)radio.getTag(R.id.tag_color);
+					if(null != color)
+						radio.setTextColor(color);
+					else
+						radio.setTextColor(Color.BLACK);
+				}
+				else
+				{
+					radio.setTextColor(Color.RED);
+				}
+			}
+		}
+	}
+
 	private void InitGameList()
 	{
 		RadioButton radio;
@@ -4195,31 +4288,40 @@ public class GameLauncher extends Activity
 		RadioGroup.LayoutParams layoutParams;
 
 		Game[] values = Game.values();
+		List<RadioGroup> handled = new ArrayList<>();
 
 		for (Game value : values)
 		{
-/*			String subdir = "";
+			String subdir = Q3EInterface.GetStandaloneDirectory(Q3E.q3ei.standalone, value.type);
 
-			if(Q3E.q3ei.standalone)
-			{
-				subdir = Q3EInterface.GetGameStandaloneDirectory(value.type);
-				if(!subdir.isEmpty())
-					subdir += "/";
-			}*/
+//				if(!subdir.isEmpty())
+//					subdir += "/";
 
 			group = groupRadios.get(value.type);
+
+			if(!handled.contains(group))
+			{
+				if(group.getChildCount() > 0)
+					group.removeAllViews();
+				handled.add(group);
+			}
+
 			layoutParams = new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
 			radio = new RadioButton(group.getContext());
 			String name;
+			boolean isFile = false;
+
 			if(value.name instanceof Integer)
 				name = Q3ELang.tr(this, (Integer)value.name);
 			else if(value.name instanceof String)
 				name = (String)value.name;
 			else
 				name = "";
+
 			if(Q3EGameConstants.GAME_ZDOOM.equalsIgnoreCase(value.type))
 			{
 				name += " (" + /*subdir +*/ value.file + ")";
+				isFile = true;
 			}
 			else
 			{
@@ -4228,6 +4330,12 @@ public class GameLauncher extends Activity
 				if(KStr.NotEmpty(value.file))
 					name += "(" + /*subdir +*/ value.file + "/)";
 			}
+
+			int textColor = radio.getCurrentTextColor();
+			radio.setTag(R.id.tag_color, textColor);
+			boolean exists = CheckGameModExists(subdir, value.file, isFile);
+			if(!exists)
+				radio.setTextColor(Color.RED);
 			radio.setText(name);
 			radio.setTag(value.game);
 			group.addView(radio, layoutParams);

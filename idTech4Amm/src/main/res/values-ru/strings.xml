@@ -188,7 +188,6 @@
     <string name="success">Успех</string>
     <string name="fail">Неудачно</string>
     <string name="network_for_github">Подключение к GitHub......</string>
-    <string name="error">Ошибка</string>
     <string name="close">Закрыть</string>
     <string name="no_update_release">Обновлений нет</string>
     <string name="current_version_is_newest">Текущая версия является последней.</string>
