@@ -2795,7 +2795,7 @@ const char	*r_openglesArgs[]	= {
 #endif
 idCVar harm_r_openglVersion("harm_r_openglVersion",
                             r_openglesArgs[DEFAULT_GL_VERSION_NAME_INDEX]
-        , CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_INIT,
+        , CVAR_SYSTEM | CVAR_INIT,
                             "OpenGL version", r_openglesArgs, idCmdSystem::ArgCompletion_String<r_openglesArgs>);
 #endif
 

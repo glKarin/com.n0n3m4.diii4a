@@ -495,7 +495,6 @@ int main( int argc, /*const */char** argv )
 #endif
 
     Posix_EarlyInit();
-    Sys_Printf("[Harmattan]: Enter doom3 main thread -> %s\n", "main");
 
     if (argc > 1) {
         common->Init(argc-1, (const char **)&argv[1], NULL);

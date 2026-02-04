@@ -325,19 +325,11 @@ class Q3EGameHelper
         if(Q3E.q3ei.IsIdTech4())
         {
             boolean multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, true);
-            if(multithread)
-            {
-                KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
-                command.SetProp("r_multithread", "1");
-                cmd = command.toString();
-            }
+            KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
+            command.SetProp("r_multithread", multithread ? "1" : "0");
             int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, Q3EGLConstants.GetPreferOpenGLESVersion());
-            if(glVersion != 0)
-            {
-                KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
-                command.SetProp("harm_r_openglVersion", glVersion == Q3EGLConstants.OPENGLES20 ? "GLES2" : "GLES3.0");
-                cmd = command.toString();
-            }
+            command.SetProp("harm_r_openglVersion", glVersion == Q3EGLConstants.OPENGLES20 ? "GLES2" : "GLES3.0");
+            cmd = command.toString();
         }
 
         if(!useUserCommand)

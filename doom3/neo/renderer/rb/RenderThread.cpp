@@ -14,7 +14,7 @@ static idCVar r_multithread("r_multithread",
 #else
         "1"
 #endif
-        , CVAR_ARCHIVE | CVAR_INIT | CVAR_BOOL | CVAR_RENDERER, "Multithread backend. Allow using command `multithread` to enable or disable if `r_multithread` is 1");
+        , CVAR_INIT | CVAR_BOOL | CVAR_RENDERER, "Multithread backend. Allow using command `multithread` to enable or disable if `r_multithread` is 1");
 
 static void * BackendThread(void *data)
 {
