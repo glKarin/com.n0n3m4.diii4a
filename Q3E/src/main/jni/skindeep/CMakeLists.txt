@@ -952,7 +952,7 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_library(idlib STATIC ${src_idlib})
+add_library(skindeep_idlib STATIC ${src_idlib})
 if (AROS)
 	add_library(dll STATIC ${src_arosdll})
         if(CMAKE_SYSTEM_PROCESSOR STREQUAL "i386")
@@ -962,7 +962,7 @@ if (AROS)
 	endif()
 else()
 	if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MINGW)
-		set_target_properties(idlib PROPERTIES COMPILE_FLAGS "-fPIC")
+		set_target_properties(skindeep_idlib PROPERTIES COMPILE_FLAGS "-fPIC")
 	endif()
 endif()
 
@@ -998,7 +998,7 @@ endif()
 	set_target_properties(${DHEWM3BINARY} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/sys/osx/Info.plist)
 
 	target_link_libraries(${DHEWM3BINARY}
-		idlib
+		skindeep_idlib
 		${OPENAL_LIBRARY}
 		${VORBISFILE_LIBRARIES}
 		${VORBIS_LIBRARIES}
@@ -1030,7 +1030,7 @@ if(DEDICATED)
 	set_target_properties(${DHEWM3BINARY}ded PROPERTIES COMPILE_DEFINITIONS "ID_DEDICATED;__DOOM_DLL__")
 	set_target_properties(${DHEWM3BINARY}ded PROPERTIES LINK_FLAGS "${ldflags}")
 	target_link_libraries(${DHEWM3BINARY}ded
-		idlib
+		skindeep_idlib
 		${VORBISFILE_LIBRARIES}
 		${VORBIS_LIBRARIES}
 		${OGG_LIBRARIES}
@@ -1063,9 +1063,9 @@ if(D3XP AND NOT HARDLINK_GAME)
 	set_target_properties(d3xp PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(d3xp PROPERTIES INSTALL_NAME_DIR "@executable_path")
 	if (AROS)
-		target_link_libraries(d3xp idlib dll)
+		target_link_libraries(d3xp skindeep_idlib dll)
 	else()
-		target_link_libraries(d3xp idlib)
+		target_link_libraries(d3xp skindeep_idlib)
 	endif()
 
 	if(NOT APPLE AND NOT WIN32)
