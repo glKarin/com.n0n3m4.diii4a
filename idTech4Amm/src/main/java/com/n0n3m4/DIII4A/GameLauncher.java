@@ -2564,6 +2564,7 @@ public class GameLauncher extends Activity
 		menuGames.put(R.id.main_menu_game_urt, Q3EGameConstants.GAME_URT);
 		menuGames.put(R.id.main_menu_game_mohaa, Q3EGameConstants.GAME_MOHAA);
 		menuGames.put(R.id.main_menu_game_wolf3d, Q3EGameConstants.GAME_WOLF3D);
+		menuGames.put(R.id.main_menu_game_skindeep, Q3EGameConstants.GAME_SKINDEEP);
 
 		for(Map.Entry<Integer, String> entry : menuGames.entrySet())
 		{
@@ -3615,7 +3616,7 @@ public class GameLauncher extends Activity
         int colorId = GameManager.GetGameThemeColor();
         int iconId = GameManager.GetGameIcon();
 
-		// KARIN_NEW_GAME_BOOKMARK
+		// KARIN_NEW_GAME_BOOKMARK setup launcher options
 		boolean openglVisible = Q3E.q3ei.HasOpenGLSetting();
 		boolean quickloadVisible = Q3E.q3ei.IsSupportQuickload();
 		boolean skipintroVisible = Q3E.q3ei.IsSupportSkipIntro();
@@ -4865,6 +4866,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_urtgame;
 		public RadioGroup rg_fs_mohaagame;
 		public RadioGroup rg_fs_wolf3dgame;
+		public RadioGroup rg_fs_skindeepgame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -4972,11 +4974,10 @@ public class GameLauncher extends Activity
 
         public void Setup()
         {
-			// KARIN_NEW_GAME_BOOKMARK
+			// KARIN_NEW_GAME_BOOKMARK  create game RadioGroup to group
 			GameGroups = new RadioGroup[Q3EGameConstants.NUM_SUPPORT_GAME];
 			int[] gameId = { Q3EGameConstants.GAME_ID_DOOM3 };
 
-			// KARIN_NEW_GAME_BOOKMARK: create game RadioGroup
 			mods_container_layout = findViewById(R.id.mods_container_layout);
 			rg_fs_game = CreateGameRadioGroup(gameId);
 			rg_fs_q4game = CreateGameRadioGroup(gameId);
@@ -5000,6 +5001,7 @@ public class GameLauncher extends Activity
 			rg_fs_urtgame = CreateGameRadioGroup(gameId);
 			rg_fs_mohaagame = CreateGameRadioGroup(gameId);
 			rg_fs_wolf3dgame = CreateGameRadioGroup(gameId);
+			rg_fs_skindeepgame = CreateGameRadioGroup(gameId);
 
             edt_cmdline = findViewById(R.id.edt_cmdline);
             res_customlayout = findViewById(R.id.res_customlayout);

@@ -325,12 +325,12 @@ class Q3EGameHelper
         if(Q3E.q3ei.IsIdTech4())
         {
             boolean multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, true);
-            KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
+                KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
             command.SetProp("r_multithread", multithread ? "1" : "0");
             int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, Q3EGLConstants.GetPreferOpenGLESVersion());
-            command.SetProp("harm_r_openglVersion", glVersion == Q3EGLConstants.OPENGLES20 ? "GLES2" : "GLES3.0");
-            cmd = command.toString();
-        }
+                command.SetProp("harm_r_openglVersion", glVersion == Q3EGLConstants.OPENGLES20 ? "GLES2" : "GLES3.0");
+                cmd = command.toString();
+            }
 
         if(!useUserCommand)
         {
@@ -713,6 +713,27 @@ class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
+    void ExtractSkinDeepGLSLShaderSource()
+    {
+        Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
+        final String versionFile = KStr.AppendPath(Q3E.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_SKINDEEP, "base/glsl/idtech4amm.version");
+        String version = Q3EGameConstants.SKINDEEP_GLSL_SHADER_VERSION;
+        String name = Q3ELang.tr(m_context, R.string.skin_deep_glsl_shader);
+        Q3EGameConstants.PatchResource patchResource = Q3EGameConstants.PatchResource.SKINDEEP_GLSL_SHADER;
+
+        boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
+
+        if(manager.Fetch(patchResource, overwrite) != null)
+        {
+            if (overwrite)
+            {
+                DumpExtractResourceVersion(versionFile, version, name);
+            }
+        }
+        else
+            ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
+    }
+
     void ExtractDOOM3BFGHLSLShaderSource()
     {
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
@@ -868,9 +889,9 @@ class Q3EGameHelper
     // KARIN_NEW_GAME_BOOKMARK: add patch resource extract
     void ExtractGameResource()
     {
-        if(Q3E.q3ei.IsTDMTech()) // if game is TDM, extract glsl shader
+        if(Q3E.q3ei.IsTDMTech()) // GLSL shader
             ExtractTDMGLSLShaderSource();
-        else if(Q3E.q3ei.IsIdTech4BFG()) // if game is D3BFG, extract hlsl shader
+        else if(Q3E.q3ei.IsIdTech4BFG()) // HLSL shader
             ExtractDOOM3BFGHLSLShaderSource();
         else if(Q3E.q3ei.isDOOM) // pk3
             ExtractZDOOMResource();
@@ -878,10 +899,12 @@ class Q3EGameHelper
             ExtractXash3DResource();
         else if(Q3E.q3ei.isSource) // fonts
             ExtractSourceEngineResource();
-        else if(Q3E.q3ei.isETW)
+        else if(Q3E.q3ei.isETW) // ET:L
             ExtractETWResource();
-        else if(Q3E.q3ei.isWolf3D)
+        else if(Q3E.q3ei.isWolf3D) //
             ExtractECWolfResource();
+        else if(Q3E.q3ei.isSkinDeep) // GLSL shader
+            ExtractSkinDeepGLSLShaderSource();
     }
 
     private int GetMSAA()

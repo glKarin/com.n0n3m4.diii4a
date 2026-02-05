@@ -40,6 +40,7 @@ OPTION(GAME_SERIOUSSAM              "Build Serious Sam"                         
 OPTION(GAME_URT                     "Build Urbant Error"                            ON)
 OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"          ON)
 OPTION(GAME_WOLF3D                  "Build Wolfenstein 3D"                          ON)
+OPTION(GAME_SKINDEEP                "Build Skin Deep"                               ON)
 # Not in F-Droid
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_SOURCE                  "Build Source"                                  ON)
@@ -96,7 +97,7 @@ add_subdirectory( q3e )
 
 
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SERIOUSSAM)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SERIOUSSAM OR GAME_SKINDEEP)
     set(DIII4A_BUILD_COMMON True)
 endif()
 
@@ -124,7 +125,7 @@ if(NOT GAME_DOOM3 AND DIII4A_BUILD_OPENAL)
     add_subdirectory(${DIII4A_DOOM3_NEO_PATH}/neo/externlibs/openal-soft "doom3/neo/externlibs/openal-soft")
 endif()
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SOURCE OR GAME_WOLF3D)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_DNF OR GAME_TDM OR GAME_RTCW OR GAME_DOOM OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SOURCE OR GAME_WOLF3D OR GAME_SKINDEEP)
     message(STATUS "Build extras depend shared libraries")
     add_subdirectory ( deplibs ) # common depend libraries
 endif()
@@ -234,6 +235,11 @@ endif()
 if(GAME_WOLF3D) #  | Apr 16, 2025 | https://github.com/libretro/ecwolf/commit/c57ad894d5942740b4896511e8554c9a776b04a6 | Fix emscripten build
     message(STATUS "Build Wolfenstein 3D")
     add_subdirectory ( ecwolf ) # Wolfenstein 3D
+endif()
+
+if(GAME_SKINDEEP) #  | Apr 16, 2025 | https://github.com/libretro/ecwolf/commit/c57ad894d5942740b4896511e8554c9a776b04a6 | Fix emscripten build
+    message(STATUS "Build Skin Deep")
+    add_subdirectory ( skindeep ) # Skin Deep
 endif()
 
 

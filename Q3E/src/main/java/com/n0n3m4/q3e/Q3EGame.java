@@ -162,6 +162,13 @@ public enum Q3EGame
             Q3EPreference.pref_harm_wolf3d_fs_game, Q3EPreference.pref_harm_wolf3d_user_mod, Q3EPreference.pref_harm_wolf3d_game_mod, Q3EPreference.pref_harm_wolf3d_game_lib, Q3EPreference.pref_params_wolf3d, Q3EPreference.pref_harm_wolf3d_command_record, null, Q3EPreference.pref_harm_wolf3d_env,
             KeyCodesAndroid.class
     ),
+
+    SKINDEEP(Q3EGameConstants.GAME_ID_SKINDEEP, Q3EGameConstants.GAME_SKINDEEP, Q3EGameConstants.LIB_ENGINE4_SKINDEEP, Q3EGameConstants.GAME_NAME_SKINDEEP, Q3EGameConstants.GAME_BASE_SKINDEEP,
+            Q3EGameConstants.GAME_VERSION_SKINDEEP, Q3EGameConstants.GAME_SUBDIR_SKINDEEP, false, Q3EGameConstants.CONFIG_FILE_SKINDEEP,
+            "fs_game", "fs_game_base", null, null,
+            Q3EPreference.pref_harm_skindeep_fs_game, Q3EPreference.pref_harm_skindeep_user_mod, Q3EPreference.pref_harm_skindeep_game_mod, Q3EPreference.pref_harm_skindeep_game_lib, Q3EPreference.pref_params_skindeep, Q3EPreference.pref_harm_skindeep_command_record, null, Q3EPreference.pref_harm_skindeep_env,
+            KeyCodesAndroid.class
+    ),
     ;
 
     public final int    ID;

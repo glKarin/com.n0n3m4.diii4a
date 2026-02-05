@@ -576,4 +576,5 @@
     <string name="crash">崩溃</string>
     <string name="backtrace">回退栈</string>
     <string name="use_multithread_command_to_switch_single_multi_threading_in_game_if_enabled">如果启用了多线程, 游戏中可以使用`multithread`命令切换单线程和多线程</string>
+    <string name="skin_deep">Skin Deep</string>
 </resources>

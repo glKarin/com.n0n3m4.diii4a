@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="idList&lt;*&gt;">
+    <DisplayString>{{num = {num}}}</DisplayString>
+    <Expand>
+      <Item Name="[num]">num</Item>
+      <ArrayItems>
+        <Size>num</Size>
+        <ValuePointer>list</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="idStr">
+    <DisplayString>{data}</DisplayString>
+    <StringView>data</StringView>
+  </Type>
+</AutoVisualizer>

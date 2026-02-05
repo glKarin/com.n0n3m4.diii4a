@@ -73,4 +73,5 @@
     <string name="open_input_method">打开输入法</string>
     <string name="error">错误</string>
     <string name="restart">重启</string>
+    <string name="skin_deep_glsl_shader">Skin Deep GLSL shader</string>
 </resources>

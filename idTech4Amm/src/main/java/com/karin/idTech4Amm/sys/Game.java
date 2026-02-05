@@ -120,6 +120,9 @@ public enum Game
 
     // Wolfenstein 3D
     WOLF3D_BASE(Q3EGameConstants.GAME_WOLF3D, "", "", "ecwolf", "", "", true, R.string.wolf3d_base),
+
+    // Skin Deep
+    SKINDEEP_BASE(Q3EGameConstants.GAME_SKINDEEP, "base", "", "skindeep", "", "base", false, R.string.skin_deep),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

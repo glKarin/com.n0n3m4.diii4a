@@ -12,6 +12,7 @@ import java.util.Map;
 
 public final class KCVarSystem
 {
+    // KARIN_NEW_GAME_BOOKMARK: add new cvars
     public static Map<String, KCVar.Group> CVars()
     {
         Map<String, KCVar.Group> _cvars = new LinkedHashMap<>();
@@ -388,6 +389,7 @@ public final class KCVarSystem
         return _cvars;
     }
 
+    // KARIN_NEW_GAME_BOOKMARK: add new cvars to map
     public static List<KCVar.Group> Match(String game)
     {
         Map<String, KCVar.Group> _cvars = CVars();
