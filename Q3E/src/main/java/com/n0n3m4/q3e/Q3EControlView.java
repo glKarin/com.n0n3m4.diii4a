@@ -213,7 +213,8 @@ public class Q3EControlView extends GLSurfaceView implements GLSurfaceView.Rende
     @Override
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event)
     {
-        return handler.OnKeyMultiple(keyCode, repeatCount, event);
+        handler.OnKeyMultiple(keyCode, repeatCount, event);
+        return super.onKeyMultiple(keyCode, repeatCount, event);
     }
 
     @Override
