@@ -333,59 +333,61 @@ void idChoiceWindow::UpdateChoicesAndVals(void)
 		src.LoadMemory(choicesStr, choicesStr.Length(), "<ChoiceList>");
 
 		if (src.IsLoaded()) {
-			while (src.ReadToken(&token)) {
-				if (token == ";") {
-					if (str2.Length()) {
-						str2.StripTrailingWhitespace();
-						str2 = common->GetLanguageDict()->GetString(str2);
-						choices.Append(str2);
-						str2 = "";
-					}
+#ifdef _WCHAR_LANG //karin: force try utf8
+            const idStr &readStr = choicesStr;
+            if(AsUTF8CharLang(readStr.c_str(), readStr.Length()))
+            {
+                int charIndex = 0;
+                int len = readStr.Length();
+                str2 = "";
 
-					continue;
-				}
+                while( charIndex < len ) {
+                    uint32_t textChar = readStr.UTF8Char( charIndex );
+                    if(textChar == ';')
+                    {
+                        if (str2.Length()) {
+                            str2.StripTrailingWhitespace();
+                            str2 = common->GetLanguageDict()->GetString(str2);
+                            choices.Append(str2);
+                            str2 = "";
+                        }
 
-				str2 += token;
-				str2 += " ";
-			}
+                        continue;
+                    }
 
-			if (str2.Length()) {
-				str2.StripTrailingWhitespace();
-				choices.Append(str2);
-			}
+                    str2.AppendUTF8Char(textChar);
+                }
+
+                if (str2.Length()) {
+                    str2.StripTrailingWhitespace();
+                    choices.Append(str2);
+                }
+            }
+            else
+            {
+#endif
+            while (src.ReadToken(&token)) {
+                if (token == ";") {
+                    if (str2.Length()) {
+                        str2.StripTrailingWhitespace();
+                        str2 = common->GetLanguageDict()->GetString(str2);
+                        choices.Append(str2);
+                        str2 = "";
+                    }
+
+                    continue;
+                }
+
+                str2 += token;
+                str2 += " ";
+            }
+
+            if (str2.Length()) {
+                str2.StripTrailingWhitespace();
+                choices.Append(str2);
+            }
 #ifdef _WCHAR_LANG
-			if(choices.Num() == 0)
-			{
-				const idStr &readStr = choicesStr;
-				if(idStr::IsValidUTF8(readStr.c_str(), readStr.Length()))
-				{
-					int charIndex = 0;
-					int len = readStr.Length();
-					str2 = "";
-
-					while( charIndex < len ) {
-						uint32_t textChar = readStr.UTF8Char( charIndex );
-						if(textChar == ';')
-						{
-							if (str2.Length()) {
-								str2.StripTrailingWhitespace();
-								str2 = common->GetLanguageDict()->GetString(str2);
-								choices.Append(str2);
-								str2 = "";
-							}
-
-							continue;
-						}
-
-						str2.AppendUTF8Char(textChar);
-					}
-
-					if (str2.Length()) {
-						str2.StripTrailingWhitespace();
-						choices.Append(str2);
-					}
-				}
-			}
+            }
 #endif
 		}
 

@@ -47,7 +47,9 @@ idCVar gui_mediumFontLimit("gui_mediumFontLimit", "0.60", CVAR_GUI | CVAR_ARCHIV
 #ifdef _WCHAR_LANG
 idCVar harm_gui_wideCharLang("harm_gui_wideCharLang", "0", CVAR_GUI | CVAR_BOOL | CVAR_ARCHIVE, "enable wide-character language support");
 static bool _hasWideCharFont = false;
-#define AsASCIICharLang(text_, len_) ( !_hasWideCharFont || !harm_gui_wideCharLang.GetBool() || idStr::IsPureASCII(text_, len_) )
+bool UI_HasWideCharFont(void) {
+    return _hasWideCharFont;
+}
 #endif
 #ifdef _D3BFG_FONT
 idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_INIT | CVAR_ARCHIVE, "using DOOM3-BFG new fonts instead of old fonts.\n"
