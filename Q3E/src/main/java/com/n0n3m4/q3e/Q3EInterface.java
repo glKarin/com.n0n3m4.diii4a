@@ -614,7 +614,7 @@ public class Q3EInterface
 
 	public boolean IsStandaloneGame()
 	{
-		return isTDM || isDOOM || isFTEQW || isSamTFE || isSamTSE || isXash3D || isSource || isWolf3D;
+		return Q3EGame.Find(game_id).STANDALONE;
 	}
 
 	public boolean IS_D3()
@@ -656,20 +656,14 @@ public class Q3EInterface
 		return false;
 	}
 
+	public boolean IsSupportSecondaryDirGame()
+	{
+		return null != Q3EGame.Find(game_id).MOD_SECONDARY_PARM;
+	}
+
 	public static boolean IsSupportSecondaryDirGame(String game)
 	{
-		final String[] UnsupportGames = {
-				Q3EGameConstants.GAME_QUAKE1,
-				Q3EGameConstants.GAME_FTEQW,
-				Q3EGameConstants.GAME_SAMTFE,
-				Q3EGameConstants.GAME_SAMTSE,
-		};
-		for(String unsupportGame : UnsupportGames)
-		{
-			if(unsupportGame.equalsIgnoreCase(game))
-				return false;
-		}
-		return true;
+		return null != Q3EGame.Find(game).MOD_SECONDARY_PARM;
 	}
 
 	public String GetGameCommandParm()
@@ -1106,9 +1100,9 @@ public class Q3EInterface
 				extraCommand = GetGameCommandEngine(extraCommand).SetProp("harm_r_autoAspectRatio", autoAspectRatio).toString();
 		}
 
-		if ((IsIdTech4() || IsIdTech3()) && preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
+		if ((IsSupportSkipIntro()) && preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
 			extraCommand = GetGameCommandEngine(extraCommand).SetCommand("disconnect", false).toString();
-		if ((IsIdTech4() || isRTCW || isRealRTCW) && preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
+		if ((IsSupportQuickload()) && preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
 			extraCommand = GetGameCommandEngine(extraCommand).SetParam("loadGame", "QuickSave").toString();
 
 		if (isDOOM)

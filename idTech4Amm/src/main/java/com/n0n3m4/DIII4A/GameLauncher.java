@@ -277,7 +277,7 @@ public class GameLauncher extends Activity
 				PreferenceManager.getDefaultSharedPreferences(GameLauncher.this).edit()
 						.putBoolean(Q3EPreference.pref_harm_auto_quick_load, isChecked)
 						.commit();
-				if (isChecked && (Q3E.q3ei.IsIdTech4() || Q3E.q3ei.isRTCW || Q3E.q3ei.isRealRTCW))
+				if (isChecked && (Q3E.q3ei.IsSupportQuickload()))
 					SetParam_temp("loadGame", "QuickSave");
 				else
 					RemoveParam_temp("loadGame");
@@ -1746,11 +1746,11 @@ public class GameLauncher extends Activity
 		V.cb_r_autoAspectRatio.setOnCheckedChangeListener(m_checkboxChangeListener);
 		boolean skipIntro = mPrefs.getBoolean(Q3EPreference.pref_harm_skip_intro, false);
 		V.skip_intro.setChecked(skipIntro);
-		if (skipIntro && (Q3E.q3ei.IsIdTech4() || Q3E.q3ei.IsIdTech3()))
+		if (skipIntro && (Q3E.q3ei.IsSupportSkipIntro()))
 			SetCommand_temp("disconnect", false);
 		boolean autoQuickLoad = mPrefs.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false);
 		V.auto_quick_load.setChecked(autoQuickLoad);
-		if (autoQuickLoad && (Q3E.q3ei.IsIdTech4() || Q3E.q3ei.isRTCW || Q3E.q3ei.isRealRTCW))
+		if (autoQuickLoad && (Q3E.q3ei.IsSupportQuickload()))
 			SetParam_temp("loadGame", "QuickSave");
 		boolean multithreading = mPrefs.getBoolean(Q3EPreference.pref_harm_multithreading, true);
 		V.multithreading.setChecked(multithreading);
@@ -4150,7 +4150,7 @@ public class GameLauncher extends Activity
 				SetGameModToCommand(prop.fs_game);
 			if(null == prop.fs_game_base || prop.fs_game_base.isEmpty() || !prop.IsValid())
 				RemoveSecondaryGameModFromCommand();
-			else if(Q3E.q3ei.IsIdTech4() || Q3E.q3ei.isD3BFG || Q3E.q3ei.isTDM || Q3E.q3ei.isFTEQW)
+			else if(Q3E.q3ei.IsSupportSecondaryDirGame())
 				SetSecondaryGameModToCommand(prop.fs_game_base);
 			RemoveProp("harm_fs_gameLibPath");
 		}
