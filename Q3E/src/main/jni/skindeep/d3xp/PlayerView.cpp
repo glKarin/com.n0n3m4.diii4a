@@ -2612,7 +2612,11 @@ void FullscreenFX_Brightness::Initialize()
 
 bool FullscreenFX_Brightness::Active()
 {
+#if !defined(_GLES) //karin: TODO rendering error
 	return true;
+#else
+	return false;
+#endif
 }
 
 void FullscreenFX_Brightness::HighQuality()
@@ -2861,16 +2865,12 @@ void FullscreenFXManager::Initialize( idPlayerView *pv ) {
     CreateFX("bulletwound", "bulletwound", 0);
 	CreateFX("telescopeblur", "telescopeblur", 0);
 	CreateFX( "motionblur", "motionblur", 0 );
-#if !defined(_GLES) //karin: TODO rendering error
 	CreateFX("zoommode", "zoommode", 0);
-#endif
 	CreateFX("roqvideo", "roqvideo", 0);
-#if !defined(_GLES) //karin: TODO rendering error
 	CreateFX("outline", "outline", 0);
 
 	// SM -- this NEEDS to be the last post effect
 	CreateFX("brightness", "brightness", 0);
-#endif
 
 	// pre-cache the texture grab so we dont hitch
 	renderSystem->CropRenderSize( 512, 512, true );
@@ -3277,9 +3277,13 @@ void FullscreenFX_ZoomMode::Initialize()
 
 bool FullscreenFX_ZoomMode::Active()
 {
+#if !defined(_GLES) //karin: TODO rendering error
 	idPlayer *player = fxman->GetPlayer();
 
 	return (player->isInZoomMode());
+#else
+	return false;
+#endif
 }
 
 void FullscreenFX_ZoomMode::HighQuality()
@@ -3296,10 +3300,14 @@ void FullscreenFX_Outline::Initialize()
 
 bool FullscreenFX_Outline::Active()
 {
+#if !defined(_GLES) //karin: TODO rendering error
 	if (!g_froboutline.GetBool())
 		return false;
 	
 	return true;
+#else
+	return false;
+#endif
 }
 
 void FullscreenFX_Outline::HighQuality()
