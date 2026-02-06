@@ -620,9 +620,11 @@ void RB_SetProgramEnvironment( void ) {
 	idVec4	parm;
 	int		pot;
 
+#if !defined(_GLES) //karin: not support ARB shader on GLES
 	if ( !glConfig.ARBVertexProgramAvailable ) {
 		return;
 	}
+#endif
 
 #if 0
 	// screen power of two correction factor, one pixel in so we don't get a bilerp
@@ -659,8 +661,10 @@ void RB_SetProgramEnvironment( void ) {
 
 	parm[2] = 0;
 	parm[3] = 1;
+#if !defined(_GLES) //karin: not support ARB shader on GLES
 	// SM: As far as I can tell, this is not used in any vertex program so not porting it to GLSL
 	qglProgramEnvParameter4fvARB( GL_VERTEX_PROGRAM_ARB, 0, parm.ToFloatPtr() );
+#endif
 #endif
 
 	// SM: Turns out we still need the correction for some FX like the heat haze
@@ -674,6 +678,7 @@ void RB_SetProgramEnvironment( void ) {
 	parm[3] = 1;
 	RB_SetProgramEnv( GL_FRAGMENT_PROGRAM_ARB, 1, parm );
 
+#if !defined(_GLES) //karin: not support ARB shader on GLES
 	//
 	// set eye position in global space
 	//
@@ -683,6 +688,7 @@ void RB_SetProgramEnvironment( void ) {
 	parm[3] = 1.0;
 	// SM: As far as I can tell, this is not used in any vertex program so not porting it to GLSL
 	qglProgramEnvParameter4fvARB( GL_VERTEX_PROGRAM_ARB, 1, parm.ToFloatPtr() );
+#endif
 
 
 }
@@ -695,9 +701,11 @@ Sets variables related to the current space that can be used by all vertex progr
 ==================
 */
 void RB_SetProgramEnvironmentSpace( void ) {
+#if !defined(_GLES) //karin: not support ARB shader on GLES
 	if ( !glConfig.ARBVertexProgramAvailable ) {
 		return;
 	}
+#endif
 
 	const struct viewEntity_s *space = backEnd.currentSpace;
 	idVec4	parm;

@@ -2861,12 +2861,16 @@ void FullscreenFXManager::Initialize( idPlayerView *pv ) {
     CreateFX("bulletwound", "bulletwound", 0);
 	CreateFX("telescopeblur", "telescopeblur", 0);
 	CreateFX( "motionblur", "motionblur", 0 );
+#if !defined(_GLES) //karin: TODO rendering error
 	CreateFX("zoommode", "zoommode", 0);
+#endif
 	CreateFX("roqvideo", "roqvideo", 0);
+#if !defined(_GLES) //karin: TODO rendering error
 	CreateFX("outline", "outline", 0);
 
 	// SM -- this NEEDS to be the last post effect
 	CreateFX("brightness", "brightness", 0);
+#endif
 
 	// pre-cache the texture grab so we dont hitch
 	renderSystem->CropRenderSize( 512, 512, true );

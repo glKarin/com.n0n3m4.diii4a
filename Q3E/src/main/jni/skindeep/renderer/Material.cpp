@@ -637,7 +637,11 @@ int idMaterial::ParseTerm( idLexer &src ) {
 		return EXP_REG_REALTIME;
 	}
 	if ( !token.Icmp( "fragmentPrograms" ) ) {
+#ifdef _GLES //karin: GLSL shader support
+		return GetExpressionConstant( (float)1 );
+#else
 		return GetExpressionConstant( (float) glConfig.ARBFragmentProgramAvailable );
+#endif
 	}
 
 	if ( !token.Icmp( "sound" ) ) {
