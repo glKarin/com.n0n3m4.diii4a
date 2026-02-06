@@ -2612,11 +2612,7 @@ void FullscreenFX_Brightness::Initialize()
 
 bool FullscreenFX_Brightness::Active()
 {
-#if !defined(_GLES) //karin: TODO rendering error
 	return true;
-#else
-	return false;
-#endif
 }
 
 void FullscreenFX_Brightness::HighQuality()
@@ -3277,13 +3273,9 @@ void FullscreenFX_ZoomMode::Initialize()
 
 bool FullscreenFX_ZoomMode::Active()
 {
-#if !defined(_GLES) //karin: TODO rendering error
 	idPlayer *player = fxman->GetPlayer();
 
 	return (player->isInZoomMode());
-#else
-	return false;
-#endif
 }
 
 void FullscreenFX_ZoomMode::HighQuality()
@@ -3300,14 +3292,10 @@ void FullscreenFX_Outline::Initialize()
 
 bool FullscreenFX_Outline::Active()
 {
-#if !defined(_GLES) //karin: TODO rendering error
 	if (!g_froboutline.GetBool())
 		return false;
 	
 	return true;
-#else
-	return false;
-#endif
 }
 
 void FullscreenFX_Outline::HighQuality()
