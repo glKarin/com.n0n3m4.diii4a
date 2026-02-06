@@ -1,0 +1,175 @@
+BSPX is a format originally invented by Tonik, I believe, and is already implemented in both ezQuake and FTE.
+It is not so much a format itself, but more of an extensible way to shove additional lumps within an existing BSP.
+Typically these additional lumps will provide supplemental information or replace existing info.
+BSPX itself can logically be applied to the BSP file format of Quake, Quake II, or Quake III.
+
+BSPX itself can be defined in just the following two structures:
+typedef struct {
+	char lumpname[24]; // up to 23 chars, zero-padded
+	int fileofs;  // from file start
+	int filelen;
+} bspx_lump_t;
+typedef struct {
+	char id[4];  // 'BSPX'
+	int numlumps;
+	bspx_lump_t lumps[1];
+} bspx_header_t;
+
+The bspx_header_t struct can be found immediately following the BSP's standard header. It is only valid if the standard header specifies no lump as starting at that location, and if the magic id matches.
+The engine can then walk the lump list looking for lumps that it recognises. Unknown lumps MUST be ignored.
+
+
+
+These lumps are currently defined:
+
+RGBLIGHTING:
+(applies to fte, ezquake, qss)
+This is equivelent to the information stored in a .lit file (sans header), and must contain the same number of samples as the lightmap lump would normally contain, because it doesn't make much sense otherwise.
+Presence of this lump permits omitting the regular mono lightmap to save space, but doing so will harm compatibility.
+
+LIGHTING_E5BGR9:
+(applies to fte, parsed by qss only as a fallback)
+This is a more advanced alternative to RGBLIGHTING.
+Each luxel is a E5BGR9 int32 packed value (ie: on little-endian machines, the exponent is the high 5 bits), resulting in what is effectively a memory-efficient floating point rgb value.
+This lightmap format virtually removes all oversaturation limits, and promises greater precision in dark areas too.
+This format is directly supported on ALL OpenGL[ES] 3.0+ gpus (aka: GL_EXT_texture_shared_exponent).
+As a floating point format, a logical value of 1.0 is considered as identity (instead of 255 being an [overbright] multiplier of 2.0).
+Lighting values are always assumed to be linear.
+
+LIGHTINGDIR:
+(applies to fte)
+This lump contains averaged surface-space light directions (read: deluxemap), equivelent to fte's .lux file, or dp's .dlit files (sans header).
+(as unorm values, these need to be biased before use).
+If bumpmaps or specular maps are not available then the effects of this may not be significant/noticable.
+
+LMSHIFT:
+(applies to fte, qss)
+This is a series of per-surface bytes. Each byte provides the (1<<shift) ratio of texels-per-luxel of the corresponding surface.
+Note that the engine's per-surface lightmap size limit still applies, but any engine that supports LMSHIFT must support up to 256 luxels in either axis (note that 1 luxel is reserved for edges, so a shift of 0 requires that surfaces be subdivided to at least a 255qu boundary while a shift of 4 reduces the required subdivisions on an infinitely sized surface by a factor of 256, or to a max extent of 4080qu).
+As a result, the subdivide size argument of qbsp can limit the minimum shift value (maximum lightmap scale).
+
+LMOFFSET:
+(applies to fte, qss)
+This replaces the lightmap offset value of the surface lumps. Should only be used in conjunction with LMSHIFT.
+This allows a bsp to contain both scaled surfaces and unscaled ones, without looking broken in engines that use either mode.
+
+LMSTYLE:
+(applies to fte, qss)
+This replaces the four lightstyle indexes of each surface lump entry. Normally only makes sense when used in conjunction with LMSHIFT.
+Obsoleted by DECOUPLED_LM.
+
+LMSTYLE16:
+(applies to fte, qss)
+An upgrade for the LMSTYLE lump, potentially giving up to 65k lightstyles.
+Additionally, the number of styles per face is variable, and must be inferred by the lump size vs surface count.
+Both of these tweeks make it useful even without LMSHIFT.
+
+VERTEXNORMALS:
+(applies to fte)
+This lump contains a series of vec3_t values. One per vertex lump entry.
+Surfaces with a texinfo flag of 0x800 will use this lump in order to determine vertex normals, otherwise they will use their plane's normal.
+These normals allow rtlights to respond to curved forms, while the flag prevents the need for excessive vertex+edge counts.
+Verticies that are not part of any 0x800 surface will not be read, and will usually hold values of 0 (if only because it compresses better).
+
+BRUSHLIST:
+(applies to fte)
+Engines that utilise this lump will no longer need to use hull-based collisions.
+struct {
+	unsigned int ver = 1;
+	unsigned int modelnum;		//inline model number. 0 for world, obviously.
+	unsigned int numbrushes;	//size of following array.
+	unsigned int numplanes;		//total count. for validation.
+	struct
+	{
+		vec_t mins;
+		vec_t maxs;
+		signed short contents;
+		unsigned short numplanes;
+		{
+			vec3_t 	normal;
+			float 	dist;
+		} planes[numplanes];
+	} brush[numbrushes];
+} permodel[];
+A submodel could be an illusionary model with no solid surfaces. Such a model will become non-solid if there is a BRUSHLIST lump that does not name the submodel.
+Axial planes MUST NOT be written - they will be inferred from the brush's mins+maxs. This guarentees that brush expansion does not extend points beyond the brush itself, and saves size on maps made by lazy people.
+Contents values are equal to Quake's normal CONTENT_FOO values. This outbreak of lack of imagination is brought to you by a desire to avoid politics about content masks.
+CONTENTS_EMPTY	= -1	//an error. pointless.
+CONTENTS_SOLID	= -2	//regular solidity
+CONTENTS_WATER	= -3	//required for pointcontents to work properly.
+CONTENTS_SLIME	= -4	//really I'm only listing these for completeness. only the last two are 'new'.
+CONTENTS_LAVA	= -5	//it burns!
+CONTENTS_SKY	= -6	//nothing explodes here!
+CONTENTS_CLIP	= -8	//borrowed from halflife, blocks only entities with size.
+CONTENTS_LADDER	= -16	//borrowed from halflife
+Presence of this lump permits hulls 1 and 2 to be entirely omitted from the BSP (0 is still used for rendering), but doing so will harm compatibility with engines that do not understand this (presumably a solid-but-valid tree should be written, just in case). This could boost load times.
+The engine is expected to insert the brushes into the bsp's various nodes. Inserting them into the leafs is suboptimal as leaf 0 will end up containing every brush...
+
+ENVMAP:
+(applies to fte)
+Generated by fte's map_findcubemaps by parsing the entities lump for env_cubemap entities.
+struct
+{
+	vec3_t origin;
+	int cubesize;
+} envmaps[];
+This defines the various envmaps in the bsp, for mdls to use.
+envmaps will be loaded from textures/env/MAPNAME_X_Y_Z using the engine's regular cubemap rules (xyz are rounded to ints).
+
+SURFENVMAP:
+(applies to fte)
+Generated by fte's map_findcubemaps by parsing the entities lump for env_cubemap entities.
+struct
+{
+	unsigned int envmapindex;
+} persurface[];
+This provides each surface in the bsp with info about its most appropriate(nearest) envmap. if the index is ~0u, then no envmap is specified.
+
+DECOUPLED_LM:
+struct
+{
+	uint16_t lmsize[2];		//made explicit. beware MAX_
+	uint32_t lmoffset;		//replacement offset for vanilla compat.
+	vec4_t lmvecs[2]; 		//lmcoord[] = dotproduct3(vertexcoord, lmvecs[])+lmvecs[][3]
+} persurface[];
+Replaces LMSHIFT and LMOFFSET, but _NOT_ LMSTYLE(16). Allows the lightmap to be oriented+scaled entirely independantly, reducing seams between surfaces.
+
+LIGHTGRID_OCTREE:
+vec3_t  step;
+ivec3_t size;
+vec3_t  mins;
+byte    numstyles;	//WARNING: misaligns the rest of the data
+uint32_t rootnode;
+uint32_t numnodes;
+struct
+{
+	uint32_t mid[3];
+	uint32_t child[8];	//((z>=mid[2])<<0) | ((y>=mid[1])<<1) | ((x>=mid[0])<<2)
+		#define LGNODE_LEAF (1u<<31)
+		#define LGNODE_MISSING (1u<<30)
+} lgnode[numnodes];
+uint32_t numleafs;
+blob
+{
+	ivec3_t mins;
+	ivec3_t size;
+	blob
+	{
+		byte stylecount;	//compression...
+		struct
+		{
+			byte stylenum; 	//which lightstyle to scale the rgb values by
+			byte rgb[3];	//the actual sample
+		} [stylecount];
+	} perpoint[size[0]*size[1]*size[2]];
+} lgleaf[numleafs];
+The nodes exists to provide support for sparse data, allowing solid unplayable areas of the map to be omitted entirely. Convert the sample position you want into an index, walk the tree until either missing or leaf. If leaf then index and add up the weighted rgb values. If missing or stylecount is 0xff then there's no data at that point. You should sample the 8 points around your target position and weight+blend them - with the missing values compensated for by increasing the weight of the other samples so that an object next to a wall does not become black/fullbright/ugly.
+Misalignment and leaf compression means it must be repacked at load time for efficient access (which is likely to mean stylecount gets clamped to 4). Does not support HDR nor 16bit styles.
+
+Other features:
+FTE supports mipmaps with all four offsets set to 0 as external textures. Such texture will ignore gl_load24bit, treating it as always enabled. This saves space and simplifies copyright ownership without resulting in untextured maps (when the textures are actually available, anyway).
+
+Misc Compatibility Concerns:
+mipmap lump - mipmaps with all four offsets set to 0 are external textures and contain no actual data. Note that vanilla quake will glitch out if given such a texture, although its unlikely to crash.
+hulls - presence of BRUSHLIST allows hulls 1 and 2 to be ommitted. This will crash vanilla glquake but not winquake, and can be reproduced with the vanilla tools too.
+lightmap sizes - winquake is limited to 18*18 lightmaps. Many quake engines support up to 256*256 now (AFTER lmscale). Note that such large lightmaps are not recommended due to all the resulting texture switches.

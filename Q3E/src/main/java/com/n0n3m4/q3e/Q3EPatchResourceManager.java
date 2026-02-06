@@ -52,7 +52,7 @@ public class Q3EPatchResourceManager
                 Q3EGameConstants.GAME_DOOM3,
                 null,
                 "pak/doom3/d3_sabot_a7.pk4",
-                null,
+                Q3EPatchResource.TO_MOD_PATH,
                 "zzz_idTech4Amm_"
         );
         resourceList.add(rsc);
@@ -64,7 +64,7 @@ public class Q3EPatchResourceManager
                 Q3EGameConstants.GAME_DOOM3,
                 "rivensin",
                 "pak/rivensin/play_original_doom3_level.pk4",
-                "",
+                Q3EPatchResource.TO_ROOT_PATH,
                 "zzz_idTech4Amm_"
         );
         resourceList.add(rsc);
@@ -87,7 +87,7 @@ public class Q3EPatchResourceManager
                 Q3EGameConstants.GAME_TDM,
                 null,
                 "pak/darkmod/glprogs.pk4",
-                ""
+                Q3EPatchResource.TO_ROOT_PATH
         );
         resourceList.add(rsc);
 
@@ -98,7 +98,7 @@ public class Q3EPatchResourceManager
                 Q3EGameConstants.GAME_ZDOOM,
                 null,
                 "pak/uzdoom/" + Q3EGameConstants.GAME_VERSION_ZDOOM,
-                ""
+                Q3EPatchResource.TO_ROOT_PATH
         );
         resourceList.add(rsc);
 
@@ -120,7 +120,7 @@ public class Q3EPatchResourceManager
                 Q3EGameConstants.GAME_QUAKE4,
                 null,
                 "pak/q4base/q4_sabot_a9.pk4",
-                null,
+                Q3EPatchResource.TO_MOD_PATH,
                 "zzz_idTech4Amm_q4_sabot_a9_aas.pk4",
                 "maps/"
         );
@@ -133,7 +133,7 @@ public class Q3EPatchResourceManager
                 Q3EGameConstants.GAME_DOOM3,
                 null,
                 "pak/doom3/d3_sabot_a7.pk4",
-                null,
+                Q3EPatchResource.TO_MOD_PATH,
                 "zzz_idTech4Amm_d3_sabot_a7_aas.pk4",
                 "maps/"
         );
@@ -146,7 +146,7 @@ public class Q3EPatchResourceManager
                 Q3EGameConstants.GAME_XASH3D,
                 null,
                 "pak/xash3d/extras.pk3",
-                ""
+                Q3EPatchResource.TO_ROOT_PATH
         );
         resourceList.add(rsc);
 
@@ -157,7 +157,7 @@ public class Q3EPatchResourceManager
                 Q3EGameConstants.GAME_XASH3D,
                 null,
                 "pak/xash3d/cs16client-extras.pk3",
-                ""
+                Q3EPatchResource.TO_ROOT_PATH
         );
         resourceList.add(rsc);
 
@@ -168,7 +168,7 @@ public class Q3EPatchResourceManager
                 Q3EGameConstants.GAME_SOURCE,
                 null,
                 "pak/source/extras.zip",
-                ""
+                Q3EPatchResource.TO_ROOT_PATH
         );
         resourceList.add(rsc);
 
@@ -190,7 +190,18 @@ public class Q3EPatchResourceManager
                 Q3EGameConstants.GAME_WOLF3D,
                 null,
                 "pak/ecwolf/ecwolf.pk3",
-                ""
+                Q3EPatchResource.TO_ROOT_PATH
+        );
+        resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource_zipToDir(
+                Q3EGameConstants.PatchResource.SKINDEEP_GLSL_SHADER,
+                Q3ELang.tr(context, R.string.skin_deep_glsl_shader),
+                Q3EGameConstants.SKINDEEP_GLSL_SHADER_VERSION,
+                Q3EGameConstants.GAME_SKINDEEP,
+                null,
+                "pak/skindeep/glsl.pk4",
+                "base"
         );
         resourceList.add(rsc);
     }

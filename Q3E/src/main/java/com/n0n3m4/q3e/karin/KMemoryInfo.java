@@ -6,6 +6,8 @@ import android.os.Build;
 import android.os.Debug;
 import android.os.Process;
 
+import com.n0n3m4.q3e.Q3EUtils;
+
 public final class KMemoryInfo
 {
     private static final int CONST_KB = 1024;
@@ -34,11 +36,11 @@ public final class KMemoryInfo
         {
             Debug.MemoryInfo memoryInfo = new Debug.MemoryInfo();
             Debug.getMemoryInfo(memoryInfo);
-            java_memory = strtol(memoryInfo.getMemoryStat("summary.java-heap")) * CONST_KB;
-            native_memory = strtol(memoryInfo.getMemoryStat("summary.native-heap")) * CONST_KB;
+            java_memory = Q3EUtils.parseLong_s(memoryInfo.getMemoryStat("summary.java-heap")) * CONST_KB;
+            native_memory = Q3EUtils.parseLong_s(memoryInfo.getMemoryStat("summary.native-heap")) * CONST_KB;
             //String code = memoryInfo.getMemoryStat("summary.code");
-            stack_memory = strtol(memoryInfo.getMemoryStat("summary.stack")) * CONST_KB;
-            graphics_memory = strtol(memoryInfo.getMemoryStat("summary.graphics")) * CONST_KB;
+            stack_memory = Q3EUtils.parseLong_s(memoryInfo.getMemoryStat("summary.stack")) * CONST_KB;
+            graphics_memory = Q3EUtils.parseLong_s(memoryInfo.getMemoryStat("summary.graphics")) * CONST_KB;
             //String privateOther = memoryInfo.getMemoryStat("summary.private-other");
             //String system = memoryInfo.getMemoryStat("summary.system");
             //String swap = memoryInfo.getMemoryStat("summary.total-swap");
@@ -47,10 +49,10 @@ public final class KMemoryInfo
         {
             Debug.MemoryInfo[] memInfos = am.getProcessMemoryInfo(processes);
             Debug.MemoryInfo memInfo = memInfos[0];
-            java_memory = strtol(memInfo.getMemoryStat("summary.java-heap")) * CONST_KB;
-            native_memory = strtol(memInfo.getMemoryStat("summary.native-heap")) * CONST_KB;
-            graphics_memory = strtol(memInfo.getMemoryStat("summary.graphics")) * CONST_KB;
-            stack_memory = strtol(memInfo.getMemoryStat("summary.stack")) * CONST_KB;
+            java_memory = Q3EUtils.parseLong_s(memInfo.getMemoryStat("summary.java-heap")) * CONST_KB;
+            native_memory = Q3EUtils.parseLong_s(memInfo.getMemoryStat("summary.native-heap")) * CONST_KB;
+            graphics_memory = Q3EUtils.parseLong_s(memInfo.getMemoryStat("summary.graphics")) * CONST_KB;
+            stack_memory = Q3EUtils.parseLong_s(memInfo.getMemoryStat("summary.stack")) * CONST_KB;
             //String code_mem = memInfo.getMemoryStat("summary.code");
             //String others_mem = memInfo.getMemoryStat("summary.system");
         }
@@ -113,20 +115,5 @@ public final class KMemoryInfo
             total_memory = total_memory / unit;
         if(used_memory > 0)
             used_memory = used_memory / unit;
-    }
-
-    private long strtol(String str)
-    {
-        if (null == str || str.isEmpty())
-            return 0L;
-        try
-        {
-            return Long.parseLong(str);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return 0;
-        }
     }
 }

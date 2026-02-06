@@ -26,7 +26,9 @@ public class KDebugTextView extends TextView {
         setFocusableInTouchMode(false);
         setTextColor(Color.WHITE);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23
-            setTextAppearance(android.R.attr.textAppearanceMedium);
+            setTextAppearance(android.R.attr.textAppearanceSmall);
+        else
+            setTextSize(12);
         setPadding(10, 5, 10, 5);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             setAlpha(0.75f);

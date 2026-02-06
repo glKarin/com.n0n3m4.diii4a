@@ -28,9 +28,9 @@ jobs:
       - name: Setup env
         id: env
         run: |
-          release=69
+          release=70
           echo "release=${release}" >> $GITHUB_OUTPUT
-          echo "version=1.1.0harmattan${release}-5" >> $GITHUB_OUTPUT
+          echo "version=1.1.0harmattan${release}" >> $GITHUB_OUTPUT
 
       - name: Mound working directory
         run: |
@@ -95,8 +95,7 @@ jobs:
           du -ch | tail -n -1
           echo "<<< disk usage"
           echo "Build Source libraries"
-          # ,-DBUILD_SOURCE_HL2=OFF,-DBUILD_SOURCE_HL2MP=OFF,-DBUILD_SOURCE_EPISODIC=OFF,-DBUILD_SOURCE_HL1=OFF,-DBUILD_SOURCE_HL1MP=OFF,-DBUILD_SOURCE_PORTAL=OFF
-          bargs="$barch -Pcmake_options=-DGAME_DOOM3=OFF,-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM3BFG=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_URT=OFF"
+          bargs="$barch -Pcmake_options=-DGAME_DOOM3=OFF,-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM3BFG=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_URT=OFF,-DGAME_OPENMOHAA=OFF"
           ./gradlew assembleRelease $bargs
           echo "disk usage: >>>"
           df -h
@@ -115,7 +114,7 @@ jobs:
           du -ch | tail -n -1
           echo "<<< disk usage"
           echo "Build idTech4"
-          bargs="$barch -Pcmake_options=-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_URT=OFF,-DGAME_SOURCE=OFF"
+          bargs="$barch -Pcmake_options=-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_URT=OFF,-DGAME_OPENMOHAA=OFF,-DGAME_SOURCE=OFF"
           ./gradlew assembleRelease $bargs
           echo "disk usage: >>>"
           df -h
@@ -195,7 +194,7 @@ jobs:
           echo "<<< disk usage"
           echo "Build Source libraries"
           # ,-DBUILD_SOURCE_HL2=OFF,-DBUILD_SOURCE_HL2MP=OFF,-DBUILD_SOURCE_EPISODIC=OFF,-DBUILD_SOURCE_HL1=OFF,-DBUILD_SOURCE_HL1MP=OFF,-DBUILD_SOURCE_PORTAL=OFF
-          bargs="$barch -Pcmake_options=-DGAME_DOOM3=OFF,-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM3BFG=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_URT=OFF"
+          bargs="$barch -Pcmake_options=-DGAME_DOOM3=OFF,-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM3BFG=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_URT=OFF,-DGAME_OPENMOHAA=OFF"
           ./gradlew assembleRelease $bargs
           echo "disk usage: >>>"
           df -h
@@ -214,7 +213,7 @@ jobs:
           du -ch | tail -n -1
           echo "<<< disk usage"
           echo "Build idTech4"
-          bargs="$barch -Pcmake_options=-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_URT=OFF,-DGAME_SOURCE=OFF"
+          bargs="$barch -Pcmake_options=-DGAME_RTCW=OFF,-DGAME_QUAKE3=OFF,-DGAME_QUAKE2=OFF,-DGAME_QUAKE1=OFF,-DGAME_TDM=OFF,-DGAME_DOOM=OFF,-DGAME_ETW=OFF,-DGAME_REALRTCW=OFF,-DGAME_FTEQW=OFF,-DGAME_JK=OFF,-DGAME_SERIOUSSAM=OFF,-DGAME_REALRTCW=OFF,-DGAME_URT=OFF,-DGAME_OPENMOHAA=OFF,-DGAME_SOURCE=OFF"
           ./gradlew assembleRelease $bargs
           echo "disk usage: >>>"
           df -h
@@ -321,10 +320,10 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
-          automatic_release_tag: "android_release"
-          prerelease: true
-          title: "[${{steps.release_datetime.outputs.time}}] Android release build test BSE (Non-release. Automatic CI builds)"
+          automatic_release_tag: "v1.1.0harmattan${{ steps.env.outputs.release }}"
+          prerelease: false
+          title: "Version ${{ steps.env.outputs.version }} update"
           files: |
+            ${{ steps.all.outputs.apk }}
             ${{ steps.arm64.outputs.apk }}
             ${{ steps.arm32.outputs.apk }}
-            ${{ steps.all.outputs.apk }}

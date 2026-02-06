@@ -1,0 +1,14 @@
+FTE is able to perform serverside lag compensation
+It is primarily controlled via the sv_antilag cvar, which shall be present in the serverinfo.
+
+If the cvar is set to 0, then no anti-lag will be performed, even if the mod attempts it.
+If the cvar is 1, then the MOVE_LAGGED and FL_LAGGEDMOVE bit flags are valid.
+If the cvar is 2, then the server will act as 1, but ALL tracelines will have laggedmove set (but not traceboxes), and ALL movetype_flymissile or movetype_bounce entities will act as if they have FL_LAGGEDMOVE set. This value is to force anti-lag within a mod, without any mod changes. Using this value may potentially cause a mod to malfunction, as it affects all tracelines - this does depend upon the mod. Thus it is better/safer if mods are adapted to use the new flags instead of it being forced.
+
+A separate but related feature found in FTE servers is the sv_minping cvar, which will enforce a minimum specific ping, however this doesn't always ensure a fair ping.
+
+
+//antilag.qc:
+//new cvar, sv_antilag. values 0, 1, 2
+float FL_LAGGEDMOVE = 65536;	/*if set in self.flags, the entity will collide against a lagged copy of the world. The lagged copy depends upon the player, which is either this entity, or the entity's owner, whichever is the first player.*/
+float MOVE_LAGGED = 64; /*if this bit is set within the 'nomonsters' argument of traceline or tracebox, the trace will collide against the lagged world. Uses the ent parameter as the lagged player. If its not a player then the owner is used instead.*/

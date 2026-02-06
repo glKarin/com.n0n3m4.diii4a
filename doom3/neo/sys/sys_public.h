@@ -62,9 +62,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _MSC_VER
 #define ID_STATIC_TEMPLATE				static
 #define ID_INLINE						__forceinline
+#define ID_FORCEINLINE					__forceinline
 #else
 #define ID_STATIC_TEMPLATE
 #define ID_INLINE						inline
+#define ID_FORCEINLINE					inline __attribute__((always_inline))
 #endif
 
 #define assertmem( x, y )				assert( _CrtIsValidPointer( x, y, true ) )

@@ -9,13 +9,16 @@ import java.util.Arrays;
 
 public abstract class Q3EPatchResource
 {
+    public static final String TO_MOD_PATH = null; // fsPath will setup real mod name
+    public static final String TO_ROOT_PATH = ""; // final is root path
+
     public final Q3EGameConstants.PatchResource type;
     public final String                   name;
     public final String                   version;
     public final String                   game;
     public final String                   mod;
     public final String                   assetPath;
-    public final String                   fsPath; // if null, append real mod name to path; if empty, always only path; else append fixed mod name to path
+    public final String                   fsPath; // if null, append real mod name to path; if empty, always only root path; else append constants mod name to path
 
     public Q3EPatchResource(Q3EGameConstants.PatchResource type, String name, String version, String game, String mod, String assetPath, String fsPath)
     {

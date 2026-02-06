@@ -199,7 +199,6 @@
     <string name="success">success</string>
     <string name="fail">fail</string>
     <string name="network_for_github">Network for GitHub......</string>
-    <string name="error">Error</string>
     <string name="close">Close</string>
     <string name="no_update_release">No update release</string>
     <string name="current_version_is_newest">Current version is newest.</string>
@@ -581,5 +580,6 @@
     <string name="crash">crash</string>
     <string name="backtrace">backtrace</string>
     <string name="use_multithread_command_to_switch_single_multi_threading_in_game_if_enabled">Use `multithread` command to switch single/multi threading in game if enabled</string>
+    <string name="skin_deep">Skin Deep</string>
 
 </resources>

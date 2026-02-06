@@ -1,0 +1,8 @@
+alias gcc='ccache gcc'
+alias i586-mingw32msvc-gcc='ccache i586-mingw32msvc-gcc'
+alias llvm-gcc='ccache llvm-gcc'
+alias clang='ccache clang'
+alias icc='ccache icc'
+alias powerpc-apple-darwin8-gcc='ccache powerpc-apple-darwin8-gcc'
+alias i686-apple-darwin8-gcc='ccache i686-apple-darwin8-gcc'
+alias ppc-morphos-gcc='ccache ppc-morphos-gcc'

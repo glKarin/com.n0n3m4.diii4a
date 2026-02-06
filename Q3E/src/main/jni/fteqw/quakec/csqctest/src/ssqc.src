@@ -1,0 +1,54 @@
+../progs.dat
+
+//#define QWSSQC
+#define SSQC
+optsall.qc
+#if defined(QSS) || defined(DP)
+ssqc_api.qc
+#else
+fteextensions.qc
+#endif
+
+ss/defs.qc
+common/econstants.qc
+common/classes.qc
+
+common/pmove.qc
+
+ss/subs.qc
+ss/fight.qc
+ss/ai.qc
+ss/combat.qc
+ss/items.qc
+ss/weapons.qc
+ss/world.qc
+
+//common/phys.qc
+//common/playerphysics.qc
+//common/sv_user.qc
+
+ss/client.qc
+ss/player.qc
+ss/monsters.qc
+ss/doors.qc
+ss/buttons.qc
+ss/triggers.qc
+ss/plats.qc
+ss/misc.qc
+
+ss/ogre.qc
+ss/demon.qc
+ss/shambler.qc
+ss/knight.qc
+ss/soldier.qc
+ss/wizard.qc
+ss/dog.qc
+ss/zombie.qc
+ss/boss.qc
+
+ss/tarbaby.qc		// registered
+ss/hknight.qc		// registered
+ss/fish.qc			// registered
+ss/shalrath.qc		// registered
+ss/enforcer.qc		// registered
+ss/oldone.qc		// registered

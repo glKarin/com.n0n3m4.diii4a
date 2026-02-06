@@ -33,6 +33,12 @@ If you have questions concerning this license or the applicable additional terms
 //
 
 #include "Rectangle.h"
+#ifdef _WCHAR_LANG
+extern idCVar harm_gui_wideCharLang;
+extern bool UI_HasWideCharFont(void);
+#define AsASCIICharLang(text_, len_) ( !UI_HasWideCharFont() || !harm_gui_wideCharLang.GetBool() || idStr::IsPureASCII(text_, len_) )
+#define AsUTF8CharLang(text_, len_) ( UI_HasWideCharFont() && harm_gui_wideCharLang.GetBool() && idStr::IsValidUTF8(text_, len_) )
+#endif
 extern idCVar r_scaleMenusTo43;
 
 const int VIRTUAL_WIDTH = 640;

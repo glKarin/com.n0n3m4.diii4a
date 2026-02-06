@@ -1,0 +1,32 @@
+r_shadow_realtime_world: if 1, enables static realtime lighting
+r_shadow_realtime_world_lightmaps: sets the intensity of the precomputed lightstyles. 0 means pure realtime lights, everything else is black. only effective if r_shadow_realtime_world is on
+r_shadow_realtime_world_shadows: 0 disables shadows on static realtime lights. tbh not that useful, you're more likely to disable them entirely.
+
+r_shadow_realtime_dlight: if 1, enables dynamic shadows (on rockets and stuff).
+r_shadow_realtime_dlight_shadows: controls whether you want to see shadows moving as the rocket flys past stuff or not.
+
+r_editlights_reload: command - changes the static realtime lights
+                     <no argument>: attempts to load lighting from maps/$mapname.rtlights. If that fails, acts as if bsp was specified.
+                               bsp: generates static realtime lighting from the light entities within a bsp. not ideal, but can be useful depending on the number of lights on the map
+                              none: removes all static realtime lights. the map goes dark... well, depending upon r_shadow_realtime_world_lightmaps anyway
+                     note that this is performed implicitly at the start of each map. if static realtime lights is on, rtlights will be loaded. otherwise none will be. This command allows you to force reload, either because they're not loaded yet or you changed the rtlights file.
+r_editlights_save: overwrites the rtlight file for the current map with the currently loaded rtlights. more for mods to provide a light editor interface. only really useful to generate a 'default' rtlights file which could then be edited by hand. not convienient.
+
+gl_bump: allows the loading and thus usage of bumpmaps, which basically add depth to the lighting effects.
+gl_specular: makes surfaces shiny. aka: gloss.
+
+
+at the time of writing, r_polygonoffset_* need to be set to 0, or you'll get pure black doors and stuff, doing so will renable z-fighting with co-planer bsp objects. To Be Fixed.
+
+Cheats: static realtime lighting _used_ to be cheat protected. Which made it useless and unusable. Darkplaces has permitted realtime lights for a while on quakeworld servers without complaint. Thus FTE no longer mandates that the server explicitly allows it.
+Having said that, you can tell if static or dynamic lights are enabled in someone else's client via the f_version say request.
+
+
+
+
+todo:
+light util that omits direct lighting + engine that forces r_shadow_realtime_world_lightmaps 1
+light util that emits e5bgr9 lighting + worldspawn key that forces srgb.
+light util that generates complete .rtlights files, with radiuses and colours and falloffs and spotlights etc.
+ggx.
+screenspace refections.

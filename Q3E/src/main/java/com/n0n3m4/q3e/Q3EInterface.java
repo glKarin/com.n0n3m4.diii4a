@@ -81,6 +81,7 @@ public class Q3EInterface
 	public boolean isUrT = false;
 	public boolean isMOHAA = false;
 	public boolean isWolf3D = false;
+	public boolean isSkinDeep = false;
 
 	public String default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
@@ -214,6 +215,8 @@ public class Q3EInterface
 			return Q3EGameConstants.GAME_ID_MOHAA;
 		else if(isWolf3D)
 			return Q3EGameConstants.GAME_ID_WOLF3D;
+		else if(isSkinDeep)
+			return Q3EGameConstants.GAME_ID_SKINDEEP;
 		else
 			return Q3EGameConstants.GAME_ID_DOOM3;
 	}
@@ -286,6 +289,8 @@ public class Q3EInterface
 			SetupMOHAA();
 		else if(Q3EGameConstants.GAME_WOLF3D.equalsIgnoreCase(name))
 			SetupWolf3D();
+		else if(Q3EGameConstants.GAME_SKINDEEP.equalsIgnoreCase(name))
+			SetupSkinDeep();
 		else
 			SetupDOOM3();
 	}
@@ -315,6 +320,7 @@ public class Q3EInterface
 		isUrT = false;
 		isMOHAA = false;
 		isWolf3D = false;
+		isSkinDeep = false;
 	}
 
 	public void SetupDOOM3()
@@ -473,6 +479,13 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public void SetupSkinDeep()
+	{
+		ResetGameState();
+		isSkinDeep = true;
+		SetupGameConfig();
+	}
+
 	public void SetupGameConfig()
 	{
 		game_id = GameID();
@@ -543,7 +556,7 @@ public class Q3EInterface
 
 	public boolean IsUsingSDL()
 	{
-		return isXash3D || isSource || isWolf3D;
+		return isXash3D || isSource || isWolf3D || isSkinDeep;
 	}
 
 	public boolean IsUsingVirtualMouse()
@@ -554,7 +567,7 @@ public class Q3EInterface
 	public boolean IsUsingOpenAL()
 	{
 		return isD3 || isQ4 || isPrey
-				|| isD3BFG || isTDM
+				|| isD3BFG || isTDM || isSkinDeep
 				|| isQ3 || isRTCW || isETW || isRealRTCW || isJA || isJO || isUrT || isMOHAA || isFTEQW
 				|| isDOOM || isQ2 || isQ1
 				|| isSamTFE || isSamTSE
@@ -573,13 +586,13 @@ public class Q3EInterface
 
 	public boolean IsSupportSkipIntro()
 	{
-		return IsSupportQuickload() || isQ3 || isJA || isJO || isUrT;
+		return IsSupportQuickload() || isQ3 || isJA || isJO || isUrT || isSkinDeep;
 	}
 
 	public boolean IsSupportMod()
 	{
 		return isD3 || isQ4 || isPrey
-				|| isD3BFG || isTDM
+				|| isD3BFG || isTDM || isSkinDeep
 				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
 				|| isQ2 || isQ1
 				|| isDOOM || isWolf3D
@@ -590,7 +603,7 @@ public class Q3EInterface
 	public boolean IsInitGame()
 	{
 		return isD3 || isQ4 || isPrey
-				|| isD3BFG || isTDM
+				|| isD3BFG || isTDM || isSkinDeep
 				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
 				|| isQ2 || isQ1
 				|| isDOOM || isWolf3D
@@ -601,7 +614,7 @@ public class Q3EInterface
 
 	public boolean IsStandaloneGame()
 	{
-		return isTDM || isDOOM || isFTEQW || isSamTFE || isSamTSE || isXash3D || isSource || isWolf3D;
+		return Q3EGame.Find(game_id).STANDALONE;
 	}
 
 	public boolean IS_D3()
@@ -622,14 +635,17 @@ public class Q3EInterface
 	// KARIN_DISABLE_GAME_BOOKMARK: add isXXX state to disable games
 	public boolean IsDisabled()
 	{
-		return isFTEQW || isXash3D;
+		return
+				//isFTEQW ||
+						isXash3D
+				;
 	}
 
 	// KARIN_DISABLE_GAME_BOOKMARK: add game type to disable games
 	public static boolean IsDisabled(String game)
 	{
 		final String[] DisabledGames = {
-				Q3EGameConstants.GAME_FTEQW,
+				//Q3EGameConstants.GAME_FTEQW,
 				Q3EGameConstants.GAME_XASH3D,
 		};
 		for(String disabledGame : DisabledGames)
@@ -640,20 +656,14 @@ public class Q3EInterface
 		return false;
 	}
 
+	public boolean IsSupportSecondaryDirGame()
+	{
+		return null != Q3EGame.Find(game_id).MOD_SECONDARY_PARM;
+	}
+
 	public static boolean IsSupportSecondaryDirGame(String game)
 	{
-		final String[] UnsupportGames = {
-				Q3EGameConstants.GAME_QUAKE1,
-				Q3EGameConstants.GAME_FTEQW,
-				Q3EGameConstants.GAME_SAMTFE,
-				Q3EGameConstants.GAME_SAMTSE,
-		};
-		for(String unsupportGame : UnsupportGames)
-		{
-			if(unsupportGame.equalsIgnoreCase(game))
-				return false;
-		}
-		return true;
+		return null != Q3EGame.Find(game).MOD_SECONDARY_PARM;
 	}
 
 	public String GetGameCommandParm()
@@ -814,6 +824,13 @@ public class Q3EInterface
 		else if(isWolf3D)
 		{
 			list.add(Q3EGameConstants.CONFIG_FILE_WOLF3D);
+		}
+		else if(isSkinDeep)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_SKINDEEP);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<mod>/graphics.cfg");
+			list.add("<base>/autoexec.cfg");
 		}
 		else
 		{
@@ -1083,9 +1100,9 @@ public class Q3EInterface
 				extraCommand = GetGameCommandEngine(extraCommand).SetProp("harm_r_autoAspectRatio", autoAspectRatio).toString();
 		}
 
-		if ((IsIdTech4() || IsIdTech3()) && preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
+		if ((IsSupportSkipIntro()) && preferences.getBoolean(Q3EPreference.pref_harm_skip_intro, false))
 			extraCommand = GetGameCommandEngine(extraCommand).SetCommand("disconnect", false).toString();
-		if ((IsIdTech4() || isRTCW || isRealRTCW) && preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
+		if ((IsSupportQuickload()) && preferences.getBoolean(Q3EPreference.pref_harm_auto_quick_load, false))
 			extraCommand = GetGameCommandEngine(extraCommand).SetParam("loadGame", "QuickSave").toString();
 
 		if (isDOOM)

@@ -6,13 +6,13 @@ on:
   push:
     branches: [ "master" ]
     paths:
-      #- 'Q3E/src/main/jni/doom3/neo/**'
+      #- 'doom3/neo/**'
       - '.github/workflows/win_linux.yml'
       - '.github/workflows/win_linux.changelog'
   pull_request:
     branches: [ "master" ]
     paths:
-      #- 'Q3E/src/main/jni/doom3/neo/**'
+      #- 'doom3/neo/**'
       - '.github/workflows/win_linux.yml'
       - '.github/workflows/win_linux.changelog'
 
@@ -85,7 +85,7 @@ jobs:
       - name: Configure project with CMake(Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          cd Q3E\src\main\jni\doom3\neo
+          cd doom3\neo
           cmake ${{ steps.vcpkg_setup.outputs.vcpkg-cmake-config }} -B ${{ steps.strings.outputs.name }} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DDIRECTXSDK_INCLUDE_PATH=${{ github.workspace }}/vcpkg/packages/directxsdk_${{steps.strings.outputs.arch}}-windows/include/directxsdk -A ${{ matrix.bits == 32 && 'Win32' || 'x64' }} -DTOOLS=ON -DDEDICATED=ON CMakeLists.txt # -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
 
       - name: Run apt
@@ -98,7 +98,7 @@ jobs:
 #      - name: Download SDL2(Linux)
 #        if: matrix.os == 'ubuntu-latest'
 #        run: |
-#          cd Q3E/src/main/jni/doom3/neo/externlibs
+#          cd doom3/neo/externlibs
 #          cd SDL2
 #          wget https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-2.30.9.tar.gz
 #          tar zxvf SDL2-2.30.9.tar.gz -C SDL2
@@ -108,27 +108,27 @@ jobs:
       - name: Configure project with CMake(Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          cd Q3E/src/main/jni/doom3/neo
+          cd doom3/neo
           cmake -B ${{ steps.strings.outputs.name }} -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_SHARED_LINKER_FLAGS=-m${{ matrix.bits }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_MINIZ=ON -DUSE_LOCAL_SDL=OFF -DDEDICATED=ON CMakeLists.txt # -DBUILD_D3_MOD=OFF -DBUILD_Q4=OFF -DBUILD_PREY=OFF -DBUILD_Q4_MOD=OFF
 
       - name: Build with Make/Ninja
         run: |
-          cd Q3E/src/main/jni/doom3/neo
+          cd doom3/neo
           ls ${{ steps.strings.outputs.name }}
           cmake --build ${{ steps.strings.outputs.name }} --config ${{ matrix.build_type }}
 
       - name: Copy OpenAL32.dll
         if: matrix.os == 'windows-latest'
         run: |
-          xcopy /Y/Q ${{ github.workspace }}\vcpkg\packages\openal-soft_x${{ steps.strings.outputs.arch }}-windows\bin\OpenAL32.dll Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}\
+          xcopy /Y/Q ${{ github.workspace }}\vcpkg\packages\openal-soft_x${{ steps.strings.outputs.arch }}-windows\bin\OpenAL32.dll doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}\
 
       - name: Prepare package
         if: matrix.os == 'windows-latest'
         run: |
-          dir Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}
+          dir doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}
           mkdir ${{ matrix.build_type }}
-          xcopy /Y/Q Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}\*.dll ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}\
-          xcopy /Y/Q Q3E\src\main\jni\doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}\*.exe ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}\
+          xcopy /Y/Q doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}\*.dll ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}\
+          xcopy /Y/Q doom3\neo\${{ steps.strings.outputs.name }}\${{ matrix.build_type }}\*.exe ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}\
           dir ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}
 
       - name: Package to zip
@@ -142,13 +142,13 @@ jobs:
       - name: Package to tgz
         if: matrix.os == 'ubuntu-latest'
         run: |
-          ls --color Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}
+          ls --color doom3/neo/${{ steps.strings.outputs.name }}
           mkdir ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/lib*.so ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Doom3 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Quake4 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Prey ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
-          cp Q3E/src/main/jni/doom3/neo/${{ steps.strings.outputs.name }}/Doom3ded ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp doom3/neo/${{ steps.strings.outputs.name }}/lib*.so ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp doom3/neo/${{ steps.strings.outputs.name }}/Doom3 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp doom3/neo/${{ steps.strings.outputs.name }}/Quake4 ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp doom3/neo/${{ steps.strings.outputs.name }}/Prey ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
+          cp doom3/neo/${{ steps.strings.outputs.name }}/Doom3ded ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
           tar zcvf idTech4A++-testing_${{ steps.current_datetime.outputs.time }}_${{ steps.strings.outputs.name }}.tar.gz ${{ steps.strings.outputs.name }}_${{ matrix.build_type }}/
 
       - uses: actions/upload-artifact@v4

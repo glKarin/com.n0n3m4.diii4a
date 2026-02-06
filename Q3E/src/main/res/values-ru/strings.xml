@@ -70,4 +70,7 @@
     <string name="finish_editing">Finish editing</string>
     <string name="choose_input_method">Choose input method</string>
     <string name="open_input_method">Open input method</string>
+    <string name="error">Ошибка</string>
+    <string name="restart">Restart</string>
+    <string name="skin_deep_glsl_shader">Skin Deep GLSL shader</string>
 </resources>

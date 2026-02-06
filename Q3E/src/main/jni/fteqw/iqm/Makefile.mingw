@@ -1,0 +1,26 @@
+CXXFLAGS= -O3 -fomit-frame-pointer
+override CXXFLAGS+= -Wall -fsigned-char
+
+PLATFORM= $(shell uname -s)
+ifeq (,$(findstring MINGW,$(PLATFORM)))
+CXX=i686-w64-mingw32-g++
+endif
+
+LIBS= -mwindows -static -static-libgcc -static-libstdc++
+IQM_OBJS= \
+	iqm.o
+UPGRADE_OBJS= \
+	upgrade.o
+
+default: all
+
+all: iqmtool.exe #upgrade.exe
+
+clean:
+	-$(RM) $(IQM_OBJS) $(UPGRADE_OBJS) iqmtool.exe upgrade.exe
+
+iqmtool.exe: $(IQM_OBJS)
+	$(CXX) $(CXXFLAGS) -o iqmtool.exe $(IQM_OBJS) $(LIBS)
+upgrade.exe: $(UPGRADE_OBJS)
+	$(CXX) $(CXXFLAGS) -o upgrade.exe $(UPGRADE_OBJS) $(LIBS)
+

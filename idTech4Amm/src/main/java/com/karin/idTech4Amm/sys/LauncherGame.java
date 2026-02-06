@@ -51,6 +51,8 @@ public enum LauncherGame
     MOHAA(Q3EGameConstants.GAME_ID_MOHAA, Q3EGameConstants.GAME_MOHAA, R.drawable.mohaa_icon, R.string.openmohaa_base, R.color.theme_mohaa_main_color, R.string.openmohaa),
 
     WOLF3D(Q3EGameConstants.GAME_ID_WOLF3D, Q3EGameConstants.GAME_WOLF3D, R.drawable.wolf3d_icon, R.string.wolf3d_base, R.color.theme_wolf3d_main_color, R.string.wolf3d),
+
+    SKINDEEP(Q3EGameConstants.GAME_ID_SKINDEEP, Q3EGameConstants.GAME_SKINDEEP, R.drawable.skindeep_icon, R.string.skin_deep, R.color.theme_skindeep_main_color, R.string.skin_deep),
     ;
 
     public final int    GAME_ID;

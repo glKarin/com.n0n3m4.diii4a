@@ -76,7 +76,6 @@
                 android:id="@+id/main_menu_game_fteqw"
                 android:title="@string/fteqw"
                 android:icon="@drawable/fteqw_icon"
-                android:visible="false"
                 android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_ja"
@@ -102,7 +101,6 @@
                 android:id="@+id/main_menu_game_xash3d"
                 android:title="@string/xash3d"
                 android:icon="@drawable/xash3d_icon"
-                android:visible="false"
                 android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_source"
@@ -123,6 +121,11 @@
                 android:id="@+id/main_menu_game_wolf3d"
                 android:title="@string/wolf3d"
                 android:icon="@drawable/wolf3d_icon"
+                android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_skindeep"
+                android:title="@string/skin_deep"
+                android:icon="@drawable/skindeep_icon"
                 android:showAsAction="never|withText"/>
         </menu>
     </item>

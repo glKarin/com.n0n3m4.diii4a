@@ -1,0 +1,41 @@
+{
+	"name": "FTE-In-Browser",
+	"short_name": "FTEQW",
+	"description": "Awesome games in your Web Browser!",
+	"categories": ["games"],
+	"id": "./",
+	"start_url": "./",
+	"display": "standalone",
+	"orientation": "landscape",
+	"icons":
+	[
+    	{
+			"src": "https://fteqw.org/favicon.png",
+			"type": "image/png",
+			"sizes": "128x128"
+    	},
+    	{
+			"src": "icon_144.png",
+			"type": "image/png",
+			"sizes": "144x144"
+    	}
+	],
+	"protocol_handlers":
+	[
+		{
+			"protocol": "web+quake",
+			"url": "./?%s"
+		},
+		{
+			"protocol": "web+qw",
+			"url": "./?%s"
+		}
+	],
+	"serviceworker":
+	{
+		"scope": "./",
+		"src": "./fte_pwa_sw.js",
+		"use_cache": true
+	}
+}
+

@@ -168,7 +168,7 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
                     Q3E.sendTextEvent(characters);
             }
         }
-        return controlView.onKeyMultiple(keyCode, repeatCount, event);
+        return false;
     }
 
     @Override

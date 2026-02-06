@@ -151,10 +151,6 @@ public class Q3EMain extends Activity
         // create
         super.onCreate(savedInstanceState);
 
-        // check start
-        if(!CheckStart())
-            return;
-
         KUncaughtExceptionHandler.DumpPID(this);
 
         // setup language environment
@@ -163,23 +159,18 @@ public class Q3EMain extends Activity
         // setup theme
         Theme.SetTheme(this, false);
 
-        // load game
-        if(gameHelper.checkGameFiles())
-        {
-            // extract game required resource in apk
-            gameHelper.ExtractGameResource();
+        // check start
+        if(!CheckStart())
+            return;
 
-            // check support devices
-            Q3E.supportDevices = gameHelper.CheckDevices();
+        // extract game required resource in apk
+        gameHelper.ExtractGameResource();
 
-            // init GUI component
-            InitGUI();
-        }
-        else
-        {
-            finish();
-            Q3EContextUtils.RunLauncher(this);
-        }
+        // check support devices
+        Q3E.supportDevices = gameHelper.CheckDevices();
+
+        // init GUI component
+        InitGUI();
     }
 
     @Override
@@ -553,35 +544,25 @@ public class Q3EMain extends Activity
         else if(Q3E.q3ei.isDOOM) // arm32 not support UZDOOM
         {
             if(!Q3EJNI.Is64())
-            {
                 msg = "UZDOOM not support on arm32 device!";
-            }
             else if(KStr.IsBlank(KidTechCommand.GetParam("-+", Q3E.q3ei.cmd, "iwad")))
-            {
                 msg = "UZDOOM requires -iwad file!";
-            }
         }
         else if(Q3EGlobals.IsFDroidVersion())
         {
             if(Q3E.q3ei.isXash3D)
-            {
                 msg = "F-Droid version not support Xash3D, you can install Github version!";
-            }
             else if(Q3E.q3ei.isSource)
-            {
                 msg = "F-Droid version not support Source-Engine game, you can install Github version!";
-            }
         }
 
         if(null != msg)
         {
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-            finish();
-            Q3EContextUtils.RunLauncher(this);
+            gameHelper.FatalError(msg);
             return false;
         }
         else
-            return true;
+            return gameHelper.checkGameFiles();
     }
 
     private void SetupGame()
