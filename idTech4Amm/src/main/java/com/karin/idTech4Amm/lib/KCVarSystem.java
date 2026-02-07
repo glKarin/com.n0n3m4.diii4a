@@ -101,7 +101,13 @@ public final class KCVarSystem
                                 "1", "Disable",
                                 "2", "Enable(check source)",
                                 "3", "Enable(not check source)"
-                        )
+                        ),
+                        KCVar.CreateCVar("r_multithread", "bool", "1", "Multithread backend", KCVar.FLAG_INIT | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_openglVersion", "string", "GLES3.0", "OpenGL version", KCVar.FLAG_INIT | KCVar.FLAG_LAUNCHER,
+                                "GLES2", "OpenGL ES2.0",
+                                "GLES3.0", "OpenGL 3.0+"
+                        ),
+                        KCVar.CreateCommand("multithread", "string", "Enable/disable multi-threading rendering", 0)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(
@@ -158,6 +164,7 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_con_noBackground", "bool", "0", "Don't draw console background", 0),
                         KCVar.CreateCVar("harm_con_floatGeometry", "vector4", "100 50 300 200", "Float console geometry, format is \"<left> <top> <width> <height>\"", 0),
                         KCVar.CreateCVar("harm_con_floatZoomStep", "integer", "10", "Zoom step of float console", 0),
+                        KCVar.CreateCVar("harm_sys_sse2neon", "bool", "0", "Emulate MMX/SSE/SSE2 SIMD by sse2neon on arm32/arm64 device", KCVar.FLAG_INIT),
                         KCVar.CreateCommand("exportFont", "string", "Convert ttf/ttc font file to DOOM3 wide character font file", 0),
                         KCVar.CreateCommand("extractBimage", "string", "extract DOOM3-BFG's bimage image to rga RGBA image files", 0),
                         KCVar.CreateCommand("skipHitEffect", "bool", "skip all hit effect in game", 0),

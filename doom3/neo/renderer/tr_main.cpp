@@ -554,7 +554,7 @@ void R_AxisToModelMatrix(const idMat3 &axis, const idVec3 &origin, float modelMa
 
 void R_LocalPointToGlobal(const float modelMatrix[16], const idVec3 &in, idVec3 &out)
 {
-#if defined(MACOS_X) && defined(__i386__) || ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) ) || ( ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON) )
+#if defined(MACOS_X) && defined(__i386__)/* || ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) ) || ( ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON) )*/
 #if defined(_MSC_VER)
 #define __m128_to_m128i(x) _mm_castps_si128(x)
 #define __m128i_to_m128(x) _mm_castsi128_ps(x)

@@ -315,7 +315,7 @@
 					<EditText
 						android:id="@+id/launcher_tab2_gyro_x_axis_sens"
 						android:inputType="numberDecimal|textNoSuggestions"
-						android:ems="10"
+						android:ems="5"
 						android:hint="@string/x_axis_sensitivity_of_gyroscope"
 						android:imeOptions="flagNoExtractUi"
 						android:text="18.0"
@@ -341,7 +341,7 @@
 					<EditText
 						android:id="@+id/launcher_tab2_gyro_y_axis_sens"
 						android:inputType="numberDecimal|textNoSuggestions"
-						android:ems="10"
+						android:ems="5"
 						android:hint="@string/y_axis_sensitivity_of_gyroscope"
 						android:imeOptions="flagNoExtractUi"
 						android:text="18.0"

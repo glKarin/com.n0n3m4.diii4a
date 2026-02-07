@@ -2,6 +2,19 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan71 (2026-02-10)
+
+* Add `Skin Deep`(ver 1.0.4) support, game standalone directory named `skindeep`, game data directory named `base`.
+* Support edit on-screen buttons layout in gaming.
+* Add `ECWolf`(ver 1.4.2) support, game standalone directory named `ecwolf`.
+* Add game main thread stack size config on Menu > Option > Advance.
+* Enable `FTEQW`.
+* Add `UZDoom`(ver 4.14.3) arm64 support, game standalone directory named `uzdoom`, And GZDoom is removed.
+* Fix some GUIs in Quake 4/Prey(2006).
+* RealRTCW(ver 5.2) is removed.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan70 (2025-12-21)
 
 * Fix font offset in GUIs on Quake 4.
