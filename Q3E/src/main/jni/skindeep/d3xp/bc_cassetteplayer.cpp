@@ -115,7 +115,11 @@ void idCassettePlayer::Save(idSaveGame *savefile) const
 void idCassettePlayer::Restore(idRestoreGame *savefile)
 {
 	tracklist->Restore( savefile ); //  idListGUI* tracklist
+#if 1 //karin: should be idList
+	SaveFileReadList( soundshaderList, ReadString ); //  idList<idStr> soundshaderList
+#else
 	SaveFileReadArray( soundshaderList, ReadString ); //  idList<idStr> soundshaderList
+#endif
 }
 
 void idCassettePlayer::Think(void)
