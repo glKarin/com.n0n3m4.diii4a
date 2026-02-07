@@ -50,7 +50,7 @@
     <string name="rivensin_play_original_doom3_level">Rivensin на оригинальных уровнях DOOM3</string>
     <string name="rbdoom3_bfg_hlsl_shader">RBDOOM3-BFG HLSL шейдер</string>
     <string name="the_dark_mod_glsl_shader">The Dark Mod GLSL шейдер</string>
-    <string name="zdoom_builtin_resource">Внутренний ресурс UZDOOM</string>
+    <string name="zdoom_builtin_resource">Внутренние ресурсы UZDOOM</string>
     <string name="close">Закрыть</string>
     <string name="open">Открыть</string>
     <string name="exit_game">Выйти из игры</string>
@@ -64,13 +64,13 @@
     <string name="external">Внешние</string>
     <string name="etlegacy_extras">ET: Legacy дополнительные ресурсы</string>
     <string name="extract_files_fail">Извлечение %1$s файлов не удалось!</string>
-    <string name="ecwolf_builtin_resource">ECWolf built-in resource</string>
-    <string name="quit">Quit</string>
-    <string name="edit_buttons_layout">Edit buttons layout</string>
-    <string name="finish_editing">Finish editing</string>
-    <string name="choose_input_method">Choose input method</string>
-    <string name="open_input_method">Open input method</string>
+    <string name="ecwolf_builtin_resource">Внутренние ресурсы ECWolf</string>
+    <string name="quit">Выйти</string>
+    <string name="edit_buttons_layout">Редактировать расположение кнопок</string>
+    <string name="finish_editing">Завершить редактирование</string>
+    <string name="choose_input_method">Выберите метод ввода</string>
+    <string name="open_input_method">Открыть метод ввода</string>
     <string name="error">Ошибка</string>
-    <string name="restart">Restart</string>
-    <string name="skin_deep_glsl_shader">Skin Deep GLSL shader</string>
+    <string name="restart">Перезапустить</string>
+    <string name="skin_deep_glsl_shader">Skin Deep GLSL шейдер</string>
 </resources>
