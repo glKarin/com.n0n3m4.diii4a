@@ -367,7 +367,24 @@ public:
 #if __cplusplus >= 202002L
 		std::string temp = std::vformat(fmt, std::make_format_args(args...));
 #else
-		return idStr(fmt.data(), 0, fmt.length());
+		// ugly format implemention for C++14
+		// only for allow `idStr(...)` constructor
+		idList<idStr> list;
+		(void)std::initializer_list<int>{
+			([&]() {
+			 list.Append(idStr(args));
+			 }(), 0)...
+		};
+
+		std::string newstr(fmt);
+		for(int i = 0; i < list.Num(); i++)
+		{
+			idStr tgt = idStr::Format("{%d}", i);
+			auto pos = newstr.find(tgt.c_str());
+			if(pos != std::string::npos)
+				newstr.replace(pos, tgt.Length(), list[i].c_str());
+		}
+		return newstr.c_str();
 #endif
 	}
 
