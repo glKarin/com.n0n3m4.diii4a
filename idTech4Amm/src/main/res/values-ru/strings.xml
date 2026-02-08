@@ -557,26 +557,26 @@
     <string name="openmohaa_base">Medal of Honor: Allied Assault</string>
     <string name="wolf3d">Wolfenstein</string>
     <string name="wolf3d_base">Wolfenstein 3D</string>
-    <string name="video">Video</string>
-    <string name="virtual_joystick">Virtual joystick</string>
-    <string name="touch">Touch</string>
-    <string name="sensor">Sensor</string>
-    <string name="mouse">Mouse</string>
-    <string name="key">Key</string>
-    <string name="configure">Configure</string>
-    <string name="common">Common</string>
-    <string name="current_game">Current game</string>
-    <string name="edit_type">Edit type</string>
-    <string name="advance">Advance</string>
-    <string name="game_thread_stack_size">Game thread stack memory size(kb)</string>
-    <string name="_0_is_unset">0 = unset</string>
-    <string name="are_you_sure_clean_all_log_files">Are you sure clean all %s log files?</string>
-    <string name="clean_logcat_files">Clean logcat files</string>
-    <string name="clean_backtrace_log_files">Clean backtrace log files</string>
-    <string name="clean_dalvik_crash_log_files">Clean dalvik crash log files</string>
-    <string name="crash">crash</string>
-    <string name="backtrace">backtrace</string>
-    <string name="use_multithread_command_to_switch_single_multi_threading_in_game_if_enabled">Use `multithread` command to switch single/multi threading in game if enabled</string>
+    <string name="video">Видео</string>
+    <string name="virtual_joystick">Виртуальный джойстик</string>
+    <string name="touch">Прикосновения</string>
+    <string name="sensor">Сенсор</string>
+    <string name="mouse">Мышь</string>
+    <string name="key">Клавиши</string>
+    <string name="configure">Конфигурация</string>
+    <string name="common">Общее</string>
+    <string name="current_game">Текущая игра</string>
+    <string name="edit_type">Изменить тип</string>
+    <string name="advance">Дополнительно</string>
+    <string name="game_thread_stack_size">Размер памяти стека игрового потока(кб)</string>
+    <string name="_0_is_unset">0 = не установлен</string>
+    <string name="are_you_sure_clean_all_log_files">Вы уверены, что хотите очистить все %s файлы ошибок?</string>
+    <string name="clean_logcat_files">Очистить logcat файлы</string>
+    <string name="clean_backtrace_log_files">Очистка файлов журнала трассировки стека</string>
+    <string name="clean_dalvik_crash_log_files">Очистка файлов ошибок Dalvik</string>
+    <string name="crash">ошибка</string>
+    <string name="backtrace">обратная трассировка</string>
+    <string name="use_multithread_command_to_switch_single_multi_threading_in_game_if_enabled">Используйте команду `Многопоточность` для переключения между однопоточным и многопоточным режимами в игре, если они включены.</string>
     <string name="skin_deep">Skin Deep</string>
 
 </resources>
