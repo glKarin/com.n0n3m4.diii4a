@@ -40,7 +40,7 @@ endif()
 
 if(UNIX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -O3")
-  if(ANDROID)
+#[[  if(ANDROID)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   add_definitions(-D__USE_FILE_OFFSET64)
   add_definitions(-D__USE_LARGEFILE64)
@@ -48,6 +48,7 @@ if(UNIX)
   add_definitions(-D_FILE_OFFSET_BIT=64)
     endif()
   endif()
+]]
 endif()
 add_definitions(-DHAVE_UNISTD_H=1)
 

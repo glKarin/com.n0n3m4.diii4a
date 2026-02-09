@@ -42,6 +42,11 @@
 
 #include <sys/stat.h> /* for stat(), maybe chmod() */
 
+#if defined(__ANDROID__) && (defined(__arm__) || defined(__i386__)) && __ANDROID_API__ < 24 //karin: ftello/fseeko on Android 32(API < 24)
+#define ftello ftell
+#define fseeko fseek
+#endif
+
 #include "private/metadata.h"
 
 #include "FLAC/assert.h"

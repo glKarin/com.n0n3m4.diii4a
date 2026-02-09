@@ -86,6 +86,9 @@ qboolean quitnextframe;
 #ifdef SDL_CPUPauseInstruction
 #  define Sys_CpuPause() SDL_CPUPauseInstruction()
 #else
+#if defined(__ANDROID__) && defined(__arm__) //karin: yield on arm
+#include <sched.h>
+#endif
 static YQ2_ATTR_INLINE void Sys_CpuPause(void)
 {
 #if defined(__GNUC__)
@@ -94,8 +97,8 @@ static YQ2_ATTR_INLINE void Sys_CpuPause(void)
 #elif defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 7) || defined(__ARM_ARCH_6K__)
 #ifdef __ANDROID__ //karin: yield on arm
 	#ifdef __arm__
-		sched_yield();
         #warning "Processor yield not supported on armv7."
+		sched_yield();
     #else
 	    asm volatile("yield");
     #endif

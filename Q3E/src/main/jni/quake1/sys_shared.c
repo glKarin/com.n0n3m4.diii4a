@@ -1185,7 +1185,7 @@ static void Sys_Frame(void)
  */
 #ifdef _DIII4A //karin: Q3E main loop
 extern volatile qbool q3e_running;
-extern void Q3E_CheckNativeWindowChanged(void);
+extern qbool GLimp_CheckGLInitialized(void);
 #endif
 int Sys_Main(int argc, char *argv[])
 {
