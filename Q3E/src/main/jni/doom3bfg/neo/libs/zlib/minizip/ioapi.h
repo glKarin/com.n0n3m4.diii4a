@@ -55,7 +55,7 @@
 #define ftello64 ftell
 #define fseeko64 fseek
 #else
-#ifdef defined(__FreeBSD__) || (defined(__ANDROID__) && __ANDROID_API__ < 24) //karin: no ftello64/fseeko64 on Android(API < 24)
+#if defined(__FreeBSD__) || (defined(__ANDROID__) && __ANDROID_API__ < 24) //karin: no ftello64/fseeko64 on Android(API < 24)
 #define fopen64 fopen
 #define ftello64 ftello
 #define fseeko64 fseeko
