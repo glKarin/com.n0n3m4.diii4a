@@ -1640,13 +1640,17 @@ public class GameLauncher extends Activity
 
 		V.main_ad_layout.setVisibility(mPrefs.getBoolean(PreferenceKey.HIDE_AD_BAR, true) ? View.GONE : View.VISIBLE);
 
+		V.edt_path.setTag(R.id.tag_color, V.edt_path.getCurrentTextColor());
+		V.edt_fs_game.setTag(R.id.tag_color, V.edt_fs_game.getCurrentTextColor());
+		V.fs_game_user.setTag(R.id.tag_color, V.fs_game_user.getCurrentTextColor());
+		V.launcher_fs_game_subdir.setTag(R.id.tag_color, V.launcher_fs_game_subdir.getCurrentTextColor());
+
 		SetGame(gameType);
 
 		V.edt_cmdline.setText(mPrefs.getString(Q3E.q3ei.GetGameCommandPreferenceKey(), Q3EGameConstants.GAME_EXECUABLE));
 		V.edt_mouse.setText(mPrefs.getString(Q3EPreference.pref_eventdev, "/dev/input/event???"));
 		V.edt_path.setText(mPrefs.getString(Q3EPreference.pref_datapath, default_gamedata));
 		m_edtPathFocused = V.edt_path.getText().toString();
-		V.edt_path.setTag(R.id.tag_color, V.edt_path.getCurrentTextColor());
 		if(ContextUtility.InScopedStorage())
 		{
 			V.edt_path.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -1795,9 +1799,7 @@ public class GameLauncher extends Activity
 		V.launcher_tab1_open_menu.setOnClickListener(m_buttonClickListener);
 		V.launcher_tab1_edit_env.setOnClickListener(m_buttonClickListener);
 
-		V.edt_fs_game.setTag(R.id.tag_color, V.edt_fs_game.getCurrentTextColor());
 		boolean userMod = mPrefs.getBoolean(Q3E.q3ei.GetEnableModPreferenceKey(), false);
-		V.fs_game_user.setTag(R.id.tag_color, V.fs_game_user.getCurrentTextColor());
 		V.fs_game_user.setChecked(userMod);
 		String game = mPrefs.getString(Q3E.q3ei.GetGameModPreferenceKey(), "");
 		if (null == game)
@@ -1945,6 +1947,7 @@ public class GameLauncher extends Activity
 				UpdateWorkPathEditText();
 				UpdateGameList();
 				UpdateGameModEditText();
+				UpdateSubDirText();
 			}
 		}));
 		V.edt_mouse.addTextChangedListener(new SavePreferenceTextWatcher(Q3EPreference.pref_eventdev, "/dev/input/event???"));
@@ -2062,6 +2065,7 @@ public class GameLauncher extends Activity
 
 		UpdateWorkPathEditText();
 		UpdateGameModEditText();
+		UpdateSubDirText();
 	}
 
 	private void SetupUI_SDL()
@@ -2607,6 +2611,7 @@ public class GameLauncher extends Activity
 		UpdateWorkPathEditText();
 		UpdateGameList();
 		UpdateGameModEditText();
+		UpdateSubDirText();
 	}
 
 	public boolean SelectMenuItem(MenuItem item)
@@ -3783,6 +3788,9 @@ public class GameLauncher extends Activity
 
 		Q3E.q3ei.start_temporary_extra_command = Q3E.q3ei.MakeTempBaseCommand(this);
 		UpdateTempCommand();
+
+		UpdateGameModEditText();
+		UpdateSubDirText();
     }
 
 	private void SetupCommandTextWatcher(boolean b)
@@ -4221,6 +4229,17 @@ public class GameLauncher extends Activity
 		if(file.isDirectory() && !isFile)
 			return true;
 		return false;
+	}
+
+	private void UpdateSubDirText()
+	{
+		Integer color = (Integer)V.launcher_fs_game_subdir.getTag(R.id.tag_color);
+		if(null == color)
+			color = Color.BLACK;
+		String subdir = Q3EInterface.GetStandaloneDirectory(Q3E.q3ei.standalone, Q3E.q3ei.game);
+		String path = KStr.AppendPath(Q3E.q3ei.datadir, subdir);
+		boolean exists = new File(path).isDirectory();
+		V.launcher_fs_game_subdir.setTextColor(exists ? color : Color.RED);
 	}
 
 	private void UpdateWorkPathEditText()

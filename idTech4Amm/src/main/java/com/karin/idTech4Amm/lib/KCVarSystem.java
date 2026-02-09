@@ -378,6 +378,15 @@ public final class KCVarSystem
                         )
                 );
 
+        KCVar.Group SKINDEEP_CVARS = new KCVar.Group("SkinDeep", true)
+                .AddCVar(
+                        KCVar.CreateCVar("harm_r_clearVertexBuffer", "integer", "2", "Clear vertex buffer on every frame", KCVar.FLAG_INIT,
+                                "0", "Not clear(original)",
+                                "1", "Only free memory",
+                                "2", "Free memory and delete VBO handle"
+                        )
+                );
+
         _cvars.put("RENDERER", RENDERER_CVARS);
         _cvars.put("FRAMEWORK", FRAMEWORK_CVARS);
         _cvars.put("base", GAME_CVARS);
@@ -392,6 +401,7 @@ public final class KCVarSystem
         _cvars.put("UrT", URT_CVARS);
         _cvars.put("Xash3D", XASH3D_CVARS);
         _cvars.put("Source", SOURCE_CVARS);
+        _cvars.put("SkinDeep", SKINDEEP_CVARS);
 
         return _cvars;
     }
@@ -427,6 +437,8 @@ public final class KCVarSystem
             res.add(_cvars.get("UrT"));
         else if(Q3E.q3ei.isSource)
             res.add(_cvars.get("Source"));
+        else if(Q3E.q3ei.isSkinDeep)
+            res.add(_cvars.get("SkinDeep"));
         else if(Q3E.q3ei.isD3)
         {
             res.add(_cvars.get("RENDERER"));
