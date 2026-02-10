@@ -97,6 +97,10 @@ enum utf8Encoding_t {
 #define _vsnprintf		vsnprintf
 #endif
 
+#if __cplusplus < 202002L //karin: for simple format on C++14
+#include <sstream>
+#endif
+
 class idVec4;
 
 #ifndef FILE_HASH_SIZE
@@ -366,6 +370,171 @@ public:
 	{
 #if __cplusplus >= 202002L
 		std::string temp = std::vformat(fmt, std::make_format_args(args...));
+#elif 1
+		// simple format implemention for C++14
+		// only for allow `std::ostringstream::operator<<(...)`
+		idList<std::string> list;
+		(void)std::initializer_list<int>{
+			([&]() {
+			 std::ostringstream os;
+			 os << args;
+			 os.flush();
+			 auto index = list.Append(os.str());
+			 }(), 0)...
+		};
+
+		idStr newstr;
+		idStr newfmt(fmt.data(), 0, fmt.size());
+		int argIndex = 0;
+		if(idStr::IsValidUTF8(newfmt.c_str(), newfmt.Length()))
+		{
+			int charIndex = 0;
+			int len = newfmt.Length();
+			while( charIndex < len ) {
+				uint32_t textChar = newfmt.UTF8Char( charIndex );
+				if(textChar == '{')
+				{
+					int tmpCharIndex = charIndex;
+					uint32_t textCharNext = newfmt.UTF8Char( tmpCharIndex );
+					if(textCharNext == '{') // {{ -> {
+					{
+						charIndex = tmpCharIndex;
+						newstr.AppendUTF8Char('{');
+						continue;
+					}
+					else if(textCharNext == '}') // {} -> arg
+					{
+						charIndex = tmpCharIndex;
+						if(argIndex < list.Num())
+						{
+							newstr.Append(list[argIndex].c_str());
+							argIndex++;
+						}
+						else
+						{
+							newstr.AppendUTF8Char('{');
+							newstr.AppendUTF8Char('}');
+						}
+						continue;
+					}
+					else
+					{
+						idStr digit;
+						while(textCharNext >= '0' && textCharNext <= '9')
+						{
+							digit.Append((char)textCharNext);
+							textCharNext = newfmt.UTF8Char( tmpCharIndex );
+						}
+						if(!digit.IsEmpty())
+						{
+							if(textCharNext == '}')
+							{
+								charIndex = tmpCharIndex;
+								auto idx = atoi(digit.c_str());
+								if(idx < list.Num())
+								{
+									newstr.Append(list[idx].c_str());
+									argIndex++;
+								}
+								else
+								{
+									newstr.AppendUTF8Char('{');
+									newstr.Append(digit);
+									newstr.AppendUTF8Char('}');
+								}
+								continue;
+							}
+						}
+					}
+				}
+				else if(textChar == '}')
+				{
+					int tmpCharIndex = charIndex;
+					uint32_t textCharNext = newfmt.UTF8Char( tmpCharIndex );
+					if(textCharNext == '}') // }} -> }
+					{
+						charIndex = tmpCharIndex;
+						newstr.AppendUTF8Char('}');
+						continue;
+					}
+				}
+
+				newstr.AppendUTF8Char(textChar);
+			}
+		}
+		else
+		{
+			auto ptr = newfmt.c_str();
+			while(*ptr)
+			{
+				if(*ptr == '{')
+				{
+					if(*(ptr + 1) == '{') // {{ -> {
+					{
+						newstr.Append('{');
+						ptr++;
+						continue;
+					}
+					else if(*(ptr + 1) == '}') // {} -> arg
+					{
+						if(argIndex < list.Num())
+						{
+							newstr.Append(list[argIndex].c_str());
+							argIndex++;
+						}
+						else
+						{
+							newstr.Append("{}");
+						}
+						ptr++;
+						continue;
+					}
+					else
+					{
+						idStr digit;
+						auto nextPtr = ptr + 1;
+						while(*nextPtr >= '0' && *nextPtr <= '9')
+						{
+							digit.Append(*nextPtr);
+							nextPtr++;
+						}
+						if(!digit.IsEmpty())
+						{
+							if(*nextPtr == '}')
+							{
+								auto idx = atoi(digit.c_str());
+								if(idx < list.Num())
+								{
+									newstr.Append(list[idx].c_str());
+									argIndex++;
+								}
+								else
+								{
+									newstr.Append('{');
+									newstr.Append(digit);
+									newstr.Append('}');
+								}
+								ptr = nextPtr + 1;
+								continue;
+							}
+						}
+					}
+				}
+				else if(*ptr == '}')
+				{
+					if(*(ptr + 1) == '}') // }} -> }
+					{
+						newstr.Append('}');
+						ptr++;
+						continue;
+					}
+				}
+
+				newstr.Append(*ptr);
+				ptr++;
+			}
+		}
+		return newstr;
 #else
 		// ugly format implemention for C++14
 		// only for allow `idStr(...)` constructor
