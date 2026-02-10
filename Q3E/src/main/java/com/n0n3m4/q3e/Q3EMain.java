@@ -664,9 +664,9 @@ public class Q3EMain extends Activity
 
     private void SetupSettingGate()
     {
-        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false))
-            return;
+//        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+//        if(mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false))
+//            return;
 
         int px = Q3EContextUtils.dip2px(this, 48);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(px, px);
@@ -705,13 +705,13 @@ public class Q3EMain extends Activity
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         editButtonMenu = menu.findItem(R.id.main_edit_button_layout);
         backMenu = menu.findItem(R.id.main_quit);
-        if(m_portrait)
+        if(m_portrait || preferences.getBoolean(Q3EPreference.pref_hideonscr, false))
         {
             menu.findItem(R.id.main_edit_button_layout).setVisible(false);
         }
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         if(preferences.getBoolean(Q3EPreference.BUILTIN_VIRTUAL_KEYBOARD, false))
             menu.findItem(R.id.main_choose_input_method).setVisible(false);
 
