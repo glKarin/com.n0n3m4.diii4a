@@ -55,6 +55,11 @@
 #include "private/macros.h"
 
 
+#if defined(__ANDROID__) && (defined(__arm__) || defined(__i386__)) && __ANDROID_API__ < 24 //karin: ftello/fseeko on Android 32(API < 24)
+#define ftello ftell
+#define fseeko fseek
+#endif
+
 /* technically this should be in an "export.c" but this is convenient enough */
 FLAC_API int FLAC_API_SUPPORTS_OGG_FLAC = FLAC__HAS_OGG;
 

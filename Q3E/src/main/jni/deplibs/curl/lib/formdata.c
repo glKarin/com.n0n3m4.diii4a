@@ -46,6 +46,11 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#if defined(__ANDROID__) && (defined(__arm__) || defined(__i386__)) && __ANDROID_API__ < 24 //karin: ftello/fseeko on Android 32(API < 24)
+#define ftello ftell
+#define fseeko fseek
+#endif
+
 
 #define HTTPPOST_PTRNAME CURL_HTTPPOST_PTRNAME
 #define HTTPPOST_FILENAME CURL_HTTPPOST_FILENAME

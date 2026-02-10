@@ -28,6 +28,11 @@
 # include <io.h>
 #endif
 
+#if defined(__ANDROID__) && (defined(__arm__) || defined(__i386__)) && __ANDROID_API__ < 24 //karin: ftello/fseeko on Android 32(API < 24)
+#define ftello ftell
+#define fseeko fseek
+#endif
+
 typedef struct OpusMemStream OpusMemStream;
 
 #define OP_MEM_SIZE_MAX (~(size_t)0>>1)

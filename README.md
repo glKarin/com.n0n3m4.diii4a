@@ -12,14 +12,12 @@
 
 **idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
 #### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
-##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic/Urban Terror/OpenMOHAA on Android  
-#### 毁灭战士3/雷神之锤4/掠食(2006) 安卓/Windows/Linux OpenGLES移植版  
-##### 毁灭战士3 BFG/The Dark Mod/雷神之锤1 2 3/重返德军总部/GZDOOM/深入敌后: 德军总部/真·重返德军总部/FTEQW/星球大战:绝地武士/英雄萨姆 安卓移植版  
+##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic/Urban Terror/OpenMOHAA/Skin Deep on Android   
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan70(lindaiyu)  
+1.1.0harmattan71(whip)  
 **Latest update:**
-2025-12-21  
+2026-02-10  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -68,28 +66,25 @@ GPLv3
 | RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.3 | 1.1 |  | realrtcw |  |
 | STAR WARS™ Jedi Knight - Jedi Academy™ | [OpenJK](https://github.com/JACoders/OpenJK) | 1.0.1.1 | 1.1 |  | openja |  |
 | STAR WARS™ Jedi Knight II - Jedi Outcast™ | [OpenJK](https://github.com/JACoders/OpenJK) | 1.0.1.1 | 1.1 |  | openjo |  |
+-- | FTEQW | [FTEQW](https://www.fteqw.org) | 1.05 | 3.2 | 1.1 | fteqw * |  |
 | Serious Sam Classic : The First Encounter | [SamTFE](https://github.com/tx00100xt/SeriousSamClassic) | 1.10.7 | 1.1 |  | serioussamtfe * |  |
 | Serious Sam Classic : The Second Encounter | [SamTSE](https://github.com/tx00100xt/SeriousSamClassic) | 1.10.7 | 1.1 |  | serioussamtse * |  |
 | Urban Terror | [Q3-UT4](https://www.urbanterror.info) | 4.3.4 | 1.1 |  | urt |  |
 | Medal of Honor: Allied Assault | [OpenMOHAA](https://github.com/openmoh/openmohaa) | 0.82.1 | 1.1 |  | openmohaa |  |
-
-<!-- | FTEQW | [FTEQW](https://www.fteqw.org) | 1.05 | 3.2 | Vulkan | fteqw * |  | -->
+| Skin Deep | [SkinDeep](https://blendogames.com/skindeep/) | 1.0.4 | 3.2 |  | skindeep |  |
 
 ----------------------------------------------------------------------------------
 
-> #### Update 1.1.0harmattan70 (2025-12-21)
+> #### Update 1.1.0harmattan71 (2026-02-10)
 
-* Fix font offset in GUIs on Quake 4.
-* Fix a sound distance volume bug on Quake 4.
-* Support smooth joystick on DOOM 3 mod `Hardscorps` and Quake 4 mod `Hardqore`.
-* Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in [OpenMOHAA](https://github.com/openmoh/openmohaa).
-* Update RealRTCW version to 5.3, version 5.2 will be removed on next release.
-* Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK, yquake2(Quake 2), and add 3rd Zigock Bot II mod support on Quake 2.
-* On-screen button keymap and layout configures are standalone in each game.
-* Add Unreal engine psk/psa, iqm, Source engine smd, GLTF/GLB, Autodesk fbx animation/static model support, add md5mesh static model support on DOOM3/Quake 4/Prey.
-* Add float console support on DOOM3/Quake 4/Prey.
-* Fix game start on arm32 device.
-* Warning: FTEQW is removed in this release.
+* Add `Skin Deep`(ver 1.0.4) support, game standalone directory named `skindeep`, game data directory named `base`.
+* Support edit on-screen buttons layout in gaming.
+* Add `ECWolf`(ver 1.4.2) support, game standalone directory named `ecwolf`.
+* Add game main thread stack size config on Menu > Option > Advance.
+* Enable `FTEQW`.
+* Add `UZDoom`(ver 4.14.3) arm64 support, game standalone directory named `uzdoom`, And GZDoom is removed.
+* Fix some GUIs in Quake 4/Prey(2006).
+* RealRTCW(ver 5.2) is removed.
 
 ----------------------------------------------------------------------------------
 
@@ -140,7 +135,7 @@ bind "Your key of drop" "_impulse25"
 ##### Other
 
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom1.jpg" width="33%" alt="DOOM 3 BFG: DOOM I"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom3.jpg" width="33%" alt="DOOM 3 BFG: DOOM III"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom2.jpg" width="33%" alt="DOOM 3 BFG: DOOM II">
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake_iii_arena.jpg" width="33%" alt="Quake III : Arena"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake_iii_team_arena.jpg" width="33%" alt="Quake III : Team Arena"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_urt.jpg" width="33%" alt="Urban Terror">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake_iii_arena.jpg" width="33%" alt="Quake III : Arena"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_skin_deep.jpg" width="33%" alt="Quake III : Team Arena"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_urt.jpg" width="33%" alt="Urban Terror">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake2.jpg" width="33%" alt="Quake II"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_the_dark_mod.jpg" width="33%" alt="The Dark Mod"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake1.jpg" width="33%" alt="Quake I">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_return_to_castle_wolfenstein.jpg" width="33%" alt="Return to Castle Wolfenstein"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_wolfenstein_enemy_territory.jpg" width="33%" alt="Wolfenstein: Enemy Territory"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_realrtcw.jpg" width="33%" alt="RealRTCW">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_openja.jpg" width="33%" alt="STAR WARS™ Jedi Knight - Jedi Academy™"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_openjo.jpg" width="33%" alt="STAR WARS™ Jedi Knight II - Jedi Outcast™"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_openmohaa.jpg" width="33%" alt="Medal of Honor: Allied Assault">
@@ -242,7 +237,7 @@ bind "Your key of drop" "_impulse25"
 ----------------------------------------------------------------------------------
 
 > #### Run idTech4A++ on other Android application with Android intent
-1. Setup game type with `game` key: also see Q3E/com.n0n3m4.q3e.Q3EGameConstants.java GAME_XXX constants. Valid value: `doom3` `quake4` `prey2006` `quake2` `quake3` `rtcw` `tdm` `quake1` `doom3bfg` `gzdoom` `etw` `realrtcw` `fteqw` `openja` `openjo` `samtfe` `samtse` `urt` `openmohaa` `source`
+1. Setup game type with `game` key: also see Q3E/com.n0n3m4.q3e.Q3EGameConstants.java GAME_XXX constants. Valid value: `doom3` `quake4` `prey2006` `quake2` `quake3` `rtcw` `tdm` `quake1` `doom3bfg` `gzdoom` `etw` `realrtcw` `fteqw` `openja` `openjo` `samtfe` `samtse` `urt` `openmohaa` `skindeep` `source`
 2. Setup game command arguments with `command` key. Starts with `game.arm`
 
 ##### e.g. Run DOOM 3 with custom mod game dll
@@ -315,7 +310,7 @@ finish();
 
 | Feature                             | Github | F-Droid |
 |:------------------------------------|:------:|:-------:|
-| Android min version(because ffmpeg) |   4.4  |   7.0   |
+| Android min version(for ffmpeg) |   4.4  |   7.0   |
 | Khronos Vulkan validation layer     |   Yes  |    No   |
 
 ---------------------------------------------------------------------------------- 

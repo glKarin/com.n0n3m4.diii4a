@@ -82,8 +82,8 @@ public enum Game
     FTEQW_Q2(Q3EGameConstants.GAME_FTEQW, "quake2", "quake2", "fteqw", "", "baseq2", true, R.string.quake_2_base),
     FTEQW_Q3(Q3EGameConstants.GAME_FTEQW, "quake3", "quake3", "fteqw", "", "baseq3", true, R.string.quake_3_base),
     FTEQW_H2(Q3EGameConstants.GAME_FTEQW, "hexen2", "hexen2", "fteqw", "", "data1", true, R.string.hexen_2_base),
-//    FTEQW_HL(Q3EGameConstants.GAME_FTEQW, "halflife", "halflife", "fteqw", "", "valve", true, R.string.halflife_base),
-//    FTEQW_CS1_5(Q3EGameConstants.GAME_FTEQW, "cstrike_1_5", "halflife", "fteqw", "cstrike", "cstrike", true, R.string.cs_1_5_base),
+    FTEQW_HL(Q3EGameConstants.GAME_FTEQW, "halflife", "halflife", "fteqw", "", "valve", true, R.string.halflife_base),
+    FTEQW_CS1_5(Q3EGameConstants.GAME_FTEQW, "cstrike_1_5", "halflife", "fteqw", "cstrike", "cstrike", true, R.string.cs_1_5_base),
 
     // OpenJA
     JA_BASE(Q3EGameConstants.GAME_JA, "base", "", "jagame", "", "base", false, R.string.openja_base),

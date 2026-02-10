@@ -707,6 +707,21 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 	auto ptr = GLimp_GetProcAddress(name);
     if(ptr)
         return ptr;
+
+	int len = strlen(name);
+	if(len > 3)
+	{
+		const char *ext = name + len - 3;
+		bool retry = (!idStr::Cmp(ext, "ARB") || !idStr::Cmp(ext, "EXT"));
+		if(retry)
+		{
+			idStr str(name);
+			str = str.Left(len - 3);
+			ptr = GLimp_GetProcAddress(str.c_str());
+			if(ptr)
+				return ptr;
+		}
+	}
 #else
 
 	auto ptr = (GLExtension_t)SDL_GL_GetProcAddress(name);

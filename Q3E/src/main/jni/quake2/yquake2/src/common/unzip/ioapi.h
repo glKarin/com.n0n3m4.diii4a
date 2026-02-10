@@ -21,7 +21,7 @@
 #ifndef _ZLIBIOAPI64_H
 #define _ZLIBIOAPI64_H
 
-#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
+#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__)) && (!defined(__ANDROID__) || __ANDROID_API__ >= 24) //karin: ftello64/fseeko64 on Android 32(API >= 24)
 
   // Linux needs this to support file operation on files larger then 4+GB
   // But might need better if/def to select just the platforms that needs them.
@@ -39,6 +39,8 @@
                 #define _FILE_OFFSET_BIT 64
         #endif
 
+#elif defined(__ANDROID__) && (defined(__arm__) || defined(__i386__)) && __ANDROID_API__ < 24 //karin: no ftello/fseeko on Android 32(API < 24)
+    #define USE_FILE32API 1
 #endif
 
 #include <stdio.h>
@@ -51,7 +53,7 @@
 #define ftello64 ftell
 #define fseeko64 fseek
 #else
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(MINIZIP_FOPEN_NO_64)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(MINIZIP_FOPEN_NO_64) || (defined(__ANDROID__) && __ANDROID_API__ < 24) //karin: no ftello64/fseeko64 on Android(API < 24)
 #define fopen64 fopen
 #define ftello64 ftello
 #define fseeko64 fseeko
