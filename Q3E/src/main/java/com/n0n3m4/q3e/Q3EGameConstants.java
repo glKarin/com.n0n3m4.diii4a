@@ -344,5 +344,43 @@ public final class Q3EGameConstants
     public static final String[] OPENAL_DRIVER = {"auto", "opensl", "oboe",};
 
 
+    public static final int ALWAYS_STANDALONE = 1;
+    public static final int SUPPORT_MOD       = 1 << 1;
+    public static final int SECONDARY_DIR     = 1 << 2;
+    public static final int AUDIO_TRACK       = 1 << 3;
+    public static final int EXTERNAL_DLL      = 1 << 4;
+    public static final int USING_OPENAL      = 1 << 5;
+    public static final int SKIP_INTRO        = 1 << 6;
+    public static final int QUICK_LOAD        = 1 << 7;
+    public static final int DISABLED          = 1 << 8;
+    public static final int USING_SDL         = 1 << 9;
+    public static final int VIRTUAL_MOUSE     = 1 << 10;
+    public static final int OPENGL_VERSION    = 1 << 11;
+
+    // KARIN_DISABLE_GAME_BOOKMARK: add game feature flags
+    public static final int FEATURE_DOOM3    = SUPPORT_MOD | SECONDARY_DIR | EXTERNAL_DLL | USING_OPENAL | SKIP_INTRO | QUICK_LOAD | OPENGL_VERSION;
+    public static final int FEATURE_QUAKE4   = FEATURE_DOOM3;
+    public static final int FEATURE_PREY     = FEATURE_DOOM3;
+    public static final int FEATURE_QUAKE2   = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL;
+    public static final int FEATURE_QUAKE3   = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
+    public static final int FEATURE_RTCW     = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO | QUICK_LOAD;
+    public static final int FEATURE_TDM      = SUPPORT_MOD | ALWAYS_STANDALONE| SECONDARY_DIR | USING_OPENAL;
+    public static final int FEATURE_QUAKE1   = SUPPORT_MOD | AUDIO_TRACK | USING_OPENAL;
+    public static final int FEATURE_DOOM3BFG = SUPPORT_MOD | SECONDARY_DIR | USING_OPENAL;
+    public static final int FEATURE_ZDOOM    = SUPPORT_MOD | ALWAYS_STANDALONE | SECONDARY_DIR | USING_OPENAL;
+    public static final int FEATURE_ETW      = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL;
+    public static final int FEATURE_REALRTCW = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO | QUICK_LOAD;
+    public static final int FEATURE_FTEQW    = SUPPORT_MOD | ALWAYS_STANDALONE | AUDIO_TRACK | USING_OPENAL;
+    public static final int FEATURE_JA       = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
+    public static final int FEATURE_JO       = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
+    public static final int FEATURE_SAMTFE   = ALWAYS_STANDALONE | VIRTUAL_MOUSE | USING_OPENAL;
+    public static final int FEATURE_SAMTSE   = ALWAYS_STANDALONE | VIRTUAL_MOUSE | USING_OPENAL;
+    public static final int FEATURE_XASH3D   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL | SECONDARY_DIR | EXTERNAL_DLL | DISABLED;
+    public static final int FEATURE_SOURCE   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL;
+    public static final int FEATURE_URT      = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
+    public static final int FEATURE_MOHAA    = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL;
+    public static final int FEATURE_WOLF3D   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL;
+    public static final int FEATURE_SKINDEEP = SUPPORT_MOD | USING_SDL | SECONDARY_DIR | USING_OPENAL | SKIP_INTRO;
+
     private Q3EGameConstants() {}
 }

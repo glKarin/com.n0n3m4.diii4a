@@ -4158,7 +4158,7 @@ public class GameLauncher extends Activity
 				SetGameModToCommand(prop.fs_game);
 			if(null == prop.fs_game_base || prop.fs_game_base.isEmpty() || !prop.IsValid())
 				RemoveSecondaryGameModFromCommand();
-			else if(Q3E.q3ei.IsSupportSecondaryDirGame())
+			else if(Q3E.q3ei.IsSupportSecondaryGameParam())
 				SetSecondaryGameModToCommand(prop.fs_game_base);
 			RemoveProp("harm_fs_gameLibPath");
 		}

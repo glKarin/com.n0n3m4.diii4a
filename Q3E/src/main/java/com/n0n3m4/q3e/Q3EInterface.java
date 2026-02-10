@@ -237,7 +237,7 @@ public class Q3EInterface
 		String subdir = GameSubDirectory();
 		if(standalone)
 			subdatadir = subdir;
-		else if(Q3EGame.Find(game_id).STANDALONE)
+		else if(IsStandaloneGame())
 			subdatadir = subdir;
 		else
 			subdatadir = null;
@@ -486,6 +486,18 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public boolean IsInitGame()
+	{
+		return isD3 || isQ4 || isPrey
+				|| isD3BFG || isTDM || isSkinDeep
+				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
+				|| isQ2 || isQ1
+				|| isDOOM || isWolf3D
+				|| isSamTFE || isSamTSE
+				|| isXash3D || isSource
+				;
+	}
+
 	public void SetupGameConfig()
 	{
 		game_id = GameID();
@@ -556,65 +568,42 @@ public class Q3EInterface
 
 	public boolean IsUsingSDL()
 	{
-		return isXash3D || isSource || isWolf3D || isSkinDeep;
+		return Q3EGame.HasFeature(game_id, Q3EGameConstants.USING_SDL);
 	}
 
 	public boolean IsUsingVirtualMouse()
 	{
-		return isSamTFE || isSamTSE;
+		return Q3EGame.HasFeature(game_id, Q3EGameConstants.VIRTUAL_MOUSE);
 	}
 
 	public boolean IsUsingOpenAL()
 	{
-		return isD3 || isQ4 || isPrey
-				|| isD3BFG || isTDM || isSkinDeep
-				|| isQ3 || isRTCW || isETW || isRealRTCW || isJA || isJO || isUrT || isMOHAA || isFTEQW
-				|| isDOOM || isQ2 || isQ1
-				|| isSamTFE || isSamTSE
-				;
+		return Q3EGame.HasFeature(game_id, Q3EGameConstants.USING_OPENAL);
 	}
 
 	public boolean HasOpenGLSetting()
 	{
-		return isD3 || isQ4 || isPrey;
+		return Q3EGame.HasFeature(game_id, Q3EGameConstants.OPENGL_VERSION);
 	}
 
 	public boolean IsSupportQuickload()
 	{
-		return isPrey || isQ4 || isD3 || isRTCW || isRealRTCW;
+		return Q3EGame.HasFeature(game_id, Q3EGameConstants.QUICK_LOAD);
 	}
 
 	public boolean IsSupportSkipIntro()
 	{
-		return IsSupportQuickload() || isQ3 || isJA || isJO || isUrT || isSkinDeep;
+		return Q3EGame.HasFeature(game_id, Q3EGameConstants.SKIP_INTRO);
 	}
 
 	public boolean IsSupportMod()
 	{
-		return isD3 || isQ4 || isPrey
-				|| isD3BFG || isTDM || isSkinDeep
-				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
-				|| isQ2 || isQ1
-				|| isDOOM || isWolf3D
-				|| isXash3D || isSource
-				;
-	}
-
-	public boolean IsInitGame()
-	{
-		return isD3 || isQ4 || isPrey
-				|| isD3BFG || isTDM || isSkinDeep
-				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
-				|| isQ2 || isQ1
-				|| isDOOM || isWolf3D
-				|| isSamTFE || isSamTSE
-				|| isXash3D || isSource
-				;
+		return Q3EGame.HasFeature(game_id, Q3EGameConstants.SUPPORT_MOD);
 	}
 
 	public boolean IsStandaloneGame()
 	{
-		return Q3EGame.Find(game_id).STANDALONE;
+		return Q3EGame.HasFeature(game_id, Q3EGameConstants.ALWAYS_STANDALONE);
 	}
 
 	public boolean IS_D3()
@@ -624,46 +613,32 @@ public class Q3EInterface
 
 	public static boolean IsStandaloneGame(String game)
 	{
-		return Q3EGame.Find(game).STANDALONE;
+		return Q3EGame.HasFeature(game, Q3EGameConstants.ALWAYS_STANDALONE);
 	}
 
 	public boolean IsSupportExternalDLL()
 	{
-		return IsIdTech4() || isXash3D;
+		return Q3EGame.HasFeature(game_id, Q3EGameConstants.EXTERNAL_DLL);
 	}
 
-	// KARIN_DISABLE_GAME_BOOKMARK: add isXXX state to disable games
 	public boolean IsDisabled()
 	{
-		return
-				//isFTEQW ||
-						isXash3D
-				;
+		return Q3EGame.HasFeature(game_id, Q3EGameConstants.DISABLED);
 	}
 
-	// KARIN_DISABLE_GAME_BOOKMARK: add game type to disable games
 	public static boolean IsDisabled(String game)
 	{
-		final String[] DisabledGames = {
-				//Q3EGameConstants.GAME_FTEQW,
-				Q3EGameConstants.GAME_XASH3D,
-		};
-		for(String disabledGame : DisabledGames)
-		{
-			if(disabledGame.equalsIgnoreCase(game))
-				return true;
-		}
-		return false;
+		return Q3EGame.HasFeature(game, Q3EGameConstants.DISABLED);
 	}
 
-	public boolean IsSupportSecondaryDirGame()
+	public boolean IsSupportSecondaryGameParam()
 	{
 		return null != Q3EGame.Find(game_id).MOD_SECONDARY_PARM;
 	}
 
 	public static boolean IsSupportSecondaryDirGame(String game)
 	{
-		return null != Q3EGame.Find(game).MOD_SECONDARY_PARM;
+		return Q3EGame.HasFeature(game, Q3EGameConstants.SECONDARY_DIR);
 	}
 
 	public String GetGameCommandParm()
@@ -703,10 +678,15 @@ public class Q3EInterface
 			return new KidTech4Command(cmd);
 	}
 
+	public static boolean GameDataIsFile(String game)
+	{
+		return Q3EGameConstants.GAME_ZDOOM.equals(game) || Q3EGameConstants.GAME_WOLF3D.equals(game);
+	}
+
     // KARIN_NEW_GAME_BOOKMARK: if using audio track
     public boolean NeedAudioTrack()
     {
-        return isQ3 || isRTCW || isQ1 || isQ2|| isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA;
+        return Q3EGame.HasFeature(game_id, Q3EGameConstants.AUDIO_TRACK);
     }
 
 	// KARIN_NEW_GAME_BOOKMARK: add config file list
