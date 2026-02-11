@@ -40,7 +40,7 @@ public class Q3EKeyboard
 
     public View CreateToolbar()
     {
-        if(Q3EUtils.q3ei.function_key_toolbar)
+        if(Q3E.function_key_toolbar)
         {
             Context context = m_context;
             m_keyToolbar = new KKeyToolBar(context);
@@ -69,7 +69,7 @@ public class Q3EKeyboard
 
     public void ToggleToolbar(boolean b)
     {
-        if(null != m_keyToolbar && Q3EUtils.q3ei.function_key_toolbar)
+        if(null != m_keyToolbar && Q3E.function_key_toolbar)
         {
             m_toolbarActive = b;
             m_keyToolbar.SetVisible(m_toolbarActive);
@@ -81,7 +81,7 @@ public class Q3EKeyboard
         if(null == vkb)
         {
             vkb = new KVKBView(m_context);
-            vkb.Init(Q3EUtils.asset_get_contents(m_context, "keyboard/generic.json"));
+            vkb.Init(Q3EContextUtils.asset_get_contents(m_context, "keyboard/generic.json"));
             vkb.Close();
         }
         return vkb;
@@ -89,7 +89,7 @@ public class Q3EKeyboard
 
     public void OpenBuiltInVKB()
     {
-        if(null != vkb && Q3EUtils.q3ei.builtin_virtual_keyboard)
+        if(null != vkb && Q3E.builtin_virtual_keyboard)
         {
             vkbActive = true;
             vkb.Open();
@@ -98,7 +98,7 @@ public class Q3EKeyboard
 
     public void CloseBuiltInVKB()
     {
-        if(null != vkb && Q3EUtils.q3ei.builtin_virtual_keyboard)
+        if(null != vkb && Q3E.builtin_virtual_keyboard)
         {
             vkbActive = false;
             vkb.Close();
@@ -107,7 +107,7 @@ public class Q3EKeyboard
 
     public void ToggleBuiltInVKB()
     {
-        if(null != vkb && Q3EUtils.q3ei.builtin_virtual_keyboard)
+        if(null != vkb && Q3E.builtin_virtual_keyboard)
         {
             vkbActive = !vkbActive;
             vkb.SetVisible(vkbActive);
@@ -125,11 +125,11 @@ public class Q3EKeyboard
         {
             if(m_context.IsCoverEdges())
             {
-                int x = Q3EUtils.GetEdgeHeight(m_context, true);
+                int x = Q3EContextUtils.GetEdgeHeight(m_context, true);
                 if(x != 0)
                     m_keyToolbar.setX(x);
             }
-            int[] size = Q3EUtils.GetNormalScreenSize(m_context);
+            int[] size = Q3EContextUtils.GetNormalScreenSize(m_context);
             ViewGroup.LayoutParams layoutParams = m_keyToolbar.getLayoutParams();
             layoutParams.width = size[0];
             m_keyToolbar.setLayoutParams(layoutParams);
@@ -140,11 +140,11 @@ public class Q3EKeyboard
         {
             if(m_context.IsCoverEdges())
             {
-                int x = Q3EUtils.GetEdgeHeight(m_context, true);
+                int x = Q3EContextUtils.GetEdgeHeight(m_context, true);
                 if(x != 0)
                     vkb.setX(x);
             }
-            int[] size = Q3EUtils.GetNormalScreenSize(m_context);
+            int[] size = Q3EContextUtils.GetNormalScreenSize(m_context);
             ViewGroup.LayoutParams layoutParams = vkb.getLayoutParams();
             layoutParams.width = size[0];
             vkb.setLayoutParams(layoutParams);
@@ -160,7 +160,7 @@ public class Q3EKeyboard
     {
         if(m_keyToolbar != null)
         {
-            int[] size = Q3EUtils.GetNormalScreenSize(m_context);
+            int[] size = Q3EContextUtils.GetNormalScreenSize(m_context);
             ViewGroup.LayoutParams layoutParams = m_keyToolbar.getLayoutParams();
             layoutParams.width = size[0];
             m_keyToolbar.setLayoutParams(layoutParams);
@@ -169,7 +169,7 @@ public class Q3EKeyboard
 
         if(vkb != null)
         {
-            int[] size = Q3EUtils.GetNormalScreenSize(m_context);
+            int[] size = Q3EContextUtils.GetNormalScreenSize(m_context);
             ViewGroup.LayoutParams layoutParams = vkb.getLayoutParams();
             layoutParams.width = size[0];
             vkb.setLayoutParams(layoutParams);

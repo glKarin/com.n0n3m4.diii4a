@@ -4,10 +4,10 @@ import android.graphics.Point;
 
 public class UiElement
 {
-    int cx;
-    int cy;
-    int size;
-    int alpha;
+    public int cx;
+    public int cy;
+    public int size;
+    public int alpha;
 
     public UiElement(int incx, int incy, int insize, int inalpha)
     {
@@ -24,14 +24,21 @@ public class UiElement
 
     public void LoadFromString(String str, int maxw, int maxh)
     {
-        String[] spl = str.split(" ");
-        cx = Integer.parseInt(spl[0]);
-        cy = Integer.parseInt(spl[1]);
-        Point point = Q3EButtonLayoutManager.ToAbsPosition(cx, cy, maxw, maxh);
-        cx = point.x;
-        cy = point.y;
-        size = Integer.parseInt(spl[2]);
-        alpha = Integer.parseInt(spl[3]);
+        try
+        {
+            String[] spl = str.split(" ");
+            cx = Integer.parseInt(spl[0]);
+            cy = Integer.parseInt(spl[1]);
+            Point point = Q3EButtonLayoutManager.ToAbsPosition(cx, cy, maxw, maxh);
+            cx = point.x;
+            cy = point.y;
+            size = Integer.parseInt(spl[2]);
+            alpha = Integer.parseInt(spl[3]);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public String SaveToString(int maxw, int maxh)

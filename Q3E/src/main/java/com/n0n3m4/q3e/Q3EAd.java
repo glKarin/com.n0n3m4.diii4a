@@ -45,18 +45,18 @@ public class Q3EAd
     {
         final LinearLayout ll = ctx.findViewById(R.id.adlayout_id);
         ll.removeAllViews();
-        if (Q3EUtils.isOuya) return;//No Google Play on ouya
+        if (Q3E.isOuya) return;//No Google Play on ouya
 
         Bitmap imagorig = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.adlist);
         //carousel
         ArrayList<Integer> ids = new ArrayList<>(0);
         ArrayList<View> vws = new ArrayList<>(0);
         Display display = ctx.getWindowManager().getDefaultDisplay();
-        final int width = Q3EUtils.dip2px(ctx, 320);//Magic number
+        final int width = Q3EContextUtils.dip2px(ctx, 320);//Magic number
         final int dspwidth = display.getWidth();
         for (int i = 0; i < adpkgsn.length; i++)
         {
-            if (!Q3EUtils.isAppInstalled(ctx, adpkgsn[i]))
+            if (!Q3EContextUtils.isAppInstalled(ctx, adpkgsn[i]))
                 ids.add(i);
         }
         for (int i : ids)

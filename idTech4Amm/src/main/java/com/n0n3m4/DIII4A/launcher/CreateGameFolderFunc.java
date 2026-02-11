@@ -9,6 +9,7 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Game;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EPreference;
@@ -89,13 +90,13 @@ public final class CreateGameFolderFunc extends GameLauncherFunc
                 String gameDataDir = value.file;
                 String path = KStr.AppendPath(DataDir, subdir);
 
-                if(Q3EGameConstants.GAME_GZDOOM.equals(game))
+                if(Q3EInterface.GameDataIsFile(game))
                 {
                     if(CreateFolder(path))
                         i++;
                     CreateTipText(path, fileGameName, defName);
 
-                    String appHome = Q3EUtils.GetAppInternalSearchPath(m_gameLauncher, null);
+                    String appHome = Q3EContextUtils.GetAppInternalSearchPath(m_gameLauncher, null);
                     String path2 = KStr.AppendPath(appHome, subdir);
 
                     if(!path2.equals(path))
@@ -114,7 +115,7 @@ public final class CreateGameFolderFunc extends GameLauncherFunc
 
                     if(Q3EInterface.IsSupportSecondaryDirGame(game))
                     {
-                        String appHome = Q3EUtils.GetAppInternalSearchPath(m_gameLauncher, null);
+                        String appHome = Q3EContextUtils.GetAppInternalSearchPath(m_gameLauncher, null);
                         String path2 = KStr.AppendPath(appHome, subdir, gameDataDir);
 
                         if(!path2.equals(path))

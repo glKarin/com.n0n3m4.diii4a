@@ -199,7 +199,6 @@
     <string name="success">success</string>
     <string name="fail">fail</string>
     <string name="network_for_github">Network for GitHub......</string>
-    <string name="error">Error</string>
     <string name="close">Close</string>
     <string name="no_update_release">No update release</string>
     <string name="current_version_is_newest">Current version is newest.</string>
@@ -559,6 +558,8 @@
     <string name="use_custom_resolution_as_fullscreen_size">Use custom resolution as fullscreen size</string>
     <string name="openmohaa">OpenMOHAA</string>
     <string name="openmohaa_base">Medal of Honor: Allied Assault</string>
+    <string name="wolf3d">Wolfenstein</string>
+    <string name="wolf3d_base">Wolfenstein 3D</string>
     <string name="video">Video</string>
     <string name="virtual_joystick">Virtual joystick</string>
     <string name="touch">Touch</string>
@@ -569,5 +570,16 @@
     <string name="common">Common</string>
     <string name="current_game">Current game</string>
     <string name="edit_type">Edit type</string>
+    <string name="advance">Advance</string>
+    <string name="game_thread_stack_size">Game thread stack memory size(kb)</string>
+    <string name="_0_is_unset">0 = unset</string>
+    <string name="are_you_sure_clean_all_log_files">Are you sure clean all %s log files?</string>
+    <string name="clean_logcat_files">Clean logcat files</string>
+    <string name="clean_backtrace_log_files">Clean backtrace log files</string>
+    <string name="clean_dalvik_crash_log_files">Clean dalvik crash log files</string>
+    <string name="crash">crash</string>
+    <string name="backtrace">backtrace</string>
+    <string name="use_multithread_command_to_switch_single_multi_threading_in_game_if_enabled">Use `multithread` command to switch single/multi threading in game if enabled</string>
+    <string name="skin_deep">Skin Deep</string>
 
 </resources>

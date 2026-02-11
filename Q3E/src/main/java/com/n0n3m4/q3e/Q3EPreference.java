@@ -50,6 +50,7 @@ public final class Q3EPreference
     public static final String pref_harm_mapBack                        = "q3e_harm_map_back"; //k
     public static final String pref_harm_game                           = "q3e_harm_game"; //k
 
+    // KARIN_NEW_GAME_BOOKMARK: add preference keys
     // DOOM 3
     public static final String pref_params                        = "q3e_params";
     public static final String pref_harm_fs_game                  = "q3e_harm_fs_game"; //k
@@ -132,15 +133,15 @@ public final class Q3EPreference
     public static final String pref_harm_d3bfg_env                = PREF_HARM_D3BFG_PREFIX + "env";
     public static final String pref_harm_d3bfg_game_mod           = PREF_HARM_D3BFG_PREFIX + "game_mod"; //k
     public static final String pref_harm_d3bfg_rendererBackend    = PREF_HARM_D3BFG_PREFIX + "rendererBackend"; //k
-    // GZDOOM
-    public static final String PREF_HARM_GZDOOM_PREFIX            = "q3e_harm_gzdoom_";
-    public static final String pref_harm_gzdoom_fs_game           = PREF_HARM_GZDOOM_PREFIX + "fs_game"; //k
-    public static final String pref_harm_gzdoom_game_lib          = PREF_HARM_GZDOOM_PREFIX + "game_lib"; //k
-    public static final String pref_harm_gzdoom_user_mod          = PREF_HARM_GZDOOM_PREFIX + "user_mod"; //k
-    public static final String pref_params_gzdoom                 = PREF_HARM_GZDOOM_PREFIX + "params"; //k
-    public static final String pref_harm_gzdoom_command_record    = PREF_HARM_GZDOOM_PREFIX + "command_record";
-    public static final String pref_harm_gzdoom_env               = PREF_HARM_GZDOOM_PREFIX + "command_env";
-    public static final String pref_harm_gzdoom_game_mod          = PREF_HARM_GZDOOM_PREFIX + "game_mod"; //k
+    // ZDOOM
+    public static final String PREF_HARM_ZDOOM_PREFIX             = "q3e_harm_uzdoom_";
+    public static final String pref_harm_zdoom_fs_game            = PREF_HARM_ZDOOM_PREFIX + "fs_game"; //k
+    public static final String pref_harm_zdoom_game_lib           = PREF_HARM_ZDOOM_PREFIX + "game_lib"; //k
+    public static final String pref_harm_zdoom_user_mod           = PREF_HARM_ZDOOM_PREFIX + "user_mod"; //k
+    public static final String pref_params_zdoom                  = PREF_HARM_ZDOOM_PREFIX + "params"; //k
+    public static final String pref_harm_zdoom_command_record     = PREF_HARM_ZDOOM_PREFIX + "command_record";
+    public static final String pref_harm_zdoom_env                = PREF_HARM_ZDOOM_PREFIX + "command_env";
+    public static final String pref_harm_zdoom_game_mod           = PREF_HARM_ZDOOM_PREFIX + "game_mod"; //k
     // ETW
     public static final String PREF_HARM_ETW_PREFIX               = "q3e_harm_etw_";
     public static final String pref_harm_etw_fs_game              = PREF_HARM_ETW_PREFIX + "fs_game"; //k
@@ -241,6 +242,24 @@ public final class Q3EPreference
     public static final String pref_harm_openmohaa_command_record = PREF_HARM_MOHAA_PREFIX + "command_record";
     public static final String pref_harm_openmohaa_env            = PREF_HARM_MOHAA_PREFIX + "env";
     public static final String pref_harm_openmohaa_game_mod       = PREF_HARM_MOHAA_PREFIX + "game_mod"; //k
+    // Wolf3D
+    public static final String PREF_HARM_WOLF3D_PREFIX            = "q3e_harm_wolf3d_";
+    public static final String pref_harm_wolf3d_fs_game           = PREF_HARM_WOLF3D_PREFIX + "fs_game"; //k
+    public static final String pref_harm_wolf3d_game_lib          = PREF_HARM_WOLF3D_PREFIX + "game_lib"; //k
+    public static final String pref_harm_wolf3d_user_mod          = PREF_HARM_WOLF3D_PREFIX + "user_mod"; //k
+    public static final String pref_params_wolf3d                 = PREF_HARM_WOLF3D_PREFIX + "params"; //k
+    public static final String pref_harm_wolf3d_command_record    = PREF_HARM_WOLF3D_PREFIX + "command_record";
+    public static final String pref_harm_wolf3d_env               = PREF_HARM_WOLF3D_PREFIX + "env";
+    public static final String pref_harm_wolf3d_game_mod          = PREF_HARM_WOLF3D_PREFIX + "game_mod"; //k
+    // Skin Deep
+    public static final String PREF_HARM_SKINDEEP_PREFIX          = "q3e_harm_skindeep_";
+    public static final String pref_harm_skindeep_fs_game         = PREF_HARM_SKINDEEP_PREFIX + "fs_game"; //k
+    public static final String pref_harm_skindeep_game_lib        = PREF_HARM_SKINDEEP_PREFIX + "game_lib"; //k
+    public static final String pref_harm_skindeep_user_mod        = PREF_HARM_SKINDEEP_PREFIX + "user_mod"; //k
+    public static final String pref_params_skindeep               = PREF_HARM_SKINDEEP_PREFIX + "params"; //k
+    public static final String pref_harm_skindeep_command_record  = PREF_HARM_SKINDEEP_PREFIX + "command_record";
+    public static final String pref_harm_skindeep_env             = PREF_HARM_SKINDEEP_PREFIX + "env";
+    public static final String pref_harm_skindeep_game_mod        = PREF_HARM_SKINDEEP_PREFIX + "game_mod"; //k
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k
@@ -279,8 +298,8 @@ public final class Q3EPreference
     public static final String pref_ratioy                            = "harm_q3e_ratioy";
     public static final String pref_ratio_use_custom_resolution       = "harm_q3e_ratio_use_custom_resolution";
     public static final String pref_harm_r_shadowMapPerforatedShadow  = "q3e_harm_r_shadowMapPerforatedShadow"; //k
-    public static final String pref_harm_gzdoom_load_lights_pk3       = "harm_gzdoom_load_lights_pk3";
-    public static final String pref_harm_gzdoom_load_brightmaps_pk3   = "harm_gzdoom_load_brightmaps_pk3";
+    public static final String pref_harm_zdoom_load_lights_pk3        = "harm_uzdoom_load_lights_pk3";
+    public static final String pref_harm_zdoom_load_brightmaps_pk3    = "harm_uzdoom_load_brightmaps_pk3";
     public static final String pref_harm_max_console_height_frac      = "q3e_harm_max_console_height_frac"; //k
     public static final String pref_harm_r_occlusionCulling           = "q3e_harm_r_occlusionCulling"; //k
     public static final String pref_harm_gui_useD3BFGFont             = "q3e_harm_gui_useD3BFGFont"; //k
@@ -310,6 +329,7 @@ public final class Q3EPreference
     public static final String THEME                         = "harm_theme";
     public static final String EVENT_QUEUE                   = "harm_event_queue"; // 0 = native; 1 = java
     public static final String GAME_THREAD                   = "harm_game_thread"; // 0 = native; 1 = java
+    public static final String GAME_THREAD_STACK_SIZE        = "harm_game_thread_stack_size"; // 0 = unset
     public static final String AUTOSAVE_BUTTON_SETTINGS      = "harm_autosave_button_settings";
     public static final String BUTTON_SWIPE_RELEASE_DELAY    = "harm_button_swipe_release_delay";
     public static final String DISC_PANEL_KEYS_PREFIX        = "harm_disc_panel_keys_";

@@ -52,7 +52,7 @@
     <string name="rivensin_play_original_doom3_level">Rivensin play original DOOM3 level</string>
     <string name="rbdoom3_bfg_hlsl_shader">RBDOOM3-BFG HLSL shader</string>
     <string name="the_dark_mod_glsl_shader">The Dark Mod GLSL shader</string>
-    <string name="gzdoom_builtin_resource">GZDOOM built-in resource</string>
+    <string name="zdoom_builtin_resource">UZDOOM built-in resource</string>
     <string name="close">Close</string>
     <string name="open">Open</string>
     <string name="exit_game">Exit game</string>
@@ -66,4 +66,13 @@
     <string name="external">External</string>
     <string name="etlegacy_extras">ET: Legacy extras</string>
     <string name="extract_files_fail">Extract %1$s files fail!</string>
+    <string name="ecwolf_builtin_resource">ECWolf built-in resource</string>
+    <string name="quit">Quit</string>
+    <string name="edit_buttons_layout">Edit buttons layout</string>
+    <string name="finish_editing">Finish editing</string>
+    <string name="choose_input_method">Choose input method</string>
+    <string name="open_input_method">Open input method</string>
+    <string name="error">Error</string>
+    <string name="restart">Restart</string>
+    <string name="skin_deep_glsl_shader">Skin Deep GLSL shader</string>
 </resources>

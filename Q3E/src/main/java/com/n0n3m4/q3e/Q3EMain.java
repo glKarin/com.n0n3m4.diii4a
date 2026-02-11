@@ -21,28 +21,37 @@ package com.n0n3m4.q3e;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.SizeF;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.n0n3m4.q3e.device.Q3EOuya;
+import com.n0n3m4.q3e.device.Q3EVirtualMouse;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.karin.KDebugTextView;
 import com.n0n3m4.q3e.karin.KLog;
-import com.n0n3m4.q3e.karin.KMouseCursor;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 import com.n0n3m4.q3e.karin.KidTechCommand;
@@ -50,12 +59,10 @@ import com.n0n3m4.q3e.karin.Theme;
 
 public class Q3EMain extends Activity
 {
-    private       Q3ECallbackObj mAudio;
     private       Q3EView        mGLSurfaceView;
-    private       RelativeLayout mainLayout;
-    private       KMouseCursor   mouseCursor;
+    private RelativeLayout  mainLayout;
     // k
-    private       boolean        m_hideNav         = true;
+    private boolean         m_hideNav         = true;
     private       int            m_runBackground   = 1;
     private       int            m_renderMemStatus = 0;
     private       Q3EControlView mControlGLSurfaceView;
@@ -65,10 +72,22 @@ public class Q3EMain extends Activity
     private       int            m_offsetY         = 0;
     private       int            m_offsetX         = 0;
     @SuppressLint("StaticFieldLeak")
-    public static Q3EGameHelper  gameHelper;
+    public static Q3EGameHelper gameHelper;
+    private MenuItem            editButtonMenu;
+    private MenuItem            backMenu;
+    private ImageView menuButton;
+    private final Handler handler = new Handler();
+    private Runnable backCallback;
 
     private       Q3EKeyboard keyboard;
     private static final int VIEW_BASE_Z = 100;
+    private static final int TOOLBAR_Z = VIEW_BASE_Z + 4;
+    private static final int VKB_Z = VIEW_BASE_Z + 3;
+    private static final int MEM_DEBUG_Z = VIEW_BASE_Z + 2;
+    private static final int SETTING_Z = VIEW_BASE_Z + 1;
+
+    private static final float MENU_ICON_ALPHA = 0.5f;
+    private static final int MENU_ICON_HIDE_DELAY = 10;
 
     public final Q3EPermissionRequest permissionRequest = new Q3EPermissionRequest();
 
@@ -86,6 +105,7 @@ public class Q3EMain extends Activity
         Q3E.activity = this;
 
         keyboard = new Q3EKeyboard(this);
+        Q3E.keyboard = keyboard;
 
         gameHelper = new Q3EGameHelper();
         gameHelper.SetContext(this);
@@ -131,11 +151,7 @@ public class Q3EMain extends Activity
         // create
         super.onCreate(savedInstanceState);
 
-        // check start
-        if(!CheckStart())
-            return;
-
-        Q3EUtils.DumpPID(this);
+        KUncaughtExceptionHandler.DumpPID(this);
 
         // setup language environment
         Q3ELang.Locale(this);
@@ -143,20 +159,18 @@ public class Q3EMain extends Activity
         // setup theme
         Theme.SetTheme(this, false);
 
-        // load game
-        if(gameHelper.checkGameFiles())
-        {
-            // extract game required resource in apk
-            gameHelper.ExtractGameResource();
+        // check start
+        if(!CheckStart())
+            return;
 
-            // init GUI component
-            InitGUI();
-        }
-        else
-        {
-            finish();
-            Q3EUtils.RunLauncher(this);
-        }
+        // extract game required resource in apk
+        gameHelper.ExtractGameResource();
+
+        // check support devices
+        Q3E.supportDevices = gameHelper.CheckDevices();
+
+        // init GUI component
+        InitGUI();
     }
 
     @Override
@@ -180,8 +194,6 @@ public class Q3EMain extends Activity
             mGLSurfaceView.Shutdown();*/
 
         super.onDestroy();
-        if(null != mAudio)
-            mAudio.OnDestroy();
     }
 
     @Override
@@ -194,10 +206,10 @@ public class Q3EMain extends Activity
             memoryUsageText.Stop();
 
         if(m_runBackground < 2)
-            if(mAudio != null)
-            {
-                mAudio.pause();
-            }
+        {
+            if(Q3E.callbackObj != null)
+                Q3E.callbackObj.pause();
+        }
 
         Q3E.Pause();
 
@@ -206,7 +218,7 @@ public class Q3EMain extends Activity
             mControlGLSurfaceView.Pause();
         }
         if(m_initView)
-            Q3EUtils.CloseVKB(mGLSurfaceView);
+            Q3E.CloseVKB();
         keyboard.OnPause();
     }
 
@@ -227,9 +239,9 @@ public class Q3EMain extends Activity
         }
 
         //k if(m_runBackground < 2)
-        if(mAudio != null)
+        if(Q3E.callbackObj != null)
         {
-            mAudio.resume();
+            Q3E.callbackObj.resume();
         }
     }
 
@@ -259,9 +271,9 @@ public class Q3EMain extends Activity
     {
         final View decorView = getWindow().getDecorView();
         if(m_hideNav)
-            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
+            decorView.setSystemUiVisibility(Q3EGUI.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
         else
-            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_OPTIONS);
+            decorView.setSystemUiVisibility(Q3EGUI.UI_FULLSCREEN_OPTIONS);
 /*        if(m_hideNav)
         {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -300,13 +312,12 @@ public class Q3EMain extends Activity
     private void InitGUI()
     {
         if(!Q3EOuya.Init(this))
-            Q3EUtils.isOuya = false;
+            Q3E.isOuya = false;
 
-        if(mAudio == null)
-            mAudio = new Q3ECallbackObj();
-        mAudio.InitGUIInterface(this);
-        Q3EUtils.q3ei.callbackObj = mAudio;
-        Q3EJNI.setCallbackObject(mAudio);
+        if(Q3E.callbackObj == null)
+            Q3E.callbackObj = new Q3ECallbackObj();
+        Q3E.callbackObj.InitGUIInterface(this);
+        Q3EJNI.setCallbackObject(Q3E.callbackObj);
 
         mainLayout = new RelativeLayout(this);
 
@@ -323,21 +334,12 @@ public class Q3EMain extends Activity
         if(m_initView)
             return;
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         if(mGLSurfaceView == null)
             mGLSurfaceView = new Q3EView(this);
         Q3E.gameView = mGLSurfaceView;
         if(mControlGLSurfaceView == null)
             mControlGLSurfaceView = new Q3EControlView(this);
         Q3E.controlView = mControlGLSurfaceView;
-        mAudio.vw = mControlGLSurfaceView;
-        mControlGLSurfaceView.EnableGyroscopeControl(Q3EUtils.q3ei.view_motion_control_gyro);
-        float gyroXSens = preferences.getFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EControlView.GYROSCOPE_X_AXIS_SENS);
-        float gyroYSens = preferences.getFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EControlView.GYROSCOPE_Y_AXIS_SENS);
-        if(Q3EUtils.q3ei.view_motion_control_gyro && (gyroXSens != 0.0f || gyroYSens != 0.0f))
-            mControlGLSurfaceView.SetGyroscopeSens(gyroXSens, gyroYSens);
-        mControlGLSurfaceView.RenderView(mGLSurfaceView);
 
         if(m_portrait)
             InitPortraitGUI();
@@ -356,7 +358,7 @@ public class Q3EMain extends Activity
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         int scheme = mPrefs.getInt(Q3EPreference.pref_scrres_scheme, Q3EGlobals.SCREEN_FULL);
 
-        int[] size = Q3EUtils.GetGeometry(this, true, m_hideNav, m_coverEdges);
+        int[] size = Q3EContextUtils.GetGeometry(this, true, m_hideNav, m_coverEdges);
         if(scheme == Q3EGlobals.SCREEN_FIXED_RATIO)
         {
             int ratioX = Q3EUtils.parseInt_s(mPrefs.getString(Q3EPreference.pref_ratiox, "0"));
@@ -395,19 +397,19 @@ public class Q3EMain extends Activity
         mControlGLSurfaceView.setZOrderMediaOverlay(true);
         mainLayout.addView(mControlGLSurfaceView, params);
 
-        if(Q3EUtils.q3ei.function_key_toolbar)
+        if(Q3E.function_key_toolbar)
         {
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
             View key_toolbar = keyboard.CreateToolbar();
             mainLayout.addView(key_toolbar, params);
-            Q3EUtils.SetViewZ(key_toolbar, VIEW_BASE_Z + 3);
+            Q3EUtils.SetViewZ(key_toolbar, TOOLBAR_Z);
         }
-        if(Q3EUtils.q3ei.builtin_virtual_keyboard)
+        if(Q3E.builtin_virtual_keyboard)
         {
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             View vkb = keyboard.CreateBuiltInVKB();
             mainLayout.addView(vkb, params);
-            Q3EUtils.SetViewZ(vkb, VIEW_BASE_Z + 2);
+            Q3EUtils.SetViewZ(vkb, VKB_Z);
         }
 
         if(m_renderMemStatus > 0) //k
@@ -415,15 +417,16 @@ public class Q3EMain extends Activity
             memoryUsageText = new KDebugTextView(mainLayout.getContext());
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             mainLayout.addView(memoryUsageText, params);
-            Q3EUtils.SetViewZ(memoryUsageText, VIEW_BASE_Z + 1);
+            Q3EUtils.SetViewZ(memoryUsageText, MEM_DEBUG_Z);
             memoryUsageText.setTypeface(Typeface.MONOSPACE);
         }
+        SetupSettingGate();
     }
 
     @SuppressLint("ResourceType")
     private void InitPortraitGUI()
     {
-        int[] size = Q3EUtils.GetGeometry(this, true, true, true);
+        int[] size = Q3EContextUtils.GetGeometry(this, true, true, true);
 
         float ratio = (float) size[3] / (float) size[2];
         int avaHeight = (int) ((float) size[3] * ratio);
@@ -485,19 +488,19 @@ public class Q3EMain extends Activity
         params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
         mainLayout.addView(mControlGLSurfaceView, params);
 
-        if(Q3EUtils.q3ei.function_key_toolbar)
+        if(Q3E.function_key_toolbar)
         {
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getResources().getDimensionPixelSize(R.dimen.toolbarHeight));
             View key_toolbar = keyboard.CreateToolbar();
             mainLayout.addView(key_toolbar, params);
-            Q3EUtils.SetViewZ(key_toolbar, VIEW_BASE_Z + 3);
+            Q3EUtils.SetViewZ(key_toolbar, TOOLBAR_Z);
         }
-        if(Q3EUtils.q3ei.builtin_virtual_keyboard)
+        if(Q3E.builtin_virtual_keyboard)
         {
             params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             View vkb = keyboard.CreateBuiltInVKB();
             mainLayout.addView(vkb, params);
-            Q3EUtils.SetViewZ(vkb, VIEW_BASE_Z + 2);
+            Q3EUtils.SetViewZ(vkb, VKB_Z);
         }
 
         if(m_renderMemStatus > 0) //k
@@ -508,11 +511,12 @@ public class Q3EMain extends Activity
             params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
             mainLayout.addView(memoryUsageText, params);
-            Q3EUtils.SetViewZ(memoryUsageText, VIEW_BASE_Z + 1);
+            Q3EUtils.SetViewZ(memoryUsageText, MEM_DEBUG_Z);
             memoryUsageText.setTypeface(Typeface.MONOSPACE);
 
             memoryUsageText.Start(m_renderMemStatus * 1000);
         }
+        SetupSettingGate();
 
         keyboard.onAttachedToWindow(m_offsetY);
     }
@@ -531,49 +535,34 @@ public class Q3EMain extends Activity
 
     private boolean CheckStart()
     {
-        if(Q3EUtils.q3ei.IsDisabled()) // disabled or removed games
+        String msg = null;
+
+        if(Q3E.q3ei.IsDisabled()) // disabled or removed games
         {
-            Toast.makeText(this, Q3EUtils.q3ei.game_name + " is disabled or removed!", Toast.LENGTH_LONG).show();
-            finish();
-            Q3EUtils.RunLauncher(this);
-            return false;
+            msg =  Q3E.q3ei.game_name + " is disabled or removed!";
         }
-        else if(Q3EUtils.q3ei.isDOOM) // arm32 not support GZDOOM
+        else if(Q3E.q3ei.isDOOM) // arm32 not support UZDOOM
         {
             if(!Q3EJNI.Is64())
-            {
-                Toast.makeText(this, "GZDOOM not support on arm32 device!", Toast.LENGTH_LONG).show();
-                finish();
-                Q3EUtils.RunLauncher(this);
-                return false;
-            }
-            String iwad = KidTechCommand.GetParam("-+", Q3EUtils.q3ei.cmd, "iwad");
-            if(KStr.IsBlank(iwad))
-            {
-                Toast.makeText(this, "GZDOOM requires -iwad file!", Toast.LENGTH_LONG).show();
-                finish();
-                Q3EUtils.RunLauncher(this);
-                return false;
-            }
+                msg = "UZDOOM not support on arm32 device!";
+            else if(KStr.IsBlank(KidTechCommand.GetParam("-+", Q3E.q3ei.cmd, "iwad")))
+                msg = "UZDOOM requires -iwad file!";
         }
         else if(Q3EGlobals.IsFDroidVersion())
         {
-            if(Q3EUtils.q3ei.isXash3D)
-            {
-                Toast.makeText(this, "F-Droid version not support Xash3D, you can install Github version!", Toast.LENGTH_LONG).show();
-                finish();
-                Q3EUtils.RunLauncher(this);
-                return false;
-            }
-            else if(Q3EUtils.q3ei.isSource)
-            {
-                Toast.makeText(this, "F-Droid version not support Source-Engine game, you can install Github version!", Toast.LENGTH_LONG).show();
-                finish();
-                Q3EUtils.RunLauncher(this);
-                return false;
-            }
+            if(Q3E.q3ei.isXash3D)
+                msg = "F-Droid version not support Xash3D, you can install Github version!";
+            else if(Q3E.q3ei.isSource)
+                msg = "F-Droid version not support Source-Engine game, you can install Github version!";
         }
-        return true;
+
+        if(null != msg)
+        {
+            gameHelper.FatalError(msg);
+            return false;
+        }
+        else
+            return gameHelper.checkGameFiles();
     }
 
     private void SetupGame()
@@ -603,47 +592,23 @@ public class Q3EMain extends Activity
         }
     }
 
-    private void MakeMouseCursor()
+    public void MakeMouseCursor(int fullWidth, int fullHeight)
     {
-        if(null == mouseCursor)
+        if(null == Q3E.virtualMouse)
         {
-            mouseCursor = new KMouseCursor(this);
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(KMouseCursor.WIDTH, KMouseCursor.HEIGHT);
-            mainLayout.addView(mouseCursor, params);
+            Q3E.virtualMouse = new Q3EVirtualMouse(this);
         }
-    }
 
-    public void SetMouseCursorVisible(boolean visible)
-    {
-        if(mControlGLSurfaceView.IsUsingMouse())
+        Q3E.virtualMouse.SetPhysicalGeometry(m_offsetX, m_offsetY, fullWidth, fullHeight);
+        Q3E.virtualMouse.SetLogicalSize(Q3E.surfaceWidth, Q3E.surfaceHeight);
+        if(!Q3E.q3ei.IsUsingSDL() || Q3E.m_usingMouse)
         {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                mControlGLSurfaceView.ShowCursor(visible);
-            }
+            Q3E.virtualMouse.DisableCursor(true);
+            Q3E.virtualMouse.SetCursorVisible(false);
         }
-        else
-        {
-            MakeMouseCursor();
-            mouseCursor.SetVisible(visible);
-        }
-    }
-
-    public void SetMouseCursorPosition(int x, int y)
-    {
-        if(mControlGLSurfaceView.IsUsingMouse())
-            return;
-        MakeMouseCursor();
-        if(Q3E.IsOriginalSize())
-            mouseCursor.SetPosition(x + m_offsetX, y + m_offsetY);
-        else
-        {
-            mouseCursor.SetPosition(Q3E.LogicalToPhysicsX(x) + m_offsetX, Q3E.LogicalToPhysicsY(y) + m_offsetY);
-        }
-    }
-
-    public Q3EKeyboard GetKeyboard()
-    {
-        return keyboard;
+        RectF physicalGeometry = Q3E.virtualMouse.PhysicalGeometry();
+        SizeF logicalSize = Q3E.virtualMouse.LogicalSize();
+        KLog.I("Virtual mouse initialization: physical geometry=(%f, %f, %f, %f), logical size=(%f, %f), cursor=%s", physicalGeometry.left, physicalGeometry.top, physicalGeometry.right, physicalGeometry.bottom, logicalSize.getWidth(), logicalSize.getHeight(), Q3E.virtualMouse.IsDisableCursor() ? "disabled" : "enabled");
     }
 
     public RelativeLayout GetMainLayout()
@@ -695,5 +660,181 @@ public class Q3EMain extends Activity
                 permissionRequest.notifyAll();
             }
         }
+    }
+
+    private void SetupSettingGate()
+    {
+//        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+//        if(mPrefs.getBoolean(Q3EPreference.pref_hideonscr, false))
+//            return;
+
+        int px = Q3EContextUtils.dip2px(this, 48);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(px, px);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP | RelativeLayout.CENTER_HORIZONTAL);
+        if(m_portrait)
+        {
+            params.addRule(RelativeLayout.BELOW, mGLSurfaceView.getId());
+            //params.topMargin = m_offsetY;
+        }
+
+        menuButton = new ImageView(this);
+        menuButton.setAlpha(MENU_ICON_ALPHA);
+        menuButton.setFocusable(false);
+        menuButton.setFocusableInTouchMode(false);
+        menuButton.setImageDrawable(getResources().getDrawable(R.drawable.icon_m_settings));
+        mainLayout.addView(menuButton, params);
+        Q3EUtils.SetViewZ(menuButton, SETTING_Z);
+        menuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OpenMenu();
+            }
+        });
+        ShowMenuIcon(0.6f, 30);
+    }
+
+    private void OpenMenu()
+    {
+        ShowMenuIcon(-1.0f, -1);
+        openOptionsMenu();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editButtonMenu = menu.findItem(R.id.main_edit_button_layout);
+        backMenu = menu.findItem(R.id.main_quit);
+        if(m_portrait || preferences.getBoolean(Q3EPreference.pref_hideonscr, false))
+        {
+            menu.findItem(R.id.main_edit_button_layout).setVisible(false);
+        }
+        if(preferences.getBoolean(Q3EPreference.BUILTIN_VIRTUAL_KEYBOARD, false))
+            menu.findItem(R.id.main_choose_input_method).setVisible(false);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int itemId = item.getItemId();
+        if (itemId == R.id.main_edit_button_layout)
+        {
+            ToggleButtonEditor();
+            return true;
+        }
+        else if (itemId == R.id.main_choose_input_method)
+        {
+            Q3EContextUtils.ChooseInputMethod(this);
+            return true;
+        }
+        else if (itemId == R.id.main_open_input_method)
+        {
+            mControlGLSurfaceView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Q3E.OpenVKB();
+                }
+            }, 250);
+            return true;
+        }
+        else if (itemId == R.id.main_quit)
+        {
+            if(null != backCallback)
+            {
+                backCallback.run();
+                backCallback = null;
+            }
+            else
+                Q3E.activity.Quit();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void ToggleButtonEditor()
+    {
+        boolean editMode = mControlGLSurfaceView.IsEditMode();
+
+        mControlGLSurfaceView.ToggleMode(new Runnable() {
+            @Override
+            public void run() {
+                ShowMenuIcon(-1.0f, -1);
+                backCallback = null;
+                UpdateMenu();
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+                ShowMenuIcon(1.0f, 0);
+                UpdateMenu();
+            }
+        });
+
+        if(!editMode)
+            backCallback = new Runnable() {
+                @Override
+                public void run() {
+                    mControlGLSurfaceView.ExitEditMode(false);
+                }
+            };
+        else
+            backCallback = null;
+    }
+
+    private final Runnable hideMenuIcon_f = new Runnable() {
+        @Override
+        public void run()
+        {
+            if(null != menuButton)
+                menuButton.setAlpha(0.0f);
+        }
+    };
+
+    private void ShowMenuIcon(float alpha, int autoHide)
+    {
+        handler.removeCallbacks(hideMenuIcon_f);
+        if(null != menuButton)
+        {
+            menuButton.setAlpha(alpha < 0.0f ? MENU_ICON_ALPHA : alpha);
+            if(autoHide > 0)
+                handler.postDelayed(hideMenuIcon_f, autoHide * 1000L);
+            else if(autoHide < 0)
+                handler.postDelayed(hideMenuIcon_f, MENU_ICON_HIDE_DELAY * 1000L);
+        }
+    }
+
+    private void UpdateMenu()
+    {
+        if(null != mControlGLSurfaceView && mControlGLSurfaceView.IsEditMode())
+            editButtonMenu.setTitle(R.string.finish_editing);
+        else
+            editButtonMenu.setTitle(R.string.edit_buttons_layout);
+
+        if(null != backCallback)
+            backMenu.setTitle(R.string.back);
+        else
+            backMenu.setTitle(R.string.quit);
+    }
+
+    public void Quit()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.exit_game);
+        builder.setMessage(R.string.are_you_sure_exit_game);
+        builder.setCancelable(true);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int v)
+            {
+                dialog.dismiss();
+                Q3E.Shutdown();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.create().show();
     }
 }

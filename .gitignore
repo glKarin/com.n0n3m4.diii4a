@@ -18,7 +18,7 @@ idTech4Amm/src/main/assets/source/LICENSE
 
 Q3E/src/main/assets/pak/gzdoom/4.7.1/
 
-# VSMC
+# MSVC
 CMakeFiles
 *.vcxproj*
 cmake_install.cmake

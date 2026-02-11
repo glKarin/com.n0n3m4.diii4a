@@ -63,7 +63,6 @@ public class Q3EUiConfig extends Activity
     //k
     private boolean   m_hideNav  = true;
     private boolean   m_autoSave = false;
-    private String    m_game     = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -73,7 +72,7 @@ public class Q3EUiConfig extends Activity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        m_game = getIntent().getStringExtra("game");
+        String m_game = getIntent().getStringExtra("game");
         KLog.i("Config button layout", "Edit %s layout", null != m_game ? m_game : "common");
         m_onScreenButtonFriendlyEdge = preferences.getBoolean(Q3EPreference.FRIENDLY_EDGE, Q3EControls.CONST_DEFAULT_ON_SCREEN_BUTTON_FRIENDLY_EDGE);
 
@@ -91,8 +90,8 @@ public class Q3EUiConfig extends Activity
         m_hideNav = preferences.getBoolean(Q3EPreference.HIDE_NAVIGATION_BAR, true);
         SetupUIFlags();
 
-        Q3EUtils.q3ei.LoadTypeAndArgTablePreference(this);
-        Q3EUtils.q3ei.LoadLayoutTablePreference(this, m_game, false);
+        Q3E.q3ei.LoadTypeAndArgTablePreference(this);
+        Q3E.q3ei.LoadLayoutTablePreference(this, m_game, false);
 
         super.onCreate(savedInstanceState);
         Q3ELang.Locale(this);
@@ -104,12 +103,12 @@ public class Q3EUiConfig extends Activity
 
         params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         vw = new Q3EUiView(this);
+        vw.SetEditGame(m_game);
 		//vw.setZOrderOnTop();
 		vw.setZOrderMediaOverlay(true);
-        vw.SetLayout(mainLayout);
         mainLayout.addView(vw, params);
 
-        int px = Q3EUtils.dip2px(this, 48);
+        int px = Q3EContextUtils.dip2px(this, 48);
 		params = new RelativeLayout.LayoutParams(px, px);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP | RelativeLayout.CENTER_HORIZONTAL);
 		ImageView btn = new ImageView(this);
@@ -204,9 +203,9 @@ public class Q3EUiConfig extends Activity
     {
         final View decorView = getWindow().getDecorView();
         if (m_hideNav)
-            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
+            decorView.setSystemUiVisibility(Q3EGUI.UI_FULLSCREEN_HIDE_NAV_OPTIONS);
         else
-            decorView.setSystemUiVisibility(Q3EUtils.UI_FULLSCREEN_OPTIONS);
+            decorView.setSystemUiVisibility(Q3EGUI.UI_FULLSCREEN_OPTIONS);
     }
 
     @Override
@@ -569,10 +568,5 @@ public class Q3EUiConfig extends Activity
     public boolean FriendlyEdge()
     {
         return m_onScreenButtonFriendlyEdge;
-    }
-
-    public String EditGame()
-    {
-        return m_game;
     }
 }

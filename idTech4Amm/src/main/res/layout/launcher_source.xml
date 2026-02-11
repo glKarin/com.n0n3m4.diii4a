@@ -61,11 +61,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="hl1" />
-        <RadioButton
+<!--        <RadioButton
                 android:id="@+id/source_sv_cl_hl1mp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="hl1mp" />
+                android:text="hl1mp" />-->
     </RadioGroup>
 
 </LinearLayout>

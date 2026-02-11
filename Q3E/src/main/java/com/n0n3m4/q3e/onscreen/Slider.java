@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
@@ -98,7 +100,7 @@ public class Slider extends Paintable implements TouchListener
             boolean suc = true;
             for(int i = 1; i <= 3; i++)
             {
-                Bitmap bitmap = Q3EUtils.ResourceToBitmap(context, split[i]);
+                Bitmap bitmap = Q3EContextUtils.ResourceToBitmap(context, split[i]);
                 if(null == bitmap)
                 {
                     suc = false;
@@ -158,12 +160,12 @@ public class Slider extends Paintable implements TouchListener
                     if(null != bs[i])
                         bs[i].recycle();
                 }
-                tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(context, split[0]));
+                tex_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(context, split[0]));
             }
         }
         else
         {
-            tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(context, split[0]));
+            tex_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(context, split[0]));
         }
     }
 
@@ -258,7 +260,7 @@ public class Slider extends Paintable implements TouchListener
                 int key = KeyInPosition(x, y);
                 if(key > 0)
                 {
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, key, 0);
+                    Q3E.sendKeyEvent(true, key, 0);
                     m_lastKey = key;
                 }
             }
@@ -270,17 +272,17 @@ public class Slider extends Paintable implements TouchListener
                 case Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT: {
                     if (x - startx < -SLIDE_DIST)
                     {
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, lkey, 0);
+                        Q3E.sendKeyEvent(true, lkey, 0);
                         ReleaseKey(lkey);
                     }
                     else if (x - startx > SLIDE_DIST)
                     {
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, rkey, 0);
+                        Q3E.sendKeyEvent(true, rkey, 0);
                         ReleaseKey(rkey);
                     }
                     else
                     {
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, ckey, 0);
+                        Q3E.sendKeyEvent(true, ckey, 0);
                         ReleaseKey(ckey);
                     }
                 }
@@ -291,18 +293,18 @@ public class Slider extends Paintable implements TouchListener
                         double ang = Math.abs(Math.atan2(y - starty, x - startx));
                         if (ang > Math.PI / 4 && ang < Math.PI * 3 / 4)
                         {
-                            Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, lkey, 0);
+                            Q3E.sendKeyEvent(true, lkey, 0);
                             ReleaseKey(lkey);
                         }
                         else
                         { //k
-                            Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, rkey, 0);
+                            Q3E.sendKeyEvent(true, rkey, 0);
                             ReleaseKey(rkey);
                         } //k
                     }
                     else
                     {
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, ckey, 0);
+                        Q3E.sendKeyEvent(true, ckey, 0);
                         ReleaseKey(ckey);
                     }
                 }
@@ -313,7 +315,7 @@ public class Slider extends Paintable implements TouchListener
                 default: {
                     if(m_lastKey > 0)
                     {
-                        Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, m_lastKey, 0);
+                        Q3E.sendKeyEvent(false, m_lastKey, 0);
                         m_lastKey = 0;
                     }
                 }
@@ -363,9 +365,9 @@ public class Slider extends Paintable implements TouchListener
     private void ReleaseKey(int key)
     {
         if(m_releaseDelay > 0)
-            Q3EUtils.q3ei.callbackObj.sendKeyEventDelayed(false, key, 0, view, m_releaseDelay);
+            Q3E.sendKeyEventDelayed(false, key, 0, view, m_releaseDelay);
         else
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, key, 0);
+            Q3E.sendKeyEvent(false, key, 0);
     }
 
     public static Slider Move(Slider tmp, GL10 gl)
@@ -458,5 +460,10 @@ public class Slider extends Paintable implements TouchListener
         /*else if (Q3EUtils.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_DOWN_RIGHT)
             sh = size;*/
         return 1.0f;
+    }
+
+    public int Type()
+    {
+        return Q3EGlobals.TYPE_SLIDER;
     }
 }

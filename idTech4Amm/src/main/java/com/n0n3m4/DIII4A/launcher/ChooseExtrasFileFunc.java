@@ -9,6 +9,7 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.Utility;
 import com.karin.idTech4Amm.misc.FileBrowser;
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KidTechCommand;
@@ -54,7 +55,7 @@ public final class ChooseExtrasFileFunc extends GameLauncherFunc
 
     public void run()
     {
-        List<FileBrowser.FileModel> fileModels = ListGZDOOMFiles(m_path);
+        List<FileBrowser.FileModel> fileModels = ListZDOOMFiles(m_path);
 
         final List<CharSequence> items = new ArrayList<>();
         final List<String> files = new ArrayList<>();
@@ -105,7 +106,7 @@ public final class ChooseExtrasFileFunc extends GameLauncherFunc
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
-        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Tr(R.string.mod) + ": " + Tr(R.string._files));
+        builder.setTitle(Q3E.q3ei.game_name + " " + Tr(R.string.mod) + ": " + Tr(R.string._files));
         builder.setMultiChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnMultiChoiceClickListener(){
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked)
@@ -145,7 +146,7 @@ public final class ChooseExtrasFileFunc extends GameLauncherFunc
         dialog.show();
     }
 
-    public static List<FileBrowser.FileModel> ListGZDOOMFiles(String path)
+    public static List<FileBrowser.FileModel> ListZDOOMFiles(String path)
     {
         FileBrowser fileBrowser = new FileBrowser();
         fileBrowser.SetExtension(".wad", ".pk3", ".ipk3", ".deh", ".bex");

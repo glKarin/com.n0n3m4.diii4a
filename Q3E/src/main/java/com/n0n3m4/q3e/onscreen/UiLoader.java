@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.preference.PreferenceManager;
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EPreference;
@@ -46,42 +47,43 @@ public class UiLoader
     {
         int key, key2, key3;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx.getContext());
-        switch (Q3EUtils.q3ei.type_table[id])
+        switch (Q3E.q3ei.type_table[id])
         {
             case Q3EGlobals.TYPE_BUTTON:
                 boolean disableMouseMotion = preferences.getBoolean(Q3EPreference.pref_harm_disable_mouse_button_motion, false);
-                int bh = Button.HeightForWidth(size, Q3EUtils.q3ei.arg_table[id * 4 + 2]);
-                key = Q3EKeyCodes.GetRealKeyCode(Q3EUtils.q3ei.arg_table[id * 4]);
-                return new Button(ctx, gl, cx, cy, size, bh, Q3EUtils.q3ei.texture_table[id], key, Q3EUtils.q3ei.arg_table[id * 4 + 2], Q3EUtils.q3ei.arg_table[id * 4 + 1] == 1, !disableMouseMotion, (float) alpha / 100);
+                int bh = Button.HeightForWidth(size, Q3E.q3ei.arg_table[id * 4 + 2]);
+                key = Q3EKeyCodes.GetRealKeyCode(Q3E.q3ei.arg_table[id * 4]);
+                return new Button(ctx, gl, cx, cy, size, bh, Q3E.q3ei.texture_table[id], key, Q3E.q3ei.arg_table[id * 4 + 2], Q3E.q3ei.arg_table[id * 4 + 1] == 1, !disableMouseMotion, (float) alpha / 100);
             case Q3EGlobals.TYPE_JOYSTICK: {
                 int visibleMode = preferences.getInt(Q3EPreference.pref_harm_joystick_visible, Q3EGlobals.ONSCRREN_JOYSTICK_VISIBLE_ALWAYS);
                 boolean showDot = preferences.getBoolean(Q3EPreference.pref_harm_hide_joystick_center, false);
                 float joystick_release_range = preferences.getFloat(Q3EPreference.pref_harm_joystick_release_range, 0.0f);
                 float joystick_inner_dead_zone = preferences.getFloat(Q3EPreference.pref_harm_joystick_inner_dead_zone, 0.0f);
-                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, joystick_release_range, joystick_inner_dead_zone, !Q3EUtils.q3ei.joystick_unfixed, !editMode, visibleMode, !showDot, Q3EUtils.q3ei.texture_table[id]);
+                boolean joystick_unfixed = preferences.getBoolean(Q3EPreference.pref_harm_joystick_unfixed, false);
+                return new Joystick(ctx, gl, size, (float) alpha / 100, cx, cy, joystick_release_range, joystick_inner_dead_zone, !joystick_unfixed, !editMode, visibleMode, !showDot, Q3E.q3ei.texture_table[id]);
             }
             case Q3EGlobals.TYPE_SLIDER:
                 int sliderDelay = preferences.getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);
                 if(sliderDelay < 0)
                 {
-                    if(Q3EUtils.q3ei.isSamTFE || Q3EUtils.q3ei.isSamTSE)
+                    if(Q3E.q3ei.isSamTFE || Q3E.q3ei.isSamTSE)
                         sliderDelay = Q3EGlobals.SERIOUS_SAM_BUTTON_SWIPE_RELEASE_DELAY;
                 }
-                key = Q3EKeyCodes.GetRealKeyCode(Q3EUtils.q3ei.arg_table[id * 4]);
-                key2 = Q3EKeyCodes.GetRealKeyCode(Q3EUtils.q3ei.arg_table[id * 4 + 1]);
-                key3 = Q3EKeyCodes.GetRealKeyCode(Q3EUtils.q3ei.arg_table[id * 4 + 2]);
-                int sh = Slider.HeightForWidth(size, Q3EUtils.q3ei.arg_table[id * 4 + 3]);
-                return new Slider(ctx, gl, cx, cy, size, sh, Q3EUtils.q3ei.texture_table[id], key, key2, key3, Q3EUtils.q3ei.arg_table[id * 4 + 3], (float) alpha / 100, sliderDelay);
+                key = Q3EKeyCodes.GetRealKeyCode(Q3E.q3ei.arg_table[id * 4]);
+                key2 = Q3EKeyCodes.GetRealKeyCode(Q3E.q3ei.arg_table[id * 4 + 1]);
+                key3 = Q3EKeyCodes.GetRealKeyCode(Q3E.q3ei.arg_table[id * 4 + 2]);
+                int sh = Slider.HeightForWidth(size, Q3E.q3ei.arg_table[id * 4 + 3]);
+                return new Slider(ctx, gl, cx, cy, size, sh, Q3E.q3ei.texture_table[id], key, key2, key3, Q3E.q3ei.arg_table[id * 4 + 3], (float) alpha / 100, sliderDelay);
             case Q3EGlobals.TYPE_DISC:
             {
-                int discKey = Q3EUtils.q3ei.arg_table[id * 4];
+                int discKey = Q3E.q3ei.arg_table[id * 4];
                 if(discKey <= 0)
                     discKey = 1;
                 else if(discKey > Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS.length)
                     discKey = 2;
-                String keysStr = preferences.getString(Q3EUtils.q3ei.DiscPanelKeysPreference(false, discKey), null);
+                String keysStr = preferences.getString(Q3E.q3ei.DiscPanelKeysPreference(false, discKey), null);
                 if(KStr.IsEmpty(keysStr))
-                    keysStr = preferences.getString(Q3EUtils.q3ei.DiscPanelKeysPreference(true, discKey), Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[discKey - 1]);
+                    keysStr = preferences.getString(Q3E.q3ei.DiscPanelKeysPreference(true, discKey), Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[discKey - 1]);
                 final int[] keycodes = Q3EKeyCodes.ONSCRREN_DISC_KEYS_KEYCODES[discKey - 1];
                 final String[] labels = Q3EKeyCodes.ONSCRREN_DISC_KEYS_STRS[discKey - 1].split(",");
                 char[] keys = null;
@@ -111,7 +113,7 @@ public class UiLoader
                     }
                 }
 
-                int discName = Q3EUtils.q3ei.arg_table[id * 4 + 2];
+                int discName = Q3E.q3ei.arg_table[id * 4 + 2];
                 String name = null;
                 if(discName != 0)
                 {
@@ -129,10 +131,10 @@ public class UiLoader
                 int discDelay = preferences.getInt(Q3EPreference.BUTTON_SWIPE_RELEASE_DELAY, Q3EGlobals.BUTTON_SWIPE_RELEASE_DELAY_AUTO);
                 if(discDelay < 0)
                 {
-                    if(Q3EUtils.q3ei.isSamTFE || Q3EUtils.q3ei.isSamTSE)
+                    if(Q3E.q3ei.isSamTFE || Q3E.q3ei.isSamTSE)
                         discDelay = Q3EGlobals.SERIOUS_SAM_BUTTON_SWIPE_RELEASE_DELAY;
                 }
-                return new Disc(ctx, gl, cx, cy, size, (float) alpha / 100, keys, keymaps, Q3EUtils.q3ei.arg_table[id * 4 + 1], Q3EUtils.q3ei.texture_table[id], name, discDelay);
+                return new Disc(ctx, gl, cx, cy, size, (float) alpha / 100, keys, keymaps, Q3E.q3ei.arg_table[id * 4 + 1], Q3E.q3ei.texture_table[id], name, discDelay);
             }
         }
         return null;
@@ -144,15 +146,15 @@ public class UiLoader
         UiElement el = new UiElement(tmp, width, height);
         final Rect ScreenRect = new Rect(0, 0, width, height);
         Rect btnRect;
-        switch (Q3EUtils.q3ei.type_table[id])
+        switch (Q3E.q3ei.type_table[id])
         {
             case Q3EGlobals.TYPE_BUTTON:
                 int bh = el.size;
-                if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL)
+                if (Q3E.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL)
                     bh =  el.size;
-                else if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM)
+                else if (Q3E.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM)
                     bh =  el.size;
-                else if (Q3EUtils.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_CENTER)
+                else if (Q3E.q3ei.arg_table[id * 4 + 2] == Q3EGlobals.ONSCREEN_BUTTON_TYPE_CENTER)
                     bh =  el.size / 2;
                 btnRect = new Rect(-el.size / 2 + el.cx, -bh / 2 + el.cy, el.size / 2 + el.cx, bh / 2 + el.cy);
                 return ScreenRect.intersect(btnRect);
@@ -161,7 +163,7 @@ public class UiLoader
             }
             case Q3EGlobals.TYPE_SLIDER:
                 int sh = el.size;
-                if (Q3EUtils.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT || Q3EUtils.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK)
+                if (Q3E.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT || Q3E.q3ei.arg_table[id * 4 + 3] == Q3EGlobals.ONSCRREN_SLIDER_STYLE_LEFT_RIGHT_SPLIT_CLICK)
                     sh = el.size / 2;
                 btnRect = new Rect(-el.size / 2 + el.cx, -sh / 2 + el.cy, el.size / 2 + el.cx, sh / 2 + el.cy);
                 return ScreenRect.intersect(btnRect);

@@ -65,12 +65,12 @@ public class Q3EAudioTrack extends AudioTrack
 
     public static Q3EAudioTrack Instance(int size)
     {
-        if (Q3EUtils.q3ei.isQ3 || Q3EUtils.q3ei.isRTCW || Q3EUtils.q3ei.isQ1 || Q3EUtils.q3ei.isQ2|| Q3EUtils.q3ei.isETW || Q3EUtils.q3ei.isRealRTCW || Q3EUtils.q3ei.isFTEQW || Q3EUtils.q3ei.isJA || Q3EUtils.q3ei.isJO || Q3EUtils.q3ei.isUrT || Q3EUtils.q3ei.isMOHAA)
+        if (Q3E.q3ei.NeedAudioTrack())
             size /= 8;
 
         int sampleFreq = 44100;
         int minBufferSize = AudioTrack.getMinBufferSize(sampleFreq, AudioFormat.CHANNEL_CONFIGURATION_STEREO, AudioFormat.ENCODING_PCM_16BIT);
-        int bufferSize = Math.max((Q3EUtils.isOuya) ? 0 : 3 * size, minBufferSize);
+        int bufferSize = Math.max((Q3E.isOuya) ? 0 : 3 * size, minBufferSize);
         //k bufferSize = size; //k set original buffer size
         bufferSize = Math.max(size, minBufferSize);
         //k Log.e(TAG, "" + size + " - " + minBufferSize);

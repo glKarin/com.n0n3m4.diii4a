@@ -10,13 +10,18 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.Toast;
 
+import com.karin.idTech4Amm.EventTestActivity;
 import com.karin.idTech4Amm.LogcatActivity;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.sys.Constants;
+import com.n0n3m4.q3e.Q3EContextUtils;
+import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KBacktraceHandler;
+import com.n0n3m4.q3e.karin.KLog;
+import com.n0n3m4.q3e.karin.KStr;
 import com.n0n3m4.q3e.karin.KUncaughtExceptionHandler;
 
 /**
@@ -36,6 +41,7 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference)
     {
         String key = preference.getKey();
+        Context context = ContextUtility.GetContext(this);
         if("last_dalvik_crash_info".equals(key))
         {
             OpenCrashInfo();
@@ -59,6 +65,20 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         else if("last_backtrace".equals(key))
         {
             OpenBacktraceInfo();
+        }
+        else if("clean_dalvik_crash_files".equals(key))
+        {
+            String path = Q3EContextUtils.GetAppStoragePath(context, "/" + Q3EGlobals.FOLDER_CRASH_LOG);
+            CleanFolder(path, Q3ELang.tr(context, R.string.crash));
+        }
+        else if("clean_backtrace_crash_files".equals(key))
+        {
+            String path = Q3EContextUtils.GetAppStoragePath(context, "/" + Q3EGlobals.FOLDER_BACKTRACE_LOG);
+            CleanFolder(path, Q3ELang.tr(context, R.string.backtrace));
+        }
+        else if("test_event".equals(key))
+        {
+            OpenEventTesting();
         }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
@@ -97,7 +117,7 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         Context activity = ContextUtility.GetContext(this);
         final String PID = "" + Process.myPid();
         Toast.makeText(activity, getString(R.string.application_pid) + PID, Toast.LENGTH_LONG).show();
-        Q3EUtils.CopyToClipboard(activity, PID);
+        Q3EContextUtils.CopyToClipboard(activity, PID);
     }
 
     private void OpenDocumentsUI()
@@ -120,10 +140,30 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
         activity.startActivity(new Intent(activity, LogcatActivity.class));
     }
 
+    private void OpenEventTesting()
+    {
+        Context activity = ContextUtility.GetContext(this);
+        activity.startActivity(new Intent(activity, EventTestActivity.class));
+    }
+
     private void ShowPreference()
     {
         Context activity = ContextUtility.GetContext(this);
         new SharedPreferenceViewer(activity).run();
+    }
+
+    private void CleanFolder(String path, String type)
+    {
+        Context context = ContextUtility.GetContext(this);
+        ContextUtility.Confirm(context, Q3ELang.tr(context, R.string.warning), Q3ELang.tr(context, R.string.are_you_sure_clean_all_log_files, type), new Runnable() {
+            @Override
+            public void run()
+            {
+                KLog.I("Remove folder: " + path);
+                Q3EUtils.rmdir_r(path);
+                Toast.makeText(context, R.string.success, Toast.LENGTH_SHORT).show();
+            }
+        }, null, null, null);
     }
 
     private void OpenBacktraceInfo()
@@ -146,7 +186,7 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
                 @Override
                 public void onClick(DialogInterface dialog, int id)
                 {
-                    Q3EUtils.CopyToClipboard(activity, text);
+                    Q3EContextUtils.CopyToClipboard(activity, text);
                     Toast.makeText(activity, R.string.success, Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 }

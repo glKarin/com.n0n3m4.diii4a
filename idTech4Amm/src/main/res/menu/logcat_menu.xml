@@ -33,4 +33,7 @@
     <item android:id="@+id/logcat_menu_clear"
         android:title="@string/clear"
         android:showAsAction="never"/>
+    <item android:id="@+id/logcat_menu_clean_folder"
+        android:title="@string/clean_logcat_files"
+        android:showAsAction="never"/>
 </menu>

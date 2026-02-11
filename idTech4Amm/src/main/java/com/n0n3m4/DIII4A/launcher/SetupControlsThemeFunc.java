@@ -23,6 +23,8 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3ELang;
@@ -56,12 +58,12 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
 
     public void run()
     {
-        Q3EUtils.q3ei.LoadTypeAndArgTablePreference(m_gameLauncher);
+        Q3E.q3ei.LoadTypeAndArgTablePreference(m_gameLauncher);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(R.string.controls_theme);
         View widget = m_gameLauncher.getLayoutInflater().inflate(R.layout.controls_theme_dialog, null, false);
-        List<KControlsTheme> schemes = Q3EUtils.GetControlsThemes(m_gameLauncher);
+        List<KControlsTheme> schemes = Q3EContextUtils.GetControlsThemes(m_gameLauncher);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher);
         String type = preferences.getString(Q3EPreference.CONTROLS_THEME, "");
@@ -186,9 +188,9 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
 
             for(int i = 0; i < Q3EGlobals.UI_SIZE; i++)
             {
-                int type = Q3EUtils.q3ei.type_table[i];
+                int type = Q3E.q3ei.type_table[i];
 
-                String name = Q3EUtils.q3ei.texture_table[i];
+                String name = Q3E.q3ei.texture_table[i];
                 if(type == Q3EGlobals.TYPE_SLIDER)
                 {
                     ControlsTheme theme = new ControlsTheme();
@@ -298,7 +300,7 @@ public final class SetupControlsThemeFunc extends GameLauncherFunc
 
         public void Load(Context context, String type)
         {
-            texture = Q3EUtils.LoadControlBitmap(context, path, type);
+            texture = Q3EContextUtils.LoadControlBitmap(context, path, type);
         }
 
         public String GetTextureSize()

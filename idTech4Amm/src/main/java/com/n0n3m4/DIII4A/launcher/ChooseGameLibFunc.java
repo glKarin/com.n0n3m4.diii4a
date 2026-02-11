@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.lib.ContextUtility;
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EJNI;
 import com.n0n3m4.q3e.Q3ELang;
@@ -67,7 +68,7 @@ public final class ChooseGameLibFunc extends GameLauncherFunc
     {
         final SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(m_gameLauncher);
         final String libPath = ContextUtility.NativeLibDir(m_gameLauncher) + "/";
-        final String[] Libs = m_gameLauncher.GetGameManager().GetGameLibs(Q3EUtils.q3ei.game, false);
+        final String[] Libs = m_gameLauncher.GetGameManager().GetGameLibs(Q3E.q3ei.game, false);
         final String PreferenceKey = m_key;
         final List<CharSequence> items = new ArrayList<>();
         final List<String> values = new ArrayList<>();
@@ -120,7 +121,7 @@ public final class ChooseGameLibFunc extends GameLauncherFunc
         else
             sb.append("armv7-a");
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
-        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Tr(R.string.game_library) + "(" + sb.toString() + ")");
+        builder.setTitle(Q3E.q3ei.game_name + " " + Tr(R.string.game_library) + "(" + sb.toString() + ")");
         builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int p)
             {

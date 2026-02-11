@@ -8,7 +8,7 @@ import java.util.List;
 
 public enum GameResourceUrl
 {
-    // KARIN_NEW_GAME_BOOKMARK
+    // KARIN_NEW_GAME_BOOKMARK: add game resource url
 
     // DOOM 3
     DOOM3_BASE(Q3EGameConstants.GAME_DOOM3, "base", "", "https://store.steampowered.com/app/208200/DOOM_3/", 2),
@@ -54,9 +54,9 @@ public enum GameResourceUrl
     D3BFG_BASE(Q3EGameConstants.GAME_DOOM3BFG, "base", "", "https://store.steampowered.com/app/208200/DOOM_3/", 2),
     D3BFG_RB(Q3EGameConstants.GAME_DOOM3BFG, "base", "", "https://www.moddb.com/mods/rbdoom-3-bfg", 3),
 
-    // GZDOOM
-    GZDOOM_DOOM1(Q3EGameConstants.GAME_GZDOOM, "doom", "", "https://store.steampowered.com/app/2280/DOOM__DOOM_II", 2),
-    GZDOOM_DOOM2(Q3EGameConstants.GAME_GZDOOM, "doom2", "", "https://store.steampowered.com/app/2280/DOOM__DOOM_II", 2),
+    // ZDOOM
+    ZDOOM_DOOM1(Q3EGameConstants.GAME_ZDOOM, "doom", "", "https://store.steampowered.com/app/2280/DOOM__DOOM_II", 2),
+    ZDOOM_DOOM2(Q3EGameConstants.GAME_ZDOOM, "doom2", "", "https://store.steampowered.com/app/2280/DOOM__DOOM_II", 2),
 
     // Wolfenstein: Enemy Territory
     ETW_BASE(Q3EGameConstants.GAME_ETW, "etmain", "ET: LEGACY", "https://www.etlegacy.com", 1),
@@ -91,6 +91,11 @@ public enum GameResourceUrl
     URT_BASE(Q3EGameConstants.GAME_URT, "", "", "https://www.urbanterror.info", 1),
 
     MOHAA_BASE(Q3EGameConstants.GAME_MOHAA, "", "", "https://github.com/openmoh/openmohaa", 1),
+
+    WOLF3D_BASE(Q3EGameConstants.GAME_WOLF3D, "", "", "https://store.steampowered.com/app/2270/Wolfenstein_3D/", 2),
+
+    SKINDEEP_BASE(Q3EGameConstants.GAME_SKINDEEP, "base", "", "https://blendogames.com/skindeep/", 1),
+    SKINDEEP_BASE2(Q3EGameConstants.GAME_SKINDEEP, "base", "", "https://store.steampowered.com/app/301280/Skin_Deep/", 2),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

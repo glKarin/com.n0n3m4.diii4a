@@ -2,6 +2,7 @@ package com.karin.idTech4Amm;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
@@ -15,6 +16,9 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.misc.Function;
 import com.karin.idTech4Amm.sys.Constants;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.n0n3m4.q3e.Q3EContextUtils;
+import com.n0n3m4.q3e.Q3EGlobals;
+import com.n0n3m4.q3e.karin.KLog;
 import com.n0n3m4.q3e.karin.Theme;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -175,7 +179,7 @@ public class LogcatActivity extends Activity
         }
         else if (itemId == R.id.logcat_menu_dump)
         {
-            String path = Q3EUtils.GetAppStoragePath(this, "/logcat");
+            String path = LocalStorePath();
             if(Q3EUtils.mkdir(path, true))
             {
                 String filePath = path + "/" + Constants.CONST_APP_NAME + "_logcat.log";
@@ -225,7 +229,25 @@ public class LogcatActivity extends Activity
         {
             OpenFilterDialog();
         }
+        else if (itemId == R.id.logcat_menu_clean_folder)
+        {
+            ContextUtility.Confirm(this, Q3ELang.tr(this, R.string.warning), Q3ELang.tr(this, R.string.are_you_sure_clean_all_log_files, "logcat"), new Runnable() {
+                @Override
+                public void run()
+                {
+                    String path = LocalStorePath();
+                    KLog.I("Remove folder: " + path);
+                    Q3EUtils.rmdir_r(path);
+                    Toast.makeText(LogcatActivity.this, R.string.success, Toast.LENGTH_SHORT).show();
+                }
+            }, null, null, null);
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private String LocalStorePath()
+    {
+        return Q3EContextUtils.GetAppStoragePath(this, "/" + Q3EGlobals.FOLDER_LOGCAT_LOG);
     }
 
     private void ScrollToBottom()

@@ -6,6 +6,7 @@ import android.graphics.Point;
 import android.preference.PreferenceManager;
 import android.view.Surface;
 
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3EPreference;
@@ -62,7 +63,7 @@ public class Q3EButtonLayoutManager
     private int Dip2px_s(int i)
     {
         final boolean NeedScale = m_scale > 0.0f && m_scale != 1.0f;
-        int r = Q3EUtils.dip2px(m_context, i);
+        int r = Q3EContextUtils.dip2px(m_context, i);
         if(NeedScale)
             r = Math.round((float)r * m_scale);
         return r;
@@ -70,7 +71,7 @@ public class Q3EButtonLayoutManager
 
     private int Dip2px(int i)
     {
-        return Q3EUtils.dip2px(m_context, i);
+        return Q3EContextUtils.dip2px(m_context, i);
     }
 
     private int S(int i)

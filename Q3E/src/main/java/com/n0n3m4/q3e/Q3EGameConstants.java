@@ -2,6 +2,8 @@ package com.n0n3m4.q3e;
 
 public final class Q3EGameConstants
 {
+    // KARIN_NEW_GAME_BOOKMARK: add game library/config file/type/name/base/standalone dir/version/id
+
     // game engine library
     public static final String LIB_ENGINE_ID        = "libdoom3.so"; // DOOM3
     public static final String LIB_ENGINE_RAVEN     = "libquake4.so"; // Quake 4
@@ -12,7 +14,7 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE4_TDM      = "libTheDarkMod.so"; // TDM
     public static final String LIB_ENGINE1_QUAKE    = "libdarkplaces.so"; // Quake 1
     public static final String LIB_ENGINE4_D3BFG    = "libRBDoom3BFG.so"; // Doom3-BFG
-    public static final String LIB_ENGINE1_DOOM     = "libgzdoom.so"; // GZDOOM
+    public static final String LIB_ENGINE1_DOOM     = "libuzdoom.so"; // ZDOOM
     public static final String LIB_ENGINE3_ETW      = "libetl.so"; // ETW
     public static final String LIB_ENGINE3_REALRTCW = "libRealRTCW.so"; // RealRTCW
     public static final String LIB_ENGINE_FTEQW     = "libfteqw.so"; // FTEQW
@@ -24,7 +26,8 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE_SOURCE    = "libsource.so"; // Source Engine
     public static final String LIB_ENGINE3_URT      = "liburbanterror.so"; // Q3 Urban Terror
     public static final String LIB_ENGINE3_MOHAA    = "libopenmohaa.so"; // OpenMOHAA Medal of Honor: Allied Assault
-
+    public static final String LIB_ENGINE1_WOLF3D   = "libecwolf.so"; // Wolfenstein 3D
+    public static final String LIB_ENGINE4_SKINDEEP = "libskindeep.so"; // Skin Deep
 
 
     // game engine version
@@ -35,12 +38,12 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE4_D3BFG_VULKAN  = "libRBDoom3BFGVulkan.so"; // Doom3-BFG(Vulkan)
 
 
-    public static final String GAME_VERSION_REALRTCW_5_2 = "5.2"; // RealRTCW 5.2
-    public static final String LIB_ENGINE3_REALRTCW_5_2  = "libRealRTCW_5_2.so"; // RealRTCW(5.2)
+    // KARIN_GAME_VERSION_BOOKMARK: add/remove other game version/engine library constants
+    //public static final String GAME_VERSION_REALRTCW_5_2 = "5.2"; // RealRTCW 5.2
+    //public static final String LIB_ENGINE3_REALRTCW_5_2  = "libRealRTCW_5_2.so"; // RealRTCW(5.2)
 
     //public static final String GAME_VERSION_TDM      = "2.13"; // TDM 2.13
     //public static final String LIB_ENGINE4_TDM_2_12     = "libTheDarkMod_2_12.so"; // TDM(2.12)
-
 
 
     // game config file
@@ -53,7 +56,7 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_TDM      = "Darkmod.cfg";
     public static final String CONFIG_FILE_QUAKE1   = "config.cfg";
     public static final String CONFIG_FILE_DOOM3BFG = "D3BFGConfig.cfg";
-    public static final String CONFIG_FILE_GZDOOM   = "gzdoom.ini";
+    public static final String CONFIG_FILE_ZDOOM    = "uzdoom.ini";
     public static final String CONFIG_FILE_ETW      = "etconfig.cfg";
     public static final String CONFIG_FILE_REALRTCW = "realrtcwconfig.cfg";
     public static final String CONFIG_FILE_FTEQW    = "fte.cfg";
@@ -65,6 +68,8 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_SOURCE   = "cfg/config.cfg";
     public static final String CONFIG_FILE_URT      = "q3config.cfg";
     public static final String CONFIG_FILE_MOHAA    = "configs/omconfig.cfg";
+    public static final String CONFIG_FILE_WOLF3D   = "ecwolf.cfg";
+    public static final String CONFIG_FILE_SKINDEEP = "settings.cfg";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -76,7 +81,7 @@ public final class Q3EGameConstants
     public static final String GAME_TDM      = "tdm";
     public static final String GAME_QUAKE1   = "quake1";
     public static final String GAME_DOOM3BFG = "doom3bfg";
-    public static final String GAME_GZDOOM   = "gzdoom";
+    public static final String GAME_ZDOOM    = "zdoom";
     public static final String GAME_ETW      = "etw";
     public static final String GAME_REALRTCW = "realrtcw";
     public static final String GAME_FTEQW    = "fteqw";
@@ -88,6 +93,8 @@ public final class Q3EGameConstants
     public static final String GAME_SOURCE   = "source";
     public static final String GAME_URT      = "urt";
     public static final String GAME_MOHAA    = "openmohaa";
+    public static final String GAME_WOLF3D   = "ecwolf";
+    public static final String GAME_SKINDEEP = "skindeep";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -99,7 +106,7 @@ public final class Q3EGameConstants
     public static final String GAME_NAME_TDM      = "Dark mod"; // The Dark Mod
     public static final String GAME_NAME_QUAKE1   = "Quake 1";
     public static final String GAME_NAME_DOOM3BFG = "DOOM 3 BFG";
-    public static final String GAME_NAME_GZDOOM   = "GZDOOM";
+    public static final String GAME_NAME_ZDOOM    = "ZDOOM";
     public static final String GAME_NAME_ETW      = "ETW"; // "Wolfenstein: Enemy Territory";
     public static final String GAME_NAME_REALRTCW = "RealRTCW";
     public static final String GAME_NAME_FTEQW    = "FTEQW";
@@ -111,6 +118,8 @@ public final class Q3EGameConstants
     public static final String GAME_NAME_SOURCE   = "Source Engine";
     public static final String GAME_NAME_URT      = "Urban Terror";
     public static final String GAME_NAME_MOHAA    = "MOHAA"; // "Medal of Honor: Allied Assault";
+    public static final String GAME_NAME_WOLF3D   = "Wolfenstein 3D";
+    public static final String GAME_NAME_SKINDEEP = "Skin Deep";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -124,7 +133,7 @@ public final class Q3EGameConstants
     public static final String GAME_BASE_QUAKE1     = "darkplaces/id1"; // "darkplaces";
     public static final String GAME_BASE_QUAKE1_DIR = "id1";
     public static final String GAME_BASE_DOOM3BFG   = "base"; // RBDoom3BFG always in doom3bfg folder
-    public static final String GAME_BASE_GZDOOM     = ""; // GZDOOM is standalone
+    public static final String GAME_BASE_ZDOOM      = ""; // UZDOOM is standalone
     public static final String GAME_BASE_ETW        = "etmain";
     public static final String GAME_BASE_REALRTCW   = "Main";
     public static final String GAME_BASE_FTEQW      = "";
@@ -136,6 +145,8 @@ public final class Q3EGameConstants
     public static final String GAME_BASE_SOURCE     = "hl2";
     public static final String GAME_BASE_URT        = "q3ut4";
     public static final String GAME_BASE_MOHAA      = "main";
+    public static final String GAME_BASE_WOLF3D     = ""; // ECWolf is standalone
+    public static final String GAME_BASE_SKINDEEP   = "base";
 
     // game standalone directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
@@ -147,7 +158,7 @@ public final class Q3EGameConstants
     public static final String GAME_SUBDIR_TDM      = "darkmod";
     public static final String GAME_SUBDIR_QUAKE1   = "quake1";
     public static final String GAME_SUBDIR_DOOMBFG  = "doom3bfg";
-    public static final String GAME_SUBDIR_GZDOOM   = "gzdoom";
+    public static final String GAME_SUBDIR_ZDOOM    = "uzdoom";
     public static final String GAME_SUBDIR_ETW      = "etw";
     public static final String GAME_SUBDIR_REALRTCW = "realrtcw";
     public static final String GAME_SUBDIR_FTEQW    = "fteqw";
@@ -159,6 +170,8 @@ public final class Q3EGameConstants
     public static final String GAME_SUBDIR_SOURCE   = "srceng";
     public static final String GAME_SUBDIR_URT      = "urt";
     public static final String GAME_SUBDIR_MOHAA    = "openmohaa";
+    public static final String GAME_SUBDIR_WOLF3D   = "ecwolf";
+    public static final String GAME_SUBDIR_SKINDEEP = "skindeep";
 
     // game version
     public static final String GAME_VERSION_DOOM3    = "1.3.1.1304";
@@ -170,7 +183,7 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_TDM      = "2.13";
     public static final String GAME_VERSION_QUAKE1   = "";
     public static final String GAME_VERSION_DOOM3BFG = "1.4.0";
-    public static final String GAME_VERSION_GZDOOM   = "4.14.2";
+    public static final String GAME_VERSION_ZDOOM    = "4.14.3";
     public static final String GAME_VERSION_ETW      = "2.83.2";
     public static final String GAME_VERSION_REALRTCW = "5.3";
     public static final String GAME_VERSION_FTEQW    = "1.05"; // ???
@@ -182,6 +195,8 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_SOURCE   = "1.16";
     public static final String GAME_VERSION_URT      = "4.3.4";
     public static final String GAME_VERSION_MOHAA    = "0.82.1";
+    public static final String GAME_VERSION_WOLF3D   = "1.4.2";
+    public static final String GAME_VERSION_SKINDEEP = "1.0.4";
 
     // game type index(ID)
     public static final int GAME_ID_DOOM3    = 0;
@@ -193,7 +208,7 @@ public final class Q3EGameConstants
     public static final int GAME_ID_QUAKE1   = 6;
     public static final int GAME_ID_DOOM3BFG = 7;
     public static final int GAME_ID_TDM      = 8;
-    public static final int GAME_ID_GZDOOM   = 9;
+    public static final int GAME_ID_ZDOOM    = 9;
     public static final int GAME_ID_ETW      = 10;
     public static final int GAME_ID_REALRTCW = 11;
     public static final int GAME_ID_FTEQW    = 12;
@@ -205,14 +220,14 @@ public final class Q3EGameConstants
     public static final int GAME_ID_SOURCE   = 18;
     public static final int GAME_ID_URT      = 19;
     public static final int GAME_ID_MOHAA    = 20;
+    public static final int GAME_ID_WOLF3D   = 21;
+    public static final int GAME_ID_SKINDEEP = 22;
 
 
-    public static final int NUM_SUPPORT_GAME = 21;
+    // KARIN_NEW_GAME_BOOKMARK: increment
+    public static final int NUM_SUPPORT_GAME = 23;
 
-    public enum PatchResource
-    {
-        QUAKE4_SABOT, DOOM3_SABOT, DOOM3_RIVENSIN_ORIGIANL_LEVELS, DOOM3BFG_HLSL_SHADER, TDM_GLSL_SHADER, GZDOOM_RESOURCE, DOOM3_BFG_CHINESE_TRANSLATION, XASH3D_EXTRAS, XASH3D_CS16_EXTRAS, SOURCE_ENGINE_EXTRAS, ET_LEGACY_EXTRAS
-    }
+    public static final String GAME_EXECUABLE = "game.arm";
 
 /*
     public static final String[] QUAKE4_MAPS = {
@@ -283,32 +298,89 @@ public final class Q3EGameConstants
             "THE NEXUS",
     };*/
 
-    public static final String GAME_EXECUABLE = "game.arm";
+    // KARIN_NEW_GAME_BOOKMARK: add patch resource config/version
+    public enum PatchResource
+    {
+        QUAKE4_SABOT,
+        DOOM3_SABOT, DOOM3_RIVENSIN_ORIGIANL_LEVELS, DOOM3_BFG_CHINESE_TRANSLATION,
+        DOOM3BFG_HLSL_SHADER,
+        TDM_GLSL_SHADER,
+        ZDOOM_RESOURCE,
+        XASH3D_EXTRAS, XASH3D_CS16_EXTRAS,
+        SOURCE_ENGINE_EXTRAS,
+        ET_LEGACY_EXTRAS,
+        ECWOLF_RESOURCE,
+        SKINDEEP_GLSL_SHADER,
+    }
 
     // extra internal game file version: <Game engine version>.<idTech4A++ patch version>
     public static final String TDM_GLSL_SHADER_VERSION        = GAME_VERSION_TDM + ".1"; // 1: init
     //public static final String TDM_2_12_GLSL_SHADER_VERSION   = "2.12.6"; // 6: fix a integer to float convert
     public static final String RBDOOM3BFG_HLSL_SHADER_VERSION = GAME_VERSION_DOOM3BFG + ".1"; // 1: init
-    public static final String GZDOOM_VERSION                 = GAME_VERSION_GZDOOM + ".1"; // 1: init
+    public static final String ZDOOM_VERSION                  = GAME_VERSION_ZDOOM + ".1"; // 1: init
     public static final String XASH3D_VERSION                 = GAME_VERSION_XASH3D + ".3"; // 1: include cs16 resource
     public static final String SOURCE_ENGINE_VERSION          = GAME_VERSION_SOURCE + ".1"; // 1: init
     public static final String ETW_VERSION                    = GAME_VERSION_ETW + ".1"; // 1: init
+    public static final String WOLF3D_VERSION                 = GAME_VERSION_WOLF3D + ".2"; // 1: unuse libretro
+    public static final String SKINDEEP_GLSL_SHADER_VERSION   = GAME_VERSION_SKINDEEP + ".1"; // 1: init
 
-    public static final String[] DOOM3_SOUND_DRIVER = { "AudioTrack", "OpenSLES", };
 
-    public static final String[] FTEQW_VID_RENDERER = { "vk", "gl", };
 
-    public static final String[]    GZDOOM_GL_VERSIONS       = { "0", "330", "420", "430", "450", };
-    public static final String[] QUAKE2_RENDERER_BACKENDS = { "gles1", "gles3", "vk", };
+    // KARIN_NEW_GAME_BOOKMARK: add select options on launcher
+    public static final String[] DOOM3_SOUND_DRIVER = {"AudioTrack", "OpenSLES",};
 
-    public static final String[] XASH3D_REFS   = { "gles1", "gl4es", "gles3compat", "soft", };
-    public static final String[] XASH3D_SV_CLS = { "", "hl", "cs16", "cs16_yapb", };
+    public static final String[] FTEQW_VID_RENDERER = {"vk", "gl",};
 
-    public static final String[] SOURCE_ENGINE_SV_CLS = { "hl2", "cstrike", "portal", "dod", "episodic", "hl2mp", "hl1", "hl1mp", };
+    public static final String[] ZDOOM_GL_VERSIONS        = {"0", "330", "420", "430", "450",};
+    public static final String[] QUAKE2_RENDERER_BACKENDS = {"gles1", "gles3", "vk",};
 
-    public static final String[] SDL_AUDIO_DRIVER = { "auto", "opensles", "aaudio", };
+    public static final String[] XASH3D_REFS   = {"gles1", "gl4es", "gles3compat", "soft",};
+    public static final String[] XASH3D_SV_CLS = {"", "hl", "cs16", "cs16_yapb",};
 
-    public static final String[] OPENAL_DRIVER = { "auto", "opensl", "oboe", };
+    public static final String[] SOURCE_ENGINE_SV_CLS = {"hl2", "cstrike", "portal", "dod", "episodic", "hl2mp", "hl1", /*"hl1mp",*/};
+
+    public static final String[] SDL_AUDIO_DRIVER = {"auto", "opensles", "aaudio",};
+
+    public static final String[] OPENAL_DRIVER = {"auto", "opensl", "oboe",};
+
+
+    public static final int ALWAYS_STANDALONE = 1;
+    public static final int SUPPORT_MOD       = 1 << 1;
+    public static final int SECONDARY_DIR     = 1 << 2;
+    public static final int AUDIO_TRACK       = 1 << 3;
+    public static final int EXTERNAL_DLL      = 1 << 4;
+    public static final int USING_OPENAL      = 1 << 5;
+    public static final int SKIP_INTRO        = 1 << 6;
+    public static final int QUICK_LOAD        = 1 << 7;
+    public static final int DISABLED          = 1 << 8;
+    public static final int USING_SDL         = 1 << 9;
+    public static final int VIRTUAL_MOUSE     = 1 << 10;
+    public static final int OPENGL_VERSION    = 1 << 11;
+
+    // KARIN_DISABLE_GAME_BOOKMARK: add game feature flags
+    public static final int FEATURE_DOOM3    = SUPPORT_MOD | SECONDARY_DIR | EXTERNAL_DLL | USING_OPENAL | SKIP_INTRO | QUICK_LOAD | OPENGL_VERSION;
+    public static final int FEATURE_QUAKE4   = FEATURE_DOOM3;
+    public static final int FEATURE_PREY     = FEATURE_DOOM3;
+    public static final int FEATURE_QUAKE2   = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL;
+    public static final int FEATURE_QUAKE3   = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
+    public static final int FEATURE_RTCW     = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO | QUICK_LOAD;
+    public static final int FEATURE_TDM      = SUPPORT_MOD | ALWAYS_STANDALONE| SECONDARY_DIR | USING_OPENAL;
+    public static final int FEATURE_QUAKE1   = SUPPORT_MOD | AUDIO_TRACK | USING_OPENAL;
+    public static final int FEATURE_DOOM3BFG = SUPPORT_MOD | SECONDARY_DIR | USING_OPENAL;
+    public static final int FEATURE_ZDOOM    = SUPPORT_MOD | ALWAYS_STANDALONE | SECONDARY_DIR | USING_OPENAL;
+    public static final int FEATURE_ETW      = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL;
+    public static final int FEATURE_REALRTCW = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO | QUICK_LOAD;
+    public static final int FEATURE_FTEQW    = SUPPORT_MOD | ALWAYS_STANDALONE | AUDIO_TRACK | USING_OPENAL;
+    public static final int FEATURE_JA       = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
+    public static final int FEATURE_JO       = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
+    public static final int FEATURE_SAMTFE   = ALWAYS_STANDALONE | VIRTUAL_MOUSE | USING_OPENAL;
+    public static final int FEATURE_SAMTSE   = ALWAYS_STANDALONE | VIRTUAL_MOUSE | USING_OPENAL;
+    public static final int FEATURE_XASH3D   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL | SECONDARY_DIR | EXTERNAL_DLL | DISABLED;
+    public static final int FEATURE_SOURCE   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL;
+    public static final int FEATURE_URT      = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
+    public static final int FEATURE_MOHAA    = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL;
+    public static final int FEATURE_WOLF3D   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL;
+    public static final int FEATURE_SKINDEEP = SUPPORT_MOD | USING_SDL | SECONDARY_DIR | USING_OPENAL | SKIP_INTRO;
 
     private Q3EGameConstants() {}
 }

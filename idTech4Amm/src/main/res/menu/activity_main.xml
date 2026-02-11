@@ -10,6 +10,8 @@
         android:title="@string/game"
         android:showAsAction="always">
         <menu>
+            <!-- KARIN_NEW_GAME_BOOKMARK: add game to menu -->
+            <!-- KARIN_DISABLE_GAME_BOOKMARK: remove game from menu -->
             <item
                 android:id="@+id/main_menu_game_doom3"
                 android:title="@string/doom_3"
@@ -58,7 +60,7 @@
             <item
                 android:id="@+id/main_menu_game_doom"
                 android:title="@string/doom"
-                android:icon="@drawable/gzdoom_icon"
+                android:icon="@drawable/uzdoom_icon"
                 android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_etw"
@@ -74,7 +76,6 @@
                 android:id="@+id/main_menu_game_fteqw"
                 android:title="@string/fteqw"
                 android:icon="@drawable/fteqw_icon"
-                android:visible="false"
                 android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_ja"
@@ -100,7 +101,6 @@
                 android:id="@+id/main_menu_game_xash3d"
                 android:title="@string/xash3d"
                 android:icon="@drawable/xash3d_icon"
-                android:visible="false"
                 android:showAsAction="never|withText"/>
             <item
                 android:id="@+id/main_menu_game_source"
@@ -116,6 +116,16 @@
                 android:id="@+id/main_menu_game_mohaa"
                 android:title="@string/openmohaa"
                 android:icon="@drawable/mohaa_icon"
+                android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_wolf3d"
+                android:title="@string/wolf3d"
+                android:icon="@drawable/wolf3d_icon"
+                android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_skindeep"
+                android:title="@string/skin_deep"
+                android:icon="@drawable/skindeep_icon"
                 android:showAsAction="never|withText"/>
         </menu>
     </item>
@@ -173,8 +183,8 @@
                 android:title="@string/extract_resource"
                 android:showAsAction="never"/>
             <item
-                android:id="@+id/main_menu_experimental"
-                android:title="@string/experimental"
+                android:id="@+id/main_menu_advance"
+                android:title="@string/advance"
                 android:showAsAction="never"/>
             <item
                 android:id="@+id/main_menu_check_for_update"

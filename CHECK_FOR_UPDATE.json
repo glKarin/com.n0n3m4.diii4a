@@ -1,7 +1,7 @@
 {
-    "release":70,
-    "update":"2025-12-21",
-    "version":"1.1.0harmattan70",
-    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan70/idTech4A++_1.1.0harmattan70.apk",
-    "changes":"  * Fix font offset in GUIs on Quake 4.\n  * Fix a sound distance volume bug on Quake 4.\n  * Support smooth joystick on DOOM 3 mod `Hardscorps` and Quake 4 mod `Hardqore`.\n  * Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`.\n  * Update RealRTCW version to 5.3, version 5.2 will be removed on next release.\n  * Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK, yquake2(Quake 2), and add 3rd Zigock Bot II mod support on Quake 2.\n  * On-screen button keymap and layout configures are standalone in each game.\n  * Add Unreal engine psk/psa, iqm, Source engine smd, GLTF/GLB, Autodesk fbx animation/static model support, add md5mesh static model support on DOOM3/Quake 4/Prey.\n  * Add float console support on DOOM3/Quake 4/Prey.\n  * Warning: FTEQW/Xash3D is removed in this release."
+    "release":71,
+    "update":"2026-02-10",
+    "version":"1.1.0harmattan71",
+    "apk_url":"https://github.com/glKarin/com.n0n3m4.diii4a/releases/download/v1.1.0harmattan71/idTech4A++_1.1.0harmattan71.apk",
+    "changes":"  * Add `Skin Deep`(ver 1.0.4) support, game standalone directory named `skindeep`, game data directory named `base`.\n  * Support edit on-screen buttons layout in gaming.\n  * Add `ECWolf`(ver 1.4.2) support, game standalone directory named `ecwolf`.\n  * Add game main thread stack size config on Menu > Option > Advance.\n  * Enable `FTEQW`.\n  * Add `UZDoom`(ver 4.14.3) arm64 support, game standalone directory named `uzdoom`, And GZDoom is removed.\n  * Fix some GUIs in Quake 4/Prey(2006).\n  * RealRTCW(ver 5.2) is removed."
 }

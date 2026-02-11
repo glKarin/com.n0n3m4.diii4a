@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.n0n3m4.q3e.Q3EContextUtils;
+import com.n0n3m4.q3e.Q3EEditButtonHandler;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUiView;
@@ -41,14 +43,14 @@ public class MenuOverlayView implements UiViewOverlay
     private       TextView     sizeTextView;
     private       TextView     alphaTextView;
     private       LinearLayout mainLayout;
-    private final Q3EUiView    uiView;
+    private final Q3EEditButtonHandler    uiView;
     private       int          posX;
     private       int          posY;
     private final int          layoutWidth;
     private final ViewGroup    layout;
     private       FingerUi     fngr;
 
-    public MenuOverlayView(int width, ViewGroup layout, Q3EUiView uiView)
+    public MenuOverlayView(int width, ViewGroup layout, Q3EEditButtonHandler uiView)
     {
         this.uiView = uiView;
         this.context = uiView.getContext();
@@ -151,21 +153,21 @@ public class MenuOverlayView implements UiViewOverlay
             }
         });
 
+        button = AddButton(R.string.reset, sublayout, 0, 0, LinearLayout.LayoutParams.MATCH_PARENT, 0.3f);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                uiView.ResetOnScreenButtonSize(fngr.target);
+            }
+        });
+
         button = AddButton(" + ", sublayout, 32, 0, LinearLayout.LayoutParams.MATCH_PARENT, 0.35f);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
                 tgtresize(true);
-            }
-        });
-
-        button = AddButton(R.string.reset, mainLayout, 0, LinearLayout.LayoutParams.MATCH_PARENT, 64, 0.0f);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v)
-            {
-                uiView.ResetOnScreenButtonSize(fngr.target);
             }
         });
 
@@ -208,7 +210,7 @@ public class MenuOverlayView implements UiViewOverlay
         if(null != mainLayout)
             return;
 
-        Q3EUtils.RunOnUiThread(context, new Runnable() {
+        Q3EContextUtils.RunOnUiThread(context, new Runnable() {
                 @Override
                 public void run()
                 {
@@ -318,7 +320,7 @@ public class MenuOverlayView implements UiViewOverlay
 
     public void Show()
     {
-        Q3EUtils.RunOnUiThread(context, new Runnable() {
+        Q3EContextUtils.RunOnUiThread(context, new Runnable() {
                 @Override
                 public void run()
                 {
@@ -329,7 +331,7 @@ public class MenuOverlayView implements UiViewOverlay
 
     public void hide()
     {
-        Q3EUtils.RunOnUiThread(context, new Runnable() {
+        Q3EContextUtils.RunOnUiThread(context, new Runnable() {
                 @Override
                 public void run()
                 {
@@ -340,7 +342,7 @@ public class MenuOverlayView implements UiViewOverlay
 
     public void Paint(GL11 gl)
     {
-        Q3EUtils.RunOnUiThread(context, new Runnable() {
+        Q3EContextUtils.RunOnUiThread(context, new Runnable() {
                 @Override
                 public void run()
                 {
@@ -371,13 +373,13 @@ public class MenuOverlayView implements UiViewOverlay
     {
         SetTouchItem(fn.target);
 
-        Q3EUtils.RunOnUiThread(context, new Runnable() {
+        Q3EContextUtils.RunOnUiThread(context, new Runnable() {
             @Override
             public void run()
             {
                 Show();
 
-                Q3EUtils.Post(context, new Runnable() {
+                Q3EContextUtils.Post(context, new Runnable() {
                     @Override
                     public void run()
                     {
@@ -419,5 +421,10 @@ public class MenuOverlayView implements UiViewOverlay
             Paint(null);
         }
         return res;
+    }
+
+    public int Type()
+    {
+        return -1;
     }
 }

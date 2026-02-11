@@ -33,6 +33,7 @@ import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.misc.Function;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.Constants;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -522,7 +523,7 @@ public final class ContextUtility
 
     public static boolean IsInAppPrivateDirectory(Context context, String path)
     {
-        final String appPath = Q3EUtils.GetAppStoragePath(context);
+        final String appPath = Q3EContextUtils.GetAppStoragePath(context);
         if(path.startsWith("/sdcard"))
         {
             int i = appPath.indexOf("/Android/data");

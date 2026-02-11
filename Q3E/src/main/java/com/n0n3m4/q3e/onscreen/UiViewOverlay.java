@@ -1,5 +1,6 @@
 package com.n0n3m4.q3e.onscreen;
 
+import com.n0n3m4.q3e.Q3EEditButtonHandler;
 import com.n0n3m4.q3e.Q3EUiView;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -18,8 +19,11 @@ public interface UiViewOverlay extends TouchListener
     public boolean tgtresize(boolean dir);
     public boolean tgtalpha(boolean dir);
 
-    public static boolean SetupAlpha(boolean dir, FingerUi fngr, Q3EUiView view)
+    public static boolean SetupAlpha(boolean dir, FingerUi fngr, Q3EEditButtonHandler view)
     {
+        if(null == fngr || !(fngr.target instanceof Paintable))
+            return false;
+
         Paintable target = (Paintable) fngr.target;
         target.alpha += dir ? 0.1 : -0.1;
         view.SetModified();
@@ -36,7 +40,7 @@ public interface UiViewOverlay extends TouchListener
         return true;
     }
 
-    public static boolean Resize(boolean dir, int step, FingerUi fngr, Q3EUiView view)
+    public static boolean Resize(boolean dir, int step, FingerUi fngr, Q3EEditButtonHandler view)
     {
         if(null == fngr)
             return false;

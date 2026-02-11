@@ -11,6 +11,7 @@ import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.misc.FileBrowser;
 import com.karin.idTech4Amm.misc.Function;
 import com.n0n3m4.DIII4A.GameLauncher;
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGame;
 import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EPreference;
@@ -21,7 +22,6 @@ import com.n0n3m4.q3e.karin.KidTechCommand;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -66,8 +66,8 @@ public final class ChooseGameModFunc extends GameLauncherFunc
     public void run()
     {
         FileBrowser fileBrowser = new FileBrowser();
-        final boolean UsingFile = Q3EUtils.q3ei.isDOOM;
-        final boolean AllowExtraFiles = false; // Q3EUtils.q3ei.isDOOM;
+        final boolean UsingFile = Q3E.q3ei.isDOOM;
+        final boolean AllowExtraFiles = false; // Q3E.q3ei.isDOOM;
         fileBrowser.SetFilter(FileBrowser.ID_FILTER_DIRECTORY);
         fileBrowser.SetIgnoreDotDot(true);
         fileBrowser.SetShowHidden(false);
@@ -99,13 +99,13 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             }
         }
 
-        Q3EGame q3eGame = Q3EUtils.q3ei.GameInfo();
+        Q3EGame q3eGame = Q3E.q3ei.GameInfo();
         if(standalone)
             blackList.add(q3eGame.BASE);
         else
             blackList.remove(q3eGame.BASE);
 
-        String gameHomePath = Q3EUtils.q3ei.GetGameHomeDirectoryPath();
+        String gameHomePath = Q3E.q3ei.GetGameHomeDirectoryPath();
         if(null != gameHomePath)
         {
             int i = gameHomePath.indexOf("/");
@@ -121,7 +121,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             fileBrowser.SetDirNameWithSeparator(true);
             fileModels = new ArrayList<>(fileBrowser.FileList());
 
-            if(Q3EUtils.q3ei.isDOOM)
+            if(Q3E.q3ei.isDOOM)
                 fileBrowser.SetExtension(".wad", ".ipk3");
             fileBrowser.SetFilter(FileBrowser.ID_FILTER_FILE);
             List<FileBrowser.FileModel> allFiles = fileBrowser.ListAllFiles();
@@ -149,7 +149,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
                 q3eGame = Q3EGame.FindOrNull(guessGame);
                 if(null != q3eGame)
                 {
-                    if(q3eGame.ID == Q3EUtils.q3ei.game_id)
+                    if(q3eGame.ID == Q3E.q3ei.game_id)
                         continue;
                 }
             }*/
@@ -201,7 +201,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
-        builder.setTitle(Q3EUtils.q3ei.game_name + " " + Tr(R.string.mod));
+        builder.setTitle(Q3E.q3ei.game_name + " " + Tr(R.string.mod));
         builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int p)
             {
@@ -272,9 +272,9 @@ public final class ChooseGameModFunc extends GameLauncherFunc
     private String SelectMod(FileBrowser.FileModel file, List<String> efiles)
     {
         String lib;
-        if(Q3EUtils.q3ei.isDOOM && file.type == FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY)
+        if(Q3E.q3ei.isDOOM && file.type == FileBrowser.FileModel.ID_FILE_TYPE_DIRECTORY)
         {
-            List<FileBrowser.FileModel> fileModels = ChooseExtrasFileFunc.ListGZDOOMFiles(file.path);
+            List<FileBrowser.FileModel> fileModels = ChooseExtrasFileFunc.ListZDOOMFiles(file.path);
             List<String> wads = new ArrayList<>();
 
             for(FileBrowser.FileModel fileModel : fileModels)
@@ -329,7 +329,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         Bundle bundle = new Bundle();
         bundle.putString("mod", mod);
         bundle.putString("path", m_path);
-        if(Q3EUtils.q3ei.isDOOM)
+        if(Q3E.q3ei.isDOOM)
             bundle.putString("file", KidTechCommand.JoinValue(files, true));
         m_chooseExtrasFileFunc.Start(bundle);
     }

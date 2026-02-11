@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -69,8 +70,8 @@ public final class KFDManager
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
         final String[] Paths = {
                 preferences.getString(Q3EPreference.pref_datapath, DefPath),
-                Q3EUtils.GetAppStoragePath(m_context, null),
-                Q3EUtils.GetAppInternalPath(m_context, null),
+                Q3EContextUtils.GetAppStoragePath(m_context, null),
+                Q3EContextUtils.GetAppInternalPath(m_context, null),
                 //DefPath,
                 "/android_asset"
         };

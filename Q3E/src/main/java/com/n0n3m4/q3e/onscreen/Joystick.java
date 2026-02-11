@@ -3,12 +3,15 @@ package com.n0n3m4.q3e.onscreen;
 import android.graphics.Rect;
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.gl.Q3EGL;
 import com.n0n3m4.q3e.gl.KGLBitmapTexture;
 import com.n0n3m4.q3e.gl.Q3EGLVertexBuffer;
+import com.n0n3m4.q3e.keycode.KeyCodesGeneric;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -44,7 +47,7 @@ public class Joystick extends Paintable implements TouchListener
     private boolean dotjoyenabled = false;
 
     //private final int[] codes = { Q3EKeyCodes.KeyCodesGeneric.J_UP, Q3EKeyCodes.KeyCodesGeneric.J_RIGHT, Q3EKeyCodes.KeyCodesGeneric.J_DOWN, Q3EKeyCodes.KeyCodesGeneric.J_LEFT };
-    private final int[] Menu_Codes = { Q3EKeyCodes.KeyCodesGeneric.K_UPARROW, Q3EKeyCodes.KeyCodesGeneric.K_RIGHTARROW, Q3EKeyCodes.KeyCodesGeneric.K_DOWNARROW, Q3EKeyCodes.KeyCodesGeneric.K_LEFTARROW };
+    private final int[] Menu_Codes = { KeyCodesGeneric.K_UPARROW, KeyCodesGeneric.K_RIGHTARROW, KeyCodesGeneric.K_DOWNARROW, KeyCodesGeneric.K_LEFTARROW };
     private final boolean[] keys = {false, false, false, false};
     private final boolean[] enarr = new boolean[4];
 
@@ -320,12 +323,12 @@ public class Joystick extends Paintable implements TouchListener
 
         final int[] color = {255, 255, 255, 255};
         if(null != m_textures && m_textures.length > 0)
-            tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
+            tex_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(view.getContext(), m_textures[0]));
         if(tex_ind == 0)
             tex_ind = KGLBitmapTexture.GenCircleRingTexture(gl, size, CalcRingWidth(), color);
 
         if(null != m_textures && m_textures.length > 1)
-            texd_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), m_textures[1]));
+            texd_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(view.getContext(), m_textures[1]));
         if(texd_ind == 0)
             texd_ind = KGLBitmapTexture.GenCircleTexture(gl, dot_size, color);
 
@@ -345,7 +348,7 @@ public class Joystick extends Paintable implements TouchListener
         {
             keys[ind] = b;
             // Q3EUtils.q3ei.callbackObj.sendKeyEvent(b, (Q3EUtils.q3ei.callbackObj.notinmenu ? codes : Menu_Codes)[ind], 0);
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(b, Menu_Codes[ind], 0); // always bind arrow keys
+            Q3E.sendKeyEvent(b, Menu_Codes[ind], 0); // always bind arrow keys
         }
     }
 
@@ -385,9 +388,9 @@ public class Joystick extends Paintable implements TouchListener
             m_pressed = true;
         if (res && act != ACT_RELEASE)
         {
-            if (Q3EUtils.q3ei.callbackObj.notinmenu)
+            if (Q3E.callbackObj.notinmenu)
             {
-                if (Q3EUtils.q3ei.joystick_smooth)
+                if (Q3E.joystick_smooth)
                 {
                     dotjoyenabled = true;
                     dotx = deltax;
@@ -408,12 +411,12 @@ public class Joystick extends Paintable implements TouchListener
                     if(NotInDeadZone(deltax, deltay))
                     {
                         //m_pressed = true;
-                        Q3EUtils.q3ei.callbackObj.sendAnalog(true, analogx, analogy);
+                        Q3E.sendAnalog(true, analogx, analogy);
                     }
                     else
                     {
                         //m_pressed = false;
-                        Q3EUtils.q3ei.callbackObj.sendAnalog(false, 0, 0);
+                        Q3E.sendAnalog(false, 0, 0);
                     }
                 }
                 else
@@ -456,10 +459,10 @@ public class Joystick extends Paintable implements TouchListener
         else
         {
             m_pressed = false;
-            if (Q3EUtils.q3ei.joystick_smooth)
+            if (Q3E.joystick_smooth)
             {
                 dotjoyenabled = false;
-                Q3EUtils.q3ei.callbackObj.sendAnalog(false, 0, 0);
+                Q3E.sendAnalog(false, 0, 0);
             }
             dot_pos = CONST_INVALID_DIRECTION;
                 enarr[0] = false;
@@ -511,9 +514,9 @@ public class Joystick extends Paintable implements TouchListener
                 else // if(res)
                 */
                 {
-                    if (Q3EUtils.q3ei.callbackObj.notinmenu)
+                    if (Q3E.callbackObj.notinmenu)
                     {
-                        if (Q3EUtils.q3ei.joystick_smooth)
+                        if (Q3E.joystick_smooth)
                         {
                             dotjoyenabled = true;
                             dotx = deltax;
@@ -532,9 +535,9 @@ public class Joystick extends Paintable implements TouchListener
                             }
                             */
                             if(NotInDeadZone(deltax, deltay))
-                                Q3EUtils.q3ei.callbackObj.sendAnalog(true, analogx, analogy);
+                                Q3E.sendAnalog(true, analogx, analogy);
                             else
-                                Q3EUtils.q3ei.callbackObj.sendAnalog(false, 0, 0);
+                                Q3E.sendAnalog(false, 0, 0);
                         }
                         else
                         {
@@ -575,10 +578,10 @@ public class Joystick extends Paintable implements TouchListener
             case ACT_RELEASE:
                 m_pressed = false;
 
-                if (Q3EUtils.q3ei.joystick_smooth)
+                if (Q3E.joystick_smooth)
                 {
                     dotjoyenabled = false;
-                    Q3EUtils.q3ei.callbackObj.sendAnalog(false, 0, 0);
+                    Q3E.sendAnalog(false, 0, 0);
                 }
                 dot_pos = CONST_INVALID_DIRECTION;
             enarr[0] = false;
@@ -811,5 +814,10 @@ public class Joystick extends Paintable implements TouchListener
             m_innerVertexBuffer.put(verts);
             m_innerVertexBuffer.position(0);
         }
+    }
+
+    public int Type()
+    {
+        return Q3EGlobals.TYPE_JOYSTICK;
     }
 }

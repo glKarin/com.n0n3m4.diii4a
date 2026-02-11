@@ -209,5 +209,25 @@ public final class KStr
         return name + "=" + (null != value ? value : "");
     }
 
+    public static String Format(Object fmt, Object...args)
+    {
+        if(null == fmt)
+            return "(null)";
+        if(fmt instanceof String)
+            return String.format((String)fmt, args);
+        else
+            return fmt.toString();
+    }
+
+    public static void Append(StringBuilder buf, Object fmt, Object...args)
+    {
+        if(null == fmt)
+            buf.append("");
+        if(fmt instanceof String)
+            buf.append(String.format((String)fmt, args));
+        else
+            buf.append(fmt.toString());
+    }
+
     private KStr() {}
 }

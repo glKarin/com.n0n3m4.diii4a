@@ -87,6 +87,16 @@
             android:title="@string/open_logcat"
             android:summary="@string/view_logcat"
             android:persistent="false"/>
+        <Preference
+            android:key="clean_dalvik_crash_files"
+            android:title="@string/clean_dalvik_crash_log_files"
+            android:summary="@string/clean_dalvik_crash_log_files"
+            android:persistent="false"/>
+        <Preference
+            android:key="clean_backtrace_crash_files"
+            android:title="@string/clean_backtrace_log_files"
+            android:summary="@string/clean_backtrace_log_files"
+            android:persistent="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -97,6 +107,11 @@
             android:key="open_documentsui"
             android:title="@string/open_documents"
             android:summary="@string/open_system_file_browser"
+            android:persistent="false"/>
+        <Preference
+            android:key="test_event"
+            android:title="Event testing"
+            android:summary="Debug event"
             android:persistent="false"/>
     </PreferenceCategory>
     

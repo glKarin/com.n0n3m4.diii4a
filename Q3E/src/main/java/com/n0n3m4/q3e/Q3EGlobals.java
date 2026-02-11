@@ -143,6 +143,19 @@ public final class Q3EGlobals
     public static final int SCREEN_CUSTOM = 3;
     public static final int SCREEN_FIXED_RATIO = 4;
 
+    // gyroscope
+    public static final float GYROSCOPE_X_AXIS_SENS = 18;
+    public static final float GYROSCOPE_Y_AXIS_SENS = 18;
+
+    // device
+    public static final int DEVICE_TOUCHSCREEN = 1;
+    public static final int DEVICE_KEYBOARD = 1 << 1;
+    public static final int DEVICE_MOUSE = 1 << 2;
+    public static final int DEVICE_JOYSTICK = 1 << 3;
+    public static final int DEVICE_GAMEPAD = 1 << 4;
+    public static final int DEVICE_TRACKBALL = 1 << 5;
+    public static final int DEVICE_TOUCHPAD = 1 << 6;
+
     public static final String[] CONTROLS_NAMES = {
             "Joystick",
             "Shoot",
@@ -214,6 +227,18 @@ public final class Q3EGlobals
     public static final int DEFAULT_DEPTH_BITS = 24; // 16 32
 
     public static final String IDTECH4AMM_PAK_SUFFIX = ".zipak";
+
+    public static final String FOLDER_CRASH_LOG     = "logs"; // crash log
+    public static final String FOLDER_BACKTRACE_LOG = "backtrace"; // backtrace
+    public static final String FOLDER_LOGCAT_LOG    = "logcat"; // logcat
+
+    // same as JNI
+    // game thread creating
+    public static final int GAME_THREAD_TYPE_NATIVE = 0;
+    public static final int GAME_THREAD_TYPE_JAVA   = 1;
+    // game input event queue
+    public static final int EVENT_QUEUE_TYPE_NATIVE = 0;
+    public static final int EVENT_QUEUE_TYPE_JAVA   = 1;
 
 
 

@@ -2,6 +2,8 @@ package com.n0n3m4.q3e.onscreen;
 
 import android.view.View;
 
+import com.n0n3m4.q3e.Q3E;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
@@ -85,7 +87,7 @@ public class Button extends Paintable implements TouchListener
     @Override
     public void loadtex(GL10 gl)
     {
-        tex_ind = Q3EGL.loadGLTexture(gl, Q3EUtils.ResourceToBitmap(view.getContext(), tex_androidid));
+        tex_ind = Q3EGL.loadGLTexture(gl, Q3EContextUtils.ResourceToBitmap(view.getContext(), tex_androidid));
     }
 
     @Override
@@ -135,13 +137,13 @@ public class Button extends Paintable implements TouchListener
             {
                 if (!heldarr.contains(keycode))
                 {
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, keycode, 0);
+                    Q3E.sendKeyEvent(true, keycode, 0);
                     heldarr.add(keycode);
                     alpha = Math.min(initalpha * 2, 1f);
                 }
                 else
                 {
-                    Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, keycode, 0);
+                    Q3E.sendKeyEvent(false, keycode, 0);
                     heldarr.remove(Integer.valueOf(keycode));
                     alpha = initalpha;
                 }
@@ -152,7 +154,7 @@ public class Button extends Paintable implements TouchListener
         if (keycode == Q3EKeyCodes.K_VKBD)
         {
             if (act == 1)
-                Q3EUtils.togglevkbd(this.view);
+                Q3E.togglevkbd();
             return true;
         }
 
@@ -160,24 +162,24 @@ public class Button extends Paintable implements TouchListener
         {
             lx = x;
             ly = y;
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(true, keycode, 0);
+            Q3E.sendKeyEvent(true, keycode, 0);
         }
         else if (act == -1)
-            Q3EUtils.q3ei.callbackObj.sendKeyEvent(false, keycode, 0);
+            Q3E.sendKeyEvent(false, keycode, 0);
 
         if(allowMouseButtonMotion)
         {
         if (keycode == Q3EKeyCodes.KeyCodes.K_MOUSE1 || keycode == Q3EKeyCodes.KeyCodes.K_MOUSE2)
         {
-            if (Q3EUtils.q3ei.callbackObj.notinmenu)
+            if (Q3E.callbackObj.notinmenu)
             {
-                Q3EUtils.q3ei.callbackObj.sendMotionEvent(x - lx, y - ly);
+                Q3E.sendMotionEvent(x - lx, y - ly);
                 lx = x;
                 ly = y;
             }
             else
             {
-                Q3EUtils.q3ei.callbackObj.sendMotionEvent(0, 0);//???
+                Q3E.sendMotionEvent(0, 0);//???
             }
         }
         }
@@ -281,5 +283,10 @@ public class Button extends Paintable implements TouchListener
         else if (type == Q3EGlobals.ONSCREEN_BUTTON_TYPE_CENTER)
             return 0.5f;
         return 1.0f;
+    }
+
+    public int Type()
+    {
+        return Q3EGlobals.TYPE_BUTTON;
     }
 }

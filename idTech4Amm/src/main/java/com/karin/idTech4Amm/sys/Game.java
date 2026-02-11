@@ -13,7 +13,7 @@ import com.n0n3m4.q3e.Q3ELang;
  */
 public enum Game
 {
-    // KARIN_NEW_GAME_BOOKMARK
+    // KARIN_NEW_GAME_BOOKMARK: add game mod enum
 
     // DOOM 3
     DOOM3_BASE(Q3EGameConstants.GAME_DOOM3, "base", "", "game", "", "base", false, R.string.doom_iii),
@@ -64,12 +64,12 @@ public enum Game
     // Doom3 BFG
     D3BFG_BASE(Q3EGameConstants.GAME_DOOM3BFG, "base", "", "RBDoom3BFG", "", "base", false, R.string.d3bfg_base),
 
-    // GZDOOM
-    //GZDOOM_BASE(Q3EGameConstants.GAME_GZDOOM, "", "", "", false, R.string.doom_base),
-    GZDOOM_DOOM1(Q3EGameConstants.GAME_GZDOOM, "DOOM.WAD", "DOOM.WAD", "gzdoom", "", "DOOM.WAD", true, R.string.doom1_base),
-    GZDOOM_DOOM2(Q3EGameConstants.GAME_GZDOOM, "DOOM2.WAD", "DOOM2.WAD", "gzdoom", "", "DOOM2.WAD", true, R.string.doom2_base),
-    GZDOOM_FREEDOOM1(Q3EGameConstants.GAME_GZDOOM, "freedoom1.wad", "freedoom1.wad", "gzdoom", "", "freedoom1.wad", true, R.string.freedoom1_base),
-    GZDOOM_FREEDOOM2(Q3EGameConstants.GAME_GZDOOM, "freedoom2.wad", "freedoom2.wad", "gzdoom", "", "freedoom2.wad", true, R.string.freedoom2_base),
+    // ZDOOM
+    //ZDOOM_BASE(Q3EGameConstants.GAME_ZDOOM, "", "", "", false, R.string.doom_base),
+    ZDOOM_DOOM1(Q3EGameConstants.GAME_ZDOOM, "DOOM.WAD", "DOOM.WAD", "uzdoom", "", "DOOM.WAD", true, R.string.doom1_base),
+    ZDOOM_DOOM2(Q3EGameConstants.GAME_ZDOOM, "DOOM2.WAD", "DOOM2.WAD", "uzdoom", "", "DOOM2.WAD", true, R.string.doom2_base),
+    ZDOOM_FREEDOOM1(Q3EGameConstants.GAME_ZDOOM, "freedoom1.wad", "freedoom1.wad", "uzdoom", "", "freedoom1.wad", true, R.string.freedoom1_base),
+    ZDOOM_FREEDOOM2(Q3EGameConstants.GAME_ZDOOM, "freedoom2.wad", "freedoom2.wad", "uzdoom", "", "freedoom2.wad", true, R.string.freedoom2_base),
 
     // Wolfenstein: Enemy Territory
     ETW_BASE(Q3EGameConstants.GAME_ETW, "etmain", "", "etwgame", "", "etmain", false, R.string.etw_base),
@@ -82,8 +82,8 @@ public enum Game
     FTEQW_Q2(Q3EGameConstants.GAME_FTEQW, "quake2", "quake2", "fteqw", "", "baseq2", true, R.string.quake_2_base),
     FTEQW_Q3(Q3EGameConstants.GAME_FTEQW, "quake3", "quake3", "fteqw", "", "baseq3", true, R.string.quake_3_base),
     FTEQW_H2(Q3EGameConstants.GAME_FTEQW, "hexen2", "hexen2", "fteqw", "", "data1", true, R.string.hexen_2_base),
-//    FTEQW_HL(Q3EGameConstants.GAME_FTEQW, "halflife", "halflife", "fteqw", "", "valve", true, R.string.halflife_base),
-//    FTEQW_CS1_5(Q3EGameConstants.GAME_FTEQW, "cstrike_1_5", "halflife", "fteqw", "cstrike", "cstrike", true, R.string.cs_1_5_base),
+    FTEQW_HL(Q3EGameConstants.GAME_FTEQW, "halflife", "halflife", "fteqw", "", "valve", true, R.string.halflife_base),
+    FTEQW_CS1_5(Q3EGameConstants.GAME_FTEQW, "cstrike_1_5", "halflife", "fteqw", "cstrike", "cstrike", true, R.string.cs_1_5_base),
 
     // OpenJA
     JA_BASE(Q3EGameConstants.GAME_JA, "base", "", "jagame", "", "base", false, R.string.openja_base),
@@ -110,13 +110,19 @@ public enum Game
     SOURCE_EP2(Q3EGameConstants.GAME_SOURCE, "ep2", "ep2", "source", "", "ep2", true, R.string.halflife_2_ep2_base),
     SOURCE_HL2MP(Q3EGameConstants.GAME_SOURCE, "hl2mp", "hl2mp", "source", "", "hl2mp", false, R.string.halflife_2_mp_base),
     SOURCE_HL1(Q3EGameConstants.GAME_SOURCE, "hl1", "hl1", "source", "", "hl1", false, R.string.halflife_1_source_base),
-    SOURCE_HL1MP(Q3EGameConstants.GAME_SOURCE, "hl1mp", "hl1mp", "source", "", "hl1mp", false, R.string.halflife_1_mp_source_base),
+    //SOURCE_HL1MP(Q3EGameConstants.GAME_SOURCE, "hl1mp", "hl1mp", "source", "", "hl1mp", false, R.string.halflife_1_mp_source_base),
 
     // Urban Terror
     URT_BASE(Q3EGameConstants.GAME_URT, "q3ut4", "", "", "", "q3ut4", false, R.string.urbanterror_base),
 
     // OpenMOHAA
     MOHAA_BASE(Q3EGameConstants.GAME_MOHAA, "main", "", "", "", "main", false, R.string.openmohaa_base),
+
+    // Wolfenstein 3D
+    WOLF3D_BASE(Q3EGameConstants.GAME_WOLF3D, "", "", "ecwolf", "", "", true, R.string.wolf3d_base),
+
+    // Skin Deep
+    SKINDEEP_BASE(Q3EGameConstants.GAME_SKINDEEP, "base", "", "skindeep", "", "base", false, R.string.skin_deep),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

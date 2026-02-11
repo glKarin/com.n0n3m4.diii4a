@@ -9,8 +9,8 @@ import com.karin.idTech4Amm.misc.TextHelper;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 70;
-    public static final String CONST_RELEASE = "2025-12-21"; // 02-12; 05-08
+    public static final int    CONST_UPDATE_RELEASE = 71;
+    public static final String CONST_RELEASE = "2026-02-10"; // 02-12; 05-08
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -26,21 +26,18 @@ public final class Constants
 	public static final String CONST_CHECK_FOR_UPDATE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/CHECK_FOR_UPDATE.json";
     public static final String CONST_LICENSE_URL = "https://raw.githubusercontent.com/glKarin/com.n0n3m4.diii4a/master/LICENSE";
     public static final String CONST_TESTING_URL = "https://github.com/glKarin/com.n0n3m4.diii4a/releases/tag/android_testing";
-    public static final String CONST_CODE_ALIAS = "Lin Daiyu"; // Natasha; Verena; Caitlyn; Lin Daiyu; Lu Yiping
+    public static final String CONST_CODE_ALIAS = "Whip"; // Natasha; Verena; Caitlyn; Lin Daiyu; Lu Yiping; Whip
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Fix font offset in GUIs on Quake 4.",
-            "Fix a sound distance volume bug on Quake 4.",
-            "Support smooth joystick on DOOM 3 mod `Hardscorps` and Quake 4 mod `Hardqore`.",
-            "Add `Medal of Honor: Allied Assault`(ver 0.82.1) support, game standalone directory named `openmohaa`, game data directory named `main`. More view in `" + TextHelper.GenLinkText("https://github.com/openmoh/openmohaa", "OpenMOHAA") + "`.",
-            "Update RealRTCW version to 5.3, version 5.2 will be removed on next release.",
-            "Update ioquake3(Quake 3), Darkplace(Quake 1), OpenJK, yquake2(Quake 2), and add 3rd Zigock Bot II mod support on Quake 2.",
-            "On-screen button keymap and layout configures are standalone in each game.",
-            "Add Unreal engine psk/psa, iqm, Source engine smd, GLTF/GLB, Autodesk fbx animation/static model support, add md5mesh static model support on DOOM3/Quake 4/Prey",
-            "Add float console support on DOOM3/Quake 4/Prey.",
-            "Add Botrix bot support on HL2MP. More view in `" + TextHelper.GenLinkText("https://github.com/borzh/botrix", "Botrix") + "`.",
-            "[Warning]: FTEQW/Xash3D is removed in this release.",
+                "Add `Skin Deep`(ver 1.0.4) support, game standalone directory named `skindeep`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://blendogames.com/skindeep/", "Skin Deep") + "`.",
+                "Support edit on-screen buttons layout in gaming.",
+                "Add `ECWolf`(ver 1.4.2) support, game standalone directory named `ecwolf`. More view in `" + TextHelper.GenLinkText("http://maniacsvault.net/ecwolf/", "ECWolf") + "`.",
+                "Add game main thread stack size config on Menu > Option > Advance.",
+                "Enable `FTEQW`.",
+                "Add `UZDoom`(ver 4.14.3) arm64 support, game standalone directory named `uzdoom`. More view in `" + TextHelper.GenLinkText("https://github.com/UZDoom/UZDoom", "UZDoom") + "`. And GZDoom is removed.",
+                "Fix some GUIs in Quake 4/Prey(2006).",
+                "RealRTCW(ver 5.2) is removed.",
         };
 	};
 

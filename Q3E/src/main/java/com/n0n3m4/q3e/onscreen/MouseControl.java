@@ -1,6 +1,8 @@
 package com.n0n3m4.q3e.onscreen;
 
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EControlView;
+import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3EKeyCodes;
 import com.n0n3m4.q3e.Q3EUtils;
 
@@ -37,7 +39,7 @@ public class MouseControl implements TouchListener
         {
             if(clicked)
             {
-                Q3EUtils.q3ei.callbackObj.sendMotionEvent(x - lx, y - ly);
+                Q3E.sendMotionEvent(x - lx, y - ly);
             }
             lx = x;
             ly = y;
@@ -49,5 +51,10 @@ public class MouseControl implements TouchListener
     public boolean isInside(int x, int y)
     {
         return !clicked;
+    }
+
+    public int Type()
+    {
+        return Q3EGlobals.TYPE_MOUSE;
     }
 }

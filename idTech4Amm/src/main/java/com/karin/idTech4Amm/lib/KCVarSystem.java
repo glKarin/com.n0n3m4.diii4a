@@ -1,6 +1,7 @@
 package com.karin.idTech4Amm.lib;
 
 import com.karin.idTech4Amm.misc.TextHelper;
+import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KStr;
 
@@ -11,6 +12,7 @@ import java.util.Map;
 
 public final class KCVarSystem
 {
+    // KARIN_NEW_GAME_BOOKMARK: add new cvars
     public static Map<String, KCVar.Group> CVars()
     {
         Map<String, KCVar.Group> _cvars = new LinkedHashMap<>();
@@ -99,7 +101,13 @@ public final class KCVarSystem
                                 "1", "Disable",
                                 "2", "Enable(check source)",
                                 "3", "Enable(not check source)"
-                        )
+                        ),
+                        KCVar.CreateCVar("r_multithread", "bool", "1", "Multithread backend", KCVar.FLAG_INIT | KCVar.FLAG_LAUNCHER),
+                        KCVar.CreateCVar("harm_r_openglVersion", "string", "GLES3.0", "OpenGL version", KCVar.FLAG_INIT | KCVar.FLAG_LAUNCHER,
+                                "GLES2", "OpenGL ES2.0",
+                                "GLES3.0", "OpenGL 3.0+"
+                        ),
+                        KCVar.CreateCommand("multithread", "string", "Enable/disable multi-threading rendering", 0)
                 );
         KCVar.Group FRAMEWORK_CVARS = new KCVar.Group("Framework", true)
                 .AddCVar(
@@ -156,6 +164,7 @@ public final class KCVarSystem
                         KCVar.CreateCVar("harm_con_noBackground", "bool", "0", "Don't draw console background", 0),
                         KCVar.CreateCVar("harm_con_floatGeometry", "vector4", "100 50 300 200", "Float console geometry, format is \"<left> <top> <width> <height>\"", 0),
                         KCVar.CreateCVar("harm_con_floatZoomStep", "integer", "10", "Zoom step of float console", 0),
+                        KCVar.CreateCVar("harm_sys_sse2neon", "bool", "0", "Emulate MMX/SSE/SSE2 SIMD by sse2neon on arm32/arm64 device", KCVar.FLAG_INIT),
                         KCVar.CreateCommand("exportFont", "string", "Convert ttf/ttc font file to DOOM3 wide character font file", 0),
                         KCVar.CreateCommand("extractBimage", "string", "extract DOOM3-BFG's bimage image to rga RGBA image files", 0),
                         KCVar.CreateCommand("skipHitEffect", "bool", "skip all hit effect in game", 0),
@@ -323,7 +332,7 @@ public final class KCVarSystem
                         )
                 );
 
-        KCVar.Group GZDOOM_CVARS = new KCVar.Group("GZDOOM", true)
+        KCVar.Group ZDOOM_CVARS = new KCVar.Group("ZDOOM", true)
                 .AddCVar(
                         KCVar.CreateCVar("harm_gl_es", "integer", "0", "OpenGLES version", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
                                 "0", "Automatic",
@@ -364,8 +373,17 @@ public final class KCVarSystem
                                 "dod", "Day of Defeat: Source",
                                 "episodic", "Half-Life 2: Episodic 1 & 2",
                                 "hl2mp", "Half-Life 2: Deathmatch",
-                                "hl1", "Half-Life 1: Source",
-                                "hl1mp", "Half-Life 1 Deathmatch: Source"
+                                "hl1", "Half-Life 1: Source"/*,
+                                "hl1mp", "Half-Life 1 Deathmatch: Source"*/
+                        )
+                );
+
+        KCVar.Group SKINDEEP_CVARS = new KCVar.Group("SkinDeep", true)
+                .AddCVar(
+                        KCVar.CreateCVar("harm_r_clearVertexBuffer", "integer", "2", "Clear vertex buffer on every frame", KCVar.FLAG_INIT,
+                                "0", "Not clear(original)",
+                                "1", "Only free memory",
+                                "2", "Free memory and delete VBO handle"
                         )
                 );
 
@@ -379,45 +397,49 @@ public final class KCVarSystem
         _cvars.put("RealRTCW", REALRTCW_CVARS);
         _cvars.put("ETW", ETW_CVARS);
         _cvars.put("TDM", TDM_CVARS);
-        _cvars.put("GZDOOM", GZDOOM_CVARS);
+        _cvars.put("ZDOOM", ZDOOM_CVARS);
         _cvars.put("UrT", URT_CVARS);
         _cvars.put("Xash3D", XASH3D_CVARS);
         _cvars.put("Source", SOURCE_CVARS);
+        _cvars.put("SkinDeep", SKINDEEP_CVARS);
 
         return _cvars;
     }
 
+    // KARIN_NEW_GAME_BOOKMARK: add new cvars to map
     public static List<KCVar.Group> Match(String game)
     {
         Map<String, KCVar.Group> _cvars = CVars();
         List<KCVar.Group> res = new ArrayList<>();
-        if(Q3EUtils.q3ei.isPrey)
+        if(Q3E.q3ei.isPrey)
         {
             res.add(_cvars.get("RENDERER"));
             res.add(_cvars.get("FRAMEWORK"));
         }
-        else if(Q3EUtils.q3ei.isQ4)
+        else if(Q3E.q3ei.isQ4)
         {
             res.add(_cvars.get("RENDERER"));
             res.add(_cvars.get("FRAMEWORK"));
         }
-        else if(Q3EUtils.q3ei.isTDM)
+        else if(Q3E.q3ei.isTDM)
             res.add(_cvars.get("TDM"));
-        else if(Q3EUtils.q3ei.isD3BFG)
+        else if(Q3E.q3ei.isD3BFG)
             res.add(_cvars.get("DOOM3BFG"));
-        else if(Q3EUtils.q3ei.isDOOM)
-            res.add(_cvars.get("GZDOOM"));
-        else if(Q3EUtils.q3ei.isETW)
+        else if(Q3E.q3ei.isDOOM)
+            res.add(_cvars.get("ZDOOM"));
+        else if(Q3E.q3ei.isETW)
             res.add(_cvars.get("ETW"));
-        else if(Q3EUtils.q3ei.isRealRTCW)
+        else if(Q3E.q3ei.isRealRTCW)
             res.add(_cvars.get("RealRTCW"));
-        else if(Q3EUtils.q3ei.isXash3D)
+        else if(Q3E.q3ei.isXash3D)
             res.add(_cvars.get("Xash3D"));
-        else if(Q3EUtils.q3ei.isUrT)
+        else if(Q3E.q3ei.isUrT)
             res.add(_cvars.get("UrT"));
-        else if(Q3EUtils.q3ei.isSource)
+        else if(Q3E.q3ei.isSource)
             res.add(_cvars.get("Source"));
-        else if(Q3EUtils.q3ei.isD3)
+        else if(Q3E.q3ei.isSkinDeep)
+            res.add(_cvars.get("SkinDeep"));
+        else if(Q3E.q3ei.isD3)
         {
             res.add(_cvars.get("RENDERER"));
             res.add(_cvars.get("FRAMEWORK"));
@@ -425,11 +447,11 @@ public final class KCVarSystem
 
         if(null == game || game.isEmpty())
         {
-            if(Q3EUtils.q3ei.isPrey)
+            if(Q3E.q3ei.isPrey)
                 res.add(_cvars.get("preybase"));
-            else if(Q3EUtils.q3ei.isQ4)
+            else if(Q3E.q3ei.isQ4)
                 res.add(_cvars.get("q4base"));
-            else if(Q3EUtils.q3ei.isD3)
+            else if(Q3E.q3ei.isD3)
                 res.add(_cvars.get("base"));
         }
         else

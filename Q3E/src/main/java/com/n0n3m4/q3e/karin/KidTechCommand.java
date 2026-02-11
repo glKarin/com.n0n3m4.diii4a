@@ -16,8 +16,9 @@ import java.util.List;
  */
 public class KidTechCommand
 {
-    public static final String ARG_PREFIX_IDTECH = "+";
+    public static final String ARG_PREFIX_IDTECH    = "+";
     public static final String ARG_PREFIX_QUAKETECH = "-";
+    public static final String ARG_PREFIX_WOLFTECH  = "--";
     public static final String ARG_PREFIX_ALL = ARG_PREFIX_IDTECH + ARG_PREFIX_QUAKETECH;
 
     private String m_cmd = Q3EGameConstants.GAME_EXECUABLE;
@@ -583,23 +584,33 @@ public class KidTechCommand
                     i += val.length();
                 }
                 hasArg0 = true;
+
+                continue;
             }
-            else if(/*c == '+' || c == '-'*/ argPrefix.contains("" + c))
+
+            if(/*c == '+' || c == '-'*/ argPrefix.contains("" + c))
             {
-                readingSet = false;
-                String cmd = ReadWord(m_cmd, i + 1);
-                boolean isSet = cmd.equals("set") || cmd.equals("\"set\"");
-                cmd = c + cmd;
-                if(isSet)
-                    AddPart(CMD_PART_SET, cmd);
-                else
-                    AddPart(CMD_PART_PARAM, cmd);
-                i += cmd.length();
-                hasArg0 = true;
-                if(isSet)
-                    readingSet = true;
+                String prefix = IsArgPrefix(c, i);
+                if(null != prefix)
+                {
+                    readingSet = false;
+                    String cmd = ReadWord(m_cmd, i + prefix.length());
+                    boolean isSet = cmd.equals("set") || cmd.equals("\"set\"");
+                    cmd = prefix + cmd;
+                    if(isSet)
+                        AddPart(CMD_PART_SET, cmd);
+                    else
+                        AddPart(CMD_PART_PARAM, cmd);
+                    i += cmd.length();
+                    hasArg0 = true;
+                    if(isSet)
+                        readingSet = true;
+
+                    continue;
+                }
             }
-            else if(Character.isSpaceChar(c))
+
+            if(Character.isSpaceChar(c))
             {
                 String blank = SkipBlank(m_cmd, i);
                 if(!blank.isEmpty())
@@ -607,8 +618,10 @@ public class KidTechCommand
                     AddPart(CMD_PART_BLANK, blank);
                     i += blank.length();
                 }
+
+                continue;
             }
-            else
+
             {
                 if(readingSet)
                 {
@@ -629,6 +642,8 @@ public class KidTechCommand
                 hasArg0 = true;
             }
         }
+
+        //for(CmdPart cmdPart : cmdParts) KLog.I(cmdPart);
     }
 
     private boolean EndsWithBlank()
@@ -759,9 +774,17 @@ public class KidTechCommand
         return cmdParts.get(i).type == type;
     }
 
-    private char GetArgPrefixChar()
+    private String GetArgPrefixChar()
     {
-        return argPrefix.charAt(0);
+        switch(argPrefix)
+        {
+            case ARG_PREFIX_IDTECH:
+            case ARG_PREFIX_QUAKETECH:
+            case ARG_PREFIX_WOLFTECH:
+                return argPrefix;
+            default:
+                return "" + argPrefix.charAt(0);
+        }
     }
 
     private void AddBlankPart()
@@ -787,7 +810,8 @@ public class KidTechCommand
 
     private boolean EqualsParam(String part, String name)
     {
-        return name.equals(part.substring(1));
+        int offset = GetArgPrefixChar().length();
+        return name.equals(part.substring(offset));
     }
 
     private int FirstBlank()
@@ -976,5 +1000,26 @@ public class KidTechCommand
         }
 
         return list;
+    }
+
+    private String IsArgPrefix(char c, int i)
+    {
+        switch(argPrefix)
+        {
+            case ARG_PREFIX_IDTECH:
+            case ARG_PREFIX_QUAKETECH:
+                return argPrefix.equals("" + c) ? "" + c : null;
+            case ARG_PREFIX_WOLFTECH:
+                if(c != '-')
+                    return null;
+                int index = i + 1;
+                if(index >= m_cmd.length())
+                    return null;
+                if(m_cmd.charAt(index) != '-')
+                    return null;
+                return "--";
+            default:
+                return argPrefix.contains("" + c) ? "" + c : null;
+        }
     }
 }

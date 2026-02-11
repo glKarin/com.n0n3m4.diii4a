@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.MyHorizontalScrollView;
+import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3EUtils;
 
@@ -102,7 +103,7 @@ public class GameAd extends GameLauncherFunc
 
     private int ItemWidth()
     {
-        return Q3EUtils.dip2px(m_gameLauncher, 320);//Magic number
+        return Q3EContextUtils.dip2px(m_gameLauncher, 320);//Magic number
     }
 
     private ImageView createiwbyid(int width, String game)
