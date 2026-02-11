@@ -19,6 +19,10 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#if defined(__ANDROID__) && (defined(__arm__) || defined(__i386__)) && __ANDROID_API__ < 24 //karin: ftello/fseeko on Android 32(API < 24)
+#define ftello ftell
+#define fseeko fseek
+#endif
 
 /*
 ** The hook table at registry[HOOKKEY] maps threads to their current

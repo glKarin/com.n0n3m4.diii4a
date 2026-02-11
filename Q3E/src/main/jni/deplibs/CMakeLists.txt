@@ -57,3 +57,12 @@ add_subdirectory (bzip2) # -1.0.8
 #add_subdirectory (ktx) # KTX-Software-3.0.1
 
 #add_subdirectory (sdl2) # 2.30.2
+
+add_subdirectory (opusfile) # https://github.com/xiph/opusfile/commit/cc04a82f7964067da6e3f5dddc7634b833c9402c
+
+if(Q3E_SDL)
+    if(GAME_WOLF3D)
+        add_subdirectory(SDL_mixer) # 2.8.1
+        add_subdirectory(SDL_net) # 2.2.0
+    endif()
+endif()

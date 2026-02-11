@@ -80,6 +80,11 @@
  */
 #undef ENABLE_RICE_PARAMETER_SEARCH
 
+#if defined(__ANDROID__) && (defined(__arm__) || defined(__i386__)) && __ANDROID_API__ < 24 //karin: ftello/fseeko on Android 32(API < 24)
+#define ftello ftell
+#define fseeko fseek
+#endif
+
 
 typedef struct {
 	FLAC__int32 *data[FLAC__MAX_CHANNELS];

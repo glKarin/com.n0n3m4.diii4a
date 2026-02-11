@@ -104,6 +104,7 @@ static pthread_key_t mThreadKey;
 static pthread_once_t key_once = PTHREAD_ONCE_INIT;
 
 /* Main activity */
+static SDL_bool mActivityClass;
 
 /* method signatures */
 #define CALLBACK_METHOD(ret, name, args) ret (* mid##name) args
@@ -127,9 +128,11 @@ __attribute__((visibility("default"))) void SDL_Android_GetAPI(const SDL_Android
 #define SDL_JAVA_INTERFACE_INPUT_CONNECTION(function) sdl_connection_##function
 
 /* audio manager */
+static SDL_bool mAudioManagerClass;
 /* method signatures */
 
 /* controller manager */
+static SDL_bool mControllerManagerClass;
 /* method signatures */
 
 /* Accelerometer data storage */
@@ -251,12 +254,10 @@ JNIEXPORT int JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 
 void checkJNIReady(void)
 {
-#if 0
     if (!mActivityClass || !mAudioManagerClass || !mControllerManagerClass) {
         /* We aren't fully initialized, let's just return. */
         return;
     }
-#endif
 
     SDL_SetMainReady();
 }
@@ -339,6 +340,8 @@ JNIEXPORT void JNICALL SDL_JAVA_INTERFACE(nativeSetupJNI)()
         !midSupportsRelativeMouse) {
         __android_log_print(ANDROID_LOG_WARN, "SDL", "Missing some Java callbacks, do you have the latest version of SDLActivity.java?");
     }
+#else
+    mActivityClass = SDL_TRUE;
 #endif
 
     checkJNIReady();
@@ -358,6 +361,8 @@ JNIEXPORT void JNICALL SDL_JAVA_AUDIO_INTERFACE(nativeSetupJNI)()
         __android_log_print(ANDROID_LOG_WARN, "SDL",
                             "Missing some Java callbacks, do you have the latest version of SDLAudioManager.java?");
     }
+#else
+    mAudioManagerClass = SDL_TRUE;
 #endif
 
     checkJNIReady();
@@ -372,6 +377,8 @@ JNIEXPORT void JNICALL SDL_JAVA_CONTROLLER_INTERFACE(nativeSetupJNI)()
     if (!midPollInputDevices || !midPollHapticDevices || !midHapticRun || !midHapticStop) {
         __android_log_print(ANDROID_LOG_WARN, "SDL", "Missing some Java callbacks, do you have the latest version of SDLControllerManager.java?");
     }
+#else
+    mControllerManagerClass = SDL_TRUE;
 #endif
 
     checkJNIReady();
