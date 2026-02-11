@@ -1,0 +1,5 @@
+// md5mesh static model
+entityDef test_md5mesh_static_model {
+	"inherit" "func_static"
+	"model" "test_static_mesh.md5meshs" // file content is same as md5mesh, only change file extension to md5meshs
+}

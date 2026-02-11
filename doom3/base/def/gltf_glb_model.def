@@ -1,0 +1,60 @@
+// gltf/glb static model
+entityDef test_gltf_glb_static_model {
+	"inherit" "func_static"
+	"model" "models/gltf_glb/test_static_mesh.gltf" // or glb
+}
+
+// gltf/glb animation model
+// 1. md5 animation model
+model test_gltf_glb_animation_model {
+	mesh "models/gltf_glb/test_animation_mesh.md5mesh"
+
+	anim idle "models/gltf_glb/anims/test_anim_idle.md5anim"
+	anim stand "models/gltf_glb/anims/test_anim_stand.md5anim"
+}
+
+// 2-a. define gltf/glb to md5mesh/md5anim conversion config
+entityDef models/gltf_glb/test_animation_mesh { // name must be same as model's mesh field
+    "md5convert" "1" // mark this entityDef is md5 conversion define for clean manually later by command `cleanConvertedMd5`
+
+    "type" "gltf" // or glb // animation model type, if not set, will using mesh's extension
+
+    // mesh. file path and name is same as md5 model, but extension is gltf/glb
+	"mesh" "models/gltf_glb/test_animation_mesh.gltf" // or glb // required
+
+	"scale" "0.3" // scale vertexes, float, default -1.0. It will not scale if less or equals than 0
+    "allFlags" "" // same as `flag*` parameters, values are `addOrigin`, `renameOrigin`, split by ','. It can be override by `flag*`
+	"flag1" "renameOrigin" // rename root bone name to 'origin', string, default false.
+	"flag2" "addOrigin" // prepend 'origin' bone to front, string, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
+    "offset" "0 0 0" // root bone origin offset, vector, default '0 0 0'
+    "rotation" "0 90 0" // root bone orient rotation, vector, default '0 0 0'. value is angle degree(-360 - 360)
+    "savePath" "" // output path, string, default is empty, it will be output to same path
+
+    // animations. file path and name is same as md5 model, only use file name and find it in gltf/glb animations
+	"anim idle" "models/gltf_glb/anims/test_anim_idle"
+	"anim run" "models/gltf_glb/anims/test_anim_stand"
+    // more animations
+}
+
+// 2-b define gltf/glb to md5mesh/md5anim secondary conversion config, it will be used if entityDef 'models/gltf_glb/test_animation_mesh' not found
+entityDef md5convert/models/gltf_glb/test_animation_mesh { // name must be same as 'md5convert/' + model's mesh field
+    "md5convert" "1" // mark this entityDef is md5 conversion define for clean manually later by command `cleanConvertedMd5`
+    "type" "gltf" // or glb // animation model type, if not set, will using mesh's extension
+
+    // mesh. file path and name is same as md5 model, but extension is gltf/glb
+	"mesh" "models/gltf_glb/test_animation_mesh.gltf" // or glb // required
+
+	"scale" "0.5" // scale vertexes, float, default -1.0. It will not scale if less or equals than 0
+    "allFlags" "addOrigin,renameOrigin" // same as `flag*` parameters, values are `addOrigin`, `renameOrigin`, split by ','. It can be override by `flag*`
+	"flag1" "renameOrigin" // rename root bone name to 'origin', string, default false.
+	"flag2" "addOrigin" // prepend 'origin' bone to front, string, default false. It is useful when no origin bone or has more than 1 root bones or root bone is not identity position/rotation
+    "offset" "0 0 0" // root bone origin offset, vector, default '0 0 0'
+    "rotation" "0 90 0" // root bone orient rotation, vector, default '0 0 0'. value is angle degree(-360 - 360)
+    "savePath" "" // output path, string, default is empty, it will be output to same path
+
+    // animations. file path and name is same as md5 model, only use file name and find it in gltf/glb animations
+	"anim idle" "models/gltf_glb/anims/test_anim_idle"
+	"anim run" "models/gltf_glb/anims/test_anim_stand"
+    // more animations
+}
+

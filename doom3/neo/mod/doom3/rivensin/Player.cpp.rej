@@ -1,0 +1,21 @@
+--- game/Player.cpp
++++ game/Player.cpp
+@@ -10632,7 +12368,7 @@ idPlayer::Show
+ */
+ void idPlayer::Show( void ) {
+ 	idWeapon *weap;
+-	
++
+ 	idActor::Show();
+ 	weap = weapon.GetEntity();
+ 	if ( weap ) {
+@@ -10675,7 +12411,8 @@ void idPlayer::ShowTip( const char *title, const char *tip, bool autoHide ) {
+ 	hud->SetStateString( "tiptitle", title );
+ 	hud->HandleNamedEvent( "tipWindowUp" ); 
+ 	if ( autoHide ) {
+-		PostEventSec( &EV_Player_HideTip, 5.0f );
++		CancelEvents( &EV_Player_HideTip ); //ivan - make sure there are no other events that could hide this too soon.
++		PostEventSec( &EV_Player_HideTip, 10.0f ); //ivan - was 5.0f 
+ 	}
+ 	tipUp = true;
+ }
