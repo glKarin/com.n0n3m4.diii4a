@@ -1,7 +1,0 @@
--o "emailnot"
-plugin
-qvm_api
-memory
-imapnoti
-pop3noti
-md5
