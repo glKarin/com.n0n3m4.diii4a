@@ -1,13 +1,38 @@
+#include <jni.h>
+
 #include "q3esdl2.h"
-#include "../deplibs/SDL2/src/core/android/SDL_android_env.h"
-#include "../deplibs/SDL2/include/SDL.h"
 
 #include <dlfcn.h>
 
+#include <android/log.h>
 #include <android/keycodes.h>
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
+
+#include "q3estd.h"
+#include "q3eenv.h"
+
+#include "../deplibs/SDL2/src/core/android/SDL_android_env.h"
+#include "../deplibs/SDL2/include/SDL.h"
+
+#define LOG_TAG "Q3E::SDL"
 
 #define Q3E_SDL_FAKE_CUSTOM_CURSOR 1
 #define SDL_HINT_EGL_Q3E_SPECIAL_CONFIG "SDL_HINT_EGL_Q3E_SPECIAL_CONFIG"
+
+#define GET_JNI(env) JNIEnv *env = Q3E_GetEnv();
+
+extern char * get_clipboard_text(void);
+extern jobject q3eCallbackObj;
+extern ANativeWindow *window;
+extern void copy_to_clipboard(const char *text);
+extern void *libdl;
+extern void Android_AttachThread(void);
+extern void Android_DetachThread(void);
+extern void open_url(const char *url);
+extern void show_toast(const char *text);
+extern void grab_mouse(int grab);
+extern int open_dialog(const char *title, const char *message, int num, const char *buttons[]);
 
 SDL_Android_GetAPI_f sdl_api;
 int USING_SDL = 0;
@@ -23,6 +48,50 @@ static SDL_bool (*SDL_SetHint_f)(const char *name, const char *value);
 
 #define INTERFACE_METHOD(ret, name, args) ret (* name) args;
 #include "../deplibs/SDL2/src/core/android/SDL_android_interface.h"
+
+static jmethodID android_RequestPermission_method;
+
+/* controller manager */
+static jclass mControllerManagerClass;
+
+/* method signatures */
+static jmethodID midPollInputDevices;
+//static jmethodID midPollHapticDevices;
+//static jmethodID midHapticRun;
+//static jmethodID midHapticStop;
+
+void Q3E_InitSDLJava(JNIEnv *env, jclass q3eCallbackClass)
+{
+    android_RequestPermission_method = (*env)->GetMethodID(env, q3eCallbackClass, "RequestPermission", "(Ljava/lang/String;I)Z");
+
+    jclass SDLControllerManager = (*env)->FindClass(env, "com/n0n3m4/q3e/sdl/SDLControllerManager");
+    mControllerManagerClass = (jclass)((*env)->NewGlobalRef(env, SDLControllerManager));
+
+    midPollInputDevices = (*env)->GetStaticMethodID(env, mControllerManagerClass,
+                                                    "pollInputDevices", "()V");
+//    midPollHapticDevices = (*env)->GetStaticMethodID(env, mControllerManagerClass,
+//                                                     "pollHapticDevices", "()V");
+//    midHapticRun = (*env)->GetStaticMethodID(env, mControllerManagerClass,
+//                                             "hapticRun", "(IFI)V");
+//    midHapticStop = (*env)->GetStaticMethodID(env, mControllerManagerClass,
+//                                              "hapticStop", "(I)V");
+}
+
+// from Java
+static int request_permission(const char *perm, int code)
+{
+    GET_JNI(env)
+
+    if(!perm)
+        return Q3E_FALSE;
+
+    LOGI("Request permission: %s(%d)", perm, code);
+    jstring str = (*env)->NewStringUTF(env, perm);
+    jstring nstr = (*env)->NewWeakGlobalRef(env, str);
+    (*env)->DeleteLocalRef(env, str);
+    jboolean res = (*env)->CallBooleanMethod(env, q3eCallbackObj, android_RequestPermission_method, nstr, code);
+    return res ? Q3E_TRUE : Q3E_FALSE;
+}
 
 // from SDL2
 static void UnicodeToUtf8( int w , char *utf8buf)
@@ -299,7 +368,7 @@ void audioSetThreadPriority(int iscapture, int device_id)
 {
     //LOGW("Q3E SDL audioSetThreadPriority(%d, %d) -> not supported!", iscapture, device_id);
 
-    ATTACH_JNI(env)
+    GET_JNI(env)
     int res = 0;
 
     jclass Thread = (*env)->FindClass(env, "java/lang/Thread");
@@ -363,12 +432,13 @@ _Exit:
 
 void pollInputDevices()
 {
-    
+    GET_JNI(env)
+    (*env)->CallStaticVoidMethod(env, mControllerManagerClass, midPollInputDevices);
 }
 
 void pollHapticDevices()
 {
-    
+
 }
 
 void hapticRun(int device_id, float intensity, int length)
@@ -497,6 +567,11 @@ void Q3E_InitSDL(void)
     CALL_SDL(audio_nativeSetupJNI);
     CALL_SDL(controller_nativeSetupJNI);
 
+    GET_JNI(env)
+    jclass Q3ESDL = (*env)->FindClass(env, "com/n0n3m4/q3e/sdl/Q3ESDL");
+    jmethodID InitSDL = (*env)->GetStaticMethodID(env, Q3ESDL, "InitSDL", "()V");
+    (*env)->CallStaticObjectMethod(env, Q3ESDL, InitSDL);
+
     atexit(Q3E_ShutdownSDL);
 
     void *SDL_SetHint = dlsym(libdl, "SDL_SetHint");
@@ -508,179 +583,4 @@ void Q3E_InitSDL(void)
     LOGI("Game library SDL2 initialized!");
 }
 
-typedef float mouse_pos_t;
-static mouse_pos_t in_positionX = 0;
-static mouse_pos_t in_positionY = 0;
-static mouse_pos_t in_deltaX = 0;
-static mouse_pos_t in_deltaY = 0;
-//static int8_t mouseState;
-static uint8_t relativeMouseMode = Q3E_FALSE;
-static int IN_WINDOW_WIDTH;
-static int IN_WINDOW_HEIGHT;
-
-void Q3E_SDL_SetRelativeMouseMode(int on)
-{
-    relativeMouseMode = on;
-    if(on)
-    {
-        in_deltaX = IN_WINDOW_WIDTH / 2;
-        in_deltaY = IN_WINDOW_HEIGHT / 2;
-        set_mouse_cursor_visible(false);
-    }
-    else
-    {
-        //in_positionX = 0;
-        //in_positionY = 0;
-        set_mouse_cursor_position(in_positionX, in_positionY);
-        set_mouse_cursor_visible(true);
-    }
-}
-
-void Q3E_SDL_SetWindowSize(int width, int height)
-{
-    if(IN_WINDOW_WIDTH && IN_WINDOW_HEIGHT)
-        return;
-    IN_WINDOW_WIDTH = width;
-    IN_WINDOW_HEIGHT = height;
-	in_deltaX = IN_WINDOW_WIDTH / 2;
-	in_deltaY = IN_WINDOW_HEIGHT / 2;
-}
-
-static void Q3E_SDL_MouseMotion(float dx, float dy)
-{
-    if(relativeMouseMode)
-    {
-        mouse_pos_t x = dx;
-        mouse_pos_t y = dy;
-
-        int hw = IN_WINDOW_WIDTH / 2;
-        if(x < -hw) {
-            x = -hw;
-        } else if(x > hw) {
-            x = hw;
-        }
-
-        int hh = IN_WINDOW_HEIGHT / 2;
-        if(y < -hh) {
-            y = -hh;
-        } else if(y > hh) {
-            y = hh;
-        }
-
-        in_deltaX = x;
-        in_deltaY = y;
-    }
-    else
-    {
-        mouse_pos_t x = in_positionX + dx;
-        mouse_pos_t y = in_positionY + dy;
-
-        if(x < 0) {
-            x = 0;
-        } else if(x >= IN_WINDOW_WIDTH) {
-            x = IN_WINDOW_WIDTH - 1;
-        }
-
-        if(y < 0) {
-            y = 0;
-        } else if(y >= IN_WINDOW_HEIGHT) {
-            y = IN_WINDOW_HEIGHT - 1;
-        }
-
-        in_positionX = x;
-        in_positionY = y;
-
-        set_mouse_cursor_position(in_positionX, in_positionY);
-    }
-}
-
-static void Q3E_SDL_MousePosition(float x, float y)
-{
-    if(relativeMouseMode)
-    {
-        in_deltaX = x;
-        in_deltaY = y;
-    }
-    else
-    {
-        in_positionX = x;
-        in_positionY = y;
-    }
-}
-
-#define ACTION_DOWN       0
-#define ACTION_UP         1
-#define ACTION_MOVE       2
-#define ACTION_HOVER_MOVE 7
-#define ACTION_SCROLL     8
-#define BUTTON_PRIMARY    1
-#define BUTTON_SECONDARY  2
-#define BUTTON_TERTIARY   4
-#define BUTTON_BACK       8
-#define BUTTON_FORWARD    16
-
-void Q3E_SDL_MotionEvent(float dx, float dy)
-{
-    // mouse motion event
-    Q3E_SDL_MouseMotion(dx, dy);
-
-    //if(!relativeMouseMode)
-    {
-        CALL_SDL(onNativeMouse, 0, ACTION_MOVE, relativeMouseMode ? in_deltaX : in_positionX, relativeMouseMode ? in_deltaY : in_positionY, relativeMouseMode);
-    }
-}
-
-void Q3E_SDL_MouseEvent(float x, float y)
-{
-    // mouse motion event
-    Q3E_SDL_MousePosition(x, y);
-
-    //if(!relativeMouseMode)
-    {
-        CALL_SDL(onNativeMouse, 0, ACTION_MOVE, relativeMouseMode ? in_deltaX : in_positionX, relativeMouseMode ? in_deltaY : in_positionY, relativeMouseMode);
-    }
-}
-
-void Q3E_SDL_TextEvent(JNIEnv *env, jstring text)
-{
-    jboolean iscopy;
-    const char *utf8str = (*env)->GetStringUTFChars(env, text, &iscopy);
-    CALL_SDL(connection_nativeCommitText, utf8str, 0);
-    (*env)->ReleaseStringUTFChars(env, text, utf8str);
-}
-
-void Q3E_SDL_CharEvent(int ch)
-{
-    char text[4] = { 0 };
-    UnicodeToUtf8(ch, text);
-    CALL_SDL(connection_nativeCommitText, text, 1);
-}
-
-void Q3E_SDL_WheelEvent(float x, float y)
-{
-    CALL_SDL(onNativeMouse, 0, ACTION_SCROLL, x, y, 0);
-}
-
-void Q3E_SDL_KeyEvent(int key, int down, int ch)
-{
-    if(key < 0)
-    {
-        CALL_SDL(onNativeMouse, -key, down ? ACTION_DOWN : ACTION_UP, relativeMouseMode ? in_deltaX : in_positionX, relativeMouseMode ? in_deltaY : in_positionY, relativeMouseMode);
-        return;
-    }
-	
-    if(down)
-    {
-        CALL_SDL(onNativeKeyDown, key);
-		if(ch > 0)
-		{
-            char text[4] = { 0 };
-            UnicodeToUtf8(ch, text);
-			CALL_SDL(connection_nativeCommitText, text, 1);
-		}
-    }
-    else
-    {
-        CALL_SDL(onNativeKeyUp, key);
-    }
-}
+#include "q3esdljni.c"

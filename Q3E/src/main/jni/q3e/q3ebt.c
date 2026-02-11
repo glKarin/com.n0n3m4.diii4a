@@ -120,8 +120,22 @@ static void sample_sigsegv_handler(int signum, siginfo_t *siginfo, void *context
 }
 
 // ----------- lots of signal handling stuff ------------
-static const int sigs[] = {SIGILL, SIGABRT, SIGFPE, SIGSEGV};
-//static const char* crashSigNames[] = { "SIGILL", "SIGABRT", "SIGFPE", "SIGSEGV" };
+#define DEFINE_SIGS(T, name) \
+static const T name[] = { \
+        SIG(SIGILL), /*4*/ \
+        SIG(SIGABRT), /*6*/ \
+        SIG(SIGFPE), /*8*/ \
+        SIG(SIGSEGV), /*11*/ \
+        SIG(SIGBUS), /*7*/ \
+        SIG(SIGSTKFLT), /*16*/ \
+};
+
+#define SIG(x) x
+DEFINE_SIGS(int, sigs)
+#undef SIG
+#define SIG(x) #x
+DEFINE_SIGS(char *, sig_names)
+#undef SIG
 
 void Q3E_BT_Init(void)
 {
@@ -143,7 +157,7 @@ void Q3E_BT_Init(void)
         act.sa_flags = SA_RESTART | SA_SIGINFO | SA_ONSTACK | SA_RESETHAND;
         sigaction(sigs[i], &act, NULL);
         //signal(sigs[i], sigsegv_handler);
-        LOGI("[%d] Register signal: %d", i, sigs[i]);
+        LOGI("[%d] Register signal: %d(%s)", i, sigs[i], sig_names[i]);
     }
 }
 
@@ -155,7 +169,7 @@ void Q3E_BT_Shutdown(void)
         int i;
         for (i = 0; i < sizeof(sigs) / sizeof(sigs[0]); i++) {
             signal(sigs[i], SIG_DFL);
-            LOGI("[%d] Unregister signal: %d", i, sigs[i]);
+            LOGI("[%d] Unregister signal: %d(%s)", i, sigs[i], sig_names[i]);
         }
     }
 }

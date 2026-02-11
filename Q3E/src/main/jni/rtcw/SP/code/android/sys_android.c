@@ -12,6 +12,7 @@
 #define Q3E_QUIT_WINDOW GLimp_AndroidQuit
 #define Q3E_CHANGE_WINDOW GLimp_AndroidInit
 
+extern void GLimp_AndroidOpenWindow(volatile ANativeWindow *w);
 extern void GLimp_AndroidInit(volatile ANativeWindow *win);
 extern void GLimp_AndroidQuit(void);
 extern void ShutdownGame(void);

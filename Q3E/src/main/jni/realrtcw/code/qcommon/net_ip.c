@@ -1269,6 +1269,10 @@ static void NET_AddLocalAddress(char *ifname, struct sockaddr *addr, struct sock
 }
 
 #if defined(__linux__) || defined(MACOSX) || defined(__BSD__)
+#ifdef __ANDROID__ //karin: ifaddrs.h
+extern int getifaddrs(struct ifaddrs **ifap);
+extern void freeifaddrs(struct ifaddrs *ifa);
+#endif
 static void NET_GetLocalAddress(void)
 {
 	struct ifaddrs *ifap, *search;

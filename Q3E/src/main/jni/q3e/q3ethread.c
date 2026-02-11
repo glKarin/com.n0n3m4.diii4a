@@ -4,11 +4,23 @@
 #include <string.h>
 #include <signal.h>
 
+#include <unistd.h>
+#include <sys/prctl.h>
 #include <android/log.h>
 
 #include "q3estd.h"
 
 #define LOG_TAG "Q3E::Thread"
+
+#include <dlfcn.h>
+typedef int (*PROC_pthread_getattr_np)(pthread_t __pthread, pthread_attr_t* __attr);
+typedef int (*PROC_pthread_setname_np)(pthread_t __pthread, const char* __name);
+// __ANDROID_API__ >= 26
+typedef int (*PROC_pthread_getname_np)(pthread_t __pthread, char* __buf, size_t __n);
+static PROC_pthread_getattr_np pthread_getattr_np_f;
+static PROC_pthread_setname_np pthread_setname_np_f;
+static PROC_pthread_getname_np pthread_getname_np_f;
+static _Bool proc_init = 0;
 
 static pthread_mutex_t global_lock;
 static pthread_mutex_t cond_lock;
@@ -49,7 +61,116 @@ int q3e_pthread_cancelable(void)
     return 0;
 }
 
-int Q3E_CreateThread(pthread_t *threadid, void * (*mainf)(void *), void *data)
+static void Q3E_InitPthreadProc(void)
+{
+	if(proc_init)
+		return;
+#define PTHREAD_GETPROC(x) x##_f = (PROC_##x)dlsym(RTLD_DEFAULT, #x); \
+	if(x##_f) { LOGI("pthread proc " #x ": %p", x##_f); } \
+	else { LOGI("pthread proc " #x ": not found"); }
+
+	PTHREAD_GETPROC(pthread_getattr_np)
+	PTHREAD_GETPROC(pthread_setname_np)
+	PTHREAD_GETPROC(pthread_getname_np)
+
+	proc_init = 1;
+#undef PTHREAD_GETPROC
+}
+
+inline static int qpthread_getattr_np(pthread_t pid, pthread_attr_t *attr)
+{
+    Q3E_InitPthreadProc();
+
+    if(pthread_getattr_np_f)
+		return pthread_getattr_np_f(pid, attr);
+	else
+	{
+        LOGW("pthread_getattr_np not support");
+		return -1;
+	}
+}
+
+inline static int qpthread_setname_np(pthread_t pid, const char *name)
+{
+    Q3E_InitPthreadProc();
+
+    if(pthread_setname_np_f)
+		return pthread_setname_np_f(pid, name);
+	else
+	{
+        LOGW("pthread_setname_np not support");
+		return -1;
+	}
+}
+
+inline static int qpthread_getname_np(pthread_t pid, char *name, size_t n)
+{
+    Q3E_InitPthreadProc();
+
+    if(pthread_getname_np_f)
+		return pthread_getname_np_f(pid, name, n);
+	else
+	{
+		LOGW("pthread_getname_np not support");
+		return -1;
+	}
+}
+
+int Q3E_AlignedStackSize(size_t stackSize)
+{
+	if (stackSize == 0)
+		return 0;
+
+	size_t bytes = stackSize * 1024;
+	long pagesize = sysconf(_SC_PAGESIZE);
+	if (pagesize <= 0) {
+		LOGI("Get page size error %ld, using 4096 bytes.", pagesize);
+		pagesize = 4096;
+	}
+	else {
+		LOGI("Get page size %ld bytes.", pagesize);
+	}
+	long stackmin = sysconf(_SC_THREAD_STACK_MIN);
+	if (stackmin <= 0) {
+#ifdef PTHREAD_STACK_MIN
+		LOGI("Get thread stack min error %ld, using PTHREAD_STACK_MIN macro %d. bytes.", stackmin, PTHREAD_STACK_MIN);
+		stackmin = PTHREAD_STACK_MIN;
+#else
+		LOGI("Get thread stack min error %ld, using %d bytes.", pagesize, 16384);
+        stackmin = 16384;
+#endif
+	} else {
+		LOGI("Get thread stack min %ld bytes.", stackmin);
+	}
+	if (bytes < stackmin)
+		bytes = stackmin;
+	size_t alignedsize = (bytes + pagesize - 1) / pagesize * pagesize;
+	LOGI("Require stack size %zu bytes, aligned size %zu bytes.", bytes, alignedsize);
+
+	return alignedsize;
+}
+
+static int Q3E_SetupThreadAttrStackSize(pthread_attr_t *attr, size_t stackSize)
+{
+    if (stackSize == 0)
+        return 0;
+
+    size_t alignedsize = Q3E_AlignedStackSize(stackSize);
+
+    size_t size = 0;
+    pthread_attr_getstacksize(attr, &size);
+    LOGI("Default stack size %zu bytes.", size);
+    if (pthread_attr_setstacksize(attr, alignedsize) == 0) {
+        pthread_attr_getstacksize(attr, &size);
+        LOGI("Setup stack size %zu bytes", size);
+        return alignedsize;
+    } else {
+        LOGW("Setup stack size %zu bytes fail!", alignedsize);
+        return -1;
+    }
+}
+
+int Q3E_CreateThread(pthread_t *threadid, void * (*mainf)(void *), void *data, const char *name, size_t stackSize)
 {
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -60,6 +181,27 @@ int Q3E_CreateThread(pthread_t *threadid, void * (*mainf)(void *), void *data)
 		return -1;
 	}
 
+    // setup thread stack size
+    res = Q3E_SetupThreadAttrStackSize(&attr, stackSize);
+
+#if 0
+	if(data)
+	{
+        void (* before_f)(void *ptrs[], int size);
+        before_f = dlsym(data, "q3e_test");
+		LOGI("Find q3e_test entry point on library: %p", before_f);
+		if(before_f)
+		{
+			void *ptrs[] = {
+					&attr,
+					NULL,
+			};
+			LOGI("Call q3e_test entry point on library: %p", &attr);
+			before_f(ptrs, sizeof(ptrs) / sizeof(ptrs[0]) - 1);
+		}
+	}
+#endif
+
 	if ( (res = pthread_create((pthread_t *)threadid, &attr, mainf, data)) != 0 ) {
 		LOGE("ERROR: pthread_create native thread failed: %d", res);
 		return -2;
@@ -67,13 +209,82 @@ int Q3E_CreateThread(pthread_t *threadid, void * (*mainf)(void *), void *data)
 
 	pthread_attr_destroy(&attr);
 
-	LOGI("Native thread created: %zu.", PTHREAD_ID_WRAP(*threadid));
+	qpthread_setname_np(*threadid, name);
+
+	LOGI("Native thread '%s' created: %zu.", name, PTHREAD_ID_WRAP(*threadid));
 
 	return 0;
 }
 
-int Q3E_QuitThread(pthread_t *threadid, void **data, int cancel)
+int Q3E_GetThreadName(const pthread_t *pid, char *name, int len)
 {
+	pthread_t id = pid ? *pid : pthread_self();
+    int res;
+	if((res = qpthread_getname_np(id, name, len)) == 0)
+	{
+		return strlen(name);
+	}
+	else
+	{
+		LOGW("Get thread name fail: %d.", res);
+		return 0;
+	}
+}
+
+int Q3E_GetCurrentThreadName(char *name)
+{
+    if(prctl(PR_GET_NAME, (long)name, 0, 0, 0) == 0)
+    {
+        return strlen(name);
+    }
+    else
+    {
+        LOGW("Get current thread name fail.");
+        return 0;
+    }
+}
+
+int Q3E_InThread(pthread_t pid)
+{
+	if(!pid)
+		return 0;
+	return pthread_equal(pthread_self(), pid);
+}
+
+int Q3E_GetStackSize(const pthread_t *pid)
+{
+	pthread_t id = pid ? *pid : pthread_self();
+	pthread_attr_t attr;
+    int res;
+
+	if((res = qpthread_getattr_np(id, &attr)) == 0)
+	{
+		size_t size = 0;
+		pthread_attr_getstacksize(&attr, &size);
+		pthread_attr_destroy(&attr);
+		return size;
+	}
+	else
+	{
+		LOGW("Get thread stack size fail: %d.", res);
+		return 0;
+	}
+}
+
+int Q3E_QuitThread(volatile pthread_t *threadid, void **data, int cancel)
+{
+    if(*threadid == 0)
+    {
+        LOGW("Thread ID invalid");
+        return -2;
+    }
+
+    if(Q3E_InThread(*threadid))
+    {
+        LOGW("Can't operate in same thread");
+        return -3;
+    }
+
     int res;
 	if(cancel)
 		q3e_pthread_cancel(*threadid);

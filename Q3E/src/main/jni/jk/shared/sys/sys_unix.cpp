@@ -52,11 +52,19 @@ void Sys_PlatformInit( int argc, char *argv[] )
 {
 	const char* term = getenv( "TERM" );
 
+#ifdef __ANDROID__ //karin: no handle signals
+	extern qboolean no_handle_signals;
+    if(!no_handle_signals)
+    {
+#endif
 	signal( SIGHUP, Sys_SigHandler );
 	signal( SIGQUIT, Sys_SigHandler );
 	signal( SIGTRAP, Sys_SigHandler );
 	signal( SIGABRT, Sys_SigHandler );
 	signal( SIGBUS, Sys_SigHandler );
+#ifdef __ANDROID__ //karin: no handle signals
+	}
+#endif
 
 	if (isatty( STDIN_FILENO ) && !( term && ( !strcmp( term, "raw" ) || !strcmp( term, "dumb" ) ) ))
 		stdinIsATTY = qtrue;

@@ -81,6 +81,7 @@ void Q3E_PrintInterface(const Q3E_Interface_t *d3interface)
 	LOGI("Key event: %p", d3interface->keyEvent);
 	LOGI("Analog event: %p", d3interface->analogEvent);
 	LOGI("Motion event: %p", d3interface->motionEvent);
+    LOGI("Mouse event: %p", d3interface->mouseEvent);
 
 	LOGI("<---------");
 }
@@ -113,6 +114,7 @@ void Q3E_PrintCallbacks(const Q3E_Callback_t *callback)
 	LOGI("    open_dialog: %p", callback->Gui_openDialog);
 	LOGI("  Other: ");
 	LOGI("    setState: %p", callback->set_state);
+    LOGI("    log_print: %p", callback->Log_Print);
 
 	LOGI("<---------");
 }
@@ -133,7 +135,6 @@ void Q3E_PrintInitialContext(const Q3E_InitialContext_t *context)
 	LOGI("    Native library directory: %s", context->nativeLibraryDir);
 	LOGI("    Redirect output to file: %d", context->redirectOutputToFile);
 	LOGI("    No handle signals: %d", context->noHandleSignals);
-	LOGI("    Multi-thread: %d", context->multithread);
 	LOGI("    Using mouse: %d", context->mouseAvailable);
 	LOGI("    Game data directory: %s", context->gameDataDir);
 	LOGI("    Application home directory: %s", context->appHomeDir);

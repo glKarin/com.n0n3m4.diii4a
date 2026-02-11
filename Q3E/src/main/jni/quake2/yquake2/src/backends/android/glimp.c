@@ -59,6 +59,7 @@ extern int gl_msaa;
 extern int gl_depth_bits;
 
 extern volatile ANativeWindow * Android_GetWindow(void);
+extern void Android_GrabMouseCursor(qboolean grab);
 
 void (* GLref_AndroidInit)(volatile ANativeWindow *w);
 void (* GLref_AndroidQuit)(void);

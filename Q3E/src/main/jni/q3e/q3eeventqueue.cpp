@@ -13,16 +13,19 @@
 
 #include "q3estd.h"
 
+using BOOL_t = int;
+
 typedef enum EventType_e {
     Event_Key = 1,
     Event_Motion,
     Event_Analog,
+    Event_Mouse,
 } EventType_t;
 
 typedef struct AnalogEvent_s
 {
     int type;
-    bool down;
+    BOOL_t down;
     float x;
     float y;
 } AnalogEvent_t;
@@ -30,7 +33,7 @@ typedef struct AnalogEvent_s
 typedef struct KeyEvent_s
 {
     int type;
-    bool down;
+    BOOL_t down;
     int keycode;
     int charcode;
 } KeyEvent_t;
@@ -42,15 +45,24 @@ typedef struct MotionEvent_s
     float deltay;
 } MotionEvent_t;
 
+typedef struct MouseEvent_s
+{
+    int type;
+    float x;
+    float y;
+    BOOL_t relativeMode;
+} MouseEvent_t;
+
 typedef union Event_s
 {
     int type;
     KeyEvent_t key;
     AnalogEvent_t analog;
     MotionEvent_t motion;
+    MouseEvent_t mouse;
 } Event_t;
 
-typedef std::list<Event_t *> EventQueue_t;
+typedef std::list<Event_t> EventQueue_t;
 
 
 #define LOCK() const std::lock_guard<std::mutex> _lock(lockMutex);
@@ -63,13 +75,14 @@ class idEventManager
 public:
     idEventManager();
     virtual ~idEventManager();
-    void PushKeyEvent(bool down, int keycode, int charcode);
+    void PushKeyEvent(BOOL_t down, int keycode, int charcode);
     void PushMotionEvent(float deltax, float deltay);
-    void PushAnalogEvent(bool down, float x, float y);
+    void PushAnalogEvent(BOOL_t down, float x, float y);
+    void PushMouseEvent(float x, float y, BOOL_t relativeMode);
     void Clear();
     int Num();
     int PullEvent(int num);
-    void SetCallback(SendKey_f sendKey, SendMotion_f sendMotion, SendAnalog_f sendAnalog);
+    void SetCallback(SendKey_f sendKey, SendMotion_f sendMotion, SendAnalog_f sendAnalog, SendMouse_f sendMouse);
 
 private:
     void SendEvent(const Event_t *event);
@@ -80,30 +93,23 @@ private:
     SendKey_f sendKey = nullptr;
     SendMotion_f sendMotion = nullptr;
     SendAnalog_f sendAnalog = nullptr;
+    SendMouse_f sendMouse = nullptr;
 };
 
 idEventManager::idEventManager()
-/*        : sendKey(nullptr),
-          sendMotion(nullptr),
-          sendAnalog(nullptr)*/
 {
 }
 
 idEventManager::~idEventManager()
 {
-    while (!queue.empty())
-    {
-        auto &ev = queue.front();
-        free(ev);
-        queue.pop_front();
-    }
+    queue.clear();
 }
 
-inline void idEventManager::PushKeyEvent(bool down, int keycode, int charcode)
+inline void idEventManager::PushKeyEvent(BOOL_t down, int keycode, int charcode)
 {
     LOCK();
-    Event_t *event = (Event_t *)malloc(sizeof(Event_t));
-    KeyEvent_t *ev = &event->key;
+    Event_t event;
+    KeyEvent_t *ev = &event.key;
     ev->type = Event_Key;
     ev->down = down;
     ev->keycode = keycode;
@@ -114,19 +120,19 @@ inline void idEventManager::PushKeyEvent(bool down, int keycode, int charcode)
 inline void idEventManager::PushMotionEvent(float deltax, float deltay)
 {
     LOCK();
-    Event_t *event = (Event_t *)malloc(sizeof(Event_t));
-    MotionEvent_t *ev = &event->motion;
+    Event_t event;
+    MotionEvent_t *ev = &event.motion;
     ev->type = Event_Motion;
     ev->deltax = deltax;
     ev->deltay = deltay;
     PUSH(event);
 }
 
-inline void idEventManager::PushAnalogEvent(bool down, float x, float y)
+inline void idEventManager::PushAnalogEvent(BOOL_t down, float x, float y)
 {
     LOCK();
-    Event_t *event = (Event_t *)malloc(sizeof(Event_t));
-    AnalogEvent_t *ev = &event->analog;
+    Event_t event;
+    AnalogEvent_t *ev = &event.analog;
     ev->type = Event_Analog;
     ev->down = down;
     ev->x = x;
@@ -134,15 +140,22 @@ inline void idEventManager::PushAnalogEvent(bool down, float x, float y)
     PUSH(event);
 }
 
+inline void idEventManager::PushMouseEvent(float x, float y, BOOL_t relativeMode)
+{
+    LOCK();
+    Event_t event;
+    MouseEvent_t *ev = &event.mouse;
+    ev->type = Event_Mouse;
+    ev->x = x;
+    ev->y = y;
+    ev->relativeMode = relativeMode;
+    PUSH(event);
+}
+
 inline void idEventManager::Clear()
 {
     LOCK();
-    while (!queue.empty())
-    {
-        auto &ev = queue.front();
-        free(ev);
-        queue.pop_front();
-    }
+    queue.clear();
 }
 
 inline int idEventManager::Num()
@@ -170,6 +183,11 @@ inline void idEventManager::SendEvent(const Event_t *ev)
             sendAnalog(analogEvent.down, analogEvent.x, analogEvent.y);
         }
             break;
+        case Event_Mouse: {
+            const MouseEvent_t &mouseEvent = ev->mouse;
+            sendMouse(mouseEvent.x, mouseEvent.y, mouseEvent.relativeMode);
+        }
+            break;
         default:
             LOGE("Unexpected event type: %d", ev->type);
             ABORT();
@@ -186,8 +204,7 @@ int idEventManager::PullEvent(int num)
         while (!queue.empty())
         {
             auto &ev = queue.front();
-            SendEvent(ev);
-            free(ev);
+            SendEvent(&ev);
             queue.pop_front();
         }
         return i;
@@ -198,8 +215,7 @@ int idEventManager::PullEvent(int num)
         while (!queue.empty())
         {
             auto &ev = queue.front();
-            SendEvent(ev);
-            free(ev);
+            SendEvent(&ev);
             queue.pop_front();
             i++;
             if(i >= num)
@@ -211,25 +227,24 @@ int idEventManager::PullEvent(int num)
     {
         while (!queue.empty())
         {
-            auto &ev = queue.front();
-            free(ev);
             queue.pop_front();
         }
         return 0;
     }
 }
 
-void idEventManager::SetCallback(SendKey_f _sendKey, SendMotion_f _sendMotion, SendAnalog_f _sendAnalog)
+void idEventManager::SetCallback(SendKey_f _sendKey, SendMotion_f _sendMotion, SendAnalog_f _sendAnalog, SendMouse_f _sendMouse)
 {
     this->sendKey = _sendKey;
     this->sendMotion = _sendMotion;
     this->sendAnalog = _sendAnalog;
+    this->sendMouse = _sendMouse;
 }
 
 // C interface
 static idEventManager *eventManager = nullptr;
 
-void Q3E_InitEventManager(SendKey_f sendKey, SendMotion_f sendMotion, SendAnalog_f sendAnalog)
+void Q3E_InitEventManager(SendKey_f sendKey, SendMotion_f sendMotion, SendAnalog_f sendAnalog, SendMouse_f sendMouse)
 {
     if(eventManager)
     {
@@ -239,7 +254,7 @@ void Q3E_InitEventManager(SendKey_f sendKey, SendMotion_f sendMotion, SendAnalog
 
     LOGI("idEventManager initialization");
     eventManager = new idEventManager;
-    eventManager->SetCallback(sendKey, sendMotion, sendAnalog);
+    eventManager->SetCallback(sendKey, sendMotion, sendAnalog, sendMouse);
     LOGI("-----------------------");
 }
 
@@ -283,6 +298,13 @@ void Q3E_PushAnalogEvent(int down, float x, float y)
     ASSERT(eventManager);
 
     eventManager->PushAnalogEvent(down, x, y);
+}
+
+void Q3E_PushMouseEvent(float x, float y, int relativeMode)
+{
+    ASSERT(eventManager);
+
+    eventManager->PushMouseEvent(x, y, relativeMode);
 }
 
 int Q3E_EventManagerIsInitialized()

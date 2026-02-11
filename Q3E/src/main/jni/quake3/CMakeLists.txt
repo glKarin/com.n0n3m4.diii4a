@@ -14,7 +14,7 @@ set(IOQ3_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(IOQ3_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(PRODUCT_VERSION TRUE)
 set(IOQ3_PREFIX "q3")
-set(IOQ3_CFLAGS "-pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wno-format-zero-length -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization -Wno-implicit-function-declaration") # -Qunused-arguments
+set(IOQ3_CFLAGS "-pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wno-format-zero-length -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization -Wno-implicit-function-declaration -fno-stack-protector") # -Qunused-arguments
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${IOQ3_CFLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${IOQ3_CFLAGS}")
 list(APPEND CLIENT_INCLUDE_DIRS ${DIII4A_DEPEND_COMMON_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)

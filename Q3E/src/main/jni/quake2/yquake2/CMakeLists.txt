@@ -220,7 +220,7 @@ endif()
 
 # OpenAL support.
 if(${OPENAL_SUPPORT})
-	list(APPEND yquake2IncludeDirectories "../../doom3/neo/externlibs/openal-soft/include")
+	list(APPEND yquake2IncludeDirectories "${DIII4A_DEPEND_INCLUDE_PATH}/openal")
 	list(APPEND yquake2ClientLinkerFlags "")
 
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")

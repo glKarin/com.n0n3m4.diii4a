@@ -8,10 +8,10 @@ set(OPENMOHAA_DEPINCS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../depincs")
 set(OPENMOHAA_DEPLIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../deplibs")
 add_definitions(-D_DIII4A -DUSE_OPENGLES) # android
 
-set(UT_CFLAGS "-pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wno-format-zero-length -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Werror-implicit-function-declaration -Qunused-arguments
+set(MOHAA_CFLAGS "-pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-strict-aliasing -Wformat=2 -Wno-format-zero-length -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization -fno-stack-protector") # -Werror-implicit-function-declaration -Qunused-arguments
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${UT_CFLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${UT_CFLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MOHAA_CFLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MOHAA_CFLAGS}")
 
 include(misc/cmake/TargetArch.cmake)
 

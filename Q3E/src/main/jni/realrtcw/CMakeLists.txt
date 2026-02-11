@@ -64,8 +64,9 @@ endif()
 #message(FATAL_ERROR "STOP")
 # -fshort-enums
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-omit-frame-pointer -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-omit-frame-pointer -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization") # -Qunused-arguments
+set(REALRTCW_CFLAGS "-pipe -fsigned-char -fPIC -DNDEBUG -O3 -fno-builtin-sin -fno-builtin-cos -ffast-math -fno-omit-frame-pointer -fno-strict-aliasing -Wformat=2 -Wformat-security -Wno-format-nonliteral -Wstrict-aliasing=2 -Wmissing-format-attribute -Wdisabled-optimization -fno-stack-protector") # -Qunused-arguments
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${REALRTCW_CFLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${REALRTCW_CFLAGS}")
 
 # Switch off some annoying warnings
 if (${CMAKE_C_COMPILER_ID} STREQUAL "Clang")

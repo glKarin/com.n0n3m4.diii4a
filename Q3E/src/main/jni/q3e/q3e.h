@@ -11,7 +11,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_setCallbackObject
   (JNIEnv *, jclass, jobject);
 
 JNIEXPORT jboolean JNICALL Java_com_n0n3m4_q3e_Q3EJNI_init
-  (JNIEnv *, jclass, jstring, jstring, jint, jint, jstring, jstring, jstring, jobject, jint, jint, jint, jint, jboolean, jint, jboolean, jboolean, jint, jstring, jboolean, jint, jboolean, jint, jboolean);
+  (JNIEnv *env, jclass c, jstring LibPath, jstring nativeLibPath, jint width, jint height, jstring GameDir, jstring gameSubDir, jstring Cmdline, jobject view, jint format, jint depthBits, jint msaa, jint glVersion, jboolean redirectOutputToFile, jint signalsHandler, jboolean mouseAvailable, jint refreshRate, jstring appHome, jboolean smoothJoystick, jint consoleMaxHeightFrac, jboolean usingExternalLibs, jint sdlAudioDriver, jboolean bContinueNoGLContext);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendKeyEvent
   (JNIEnv *, jclass, jint, jint, jint);
@@ -20,7 +20,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMotionEvent
   (JNIEnv *, jclass, jfloat, jfloat);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendMouseEvent
-(JNIEnv *, jclass, jfloat, jfloat);
+(JNIEnv *, jclass, jfloat, jfloat, jint);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_sendTextEvent
 (JNIEnv *, jclass, jstring);
@@ -59,7 +59,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMotionEvent
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushAnalogEvent(JNIEnv *env, jclass c, jint enable, jfloat x, jfloat y);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushMouseEvent
-(JNIEnv *, jclass, jfloat, jfloat);
+(JNIEnv *, jclass, jfloat, jfloat, jint);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushTextEvent(JNIEnv *env, jclass clazz, jstring text);
 
@@ -69,7 +69,7 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PushWheelEvent
         (JNIEnv *, jclass, jfloat, jfloat);
 
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_PreInit
-        (JNIEnv *, jclass, jint, jint);
+        (JNIEnv *, jclass, jint, jint, jint);
 
 JNIEXPORT jint JNICALL Java_com_n0n3m4_q3e_Q3EJNI_main
         (JNIEnv *, jclass);
@@ -83,6 +83,10 @@ JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_NotifyExit(JNIEnv *, jclass);
 JNIEXPORT void JNICALL Java_com_n0n3m4_q3e_Q3EJNI_Setenv(
         JNIEnv *env, jclass cls,
         jstring name, jstring value);
+
+JNIEXPORT int JNICALL Java_com_n0n3m4_q3e_Q3EJNI_AlignedStackSize(
+        JNIEnv *env, jclass cls,
+        jint kb);
 
 #ifdef __cplusplus
 }

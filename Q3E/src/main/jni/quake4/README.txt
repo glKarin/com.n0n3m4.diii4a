@@ -1,1 +1,1 @@
-doom3/neo/quake4
+<root>/doom3/neo/quake4

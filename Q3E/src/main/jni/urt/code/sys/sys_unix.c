@@ -913,6 +913,11 @@ void Sys_PlatformInit( void )
 {
 	const char* term = getenv( "TERM" );
 
+#ifdef __ANDROID__ //karin: no handle signals
+	extern qboolean no_handle_signals;
+    if(!no_handle_signals)
+    {
+#endif
 	// Let debug builds crash instead of handling the error ourselves.
 #ifdef NDEBUG
 	signal( SIGQUIT, Sys_SigHandler );
@@ -921,6 +926,9 @@ void Sys_PlatformInit( void )
 	signal( SIGBUS, Sys_SigHandler );
 #endif
 	signal( SIGHUP, Sys_SigHandler );
+#ifdef __ANDROID__ //karin: no handle signals
+	}
+#endif
 
 	Sys_SetFloatEnv();
 

@@ -1,1 +1,1 @@
-doom3/neo/prey
+<root>/doom3/neo/prey
