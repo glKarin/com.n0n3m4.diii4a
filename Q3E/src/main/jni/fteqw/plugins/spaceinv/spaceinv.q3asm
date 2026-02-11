@@ -1,0 +1,5 @@
+-o "spaceinv"
+plugin
+spaceinv
+qvm_api
+memory

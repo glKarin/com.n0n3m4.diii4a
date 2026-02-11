@@ -1,0 +1,13 @@
+What is this?
+
+Its a simple particle config with somewhat more complex (glsl) rendering effect.
+Simply put, it'll distort the screen behind rockets and grenades.
+
+To use, place the pk3 in your quake/fte/ dir.
+Start up FTE.
+r_particlesystem script
+r_particlesdesc "spikeset tsshaft distort"
+
+The second line will give you the default particle config, with the two replacement trails overriding the built in effects.
+
+If you want to look at how its done, you can open the pk3 with winrar/7zip/winzip/windows explorer (if you change the filename extension). There are two text files inside. The effect could be adapted and applied to explosions and other stuff too. Enjoy.

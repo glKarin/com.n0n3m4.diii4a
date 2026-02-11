@@ -1,0 +1,18 @@
+//this file is intended for dedicated servers, but I guess clients might have reason to use it too. expect quirks though.
+
+FTEMANIFEST 1
+game quake
+name "nQuakeSV-KTX"
+gamedir ktx
+
+homedirmode never	//auto/always
+
+downloadsurl https://fte.triptohell.info/moodles/ktx.meta
+install quake_shareware		//we need(ish) a pak0!
+install nquakesv_configs	//ktx breaks without some configs
+install nquakesv_gamecode	//can't run ktx without ktx!
+//install nquakesv_maps		//urgh, massive bloated download.
+
+//gah, make sure stuff still works when embedded in a browser.
+archivedpackage id1/pak0.pak 0x4f069cac id1/pak0.pak https://fte.triptohell.info/qsw106.zip
+

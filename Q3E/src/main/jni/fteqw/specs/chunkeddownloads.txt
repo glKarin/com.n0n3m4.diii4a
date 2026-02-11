@@ -1,0 +1,104 @@
+Establishment:
+	Useful defines:
+		#define PROTOCOL_VERSION_FTE		(('F'<<0) + ('T'<<8) + ('E'<<16) + ('X' << 24))
+		#define PEXT_CHUNKEDDOWNLOADS		0x20000000
+
+	QW: Extensions are established during the handshake.
+		CL: "\xff\xff\xff\xffgetchallenge\n"
+		SV: "\xff\xff\xff\xffc$challenge\0<binary key value pairs>"
+		CL: "\xff\xff\xff\xffconnect $ver $qport $challenge \"$userinfo\"\n%#x %#x\n", key1, value1
+		SV: "\xff\xff\xff\xffj\n"
+		See the 'both' part for additional info.
+		This handshake will be stripped by proxies. This is by design. It prevents qizmo and similar proxies from erroring on extensions.
+		
+	NQ: This extension is not currently supported.
+		it can be implemented, but darkplaces' stream downloads may be more standard for the nq protocol.
+
+	Both:
+		The server will update the svc_serverinfo message to have this ordering:
+		byte svcqw_serverdata / svcnq_serverinfo 
+		optional long PROTOCOL_VERSION_FTE
+		optional long flags=PEXT_CHUNKEDDOWNLOADS|etc
+		long PROTOCOL_VERSION
+		...
+		The protocol version should be parsed in a loop, stopping on unrecognised or non-extension-bits protocols.
+		The server must mask the extension bits with those that it supports, to avoid future extensions appearing active on servers that don't support them.
+		If the extension bits are not echoed from the server in the list, those extensions WILL NOT be used.
+		This mechanism allows the server to mask the client's extensions with the extensionbits that it supports, and to tell the client which protocol bits will actually be used for each map.
+		The server may kick the client if the client does not support extensions required by the server, just as a server sending an unsupported protocol version would result in a client getting kicked, but at least the server has the chance to run without.
+
+Modified SVCs:
+	svc_download: completely rewritten, but uses the old svc value.
+		Takes three forms.
+		Startup/failure:
+			Sent reliably.
+
+			unsigned long chunknum < 0
+			long totalsize
+			string nameonserver
+
+			totalsize < 0 denotes an error.
+			-1 = file not found
+			-2 = server rejected download based upon name. file may or may not exist.
+			-3 = generic error, active download aborted.
+
+			nameonserver should match the filename the client requested. It is present to potentially allow replacement extensions, but any such replacements are subject to other extensions.
+			The client must ensure that the server does not have a way to write out files such as *.dll or *.so
+
+		Data:
+			Sent unreliably.
+
+			unsigned long chunknum
+			byte data[1024]
+
+			the start offset of the data is chunknum*1024
+			with the final chunk, the data sent is padded to 1024 bytes. the client must write only as many bytes as are in the file.
+
+		OOB Data:
+			Sent unreliably in its own udp packet.
+
+			string"\xff\xff\xff\xffn\\chunk"
+			long filenum
+			byte svc_download
+			unsigned long chunknum
+			byte data[1024]
+
+			Much like the in-band data chunk.
+			Remember to ensure that it came from the right source address.
+			The filenum value is a copy of the filenum argument of the nextdl client command.
+			
+
+Modified client stringcmds:
+	download "$filename"
+		Begins download.
+		Triggers a svc_download Startup or failure command.
+		otherwise unmodified.
+
+	nextdl $chunknum $percent $filenum
+		only the first argument is required.
+		the percentage is for display on the server only, and does not affect anything. If it is set to '-', servers should guess based upon the chunk number.
+		the third argument permits out-of-band file downloads, and is a cookie. increment the value each time a new file starts, and ignore oob chunks that do not match.
+
+		The client must periodically generate new chunk requests, sending it unreliably. If the third argument is present, multiple nextdl commands can be sent in a single client packet.
+		The server typically sends out a new svc_download data message upon receipt of each nextdl, either in band or out of band. The server must take care to rate limit oob messages.
+		The client will need to track which chunks have been received, which ones have not, and avoid requesting the same chunk too many times in rapid succession.
+		The client should take its requested netchan rate and its packetloss into consideration in order to avoid spamming itself off the internet.
+		You may wish to implement a slow-start algorithm or some such, and cut back if the packetloss rises.
+		The actual algorithm used to decide which chunk to request and when is up to the client implementor, but should generally be roughly sequential to avoid unnecessary cache thrashing on the server.
+		While unadvised, it is not an error to start at the last chunk and work backwards, though its generally not recommended to do so, and such implementations really should be explicit with the percentage hints.
+		The server should report an error if there is no active download or if the chunk is invalid (however, note ezquake incompatibilities).
+
+	stopdownload
+		Sent by the client whenever a download failed or finished. This allows the server to clean up resources.
+		The server will only allow one active download at a time, so this is not strictly required.
+		The server must not reply (except maybe with a print if there is no download currently active).
+
+EZQuake's Incompatiblities:
+	ezquake clients do not send stopdownload. Instead it sends 'nextdl -1'. FTE servers print a warning and closes the download upon reception. Older versions reported error -3 due to this, but as ezquake cannot handle error conditions, servers that care about compatibility over correctness should not report error conditions if the chunk index is ~0.
+	mvdsv spams like fuck when it receives the stopdownload command.
+	mvdsv does not always report filenames in svc_download messages. Such messages can safely be ignored.
+	out of band downloads were not supported in the earliest versions, but do not present any compatibility issues.
+
+Competing extensions:
+	darkplaces streamed downloads. more common with dp's own protocol.
+	quakeforge redirects. chunked downloads redefine the svc_download message, meaning quakeforge's redirects are incompatible.

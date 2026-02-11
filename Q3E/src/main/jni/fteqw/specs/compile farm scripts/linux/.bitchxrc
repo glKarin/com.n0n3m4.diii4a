@@ -1,0 +1,16 @@
+^on -join "% #testdisabled *" {
+/exec -msg #fte /home/moodles/svninfo.sh
+/exec -msg #fte /home/moodles/count.sh
+timer 60 //^part #fte Until the next SVN commit..
+timer 120 //^quit
+}
+on connect "*quakenet.org*" {
+/msg Q@CServe.quakenet.org AUTH AGorilla passwordhere
+}
+on ^channel_synch "#fte *" 
+{ 
+exec -msg $0 /home/moodles/svninfo.sh
+timer 1 //exec -msg $0 /home/moodles/count.sh
+timer 60 //^part $0 Until the next SVN commit..
+timer 120 //^quit
+}

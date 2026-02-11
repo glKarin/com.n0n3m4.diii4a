@@ -1,9 +1,11 @@
 #misc build artifacts
+/build
 *.o
 *.o.d
 engine/debug/
 engine/release/
 engine/libs-*/
+engine/bullet3-*/
 engine/*.tar.gz
 engine/shaders/generatebuiltinsl
 engine/shaders/makevulkanblob
@@ -40,3 +42,5 @@ engine/droid/ftekeystore
 engine/droid/proguard-project.txt
 engine/droid/project.properties
 
+# Flatpak build artifacts
+.flatpak-builder

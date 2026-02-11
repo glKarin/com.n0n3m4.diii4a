@@ -1,0 +1,267 @@
+Supported skeletal formats:
+ FTE supports:
+  iqm (prefered)
+  psk (.psa is loaded automatically, slow to load)
+  md5mesh (animationless mesh-only models)
+  md5anim (meshless animation-only models, each one is a single framegroup)
+  zym (supported only for compat. single-weighted)
+  dpm (supported only for compat. lacks framegroups)
+
+With the exception of md5 models, all of the above can be used as a drop-in replacement for regular .mdl files.
+
+As you may have noticed, md5anim models contain no mesh, making them pointless, right?
+Well, kinda.
+Using the skeletal objects extension, you can actually 'build' the animation data from one model into a skeletal object, and then use that skeleton to render an entity with the actual md5mesh model instead.
+This can be used to share a single set of animation data between X different mesh models (this feature is not specific to md5anims, but the various models do need to have the same bones+bone order, and similar enough stature for it to not look absurd).
+
+The ragdoll extension builds upon skeletal objects, where physics bodies+joints are instanciated+moved from the animation data within a skeletal object, and fed back to later update that skeletal object after physics is run.
+Because you can control which bodies are 'animated' as opposed to 'simulated', you can simulate a pony tail for instance, and use animation data for the head itself. Doing so will result in the pony tail following the head naturally, adhering to angle+position changes of the entity itself.
+
+
+
+
+To use a skeletal object, you must first create the skeletal object with skel_create, and store the object handle in the entity's skeletonindex field. This will cause rendering to use the bone data from the skeletal object instead of the entity's frame info (it will still use the entity's model as normal, so the bone counts must be correct).
+An uninitialised skeletal object is generally invalid, so after creating the skeletal object, you must fill its bone data with info from the animation model. You can do this with skel_build.
+
+So for csqc:
+void() mycsqcpredrawfunction =
+{
+	if (!self.skeletonindex)
+		self.skeletonindex = skel_create(self.modelindex);
+	self.frame1time = time;
+	self.frame2time = time;
+	self.frame = 0;
+	self.frame2 = 1;
+	self.lerpfrac = 0.5;
+	skel_build(self.skeletonindex, self, self.modelindex, 0, 0, 0, 1);
+};
+Be sure to call skel_delete when the entity is removed. The engine will not do this for you.
+
+The code above will create a skeletal object for the entity, and fill it with animation data (firstbone, lastbone set to 0 means 'all bones').
+The animation data used will be blended between framegroup 0 and framegroup 1 at a ratio of 50% vs 50%, and will animate with time. Note that you can set frameXtime to be dependant upon distance traveled. If your model animates a run speed of 320 qu per second, then self.frame1time += distancemoved/320; will keep your legs moving in sync with the ground.
+The lerpfrac field is a bit useless, of course. This should generally be used for blending between separate animations. You can of course ditch framegroups entirely and use only frame+frame2 to animate your model, resetting lerpfrac 10 times a second or whatever.
+
+Separation of torso+legs can also be achieved, by calling skel_build multiple times with separate bone ranges.
+If your model is arranged with the legs as the early bones, and the torso as the later bones, you can use skel_find_bone to find the lower spine bone, and animate the two bone groups separately by updating the animation fields for torso, then for legs.
+Note that you can simply pass something other than 'self' for the legs, and it'll use the animation fields from a different (invisible) entity instead.
+
+You can blend forward+back+right+left animations together smoothly by calling skel_build with retainfrac=0 for the first animation, and with retainfrac=1 for all the others. If addfrac for all skel_build calls add up to 1 for each bone, you will have a valid animation that can completely avoid the need for messing with lerpfrac/frame2. Calling skel_build with addfrac not adding up to 1 will result in the model getting rescaled weirdly.
+
+
+Aiming:
+The easiest way to make the head aim at some fixed place separately from the gun, is to have the bone set directly straight forward in your modeling program, and to call skel_set_bone_world in the QC after making all your skel_build calls. The forward/right/up vectors should be the v_forward/v_right/v_up vectors after calling makevectors(vectoangles(target - org)); or some such.
+
+Spinning:
+To have a bone spin 1 rotation every second since time=0, you can use the following code:
+{
+	if (!self.skeletonindex) self.skeletonindex = skel_create(self.modelindex);
+	skel_build(self.skeletonindex, self, self.modelindex, 0, 0, 0, 1);
+	makevectors([0, time*360, 0]);
+	skel_mul_bone(self.skeletonindex, skel_find_bone(self.skeletonindex, "spine"), '0 0 0', v_forward, v_right, v_up);
+}
+There's nothing special about the skel_create or skel_build calls here, and skel_find_bone should probably be cached or something.
+Note that the skel_build is not strictly required every frame. You could change 'time' to 'frametime' and move the skel_build into the skel_create's if-statement block, and the result would be the same.
+Because skeletal objects are (generally) relative, rotating the spine like that will also rotate every single child bone along with the 'spine' bone.
+A small note: skel_get_boneabs is in model space, not world space. You should use gettaginfo in order to get the world-space position of the bone (bones are equivelent to tags).
+
+skel_set_bone will generally set the position of the bone relative to its parent, ignoring that bone's current rotation+position. skel_mul_bone on the other hand will rotate/move without destroying previous rotations/movements. Typically the children of that bone will also move.
+
+
+
+Ragdolls:
+To use ragdolls, you must have:
+a) a skeletal model.
+b) a skeletal object.
+c) a body/joint (doll) definition.
+
+While the entity is still alive, you will be calling skel_build on the skeletal object as normal, but also calling skel_ragupdate afterwards.
+Here's some uncompiled example code.
+
+{
+	float alive = self.frame != itsdeadjim;
+	if (!self.skeletonindex)
+		self.skeletonindex = skel_create(self.modelindex);
+	if (alive || self.oldalive != alive)
+	{
+		//you should update these fields properly...
+		self.frame1time = time;
+		self.frame2time = time;
+		self.frame = 0;
+		self.frame2 = 1;
+		self.lerpfrac = 0.5;
+		skel_build(self.skeletonindex, self, self.modelindex, 0, 0, 0, 1);
+	}
+	if (self.oldalive != alive)
+	{
+		if (alive)
+			skel_ragupdate(self, "animate 1", 0);
+		else
+			skel_ragupdate(self, "animate 0", 0);
+	}
+	skel_ragupdate(self, "doll foo.doll", 0);
+	self.oldalive = alive;
+}
+
+There's a few noteworthy things in the code above.
+Setting the animate value to 1 means the doll will begin animating the doll as normal. This will give some sort of inverse kinematics (BUG: the current version forces positions rather than updating velocities, meaning the bodies will just spaz out as the joints break).
+Setting the animate value to 0 means that the doll will ignore all animation values, thus the current info in the skeletal object is ignored and completely overwritten, thus removing the need to call skel_build. You can still call it, it just won't do anything useful.
+skel_ragupdate will change the skeletal object to an absolute-skeletal-object (the bones are specified in modelspace rather than relative to their parents).
+skel_build can only update relative-skeletal-objects, and will throw an error if given an absolute skeleton. If retainfrac=0 then it'll just silently update the skeletal object to relative as all data will be overwritten anyway.
+The third argument to skel_ragupdate can be used as an animation source. This allows you to retain a set of animation data without destroying it. Specifically, if this is set to 0, the bones without bodies will snap back to their base pose, which can be rather ugly when it dies if the preliminary death animations do not revert them first. This animation source argument must be a relative-skeletal-object (ie: filled in with skel_build).
+
+For portability/sanity reasons, don't call skel_get_bonerel+skel_set_bone+skel_mul_bone if ragupdate was called more recently than build.
+
+Commands that skel_ragupdate accepts are:
+ enablejoint $jointname $truth
+	Can be used to disable(truth=0)/enable(truth=1) joints.
+	Disabling joints when the entity is killed allows things like dismemberment. You should probably stop calling skel_build for the affected bones if the entity is still alive.
+ animatebody $bodyname $strength
+	Can be used to override/change whether a single body is animated or not. The skeletal object must be valid/built for the bones of all animating bodies.
+	By setting and animating a single bone's world position, you can drag the entity around by that bone, even if all other bones are in their non-animated simulate-only state, before reverting that body setting when released.
+ animate $strength
+	Sets/clears the animate flag on all bodies to default.
+	Used to easily enter ragdoll state or reset the bodies to an alive state.
+
+ doll $dollfilename
+	Loads a doll file from disk and applies it to the current model.
+	See below for a vauge description of the file format.
+	Multiple instances of the same model will use the same internal representation of the file, but the file also be instanciated with separate models.
+ dollstring\n$dolltext
+	Can be used if you wish to embed the doll text within the qc, or generate it yourself.
+	Each skeletal object will have its own copy of the doll.
+ cleardoll
+	Can be used to uninstanciate the ragdoll. The skeletal object returns to being a regular non-ragdoll skeletal object.
+	Note that skel_delete will do this as required, so this is not really needed.
+
+Loading a doll with one of the above commands will instanciate the model using the current pose. Make sure you have called skel_build appropriately before doing so.
+Attempting to update a ragdoll skeletal object with no command specified will update the skeletal object to follow the ragdoll. If there is no current ragdoll, the default ragdoll for the skeletal object's initial model will be instanciated (the one that would be used from ssqc).
+The default doll can be precached.
+
+
+Differences between csqc and ssqc:
+SSQC is visually crippled at this time. While the various skeleton builtins are available, it is not possible to render them onscreen. They can be used for hitmodel support and the like, but that is all. Other than this severe limitation, ssqc is fully functional. If you wish to test, FTE's csqc and ssqc modules share access to valid skeletal objects - THIS WILL ONLY WORK IN SINGLE PLAYER - thus it is possible to pass the skeletal object index to csqc for debug rendering, and ONLY debug.
+Practical use is limited to either only hitmodels (to mirror csqc's positions), or replicating bones via csqc. It should be enough to network just the positions, and to allow the joints to correct the angles.
+As a special exception for ssqc, if the gamecode uses a file named eg 'foo.iqm', the engine will also attempt to load 'foo.doll'. If the frame is set to something rediculous (try 65535), the skeletal object will ignore all 'animate 1' bodies, treating them all as 'animate 0'. This will allow you to activate ragdoll part way through a death animation, but also means you don't have control over the initial frame if the entity enters pvs late. You will likely want to use PVSF_NOREMOVE to mitigate this issue somewhat.
+There is no functionality to copy player ragdolls to bodyqueue corpses, and it is not possible to reassign players to other entity slots. The only way around this is to have the ragdoll entity spawn at the start of the death animation, or be permanantly tracking the (invisible) player with exteriormodeltoclient set.
+
+
+
+
+Ragdoll description files:
+Note that the bones are all specified by name. The same .doll description file can be used with multiple models with different bone ordering without an issue.
+
+to create a body:
+body BODYNAME BONENAME
+ATTRIBUTE ARGUMENTS
+...
+attributes are:
+ shape - one of:
+	box
+	sphere
+	cylinder
+	capsule
+ animate - 1 means uses the animation data instead of the body (and drives the body to match, so other bones follow)
+ size X [[Y] Z] - the z is the length of cylinders/capsules.
+ orient [BONE] - orient the body such that the top tip touches the body's bone, and the bottom touches the named bone. if BONE is omitted, uses the body's bone's parent.
+
+to create a joint:
+joint JOINTNAME BODY1 BODY2
+ATTRIBUTE ARGUMENTS
+...
+attributes are:
+ type - one of:
+	fixed
+	point
+	hinge
+	slider
+	universal
+	hinge2
+ ERP,ERP2 - 
+ CFM,CFM2 - should be kept low.
+ FMax,FMax2 - 
+ HiStop,HiStop2 - the maximum angle allowed.
+ LoStop,LoStop2 - the minimum angle allowed.
+ axis,axis2 X Y Z - the hinge axis, a direction vector, around which the hinge will bend, spring will move, etc.
+ pivot BONE X Y Z - the pivot point of the joint will be created relative to the current position of the given bone. the xyz is relative to the angles of the bone. cannot be used on the default joint.
+ offset X Y Z - the pivot point relative to the parent bone, which can be used on the default joint.
+
+
+
+
+
+QC definitions for the associated extensions:
+
+.float skeletonindex;
+	Specifies the skeletal object to be used to render the entity. The named object overrides the frame etc fields but not the modelindex of the entity.
+float(float modlindex) skel_create = #263;
+	Creates a new empty skeletal object to be used to animate the given model.
+	Every skeletal object you create MUST be deleted again - the remove builtin will _NOT_ do this for you.
+float(float skel, entity ent, float modelindex, float retainfrac, float firstbone, float lastbone, optional float addfrac) skel_build = #264;
+	Fill a skeletal object with animation data from a model. model must be compatible with the skeletal object's model.
+	retainfrac+addfrac can be used to blend between simultaneous animations. The gamecode should ensure that the final result aproximates a total strength of '1' for each bone.
+	A firstbone of 0 means 'start with bone 1'.
+	A lastbone of 0 means 'include the last bone'.
+	You should use different bone regions if you wish to separate torso+legs.
+	ent determines which entity's fields to use. frame, frame2, lerpfrac, frame1time, frame2time are all used.
+	CSQCONLY: baseframe, baseframe2, baseframe1time, baseframe2time, baselerpfrac, basebone fields still apply, as they would without skeletal objects.
+float(float skel) skel_get_numbones = #265;
+	Returns the number of bones in the model. as bone indicies are 1-based, the last bone is actually (skel_get_numbones(sko)+1)
+string(float skel, float bonenum) skel_get_bonename = #266;
+	Retrieves the name of the bone.
+float(float skel, float bonenum) skel_get_boneparent = #267;
+	Retrieves the index of the given bone's parent. 0 means no parent.
+float(float skel, string tagname) skel_find_bone = #268;
+	Finds a bone by name. Use this for easily splitting a model at the waste or so.
+vector(float skel, float bonenum) skel_get_bonerel = #269;
+	Gets the matrix transformation of the bone relative to its parent.
+	the offset is in the return value. v_forward, v_right, v_up contain the angle transform.
+vector(float skel, float bonenum) skel_get_boneabs = #270;
+	Gets the matrix transformation of the bone relative to the entity that it is attached to.
+	the offset is in the return value. v_forward, v_right, v_up contain the angle transform.
+vector(entity ent, float tagindex) gettaginfo = #452;
+	Gets the matrix transformation of the bone in world space.
+	the origin is in the return value. v_forward, v_right, v_up contain the angle transform. Use vectoangles(v_forward, v_up) to get the required angles for an entity to be positioned on that bone.
+void(float skel, float bonenum, vector org, optional vector fwd, optional vector right, optional vector up) skel_set_bone = #271;
+	Sets the relative transform of the bone relative to its parent.
+	Also affects the child bones.
+	This can be used to remove the coord changes from certain md5anim files, for example.
+void(float skel, float bonenum, vector org, optional vector fwd, optional vector right, optional vector up) skel_mul_bone = #272;
+	Rotates/moves the bone relative to the parent.
+	Also affects the children.
+	An easy trick is to use:
+	makevectors('0 15 0');
+	skel_mul_bone(skel, bone, '0 0 0');
+	To rotate the given bone 15 degrees around its parent.
+void(float skel, float startbone, float endbone, vector org, optional vector fwd, optional vector right, optional vector up) skel_mul_bones = #273;
+	Rotates/moves a range of bones individually. Useful for character spines where you want to affect each rib. Note that the angle is applied separately to each bone, so the angle used should be =(totalangle/numbones).
+void(float skeldst, float skelsrc, float startbone, float entbone) skel_copybones = #274;
+	Copies the bones directly from one skeletal object to another. If the parent bones still differ then the visible result can still differ.
+void(float skel) skel_delete = #275;
+	Deletes a skeletal object. The skeletal object is still valid and usable until the end of the frame. This allows you to add entities using that sko and delete them as part of the same frame.
+void(entity ent, float bonenum, vector org, optional vector angorfwd, optional vector right, optional vector up) skel_set_bone_world = #283;
+	Edits the skeletal object attached to the entity to position+rotate the bone to the exact worldspace coordinate/angles specified, for things like eyes tracking victims etc.
+float*(float skel) skel_mmap = #282;
+	Returns a pointer to the bonematrix of the skeletal object. Starting at bone 1, each bone takes 12 floats, ordered: fwd_x, lft_x, up_x, org_x, fwd_y, lft_y, up_y, org_y, fwd_z, lft_z, up_z, org_z.
+	The pointer is valid for as long as the sko is.
+float(entity skelent, string dollcommand, float animskel) skel_ragupdate = #281;
+	Creates, modifies, or animates the physics bodies attached to the ent's sko, and copies the results back into the sko bone data.
+	dollcommand can be blank or for example "DOLL models/test.doll" to specify the ragdoll definition to use.
+	For performance reasons, the skeletal object will be defined using matricies relative to the entity rather than the parent bones. This will give weird results with the skel_set_bone skel_mul_* builtins, which can be fixed only with skel_build with retainfrac=0 refering to all bones.
+	If animskel is set: bones without bodies will use the information in the given sko.
+	If animskel is 0 and skel_build was called more recently than skel_ragupdate: bones without bodies will use the sko bone data already in the object.
+	If animskel is 0 and skel_build was not called recently: bones without bodies will snap to the base pose (relative to parent).
+
+.float pvsflags;
+	Modifiers to control how the PVS affects entities.
+#define PVSF_NORMALPVS		0
+	Culled by sv_cullentities_trace. This is the tighest PVS possible.
+#define PVSF_NOTRACECHECK	1
+	Uses PVS only, and will not be subject to sv_cullentities_trace, like vanilla Quake.
+#define PVSF_USEPHS		2
+	The entity will be visible if any sounds it makes could be heard. Basically a fatter pvs.
+#define PVSF_IGNOREPVS		3
+	The entity will be globally visible.
+#define PVSF_NOREMOVE 128
+	If set in pvsflags, the entity will not be hidden from the client simply because it is no longer visible, yet still not globally visible.
+	Should probably always be used on ssqc ents 
+

@@ -1,0 +1,23 @@
+//documentation on this file can be found at https://sourceforge.net/p/fteqw/code/HEAD/tree/trunk/specs/fte_manifests.txt
+
+FTEManifestVer 1
+game afterquake
+name "AfterQuake"
+//listing dp here allows listing public dp servers, but still won't be listed inside dp
+protocolname "FTE-Quake DarkPlaces-Quake"
+basegame id1
+basegame qw
+basegame *fte
+disablehomedir 1
+
+//first, so we don't favour it over pak1.pak
+//avoids distributing the demo as anything other than the demo.
+package id1/gpl_maps.pk3
+archivedpackage id1/pak0.pak - id1/pak0.pak http://triptohell.info/moodles/live/QUAKE_SW.zip
+package id1/pak1.pak
+package id1/new_playermodel_only.pak
+
+//autoupdate stuff
+//FIME FIXME FIXME - on android we have no https support
+downloadsurl "http://fte.triptohell.info/downloadables.php"
+install "AfterQuake - Minimum"

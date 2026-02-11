@@ -1,0 +1,46 @@
+This code compiles against libjpeg, libpng, zlib, dx7, libogg and libvorbis.
+You can find the main MSVC 6 workspace in the ftequake directory.
+You will need to build the gas2masm project's debug build first.
+After that, you will have a choice of FTE builds.
+If you are running without libraries, you can pick the mingldebug build. For sw only builds, select the debug/release options. For dedicated builds, choose the logical one. The MDebug/MRelease builds are the merged binaries.
+
+important: msvc 6.0 standard install doesn't come with "ml.exe" which is needed to build fte, you can get it from either service pack 5 or 6. or grab it from somewhere i dunno
+
+zlib:
+libs/zconf.h
+libs/zlib.h
+libs/zlib.lib
+You will need zlib if you wish to build a version of FTE with png/zip/pk3 support.
+If you don't have it, you can hunt out the line '#define AVAIL_ZLIB' in bothdefs.h and disable it.
+
+Ogg Vorbis:
+libs/ogg/*
+libs/vorbis/*
+At the time of writing, ogg vorbis support is not fully functional and is #ifdefed out. You will not need these libraries.
+Lack of these files can be indicated by removing any '#define AVAIL_OGGVORBIS' line found in bothdefs.h (if they exist)
+
+lib jpeg:
+libs/jpeg.lib
+libs/jpeglib.h
+libs/jmorecfg.h
+libs/jconfig.h
+libs/jerror.h
+These files are optional and not strictly needed for anything other than screenshots and loading Quake3 textures.
+Hunt out and kill '#define AVAIL_JPEGLIB' from bothdefs.h to disable the requirement.
+URL pending.
+
+libpng:
+libs/libpng.lib
+libs/png.h
+libs/pngconf.h
+These files are for support of png textures and screenshots.
+Hunt out and kill '#define AVAIL_PNGLIB' from bothdefs.h to disable the requirement.
+URL pending.
+
+DirectX 7 SDK:
+libs/dxsdk7/include/*
+libs/dxsdk7/lib/*
+These are used for the d3d renderer. They are only benefitial in this way.
+This feature is normally enabled via an ifdef in the project file. An '#define NODIRECTX' in bothdefs.h will disable all requirements of dx. It is normally only used in the merged binaries.
+Without this define, it will expect to find DX5 headers and libraries in your compilers default directories.
+You can obtain an uptodate copy of directx from Microsoft's Website.

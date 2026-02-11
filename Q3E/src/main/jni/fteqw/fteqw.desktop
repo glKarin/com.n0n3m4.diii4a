@@ -1,0 +1,40 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=FTEQW Game Engine
+Comment=Awesome First Person Shooter
+Exec=fteqw %u
+Icon=info.triptohell.fteqw
+Terminal=false
+Categories=Game;
+MimeType=application/x-quakeworlddemo;x-scheme-handler/quake;x-scheme-handler/qw;
+Actions=quake;rerel;netquake;quake2;quake3;hexen2;hexen2mp
+
+[Desktop Action quake]
+Name=Play Quake
+Exec=fteqw %u -quake
+
+[Desktop Action rerel]
+Name=Play Quake Rerelease
+Exec=fteqw %u -quake_rerel
+
+[Desktop Action netquake]
+Name=Play Classic Quake
+Exec=fteqw %u -netquake
+
+[Desktop Action quake2]
+Name=Play QuakeII
+Exec=fteqw %u -quake2
+
+[Desktop Action quake3]
+Name=Play Quake III Arena
+Exec=fteqw %u -quake
+
+[Desktop Action hexen2]
+Name=Play Hexen2
+Exec=fteqw %u -hexen2
+
+[Desktop Action hexen2mp]
+Name=Play Hexen2 Mission Pack
+Exec=fteqw %u -portals
+
