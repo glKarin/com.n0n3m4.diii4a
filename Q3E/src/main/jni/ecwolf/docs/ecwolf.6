@@ -1,0 +1,39 @@
+.TH ecwolf 6
+.SH NAME
+ecwolf - Advanced Wolfenstein 3D source port
+
+.SH SYNOPSIS
+.B ecwolf
+[\fIoptions\fR] [\fIfiles\fR ...]
+
+.SH DESCRIPTION
+.B ecwolf
+is an advanced source port of the Wolfenstein 3D engine based upon Wolf4SDL
+with some back ports from ZDoom. It provides substantially boosted capabilities
+for creating mods without requiring source code edits using scripting and other
+tools familiar to users of ZDoom.
+
+For players it offers modern features such as support for modern control
+schemes and wide screen. Being based on the Wolfenstein 3D engine and using an
+enhanced version of the original software renderer, it provides a relatively
+accurate play experience to vanilla while modernizing.
+
+Currently supported games are Wolfenstein 3D, Spear of Destiny, and Super 3-D
+Noah's Ark.
+
+.SH OPTIONS
+Use the --help option for a complete list of options.
+
+.SH FILES
+The original game data files are required for operation. These are files with
+the extensions *.n3d, *.sod, *.sd2, *.sd3, *.wl1, or *.wl6. They should be
+placed either in
+.IR ~/.config/ecwolf
+or
+.IR /usr/local/share/games/wolf3d .
+
+If you do not have these files they can be acquired at https://www.gog.com or
+through Steam.
+
+.SH BUGS
+The bug tracker is located at https://bitbucket.org/ecwolf/ecwolf/issues

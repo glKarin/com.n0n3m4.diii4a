@@ -1,0 +1,12 @@
+#define INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
+
+#define GAMENAME "@PRODUCT_NAME@"
+#define GAMESIG "@PRODUCT_SIGNATURE@"
+#define BINNAME "@PRODUCT_BINARY@"
+#define GAME_DIR "@PRODUCT_DIRECTORY@"
+
+#define DOTVERSIONSTR_NOREV "@VERSION_STRING@"
+#define SAVEPRODVER @VERSION_INTEGER@ // 0xMMMmmmrr in hex
+
+// Windows RC files have weird syntax so we need an unquoted version
+#define RCGAMENAME @PRODUCT_NAME@
