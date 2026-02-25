@@ -1,0 +1,32 @@
+
+//include at header of snd_systems.cpp
+extern "C"
+{
+#include "flite.h"
+cst_voice *register_cmu_us_rms();
+cst_voice *voice;
+};
+
+//In the snd_systems init()
+flite_init()
+voice = register_cmu_us_rms();
+
+//to play audio:
+flite_text_to_speech("Baboo wizard.", voice, "play");
+
+
+//ENVIRONMENT
+// Library dir
+C:\sdks\speech\flite-1.4-release\lib
+
+// include dir
+C:\sdks\speech\flite-1.4-release\include
+
+// additional libraries
+fliteDll.lib
+cmu_us_rms.lib
+
+//copy these dlls to your game folder
+cmu_us_rms.dll
+fliteDll.dll
+
