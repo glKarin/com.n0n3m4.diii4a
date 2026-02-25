@@ -77,6 +77,17 @@ public class ChangeLog
         final ChangeLog[] CHANGES = {
                 ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2026-02-10", 71,
+                        "Add `Skin Deep`(ver 1.0.4) support, game standalone directory named `skindeep`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://blendogames.com/skindeep/", "Skin Deep") + "`.",
+                        "Support edit on-screen buttons layout in gaming.",
+                        "Add `ECWolf`(ver 1.4.2) support, game standalone directory named `ecwolf`. More view in `" + TextHelper.GenLinkText("http://maniacsvault.net/ecwolf/", "ECWolf") + "`.",
+                        "Add game main thread stack size config on Menu > Option > Advance.",
+                        "Enable `FTEQW`.",
+                        "Add `UZDoom`(ver 4.14.3) arm64 support, game standalone directory named `uzdoom`. More view in `" + TextHelper.GenLinkText("https://github.com/UZDoom/UZDoom", "UZDoom") + "`. And GZDoom is removed.",
+                        "Fix some GUIs in Quake 4/Prey(2006).",
+                        "RealRTCW(ver 5.2) is removed."
+                ),
+
                 ChangeLog.Create("2025-12-21", 70,
                         "Fix font offset in GUIs on Quake 4.",
                         "Fix a sound distance volume bug on Quake 4.",

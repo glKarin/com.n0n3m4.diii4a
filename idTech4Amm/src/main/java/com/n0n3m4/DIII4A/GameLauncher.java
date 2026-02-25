@@ -2569,6 +2569,7 @@ public class GameLauncher extends Activity
 		menuGames.put(R.id.main_menu_game_mohaa, Q3EGameConstants.GAME_MOHAA);
 		menuGames.put(R.id.main_menu_game_wolf3d, Q3EGameConstants.GAME_WOLF3D);
 		menuGames.put(R.id.main_menu_game_skindeep, Q3EGameConstants.GAME_SKINDEEP);
+		menuGames.put(R.id.main_menu_game_qc, Q3EGameConstants.GAME_QC);
 
 		for(Map.Entry<Integer, String> entry : menuGames.entrySet())
 		{
@@ -4886,6 +4887,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_mohaagame;
 		public RadioGroup rg_fs_wolf3dgame;
 		public RadioGroup rg_fs_skindeepgame;
+		public RadioGroup rg_fs_qcgame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -5021,6 +5023,7 @@ public class GameLauncher extends Activity
 			rg_fs_mohaagame = CreateGameRadioGroup(gameId);
 			rg_fs_wolf3dgame = CreateGameRadioGroup(gameId);
 			rg_fs_skindeepgame = CreateGameRadioGroup(gameId);
+			rg_fs_qcgame = CreateGameRadioGroup(gameId);
 
             edt_cmdline = findViewById(R.id.edt_cmdline);
             res_customlayout = findViewById(R.id.res_customlayout);

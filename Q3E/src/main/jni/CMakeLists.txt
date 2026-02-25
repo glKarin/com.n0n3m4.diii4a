@@ -41,6 +41,7 @@ OPTION(GAME_URT                     "Build Urbant Error"                        
 OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"          ON)
 OPTION(GAME_WOLF3D                  "Build Wolfenstein 3D"                          ON)
 OPTION(GAME_SKINDEEP                "Build Skin Deep"                               ON)
+OPTION(GAME_QC                      "Build Quadrilateral Cowboy"                    ON)
 # Not in F-Droid
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_SOURCE                  "Build Source"                                  ON)
@@ -97,7 +98,7 @@ add_subdirectory( q3e )
 
 
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SERIOUSSAM OR GAME_SKINDEEP)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SERIOUSSAM OR GAME_SKINDEEP OR GAME_QC)
     set(DIII4A_BUILD_COMMON True)
 endif()
 
@@ -240,6 +241,11 @@ endif()
 if(GAME_SKINDEEP) #  | Apr 16, 2025 | https://github.com/libretro/ecwolf/commit/c57ad894d5942740b4896511e8554c9a776b04a6 | Fix emscripten build
     message(STATUS "Build Skin Deep")
     add_subdirectory ( skindeep ) # Skin Deep
+endif()
+
+if(GAME_QC) #  | Apr 16, 2025 | https://github.com/blendogames/quadrilateralcowboy/commit/c7ec52ca117a3ef6b5420d2a4bb3f63a17be57f1 | Fix for occasional crash when pressing ESC during Moto Spectre sequence
+    message(STATUS "Build Quadrilateral Cowboy")
+    add_subdirectory ( qc ) # Quadrilateral Cowboy
 endif()
 
 

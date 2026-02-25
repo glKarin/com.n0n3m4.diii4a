@@ -2,6 +2,7 @@ package com.n0n3m4.DIII4A.launcher;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
@@ -10,10 +11,12 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.lib.FileUtility;
 import com.karin.idTech4Amm.misc.FileBrowser;
 import com.karin.idTech4Amm.misc.Function;
+import com.karin.idTech4Amm.sys.GameManager;
 import com.n0n3m4.DIII4A.GameLauncher;
 import com.n0n3m4.q3e.Q3E;
 import com.n0n3m4.q3e.Q3EGame;
 import com.n0n3m4.q3e.Q3EGameConstants;
+import com.n0n3m4.q3e.Q3ELang;
 import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KStr;
@@ -127,7 +130,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
             List<FileBrowser.FileModel> allFiles = fileBrowser.ListAllFiles();
             fileModels.addAll(allFiles);
 
-            fileModels.sort(new FileBrowser.NameComparator());
+            Collections.sort(fileModels, new FileBrowser.NameComparator());
         }
         else
         {
@@ -201,7 +204,7 @@ public final class ChooseGameModFunc extends GameLauncherFunc
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
-        builder.setTitle(Q3E.q3ei.game_name + " " + Tr(R.string.mod));
+        builder.setTitle(Q3ELang.tr(m_gameLauncher, GameManager.GetGameName()) + " " + Tr(R.string.mod));
         builder.setSingleChoiceItems(items.toArray(new CharSequence[0]), selected, new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int p)
             {

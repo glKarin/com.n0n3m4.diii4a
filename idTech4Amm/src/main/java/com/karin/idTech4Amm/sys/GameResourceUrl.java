@@ -74,28 +74,42 @@ public enum GameResourceUrl
     FTEQW_FREEHL(Q3EGameConstants.GAME_FTEQW, "halflife", "FreeHL", "https://github.com/eukara/freehl", 1),
     FTEQW_CS1_5(Q3EGameConstants.GAME_FTEQW, "cstrike_1_5", "FreeCS", "https://github.com/eukara/freecs", 1),
 
-
+    // OpenJA
     JA_BASE(Q3EGameConstants.GAME_JA, "base", "", "https://store.steampowered.com/app/6020/STAR_WARS_Jedi_Knight__Jedi_Academy/", 2),
+
+    // OpenJO
     JO_BASE(Q3EGameConstants.GAME_JO, "base", "", "https://store.steampowered.com/app/6030/STAR_WARS_Jedi_Knight_II__Jedi_Outcast/", 2),
 
+    // SamTFE
     SAMTFE_BASE(Q3EGameConstants.GAME_SAMTFE, "", "", "https://store.steampowered.com/app/41050/", 2),
 
+    // SamTSE
     SAMTSE_BASE(Q3EGameConstants.GAME_SAMTSE, "", "", "https://store.steampowered.com/app/41060/", 2),
 
+    // Xash3D
     XASH_HLSDK(Q3EGameConstants.GAME_XASH3D, "", "", "https://github.com/FWGS/hlsdk-portable", 1),
     XASH_FWGS(Q3EGameConstants.GAME_XASH3D, "", "", "https://github.com/FWGS/xash3d-fwgs", 1),
     XASH_CS16(Q3EGameConstants.GAME_XASH3D, "", "", "https://github.com/Velaron/cs16-client", 1),
 
+    // Source Engine
     SOURCE_ENGINE(Q3EGameConstants.GAME_SOURCE, "", "", "https://github.com/nillerusr/source-engine", 1),
 
+    // Urban Terror
     URT_BASE(Q3EGameConstants.GAME_URT, "", "", "https://www.urbanterror.info", 1),
 
+    // OpenMOHAA
     MOHAA_BASE(Q3EGameConstants.GAME_MOHAA, "", "", "https://github.com/openmoh/openmohaa", 1),
 
+    // Wolfenstein 3D
     WOLF3D_BASE(Q3EGameConstants.GAME_WOLF3D, "", "", "https://store.steampowered.com/app/2270/Wolfenstein_3D/", 2),
 
+    // Skin Deep
     SKINDEEP_BASE(Q3EGameConstants.GAME_SKINDEEP, "base", "", "https://blendogames.com/skindeep/", 1),
     SKINDEEP_BASE2(Q3EGameConstants.GAME_SKINDEEP, "base", "", "https://store.steampowered.com/app/301280/Skin_Deep/", 2),
+
+    // Quadrilateral Cowboy
+    QC_BASE(Q3EGameConstants.GAME_QC, "base", "", "https://blendogames.com/qc/", 1),
+    QC_BASE2(Q3EGameConstants.GAME_QC, "base", "", "https://store.steampowered.com/app/240440/Quadrilateral_Cowboy", 2),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

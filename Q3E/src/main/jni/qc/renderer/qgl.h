@@ -82,9 +82,6 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef GL_DEPTH24_STENCIL8
 #define GL_DEPTH24_STENCIL8 GL_DEPTH24_STENCIL8_OES
 #endif
-#ifndef GL_DEPTH24_STENCIL8
-#define GL_DEPTH24_STENCIL8 GL_DEPTH24_STENCIL8_OES
-#endif
 #ifndef GL_UNSIGNED_INT_24_8
 #define GL_UNSIGNED_INT_24_8 GL_UNSIGNED_INT_24_8_OES
 #endif

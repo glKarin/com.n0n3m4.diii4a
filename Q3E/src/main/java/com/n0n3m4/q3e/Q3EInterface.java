@@ -82,6 +82,7 @@ public class Q3EInterface
 	public boolean isMOHAA = false;
 	public boolean isWolf3D = false;
 	public boolean isSkinDeep = false;
+	public boolean isQC = false;
 
 	public String default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
@@ -217,6 +218,8 @@ public class Q3EInterface
 			return Q3EGameConstants.GAME_ID_WOLF3D;
 		else if(isSkinDeep)
 			return Q3EGameConstants.GAME_ID_SKINDEEP;
+		else if(isQC)
+			return Q3EGameConstants.GAME_ID_QC;
 		else
 			return Q3EGameConstants.GAME_ID_DOOM3;
 	}
@@ -291,6 +294,8 @@ public class Q3EInterface
 			SetupWolf3D();
 		else if(Q3EGameConstants.GAME_SKINDEEP.equalsIgnoreCase(name))
 			SetupSkinDeep();
+		else if(Q3EGameConstants.GAME_QC.equalsIgnoreCase(name))
+			SetupQC();
 		else
 			SetupDOOM3();
 	}
@@ -321,6 +326,7 @@ public class Q3EInterface
 		isMOHAA = false;
 		isWolf3D = false;
 		isSkinDeep = false;
+		isQC = false;
 	}
 
 	public void SetupDOOM3()
@@ -486,10 +492,17 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public void SetupQC()
+	{
+		ResetGameState();
+		isQC = true;
+		SetupGameConfig();
+	}
+
 	public boolean IsInitGame()
 	{
 		return isD3 || isQ4 || isPrey
-				|| isD3BFG || isTDM || isSkinDeep
+				|| isD3BFG || isTDM || isSkinDeep || isQC
 				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
 				|| isQ2 || isQ1
 				|| isDOOM || isWolf3D
@@ -531,39 +544,10 @@ public class Q3EInterface
 	}
 
 	// KARIN_NEW_GAME_BOOKMARK: add IsXxxXxx conditions
-	public boolean IsTDMTech()
-	{
-		return isTDM;
-	}
 
 	public boolean IsIdTech4()
 	{
 		return isD3 || isQ4 || isPrey;
-	}
-
-	public boolean IsIdTech3()
-	{
-		return isQ3 || isRTCW || isETW || isRealRTCW || isJA || isJO || isUrT || isMOHAA;
-	}
-
-	public boolean IsIdTech2()
-	{
-		return isQ2;
-	}
-
-	public boolean IsIdQuakeTech()
-	{
-		return isQ1;
-	}
-
-	public boolean IsIdTech4BFG() // 4.5
-	{
-		return isD3BFG;
-	}
-
-	public boolean IsIdTech1()
-	{
-		return isDOOM || isWolf3D;
 	}
 
 	public boolean IsUsingSDL()
@@ -810,6 +794,12 @@ public class Q3EInterface
 			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_SKINDEEP);
 			list.add("<mod>/autoexec.cfg");
 			list.add("<mod>/graphics.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isQC)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_QC);
+			list.add("<mod>/autoexec.cfg");
 			list.add("<base>/autoexec.cfg");
 		}
 		else

@@ -25,6 +25,7 @@
     <color name="theme_mohaa_main_color">#FFEFBA85</color>
     <color name="theme_wolf3d_main_color">#FF0000B2</color>
     <color name="theme_skindeep_main_color">#FFC700FD</color>
+    <color name="theme_qc_main_color">#FFDCD7C3</color>
 
     <color name="launcher_divider_color">#FFCCCCCC</color>
     <color name="launcher_box_color">#FFBBBBBB</color>

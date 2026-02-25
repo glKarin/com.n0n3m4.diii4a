@@ -324,13 +324,19 @@ class Q3EGameHelper
 
         if(Q3E.q3ei.IsIdTech4())
         {
+            KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
             boolean multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, true);
-                KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
             command.SetProp("r_multithread", multithread ? "1" : "0");
+            cmd = command.toString();
+        }
+
+        if(Q3E.q3ei.IsIdTech4() || Q3E.q3ei.isQC)
+        {
+            KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
             int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, Q3EGLConstants.GetPreferOpenGLESVersion());
-                command.SetProp("harm_r_openglVersion", glVersion == Q3EGLConstants.OPENGLES20 ? "GLES2" : "GLES3.0");
-                cmd = command.toString();
-            }
+            command.SetProp("harm_r_openglVersion", glVersion == Q3EGLConstants.OPENGLES20 ? "GLES2" : "GLES3.0");
+            cmd = command.toString();
+        }
 
         if(!useUserCommand)
         {
@@ -889,9 +895,9 @@ class Q3EGameHelper
     // KARIN_NEW_GAME_BOOKMARK: add patch resource extract
     void ExtractGameResource()
     {
-        if(Q3E.q3ei.IsTDMTech()) // GLSL shader
+        if(Q3E.q3ei.isTDM) // GLSL shader
             ExtractTDMGLSLShaderSource();
-        else if(Q3E.q3ei.IsIdTech4BFG()) // HLSL shader
+        else if(Q3E.q3ei.isD3BFG) // HLSL shader
             ExtractDOOM3BFGHLSLShaderSource();
         else if(Q3E.q3ei.isDOOM) // pk3
             ExtractZDOOMResource();

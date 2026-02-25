@@ -180,7 +180,7 @@ public final class TextHelper
             "Rename from DIII4A++, base on original n0n3m4's DIII4A.",
             "Open source engine's games support on Android.",
             "1. idTech4 engine:",
-            " e.g. DOOM 3, DOOM 3 RoE, Quake 4, Prey(2006), The Dark Mod, DOOM 3 BFG, Skin Deep, and some mods(e.g. The Lost Mission, Classic DOOM).",
+            " e.g. DOOM 3, DOOM 3 RoE, Quake 4, Prey(2006), The Dark Mod, DOOM 3 BFG, Skin Deep, Quadrilateral Cowboy and some mods(e.g. The Lost Mission, Classic DOOM).",
             "2. Other idTech engine:",
             " e.g. Return to Castle Wolfenstein, Quake III, Quake II, Quake, UZDOOM, Wolfenstein: Enemy Territory, RealRTCW, OpenJK, FTEQW, Urban Terror, Medal of Honor: Allied Assault.",
             "3. Other open source engine:",

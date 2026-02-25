@@ -556,6 +556,7 @@
     <string name="openmohaa_base">荣誉勋章: 联合袭击</string>
     <string name="wolf3d">德军总部</string>
     <string name="wolf3d_base">德军总部3D</string>
+    <string name="qc_base">四方形牛仔</string>
     <string name="video">图像</string>
     <string name="virtual_joystick">虚拟摇杆</string>
     <string name="touch">触控</string>
@@ -577,4 +578,5 @@
     <string name="backtrace">回退栈</string>
     <string name="use_multithread_command_to_switch_single_multi_threading_in_game_if_enabled">如果启用了多线程, 游戏中可以使用`multithread`命令切换单线程和多线程</string>
     <string name="skin_deep">Skin Deep</string>
+    <string name="qc">四方形牛仔</string>
 </resources>

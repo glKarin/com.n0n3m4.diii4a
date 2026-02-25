@@ -30,14 +30,7 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-                "Add `Skin Deep`(ver 1.0.4) support, game standalone directory named `skindeep`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://blendogames.com/skindeep/", "Skin Deep") + "`.",
-                "Support edit on-screen buttons layout in gaming.",
-                "Add `ECWolf`(ver 1.4.2) support, game standalone directory named `ecwolf`. More view in `" + TextHelper.GenLinkText("http://maniacsvault.net/ecwolf/", "ECWolf") + "`.",
-                "Add game main thread stack size config on Menu > Option > Advance.",
-                "Enable `FTEQW`.",
-                "Add `UZDoom`(ver 4.14.3) arm64 support, game standalone directory named `uzdoom`. More view in `" + TextHelper.GenLinkText("https://github.com/UZDoom/UZDoom", "UZDoom") + "`. And GZDoom is removed.",
-                "Fix some GUIs in Quake 4/Prey(2006).",
-                "RealRTCW(ver 5.2) is removed.",
+            "Add `Quadrilateral Cowboy`(ver 1.0.2602252) support, game standalone directory named `qc`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://blendogames.com/qc/", "Quadrilateral Cowboy") + "`.",
         };
 	};
 

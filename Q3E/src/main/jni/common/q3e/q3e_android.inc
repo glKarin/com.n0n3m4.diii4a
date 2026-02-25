@@ -103,7 +103,11 @@ extern void Q3E_MouseEvent(float x, float y, int relativeMode);
 // #define Q3E_REQUIRE_THREAD
 
 // These functions must declared.
+#ifdef Q3E_MAIN_CONST_ARGS
+extern int main(int argc, const char **argv);
+#else
 extern int main(int argc, char **argv);
+#endif
 extern void Q3E_KeyEvent(int state, int key, int character);
 extern void Q3E_MotionEvent(float dx, float dy);
 
@@ -697,7 +701,11 @@ int Q3E_Main(int argc, char **argv)
 {
     Q3E_Start();
 
+#ifdef Q3E_MAIN_CONST_ARGS
+    int res = main(argc, (const char **)argv);
+#else
     int res = main(argc, argv);
+#endif
 
     Q3E_End();
 

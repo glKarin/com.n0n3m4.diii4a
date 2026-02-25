@@ -28,6 +28,7 @@ public final class Q3EGameConstants
     public static final String LIB_ENGINE3_MOHAA    = "libopenmohaa.so"; // OpenMOHAA Medal of Honor: Allied Assault
     public static final String LIB_ENGINE1_WOLF3D   = "libecwolf.so"; // Wolfenstein 3D
     public static final String LIB_ENGINE4_SKINDEEP = "libskindeep.so"; // Skin Deep
+    public static final String LIB_ENGINE4_QC       = "libqc.so"; // Quadrilateral Cowboy
 
 
     // game engine version
@@ -70,6 +71,7 @@ public final class Q3EGameConstants
     public static final String CONFIG_FILE_MOHAA    = "configs/omconfig.cfg";
     public static final String CONFIG_FILE_WOLF3D   = "ecwolf.cfg";
     public static final String CONFIG_FILE_SKINDEEP = "settings.cfg";
+    public static final String CONFIG_FILE_QC       = "DoomConfig.cfg";
 
     // game type token
     public static final String GAME_DOOM3    = "doom3";
@@ -95,6 +97,7 @@ public final class Q3EGameConstants
     public static final String GAME_MOHAA    = "openmohaa";
     public static final String GAME_WOLF3D   = "ecwolf";
     public static final String GAME_SKINDEEP = "skindeep";
+    public static final String GAME_QC       = "qc";
 
     // game name
     public static final String GAME_NAME_DOOM3    = "DOOM 3";
@@ -120,6 +123,7 @@ public final class Q3EGameConstants
     public static final String GAME_NAME_MOHAA    = "MOHAA"; // "Medal of Honor: Allied Assault";
     public static final String GAME_NAME_WOLF3D   = "Wolfenstein 3D";
     public static final String GAME_NAME_SKINDEEP = "Skin Deep";
+    public static final String GAME_NAME_QC       = "QC";
 
     // game base folder
     public static final String GAME_BASE_DOOM3      = "base";
@@ -147,6 +151,7 @@ public final class Q3EGameConstants
     public static final String GAME_BASE_MOHAA      = "main";
     public static final String GAME_BASE_WOLF3D     = ""; // ECWolf is standalone
     public static final String GAME_BASE_SKINDEEP   = "base";
+    public static final String GAME_BASE_QC         = "base";
 
     // game standalone directory
     public static final String GAME_SUBDIR_DOOM3    = "doom3";
@@ -172,6 +177,7 @@ public final class Q3EGameConstants
     public static final String GAME_SUBDIR_MOHAA    = "openmohaa";
     public static final String GAME_SUBDIR_WOLF3D   = "ecwolf";
     public static final String GAME_SUBDIR_SKINDEEP = "skindeep";
+    public static final String GAME_SUBDIR_QC       = "qc";
 
     // game version
     public static final String GAME_VERSION_DOOM3    = "1.3.1.1304";
@@ -197,6 +203,7 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_MOHAA    = "0.82.1";
     public static final String GAME_VERSION_WOLF3D   = "1.4.2";
     public static final String GAME_VERSION_SKINDEEP = "1.0.4";
+    public static final String GAME_VERSION_QC       = "1.0.2602252";
 
     // game type index(ID)
     public static final int GAME_ID_DOOM3    = 0;
@@ -222,10 +229,11 @@ public final class Q3EGameConstants
     public static final int GAME_ID_MOHAA    = 20;
     public static final int GAME_ID_WOLF3D   = 21;
     public static final int GAME_ID_SKINDEEP = 22;
+    public static final int GAME_ID_QC       = 23;
 
 
     // KARIN_NEW_GAME_BOOKMARK: increment
-    public static final int NUM_SUPPORT_GAME = 23;
+    public static final int NUM_SUPPORT_GAME = 24;
 
     public static final String GAME_EXECUABLE = "game.arm";
 
@@ -364,7 +372,7 @@ public final class Q3EGameConstants
     public static final int FEATURE_QUAKE2   = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL;
     public static final int FEATURE_QUAKE3   = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
     public static final int FEATURE_RTCW     = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO | QUICK_LOAD;
-    public static final int FEATURE_TDM      = SUPPORT_MOD | ALWAYS_STANDALONE| SECONDARY_DIR | USING_OPENAL;
+    public static final int FEATURE_TDM      = SUPPORT_MOD | ALWAYS_STANDALONE | SECONDARY_DIR | USING_OPENAL;
     public static final int FEATURE_QUAKE1   = SUPPORT_MOD | AUDIO_TRACK | USING_OPENAL;
     public static final int FEATURE_DOOM3BFG = SUPPORT_MOD | SECONDARY_DIR | USING_OPENAL;
     public static final int FEATURE_ZDOOM    = SUPPORT_MOD | ALWAYS_STANDALONE | SECONDARY_DIR | USING_OPENAL;
@@ -381,6 +389,7 @@ public final class Q3EGameConstants
     public static final int FEATURE_MOHAA    = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL;
     public static final int FEATURE_WOLF3D   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL;
     public static final int FEATURE_SKINDEEP = SUPPORT_MOD | USING_SDL | SECONDARY_DIR | USING_OPENAL | SKIP_INTRO;
+    public static final int FEATURE_QC       = SUPPORT_MOD | USING_SDL | SECONDARY_DIR | USING_OPENAL | SKIP_INTRO | QUICK_LOAD | OPENGL_VERSION;
 
     private Q3EGameConstants() {}
 }

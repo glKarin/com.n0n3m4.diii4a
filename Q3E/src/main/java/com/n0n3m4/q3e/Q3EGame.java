@@ -169,6 +169,13 @@ public enum Q3EGame
             Q3EPreference.pref_harm_skindeep_fs_game, Q3EPreference.pref_harm_skindeep_user_mod, Q3EPreference.pref_harm_skindeep_game_mod, Q3EPreference.pref_harm_skindeep_game_lib, Q3EPreference.pref_params_skindeep, Q3EPreference.pref_harm_skindeep_command_record, null, Q3EPreference.pref_harm_skindeep_env,
             KeyCodesAndroid.class, Q3EGameConstants.FEATURE_SKINDEEP
     ),
+
+    QC(Q3EGameConstants.GAME_ID_QC, Q3EGameConstants.GAME_QC, Q3EGameConstants.LIB_ENGINE4_QC, Q3EGameConstants.GAME_NAME_QC, Q3EGameConstants.GAME_BASE_QC,
+            Q3EGameConstants.GAME_VERSION_QC, Q3EGameConstants.GAME_SUBDIR_QC, Q3EGameConstants.CONFIG_FILE_QC,
+            "fs_game", "fs_game_base", null, null,
+            Q3EPreference.pref_harm_qc_fs_game, Q3EPreference.pref_harm_qc_user_mod, Q3EPreference.pref_harm_qc_game_mod, Q3EPreference.pref_harm_qc_game_lib, Q3EPreference.pref_params_qc, Q3EPreference.pref_harm_qc_command_record, null, Q3EPreference.pref_harm_qc_env,
+            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_QC
+    ),
     ;
 
     public final int    ID;

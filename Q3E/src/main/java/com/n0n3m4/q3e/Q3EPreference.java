@@ -260,6 +260,15 @@ public final class Q3EPreference
     public static final String pref_harm_skindeep_command_record  = PREF_HARM_SKINDEEP_PREFIX + "command_record";
     public static final String pref_harm_skindeep_env             = PREF_HARM_SKINDEEP_PREFIX + "env";
     public static final String pref_harm_skindeep_game_mod        = PREF_HARM_SKINDEEP_PREFIX + "game_mod"; //k
+    // Quadrilateral Cowboy
+    public static final String PREF_HARM_QC_PREFIX                = "q3e_harm_qc_";
+    public static final String pref_harm_qc_fs_game               = PREF_HARM_QC_PREFIX + "fs_game"; //k
+    public static final String pref_harm_qc_game_lib              = PREF_HARM_QC_PREFIX + "game_lib"; //k
+    public static final String pref_harm_qc_user_mod              = PREF_HARM_QC_PREFIX + "user_mod"; //k
+    public static final String pref_params_qc                     = PREF_HARM_QC_PREFIX + "params"; //k
+    public static final String pref_harm_qc_command_record        = PREF_HARM_QC_PREFIX + "command_record";
+    public static final String pref_harm_qc_env                   = PREF_HARM_QC_PREFIX + "env";
+    public static final String pref_harm_qc_game_mod              = PREF_HARM_QC_PREFIX + "game_mod"; //k
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k

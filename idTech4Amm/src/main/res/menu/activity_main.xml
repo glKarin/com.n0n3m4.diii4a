@@ -127,6 +127,11 @@
                 android:title="@string/skin_deep"
                 android:icon="@drawable/skindeep_icon"
                 android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_qc"
+                android:title="@string/qc"
+                android:icon="@drawable/empty_icon"
+                android:showAsAction="never|withText"/>
         </menu>
     </item>
 

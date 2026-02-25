@@ -557,6 +557,7 @@
     <string name="openmohaa_base">Medal of Honor: Allied Assault</string>
     <string name="wolf3d">Wolfenstein</string>
     <string name="wolf3d_base">Wolfenstein 3D</string>
+    <string name="qc_base">Quadrilateral Cowboy</string>
     <string name="video">Видео</string>
     <string name="virtual_joystick">Виртуальный джойстик</string>
     <string name="touch">Прикосновения</string>
@@ -578,5 +579,6 @@
     <string name="backtrace">обратная трассировка</string>
     <string name="use_multithread_command_to_switch_single_multi_threading_in_game_if_enabled">Используйте команду `Многопоточность` для переключения между однопоточным и многопоточным режимами в игре, если они включены.</string>
     <string name="skin_deep">Skin Deep</string>
+    <string name="qc">QC</string>
 
 </resources>

@@ -53,6 +53,8 @@ public enum LauncherGame
     WOLF3D(Q3EGameConstants.GAME_ID_WOLF3D, Q3EGameConstants.GAME_WOLF3D, R.drawable.wolf3d_icon, R.string.wolf3d_base, R.color.theme_wolf3d_main_color, R.string.wolf3d),
 
     SKINDEEP(Q3EGameConstants.GAME_ID_SKINDEEP, Q3EGameConstants.GAME_SKINDEEP, R.drawable.skindeep_icon, R.string.skin_deep, R.color.theme_skindeep_main_color, R.string.skin_deep),
+
+    QC(Q3EGameConstants.GAME_ID_QC, Q3EGameConstants.GAME_QC, R.drawable.empty_icon, R.string.qc_base, R.color.theme_qc_main_color, R.string.qc),
     ;
 
     public final int    GAME_ID;
