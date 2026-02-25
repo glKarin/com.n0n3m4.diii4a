@@ -164,7 +164,6 @@ class idVertexCache
 #else
 		vertCache_t		dynamicHeaders;			// head of doubly linked list
 		vertCache_t		deferredFreeList;		// head of doubly linked list
-#endiflinked list
 #endif
 #ifdef SEPARATE_INDEX_BUFFER
 		vertCache_t		staticHeaderss[VBO_TOTAL];			// head of doubly linked list in MRU order,

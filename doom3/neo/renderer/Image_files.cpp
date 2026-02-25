@@ -41,13 +41,14 @@ If you have questions concerning this license or the applicable additional terms
 #define STBI_ONLY_PNG
 #include "../externlibs/stb/stb_image.h"
 
-#define TINYEXR_IMPLEMENTATION
 #ifdef _MINIZ
+#define TINYEXR_IMPLEMENTATION
 #define TINYEXR_USE_INTERNAL_MINIZ 0
 #define TINYEXR_EXTERNAL_MINIZ_INCLUDE "../miniz/miniz.h"
-#endif
 #define TINYEXR_USE_CXX11 0
 #include "../externlibs/tinyexr/tinyexr.h"
+#define _USING_EXR
+#endif
 
 //#define snprintf		use_idStr_snPrintf
 //#define vsnprintf		use_idStr_vsnPrintf

@@ -1,4 +1,6 @@
 
+#ifdef GL_ES_VERSION_3_0 // GLES3.1
+
 idCVar harm_r_debugOpenGL("harm_r_debugOpenGL", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INIT | CVAR_BOOL, "debug OpenGL");
 
 static void GLimp_OutputOpenGLCallback_f(GLenum source,
@@ -91,3 +93,4 @@ void RB_DebugOpenGL(void)
 	GLimp_DebugOpenGL(true);
 }
 
+#endif

@@ -45,8 +45,10 @@ bool idStencilTexture::Init(int w, int h)
 	R_CreateStencilTextureDepthStencilTexture(depthStencilTexture);
 	//depthStencilTexture->Reload(false, false);
 	fb->Bind();
+#ifdef GL_ES_VERSION_3_0
     GLenum drawbuf = GL_NONE;
     qglDrawBuffers(1, &drawbuf);
+#endif
 	fb->AttachImageDepthStencil(depthStencilTexture);
 	fb->Check();
 	fb->Unbind();

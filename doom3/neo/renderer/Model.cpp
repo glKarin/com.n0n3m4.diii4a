@@ -322,9 +322,11 @@ void idRenderModelStatic::InitFromFile(const char *fileName)
 	} else if (extension.Icmp("ma") == 0) {
 		loaded		= LoadMA(name);
 		reloadable	= true;
+#ifdef MD5_STATIC_MESH_EXT
     } else if (extension.Icmp(MD5_STATIC_MESH_EXT) == 0) {
         loaded		= LoadMD5Mesh(name);
         reloadable	= true;
+#endif
 #ifdef _MODEL_OBJ
 	} else if (extension.Icmp("obj") == 0) {
 		loaded		= LoadOBJ(name);
@@ -3471,6 +3473,7 @@ bool idRenderModelStatic::ConvertDAEToModelSurfaces( const ColladaParser* dae )
 
 #endif
 
+#ifdef MD5_STATIC_MESH_EXT
 #include "model/Model_md5mesh.h"
 /*
 =================
@@ -3850,6 +3853,7 @@ bool idRenderModelStatic::ConvertMD5MeshToModelSurfaces( const idMd5MeshFile* md
 
     return true;
 }
+#endif
 
 #ifdef _MODEL_PSK
 #include "model/Model_psk.h"

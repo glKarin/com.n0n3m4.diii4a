@@ -79,6 +79,19 @@ If you have questions concerning this license or the applicable additional terms
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT     0x84FE
 #endif
 
+#ifndef GL_DEPTH24_STENCIL8
+#define GL_DEPTH24_STENCIL8 GL_DEPTH24_STENCIL8_OES
+#endif
+#ifndef GL_UNSIGNED_INT_24_8
+#define GL_UNSIGNED_INT_24_8 GL_UNSIGNED_INT_24_8_OES
+#endif
+#ifndef GL_DEPTH_STENCIL_ATTACHMENT
+#define GL_DEPTH_STENCIL_ATTACHMENT 0x821A
+#endif
+#ifndef GL_DEPTH_STENCIL
+#define GL_DEPTH_STENCIL GL_DEPTH_STENCIL_OES
+#endif
+
 //#if defined(GL_ES_VERSION_2_0)
 #ifndef GL_RGB8 //karin: !!Only for OpenGLES2.0 compat, it defined and not equals GL_RGB if in OpenGLES3.0!!
 #define GL_RGB8	GL_RGB

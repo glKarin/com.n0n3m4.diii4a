@@ -861,6 +861,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
                     newStageUniformIsSet[index] = true;
                 }
             }
+#if defined(_GLSL_PROGRAM) // || defined(_RAVEN)
             else
             {
                 //assert(SHADER_CUSTOM == shaderProgram->type);
@@ -878,6 +879,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
                     customNewStageUniformIsSet.Append(index);
                 }
             }
+#endif
 
 			//============================================================================
 

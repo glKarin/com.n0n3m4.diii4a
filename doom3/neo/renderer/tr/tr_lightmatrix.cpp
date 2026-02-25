@@ -4,6 +4,11 @@
 
 #include "../tr_local.h"
 
+#define idVec3_INIT_WITH_ONE_NUM(x) idVec3((x), (x), (x))
+
+idBounds bounds_zeroOneCube( idVec3_INIT_WITH_ONE_NUM( 0.0f ), idVec3_INIT_WITH_ONE_NUM( 1.0f ) );
+idBounds bounds_unitCube( idVec3_INIT_WITH_ONE_NUM( -1.0f ), idVec3_INIT_WITH_ONE_NUM( 1.0f ) );
+
 /*
 ========================
 R_ComputePointLightProjectionMatrix
@@ -173,6 +178,7 @@ void R_SetupFrontEndViewDefMVP(void)
     }
 }
 
+#ifdef _SHADOW_MAPPING
 void R_SetupSplitFrustums( viewDef_t* viewDef )
 {
     idVec3			planeOrigin;
@@ -255,3 +261,4 @@ void R_SetupFrontEndFrustums(void)
         R_SetupSplitFrustums( tr.viewDef );
     }
 }
+#endif

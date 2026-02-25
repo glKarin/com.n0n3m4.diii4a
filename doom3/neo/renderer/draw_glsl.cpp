@@ -165,7 +165,9 @@ static void R_InitGLSLCvars(void)
 		r_stencilShadowSoft = false;
 		harm_r_stencilShadowSoft.SetBool(false);
 		harm_r_stencilShadowSoft.ClearModified();
+#ifdef CVAR_READONLY
 		CVAR_READONLY(harm_r_stencilShadowSoft);
+#endif
 	}
 #endif
 #endif
@@ -250,7 +252,9 @@ void R_CheckBackEndCvars(void)
 			r_stencilShadowSoft = false;
 			harm_r_stencilShadowSoft.SetBool(false);
 			harm_r_stencilShadowSoft.ClearModified();
+#ifdef CVAR_READONLY
 			CVAR_READONLY(harm_r_stencilShadowSoft);
+#endif
 		}
 	}
 #endif

@@ -1970,6 +1970,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
         }
 #endif
 
+#ifdef _GLSL_PROGRAM
         // karin:
         /*
          * full usage: programGLSL <vertex shader file(.vert|.vp)> <fragment shader file(.frag|.fp)> <shader name>
@@ -1985,6 +1986,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
             continue;
         }
+#endif
 
 #ifdef _RAVEN //karin: GLSL newShaderStage
 		if (!token.Icmp("glslProgram")) {

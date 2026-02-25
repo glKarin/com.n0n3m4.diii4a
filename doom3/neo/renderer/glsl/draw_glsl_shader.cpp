@@ -780,7 +780,7 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 		idStr::snPrintf(buffer, sizeof(buffer), "u_vertexParm%d", i);
 		shader->u_vertexParm[i] = GL_GetUniformLocation(shader->program, buffer);
 	}
-#if 1 // defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+#if defined(_GLSL_PROGRAM) || defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms //karin: fragment shader parms
     for (i = 0; i < MAX_FRAGMENT_PARMS; i++) {
         idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentParm%d", i);
 		shader->u_fragmentParm[i] = GL_GetUniformLocation(shader->program, buffer);
@@ -920,7 +920,9 @@ static bool RB_GLSL_InitShaders(void)
 			{
 				r_useShadowMapping.SetBool(false);
 			}
+#ifdef CVAR_READONLY
 			CVAR_READONLY(r_useShadowMapping);
+#endif
 			break;
 		}
 		shaderManager->Add(prop->program);
@@ -942,12 +944,18 @@ static bool RB_GLSL_InitShaders(void)
 			{
 				harm_r_stencilShadowTranslucent.SetBool(false);
 			}
+#ifdef CVAR_READONLY
 			CVAR_READONLY(harm_r_stencilShadowTranslucent);
+#endif
+#ifdef _SOFT_STENCIL_SHADOW
             if(harm_r_stencilShadowSoft.GetBool())
             {
                 harm_r_stencilShadowSoft.SetBool(false);
             }
+#ifdef CVAR_READONLY
 			CVAR_READONLY(harm_r_stencilShadowSoft);
+#endif
+#endif
 			break;
 		}
 		shaderManager->Add(prop->program);
@@ -969,7 +977,9 @@ static bool RB_GLSL_InitShaders(void)
             {
                 r_renderMode.SetInteger(0);
             }
+#ifdef CVAR_READONLY
             CVAR_READONLY(r_renderMode);
+#endif
             break;
         }
         shaderManager->Add(prop->program);

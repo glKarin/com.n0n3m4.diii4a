@@ -3,8 +3,6 @@
 
 #include "QueueList.h"
 
-#define NUM_FRAME_DATA 2 // 3
-
 #define RENDER_THREAD_NAME "render_thread"
 
 extern bool multithreadActive;

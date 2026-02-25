@@ -4,11 +4,6 @@
 
 #include "../tr_local.h"
 
-#define idVec3_INIT_WITH_ONE_NUM(x) idVec3((x), (x), (x))
-
-idBounds bounds_zeroOneCube( idVec3_INIT_WITH_ONE_NUM( 0.0f ), idVec3_INIT_WITH_ONE_NUM( 1.0f ) );
-idBounds bounds_unitCube( idVec3_INIT_WITH_ONE_NUM( -1.0f ), idVec3_INIT_WITH_ONE_NUM( 1.0f ) );
-
 /*
 ========================
 R_CalcShadowMappingLOD

@@ -887,6 +887,7 @@ static idCVar r_showStencil("r_showStencil", "0", CVAR_RENDERER | CVAR_INTEGER, 
 
 static void RB_ShowStencilBuffer_framebuffer(void)
 {
+#ifdef GL_ES_VERSION_3_0
     // using framebuffer and stencil to color shader
 #if !defined(__ANDROID__)
     if (r_showStencil.GetInteger() < 16) {
@@ -942,6 +943,7 @@ static void RB_ShowStencilBuffer_framebuffer(void)
 
     glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, colorReadback);
     R_StaticFree(colorReadback);
+#endif
 }
 /*
 ===================

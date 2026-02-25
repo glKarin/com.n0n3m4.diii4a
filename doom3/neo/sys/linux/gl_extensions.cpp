@@ -39,7 +39,7 @@ glExtName_t glExtNames[] = {
 	{ NULL }
 };
 
-static void StubFunction(void) { }
+static intptr_t StubFunction(void) { return 0; }
 
 bool GLimp_ProcIsValid(const void *func)
 {

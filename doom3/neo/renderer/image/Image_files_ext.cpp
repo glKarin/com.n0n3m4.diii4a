@@ -324,6 +324,7 @@ LoadEXR
 */
 void LoadEXR(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp)
 {
+#ifdef _USING_EXR
 	if( !pic )
 	{
 		fileSystem->ReadFile( filename, NULL, timestamp );
@@ -415,6 +416,10 @@ void LoadEXR(const char *filename, byte **pic, int *width, int *height, ID_TIME_
 	//R_VerticalFlip( *pic, *width, *height );
 
 	Mem_Free( ( void* )fbuffer );
+#else
+    *pic = NULL;
+    *timestamp = -1;
+#endif
 }
 
 /*
@@ -424,6 +429,7 @@ R_WriteEXR
 */
 void R_WriteEXR( const char* filename, const byte* rgba, int width, int height, int channelsPerPixel, bool flipVertical, const char* basePath )
 {
+#ifdef _USING_EXR
 #if 0
 	// miniexr.cpp - v0.2 - public domain - 2013 Aras Pranckevicius / Unity Technologies
 	//
@@ -666,6 +672,8 @@ cleanup:
 	free( header.pixel_types );
 	free( header.requested_pixel_types );
     free(ndata);
+
+#endif
 
 #endif
 }

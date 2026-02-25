@@ -5,7 +5,7 @@
 #include "ETC1/etc_android.cpp"
 #endif
 
-#ifdef _OPENGLES3
+#ifdef _COMPRESSION_IMAGE_ETC2
 #ifdef USE_RG_ETC2
 #include "ETC1/etc2_encoder.cpp"
 

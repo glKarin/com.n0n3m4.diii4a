@@ -20,7 +20,7 @@
 enum {
     IC_ETC1 = 1,
     IC_RGBA4444 = 2,
-#ifdef _OPENGLES3
+#ifdef _COMPRESSION_IMAGE_ETC2
     IC_ETC2_RGBA8 = 3,
 #endif
 };
@@ -159,7 +159,7 @@ static int isopaque(GLint width, GLint height, const GLvoid *pixels) {
     return 1;
 }
 
-#ifdef _OPENGLES3
+#ifdef _COMPRESSION_IMAGE_ETC2
 ID_INLINE static unsigned short CalcExtendedDimension(unsigned short a_ushOriginalDimension)
 {
     return (unsigned short)((a_ushOriginalDimension + 3) & ~3);
@@ -324,7 +324,7 @@ int uploadetc(const char *cachefname, GLenum target, GLint level, GLint internal
                     qglCompressedTexImage2D(target, level, GL_ETC1_RGB8_OES, width, height, 0,
                                             image.header.length, image.data);
                 } else if (image.header.type == IC_RGBA4444) {
-#ifdef _OPENGLES3
+#ifdef _COMPRESSION_IMAGE_ETC2
                     if(R_IsETC2Enabled())
                     {
                         IC_ERROR("Unmatch idTech4A++ compression texture format: RGBA4444 != ETC2_RGBA (%s).\n", cachefname);
@@ -338,10 +338,10 @@ int uploadetc(const char *cachefname, GLenum target, GLint level, GLint internal
                         qglTexImage2D(target, level, format, width, height, border, format,
                                       GL_UNSIGNED_SHORT_4_4_4_4, image.data);
 
-#ifdef _OPENGLES3
+#ifdef _COMPRESSION_IMAGE_ETC2
                     }
 #endif
-#ifdef _OPENGLES3
+#ifdef _COMPRESSION_IMAGE_ETC2
                 } else if (image.header.type == IC_ETC2_RGBA8) {
                     if(!R_IsETC2Enabled())
                     {
@@ -383,7 +383,7 @@ int uploadetc(const char *cachefname, GLenum target, GLint level, GLint internal
 
 void myglTexImage2D(const char *cachefname, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) {
     static int opaque = 0;
-#ifdef _OPENGLES3
+#ifdef _COMPRESSION_IMAGE_ETC2
     static int useETC2 = 0;
 #endif
     if (r_useETC1.GetBool() && format == GL_RGBA && type == GL_UNSIGNED_BYTE) {
@@ -391,7 +391,7 @@ void myglTexImage2D(const char *cachefname, GLenum target, GLint level, GLint in
         if (level == 0)
         {
             opaque = isopaque(width, height, pixels);
-#ifdef _OPENGLES3
+#ifdef _COMPRESSION_IMAGE_ETC2
             useETC2 = !opaque && R_IsETC2Enabled()/* && target == GL_TEXTURE_2D && R_IsKeepSize(width) && R_IsKeepSize(height)*/;
 #endif
         }
@@ -403,7 +403,7 @@ void myglTexImage2D(const char *cachefname, GLenum target, GLint level, GLint in
             etc1_compress_tex_image(cachefname, target, level, format, width, height, border, format, type, pixels);
         else
         {
-#ifdef _OPENGLES3
+#ifdef _COMPRESSION_IMAGE_ETC2
             if(useETC2)
                 etc2_compress_tex_image(cachefname, target, level, format, width, height, border, format, type, pixels);
             else

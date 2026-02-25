@@ -129,10 +129,8 @@ typedef enum {
 	TD_DEFAULT,				// will use compressed formats when possible
 	TD_BUMP,				// may be compressed with 8 bit lookup
 	TD_HIGH_QUALITY			// either 32 bit or a component format, no loss at all
-#ifdef _SHADOW_MAPPING
 #ifdef GL_ES_VERSION_3_0
 	, TD_SHADOW_ARRAY		// 2D depth buffer array for shadow mapping
-#endif
 #endif
 #ifdef _RAVEN
 		,

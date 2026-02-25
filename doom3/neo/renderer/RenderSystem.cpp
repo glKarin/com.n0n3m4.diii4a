@@ -1246,4 +1246,10 @@ void idRenderSystemLocal::EndFrame(byte *data, int *frontEndMsec, int *backEndMs
 #include "rb/RenderThread.cpp"
 #endif
 
+//k: temp memory allocate in stack / heap control on Android
+#ifdef _DYNAMIC_ALLOC_STACK_OR_HEAP
+// #warning "For fix `DOOM3: The lost mission` mod, when load `game/le_hell` map(loading resource `models/mapobjects/hell/hellintro.lwo` model, a larger scene, alloca() stack out of memory)."
+/*static */ _DYNAMIC_ALLOC_CVAR_DECL;
+#endif
+
 #include "rb/Framebuffer.cpp"

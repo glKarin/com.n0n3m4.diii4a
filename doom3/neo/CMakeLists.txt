@@ -148,6 +148,7 @@ option(SUPPORT_IQM							"Support iqm animation/static model"										ON)
 option(SUPPORT_SMD							"Support Source engine smd animation/static model"							ON)
 option(SUPPORT_GLTF							"Support Khronos gltf/glb animation/static model"							ON)
 option(SUPPORT_FBX							"Support Autodesk fbx animation/static model"								ON)
+option(ETC2_IMAGE							"Support ETC2 compression image"											ON)
 #option(FLAC_SUPPORT							"Add FLAC sound support(don't support realtime decoding)"					OFF)
 
 # DOOM3 cores
@@ -204,6 +205,8 @@ option(PREY									"Build the prey game code" 													ON)
 option(PREY_MOD_FULL_BODY_AWARENESS			"Build prey full body awareness mod support" 								ON)
 endif()
 
+set(ENABLE_ETC2 ${ETC2_IMAGE})
+
 # Print env
 if(OPENSLES)
 	add_definitions(-D_OPENSLES)
@@ -219,6 +222,8 @@ endif()
 if(OPENGLES3)
 	add_definitions(-D_OPENGLES3)
 	message(STATUS "Build OpenGLES3 support")
+else()
+	set(ENABLE_ETC2 FALSE)
 endif()
 
 if(EXTRAS_TOOLS)
@@ -227,9 +232,14 @@ if(EXTRAS_TOOLS)
 endif()
 
 # ETC2 support: but using C++11, so build a static library
+if(ENABLE_ETC2)
 if(CORE OR RAVEN OR HUMANHEAD)
 add_subdirectory(renderer/etc/EtcLib)
 set(local_libs "idtech4_EtcLib")
+
+set(CORE_DEFINES "${CORE_DEFINES};_COMPRESSION_IMAGE_ETC2")
+message(STATUS "Build ETC2 compression image support")
+endif()
 endif()
 
 # Using traditional C++98

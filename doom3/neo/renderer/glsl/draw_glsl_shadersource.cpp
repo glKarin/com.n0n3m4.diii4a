@@ -467,7 +467,7 @@ static void R_ExportDevShaderSource_f(const idCmdArgs &args)
 		RB_GLSL_ExportDevGLSLShaderSource(ES3_##source, name "." type, SHADER_ES_PATH); \
 	}
 #else
-#define EXPORT_SHADER_SOURCE(source, name, type) RB_GLSL_ExportBaseGLSLShaderSource(source, name "." type, SHADER_ES_PATH);
+#define EXPORT_SHADER_SOURCE(source, name, type) RB_GLSL_ExportDevGLSLShaderSource(source, name "." type, SHADER_ES_PATH);
 #endif
 #define EXPORT_SHADER_PAIR_SOURCE(source, name) \
             EXPORT_SHADER_SOURCE(source##_VERT, name, "vert") \

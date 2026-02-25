@@ -540,8 +540,10 @@ void Framebuffer::Shutdown()
 	}
 	framebuffers.Clear();
 
+#ifdef _SHADOW_MAPPING
     printf("Shadow map framebuffer purged\n");
     memset(globalFramebuffers.shadowFBO, 0, sizeof(globalFramebuffers.shadowFBO));
+#endif
 
     // if(USING_GLES31)
     if(idStencilTexture::IsAvailable())

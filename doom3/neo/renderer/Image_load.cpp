@@ -95,10 +95,14 @@ int idImage::BitsForInternalFormat(int internalFormat) const
         case GL_ALPHA:
             return 8;
         case GL_RGBA:
+#ifdef GL_ES_VERSION_3_0
         case GL_RGBA8:
+#endif
             return 32;
         case GL_RGB:
+#ifdef GL_ES_VERSION_3_0
         case GL_RGB8:
+#endif
             return 32;		// on some future hardware, this may actually be 24, but be conservative
         case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
             return 4;
@@ -2425,11 +2429,15 @@ void idImage::Print() const
 			common->Printf("A     ");
 			break;
 		case GL_RGBA:
+#ifdef GL_ES_VERSION_3_0
         case GL_RGBA8:
+#endif
 			common->Printf("RGBA  ");
 			break;
 		case GL_RGB:
+#ifdef GL_ES_VERSION_3_0
         case GL_RGB8:
+#endif
 			common->Printf("RGB   ");
 			break;
 		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
@@ -2962,6 +2970,7 @@ void idImage::GenerateDepthStencilImage( int width, int height, bool allowDownSi
 	uploadWidth = scaled_width;
 
 	GLenum dataType;
+#ifdef GL_ES_VERSION_3_0
 	switch (component) {
 		case 32:
 			internalFormat = GL_DEPTH32F_STENCIL8;
@@ -2969,10 +2978,13 @@ void idImage::GenerateDepthStencilImage( int width, int height, bool allowDownSi
 			break;
 		case 24:
 		default:
+#endif
 			internalFormat = GL_DEPTH24_STENCIL8;
 			dataType = GL_UNSIGNED_INT_24_8;
+#ifdef GL_ES_VERSION_3_0
 			break;
 	}
+#endif
 
 	qglGenTextures(1, &texnum);
 
