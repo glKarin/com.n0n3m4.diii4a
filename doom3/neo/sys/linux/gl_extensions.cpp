@@ -54,7 +54,7 @@ GLExtension_t GLimp_ExtensionPointer(const char *name)
 
 #ifdef ID_DEDICATED
 	common->Printf("GLimp_ExtensionPointer %s\n", name);
-	return StubFunction;
+	return (GLExtension_t)StubFunction;
 #else
 #if 0
 	glExtName_t *n;
@@ -81,7 +81,7 @@ GLExtension_t GLimp_ExtensionPointer(const char *name)
 
 	if (!ret) {
 		common->Printf("GetProcAddress failed: \"%s\"\n", name);
-		return StubFunction;
+		return (GLExtension_t)StubFunction;
 	}
 
 	return ret;
