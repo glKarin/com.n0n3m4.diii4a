@@ -45,13 +45,11 @@ OPTION(GAME_QC                      "Build Quadrilateral Cowboy"                
 # Not in F-Droid
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_SOURCE                  "Build Source"                                  ON)
+OPTION(GAME_XASH3D                  "Build Xash3D"                                  ON)
 endif()
 
 
 # Disabled
-if(NOT PRODUCT_FLAVOR_IS_FDROID)
-OPTION(GAME_XASH3D                  "Build Xash3D"                                  OFF)
-endif()
 
 
 # Experimental
