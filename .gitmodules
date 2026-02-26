@@ -1,15 +1,12 @@
-[submodule "xash3d/xash3d-fwgs"]
+[submodule "Q3E/src/main/jni/xash3d/xash3d-fwgs"]
 	path = Q3E/src/main/jni/xash3d/xash3d-fwgs
 	url = https://github.com/glKarin/xash3d-fwgs
 	branch = diii4a
-	shallow = true
-[submodule "xash3d/hlsdk-portable"]
-	path = Q3E/src/main/jni/xash3d/hlsdk-portable
-	url = https://github.com/glKarin/hlsdk-portable
-	branch = diii4a
-	shallow = true
-[submodule "xash3d/cs16-client"]
+[submodule "Q3E/src/main/jni/xash3d/cs16-client"]
 	path = Q3E/src/main/jni/xash3d/cs16-client
 	url = https://github.com/glKarin/cs16-client
 	branch = diii4a
-	shallow = true
+[submodule "Q3E/src/main/jni/xash3d/hlsdk-portable"]
+	path = Q3E/src/main/jni/xash3d/hlsdk-portable
+	url = https://github.com/glKarin/hlsdk-portable
+	branch = diii4a
