@@ -1,5 +1,0 @@
-{% if func.args %}
-    printf("{{ func.name }}({{ func.args|printf }});\n", {{ func.args|args(0) }});
-{% else %}
-    printf("{{ func.name }}();\n");
-{% endif %}
