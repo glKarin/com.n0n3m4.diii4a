@@ -1,8 +1,0 @@
-[wrap-git]
-directory=gperf
-url=https://gitlab.freedesktop.org/tpm/gperf.git
-push-url=https://gitlab.freedesktop.org/tpm/gperf.git
-revision=meson
-
-[provide]
-program_names=gperf
