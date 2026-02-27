@@ -10,3 +10,7 @@
 	path = Q3E/src/main/jni/xash3d/hlsdk-portable
 	url = https://github.com/glKarin/hlsdk-portable
 	branch = diii4a
+[submodule "Q3E/src/main/jni/source"]
+	path = Q3E/src/main/jni/source
+	url = https://github.com/glKarin/source-engine
+	branch = diii4a
