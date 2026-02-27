@@ -44,8 +44,8 @@ OPTION(GAME_SKINDEEP                "Build Skin Deep"                           
 OPTION(GAME_QC                      "Build Quadrilateral Cowboy"                    ON)
 # Not in F-Droid
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
-OPTION(GAME_SOURCE                  "Build Source"                                  ON)
 OPTION(GAME_XASH3D                  "Build Xash3D"                                  ON)
+OPTION(GAME_SOURCE                  "Build Source"                                  ON)
 endif()
 
 
@@ -65,7 +65,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_definitions(-D__ANDROID__)
+if(NOT ANDROID)
 option(ANDROID "Android build" ON)
+endif()
 option(BUILD_TESTING "Build tests" OFF)
 
 set(DIII4A_DEPEND_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deplibs")
@@ -213,7 +215,11 @@ endif()
 
 if(GAME_SOURCE) # 29985681a18508e78dc79ad863952f830be237b6 | Dec 30, 2023 | Merge pull request #312 from AruMoon/add-master-server Add new master server
 	message(STATUS "Build Source")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/source/CMakeLists.txt") # is git submodule now, so check is pull
     add_subdirectory(source) # Source-Engine
+    else()
+        message(WARNING "Source source code not exists")
+    endif()
 endif()
 
 if(GAME_Q3RALLY) # v0.5b | Aug 5, 2025 | https://github.com/Q3Rally-Team/q3rally/commit/d495c7518dc17d24357de1df5b308ba251994d1e
