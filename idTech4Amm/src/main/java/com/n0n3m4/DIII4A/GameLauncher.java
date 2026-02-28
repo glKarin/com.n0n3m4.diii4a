@@ -571,6 +571,18 @@ public class GameLauncher extends Activity
 				if(Q3E.q3ei.isTDM)
 					setProp("harm_r_useMediumPrecision", isChecked);
 			}
+
+			// QC
+			else if (id == R.id.qc_r_shadowMapping)
+			{
+				if(Q3E.q3ei.isQC)
+					setProp("r_useShadowMapping", isChecked);
+			}
+			else if (id == R.id.qc_r_globalIllumination)
+			{
+				if(Q3E.q3ei.isQC)
+					setProp("harm_r_globalillumination", isChecked);
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener() {
@@ -1393,6 +1405,10 @@ public class GameLauncher extends Activity
 		{
 			Updatehacktings_UrT();
 		}
+		else if(Q3E.q3ei.isQC)
+		{
+			Updatehacktings_QC();
+		}
 
 		// game mods for every games
 		str = GetGameModFromCommand();
@@ -1522,6 +1538,12 @@ public class GameLauncher extends Activity
 	{
 		SyncCmdEditText(V.urt_bot_autoAdd, "harm_bot_autoAdd", "0");
 		SyncCmdEditText(V.urt_bot_level, "harm_bot_level", "0");
+	}
+
+	private void Updatehacktings_QC()
+	{
+		SyncCmdCheckbox(V.qc_r_shadowMapping, "r_useShadowMapping", false);
+		SyncCmdCheckbox(V.qc_r_globalIllumination, "harm_r_globalillumination", false);
 	}
 
     private void ThrowException()
@@ -1907,6 +1929,9 @@ public class GameLauncher extends Activity
 
 		// UrT
 		SetupUI_UrT();
+
+		// QC
+		SetupUI_QC();
 
 		//DIII4A-specific
 		SetupCommandTextWatcher(true);
@@ -2340,6 +2365,14 @@ public class GameLauncher extends Activity
 				}
 			}
 		});
+	}
+
+	private void SetupUI_QC()
+	{
+		V.qc_r_shadowMapping.setChecked(getProp("r_useShadowMapping", false));
+		V.qc_r_shadowMapping.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.qc_r_globalIllumination.setChecked(getProp("harm_r_globalillumination", false));
+		V.qc_r_globalIllumination.setOnCheckedChangeListener(m_checkboxChangeListener);
 	}
 
 	private void LoadAds()
@@ -3672,6 +3705,7 @@ public class GameLauncher extends Activity
 		V.xash3d_section.setVisibility(Q3E.q3ei.isXash3D ? View.VISIBLE : View.GONE);
 		V.source_section.setVisibility(Q3E.q3ei.isSource ? View.VISIBLE : View.GONE);
 		V.urt_section.setVisibility(Q3E.q3ei.isUrT ? View.VISIBLE : View.GONE);
+		V.qc_section.setVisibility(Q3E.q3ei.isQC ? View.VISIBLE : View.GONE);
 		V.sdl_section.setVisibility(Q3E.q3ei.IsUsingSDL() ? View.VISIBLE : View.GONE);
 		V.openal_section.setVisibility(Q3E.q3ei.IsUsingOpenAL() ? View.VISIBLE : View.GONE);
 
@@ -4979,6 +5013,9 @@ public class GameLauncher extends Activity
 		public EditText ratio_y;
 		public LinearLayout res_ratiolayout;
 		public CheckBox use_custom_resolution;
+		public LinearLayout qc_section;
+		public CheckBox qc_r_shadowMapping;
+		public CheckBox qc_r_globalIllumination;
 
 		private RadioGroup CreateGameRadioGroup(int[] id)
 		{
@@ -5186,6 +5223,9 @@ public class GameLauncher extends Activity
 			ratio_y = findViewById(R.id.ratio_y);
 			res_ratiolayout = findViewById(R.id.res_ratiolayout);
 			use_custom_resolution = findViewById(R.id.use_custom_resolution);
+			qc_section = findViewById(R.id.qc_section);
+			qc_r_shadowMapping = findViewById(R.id.qc_r_shadowMapping);
+			qc_r_globalIllumination = findViewById(R.id.qc_r_globalIllumination);
         }
     }
 }

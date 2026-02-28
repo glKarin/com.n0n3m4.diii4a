@@ -1077,6 +1077,11 @@
             android:visibility="gone"></include>
 
         <include
+            android:id="@+id/qc_section"
+            layout="@layout/launcher_qc"
+            android:visibility="gone"></include>
+
+        <include
             android:id="@+id/openal_section"
             layout="@layout/launcher_openal"
             android:visibility="gone"></include>

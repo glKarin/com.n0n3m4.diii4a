@@ -583,5 +583,7 @@
     <string name="use_multithread_command_to_switch_single_multi_threading_in_game_if_enabled">Use `multithread` command to switch single/multi threading in game if enabled</string>
     <string name="skin_deep">Skin Deep</string>
     <string name="qc">QC</string>
+    <string name="soft_shadow_r_useShadowMapping">Soft shadow(r_useShadowMapping)</string>
+    <string name="lighting_and_shadow_cvars_are_same_as_doom_3_quake_4_prey_2006">Lighting and shadow cvars are same as DOOM 3/Quake 4/Prey(2006)</string>
 
 </resources>
