@@ -55,6 +55,8 @@ public enum LauncherGame
     SKINDEEP(Q3EGameConstants.GAME_ID_SKINDEEP, Q3EGameConstants.GAME_SKINDEEP, R.drawable.skindeep_icon, R.string.skin_deep, R.color.theme_skindeep_main_color, R.string.skin_deep),
 
     QC(Q3EGameConstants.GAME_ID_QC, Q3EGameConstants.GAME_QC, R.drawable.empty_icon, R.string.qc_base, R.color.theme_qc_main_color, R.string.qc),
+
+    ICARUS(Q3EGameConstants.GAME_ID_ICARUS, Q3EGameConstants.GAME_ICARUS, R.drawable.empty_icon, R.string.icarus_base, R.color.theme_icarus_main_color, R.string.icarus),
     ;
 
     public final int    GAME_ID;

@@ -31,6 +31,7 @@ public final class Constants
     {
         return new String[] {
             "Add `Quadrilateral Cowboy`(ver 1.0.2602252) support, game standalone directory named `qc`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://blendogames.com/qc/", "Quadrilateral Cowboy") + "`.",
+            "Add `Icarus Starship Command Simulator`(ver 1.0.9) support, game standalone directory named `icarus`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/620170/Icarus_Starship_Command_Simulator/", "Icarus Starship Command Simulator") + "`.",
         };
 	};
 

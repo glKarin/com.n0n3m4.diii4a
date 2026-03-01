@@ -132,6 +132,11 @@
                 android:title="@string/qc"
                 android:icon="@drawable/empty_icon"
                 android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_icarus"
+                android:title="@string/icarus"
+                android:icon="@drawable/empty_icon"
+                android:showAsAction="never|withText"/>
         </menu>
     </item>
 

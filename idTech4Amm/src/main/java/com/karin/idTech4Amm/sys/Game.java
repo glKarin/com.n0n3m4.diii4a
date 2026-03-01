@@ -126,6 +126,9 @@ public enum Game
 
     // Quadrilateral Cowboy
     QC_BASE(Q3EGameConstants.GAME_QC, "base", "", "qc", "", "base", false, R.string.qc_base),
+
+    // Icarus Starship Command Simulator
+    ICARUS_BASE(Q3EGameConstants.GAME_ICARUS, "base", "", "ICARUS", "", "base", false, R.string.icarus_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

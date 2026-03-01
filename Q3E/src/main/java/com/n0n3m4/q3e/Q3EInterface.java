@@ -83,6 +83,7 @@ public class Q3EInterface
 	public boolean isWolf3D = false;
 	public boolean isSkinDeep = false;
 	public boolean isQC = false;
+	public boolean isIcarus = false;
 
 	public String default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
@@ -220,6 +221,8 @@ public class Q3EInterface
 			return Q3EGameConstants.GAME_ID_SKINDEEP;
 		else if(isQC)
 			return Q3EGameConstants.GAME_ID_QC;
+		else if(isIcarus)
+			return Q3EGameConstants.GAME_ID_ICARUS;
 		else
 			return Q3EGameConstants.GAME_ID_DOOM3;
 	}
@@ -296,6 +299,8 @@ public class Q3EInterface
 			SetupSkinDeep();
 		else if(Q3EGameConstants.GAME_QC.equalsIgnoreCase(name))
 			SetupQC();
+		else if(Q3EGameConstants.GAME_ICARUS.equalsIgnoreCase(name))
+			SetupIcarus();
 		else
 			SetupDOOM3();
 	}
@@ -327,6 +332,7 @@ public class Q3EInterface
 		isWolf3D = false;
 		isSkinDeep = false;
 		isQC = false;
+		isIcarus = false;
 	}
 
 	public void SetupDOOM3()
@@ -499,10 +505,17 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public void SetupIcarus()
+	{
+		ResetGameState();
+		isIcarus = true;
+		SetupGameConfig();
+	}
+
 	public boolean IsInitGame()
 	{
 		return isD3 || isQ4 || isPrey
-				|| isD3BFG || isTDM || isSkinDeep || isQC
+				|| isD3BFG || isTDM || isSkinDeep || isQC || isIcarus
 				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
 				|| isQ2 || isQ1
 				|| isDOOM || isWolf3D
@@ -799,6 +812,12 @@ public class Q3EInterface
 		else if(isQC)
 		{
 			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_QC);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isIcarus)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_ICARUS);
 			list.add("<mod>/autoexec.cfg");
 			list.add("<base>/autoexec.cfg");
 		}

@@ -176,6 +176,13 @@ public enum Q3EGame
             Q3EPreference.pref_harm_qc_fs_game, Q3EPreference.pref_harm_qc_user_mod, Q3EPreference.pref_harm_qc_game_mod, Q3EPreference.pref_harm_qc_game_lib, Q3EPreference.pref_params_qc, Q3EPreference.pref_harm_qc_command_record, null, Q3EPreference.pref_harm_qc_env,
             KeyCodesAndroid.class, Q3EGameConstants.FEATURE_QC
     ),
+
+    ICARUS(Q3EGameConstants.GAME_ID_ICARUS, Q3EGameConstants.GAME_ICARUS, Q3EGameConstants.LIB_ENGINE4_ICARUS, Q3EGameConstants.GAME_NAME_ICARUS, Q3EGameConstants.GAME_BASE_ICARUS,
+            Q3EGameConstants.GAME_VERSION_ICARUS, Q3EGameConstants.GAME_SUBDIR_ICARUS, Q3EGameConstants.CONFIG_FILE_ICARUS,
+            "fs_game", "fs_game_base", null, null,
+            Q3EPreference.pref_harm_icarus_fs_game, Q3EPreference.pref_harm_icarus_user_mod, Q3EPreference.pref_harm_icarus_game_mod, Q3EPreference.pref_harm_icarus_game_lib, Q3EPreference.pref_params_icarus, Q3EPreference.pref_harm_icarus_command_record, null, Q3EPreference.pref_harm_icarus_env,
+            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_ICARUS
+    ),
     ;
 
     public final int    ID;

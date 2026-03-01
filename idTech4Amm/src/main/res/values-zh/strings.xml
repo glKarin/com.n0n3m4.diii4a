@@ -581,4 +581,6 @@
     <string name="qc">四方形牛仔</string>
     <string name="soft_shadow_r_useShadowMapping">软阴影(r_useShadowMapping)</string>
     <string name="lighting_and_shadow_cvars_are_same_as_doom_3_quake_4_prey_2006">光照和阴影的cvar与毁灭战士3/雷神之锤4/掠食(2006)相同</string>
+    <string name="icarus">伊卡洛斯</string>
+    <string name="icarus_base">伊卡洛斯飞船指挥模拟</string>
 </resources>

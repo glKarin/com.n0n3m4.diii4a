@@ -388,89 +388,93 @@ public final class KCVarSystem
                 );
 
 
+        KCVar[] rendereres = {
+                KCVar.CreateCVar("harm_r_clearVertexBuffer", "integer", "2", "Clear vertex buffer on every frame", KCVar.FLAG_LAUNCHER,
+                        "0", "Not clear(original)",
+                        "1", "Only free memory",
+                        "2", "Free memory and delete VBO handle"
+                ),
+                KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "262144", "Control allocate temporary memory when load model data. 0 = Always heap; Negative = Always stack; Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)", 0),
+                KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external OpenGLES2.0 GLSL shader program directory path", 0),
+                KCVar.CreateCVar("harm_r_shaderProgramES3Dir", "string", "glsl3progs", "Special external OpenGLES3.0 GLSL shader program directory path", 0),
+
+                KCVar.CreateCVar("harm_r_shadowCarmackInverse", "bool", "0", "Stencil shadow using Carmack-Inverse", 0),
+                KCVar.CreateCVar("harm_r_lightingModel", "string", "1", "Lighting model when draw interactions", KCVar.FLAG_LAUNCHER,
+                        "1", "Phong",
+                        "2", "Blinn-Phong",
+                        "3", "PBR",
+                        "4", "Ambient",
+                        "0", "No lighting"
+                ),
+                KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "5.0", "Specular exponent in PBR interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("harm_r_PBRNormalCorrection", "float", "0.25", "Vertex normal correction(surface smoothness) in PBR interaction lighting model(1 = pure using bump texture(lower smoothness); 0 = pure using vertex normal(high smoothness); 0.0 - 1.0 = bump texture * harm_r_PBRNormalCorrection + vertex normal * (1 - harm_r_PBRNormalCorrection))", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("harm_r_PBRRoughnessCorrection", "float", "0.55", "max roughness for old specular texture. 0 = disable; else = roughness = harm_r_PBRRoughnessCorrection - texture(specularTexture, st).r", 0),
+                KCVar.CreateCVar("harm_r_PBRMetallicCorrection", "float", "0", "min metallic for old specular texture. 0 = disable; else = metallic = texture(specularTexture, st).r + harm_r_PBRMetallicCorrection", 0),
+                KCVar.CreateCVar("harm_r_PBRRMAOSpecularMap", "bool", "0", "Specular map is standard PBR RAMO texture or old non-PBR texture", 0),
+                KCVar.CreateCVar("harm_r_ambientLightingBrightness", "float", "1.0", "Lighting brightness in ambient lighting", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("r_maxFps", "integer", "0", "Limit maximum FPS. 0 = unlimited", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+
+                KCVar.CreateCVar("r_screenshotFormat", "integer", "0", "Screenshot format", 0,
+                        "0", "TGA (default)",
+                        "1", "BMP",
+                        "2", "PNG",
+                        "3", "JPG",
+                        "4", "DDS",
+                        "5", "EXR",
+                        "6", "HDR"
+                ),
+                KCVar.CreateCVar("r_screenshotJpgQuality", "integer", "75", "Screenshot quality for JPG images (0-100)", KCVar.FLAG_POSITIVE),
+                KCVar.CreateCVar("r_screenshotPngCompression", "integer", "3", "Compression level when using PNG screenshots (0-9)", KCVar.FLAG_POSITIVE),
+
+                KCVar.CreateCVar("r_useShadowMapping", "bool", "0", "use shadow mapping instead of stencil shadows", KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("r_forceShadowMapsOnAlphaTestedSurfaces", "bool", "0", "render perforated surface to shadow map(DOOM 3 default is 1)", KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "1.0", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("r_shadowMapJitterScale", "float", "2.5", "scale factor for jitter offset", KCVar.FLAG_POSITIVE),
+                KCVar.CreateCVar("r_shadowMapSplits", "integer", "3", "number of splits for cascaded shadow mapping with parallel lights(0: disable, max is 4)", 0),
+                KCVar.CreateCVar("harm_r_shadowMapCombine", "bool", "1", "combine local and global shadow mapping", KCVar.FLAG_LAUNCHER),
+
+                KCVar.CreateCVar("harm_r_stencilShadowTranslucent", "bool", "0", "enable translucent shadow in stencil shadow", KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "1.0", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("harm_r_stencilShadowCombine", "bool", "0", "combine local and global stencil shadow", KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("harm_r_stencilShadowSoft", "bool", "0", "enable soft stencil shadow(Only OpenGLES3.1+)", KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("harm_r_stencilShadowSoftBias", "float", "-1", "soft stencil shadow sampler BIAS(-1 = automatic; 0 = disable; positive = value)", 0),
+                KCVar.CreateCVar("harm_r_stencilShadowSoftCopyStencilBuffer", "bool", "0", "copy stencil buffer directly for soft stencil shadow. 0: copy depth buffer and bind and renderer stencil buffer to texture directly; 1: copy stencil buffer to texture directly", 0),
+                KCVar.CreateCVar("harm_r_useHighPrecision", "integer", "0", "Use high precision float on GLSL shader", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
+                        "0", "use default precision(interaction/depth shaders use high precision, otherwise use medium precision)",
+                        "1", "all shaders use high precision as default precision exclude special variables",
+                        "2", "all shaders use high precision as default precision and special variables also use high precision"
+                ),
+                KCVar.CreateCVar("harm_r_globalIllumination", "bool", "0", "render global illumination before draw lighting interactions", KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("harm_r_globalIlluminationBrightness", "float", "0.3", "global illumination brightness", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
+                KCVar.CreateCVar("r_renderMode", "integer", "0", "Enable retro postprocess rendering", KCVar.FLAG_LAUNCHER,
+                        "0", "None",
+                        "1", "CGA",
+                        "2", "CGA Highres",
+                        "3", "Commodore 64",
+                        "4", "Commodore 64 Highres",
+                        "5", "Amstrad CPC 6128",
+                        "6", "Amstrad CPC 6128 Highres",
+                        "7", "Sega Genesis",
+                        "8", "Sega Genesis Highres",
+                        "9", "Sony PSX"
+                ),
+                KCVar.CreateCVar("harm_r_useGLSLShaderBinaryCache", "integer", "0", "Use/cache GLSL shader compiled binary(OpenGL ES2.0 not support)", KCVar.FLAG_LAUNCHER,
+                        "1", "Disable",
+                        "2", "Enable(check source)",
+                        "3", "Enable(not check source)"
+                ),
+                KCVar.CreateCVar("harm_r_openglVersion", "string", "GLES3.0", "OpenGL version", KCVar.FLAG_INIT | KCVar.FLAG_LAUNCHER,
+                        "GLES2", "OpenGL ES2.0",
+                        "GLES3.0", "OpenGL 3.0+"
+                )
+        };
+
         KCVar.Group QC_CVARS = new KCVar.Group("QC", true)
-                .AddCVar(
-                        KCVar.CreateCVar("harm_r_clearVertexBuffer", "integer", "2", "Clear vertex buffer on every frame", KCVar.FLAG_LAUNCHER,
-                                "0", "Not clear(original)",
-                                "1", "Only free memory",
-                                "2", "Free memory and delete VBO handle"
-                        ),
-                        KCVar.CreateCVar("harm_r_maxAllocStackMemory", "integer", "262144", "Control allocate temporary memory when load model data. 0 = Always heap; Negative = Always stack; Positive = Max stack memory limit(If less than this `byte` value, call `alloca` in stack memory, else call `malloc`/`calloc` in heap memory)", 0),
-                        KCVar.CreateCVar("harm_r_shaderProgramDir", "string", "glslprogs", "Special external OpenGLES2.0 GLSL shader program directory path", 0),
-                        KCVar.CreateCVar("harm_r_shaderProgramES3Dir", "string", "glsl3progs", "Special external OpenGLES3.0 GLSL shader program directory path", 0),
-
-                        KCVar.CreateCVar("harm_r_shadowCarmackInverse", "bool", "0", "Stencil shadow using Carmack-Inverse", 0),
-                        KCVar.CreateCVar("harm_r_lightingModel", "string", "1", "Lighting model when draw interactions", KCVar.FLAG_LAUNCHER,
-                                "1", "Phong",
-                                "2", "Blinn-Phong",
-                                "3", "PBR",
-                                "4", "Ambient",
-                                "0", "No lighting"
-                        ),
-                        KCVar.CreateCVar("harm_r_specularExponent", "float", "3.0", "Specular exponent in Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_specularExponentBlinnPhong", "float", "12.0", "Specular exponent in Blinn-Phong interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_specularExponentPBR", "float", "5.0", "Specular exponent in PBR interaction lighting model", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_PBRNormalCorrection", "float", "0.25", "Vertex normal correction(surface smoothness) in PBR interaction lighting model(1 = pure using bump texture(lower smoothness); 0 = pure using vertex normal(high smoothness); 0.0 - 1.0 = bump texture * harm_r_PBRNormalCorrection + vertex normal * (1 - harm_r_PBRNormalCorrection))", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_PBRRoughnessCorrection", "float", "0.55", "max roughness for old specular texture. 0 = disable; else = roughness = harm_r_PBRRoughnessCorrection - texture(specularTexture, st).r", 0),
-                        KCVar.CreateCVar("harm_r_PBRMetallicCorrection", "float", "0", "min metallic for old specular texture. 0 = disable; else = metallic = texture(specularTexture, st).r + harm_r_PBRMetallicCorrection", 0),
-                        KCVar.CreateCVar("harm_r_PBRRMAOSpecularMap", "bool", "0", "Specular map is standard PBR RAMO texture or old non-PBR texture", 0),
-                        KCVar.CreateCVar("harm_r_ambientLightingBrightness", "float", "1.0", "Lighting brightness in ambient lighting", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("r_maxFps", "integer", "0", "Limit maximum FPS. 0 = unlimited", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-
-                        KCVar.CreateCVar("r_screenshotFormat", "integer", "0", "Screenshot format", 0,
-                                "0", "TGA (default)",
-                                "1", "BMP",
-                                "2", "PNG",
-                                "3", "JPG",
-                                "4", "DDS",
-                                "5", "EXR",
-                                "6", "HDR"
-                        ),
-                        KCVar.CreateCVar("r_screenshotJpgQuality", "integer", "75", "Screenshot quality for JPG images (0-100)", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("r_screenshotPngCompression", "integer", "3", "Compression level when using PNG screenshots (0-9)", KCVar.FLAG_POSITIVE),
-
-                        KCVar.CreateCVar("r_useShadowMapping", "bool", "0", "use shadow mapping instead of stencil shadows", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("r_forceShadowMapsOnAlphaTestedSurfaces", "bool", "0", "render perforated surface to shadow map(DOOM 3 default is 1)", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_shadowMapAlpha", "float", "1.0", "Shadow's alpha in shadow mapping", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("r_shadowMapJitterScale", "float", "2.5", "scale factor for jitter offset", KCVar.FLAG_POSITIVE),
-                        KCVar.CreateCVar("r_shadowMapSplits", "integer", "3", "number of splits for cascaded shadow mapping with parallel lights(0: disable, max is 4)", 0),
-                        KCVar.CreateCVar("harm_r_shadowMapCombine", "bool", "1", "combine local and global shadow mapping", KCVar.FLAG_LAUNCHER),
-
-                        KCVar.CreateCVar("harm_r_stencilShadowTranslucent", "bool", "0", "enable translucent shadow in stencil shadow", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_stencilShadowAlpha", "float", "1.0", "translucent shadow's alpha in stencil shadow", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_stencilShadowCombine", "bool", "0", "combine local and global stencil shadow", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_stencilShadowSoft", "bool", "0", "enable soft stencil shadow(Only OpenGLES3.1+)", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_stencilShadowSoftBias", "float", "-1", "soft stencil shadow sampler BIAS(-1 = automatic; 0 = disable; positive = value)", 0),
-                        KCVar.CreateCVar("harm_r_stencilShadowSoftCopyStencilBuffer", "bool", "0", "copy stencil buffer directly for soft stencil shadow. 0: copy depth buffer and bind and renderer stencil buffer to texture directly; 1: copy stencil buffer to texture directly", 0),
-                        KCVar.CreateCVar("harm_r_useHighPrecision", "integer", "0", "Use high precision float on GLSL shader", KCVar.FLAG_LAUNCHER | KCVar.FLAG_INIT,
-                                "0", "use default precision(interaction/depth shaders use high precision, otherwise use medium precision)",
-                                "1", "all shaders use high precision as default precision exclude special variables",
-                                "2", "all shaders use high precision as default precision and special variables also use high precision"
-                        ),
-                        KCVar.CreateCVar("harm_r_globalIllumination", "bool", "0", "render global illumination before draw lighting interactions", KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("harm_r_globalIlluminationBrightness", "float", "0.3", "global illumination brightness", KCVar.FLAG_POSITIVE | KCVar.FLAG_LAUNCHER),
-                        KCVar.CreateCVar("r_renderMode", "integer", "0", "Enable retro postprocess rendering", KCVar.FLAG_LAUNCHER,
-                                "0", "None",
-                                "1", "CGA",
-                                "2", "CGA Highres",
-                                "3", "Commodore 64",
-                                "4", "Commodore 64 Highres",
-                                "5", "Amstrad CPC 6128",
-                                "6", "Amstrad CPC 6128 Highres",
-                                "7", "Sega Genesis",
-                                "8", "Sega Genesis Highres",
-                                "9", "Sony PSX"
-                        ),
-                        KCVar.CreateCVar("harm_r_useGLSLShaderBinaryCache", "integer", "0", "Use/cache GLSL shader compiled binary(OpenGL ES2.0 not support)", KCVar.FLAG_LAUNCHER,
-                                "1", "Disable",
-                                "2", "Enable(check source)",
-                                "3", "Enable(not check source)"
-                        ),
-                        KCVar.CreateCVar("harm_r_openglVersion", "string", "GLES3.0", "OpenGL version", KCVar.FLAG_INIT | KCVar.FLAG_LAUNCHER,
-                                "GLES2", "OpenGL ES2.0",
-                                "GLES3.0", "OpenGL 3.0+"
-                        )
-                );
+                .AddCVar(rendereres);
+        KCVar.Group ICARUS_CVARS = new KCVar.Group("Icarus", true)
+                .AddCVar(rendereres);
 
         _cvars.put("RENDERER", RENDERER_CVARS);
         _cvars.put("FRAMEWORK", FRAMEWORK_CVARS);
@@ -488,6 +492,7 @@ public final class KCVarSystem
         _cvars.put("Source", SOURCE_CVARS);
         _cvars.put("SkinDeep", SKINDEEP_CVARS);
         _cvars.put("QC", QC_CVARS);
+        _cvars.put("Icarus", ICARUS_CVARS);
 
         return _cvars;
     }
@@ -527,6 +532,8 @@ public final class KCVarSystem
             res.add(_cvars.get("SkinDeep"));
         else if(Q3E.q3ei.isQC)
             res.add(_cvars.get("QC"));
+        else if(Q3E.q3ei.isIcarus)
+            res.add(_cvars.get("Icarus"));
         else if(Q3E.q3ei.isD3)
         {
             res.add(_cvars.get("RENDERER"));

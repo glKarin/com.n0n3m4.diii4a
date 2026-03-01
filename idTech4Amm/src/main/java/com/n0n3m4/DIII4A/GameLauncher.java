@@ -583,6 +583,18 @@ public class GameLauncher extends Activity
 				if(Q3E.q3ei.isQC)
 					setProp("harm_r_globalillumination", isChecked);
 			}
+
+			// Icarus
+			else if (id == R.id.icarus_r_shadowMapping)
+			{
+				if(Q3E.q3ei.isIcarus)
+					setProp("r_useShadowMapping", isChecked);
+			}
+			else if (id == R.id.icarus_r_globalIllumination)
+			{
+				if(Q3E.q3ei.isIcarus)
+					setProp("harm_r_globalillumination", isChecked);
+			}
         }
     };
     private final RadioGroup.OnCheckedChangeListener m_groupCheckChangeListener = new RadioGroup.OnCheckedChangeListener() {
@@ -1409,6 +1421,10 @@ public class GameLauncher extends Activity
 		{
 			Updatehacktings_QC();
 		}
+		else if(Q3E.q3ei.isIcarus)
+		{
+			Updatehacktings_Icarus();
+		}
 
 		// game mods for every games
 		str = GetGameModFromCommand();
@@ -1544,6 +1560,12 @@ public class GameLauncher extends Activity
 	{
 		SyncCmdCheckbox(V.qc_r_shadowMapping, "r_useShadowMapping", false);
 		SyncCmdCheckbox(V.qc_r_globalIllumination, "harm_r_globalillumination", false);
+	}
+
+	private void Updatehacktings_Icarus()
+	{
+		SyncCmdCheckbox(V.icarus_r_shadowMapping, "r_useShadowMapping", false);
+		SyncCmdCheckbox(V.icarus_r_globalIllumination, "harm_r_globalillumination", false);
 	}
 
     private void ThrowException()
@@ -1932,6 +1954,9 @@ public class GameLauncher extends Activity
 
 		// QC
 		SetupUI_QC();
+
+		// Icarus
+		SetupUI_Icarus();
 
 		//DIII4A-specific
 		SetupCommandTextWatcher(true);
@@ -2375,6 +2400,14 @@ public class GameLauncher extends Activity
 		V.qc_r_globalIllumination.setOnCheckedChangeListener(m_checkboxChangeListener);
 	}
 
+	private void SetupUI_Icarus()
+	{
+		V.icarus_r_shadowMapping.setChecked(getProp("r_useShadowMapping", false));
+		V.icarus_r_shadowMapping.setOnCheckedChangeListener(m_checkboxChangeListener);
+		V.icarus_r_globalIllumination.setChecked(getProp("harm_r_globalillumination", false));
+		V.icarus_r_globalIllumination.setOnCheckedChangeListener(m_checkboxChangeListener);
+	}
+
 	private void LoadAds()
 	{
 		//Q3EAd.LoadAds(this);
@@ -2603,6 +2636,7 @@ public class GameLauncher extends Activity
 		menuGames.put(R.id.main_menu_game_wolf3d, Q3EGameConstants.GAME_WOLF3D);
 		menuGames.put(R.id.main_menu_game_skindeep, Q3EGameConstants.GAME_SKINDEEP);
 		menuGames.put(R.id.main_menu_game_qc, Q3EGameConstants.GAME_QC);
+		menuGames.put(R.id.main_menu_game_icarus, Q3EGameConstants.GAME_ICARUS);
 
 		for(Map.Entry<Integer, String> entry : menuGames.entrySet())
 		{
@@ -3706,6 +3740,7 @@ public class GameLauncher extends Activity
 		V.source_section.setVisibility(Q3E.q3ei.isSource ? View.VISIBLE : View.GONE);
 		V.urt_section.setVisibility(Q3E.q3ei.isUrT ? View.VISIBLE : View.GONE);
 		V.qc_section.setVisibility(Q3E.q3ei.isQC ? View.VISIBLE : View.GONE);
+		V.icarus_section.setVisibility(Q3E.q3ei.isIcarus ? View.VISIBLE : View.GONE);
 		V.sdl_section.setVisibility(Q3E.q3ei.IsUsingSDL() ? View.VISIBLE : View.GONE);
 		V.openal_section.setVisibility(Q3E.q3ei.IsUsingOpenAL() ? View.VISIBLE : View.GONE);
 
@@ -4922,6 +4957,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_wolf3dgame;
 		public RadioGroup rg_fs_skindeepgame;
 		public RadioGroup rg_fs_qcgame;
+		public RadioGroup rg_fs_icarusgame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -5016,6 +5052,9 @@ public class GameLauncher extends Activity
 		public LinearLayout qc_section;
 		public CheckBox qc_r_shadowMapping;
 		public CheckBox qc_r_globalIllumination;
+		public LinearLayout icarus_section;
+		public CheckBox icarus_r_shadowMapping;
+		public CheckBox icarus_r_globalIllumination;
 
 		private RadioGroup CreateGameRadioGroup(int[] id)
 		{
@@ -5061,6 +5100,7 @@ public class GameLauncher extends Activity
 			rg_fs_wolf3dgame = CreateGameRadioGroup(gameId);
 			rg_fs_skindeepgame = CreateGameRadioGroup(gameId);
 			rg_fs_qcgame = CreateGameRadioGroup(gameId);
+			rg_fs_icarusgame = CreateGameRadioGroup(gameId);
 
             edt_cmdline = findViewById(R.id.edt_cmdline);
             res_customlayout = findViewById(R.id.res_customlayout);
@@ -5226,6 +5266,9 @@ public class GameLauncher extends Activity
 			qc_section = findViewById(R.id.qc_section);
 			qc_r_shadowMapping = findViewById(R.id.qc_r_shadowMapping);
 			qc_r_globalIllumination = findViewById(R.id.qc_r_globalIllumination);
+			icarus_section = findViewById(R.id.icarus_section);
+			icarus_r_shadowMapping = findViewById(R.id.icarus_r_shadowMapping);
+			icarus_r_globalIllumination = findViewById(R.id.icarus_r_globalIllumination);
         }
     }
 }

@@ -42,7 +42,7 @@ OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"      
 OPTION(GAME_WOLF3D                  "Build Wolfenstein 3D"                          ON)
 OPTION(GAME_SKINDEEP                "Build Skin Deep"                               ON)
 OPTION(GAME_QC                      "Build Quadrilateral Cowboy"                    ON)
-OPTION(GAME_ISCS                    "Build Icarus Starship Command Simulator"       OFF)
+OPTION(GAME_ICARUS                    "Build Icarus Starship Command Simulator"       ON)
 # Not in F-Droid
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
 OPTION(GAME_XASH3D                  "Build Xash3D"                                  ON)
@@ -99,7 +99,7 @@ add_subdirectory( q3e )
 
 
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SERIOUSSAM OR GAME_SKINDEEP OR GAME_QC OR GAME_ISCS)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SERIOUSSAM OR GAME_SKINDEEP OR GAME_QC OR GAME_ICARUS)
     set(DIII4A_BUILD_COMMON True)
 endif()
 
@@ -253,9 +253,9 @@ if(GAME_QC) #  | Apr 16, 2025 | https://github.com/blendogames/quadrilateralcowb
     add_subdirectory ( qc ) # Quadrilateral Cowboy
 endif()
 
-if(GAME_ISCS) #  | Apr 16, 2025 | https://github.com/blendogames/quadrilateralcowboy/commit/c7ec52ca117a3ef6b5420d2a4bb3f63a17be57f1 | Fix for occasional crash when pressing ESC during Moto Spectre sequence
+if(GAME_ICARUS) #  | Apr 16, 2025 | https://github.com/blendogames/quadrilateralcowboy/commit/c7ec52ca117a3ef6b5420d2a4bb3f63a17be57f1 | Fix for occasional crash when pressing ESC during Moto Spectre sequence
 message(STATUS "Build Icarus Starship Command Simulator")
-add_subdirectory ( iscs ) # Icarus Starship Command Simulator
+add_subdirectory ( icarus ) # Icarus Starship Command Simulator
 endif()
 
 

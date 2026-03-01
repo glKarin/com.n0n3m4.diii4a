@@ -585,5 +585,7 @@
     <string name="qc">QC</string>
     <string name="soft_shadow_r_useShadowMapping">Soft shadow(r_useShadowMapping)</string>
     <string name="lighting_and_shadow_cvars_are_same_as_doom_3_quake_4_prey_2006">Lighting and shadow cvars are same as DOOM 3/Quake 4/Prey(2006)</string>
+    <string name="icarus">Icarus</string>
+    <string name="icarus_base">Icarus Starship Command Simulator</string>
 
 </resources>

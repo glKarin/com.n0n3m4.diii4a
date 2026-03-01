@@ -1082,6 +1082,11 @@
             android:visibility="gone"></include>
 
         <include
+            android:id="@+id/icarus_section"
+            layout="@layout/launcher_icarus"
+            android:visibility="gone"></include>
+
+        <include
             android:id="@+id/openal_section"
             layout="@layout/launcher_openal"
             android:visibility="gone"></include>

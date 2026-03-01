@@ -110,6 +110,9 @@ public enum GameResourceUrl
     // Quadrilateral Cowboy
     QC_BASE(Q3EGameConstants.GAME_QC, "base", "", "https://blendogames.com/qc/", 1),
     QC_BASE2(Q3EGameConstants.GAME_QC, "base", "", "https://store.steampowered.com/app/240440/Quadrilateral_Cowboy", 2),
+
+    // Icarus Starship Command Simulator
+    ICARUS_BASE(Q3EGameConstants.GAME_ICARUS, "base", "", "https://store.steampowered.com/app/620170/Icarus_Starship_Command_Simulator/", 2),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

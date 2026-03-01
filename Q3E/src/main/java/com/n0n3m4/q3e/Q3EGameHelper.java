@@ -330,7 +330,7 @@ class Q3EGameHelper
             cmd = command.toString();
         }
 
-        if(Q3E.q3ei.IsIdTech4() || Q3E.q3ei.isQC)
+        if(Q3E.q3ei.IsIdTech4() || Q3E.q3ei.isQC || Q3E.q3ei.isIcarus)
         {
             KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
             int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, Q3EGLConstants.GetPreferOpenGLESVersion());
