@@ -1,0 +1,12 @@
+Pvs.cpp: long -> int
+gamesys/Callbacks.cpp: int -> intptr_t
+gamesys/Class.cpp: int -> intptr_t
+gamesys/Class.h: int -> intptr_t
+gamesys/Event.cpp: int -> intptr_t, sizeof(idVec3)
+gamesys/Event.h: int -> intptr_t, E_EVENT_SIZEOF_VEC
+gamesys/TypeInfo.cpp: long -> int
+script/Script_Interpreter.cpp: int -> intptr_t, PushVector
+script/Script_Interpreter.h: LOCALSTACK_SIZE * 2, int -> intptr_t, PushVector
+script/Script_Program.cpp: void * -> intptr_t, sizeof( idVec3 ) -> E_EVENT_SIZEOF_VEC, size_t -> int, AllocVarDef(), ReserveMem(), AllocVarDef
+script/Script_Program.h: AllocVarDef(), ReserveMem()
+anim/Anim_Import.cpp: int -> void *
