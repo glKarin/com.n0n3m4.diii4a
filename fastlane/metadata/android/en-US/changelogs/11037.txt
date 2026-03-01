@@ -1,4 +1,0 @@
-* Fixed on-screen buttons initial keycodes.
-* On-screen slider button can setup clickable.
-* Add dds screenshot support.
-* Add cvar `r_scaleMenusTo43` for 4:3 menu.

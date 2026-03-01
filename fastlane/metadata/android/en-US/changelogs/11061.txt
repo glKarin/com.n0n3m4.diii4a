@@ -1,2 +1,0 @@
-* Add `FTEQW` support, game standalone directory named `fteqw`, support HeXen II, Half-Life [FreeHL], Counter Striker 1.5 [FreeCS].
-* DOOM 3 BFG add Vulkan renderer backend.

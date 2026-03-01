@@ -1,7 +1,0 @@
-* Support perforated surface shadow in shadow mapping.
-* Add `LibreCoop` mod of DOOM3 support.
-* Add `Quake II` support.
-* Add `Quake III Arena` support and `Quake III Team Arena` support.
-* Add `Return to Castle Wolfenstein` support.
-* Add `The dark mod` 2.12 support.
-* Add a on-screen button theme.

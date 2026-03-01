@@ -1,5 +1,0 @@
-* 毁灭战士3/雷神之锤4/掠食(2006)在OpenGLES3.1+下新增模板软阴影(cvar `harm_r_stencilShadowSoft`).
-* 毁灭战士3/雷神之锤4/掠食(2006)优化阴影图光照着色器.
-* 毁灭战士3/雷神之锤4/掠食(2006)多线程下支持r_showSurfaceInfo调试渲染, 多线程下开启调试渲染工具需要手动设置 cvar `harm_r_renderToolsMultithread`为1才开启.
-* 雷神之锤2新增GLES3.2渲染器支持(命令行 GLES3.2渲染器: +set vid_renderer gles3 for GLES3.2, GLES1.1渲染器: +set vid_renderer gl1).
-* 新增GZDOOM支持(仅arm64), 游戏数据文件夹为`gzdoom`.

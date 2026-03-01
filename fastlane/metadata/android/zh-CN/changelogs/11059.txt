@@ -1,9 +1,0 @@
-* 深入敌后:德军总部新增`Omni-Bot`支持.
-* 毁灭战士3-BFG修复在Mali GPU上的渲染问题.
-* The Dark Mod修复在Mali GPU上的渲染问题.
-* 修复深入敌后:德军总部的模板阴影当`cg_shadows` = 2.
-* GZDOOM选择mod时支持选择整个文件夹.
-* 启动器新增一些新特性的设置功能: 深入敌后:德军总部, 真·重返德军总部, 毁灭战士3-BFG, 雷神之锤2, GZDOOM, The Dark Mod.
-* 毁灭战士3/雷神之锤 4/掠食(2006)支持GLSL着色器中使用高精度浮点数(cvar `harm_r_useHighPrecision`).
-* 新增5个虚拟按键.
-* 新增毁灭战士3 mod `Phobos(Dhewm3版本)`支持, 游戏数据文件夹命名为`tfphobos`(需要邪恶复苏和dhewm3兼容补丁).
