@@ -258,7 +258,7 @@ typedef struct renderEntity_s {
 	const idMaterial 		*customShader;			// if non-0, all surfaces will use this
 	const idMaterial 		*referenceShader;		// used so flares can reference the proper light shader
 	const idDeclSkin 		*customSkin;				// 0 for no remappings
-#ifdef _ICARUS
+#ifdef _ICARUS //karin: renderer compat
 	// BOYETTE SPACE COMMAND BEGIN
 	const idDeclSkin *		originalCustomSkin;				// 0 for no remappings
 	// BOYETTE SPACE COMMAND END

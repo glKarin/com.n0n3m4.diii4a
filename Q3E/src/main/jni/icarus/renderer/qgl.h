@@ -544,6 +544,6 @@ extern BOOL(WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 #define qgluDeleteQuadric()
 #define qgluSphere gluSphere
 
-#define qglColor3ubv(...)
+#define qglColor3ubv glColor3ubv
 #define qglPixelZoom(...)
-#define qglDrawPixels(...)
+#define qglDrawPixels glDrawPixels

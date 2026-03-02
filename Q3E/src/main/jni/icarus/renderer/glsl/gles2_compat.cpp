@@ -996,6 +996,11 @@ GLRB_API void glColor4ubv(const GLubyte v[4])
 	glColor4f(COLOR_B2F(v[0]), COLOR_B2F(v[1]), COLOR_B2F(v[2]), COLOR_B2F(v[3]));
 }
 
+GLRB_API void glColor3ubv(const GLubyte v[3])
+{
+    glColor3f(COLOR_B2F(v[0]), COLOR_B2F(v[1]), COLOR_B2F(v[2]));
+}
+
 GLRB_API void glArrayElement(GLint index)
 {
 	gl_IndexList.Append(index);

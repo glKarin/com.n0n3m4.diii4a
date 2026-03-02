@@ -2814,7 +2814,7 @@ int GLES3_VERSION = USING_GLES3 ? 2 : -1;
 
 int gl_version = DEFAULT_GLES_VERSION;
 
-#ifdef _ICARUS
+#ifdef _ICARUS //karin: renderer compat
 
 // BOYETTE BEGIN:
 /*

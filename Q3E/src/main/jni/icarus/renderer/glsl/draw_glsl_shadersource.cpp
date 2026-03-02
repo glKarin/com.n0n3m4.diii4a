@@ -663,7 +663,7 @@ bool RB_GLSL_FindGLSLShaderSource(const char *name, int type, idStr *source, idS
 
 static void R_CleanGLSLShaderSource_f(const idCmdArgs &)
 {
-#if !defined(_ICARUS)
+#if !defined(_ICARUS) //karin: renderer compat
     idStr path = RB_GLSL_GetExternalShaderSourcePath();
     common->Printf("Remove external GLSL shader source directory '%s'\n", path.c_str());
     fileSystem->RemoveFolder(path);

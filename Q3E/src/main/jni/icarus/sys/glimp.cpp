@@ -599,7 +599,7 @@ GLimp_EnableLogging
 void GLimp_EnableLogging(bool stat) { }
 #endif
 
-#ifdef _GLES //karin: using stub function
+#ifdef _DIII4A //karin: using stub function
 static intptr_t StubFunction(void) { return 0; }
 
 bool GLimp_ProcIsValid(const void *func)
@@ -615,7 +615,7 @@ GLimp_ExtensionPointer
 GLExtension_t GLimp_ExtensionPointer(const char *name) {
 	assert(SDL_WasInit(SDL_INIT_VIDEO));
 
-#ifdef _GLES //karin: using stub function
+#ifdef _DIII4A //karin: using stub function
 	GLExtension_t ptr = (GLExtension_t)SDL_GL_GetProcAddress(name);
     if(!ptr)
     {

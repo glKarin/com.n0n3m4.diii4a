@@ -37,7 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 #define ALIGNTYPE16
 #endif
 
-#if !defined(_ICARUS)
+#if !defined(_ICARUS) //karin: renderer compat
 typedef uint64_t uint64;
 #endif
 

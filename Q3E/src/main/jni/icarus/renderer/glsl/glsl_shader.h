@@ -27,6 +27,10 @@
 #include "glsl_shader_100.h"
 #include "glsl_shader_d3xp_100.h"
 
+#ifdef _ICARUS //karin: extras new stage shaders
+#include "glsl_shader_icarus_100.h"
+#endif
+
 #ifdef _POSTPROCESS
 #include "glsl_shader_postprocess_100.h"
 #endif
@@ -56,6 +60,10 @@
 
 #include "glsl_shader_300.h"
 #include "glsl_shader_d3xp_300.h"
+
+#ifdef _ICARUS //karin: extras new stage shaders
+#include "glsl_shader_icarus_300.h"
+#endif
 
 #ifdef _POSTPROCESS
 #include "glsl_shader_postprocess_300.h"

@@ -86,4 +86,10 @@ GLSL_PROGRAM_PROC shaderProgram_t interactionBlinnPhongSoftShader; //k: BLINN-PH
 GLSL_PROGRAM_PROC shaderProgram_t ambientLightingSoftShader; //k: Ambient lighting model interaction shader(soft stencil shadow)
 #endif
 
+#ifdef _ICARUS //karin: extras new stage shaders
+GLSL_PROGRAM_PROC shaderProgram_t blurShader;
+GLSL_PROGRAM_PROC shaderProgram_t blurLessBlurryShader;
+GLSL_PROGRAM_PROC shaderProgram_t desaturateShader;
+#endif
+
 #endif

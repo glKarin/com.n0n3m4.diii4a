@@ -58,7 +58,7 @@ Constant render matrices
 
 ================================================================================================
 */
-#if !defined(_ICARUS)
+#if !defined(_ICARUS) //karin: renderer compat
 #define assert_16_byte_aligned( ptr )		assert( ( ((uintptr_t)(ptr)) & 15 ) == 0 )
 #endif
 #define IEEE_FLT_SIGNBITSET( a )	(reinterpret_cast<const unsigned int &>(a) >> IEEE_FLT_SIGN_BIT)

@@ -904,7 +904,7 @@ class idRenderSystemLocal : public idRenderSystem
 		virtual void			CaptureRenderToImage(const char *imageName);
 		virtual void			CaptureRenderToFile(const char *fileName, bool fixAlpha);
 		virtual void			UnCrop();
-#ifdef _ICARUS
+#ifdef _ICARUS //karin: renderer compat
         virtual void			GetCardCaps( bool &oldCard, bool &nv10or20 ) { oldCard = false; nv10or20 = false; }
 
 	// BOYETTE BEGIN:
@@ -1646,6 +1646,11 @@ typedef enum {
 	SHADER_COLORPROCESS,
 	// D3XP
     SHADER_ENVIROSUIT,
+#ifdef _ICARUS //karin: extras new stage shaders
+    SHADER_BLUR,
+    SHADER_BLUR_LESS_BLURRY,
+    SHADER_DESATURATE,
+#endif
 #ifdef _HUMANHEAD
 	SHADER_SCREENEFFECT, // spiritview
 	SHADER_RADIALBLUR, // deathview

@@ -523,6 +523,11 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMask", SHADER_HEATHAZE_WITH_MASK, &heatHazeWithMaskShader, HEATHAZEWITHMASK_VERT, HEATHAZEWITHMASK_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", SHADER_HEATHAZE_WITH_MASK_AND_VERTEX, &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("colorProcess", SHADER_COLORPROCESS, &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
+#ifdef _ICARUS //karin: extras new stage shaders
+	ret.Append(GLSL_SHADER_SOURCE("blur", SHADER_BLUR, &blurShader, BLUR_VERT, BLUR_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("blur_less_blurry", SHADER_BLUR_LESS_BLURRY, &blurLessBlurryShader, BLUR_VERT, BLUR_LESS_BLURRY_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("desaturate", SHADER_DESATURATE, &desaturateShader, DESATURATE_VERT, DESATURATE_FRAG, "", ""));
+#endif
 	// D3XP
 	ret.Append(GLSL_SHADER_SOURCE("enviroSuit", SHADER_ENVIROSUIT, &enviroSuitShader, ENVIROSUIT_VERT, ENVIROSUIT_FRAG, "", ""));
 #ifdef _HUMANHEAD
