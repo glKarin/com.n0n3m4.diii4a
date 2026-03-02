@@ -488,6 +488,8 @@ extern int  (WINAPI * qwglGetLayerPaletteEntries)(HDC, int, int, int,
 extern BOOL(WINAPI * qwglRealizeLayerPalette)(HDC, int, BOOL);
 extern BOOL(WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 
+#endif	// _WIN32 && ID_ALLOW_TOOLS
+
 #include "glsl/gles2_compat.h"
 
 #define qglBegin glBegin
@@ -542,4 +544,6 @@ extern BOOL(WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 #define qgluDeleteQuadric()
 #define qgluSphere gluSphere
 
-#endif	// _WIN32 && ID_ALLOW_TOOLS
+#define qglColor3ubv glColor3ubv
+#define qglPixelZoom(...)
+#define qglDrawPixels glDrawPixels
