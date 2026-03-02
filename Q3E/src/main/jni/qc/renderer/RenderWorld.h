@@ -289,7 +289,7 @@ typedef struct renderEntity_s {
 
 	struct renderView_s		*remoteRenderView;		// any remote camera surfaces will use this
 
-#ifdef _QC
+#ifdef _QC //karin: renderer compat
     //bc if photo, then only takes a frozen snapshot and doesn't update.
     int isFreezeFrame;
 

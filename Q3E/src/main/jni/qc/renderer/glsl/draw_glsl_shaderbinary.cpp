@@ -570,7 +570,7 @@ static bool RB_GLSL_LoadShaderBinaryCache(shaderProgram_t *shaderProgram, const 
 
 static void R_CleanGLSLShaderBinary_f(const idCmdArgs &)
 {
-#if !defined(_QC)
+#if !defined(_QC) //karin: renderer compat
     idStr path = RB_GLSL_GetExternalShaderBinaryPath(false);
     common->Printf("Remove GLSL shader binary cache directory '%s'\n", path.c_str());
     fileSystem->RemoveFolder(path);

@@ -314,7 +314,7 @@ static void R_RemoteRender(drawSurf_t *surf, textureStage_t *stage)
 		return;
 	}
 
-#ifdef _QC
+#ifdef _QC //karin: renderer compat
     if (surf->space->entityDef->parms.isFreezeFrame >= 2)
         return;
 

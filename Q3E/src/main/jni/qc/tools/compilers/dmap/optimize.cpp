@@ -235,7 +235,6 @@ DrawAllEdges
 ================
 */
 static	void DrawAllEdges( void ) {
-#if !defined(_GLES) //karin: fixed pipeline
 	int		i;
 
 	if ( !dmapGlobals.drawflag ) {
@@ -258,7 +257,6 @@ static	void DrawAllEdges( void ) {
 	qglFlush();
 
 //	GLimp_SwapBuffers();
-#endif
 }
 
 /*
@@ -267,7 +265,6 @@ DrawVerts
 ================
 */
 static void DrawVerts( optIsland_t *island ) {
-#if !defined(_GLES) //karin: fixed pipeline
 	optVertex_t	*vert;
 
 	if ( !dmapGlobals.drawflag ) {
@@ -285,7 +282,6 @@ static void DrawVerts( optIsland_t *island ) {
 	qglEnd();
 	qglDisable( GL_BLEND );
 	qglFlush();
-#endif
 }
 
 /*
@@ -294,7 +290,6 @@ DrawEdges
 ================
 */
 static	void DrawEdges( optIsland_t *island ) {
-#if !defined(_GLES) //karin: fixed pipeline
 	optEdge_t	*edge;
 
 	if ( !dmapGlobals.drawflag ) {
@@ -317,7 +312,6 @@ static	void DrawEdges( optIsland_t *island ) {
 	qglFlush();
 
 //	GLimp_SwapBuffers();
-#endif
 }
 
 //=================================================================
@@ -488,7 +482,6 @@ static	bool TryAddNewEdge( optVertex_t *v1, optVertex_t *v2, optIsland_t *island
 		}
 	}
 
-#if !defined(_GLES) //karin: fixed pipeline
 	if ( dmapGlobals.drawflag ) {
 		qglBegin( GL_LINES );
 		qglColor3f( 0, ( 128 + orandom.RandomInt( 127 ) )/ 255.0, 0 );
@@ -497,7 +490,6 @@ static	bool TryAddNewEdge( optVertex_t *v1, optVertex_t *v2, optIsland_t *island
 		qglEnd();
 		qglFlush();
 	}
-#endif
 	// add it
 	e = AllocEdge();
 
@@ -693,7 +685,6 @@ static	void RemoveIfColinear( optVertex_t *ov, optIsland_t *island ) {
 		return;
 	}
 
-#if !defined(_GLES) //karin: fixed pipeline
 	if ( dmapGlobals.drawflag ) {
 		qglBegin( GL_LINES );
 		qglColor3f( 1, 1, 0 );
@@ -708,7 +699,6 @@ static	void RemoveIfColinear( optVertex_t *ov, optIsland_t *island ) {
 		qglEnd();
 		qglFlush();
 	}
-#endif
 
 	// replace the two edges with a single edge
 	UnlinkEdge( e1, island );
@@ -969,7 +959,6 @@ static void CreateOptTri( optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optI
 //DrawEdges( island );
 
 		// identify the third edge
-#if !defined(_GLES) //karin: fixed pipeline
 	if ( dmapGlobals.drawflag ) {
 		qglColor3f(1,1,0);
 		qglBegin( GL_LINES );
@@ -984,7 +973,6 @@ static void CreateOptTri( optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optI
 		qglEnd();
 		qglFlush();
 	}
-#endif
 
 	for ( opposite = second->edges ; opposite ; ) {
 		if ( opposite != e1 && ( opposite->v1 == third || opposite->v2 == third ) ) {
@@ -1004,7 +992,6 @@ static void CreateOptTri( optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optI
 		return;
 	}
 
-#if !defined(_GLES) //karin: fixed pipeline
 	if ( dmapGlobals.drawflag ) {
 		qglColor3f(1,0,1);
 		qglBegin( GL_LINES );
@@ -1013,7 +1000,6 @@ static void CreateOptTri( optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optI
 		qglEnd();
 		qglFlush();
 	}
-#endif
 
 	// create new triangle
 	optTri = (optTri_t *)Mem_Alloc( sizeof( *optTri ) );
@@ -1024,7 +1010,6 @@ static void CreateOptTri( optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optI
 	optTri->next = island->tris;
 	island->tris = optTri;
 
-#if !defined(_GLES) //karin: fixed pipeline
 	if ( dmapGlobals.drawflag ) {
 		qglColor3f( 1, 1, 1 );
 		qglPointSize( 4 );
@@ -1033,7 +1018,6 @@ static void CreateOptTri( optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optI
 		qglEnd();
 		qglFlush();
 	}
-#endif
 
 	// find the midpoint, and scan through all the original triangles to
 	// see if it is inside any of them
@@ -1047,7 +1031,6 @@ static void CreateOptTri( optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optI
 	} else {
 		optTri->filled = false;
 	}
-#if !defined(_GLES) //karin: fixed pipeline
 	if ( dmapGlobals.drawflag ) {
 		if ( optTri->filled ) {
 			qglColor3f( ( 128 + orandom.RandomInt( 127 ) )/ 255.0, 0, 0 );
@@ -1067,7 +1050,6 @@ static void CreateOptTri( optVertex_t *first, optEdge_t *e1, optEdge_t *e2, optI
 		qglEnd();
 		qglFlush();
 	}
-#endif
 
 	// link the triangle to it's edges
 	LinkTriToEdge( optTri, e1 );
@@ -1372,7 +1354,6 @@ DrawOriginalEdges
 =================
 */
 static void DrawOriginalEdges( int numOriginalEdges, originalEdges_t *originalEdges ) {
-#if !defined(_GLES) //karin: fixed pipeline
 	int		i;
 
 	if ( !dmapGlobals.drawflag ) {
@@ -1389,7 +1370,6 @@ static void DrawOriginalEdges( int numOriginalEdges, originalEdges_t *originalEd
 	}
 	qglEnd();
 	qglFlush();
-#endif
 }
 
 
@@ -1505,7 +1485,6 @@ void SplitOriginalEdgesAtCrossings( optimizeGroup_t *opt ) {
 	crossings = (edgeCrossing_t **)Mem_ClearedAlloc( numOriginalEdges * sizeof( *crossings ) );
 
 	for ( i = 0 ; i < numOriginalEdges ; i++ ) {
-#if !defined(_GLES) //karin: fixed pipeline
 		if ( dmapGlobals.drawflag ) {
 			DrawOriginalEdges( numOriginalEdges, originalEdges );
 			qglBegin( GL_LINES );
@@ -1516,7 +1495,6 @@ void SplitOriginalEdgesAtCrossings( optimizeGroup_t *opt ) {
 			qglEnd();
 			qglFlush();
 		}
-#endif
 		for ( j = i+1 ; j < numOriginalEdges ; j++ ) {
 			optVertex_t	*v1, *v2, *v3, *v4;
 			optVertex_t	*newVert;

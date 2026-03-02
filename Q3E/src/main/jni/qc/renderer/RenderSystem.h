@@ -97,7 +97,7 @@ typedef struct glconfig_s {
 	int                 multiSamples;
 	bool				debugOutput;
     bool				syncAvailable;
-#ifdef _QC
+#ifdef _QC //karin: renderer compat
     int					winWidth, winHeight;
 #endif
 } glconfig_t;
@@ -299,7 +299,7 @@ class idRenderSystem
 		// to use the default tga loading code without having dimmed down areas in many places
 		virtual void			CaptureRenderToFile(const char *fileName, bool fixAlpha = false) = 0;
 		virtual void			UnCrop() = 0;
-#ifdef _QC
+#ifdef _QC //karin: renderer compat
         virtual void			GetCardCaps( bool &oldCard, bool &nv10or20 ) = 0;
 #endif
 

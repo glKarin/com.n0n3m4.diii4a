@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "roq.h"
 
-#ifdef _GLES //karin: compat for renderer
+#ifdef _DIII4A //karin: compat for renderer
 void R_LoadImage(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2, bool disableDownSize = false);
 #else
 void R_LoadImage( const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2 );

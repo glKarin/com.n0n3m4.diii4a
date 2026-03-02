@@ -921,7 +921,6 @@ RenderBumpTriangles
 ==============
 */
 static void RenderBumpTriangles( srfTriangles_t *lowMesh, renderBump_t *rb ) {
-#if !defined(_GLES) //karin: fixed pipeline
 	int		i, j;
 
 	RB_SetGL2D();
@@ -987,7 +986,6 @@ static void RenderBumpTriangles( srfTriangles_t *lowMesh, renderBump_t *rb ) {
 	}
 
 	Mem_Free( lowMeshNormals );
-#endif
 }
 
 
@@ -1347,7 +1345,6 @@ RenderBumpFlat_f
 ==============
 */
 void RenderBumpFlat_f( const idCmdArgs &args ) {
-#if !defined(_GLES) //karin: fixed pipeline
 	int		width, height;
 	idStr	source;
 	int		i;
@@ -1425,8 +1422,10 @@ void RenderBumpFlat_f( const idCmdArgs &args ) {
 	qglEnable( GL_CULL_FACE );
 	qglCullFace( GL_FRONT );
 	qglDisable( GL_STENCIL_TEST );	
-	qglDisable( GL_SCISSOR_TEST );	
-	qglDisable( GL_ALPHA_TEST );	
+	qglDisable( GL_SCISSOR_TEST );
+#if !defined(GL_ES_VERSION_2_0) //karin: GLES2.0
+	qglDisable( GL_ALPHA_TEST );
+#endif
 	qglDisable( GL_BLEND );	
 	qglEnable( GL_DEPTH_TEST );
 	qglDisable( GL_TEXTURE_2D );
@@ -1641,5 +1640,4 @@ void RenderBumpFlat_f( const idCmdArgs &args ) {
 	common->SetRefreshOnPrint( false );
 
 	common->Error( "Completed." );
-#endif
 }

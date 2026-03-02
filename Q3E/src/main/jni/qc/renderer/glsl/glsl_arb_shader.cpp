@@ -126,6 +126,7 @@ private:
     void ALIAS(void);
     void ATTRIB(void);
     void ADDRESS(void);
+    void TXB(void);
     void _SAT_Start(void);
     void _SAT_End(void);
     void Dot(const char *t);
@@ -237,6 +238,7 @@ void idARBProgram::Command(const char *cmd)
     else ARB_HANDLE_CMD(OUTPUT)
     else ARB_HANDLE_CMD(ATTRIB)
     else ARB_HANDLE_CMD(ADDRESS)
+    else ARB_HANDLE_CMD(TXB)
     else
     {
         ParseUnknown();
@@ -454,6 +456,12 @@ void idARBProgram::TXP(void)
 void idARBProgram::TEX(void)
 {
     ParseTexture("TEX");
+}
+
+// TXB T, TexCoord, LOD, Sampler, 2D/CUBE -> T = textureLod(Sampler, LOD, TexCoord)
+void idARBProgram::TXB(void)
+{
+    ParseTexture("TXB", "Lod");
 }
 
 // END
@@ -837,6 +845,8 @@ void idARBShader::ToSource(idStr &source)
     list.Append(tokenList);
     list.AddToken("}");
     list.AddEOL();
+
+	list.ToSource(source);
 }
 
 void idARBShader::Print(void)
@@ -1638,6 +1648,8 @@ idStr idARBProgram::TextureFunc(const char *td, const char *d)
         }
         if(!idStr::Icmp("proj", td))
             return va("texture%sProj", str.c_str());
+        else if(!idStr::Icmp("lod", td))
+            return va("texture%sLod", str.c_str());
         else
             return va("texture%s", str.c_str());
     }
@@ -1645,6 +1657,8 @@ idStr idARBProgram::TextureFunc(const char *td, const char *d)
     {
         if(!idStr::Icmp("proj", td))
             return "textureProj";
+		else if(!idStr::Icmp("lod", td))
+            return "textureLod";
         else
             return "texture";
     }

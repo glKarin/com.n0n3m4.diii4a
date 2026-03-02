@@ -901,7 +901,7 @@ class idRenderSystemLocal : public idRenderSystem
 		virtual void			CaptureRenderToImage(const char *imageName);
 		virtual void			CaptureRenderToFile(const char *fileName, bool fixAlpha);
 		virtual void			UnCrop();
-#ifdef _QC
+#ifdef _QC //karin: renderer compat
         virtual void			GetCardCaps( bool &oldCard, bool &nv10or20 ) { oldCard = false; nv10or20 = false; }
 #endif
 		virtual bool			UploadImage(const char *imageName, const byte *data, int width, int height);
