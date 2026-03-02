@@ -584,5 +584,13 @@
     <string name="lighting_and_shadow_cvars_are_same_as_doom_3_quake_4_prey_2006">Lighting and shadow cvars are same as DOOM 3/Quake 4/Prey(2006)</string>
     <string name="icarus">Icarus</string>
     <string name="icarus_base">Icarus Starship Command Simulator</string>
+    <string name="gold_source_source_engine">Gold Source/Source engine</string>
+    <string name="based_on_idsoftware_engine">Based on idSoftware engine</string>
+    <string name="quake_engine">Quake Engine</string>
+    <string name="idtech_1_engine">idTech 1 engine</string>
+    <string name="idtech_2_engine">idTech 2 engine</string>
+    <string name="idtech_3_engine">idTech 3 engine</string>
+    <string name="idtech_4_engine">idTech 4 engine</string>
+    <string name="other_engine">Other engine</string>
 
 </resources>
