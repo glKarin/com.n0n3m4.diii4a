@@ -2,6 +2,8 @@ package com.karin.idTech4Amm.ui;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -95,19 +97,21 @@ public class GameListView extends ListView
 
     private static class GameInfoItem
     {
-        public final String game;
-        public final int    name;
-        public final Integer    icon;
+        public final String  game;
+        public final int     name;
+        public final Integer icon;
+        public final Integer color;
 
-        public GameInfoItem(String game, int name, Integer icon)
+        public GameInfoItem(String game, int name, Integer icon, Integer color)
         {
             this.game = game;
             this.name = name;
             this.icon = icon;
+            this.color = color;
         }
     }
 
-    private static class GameEngineInfoItem
+    private class GameEngineInfoItem
     {
         public final String             name;
         public final List<GameInfoItem> games;
@@ -119,7 +123,10 @@ public class GameListView extends ListView
             games = new ArrayList<>();
             for(String game : ei.games)
             {
-                GameInfoItem item = new GameInfoItem(game, GameManager.GetGameNameRS(game), GameManager.GetGameIcon(game));
+                int colorId = GameManager.GetGameThemeColor(game);
+                Resources resources = getContext().getResources();
+                int color = resources.getColor(colorId);
+                GameInfoItem item = new GameInfoItem(game, GameManager.GetGameNameRS(game), GameManager.GetGameIcon(game), color);
                 games.add(item);
             }
         }
@@ -164,6 +171,7 @@ public class GameListView extends ListView
 
                 TextView textView = v.findViewById(R.id.game_list_delegate_name);
                 textView.setText(game.name);
+                //textView.setTextColor(game.color);
 
                 v.setOnClickListener(new OnClickListener() {
                     @Override

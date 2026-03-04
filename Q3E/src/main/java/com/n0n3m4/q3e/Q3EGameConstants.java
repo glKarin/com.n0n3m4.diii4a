@@ -381,6 +381,7 @@ public final class Q3EGameConstants
     public static final int USING_SDL         = 1 << 9;
     public static final int VIRTUAL_MOUSE     = 1 << 10;
     public static final int OPENGL_VERSION    = 1 << 11;
+    public static final int NOT_FREE          = 1 << 12;
 
     // KARIN_NEW_GAME_BOOKMARK: add game feature flags
     public static final int FEATURE_DOOM3    = SUPPORT_MOD | SECONDARY_DIR | EXTERNAL_DLL | USING_OPENAL | SKIP_INTRO | QUICK_LOAD | OPENGL_VERSION;
@@ -400,8 +401,8 @@ public final class Q3EGameConstants
     public static final int FEATURE_JO       = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
     public static final int FEATURE_SAMTFE   = ALWAYS_STANDALONE | VIRTUAL_MOUSE | USING_OPENAL;
     public static final int FEATURE_SAMTSE   = ALWAYS_STANDALONE | VIRTUAL_MOUSE | USING_OPENAL;
-    public static final int FEATURE_XASH3D   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL | SECONDARY_DIR | EXTERNAL_DLL; //  | DISABLED
-    public static final int FEATURE_SOURCE   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL;
+    public static final int FEATURE_XASH3D   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL | SECONDARY_DIR | EXTERNAL_DLL | NOT_FREE; //  | DISABLED
+    public static final int FEATURE_SOURCE   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL | NOT_FREE;
     public static final int FEATURE_URT      = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL | SKIP_INTRO;
     public static final int FEATURE_MOHAA    = SUPPORT_MOD | SECONDARY_DIR | AUDIO_TRACK | USING_OPENAL;
     public static final int FEATURE_WOLF3D   = SUPPORT_MOD | ALWAYS_STANDALONE | USING_SDL;

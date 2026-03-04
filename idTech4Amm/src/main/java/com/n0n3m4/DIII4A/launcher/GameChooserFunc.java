@@ -24,6 +24,7 @@ import com.n0n3m4.q3e.Q3EGameConstants;
 import com.n0n3m4.q3e.Q3ELang;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class GameChooserFunc extends GameLauncherFunc
@@ -62,6 +63,9 @@ public final class GameChooserFunc extends GameLauncherFunc
             }
         }
 
+        if(games.isEmpty())
+            return null;
+
         String name;
         if(null == engineName)
             name = String.join("/", engineIds);
@@ -78,15 +82,34 @@ public final class GameChooserFunc extends GameLauncherFunc
     private List<GameListView.GameEngineInfo> CreateEngineInfos()
     {
         List<GameListView.GameEngineInfo> list = new ArrayList<>();
+        class EngineItem {
+            public final Object name;
+            public final String[] list;
 
-        list.add(CreateEngineInfo(R.string.idtech_4_engine, Q3EGameConstants.ENGINE_IDTECH_4));
-        list.add(CreateEngineInfo(R.string.idtech_3_engine, Q3EGameConstants.ENGINE_IDTECH_3));
-        list.add(CreateEngineInfo(R.string.idtech_2_engine, Q3EGameConstants.ENGINE_IDTECH_2));
-        list.add(CreateEngineInfo(R.string.quake_engine, Q3EGameConstants.ENGINE_ID_QUAKE));
-        list.add(CreateEngineInfo(R.string.idtech_1_engine, Q3EGameConstants.ENGINE_IDTECH_1));
-        list.add(CreateEngineInfo(R.string.based_on_idsoftware_engine, Q3EGameConstants.ENGINE_ID_BASE));
-        list.add(CreateEngineInfo(R.string.gold_source_source_engine, Q3EGameConstants.ENGINE_GOLD_SOURCE, Q3EGameConstants.ENGINE_SOURCE));
-        list.add(CreateEngineInfo(R.string.other_engine, Q3EGameConstants.ENGINE_OTHER));
+            public EngineItem(Object name, String...list)
+            {
+                this.name = name;
+                this.list = list;
+            }
+        }
+
+        List<EngineItem> configs = Arrays.asList(
+                new EngineItem(R.string.idtech_4_engine, Q3EGameConstants.ENGINE_IDTECH_4),
+                new EngineItem(R.string.idtech_3_engine, Q3EGameConstants.ENGINE_IDTECH_3),
+                new EngineItem(R.string.idtech_2_engine, Q3EGameConstants.ENGINE_IDTECH_2),
+                new EngineItem(R.string.quake_engine, Q3EGameConstants.ENGINE_ID_QUAKE),
+                new EngineItem(R.string.idtech_1_engine, Q3EGameConstants.ENGINE_IDTECH_1),
+                new EngineItem(R.string.based_on_idsoftware_engine, Q3EGameConstants.ENGINE_ID_BASE),
+                new EngineItem(R.string.gold_source_source_engine, Q3EGameConstants.ENGINE_GOLD_SOURCE, Q3EGameConstants.ENGINE_SOURCE),
+                new EngineItem(R.string.other_engine, Q3EGameConstants.ENGINE_OTHER)
+        );
+
+        for(EngineItem config : configs)
+        {
+            GameListView.GameEngineInfo engineInfo = CreateEngineInfo(config.name, config.list);
+            if(null != engineInfo)
+                list.add(engineInfo);
+        }
 
         return list;
     }

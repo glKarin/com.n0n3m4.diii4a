@@ -283,11 +283,16 @@ public enum Q3EGame
 
     public static boolean HasFeature(int index, int feature)
     {
-        return (Find(index).FEATURES & feature) != 0;
+        return Find(index).CheckFeature(feature);
     }
 
     public static boolean HasFeature(String type, int feature)
     {
-        return (Find(type).FEATURES & feature) != 0;
+        return Find(type).CheckFeature(feature);
+    }
+
+    public boolean CheckFeature(int feature)
+    {
+        return (FEATURES & feature) != 0;
     }
 }
