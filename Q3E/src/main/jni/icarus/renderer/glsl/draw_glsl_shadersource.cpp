@@ -505,6 +505,13 @@ static void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #define EXPORT_D3XP_SHADER() \
     EXPORT_SHADER_PAIR_SOURCE(ENVIROSUIT, "enviroSuit");
 
+#ifdef _ICARUS
+#define EXPORT_ICARUS_SHADER() \
+    EXPORT_SHADER_PAIR_SOURCE(BLUR, "blur"); \
+	EXPORT_SHADER_SOURCE(BLUR_LESS_BLURRY_FRAG, "blur_less_blurry", "frag"); \
+    EXPORT_SHADER_PAIR_SOURCE(DESATURATE, "desaturate");
+#endif
+
 #ifdef _HUMANHEAD
     #define EXPORT_PREY_SHADER() \
     EXPORT_SHADER_PAIR_SOURCE(SCREENEFFECT, "screeneffect"); \
@@ -546,6 +553,9 @@ static void R_ExportDevShaderSource_f(const idCmdArgs &args)
 #ifdef _GLOBAL_ILLUMINATION
     EXPORT_GI_SHADER()
 #endif
+#ifdef _ICARUS
+    EXPORT_ICARUS_SHADER()
+#endif
 #ifdef _SHADOW_MAPPING
     EXPORT_SHADOW_MAPPING_SHADER()
 #endif
@@ -568,6 +578,9 @@ static void R_ExportDevShaderSource_f(const idCmdArgs &args)
     EXPORT_DEBUG_SHADER()
 #ifdef _GLOBAL_ILLUMINATION
     EXPORT_GI_SHADER()
+#endif
+#ifdef _ICARUS
+    EXPORT_ICARUS_SHADER()
 #endif
 #ifdef _SHADOW_MAPPING
     EXPORT_SHADOW_MAPPING_SHADER()

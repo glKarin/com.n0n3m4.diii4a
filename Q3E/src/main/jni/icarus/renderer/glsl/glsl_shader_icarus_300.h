@@ -18,6 +18,7 @@ GLSL_SHADER const char ES3_BLUR_VERT[] =
 
 GLSL_SHADER const char ES3_BLUR_FRAG[] =
 "#version 300 es\n"
+"//#pragma optimize(off)\n"
 "\n"
 "precision mediump float;\n"
 "\n"
@@ -75,6 +76,7 @@ GLSL_SHADER const char ES3_BLUR_FRAG[] =
 // blur_less_blurry
 GLSL_SHADER const char ES3_BLUR_LESS_BLURRY_FRAG[] =
 "#version 300 es \n"
+"//#pragma optimize(off)\n"
 "\n"
 "precision mediump float;\n"
 "\n"
@@ -132,6 +134,7 @@ GLSL_SHADER const char ES3_BLUR_LESS_BLURRY_FRAG[] =
 // desaturate
 GLSL_SHADER const char ES3_DESATURATE_VERT[] =
 "#version 300 es \n"
+"//#pragma optimize(off)\n"
 "\n"
 "precision mediump float;\n"
 "\n"
@@ -162,6 +165,7 @@ GLSL_SHADER const char ES3_DESATURATE_VERT[] =
 ;
 GLSL_SHADER const char ES3_DESATURATE_FRAG[] =
 "#version 300 es \n"
+"//#pragma optimize(off)\n"
 "\n"
 "precision mediump float;\n"
 "\n"

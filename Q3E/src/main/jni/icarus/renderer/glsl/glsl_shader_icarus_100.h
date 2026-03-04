@@ -18,6 +18,7 @@ GLSL_SHADER const char BLUR_VERT[] =
 
 GLSL_SHADER const char BLUR_FRAG[] =
 "#version 100\n"
+"//#pragma optimize(off)\n"
 "\n"
 "precision mediump float;\n"
 "\n"
@@ -73,6 +74,7 @@ GLSL_SHADER const char BLUR_FRAG[] =
 // blur_less_blurry
 GLSL_SHADER const char BLUR_LESS_BLURRY_FRAG[] =
 "#version 100 \n"
+"//#pragma optimize(off)\n"
 "\n"
 "precision mediump float;\n"
 "\n"
@@ -128,6 +130,7 @@ GLSL_SHADER const char BLUR_LESS_BLURRY_FRAG[] =
 // desaturate
 GLSL_SHADER const char DESATURATE_VERT[] =
 "#version 100 \n"
+"//#pragma optimize(off)\n"
 "\n"
 "precision mediump float;\n"
 "\n"
@@ -158,6 +161,7 @@ GLSL_SHADER const char DESATURATE_VERT[] =
 ;
 GLSL_SHADER const char DESATURATE_FRAG[] =
 "#version 100 \n"
+"//#pragma optimize(off)\n"
 "\n"
 "precision mediump float;\n"
 "\n"
