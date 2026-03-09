@@ -428,15 +428,9 @@ void idImGuiSettings::RenderComboCVar(const cvarSettingItem_t &item)
 void idImGuiSettings::RenderChangeLogs(void) const
 {
     const char *ChangeLogs[] = {
-            "Add float console support.",
-            "Add Unreal engine psk/psa animation/static model support.",
-            "Add iqm animation/static model support.",
-            "Add Source engine smd animation/static model support.",
-            "Add md5mesh static model support.",
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
-            "Fix low frequency on HeXen-Edge of Chaos mod.",
 #endif
 
             NULL
@@ -459,12 +453,6 @@ void idImGuiSettings::RenderChangeLogs(void) const
 void idImGuiSettings::RenderNewCvars(void) const
 {
     const char *NewCvars[] = {
-#ifdef _USE_SSE
-            "harm_sys_useSSE",
-#endif
-#ifdef _ARM_SIMD_SSE2NEON
-            "harm_sys_sse2neon",
-#endif
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
@@ -567,9 +555,6 @@ void idImGuiSettings::RenderRemoveCvars(void) const
 void idImGuiSettings::RenderNewCommands(void) const
 {
     const char *NewCommands[] = {
-#ifdef _MULTITHREAD
-            "multithread",
-#endif
 #ifdef _RAVEN
 #elif defined(_HUMANHEAD)
 #else
