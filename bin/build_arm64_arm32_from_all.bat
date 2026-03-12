@@ -1,10 +1,10 @@
 @echo off
 
-set RELEASE=70
+set RELEASE=72
 set VERSION=1.1.0harmattan%RELEASE%
 set SRC_PATH=F:\qobj\droid\DIII4A
 set ROOT_PATH=F:\qobj\droid\Build
-set APK=%ROOT_PATH%\idTech4Amm-%VERSION%.apk
+set APK="%ROOT_PATH%\idTech4A++_%VERSION%.apk"
 set ALL_LIBS_PATH=%ROOT_PATH%\lib
 set BUILD_LIBS_PATH=%ROOT_PATH%\Q3E\libs
 set ARM64=arm64-v8a
@@ -176,7 +176,7 @@ call gradlew assembleRelease -Pabifilters=%arch% -Dorg.gradle.java.home=E:\devin
 goto:eof
 
 :copy_apk
-set save_apk=%ROOT_PATH%\idTech4Amm-%VERSION%_%apk_arch%.apk
+set save_apk="%ROOT_PATH%\idTech4A++_%VERSION%_%apk_arch%.apk"
 if exist "%save_apk%" (
     echo Remove old apk: %save_apk%
     del /Q %save_apk%

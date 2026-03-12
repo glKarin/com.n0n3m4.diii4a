@@ -2410,30 +2410,37 @@ public class GameLauncher extends Activity
 
 	private void LoadAds()
 	{
-		//Q3EAd.LoadAds(this);
-		if(null != m_adFunc)
-			return;
-		m_adFunc = new GameAd(this);
-		m_adFunc.SetCallback(new Runnable() {
-			@Override
-			public void run()
-			{
-				ChangeGame((String)m_adFunc.GetResult());
-			}
-		});
-		Bundle data = new Bundle();
-		data.putString("game", Q3E.q3ei.game);
-		m_adFunc.Start(data);
+		try
+		{
+			//Q3EAd.LoadAds(this);
+			if(null != m_adFunc)
+				return;
+			m_adFunc = new GameAd(this);
+			m_adFunc.SetCallback(new Runnable() {
+				@Override
+				public void run()
+				{
+					ChangeGame((String)m_adFunc.GetResult());
+				}
+			});
+			Bundle data = new Bundle();
+			data.putString("game", Q3E.q3ei.game);
+			m_adFunc.Start(data);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	private void AfterCreated()
 	{
+		LoadAds();
+
+		OpenUpdate();
+
 		try
 		{
-			LoadAds();
-
-			OpenUpdate();
-
 			Intent intent = getIntent();
 			if(null != intent)
 			{
@@ -3113,8 +3120,15 @@ public class GameLauncher extends Activity
 
     private void OpenUpdate()
     {
-		UpdateCompatFunc m_updateCompatFunc = new UpdateCompatFunc(this);
-		m_updateCompatFunc.Start(new Bundle());
+		try
+		{
+			UpdateCompatFunc m_updateCompatFunc = new UpdateCompatFunc(this);
+			m_updateCompatFunc.Start(new Bundle());
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
     }
 
 	private void SetCmdText(String text)

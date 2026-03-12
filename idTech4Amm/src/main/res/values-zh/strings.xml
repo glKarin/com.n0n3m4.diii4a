@@ -585,7 +585,7 @@
     <string name="icarus_base">伊卡洛斯飞船指挥模拟</string>
     <string name="gold_source_source_engine">金源/起源引擎</string>
     <string name="based_on_idsoftware_engine">基于idSoftware的引擎</string>
-    <string name="quake_engine">雷神之锤引擎</string>
+    <string name="idtech_0_engine">idTech0引擎</string>
     <string name="idtech_1_engine">idTech1引擎</string>
     <string name="idtech_2_engine">idTech2引擎</string>
     <string name="idtech_3_engine">idTech3引擎</string>

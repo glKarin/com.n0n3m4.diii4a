@@ -51,7 +51,7 @@ public final class Q3EGameConstants
     public static final String ENGINE_IDTECH_3    = "idTech 3";
     public static final String ENGINE_IDTECH_2    = "idTech 2";
     public static final String ENGINE_IDTECH_1    = "idTech 1";
-    public static final String ENGINE_ID_QUAKE    = "Quake";
+    public static final String ENGINE_IDTECH_0    = "idTech 0";
     public static final String ENGINE_ID_BASE     = "id Base";
     public static final String ENGINE_OTHER       = "Other";
     public static final String ENGINE_GOLD_SOURCE = "Gold Source";

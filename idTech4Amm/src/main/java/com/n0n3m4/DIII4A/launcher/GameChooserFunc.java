@@ -97,8 +97,8 @@ public final class GameChooserFunc extends GameLauncherFunc
                 new EngineItem(R.string.idtech_4_engine, Q3EGameConstants.ENGINE_IDTECH_4),
                 new EngineItem(R.string.idtech_3_engine, Q3EGameConstants.ENGINE_IDTECH_3),
                 new EngineItem(R.string.idtech_2_engine, Q3EGameConstants.ENGINE_IDTECH_2),
-                new EngineItem(R.string.quake_engine, Q3EGameConstants.ENGINE_ID_QUAKE),
                 new EngineItem(R.string.idtech_1_engine, Q3EGameConstants.ENGINE_IDTECH_1),
+                new EngineItem(R.string.idtech_0_engine, Q3EGameConstants.ENGINE_IDTECH_0),
                 new EngineItem(R.string.based_on_idsoftware_engine, Q3EGameConstants.ENGINE_ID_BASE),
                 new EngineItem(R.string.gold_source_source_engine, Q3EGameConstants.ENGINE_GOLD_SOURCE, Q3EGameConstants.ENGINE_SOURCE),
                 new EngineItem(R.string.other_engine, Q3EGameConstants.ENGINE_OTHER)

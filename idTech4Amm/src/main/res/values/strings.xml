@@ -589,7 +589,7 @@
     <string name="icarus_base">Icarus Starship Command Simulator</string>
     <string name="gold_source_source_engine">Gold Source/Source engine</string>
     <string name="based_on_idsoftware_engine">Based on idSoftware engine</string>
-    <string name="quake_engine">Quake Engine</string>
+    <string name="idtech_0_engine">idTech 0 engine</string>
     <string name="idtech_1_engine">idTech 1 engine</string>
     <string name="idtech_2_engine">idTech 2 engine</string>
     <string name="idtech_3_engine">idTech 3 engine</string>

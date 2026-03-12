@@ -2,6 +2,14 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan72 (2026-03-08)
+
+* Add `Quadrilateral Cowboy`(ver 1.0.2602252) support, game standalone directory named `qc`, game data directory named `base`. More view in [Quadrilateral Cowboy](https://blendogames.com/qc/).
+* Add `Icarus Starship Command Simulator`(ver 1.0.9) support, game standalone directory named `icarus`, game data directory named `base`. More view in [Icarus Starship Command Simulator](https://store.steampowered.com/app/620170/Icarus_Starship_Command_Simulator/).
+* Add new game chooser on launcher.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan71 (2026-02-10)
 
 * Add `Skin Deep`(ver 1.0.4) support, game standalone directory named `skindeep`, game data directory named `base`.
@@ -560,7 +568,6 @@ DIII4A++_harmattan.1.1.0.8_only_armv7a.apk: only include armv7 32 neon library.
 
 > 2022-05-05 1.1.0harmattan7
 
-Update:
 * Fix shadow clipped.
 * Fix sky box.
 * Fix fog and blend light.
@@ -583,10 +590,15 @@ Update:
 
 > 2020-08-25 1.1.0harmattan6
 
-* Fix video playing - 1.1.0harmattan6.
-* Choose game library when load other game mod, more view in `Help` menu - 1.1.0harmattan6.
-* Fix game audio sound playing(Testing) - 1.1.0harmattan5.
-* Add launcher orientation setting on `CONTROLS` tab - 1.1.0harmattan5.
+* Fix video playing.
+* Choose game library when load other game mod, more view in `Help` menu.
+
+----------------------------------------------------------------------------------
+
+> 2020-08-23 1.1.0harmattan5
+
+* Fix game audio sound playing(Testing).
+* Add launcher orientation setting on `CONTROLS` tab.
 
 ----------------------------------------------------------------------------------
 
@@ -602,9 +614,19 @@ Update:
 
 ----------------------------------------------------------------------------------
 
-> 2020-08-16 1.1.0harmattan2
+> 2020-07-20 1.1.0harmattan2
 
-Notification:
+* Compile `DOOM3:RoE` game library named `libd3xp`, game path name is `d3xp`, more view in `https://store.steampowered.com/app/9070/DOOM_3_Resurrection_of_Evil/`.
+* Compile `Classic DOOM3` game library named `libcdoom`, game path name is `cdoom`, more view in `https://www.moddb.com/mods/classic-doom-3`.
+* Compile `DOOM3-BFG:The lost mission` game library named `libd3le`, game path name is `d3le`, need `d3xp` resources(+set fs_game_base d3xp), more view in `https://www.moddb.com/mods/the-lost-mission`(now fix stack overflow when load model `models/mapobjects/hell/hellintro.lwo` of level `game/le_hell` map on Android).
+* Clear vertex buffer for graphics memory overflow(integer cvar `harm_r_clearVertexBuffer`).
+* Skip visual vision for `Berserk Powerup` on `DOOM3`(bool cvar `harm_g_skipBerserkVision`).
+* Skip visual vision for `Grabber` on `D3 RoE`(bool cvar `harm_g_skipWarpVision`).
+* Skip visual vision for `Helltime Powerup` on `D3 RoE`(bool cvar `harm_g_skipHelltimeVision`).
+* Add support to run on background.
+* Add support to hide navigation bar.
+* Add RGBA4444 16-bits color.
+* Add config file editor.
 * If you have installed other version apk(package name is `com.n0n3m4.diii4a`) of other sources, you first to uninstall the old version apk package named `com.n0n3m4.diii4a`, after install this new version apk. Because the apk package is same `com.n0n3m4.diii4a`, but certificate is different.
 * If app running crash(white screen), first make sure to allow `WRITE_EXTERNAL_STORAGE` permission, alter please uncheck 4th checkbox named `Use ETC1(or RGBA4444) cache` or clear ETC1 texture cache file manual on resource folder(exam. /sdcard/diii4a/<base/d3xp/d3le/cdoom/or...>/dds).
 * `Clear vertex buffer` suggest to select 3rd or 2nd for clear vertex buffer every frame! If you select 1st, it will be same as original apk, maybe flash and crash with out of graphics memory! More view in game, on DOOM3 console, cvar named `harm_r_clearVertexBuffer`.
@@ -612,18 +634,8 @@ Notification:
 
 ----------------------------------------------------------------------------------
 
-> 2020-08-16 1.1.0harmattan1
+> 2020-05-05 1.1.0harmattan1
 
-* Compile `DOOM3:RoE` game library named `libd3xp`, game path name is `d3xp`, more view in `https://store.steampowered.com/app/9070/DOOM_3_Resurrection_of_Evil/`.
-* Compile `Classic DOOM3` game library named `libcdoom`, game path name is `cdoom`, more view in `https://www.moddb.com/mods/classic-doom-3`.
-* Compile `DOOM3-BFG:The lost mission` game library named `libd3le`, game path name is `d3le`, need `d3xp` resources(+set fs_game_base d3xp), more view in `https://www.moddb.com/mods/the-lost-mission`(now fix stack overflow when load model `models/mapobjects/hell/hellintro.lwo` of level `game/le_hell` map on Android).
-	* Clear vertex buffer for graphics memory overflow(integer cvar `harm_r_clearVertexBuffer`).
-	* Skip visual vision for `Berserk Powerup` on `DOOM3`(bool cvar `harm_g_skipBerserkVision`).
-	* Skip visual vision for `Grabber` on `D3 RoE`(bool cvar `harm_g_skipWarpVision`).
-	* Skip visual vision for `Helltime Powerup` on `D3 RoE`(bool cvar `harm_g_skipHelltimeVision`).
-* Add support to run on background.
-* Add support to hide navigation bar.
-* Add RGBA4444 16-bits color.
-* Add config file editor.
+* Fix crash by graphics memory leaked.
 	
 ----------------------------------------------------------------------------------

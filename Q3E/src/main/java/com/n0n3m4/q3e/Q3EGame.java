@@ -57,7 +57,7 @@ public enum Q3EGame
             Q3EGameConstants.GAME_VERSION_QUAKE1, Q3EGameConstants.GAME_SUBDIR_QUAKE1, Q3EGameConstants.CONFIG_FILE_QUAKE1,
             "game", null, "darkplaces", null,
             Q3EPreference.pref_harm_q1_fs_game, Q3EPreference.pref_harm_q1_user_mod, Q3EPreference.pref_harm_q1_game_mod, Q3EPreference.pref_harm_q1_game_lib, Q3EPreference.pref_params_q1, Q3EPreference.pref_harm_q1_command_record, null, Q3EPreference.pref_harm_q1_env,
-            KeyCodesQ1.class, Q3EGameConstants.FEATURE_QUAKE1, Q3EGameConstants.ENGINE_ID_QUAKE
+            KeyCodesQ1.class, Q3EGameConstants.FEATURE_QUAKE1, Q3EGameConstants.ENGINE_IDTECH_2
     ),
 
     DOOM3BFG(Q3EGameConstants.GAME_ID_DOOM3BFG, Q3EGameConstants.GAME_DOOM3BFG, Q3EGameConstants.LIB_ENGINE4_D3BFG, Q3EGameConstants.GAME_NAME_DOOM3BFG, Q3EGameConstants.GAME_BASE_DOOM3BFG,
@@ -160,7 +160,7 @@ public enum Q3EGame
             Q3EGameConstants.GAME_VERSION_WOLF3D, Q3EGameConstants.GAME_SUBDIR_WOLF3D, Q3EGameConstants.CONFIG_FILE_WOLF3D,
             "data", null, null, "ecwolf",
             Q3EPreference.pref_harm_wolf3d_fs_game, Q3EPreference.pref_harm_wolf3d_user_mod, Q3EPreference.pref_harm_wolf3d_game_mod, Q3EPreference.pref_harm_wolf3d_game_lib, Q3EPreference.pref_params_wolf3d, Q3EPreference.pref_harm_wolf3d_command_record, null, Q3EPreference.pref_harm_wolf3d_env,
-            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_WOLF3D, Q3EGameConstants.ENGINE_IDTECH_1
+            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_WOLF3D, Q3EGameConstants.ENGINE_IDTECH_0
     ),
 
     SKINDEEP(Q3EGameConstants.GAME_ID_SKINDEEP, Q3EGameConstants.GAME_SKINDEEP, Q3EGameConstants.LIB_ENGINE4_SKINDEEP, Q3EGameConstants.GAME_NAME_SKINDEEP, Q3EGameConstants.GAME_BASE_SKINDEEP,
