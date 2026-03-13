@@ -170,7 +170,7 @@ class idSession
 		idDemoFile 	*writeDemo;
 		int				renderdemoVersion;
 
-#ifdef _RAVEN
+#ifdef _RAVEN //karin: from idSessionLocal
 	    idSoundWorld*	menuSoundWorld;			// so the game soundWorld can be muted
 #endif
 #ifdef _HUMANHEAD
