@@ -201,7 +201,9 @@ class idSessionLocal : public idSession
 		int					timeHitch;
 
 		bool				menuActive;
+#if !defined(_RAVEN) //karin: move to idSession
 		idSoundWorld 		*menuSoundWorld;			// so the game soundWorld can be muted
+#endif
 
 		bool				insideExecuteMapChange;	// draw loading screen and update
 		// screen on prints
