@@ -41,16 +41,16 @@ OPTION(GAME_URT                     "Build Urbant Error"                        
 OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"          ON)
 OPTION(GAME_WOLF3D                  "Build Wolfenstein 3D"                          ON)
 OPTION(GAME_SKINDEEP                "Build Skin Deep"                               ON)
+OPTION(GAME_QC                      "Build Quadrilateral Cowboy"                    ON)
+OPTION(GAME_ICARUS                  "Build Icarus Starship Command Simulator"       ON)
 # Not in F-Droid
 if(NOT PRODUCT_FLAVOR_IS_FDROID)
+OPTION(GAME_XASH3D                  "Build Xash3D"                                  ON)
 OPTION(GAME_SOURCE                  "Build Source"                                  ON)
 endif()
 
 
 # Disabled
-if(NOT PRODUCT_FLAVOR_IS_FDROID)
-OPTION(GAME_XASH3D                  "Build Xash3D"                                  OFF)
-endif()
 
 
 # Experimental
@@ -66,7 +66,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_definitions(-D__ANDROID__)
+if(NOT ANDROID)
 option(ANDROID "Android build" ON)
+endif()
 option(BUILD_TESTING "Build tests" OFF)
 
 set(DIII4A_DEPEND_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/deplibs")
@@ -97,7 +99,7 @@ add_subdirectory( q3e )
 
 
 
-if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SERIOUSSAM OR GAME_SKINDEEP)
+if(GAME_QUAKE3 OR GAME_QUAKE2 OR GAME_QUAKE1 OR GAME_RTCW OR GAME_ETW OR GAME_REALRTCW OR GAME_FTEQW OR GAME_QUAKES OR GAME_JK OR GAME_Q3RALLY OR GAME_URT OR GAME_OPENMOHAA OR GAME_SERIOUSSAM OR GAME_SKINDEEP OR GAME_QC OR GAME_ICARUS)
     set(DIII4A_BUILD_COMMON True)
 endif()
 
@@ -214,7 +216,11 @@ endif()
 
 if(GAME_SOURCE) # 29985681a18508e78dc79ad863952f830be237b6 | Dec 30, 2023 | Merge pull request #312 from AruMoon/add-master-server Add new master server
 	message(STATUS "Build Source")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/source/CMakeLists.txt") # is git submodule now, so check is pull
     add_subdirectory(source) # Source-Engine
+    else()
+        message(WARNING "Source source code not exists")
+    endif()
 endif()
 
 if(GAME_Q3RALLY) # v0.5b | Aug 5, 2025 | https://github.com/Q3Rally-Team/q3rally/commit/d495c7518dc17d24357de1df5b308ba251994d1e
@@ -240,6 +246,16 @@ endif()
 if(GAME_SKINDEEP) #  | Apr 16, 2025 | https://github.com/libretro/ecwolf/commit/c57ad894d5942740b4896511e8554c9a776b04a6 | Fix emscripten build
     message(STATUS "Build Skin Deep")
     add_subdirectory ( skindeep ) # Skin Deep
+endif()
+
+if(GAME_QC) #  | Apr 16, 2025 | https://github.com/blendogames/quadrilateralcowboy/commit/c7ec52ca117a3ef6b5420d2a4bb3f63a17be57f1 | Fix for occasional crash when pressing ESC during Moto Spectre sequence
+    message(STATUS "Build Quadrilateral Cowboy")
+    add_subdirectory ( qc ) # Quadrilateral Cowboy
+endif()
+
+if(GAME_ICARUS) #  |  Apr 19, 2024 | https://github.com/stevenericboyette/ISCS/commit/35d623a1675b5d350ffcb666c14e75e9adddb088 | Update README.md
+message(STATUS "Build Icarus Starship Command Simulator")
+add_subdirectory ( icarus ) # Icarus Starship Command Simulator
 endif()
 
 

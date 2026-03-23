@@ -123,6 +123,12 @@ public enum Game
 
     // Skin Deep
     SKINDEEP_BASE(Q3EGameConstants.GAME_SKINDEEP, "base", "", "skindeep", "", "base", false, R.string.skin_deep),
+
+    // Quadrilateral Cowboy
+    QC_BASE(Q3EGameConstants.GAME_QC, "base", "", "qc", "", "base", false, R.string.qc_base),
+
+    // Icarus Starship Command Simulator
+    ICARUS_BASE(Q3EGameConstants.GAME_ICARUS, "base", "", "ICARUS", "", "base", false, R.string.icarus_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

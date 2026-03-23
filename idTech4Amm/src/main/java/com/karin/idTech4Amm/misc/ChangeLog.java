@@ -77,6 +77,17 @@ public class ChangeLog
         final ChangeLog[] CHANGES = {
                 ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2026-02-10", 71,
+                        "Add `Skin Deep`(ver 1.0.4) support, game standalone directory named `skindeep`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://blendogames.com/skindeep/", "Skin Deep") + "`.",
+                        "Support edit on-screen buttons layout in gaming.",
+                        "Add `ECWolf`(ver 1.4.2) support, game standalone directory named `ecwolf`. More view in `" + TextHelper.GenLinkText("http://maniacsvault.net/ecwolf/", "ECWolf") + "`.",
+                        "Add game main thread stack size config on Menu > Option > Advance.",
+                        "Enable `FTEQW`.",
+                        "Add `UZDoom`(ver 4.14.3) arm64 support, game standalone directory named `uzdoom`. More view in `" + TextHelper.GenLinkText("https://github.com/UZDoom/UZDoom", "UZDoom") + "`. And GZDoom is removed.",
+                        "Fix some GUIs in Quake 4/Prey(2006).",
+                        "RealRTCW(ver 5.2) is removed."
+                ),
+
                 ChangeLog.Create("2025-12-21", 70,
                         "Fix font offset in GUIs on Quake 4.",
                         "Fix a sound distance volume bug on Quake 4.",
@@ -539,17 +550,17 @@ public class ChangeLog
                         "Add `Back` key function setting, add 3-Click to exit."
                 ),
 
-                ChangeLog.Create("2020-08-25", 5,
+                ChangeLog.Create("2020-08-25", 6,
                         "Fix video playing.",
                         "Choose game library when load other game mod, more view in `Help` menu."
                 ),
 
-                ChangeLog.Create("2020-08-21", 3,
+                ChangeLog.Create("2020-08-21", 5,
                         "Fix game audio sound playing(Testing).",
                         "Add launcher orientation setting on `CONTROLS` tab."
                 ),
 
-                ChangeLog.Create("2020-08-17", 2,
+                ChangeLog.Create("2020-08-17", 3,
                         "Uncheck 4 checkboxs, default value is 0(disabled).",
                         "Hide software keyboard when open launcher activity.",
                         "Check `WRITE_EXTERNAL_STORAGE` permission when start game or edit config file.",
@@ -559,7 +570,7 @@ public class ChangeLog
                         "Add `Help` menu."
                 ),
 
-                ChangeLog.Create("2020-07-20", 1,
+                ChangeLog.Create("2020-07-20", 2,
                         "Compile `DOOM3:RoE` game library named `libd3xp`, game path name is `d3xp`, more view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/9070/DOOM_3_Resurrection_of_Evil/", null) + "`.",
                         "Compile `Classic DOOM3` game library named `libcdoom`, game path name is `cdoom`, more view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/classic-doom-3", null) + "`.",
                         "Compile `DOOM3-BFG:The lost mission` game library named `libd3le`, game path name is `d3le`, need `d3xp` resources(+set fs_game_base d3xp), more view in `" + TextHelper.GenLinkText("https://www.moddb.com/mods/the-lost-mission", null) + "`(now fix stack overflow when load model `models/mapobjects/hell/hellintro.lwo` of level `game/le_hell` map on Android).",
@@ -571,6 +582,10 @@ public class ChangeLog
                         "Add support to hide navigation bar.",
                         "Add RGBA4444 16-bits color.",
                         "Add config file editor."
+                ),
+
+                ChangeLog.Create("2020-05-05", 1,
+                        "Fix crash by graphics memory leaked."
                 ),
         };
         return CHANGES;

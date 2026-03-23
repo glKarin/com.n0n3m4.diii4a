@@ -1843,7 +1843,7 @@ void *Mem_Alloc16(const int size, const char *fileName, const int lineNumber)
 
 	void *mem = Mem_AllocDebugMemory(size, fileName, lineNumber, true);
 	// make sure the memory is 16 byte aligned
-	assert((((int)mem) & 15) == 0);
+	assert((((intptr_t)mem) & 15) == 0);
 	return mem;
 }
 
@@ -1859,7 +1859,7 @@ void Mem_Free16(void *ptr, const char *fileName, const int lineNumber)
 	}
 
 	// make sure the memory is 16 byte aligned
-	assert((((int)ptr) & 15) == 0);
+	assert((((intptr_t)ptr) & 15) == 0);
 	Mem_FreeDebugMemory(ptr, fileName, lineNumber, true);
 }
 

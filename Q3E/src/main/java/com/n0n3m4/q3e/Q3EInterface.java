@@ -82,6 +82,8 @@ public class Q3EInterface
 	public boolean isMOHAA = false;
 	public boolean isWolf3D = false;
 	public boolean isSkinDeep = false;
+	public boolean isQC = false;
+	public boolean isIcarus = false;
 
 	public String default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
@@ -217,6 +219,10 @@ public class Q3EInterface
 			return Q3EGameConstants.GAME_ID_WOLF3D;
 		else if(isSkinDeep)
 			return Q3EGameConstants.GAME_ID_SKINDEEP;
+		else if(isQC)
+			return Q3EGameConstants.GAME_ID_QC;
+		else if(isIcarus)
+			return Q3EGameConstants.GAME_ID_ICARUS;
 		else
 			return Q3EGameConstants.GAME_ID_DOOM3;
 	}
@@ -291,6 +297,10 @@ public class Q3EInterface
 			SetupWolf3D();
 		else if(Q3EGameConstants.GAME_SKINDEEP.equalsIgnoreCase(name))
 			SetupSkinDeep();
+		else if(Q3EGameConstants.GAME_QC.equalsIgnoreCase(name))
+			SetupQC();
+		else if(Q3EGameConstants.GAME_ICARUS.equalsIgnoreCase(name))
+			SetupIcarus();
 		else
 			SetupDOOM3();
 	}
@@ -321,6 +331,8 @@ public class Q3EInterface
 		isMOHAA = false;
 		isWolf3D = false;
 		isSkinDeep = false;
+		isQC = false;
+		isIcarus = false;
 	}
 
 	public void SetupDOOM3()
@@ -486,10 +498,24 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public void SetupQC()
+	{
+		ResetGameState();
+		isQC = true;
+		SetupGameConfig();
+	}
+
+	public void SetupIcarus()
+	{
+		ResetGameState();
+		isIcarus = true;
+		SetupGameConfig();
+	}
+
 	public boolean IsInitGame()
 	{
 		return isD3 || isQ4 || isPrey
-				|| isD3BFG || isTDM || isSkinDeep
+				|| isD3BFG || isTDM || isSkinDeep || isQC || isIcarus
 				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
 				|| isQ2 || isQ1
 				|| isDOOM || isWolf3D
@@ -531,39 +557,10 @@ public class Q3EInterface
 	}
 
 	// KARIN_NEW_GAME_BOOKMARK: add IsXxxXxx conditions
-	public boolean IsTDMTech()
-	{
-		return isTDM;
-	}
 
 	public boolean IsIdTech4()
 	{
 		return isD3 || isQ4 || isPrey;
-	}
-
-	public boolean IsIdTech3()
-	{
-		return isQ3 || isRTCW || isETW || isRealRTCW || isJA || isJO || isUrT || isMOHAA;
-	}
-
-	public boolean IsIdTech2()
-	{
-		return isQ2;
-	}
-
-	public boolean IsIdQuakeTech()
-	{
-		return isQ1;
-	}
-
-	public boolean IsIdTech4BFG() // 4.5
-	{
-		return isD3BFG;
-	}
-
-	public boolean IsIdTech1()
-	{
-		return isDOOM || isWolf3D;
 	}
 
 	public boolean IsUsingSDL()
@@ -623,12 +620,20 @@ public class Q3EInterface
 
 	public boolean IsDisabled()
 	{
-		return Q3EGame.HasFeature(game_id, Q3EGameConstants.DISABLED);
+		Q3EGame g = Q3EGame.Find(game_id);
+		boolean res = g.CheckFeature(Q3EGameConstants.DISABLED);
+		if(res)
+			return true;
+		return(Q3EGlobals.IsFDroidVersion() && g.CheckFeature(Q3EGameConstants.NOT_FREE));
 	}
 
 	public static boolean IsDisabled(String game)
 	{
-		return Q3EGame.HasFeature(game, Q3EGameConstants.DISABLED);
+		Q3EGame g = Q3EGame.Find(game);
+		boolean res = g.CheckFeature(Q3EGameConstants.DISABLED);
+		if(res)
+			return true;
+		return(Q3EGlobals.IsFDroidVersion() && g.CheckFeature(Q3EGameConstants.NOT_FREE));
 	}
 
 	public boolean IsSupportSecondaryGameParam()
@@ -810,6 +815,18 @@ public class Q3EInterface
 			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_SKINDEEP);
 			list.add("<mod>/autoexec.cfg");
 			list.add("<mod>/graphics.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isQC)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_QC);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isIcarus)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_ICARUS);
+			list.add("<mod>/autoexec.cfg");
 			list.add("<base>/autoexec.cfg");
 		}
 		else

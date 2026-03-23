@@ -54,7 +54,6 @@ public class GameAd extends GameLauncherFunc
         int spacing = 10;
         int vspacing = 20;
 
-        Rect srcImgRect = new Rect(0, 0, orig.getWidth(), orig.getHeight());
         Rect dstImgRect = new Rect(border, border, HEIGHT - border, HEIGHT - border);
 
         Canvas c = new Canvas(bmp);
@@ -92,7 +91,11 @@ public class GameAd extends GameLauncherFunc
         //c.drawRect(new Rect(border, border, WIDTH - border, HEIGHT - border), p);
         p.setARGB(255, 255, 255, 255);
 
-        c.drawBitmap(orig, srcImgRect, dstImgRect, p);
+        if(null != orig)
+        {
+            Rect srcImgRect = new Rect(0, 0, orig.getWidth(), orig.getHeight());
+            c.drawBitmap(orig, srcImgRect, dstImgRect, p);
+        }
 
         c.drawText(name, startX + (int) ((float) (remainWidth - bnd.width()) / 2.0f), startY + (int) ((float) (remainHeight - bnd.height()) / 2.0f + bnd.height()), p);
 

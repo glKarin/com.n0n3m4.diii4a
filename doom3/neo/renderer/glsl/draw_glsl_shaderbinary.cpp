@@ -2,7 +2,11 @@
 #ifdef GL_ES_VERSION_3_0
 
 #define GLSL_SHADER_BINARY_MAGIC ((unsigned int)('i' << 24 | 'd' << 16 | 't' << 8 | 's'))
+#ifdef _IDTECH4AMM_PATCH
 #define GLSL_SHADER_BINARY_VERSION ((unsigned int)(0x11000000 | _IDTECH4AMM_PATCH))
+#else
+#define GLSL_SHADER_BINARY_VERSION ((unsigned int)(0x11000001))
+#endif
 
 #define GLSL_SHADER_BINARY_HEADER_EXT "glslbinh"
 #define GLSL_SHADER_BINARY_DATA_EXT "glslbin"

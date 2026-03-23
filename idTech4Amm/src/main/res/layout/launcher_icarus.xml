@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res/com.karin.idTech4Amm"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/layout_border"
+    android:layout_marginHorizontal="4dp" android:layout_marginVertical="2dp"
+    >
+
+    <com.karin.idTech4Amm.widget.Divider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        myapp:label="@string/icarus"
+        myapp:lineColor="@color/launcher_divider_color" />
+
+    <CheckBox
+        android:id="@+id/icarus_r_shadowMapping"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="@string/soft_shadow_r_useShadowMapping" />
+
+    <CheckBox
+        android:id="@+id/icarus_r_globalIllumination"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/render_global_illumination_harm_r_globalillumination" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp"
+        android:text="@string/lighting_and_shadow_cvars_are_same_as_doom_3_quake_4_prey_2006"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+         />
+
+</LinearLayout>

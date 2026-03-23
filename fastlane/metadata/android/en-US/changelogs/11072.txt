@@ -1,0 +1,3 @@
+* Add `Quadrilateral Cowboy`(ver 1.0.2602252) support, game standalone directory named `qc`, game data directory named `base`.
+* Add `Icarus Starship Command Simulator`(ver 1.0.9) support, game standalone directory named `icarus`, game data directory named `base`.
+* Add new game chooser on launcher.

@@ -15,11 +15,16 @@ import android.widget.TextView;
 
 import com.karin.idTech4Amm.R;
 import com.karin.idTech4Amm.sys.GameManager;
+import com.karin.idTech4Amm.sys.LauncherGame;
 import com.karin.idTech4Amm.ui.ArrayAdapter_base;
+import com.karin.idTech4Amm.ui.GameListView;
 import com.n0n3m4.DIII4A.GameLauncher;
-import com.n0n3m4.q3e.Q3EInterface;
+import com.n0n3m4.q3e.Q3EGame;
+import com.n0n3m4.q3e.Q3EGameConstants;
+import com.n0n3m4.q3e.Q3ELang;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class GameChooserFunc extends GameLauncherFunc
@@ -37,6 +42,100 @@ public final class GameChooserFunc extends GameLauncherFunc
 
     public void run()
     {
+        ShowGroupListView();
+        //ShowPlainListView();
+    }
+
+    private GameListView.GameEngineInfo CreateEngineInfo(Object engineName, String... engineIds)
+    {
+        List<String> games = new ArrayList<>();
+
+        String[] types = LauncherGame.GameTypes(false);
+        for(String engineId : engineIds)
+        {
+            for(String game : types)
+            {
+                Q3EGame info = Q3EGame.Find(game);
+                if(!info.ENGINE.equals(engineId))
+                    continue;
+
+                games.add(info.TYPE);
+            }
+        }
+
+        if(games.isEmpty())
+            return null;
+
+        String name;
+        if(null == engineName)
+            name = String.join("/", engineIds);
+        else
+        {
+            if(engineName instanceof Integer)
+                name = Q3ELang.tr(m_gameLauncher, (Integer)engineName);
+            else
+                name = engineName.toString();
+        }
+        return new GameListView.GameEngineInfo(name, games);
+    }
+
+    private List<GameListView.GameEngineInfo> CreateEngineInfos()
+    {
+        List<GameListView.GameEngineInfo> list = new ArrayList<>();
+        class EngineItem {
+            public final Object name;
+            public final String[] list;
+
+            public EngineItem(Object name, String...list)
+            {
+                this.name = name;
+                this.list = list;
+            }
+        }
+
+        List<EngineItem> configs = Arrays.asList(
+                new EngineItem(R.string.idtech_4_engine, Q3EGameConstants.ENGINE_IDTECH_4),
+                new EngineItem(R.string.idtech_3_engine, Q3EGameConstants.ENGINE_IDTECH_3),
+                new EngineItem(R.string.idtech_2_engine, Q3EGameConstants.ENGINE_IDTECH_2),
+                new EngineItem(R.string.idtech_1_engine, Q3EGameConstants.ENGINE_IDTECH_1),
+                new EngineItem(R.string.idtech_0_engine, Q3EGameConstants.ENGINE_IDTECH_0),
+                new EngineItem(R.string.based_on_idsoftware_engine, Q3EGameConstants.ENGINE_ID_BASE),
+                new EngineItem(R.string.gold_source_source_engine, Q3EGameConstants.ENGINE_GOLD_SOURCE, Q3EGameConstants.ENGINE_SOURCE),
+                new EngineItem(R.string.other_engine, Q3EGameConstants.ENGINE_OTHER)
+        );
+
+        for(EngineItem config : configs)
+        {
+            GameListView.GameEngineInfo engineInfo = CreateEngineInfo(config.name, config.list);
+            if(null != engineInfo)
+                list.add(engineInfo);
+        }
+
+        return list;
+    }
+
+    private void ShowGroupListView()
+    {
+        List<GameListView.GameEngineInfo> gameEngineInfos = CreateEngineInfos();
+        GameListView gameListView = new GameListView(m_gameLauncher, gameEngineInfos);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
+        builder.setTitle(R.string.game);
+        builder.setView(gameListView);
+        AlertDialog dialog = builder.create();
+        gameListView.SetCallback(new GameListView.Callback() {
+            @Override
+            public void OnGameSelected(String game) {
+                Callback(game);
+                dialog.dismiss();
+            }
+        });
+        dialog.create();
+        dialog.show();
+    }
+
+    private void ShowPlainListView()
+    {
         AlertDialog.Builder builder = new AlertDialog.Builder(m_gameLauncher);
         builder.setTitle(R.string.game);
 
@@ -46,7 +145,8 @@ public final class GameChooserFunc extends GameLauncherFunc
 
         builder.setView(list);
         AlertDialog dialog = builder.create();
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
@@ -97,8 +197,8 @@ public final class GameChooserFunc extends GameLauncherFunc
 
     private static class GameItem
     {
-        public int name;
-        public String game;
+        public int     name;
+        public String  game;
         public Integer icon;
     }
 }

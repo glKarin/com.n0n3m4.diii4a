@@ -378,8 +378,11 @@ void GLimp_DeactivateContext()
 	eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 }
 
+#if 0
 #include <dlfcn.h>
 static void *glHandle = NULL;
+#endif
+
 #define QGLPROC(name, rettype, args) rettype (GL_APIENTRYP q##name) args;
 #include "../../renderer/qgl_proc.h"
 #undef QGLPROC

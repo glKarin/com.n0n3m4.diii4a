@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "qgl.h"
 
+#define NUM_FRAME_DATA 2 // 3
+
 #include "matrix/esUtil.h"
 #if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
 #include "matrix/RenderMatrix.h"
@@ -73,6 +75,9 @@ extern const float negOneModulate[];
 
 #define MAX_SHADOWMAP_RESOLUTIONS 5
 
+#endif
+
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
 // RB: added multiple subfrustums for cascaded shadow mapping
 enum frustumPlanes_t
 {
@@ -493,7 +498,7 @@ typedef struct viewEntity_s {
 
 	float				modelMatrix[16];		// local coords to global coords
 	float				modelViewMatrix[16];	// local coords to eye coords
-#ifdef _SHADOW_MAPPING
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
 	RenderMatrix		mvp;
 #endif
 } viewEntity_t;
@@ -568,7 +573,7 @@ typedef struct viewDef_s {
     struct viewEffect_s	*viewEffects;			// chain of all viewEffects effecting view
 #endif
 
-#ifdef _SHADOW_MAPPING
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
 	// RB parallel light split frustums
     frustum_t			frustums[MAX_FRUSTUMS];					// positive sides face outward, [4] is the front clip plane
     float				frustumSplitDistances[MAX_FRUSTUMS];
@@ -2391,11 +2396,11 @@ float R_ComputeSpotLightProjectionMatrix( idRenderLightLocal* light, idRenderMat
 float R_ComputeParallelLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject );
 
 void R_SetupFrontEndViewDefMVP(void);
-void R_SetupFrontEndFrustums(void);
 void R_ShadowBounds( const idBounds& modelBounds, const idBounds& lightBounds, const idVec3& lightOrigin, idBounds& shadowBounds );
 #endif
 
 #ifdef _SHADOW_MAPPING
+void R_SetupFrontEndFrustums(void);
 
 #define ALLOW_SHADOW_MAPPING_ON_ALPHATEST_MTR(x) ( ( (shader->GetContentFlags() & CONTENTS_SOLID) != 0 || ( (shader->GetCullType() == CT_TWO_SIDED) || shader->ShouldCreateBackSides() ) ) && (shader->GetSort() != SS_DECAL) )
 
@@ -2436,15 +2441,17 @@ extern idCVar harm_r_useLightScissors;
 extern idCVar harm_r_shadowMapDepthBuffer;
 extern idCVar harm_r_shadowMapNonParallelLightUltra;
 
-extern idBounds bounds_zeroOneCube;
-extern idBounds bounds_unitCube;
-
 extern bool r_useDepthTexture;
 extern bool r_useCubeDepthTexture;
 extern bool r_usePackColorAsDepth;
 
 void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLight);
 void R_SetupShadowMappingProjectionMatrix(idRenderLightLocal *light);
+#endif
+
+#if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
+extern idBounds bounds_zeroOneCube;
+extern idBounds bounds_unitCube;
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE

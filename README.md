@@ -12,12 +12,12 @@
 
 **idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
 #### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
-##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic/Urban Terror/OpenMOHAA/Skin Deep on Android   
+##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic/Urban Terror/OpenMOHAA/Skin Deep/Quadrilateral Cowboy/Icarus Starship Command Simulator on Android   
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan71(whip)  
+1.1.0harmattan72(lindaiyu)  
 **Latest update:**
-2026-02-10  
+2026-03-08  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -66,25 +66,22 @@ GPLv3
 | RealRTCW | [RealRTCW](https://github.com/wolfetplayer/RealRTCW) | 5.3 | 1.1 |  | realrtcw |  |
 | STAR WARS™ Jedi Knight - Jedi Academy™ | [OpenJK](https://github.com/JACoders/OpenJK) | 1.0.1.1 | 1.1 |  | openja |  |
 | STAR WARS™ Jedi Knight II - Jedi Outcast™ | [OpenJK](https://github.com/JACoders/OpenJK) | 1.0.1.1 | 1.1 |  | openjo |  |
--- | FTEQW | [FTEQW](https://www.fteqw.org) | 1.05 | 3.2 | 1.1 | fteqw * |  |
+| FTEQW | [FTEQW](https://www.fteqw.org) | 1.05 | 3.2 | 1.1 | fteqw * |  |
 | Serious Sam Classic : The First Encounter | [SamTFE](https://github.com/tx00100xt/SeriousSamClassic) | 1.10.7 | 1.1 |  | serioussamtfe * |  |
 | Serious Sam Classic : The Second Encounter | [SamTSE](https://github.com/tx00100xt/SeriousSamClassic) | 1.10.7 | 1.1 |  | serioussamtse * |  |
 | Urban Terror | [Q3-UT4](https://www.urbanterror.info) | 4.3.4 | 1.1 |  | urt |  |
 | Medal of Honor: Allied Assault | [OpenMOHAA](https://github.com/openmoh/openmohaa) | 0.82.1 | 1.1 |  | openmohaa |  |
 | Skin Deep | [SkinDeep](https://blendogames.com/skindeep/) | 1.0.4 | 3.2 |  | skindeep |  |
+| Quadrilateral Cowboy | [SkinDeep](https://blendogames.com/skindeep/) | 1.0.2602252 | 2.0/3.0 |  | qc |  |
+| Icarus Starship Command Simulator | [SkinDeep](https://blendogames.com/skindeep/) | 1.0.9 | 2.0/3.0 |  | icarus |  |
 
 ----------------------------------------------------------------------------------
 
-> #### Update 1.1.0harmattan71 (2026-02-10)
+> #### Update 1.1.0harmattan72 (2026-03-08)
 
-* Add `Skin Deep`(ver 1.0.4) support, game standalone directory named `skindeep`, game data directory named `base`.
-* Support edit on-screen buttons layout in gaming.
-* Add `ECWolf`(ver 1.4.2) support, game standalone directory named `ecwolf`.
-* Add game main thread stack size config on Menu > Option > Advance.
-* Enable `FTEQW`.
-* Add `UZDoom`(ver 4.14.3) arm64 support, game standalone directory named `uzdoom`, And GZDoom is removed.
-* Fix some GUIs in Quake 4/Prey(2006).
-* RealRTCW(ver 5.2) is removed.
+* Add `Quadrilateral Cowboy`(ver 1.0.2602252) support, game standalone directory named `qc`, game data directory named `base`. More view in [Quadrilateral Cowboy](https://blendogames.com/qc/).
+* Add `Icarus Starship Command Simulator`(ver 1.0.9) support, game standalone directory named `icarus`, game data directory named `base`. More view in [Icarus Starship Command Simulator](https://store.steampowered.com/app/620170/Icarus_Starship_Command_Simulator/).
+* Add new game chooser on launcher.
 
 ----------------------------------------------------------------------------------
 
@@ -134,7 +131,7 @@ bind "Your key of drop" "_impulse25"
 
 ##### Other
 
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom1.jpg" width="33%" alt="DOOM 3 BFG: DOOM I"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom3.jpg" width="33%" alt="DOOM 3 BFG: DOOM III"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg_doom2.jpg" width="33%" alt="DOOM 3 BFG: DOOM II">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quadrilateral_cowboy.jpg" width="33%" alt="Quadrilateral Cowboy"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3bfg.jpg" width="33%" alt="DOOM 3 BFG"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_icarus.jpg" width="33%" alt="Icarus Starship Command Simulator">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake_iii_arena.jpg" width="33%" alt="Quake III : Arena"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_skin_deep.jpg" width="33%" alt="Quake III : Team Arena"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_urt.jpg" width="33%" alt="Urban Terror">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake2.jpg" width="33%" alt="Quake II"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_the_dark_mod.jpg" width="33%" alt="The Dark Mod"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake1.jpg" width="33%" alt="Quake I">
 <img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_return_to_castle_wolfenstein.jpg" width="33%" alt="Return to Castle Wolfenstein"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_wolfenstein_enemy_territory.jpg" width="33%" alt="Wolfenstein: Enemy Territory"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_realrtcw.jpg" width="33%" alt="RealRTCW">
@@ -238,7 +235,7 @@ bind "Your key of drop" "_impulse25"
 ----------------------------------------------------------------------------------
 
 > #### Run idTech4A++ on other Android application with Android intent
-1. Setup game type with `game` key: also see Q3E/com.n0n3m4.q3e.Q3EGameConstants.java GAME_XXX constants. Valid value: `doom3` `quake4` `prey2006` `quake2` `quake3` `rtcw` `tdm` `quake1` `doom3bfg` `gzdoom` `etw` `realrtcw` `fteqw` `openja` `openjo` `samtfe` `samtse` `urt` `openmohaa` `skindeep` `source`
+1. Setup game type with `game` key: also see Q3E/com.n0n3m4.q3e.Q3EGameConstants.java GAME_XXX constants. Valid value: `doom3` `quake4` `prey2006` `quake2` `quake3` `rtcw` `tdm` `quake1` `doom3bfg` `gzdoom` `etw` `realrtcw` `fteqw` `openja` `openjo` `samtfe` `samtse` `urt` `openmohaa` `skindeep` `qc` `icarus` `source`
 2. Setup game command arguments with `command` key. Starts with `game.arm`
 
 ##### e.g. Run DOOM 3 with custom mod game dll
