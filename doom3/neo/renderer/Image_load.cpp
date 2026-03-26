@@ -2537,7 +2537,7 @@ void		idImage::GenerateShadow2DDepthImage(int width, int height, textureFilter_t
     }
 
     // Optionally modify our width/height based on options/hardware
-    GetDownsize(scaled_width, scaled_height);
+    //GetDownsize(scaled_width, scaled_height);
 
     scaledBuffer = NULL;
 
@@ -2618,7 +2618,7 @@ void		idImage::GenerateShadow2DRGBAImage(int width, int height, textureFilter_t 
 	}
 
 	// Optionally modify our width/height based on options/hardware
-	GetDownsize(scaled_width, scaled_height);
+	//GetDownsize(scaled_width, scaled_height);
 
 	scaledBuffer = NULL;
 
@@ -2679,7 +2679,7 @@ void idImage::GenerateShadowCubeRGBAImage(int size, textureFilter_t filterParm, 
 	}
 
 	// Optionally modify our width/height based on options/hardware
-	GetDownsize(scaled_width, scaled_height);
+	//GetDownsize(scaled_width, scaled_height);
 
 	width = height = size;
 
@@ -2766,7 +2766,7 @@ void idImage::GenerateShadowCubeDepthImage(int size, textureFilter_t filterParm,
 	}
 
 	// Optionally modify our width/height based on options/hardware
-	GetDownsize(scaled_width, scaled_height);
+	//GetDownsize(scaled_width, scaled_height);
 
 	width = height = size;
 
@@ -2864,11 +2864,15 @@ void idImage::GenerateShadowArray( int width, int height, int numSides, textureF
 	}
 
 	// make sure it is a power of 2
-	scaled_width = width;
-	scaled_height = height;
+	scaled_width = MakePowerOfTwo(width);
+	scaled_height = MakePowerOfTwo(height);
+
+	if (scaled_width != width || scaled_height != height) {
+		common->Error("GenerateShadowArray: not a power of 2 image");
+	}
 
 	// Optionally modify our width/height based on options/hardware
-	GetDownsize(scaled_width, scaled_height);
+	//GetDownsize(scaled_width, scaled_height);
 
 	scaled_width = width;
 	scaled_height = height;
@@ -2958,16 +2962,20 @@ void idImage::GenerateDepthStencilImage( int width, int height, bool allowDownSi
 	}
 
 	// make sure it is a power of 2
-	scaled_width = width;
-	scaled_height = height;
+	scaled_width = MakePowerOfTwo(width);
+	scaled_height = MakePowerOfTwo(height);
+
+	if (scaled_width != width || scaled_height != height) {
+		common->Error("GenerateDepthStencilImage: not a power of 2 image");
+	}
 
 	// Optionally modify our width/height based on options/hardware
-	GetDownsize(scaled_width, scaled_height);
+	//GetDownsize(scaled_width, scaled_height);
 
 	scaled_width = width;
 	scaled_height = height;
-	uploadHeight = scaled_height;
 	uploadWidth = scaled_width;
+	uploadHeight = scaled_height;
 
 	GLenum dataType;
 #ifdef GL_ES_VERSION_3_0
