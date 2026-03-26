@@ -163,7 +163,7 @@ void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_
     Mem_Free( fbuffer );
 
     if ( decodedImageData == NULL ) {
-        common->Warning( "stb_image was unable to load PNG %s : %s\n",
+        common->Warning( "stb_image was unable to load DDS %s : %s\n",
                          filename, stbi_failure_reason());
         return;
     }
@@ -171,7 +171,7 @@ void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_
     // *pic must be allocated with R_StaticAlloc(), but stb_image allocates with malloc()
     // (and as there is no R_StaticRealloc(), #define STBI_MALLOC etc won't help)
     // so the decoded data must be copied once
-    int size = w*h*4;
+    int size = w*h*comp;
     *pic = (byte *)R_StaticAlloc( size );
     memcpy( *pic, decodedImageData, size );
     *width = w;
