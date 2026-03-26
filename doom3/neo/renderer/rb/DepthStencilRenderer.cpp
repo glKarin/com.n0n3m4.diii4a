@@ -11,7 +11,7 @@ void R_CreateOfflineScreenDepthStencilTexture(idImage *image)
     int h = depthStencilRenderer.height;
     w = MakePowerOfTwo(w);
     h = MakePowerOfTwo(h);
-    image->GenerateDepthStencilImage(w, h, false, TF_NEAREST, TR_CLAMP_TO_BORDER, 24, 8, false);
+    image->GenerateDepthStencilImage(w, h, false, TF_NEAREST, TR_CLAMP, 24, 8, false);
 }
 
 idDepthStencilRenderer::idDepthStencilRenderer()
