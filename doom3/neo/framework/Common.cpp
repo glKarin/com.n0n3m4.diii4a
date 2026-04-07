@@ -3572,8 +3572,10 @@ void idCommonLocal::InitGame(void)
     if(!binding || !binding[0])
     {
         common->Printf("Bind F10 to command 'idTech4AmmSettings'\n");
-    idKeyInput::SetBinding(K_F10, "idTech4AmmSettings");
+		idKeyInput::SetBinding(K_F10, "idTech4AmmSettings");
     }
+    else
+    	common->Printf("Command 'idTech4AmmSettings' not be binding\n");
 #endif
 }
 

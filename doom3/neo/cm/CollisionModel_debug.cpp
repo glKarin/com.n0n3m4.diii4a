@@ -49,7 +49,30 @@ Visualisation code
 */
 
 const char *cm_contentsNameByIndex[] = {
-#ifdef _HUMANHEAD
+#ifdef _RAVEN //karin: must sync with renderer/Material.h
+	"none",							// 0
+	"solid",						// 1
+	"opaque",						// 2
+	"water",						// 3
+	"playerclip",					// 4
+	"monsterclip",					// 5
+	"moveableclip",					// 6
+	"ikclip",						// 7
+	"blood",						// 8
+	"body",							// 9
+	"corpse",						// 10
+	"trigger",						// 11
+	"aas_solid",					// 12
+	"aas_obstacle",					// 13
+	"flashlight_trigger",			// 14
+	"sightClip",					// 15
+	"largeShotClip",				// 16
+	"notacticalfeatures",			// 17
+	"vehicleclip",					// 18
+	"flyclip",						// 19
+	"itemclip",						// 20
+	"projectileclip",				// 21
+#elif defined(_HUMANHEAD) //karin: must sync with renderer/Material.h
 // HUMANHEAD: Redid these as they were out of sync
 	"none",							//
 	"solid",						// bit 0
@@ -105,7 +128,30 @@ const char *cm_contentsNameByIndex[] = {
 };
 
 int cm_contentsFlagByIndex[] = {
-#ifdef _HUMANHEAD
+#ifdef _RAVEN //karin: must sync with renderer/Material.h
+	-1,								// 0
+	CONTENTS_SOLID,					// 1
+	CONTENTS_OPAQUE,				// 2
+	CONTENTS_WATER,					// 3
+	CONTENTS_PLAYERCLIP,			// 4
+	CONTENTS_MONSTERCLIP,			// 5
+	CONTENTS_MOVEABLECLIP,			// 6
+	CONTENTS_IKCLIP,				// 7
+	CONTENTS_BLOOD,					// 8
+	CONTENTS_BODY,					// 9
+	CONTENTS_CORPSE,				// 10
+	CONTENTS_TRIGGER,				// 11
+	CONTENTS_AAS_SOLID,				// 12
+	CONTENTS_AAS_OBSTACLE,			// 13
+	CONTENTS_FLASHLIGHT_TRIGGER,	// 14
+	CONTENTS_SIGHTCLIP,				// 15
+	CONTENTS_LARGESHOTCLIP,			// 16
+	CONTENTS_NOTACTICALFEATURES,	// 17
+	CONTENTS_VEHICLECLIP,			// 18
+	CONTENTS_FLYCLIP,				// 19
+	CONTENTS_ITEMCLIP,				// 20
+	CONTENTS_PROJECTILECLIP,		// 21
+#elif defined(_HUMANHEAD) //karin: must sync with renderer/Material.h
 // HUMANHEAD: Redid these as they were out of sync
 	-1,								// -1
 	CONTENTS_SOLID,					// bit 0

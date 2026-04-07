@@ -672,6 +672,48 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
     return true;
 }
 
+bool R_ExportTrueTypeFont(const char *fontPath, const char *fontType, const char *language, int width)
+{
+    if(fontType && !fontType[0])
+        fontType = NULL;
+    if(!language || !language[0])
+        language = "english";
+    if(width <= 256)
+        width = 256;
+
+    for(int i = 0, w = width; w > 1; i++)
+    {
+        int d = w % 2;
+        if(d != 0)
+        {
+            common->Warning("Export font width must power of two!");
+            return false;
+        }
+        w >>= 2;
+    }
+
+    common->Printf("Export font file(font=%s, type=%s, language=%s, texture width=%d)......\n", fontPath, fontType ? fontType : "", language, width);
+
+    ftGlobalVars_t exporter;
+    R_Font_InitExporter(&exporter);
+    if(!R_Font_LoadFont(&exporter, fontPath))
+        return false;
+
+    const int pointSizes[] = { 12, 24, 48, };
+
+    for(int i = 0; i < sizeof(pointSizes) / sizeof(pointSizes[0]); i++)
+    {
+        common->Printf("Export point size %d......\n", pointSizes[i]);
+        wfontInfo_t font;
+        R_Font_Export(&exporter, pointSizes[i], &font, language, fontType, width);
+    }
+
+    R_Font_UnloadFont(&exporter);
+
+    common->Printf("Export font file done(font=%s, type=%s, language=%s, texture width=%d).\n", fontPath, fontType ? fontType : "", language, width);
+
+	return true;
+}
 
 static void R_ExportFont_f(const idCmdArgs &args)
 {
@@ -701,42 +743,14 @@ static void R_ExportFont_f(const idCmdArgs &args)
     if(!textureWidth || !textureWidth[0])
         textureWidth = "256";
 
-    common->Printf("Export font file(font=%s, type=%s, language=%s, texture width=%s)......\n", fontPath, fontType ? fontType : "", language, textureWidth);
-
     int width = atoi(textureWidth);
     if(width < 256)
     {
         common->Warning("Export font width must >= 256!");
         return;
     }
-    for(int i = 0, w = width; w > 1; i++)
-    {
-        int d = w % 2;
-        if(d != 0)
-        {
-            common->Warning("Export font width must power of two!");
-            return;
-        }
-        w >>= 2;
-    }
 
-    ftGlobalVars_t exporter;
-    R_Font_InitExporter(&exporter);
-    if(!R_Font_LoadFont(&exporter, fontPath))
-        return;
-
-    const int pointSizes[] = { 12, 24, 48, };
-
-    for(int i = 0; i < sizeof(pointSizes) / sizeof(pointSizes[0]); i++)
-    {
-        common->Printf("Export point size %d......\n", pointSizes[i]);
-        wfontInfo_t font;
-        R_Font_Export(&exporter, pointSizes[i], &font, language, fontType, width);
-    }
-
-    R_Font_UnloadFont(&exporter);
-
-    common->Printf("Export font file done(font=%s, type=%s, language=%s, texture width=%d).\n", fontPath, fontType ? fontType : "", language, width);
+	R_ExportTrueTypeFont(fontPath, fontType, language, width);
 }
 
 void R_Font_AddCommand(void)

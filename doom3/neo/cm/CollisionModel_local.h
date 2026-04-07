@@ -364,7 +364,10 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
             (void)viewAxis;
             DebugOutput(viewOrigin);
         }
-		virtual  void	DrawModel(cmHandle_t handle, const idVec3& modelOrigin, const idMat3& modelAxis, const idVec3& viewOrigin, const idMat3& viewAxis, const float radius) { (void)handle; (void)modelOrigin; (void)modelAxis; (void)viewOrigin; (void)viewAxis; (void)radius; }
+		virtual  void	DrawModel(cmHandle_t handle, const idVec3& modelOrigin, const idMat3& modelAxis, const idVec3& viewOrigin, const idMat3& viewAxis, const float radius) {
+		    (void)viewAxis;
+		    DrawModel(handle, modelOrigin, modelAxis, viewOrigin, radius);
+		 }
 #endif
 
 		// get clip handle for model
