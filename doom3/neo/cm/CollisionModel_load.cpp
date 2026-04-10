@@ -1017,6 +1017,9 @@ cm_polygon_t *idCollisionModelManagerLocal::AllocPolygon(cm_model_t *model, int 
 	} else {
 		poly = (cm_polygon_t *) Mem_Alloc(size);
 	}
+#ifdef _RAVEN //karin: initial set polygon material is NULL
+	poly->material = NULL;
+#endif
 
 	return poly;
 }
@@ -1042,7 +1045,7 @@ cm_brush_t *idCollisionModelManagerLocal::AllocBrush(cm_model_t *model, int numP
 	} else {
 		brush = (cm_brush_t *) Mem_Alloc(size);
 	}
-#ifdef _RAVEN
+#ifdef _RAVEN //karin: initial set brush material is NULL
 	brush->material = NULL;
 #endif
 
@@ -3856,12 +3859,7 @@ cmHandle_t idCollisionModelManagerLocal::FindModel(const char *name)
 
 	// check if this model is already loaded
 	for (i = 0; i < numModels; i++) {
-#ifdef _RAVEN
-		if (!static_cast<cm_model_t *>(models[i])->name.Icmp(name))
-#else
-		if (!models[i]->name.Icmp(name))
-#endif
-		{
+		if (!models[i]->name.Icmp(name)) {
 			break;
 		}
 	}
@@ -4188,7 +4186,7 @@ idCollisionModelManagerLocal::GetModelName
 const char *idCollisionModelManagerLocal::GetModelName(cmHandle_t model) const
 {
 #ifdef _RAVEN
-	return model ? static_cast<cm_model_t *>(model)->GetName() : "";
+	return model ? static_cast<cm_model_t *>(model)->name.c_str() : "";
 #else
 	if (model < 0 || model > MAX_SUBMODELS || model >= numModels || !models[model]) {
 		common->Printf("idCollisionModelManagerLocal::GetModelName: invalid model handle\n");

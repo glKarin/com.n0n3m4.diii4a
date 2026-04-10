@@ -1362,6 +1362,13 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
 	tw.trace.fraction = 1.0f;
 	tw.trace.c.contents = 0;
 	tw.trace.c.type = CONTACT_NONE;
+#ifdef _RAVEN // quake4 trace
+	tw.trace.c.id = 0; // jmarshall: fix so we don't get garbage values.
+	// jmarshall - quake 4
+	tw.trace.c.materialType = NULL;
+	// jmarshall end
+	tw.trace.c.material = NULL; //kc
+#endif
 	tw.contents = contentMask;
 	tw.isConvex = true;
 	tw.rotation = true;
@@ -1494,6 +1501,16 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
 			results->c.dist += modelOrigin * results->c.normal;
 		}
 
+#ifdef _RAVEN
+		if (results->c.material)
+		{
+			results->c.materialType = results->c.material->GetMaterialType();
+		}
+		else
+		{
+			results->c.materialType = NULL;
+		}
+#endif
 		return;
 	}
 
@@ -1730,6 +1747,16 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
 		results->c.point += modelOrigin;
 		results->c.dist += modelOrigin * results->c.normal;
 	}
+#ifdef _RAVEN
+	if (results->c.material)
+	{
+		results->c.materialType = results->c.material->GetMaterialType();
+	}
+	else
+	{
+		results->c.materialType = NULL;
+	}
+#endif
 }
 
 /*
