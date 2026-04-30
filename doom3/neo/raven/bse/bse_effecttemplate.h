@@ -25,7 +25,7 @@ enum {
     ETFLAG_HAS_PHYSICS				= BITT< 7 >::VALUE,
 };
 
-class rvDeclEffect final : public idDecl {
+class rvDeclEffect : public idDecl {
 public:
     // --------------------------------------------------------------------- //
     //  Life-cycle

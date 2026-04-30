@@ -290,7 +290,16 @@ Special transform to make the mesh seem fat or skinny.  May be used for zombie d
 void idMD5Mesh::TransformScaledVerts(idDrawVert *verts, const idJointMat *entJoints, float scale)
 {
 	idVec4 *scaledWeights = (idVec4 *) _alloca16(numWeights * sizeof(scaledWeights[0]));
-	SIMDProcessor->Mul(scaledWeights[0].ToFloatPtr(), scale, scaledWeights[0].ToFloatPtr(), numWeights * 4);
+	// Note: scaledWeights name is shadow of idMD5Mesh::scaledWeights, add this->
+#if 0 // only scale offset
+	idVec4 *sw = &this->scaledWeights[0], *tw = &scaledWeights[0];
+	for (int i = 0; i < numWeights; i++, sw++, tw++) {
+		tw->ToVec3() = sw->ToVec3() * scale;
+		tw->ToFloatPtr()[3] = sw->ToFloatPtr()[3];
+	}
+#else
+	SIMDProcessor->Mul(scaledWeights[0].ToFloatPtr(), scale, this->scaledWeights[0].ToFloatPtr(), numWeights * 4);
+#endif
 	SIMDProcessor->TransformVerts(verts, texCoords.Num(), entJoints, scaledWeights, weightIndex, numWeights);
 }
 
