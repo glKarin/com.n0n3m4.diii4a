@@ -252,7 +252,7 @@ SPAWN_FLOAT3_CONST(SpawnNone3, 0.0f, 0.0f, 0.0f)
 SPAWN_SCALAR(SpawnOne1, 1.0f)
 SPAWN_SCALAR2(SpawnOne2, 1.0f, 1.0f)
 SPAWN_VEC3_CONST(SpawnOne3, 1.0f, 1.0f, 1.0f)
-SPAWN_FLOAT3_CONST(SpawnOne3, 0.0f, 0.0f, 0.0f)
+SPAWN_FLOAT3_CONST(SpawnOne3, 1.0f, 1.0f, 1.0f)
 
 void SpawnStub(float *,class rvParticleParms const &,class idVec3 *,class idVec3 const *)
 {
