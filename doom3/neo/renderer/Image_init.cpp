@@ -1174,7 +1174,11 @@ void idImageManager::ChangeTextureFilter(void)
 idImage::Reload
 ===============
 */
-void idImage::Reload(bool checkPrecompressed, bool force, bool fromBackEnd)
+void idImage::Reload(bool checkPrecompressed, bool force
+#ifdef _MULTITHREAD
+		, bool fromBackEnd
+#endif
+)
 {
 	// always regenerate functional images
 	if (generatorFunction) {

@@ -238,7 +238,11 @@ class idImage
 		void		Print() const;
 
 		// check for changed timestamp on disk and reload if necessary
-		void		Reload(bool checkPrecompressed, bool force, bool fromBackEnd = false);
+		void		Reload(bool checkPrecompressed, bool force
+#ifdef _MULTITHREAD
+				, bool fromBackEnd = false
+#endif
+			);
 
 		void		AddReference()				{
 			refCount++;
