@@ -740,6 +740,27 @@ class Q3EGameHelper
             ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
     }
 
+    void ExtractETQWGLSLShaderAndResource()
+    {
+        Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
+        final String versionFile = KStr.AppendPath(Q3E.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_ETQW, "etqwbase/idtech4amm.version");
+        String version = Q3EGameConstants.ETQW_GLSL_SHADER_VERSION;
+        String name = Q3ELang.tr(m_context, R.string.etqw_glsl_shader_and_resource_patches);
+        Q3EGameConstants.PatchResource patchResource = Q3EGameConstants.PatchResource.ETQW_GLSL_SHADER_EXTRAS;
+
+        boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
+
+        if(manager.Fetch(patchResource, overwrite) != null)
+        {
+            if (overwrite)
+            {
+                DumpExtractResourceVersion(versionFile, version, name);
+            }
+        }
+        else
+            ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
+    }
+
     void ExtractDOOM3BFGHLSLShaderSource()
     {
         Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
@@ -911,6 +932,8 @@ class Q3EGameHelper
             ExtractECWolfResource();
         else if(Q3E.q3ei.isSkinDeep) // GLSL shader
             ExtractSkinDeepGLSLShaderSource();
+        else if(Q3E.q3ei.isETQW) // GLSL shader and resource patches
+            ExtractETQWGLSLShaderAndResource();
     }
 
     private int GetMSAA()

@@ -3,6 +3,7 @@ package com.n0n3m4.q3e;
 import com.n0n3m4.q3e.keycode.KeyCodesAndroid;
 import com.n0n3m4.q3e.keycode.KeyCodesD3;
 import com.n0n3m4.q3e.keycode.KeyCodesD3BFG;
+import com.n0n3m4.q3e.keycode.KeyCodesETQW;
 import com.n0n3m4.q3e.keycode.KeyCodesJK;
 import com.n0n3m4.q3e.keycode.KeyCodesQ1;
 import com.n0n3m4.q3e.keycode.KeyCodesQ2;
@@ -182,6 +183,13 @@ public enum Q3EGame
             "fs_game", "fs_game_base", null, null,
             Q3EPreference.pref_harm_icarus_fs_game, Q3EPreference.pref_harm_icarus_user_mod, Q3EPreference.pref_harm_icarus_game_mod, Q3EPreference.pref_harm_icarus_game_lib, Q3EPreference.pref_params_icarus, Q3EPreference.pref_harm_icarus_command_record, null, Q3EPreference.pref_harm_icarus_env,
             KeyCodesAndroid.class, Q3EGameConstants.FEATURE_ICARUS, Q3EGameConstants.ENGINE_IDTECH_4
+    ),
+
+    ETQW(Q3EGameConstants.GAME_ID_ETQW, Q3EGameConstants.GAME_ETQW, Q3EGameConstants.LIB_ENGINE4_SPLASHDAMAGE, Q3EGameConstants.GAME_NAME_ETQW, Q3EGameConstants.GAME_BASE_ETQW,
+            Q3EGameConstants.GAME_VERSION_ETQW, Q3EGameConstants.GAME_SUBDIR_ETQW, Q3EGameConstants.CONFIG_FILE_ETQW,
+            "fs_game", "fs_game_base", null, null,
+            Q3EPreference.pref_harm_etqw_fs_game, Q3EPreference.pref_harm_etqw_user_mod, Q3EPreference.pref_harm_etqw_game_mod, Q3EPreference.pref_harm_etqw_game_lib, Q3EPreference.pref_params_etqw, Q3EPreference.pref_harm_etqw_command_record, null, Q3EPreference.pref_harm_etqw_env,
+            KeyCodesETQW.class, Q3EGameConstants.FEATURE_ETQW, Q3EGameConstants.ENGINE_IDTECH_4
     ),
     ;
 

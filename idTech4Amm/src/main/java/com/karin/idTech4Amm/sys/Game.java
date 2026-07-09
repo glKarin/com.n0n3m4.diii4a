@@ -129,6 +129,9 @@ public enum Game
 
     // Icarus Starship Command Simulator
     ICARUS_BASE(Q3EGameConstants.GAME_ICARUS, "base", "", "ICARUS", "", "base", false, R.string.icarus_base),
+
+    // Enemy Territory: QUAKE Wars
+    ETQW_BASE(Q3EGameConstants.GAME_ETQW, "etqwbase", "", "etqwgame", "", "etqwbase", false, R.string.etqw_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

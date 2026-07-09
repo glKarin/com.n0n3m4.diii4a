@@ -73,5 +73,6 @@
     <string name="open_input_method">打开输入法</string>
     <string name="error">错误</string>
     <string name="restart">重启</string>
-    <string name="skin_deep_glsl_shader">Skin Deep GLSL shader</string>
+    <string name="skin_deep_glsl_shader">Skin Deep GLSL着色器</string>
+    <string name="etqw_glsl_shader_and_resource_patches">深入敌后: 雷神战争GLSL着色器和补丁资源</string>
 </resources>

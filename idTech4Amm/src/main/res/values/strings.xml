@@ -595,5 +595,7 @@
     <string name="idtech_3_engine">idTech 3 engine</string>
     <string name="idtech_4_engine">idTech 4 engine</string>
     <string name="other_engine">Other engine</string>
+    <string name="etqw">ETQW</string>
+    <string name="etqw_base">Enemy Territory: QUAKE Wars</string>
 
 </resources>

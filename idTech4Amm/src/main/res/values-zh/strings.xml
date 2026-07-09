@@ -591,4 +591,6 @@
     <string name="idtech_3_engine">idTech3引擎</string>
     <string name="idtech_4_engine">idTech4引擎</string>
     <string name="other_engine">其他引擎</string>
+    <string name="etqw">深入敌后: 雷神战争</string>
+    <string name="etqw_base">深入敌后: 雷神战争</string>
 </resources>
