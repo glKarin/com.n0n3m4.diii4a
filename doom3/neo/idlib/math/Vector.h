@@ -43,7 +43,7 @@ class idAngles;
 class idPolar3;
 class idMat3;
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 // RAVEN BEGIN
 class rvAngles;
 // RAVEN END
@@ -88,6 +88,9 @@ class idVec2
 		bool			operator==(const idVec2 &a) const;						// exact compare, no epsilon
 		bool			operator!=(const idVec2 &a) const;						// exact compare, no epsilon
 
+#ifdef _SPLASHDAMAGE
+    	bool			IsZero( void ) const;	
+#endif
 		float			Length(void) const;
 		float			LengthFast(void) const;
 		float			LengthSqr(void) const;
@@ -105,11 +108,18 @@ class idVec2
 		const char 	*ToString(int precision = 2) const;
 
 		void			Lerp(const idVec2 &v1, const idVec2 &v2, const float l);
+		
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+	// RAVEN BEGIN
+	// jscott: Ensures second element greater than first
+	    void			EnsureIncremental( void );
+	// RAVEN END
+#endif
 };
 
 extern idVec2 vec2_origin;
-#ifdef _RAVEN
-extern idVec4 vec4_one;
+#ifdef _SPLASHDAMAGE
+extern idVec2 vec2_one;
 #endif
 #define vec2_zero vec2_origin
 
@@ -162,6 +172,13 @@ ID_INLINE bool idVec2::operator!=(const idVec2 &a) const
 	return !Compare(a);
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idVec2::IsZero( void ) const
+{
+    return ( ( (*(const unsigned int *)&(x)) | (*(const unsigned int *)&(y)) ) & ~(1<<31) ) == 0;
+}
+#endif
+
 ID_INLINE float idVec2::operator[](int index) const
 {
 	return (&x)[ index ];
@@ -192,6 +209,19 @@ ID_INLINE float idVec2::LengthSqr(void) const
 
 ID_INLINE float idVec2::Normalize(void)
 {
+#ifdef _SPLASHDAMAGE
+    float invLength, length;
+
+    length = x * x + y * y;
+    length = idMath::Sqrt( length );
+    if ( length < idMath::FLT_EPSILON ) {
+        return 0.f;
+    }
+    invLength = 1.f / length;
+    x *= invLength;
+    y *= invLength;
+    return length;
+#else
 	float sqrLength, invLength;
 
 	sqrLength = x * x + y * y;
@@ -199,6 +229,7 @@ ID_INLINE float idVec2::Normalize(void)
 	x *= invLength;
 	y *= invLength;
 	return invLength * sqrLength;
+#endif
 }
 
 ID_INLINE float idVec2::NormalizeFast(void)
@@ -249,14 +280,24 @@ ID_INLINE void idVec2::Clamp(const idVec2 &min, const idVec2 &max)
 
 ID_INLINE void idVec2::Snap(void)
 {
+#ifdef _SPLASHDAMAGE
+    x = idMath::Floor( x + 0.5f );
+    y = idMath::Floor( y + 0.5f );
+#else
 	x = floor(x + 0.5f);
 	y = floor(y + 0.5f);
+#endif
 }
 
 ID_INLINE void idVec2::SnapInt(void)
 {
+#ifdef _SPLASHDAMAGE
+    x = idMath::Floor( x );
+    y = idMath::Floor( y );
+#else
 	x = float(int(x));
 	y = float(int(y));
+#endif
 }
 
 ID_INLINE idVec2 idVec2::operator-() const
@@ -351,6 +392,22 @@ ID_INLINE float *idVec2::ToFloatPtr(void)
 	return &x;
 }
 
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+// RAVEN BEGIN
+// jscott: ensures the second element is greater than the first
+ID_INLINE void idVec2::EnsureIncremental( void )
+{
+    float	temp;
+
+    if( x < y ) {
+        return;
+    }
+    temp = x;
+    x = y;
+    y = temp;
+}
+// RAVEN END
+#endif
 
 //===============================================================
 //
@@ -379,6 +436,10 @@ class idVec3
 
 		idVec3(void);
 		explicit idVec3(const float x, const float y, const float z);
+#ifdef _SPLASHDAMAGE
+		explicit //karin: change to explicit for decrement code error
+		idVec3(const float v);
+#endif
 
 		void 			Set(const float x, const float y, const float z);
 		void			Zero(void);
@@ -398,7 +459,11 @@ class idVec3
 		idVec3 		&operator/=(const float a);
 		idVec3 		&operator*=(const float a);
 
+#ifdef _SPLASHDAMAGE
+    	friend idVec3	operator*( const float a, const idVec3 &b );
+#else
 		friend idVec3	operator*(const float a, const idVec3 b);
+#endif
 
 		bool			Compare(const idVec3 &a) const;							// exact compare, no epsilon
 		bool			Compare(const idVec3 &a, const float epsilon) const;		// compare with epsilon
@@ -406,7 +471,11 @@ class idVec3
 		bool			operator!=(const idVec3 &a) const;						// exact compare, no epsilon
 
 		bool			FixDegenerateNormal(void);	// fix degenerate axial cases
+#ifdef _SPLASHDAMAGE
+    	bool			FixDenormals( float epsilon = idMath::FLT_EPSILON );		// change tiny numbers to zero
+#else
 		bool			FixDenormals(void);			// change tiny numbers to zero
+#endif
 
 		idVec3			Cross(const idVec3 &a) const;
 		idVec3 		&Cross(const idVec3 &a, const idVec3 &b);
@@ -442,12 +511,20 @@ class idVec3
 
 		void			Lerp(const idVec3 &v1, const idVec3 &v2, const float l);
 		void			SLerp(const idVec3 &v1, const idVec3 &v2, const float l);
-#ifdef _RAVEN
+#if !defined(_RAVEN) && !defined(_SPLASHDAMAGE)
+	    bool			IsZero( void ) const;
+#endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 // RAVEN BEGIN
 // bdube: added vec2 equal
         idVec3 &		operator=( const idVec2 &a );
         idVec3 &		operator*=( const idVec3 &a );
 // RAVEN END
+	    bool			IsZero( void ) const;
+#endif
+
+#ifdef _RAVEN
 // RAVEN BEGIN
 // ddynerman: vector normalization operator
         idVec3 &		operator~( void );
@@ -598,7 +675,9 @@ class idVec3
             return delta.LengthFast();
         }
 // RAVEN END
+#endif
 
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 // RAVEN BEGIN
 // jscott: Ensures second element greater than first
         void			EnsureIncremental( void );
@@ -615,23 +694,33 @@ class idVec3
         }
 
 // RAVEN END
-	    bool			IsZero( void ) const;
-#else
-        bool			IsZero( void ) const;
 #endif
 
 #ifdef _HUMANHEAD
-	// HUMANHEAD nla - Returns a Mat3 with Z up instead of down
-	idMat3			hhToMat3( void ) const;		// vector should be normalized
-	int				DirectionMask() const;			// calculate direction bitmask
-					idVec3(int directionMask);	// construct from direction bitmask
-	idVec3			ToNormal() const;
-	// HUMANHEAD END
+        // HUMANHEAD nla - Returns a Mat3 with Z up instead of down
+        idMat3			hhToMat3( void ) const;		// vector should be normalized
+        int				DirectionMask() const;			// calculate direction bitmask
+                        idVec3(int directionMask);	// construct from direction bitmask
+        idVec3			ToNormal() const;
+        // HUMANHEAD END
+#endif
+
+#ifdef _SPLASHDAMAGE
+        void			ClampMin( const float &minx, const float &miny, const float &minz );
+        idVec3			ToMaya( void ) const;
+        idVec3&			ToMayaSelf( void );
+        idVec3			FromMaya( void ) const;
+        idVec3&			FromMayaSelf( void );
+
+        static float	BiTangentSign( const idVec3& n, const idVec3& t0, const idVec3& t1 );
 #endif
 };
 
 extern idVec3 vec3_origin;
 #define vec3_zero vec3_origin
+#ifdef _SPLASHDAMAGE
+extern idVec3 vec3_one;
+#endif
 
 ID_INLINE idVec3::idVec3(void)
 {
@@ -643,6 +732,13 @@ ID_INLINE idVec3::idVec3(const float x, const float y, const float z)
 	this->y = y;
 	this->z = z;
 }
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE idVec3::idVec3(const float v)
+{
+	this->x = this->y = this->z = v;
+}
+#endif
 
 ID_INLINE float idVec3::operator[](const int index) const
 {
@@ -700,7 +796,11 @@ ID_INLINE idVec3 idVec3::operator/(const float a) const
 	return idVec3(x * inva, y * inva, z * inva);
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE idVec3 operator*( const float a, const idVec3 &b )
+#else
 ID_INLINE idVec3 operator*(const float a, const idVec3 b)
+#endif
 {
 	return idVec3(b.x * a, b.y * a, b.z * a);
 }
@@ -876,6 +976,25 @@ ID_INLINE bool idVec3::FixDegenerateNormal(void)
 	return false;
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idVec3::FixDenormals( float epsilon )
+{
+    bool denormal = false;
+    if ( fabs( x ) < epsilon ) {
+        x = 0.0f;
+        denormal = true;
+    }
+    if ( fabs( y ) < epsilon ) {
+        y = 0.0f;
+        denormal = true;
+    }
+    if ( fabs( z ) < epsilon ) {
+        z = 0.0f;
+        denormal = true;
+    }
+    return denormal;
+}
+#else
 ID_INLINE bool idVec3::FixDenormals(void)
 {
 	bool denormal = false;
@@ -897,6 +1016,7 @@ ID_INLINE bool idVec3::FixDenormals(void)
 
 	return denormal;
 }
+#endif
 
 ID_INLINE idVec3 idVec3::Cross(const idVec3 &a) const
 {
@@ -932,6 +1052,21 @@ ID_INLINE float idVec3::LengthFast(void) const
 
 ID_INLINE float idVec3::Normalize(void)
 {
+#ifdef _SPLASHDAMAGE
+    float invLength, length;
+
+    length = x * x + y * y + z * z;
+    length = idMath::Sqrt( length );
+    if ( length < idMath::FLT_EPSILON ) {
+        return 0.f;
+    }
+    invLength = 1.0f / length;
+    x *= invLength;
+    y *= invLength;
+    z *= invLength;
+    VEC_CHECK_BAD( *this );
+    return length;
+#else
 	float sqrLength, invLength;
 
 	sqrLength = x * x + y * y + z * z;
@@ -940,6 +1075,7 @@ ID_INLINE float idVec3::Normalize(void)
 	y *= invLength;
 	z *= invLength;
 	return invLength * sqrLength;
+#endif
 }
 
 ID_INLINE idVec3 &idVec3::Truncate(float length)
@@ -986,16 +1122,30 @@ ID_INLINE void idVec3::Clamp(const idVec3 &min, const idVec3 &max)
 
 ID_INLINE void idVec3::Snap(void)
 {
+#ifdef _SPLASHDAMAGE
+    x = idMath::Floor( x + 0.5f );
+    y = idMath::Floor( y + 0.5f );
+    z = idMath::Floor( z + 0.5f );
+    VEC_CHECK_BAD( *this );
+#else
 	x = floor(x + 0.5f);
 	y = floor(y + 0.5f);
 	z = floor(z + 0.5f);
+#endif
 }
 
 ID_INLINE void idVec3::SnapInt(void)
 {
+#ifdef _SPLASHDAMAGE
+    x = idMath::Floor( x );
+    y = idMath::Floor( y );
+    z = idMath::Floor( z );
+    VEC_CHECK_BAD( *this );
+#else
 	x = float(int(x));
 	y = float(int(y));
 	z = float(int(z));
+#endif
 }
 
 ID_INLINE int idVec3::GetDimension(void) const
@@ -1030,14 +1180,14 @@ ID_INLINE void idVec3::NormalVectors(idVec3 &left, idVec3 &down) const
 	d = x * x + y * y;
 
 	if (!d) {
-		left[0] = 1;
-		left[1] = 0;
-		left[2] = 0;
+        left[0] = 1.0f;
+        left[1] = 0.0f;
+        left[2] = 0.0f;
 	} else {
 		d = idMath::InvSqrt(d);
 		left[0] = -y * d;
 		left[1] = x * d;
-		left[2] = 0;
+        left[2] = 0.0f;
 	}
 
 	down = left.Cross(*this);
@@ -1050,7 +1200,7 @@ ID_INLINE void idVec3::OrthogonalBasis(idVec3 &left, idVec3 &up) const
 	if (idMath::Fabs(z) > 0.7f) {
 		l = y * y + z * z;
 		s = idMath::InvSqrt(l);
-		up[0] = 0;
+        up[0] = 0.0f;
 		up[1] = z * s;
 		up[2] = -y * s;
 		left[0] = l * s;
@@ -1061,7 +1211,7 @@ ID_INLINE void idVec3::OrthogonalBasis(idVec3 &left, idVec3 &up) const
 		s = idMath::InvSqrt(l);
 		left[0] = -y * s;
 		left[1] = x * s;
-		left[2] = 0;
+        left[2] = 0.0f;
 		up[0] = -z * left[1];
 		up[1] = z * left[0];
 		up[2] = l * s;
@@ -1074,8 +1224,8 @@ ID_INLINE void idVec3::ProjectOntoPlane(const idVec3 &normal, const float overBo
 
 	backoff = *this * normal;
 
-	if (overBounce != 1.0) {
-		if (backoff < 0) {
+	if (overBounce != 1.0f) {
+		if (backoff < 0.0f) {
 			backoff *= overBounce;
 		} else {
 			backoff /= overBounce;
@@ -1104,6 +1254,132 @@ ID_INLINE bool idVec3::ProjectAlongPlane(const idVec3 &normal, const float epsil
 	return true;
 }
 
+#if !defined(_RAVEN) && !defined(_SPLASHDAMAGE)
+ID_INLINE bool idVec3::IsZero( void ) const {
+    return ( ( ( *( const unsigned int * ) &( x ) ) | ( *( const unsigned int * ) &( y ) ) | ( *( const unsigned int * ) &( z ) ) ) & ~( 1<<31 ) ) == 0;
+}
+#endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+ID_INLINE bool idVec3::IsZero( void ) const {
+    return ( ( ( *( const unsigned int * ) &( x ) ) | ( *( const unsigned int * ) &( y ) ) | ( *( const unsigned int * ) &( z ) ) ) & ~( 1<<31 ) ) == 0;
+}
+
+// RAVEN BEGIN
+// bdube: added vec3 from vec2 assignment
+ID_INLINE idVec3 &idVec3::operator=( const idVec2 &a ) {
+    x = a.x;
+    y = a.y;
+    return *this;
+}
+ID_INLINE idVec3 &idVec3::operator*=( const idVec3 &a )
+{
+    x *= a.x;
+    y *= a.y;
+    z *= a.z;
+    return *this;
+}
+// RAVEN END
+
+// RAVEN BEGIN
+ID_INLINE int idVec3::GetLargestAxis( void ) const
+{
+    float a = fabs( x );
+    float b = fabs( y );
+    float c = fabs( z );
+
+    if( a >= b && a >= c ) {
+        return( 0 );
+    }
+    if( b >= a && b >= c ) {
+        return( 1 );
+    }
+    if( c >= a && c >= b ) {
+        return( 2 );
+    }
+    return( 0 );
+}
+// RAVEN END
+#endif
+
+#ifdef _SPLASHDAMAGE
+// RAVEN BEGIN
+// jscott: ensures x < y < z
+ID_INLINE void idVec3::EnsureIncremental( void )
+{
+    if( y < x ) {
+        idSwap( x, y );
+    }
+
+    if( z < y ) {
+        idSwap( x, z );
+    }
+
+    if( y < x ) {
+        idSwap( x, y );
+    }
+    VEC_CHECK_BAD( *this );
+}
+// RAVEN END
+
+ID_INLINE void idVec3::ClampMin( const float &minx, const float &miny, const float &minz )
+{
+    if ( x < minx ) {
+        x = minx;
+    }
+    if ( y < miny ) {
+        y = miny;
+    }
+    if ( z < minz ) {
+        z = minz;
+    }
+    VEC_CHECK_BAD( *this );
+}
+
+ID_INLINE idVec3 idVec3::ToMaya( void ) const
+{
+    idVec3 vecMaya;
+
+    vecMaya = *this;
+    vecMaya.ToMayaSelf();
+    return vecMaya;
+}
+
+ID_INLINE idVec3& idVec3::ToMayaSelf( void )
+{
+    idSwap( y, z );
+    z = -z;
+
+    VEC_CHECK_BAD( *this );
+    return (*this);
+}
+
+ID_INLINE idVec3 idVec3::FromMaya( void ) const
+{
+    idVec3 vecId;
+
+    vecId = *this;
+    vecId.FromMayaSelf();
+    return vecId;
+}
+
+ID_INLINE idVec3& idVec3::FromMayaSelf( void )
+{
+    idSwap( y, z );
+    y = -y;
+
+    VEC_CHECK_BAD( *this );
+    return (*this);
+}
+
+ID_INLINE float idVec3::BiTangentSign( const idVec3& n, const idVec3& t0, const idVec3& t1 )
+{
+    idVec3 bitangent;
+
+    bitangent.Cross( n, t0 );
+    return ( bitangent.x * t1.x + bitangent.y * t1.y + bitangent.z * t1.z ) > 0.0f ? 1.0f : -1.0f;
+}
+#endif
 
 //===============================================================
 //
@@ -1162,9 +1438,17 @@ class idVec4
 		const char 	*ToString(int precision = 2) const;
 
 		void			Lerp(const idVec4 &v1, const idVec4 &v2, const float l);
+#ifdef _SPLASHDAMAGE
+	    bool			IsZero( void ) const;
+	    bool			ContainsPoint( const float xTest, const float yTest ) const;
+	    bool			ContainsPoint( const idVec2& testPoint ) const;
+#endif
 };
 
 extern idVec4 vec4_origin;
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+extern idVec4 vec4_one;
+#endif
 #define vec4_zero vec4_origin
 
 ID_INLINE idVec4::idVec4(void)
@@ -1194,11 +1478,17 @@ ID_INLINE void idVec4::Zero(void)
 
 ID_INLINE float idVec4::operator[](int index) const
 {
+#ifdef _SPLASHDAMAGE
+    assert( index >= 0 && index < 4 );
+#endif
 	return (&x)[ index ];
 }
 
 ID_INLINE float &idVec4::operator[](int index)
 {
+#ifdef _SPLASHDAMAGE
+    assert( index >= 0 && index < 4 );
+#endif
 	return (&x)[ index ];
 }
 
@@ -1291,7 +1581,7 @@ ID_INLINE idVec4 &idVec4::operator*=(const float a)
 
 ID_INLINE bool idVec4::Compare(const idVec4 &a) const
 {
-	return ((x == a.x) && (y == a.y) && (z == a.z) && w == a.w);
+	return ((x == a.x) && (y == a.y) && (z == a.z) && (w == a.w));
 }
 
 ID_INLINE bool idVec4::Compare(const idVec4 &a, const float epsilon) const
@@ -1396,6 +1686,22 @@ ID_INLINE float *idVec4::ToFloatPtr(void)
 	return &x;
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idVec4::IsZero( void ) const
+{
+    return ( ( (*(const unsigned int *)&(x)) | (*(const unsigned int *)&(y)) | (*(const unsigned int *)&(z)) | (*(const unsigned int *)&(w)) ) & ~(1<<31) ) == 0;
+}
+
+ID_INLINE bool idVec4::ContainsPoint( const idVec2& testPoint ) const
+{
+    return !((( testPoint.x < x ) || ( testPoint.x > x + z )) || (( testPoint.y < y ) || ( testPoint.y > y + w )));
+}
+
+ID_INLINE bool idVec4::ContainsPoint( const float xTest, const float yTest ) const
+{
+    return !((( xTest < x ) || ( xTest > x + z )) || (( yTest < y ) || ( yTest > y + w )));
+}
+#endif
 
 //===============================================================
 //
@@ -1429,9 +1735,18 @@ class idVec5
 		const char 	*ToString(int precision = 2) const;
 
 		void			Lerp(const idVec5 &v1, const idVec5 &v2, const float l);
+#ifdef _SPLASHDAMAGE
+	    bool			operator==( const idVec5 &rhs ) const;
+	    const idVec2 &	ToVec2( void ) const;
+	    idVec2 &		ToVec2( void );
+	    void			Set( const idVec3& xyz, const idVec2& st );
+#endif
 };
 
 extern idVec5 vec5_origin;
+#ifdef _SPLASHDAMAGE
+extern idVec5 vec5_one;
+#endif
 #define vec5_zero vec5_origin
 
 ID_INLINE idVec5::idVec5(void)
@@ -1500,6 +1815,26 @@ ID_INLINE float *idVec5::ToFloatPtr(void)
 	return &x;
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE const idVec2 &idVec5::ToVec2( void ) const
+{
+    return *reinterpret_cast<const idVec2 *>(&s);
+}
+
+ID_INLINE idVec2 &idVec5::ToVec2( void )
+{
+    return *reinterpret_cast<idVec2 *>(&s);
+}
+
+ID_INLINE void idVec5::Set( const idVec3& xyz, const idVec2& st )
+{
+    x = xyz.x;
+    y = xyz.y;
+    z = xyz.z;
+    s = st.x;
+    t = st.y;
+}
+#endif
 
 //===============================================================
 //
@@ -1555,6 +1890,9 @@ class idVec6
 };
 
 extern idVec6 vec6_origin;
+#ifdef _SPLASHDAMAGE
+extern idVec6 vec6_one;
+#endif
 #define vec6_zero vec6_origin
 extern idVec6 vec6_infinity;
 
@@ -1914,7 +2252,11 @@ ID_INLINE idVecX::~idVecX(void)
 {
 	// if not temp memory
 	if (p && (p < idVecX::tempPtr || p >= idVecX::tempPtr + VECX_MAX_TEMP) && alloced != -1) {
+#ifdef _SPLASHDAMAGE
+        Mem_FreeAligned( p );
+#else
 		Mem_Free16(p);
+#endif
 	}
 }
 
@@ -2139,10 +2481,18 @@ ID_INLINE void idVecX::SetSize(int newSize)
 
 	if (alloc > alloced && alloced != -1) {
 		if (p) {
+#ifdef _SPLASHDAMAGE
+            Mem_FreeAligned( p );
+#else
 			Mem_Free16(p);
+#endif
 		}
 
+#ifdef _SPLASHDAMAGE
+        p = (float *) Mem_AllocAligned( alloc * sizeof( float ), ALIGN_16 );
+#else
 		p = (float *) Mem_Alloc16(alloc * sizeof(float));
+#endif
 		alloced = alloc;
 	}
 
@@ -2156,7 +2506,11 @@ ID_INLINE void idVecX::ChangeSize(int newSize, bool makeZero)
 
 	if (alloc > alloced && alloced != -1) {
 		float *oldVec = p;
+#ifdef _SPLASHDAMAGE
+        p = (float *) Mem_AllocAligned( alloc * sizeof( float ), ALIGN_16 );
+#else
 		p = (float *) Mem_Alloc16(alloc * sizeof(float));
+#endif
 		alloced = alloc;
 
 		if (oldVec) {
@@ -2164,7 +2518,11 @@ ID_INLINE void idVecX::ChangeSize(int newSize, bool makeZero)
 				p[i] = oldVec[i];
 			}
 
+#ifdef _SPLASHDAMAGE
+            Mem_FreeAligned( oldVec );
+#else
 			Mem_Free16(oldVec);
+#endif
 		}
 
 		if (makeZero) {
@@ -2198,7 +2556,11 @@ ID_INLINE void idVecX::SetTempSize(int newSize)
 ID_INLINE void idVecX::SetData(int length, float *data)
 {
 	if (p && (p < idVecX::tempPtr || p >= idVecX::tempPtr + VECX_MAX_TEMP) && alloced != -1) {
+#ifdef _SPLASHDAMAGE
+        Mem_FreeAligned( p );
+#else
 		Mem_Free16(p);
+#endif
 	}
 
 	assert((((uintptr_t) data) & 15) == 0);       // data must be 16 byte aligned
@@ -2471,22 +2833,6 @@ ID_INLINE idVec3 idPolar3::ToVec3(void) const
 #ifdef _RAVEN
 
 // RAVEN BEGIN
-// bdube: added vec3 from vec2 assignment
-ID_INLINE idVec3 &idVec3::operator=( const idVec2 &a ) {
-    x = a.x;
-    y = a.y;
-    return *this;
-}
-ID_INLINE idVec3 &idVec3::operator*=( const idVec3 &a )
-{
-    x *= a.x;
-    y *= a.y;
-    z *= a.z;
-    return *this;
-}
-// RAVEN END
-
-// RAVEN BEGIN
 // ddynerman: vector normalization operator
 ID_INLINE idVec3& idVec3::operator~( void ) {
     Normalize();
@@ -2553,27 +2899,6 @@ ID_INLINE void idVec3::EnsureIncremental( void )
     }
 }
 
-ID_INLINE int idVec3::GetLargestAxis( void ) const
-{
-    float a = fabs( x );
-    float b = fabs( y );
-    float c = fabs( z );
-
-    if( a >= b && a >= c )
-    {
-        return( 0 );
-    }
-    if( b >= a && b >= c )
-    {
-        return( 1 );
-    }
-    if( c >= a && c >= b )
-    {
-        return( 2 );
-    }
-    return( 0 );
-}
-
 // abahr
 ID_INLINE idVec3 idVec3::Random( const idVec3& range, idRandom& random ) const {
     idVec3 v( *this );
@@ -2583,14 +2908,6 @@ ID_INLINE idVec3 idVec3::Random( const idVec3& range, idRandom& random ) const {
     return v;
 }
 // RAVEN END
-
-ID_INLINE bool idVec3::IsZero( void ) const {
-    return ( ( ( *( const unsigned int * ) &( x ) ) | ( *( const unsigned int * ) &( y ) ) | ( *( const unsigned int * ) &( z ) ) ) & ~( 1<<31 ) ) == 0;
-}
-#else
-ID_INLINE bool idVec3::IsZero( void ) const {
-    return ( ( ( *( const unsigned int * ) &( x ) ) | ( *( const unsigned int * ) &( y ) ) | ( *( const unsigned int * ) &( z ) ) ) & ~( 1<<31 ) ) == 0;
-}
 #endif
 
 /*

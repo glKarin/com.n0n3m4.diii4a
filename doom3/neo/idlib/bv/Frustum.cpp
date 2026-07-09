@@ -306,16 +306,28 @@ bool idFrustum::CullSphere(const idSphere &sphere) const
 	// test left/right planes
 	d = dFar * idMath::Fabs(center.y) - dLeft * center.x;
 
+#ifdef _SPLASHDAMAGE
+    if ( d > 0.f ) {
+#endif
 	if ((d * d) > rs *(sFar + dLeft * dLeft)) {
 		return true;
 	}
+#ifdef _SPLASHDAMAGE
+    }
+#endif
 
 	// test up/down planes
 	d = dFar * idMath::Fabs(center.z) - dUp * center.x;
 
+#ifdef _SPLASHDAMAGE
+    if ( d > 0.f ) {
+#endif
 	if ((d * d) > rs *(sFar + dUp * dUp)) {
 		return true;
 	}
+#ifdef _SPLASHDAMAGE
+    }
+#endif
 
 	return false;
 }

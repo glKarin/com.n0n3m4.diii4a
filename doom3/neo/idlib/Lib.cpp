@@ -70,6 +70,9 @@ void idLib::Init(void)
 
 	// init string memory allocator
 	idStr::InitMemory();
+#ifdef _SPLASHDAMAGE
+	idWStr::InitMemory();
+#endif
 
 	// initialize generic SIMD implementation
 	idSIMD::Init();
@@ -100,6 +103,9 @@ void idLib::ShutDown(void)
 
 	// shut down the string memory allocator
 	idStr::ShutdownMemory();
+#ifdef _SPLASHDAMAGE
+	idWStr::ShutdownMemory();
+#endif
 
 	// shut down the SIMD engine
 	idSIMD::Shutdown();
@@ -107,6 +113,25 @@ void idLib::ShutDown(void)
 	// shut down the memory manager
 	Mem_Shutdown();
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+===============
+idLib::Printf
+===============
+*/
+void idLib::Printf( const char *fmt, ... )
+{
+    va_list		argptr;
+    char		text[MAX_STRING_CHARS];
+
+    va_start( argptr, fmt );
+    idStr::vsnPrintf( text, sizeof( text ), fmt, argptr );
+    va_end( argptr );
+
+    common->Printf( "%s", text );
+}
+#endif
 
 
 /*
@@ -132,6 +157,10 @@ idVec4	colorBrown	= idVec4(0.40f, 0.35f, 0.08f, 1.00f);
 idVec4	colorLtGrey	= idVec4(0.75f, 0.75f, 0.75f, 1.00f);
 idVec4	colorMdGrey	= idVec4(0.50f, 0.50f, 0.50f, 1.00f);
 idVec4	colorDkGrey	= idVec4(0.25f, 0.25f, 0.25f, 1.00f);
+#ifdef _SPLASHDAMAGE
+const idVec4	colorLtBlue	= idVec4( 0.40f, 0.70f, 1.00f, 1.00f );
+const idVec4	colorDkRed	= idVec4( 0.70f, 0.00f, 0.00f, 1.00f );
+#endif
 
 static dword colorMask[2] = { 255, 0 };
 
@@ -757,3 +786,61 @@ void AssertFailed(const char *file, int line, const char *expression)
 	abort();
 #endif
 }
+
+#ifdef _SPLASHDAMAGE //karin: wide-character string and multibytes character string convert
+idStr WStrToStr( const wchar_t *wstr ) {
+	if (!wstr || !wstr[0]) {
+		return idStr();
+	}
+
+#ifdef _WIN32
+	int len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
+	char* mbuf = (char*)malloc(len);
+	memset(mbuf, 0, len);
+	WideCharToMultiByte(CP_UTF8, 0, wstr, -1, mbuf, len, NULL, NULL);
+	idStr ret = mbuf;
+	free(mbuf);
+	return ret;
+#else
+	size_t len = wcstombs(NULL, wstr, 0);
+	char *mbuf = (char *)malloc(len + 1);
+	memset(mbuf, 0, len + 1);
+	wcstombs(mbuf, wstr, len + 1);
+	idStr ret = mbuf;
+	free(mbuf);
+	return ret;
+#endif
+}
+
+idWStr StrToWStr( const char *mstr ) {
+	if (!mstr || !mstr[0]) {
+		return idWStr();
+	}
+
+#ifdef _WIN32
+	int len = MultiByteToWideChar(CP_UTF8, 0, mstr, -1, NULL, 0);
+	wchar_t* wbuf = (wchar_t*)malloc(len * sizeof(wchar_t));
+	memset(wbuf, 0, len * sizeof(wchar_t));
+	MultiByteToWideChar(CP_UTF8, 0, mstr, -1, wbuf, len);
+	idWStr ret = wbuf;
+	free(wbuf);
+	return ret;
+#else
+	size_t len = mbstowcs(NULL, mstr, 0);
+	wchar_t *wbuf = (wchar_t *)malloc((len + 1) * sizeof(wchar_t));
+	memset(wbuf, 0, (len + 1) * sizeof(wchar_t));
+	mbstowcs(wbuf, mstr, len + 1);
+	idWStr ret = wbuf;
+	free(wbuf);
+	return ret;
+#endif
+}
+
+idStr WStrToStr( const idWStr &wstr ) {
+	return WStrToStr(wstr.c_str());
+}
+
+idWStr StrToWStr( const idStr &str ) {
+	return StrToWStr(str.c_str());
+}
+#endif

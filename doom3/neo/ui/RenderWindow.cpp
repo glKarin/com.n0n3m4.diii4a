@@ -78,7 +78,14 @@ void idRenderWindow::BuildAnimation(int time)
 	if (animName.Length() && animClass.Length()) {
 		worldEntity.numJoints = worldEntity.hModel->NumJoints();
 		worldEntity.joints = (idJointMat *)Mem_Alloc16(worldEntity.numJoints * sizeof(*worldEntity.joints));
+#ifdef _SPLASHDAMAGE //karin: unuse id's GUI in ETQW
+		idDict animDict;
+		animDict.Set("model", animClass.c_str());
+		animDict.Set("anim", animName.c_str());
+		modelAnim = gameEdit->ANIM_GetAnimFromEntityDef(&animDict);
+#else
 		modelAnim = gameEdit->ANIM_GetAnimFromEntityDef(animClass, animName);
+#endif
 
 		if (modelAnim) {
 			animLength = gameEdit->ANIM_GetLength(modelAnim);
@@ -114,7 +121,11 @@ void idRenderWindow::PreRender()
 		spawnArgs.Set("name", "light_1");
 		spawnArgs.Set("origin", lightOrigin.ToVec3().ToString());
 		spawnArgs.Set("_color", lightColor.ToVec3().ToString());
+#ifdef _SPLASHDAMAGE //karin: unuse id's GUI in ETQW
+		gameEdit->ParseSpawnArgsToRenderLight(spawnArgs, rLight);
+#else
 		gameEdit->ParseSpawnArgsToRenderLight(&spawnArgs, &rLight);
+#endif
 		lightDef = world->AddLightDef(&rLight);
 
 		if (!modelName[0]) {
@@ -130,7 +141,11 @@ void idRenderWindow::PreRender()
 		if(customSkin.Length())
 		spawnArgs.Set("skin", customSkin);
 #endif
+#ifdef _SPLASHDAMAGE //karin: unuse id's GUI in ETQW
+		gameEdit->ParseSpawnArgsToRenderEntity(spawnArgs, worldEntity);
+#else
 		gameEdit->ParseSpawnArgsToRenderEntity(&spawnArgs, &worldEntity);
+#endif
 
 		if (worldEntity.hModel) {
 			idVec3 v = modelRotate.ToVec3();

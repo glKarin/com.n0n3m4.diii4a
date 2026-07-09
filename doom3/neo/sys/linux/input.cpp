@@ -316,7 +316,11 @@ static bool Sys_XRepeatPress( XEvent *event ) {
 			// emit an SE_CHAR for the repeat
 			lookupRet = XLookupString( (XKeyEvent*)&peekevent, buf, sizeof(buf), &keysym, NULL );
 			if (lookupRet > 0) {
+#ifdef _SPLASHDAMAGE //karin: evValue2 also store 
+				Posix_QueEvent( SE_CHAR, buf[ 0 ], buf[ 0 ], 0, NULL);
+#else
 				Posix_QueEvent( SE_CHAR, buf[ 0 ], 0, 0, NULL);
+#endif
 			} else {
 				// shouldn't we be doing a release/press in this order rather?
 				// ( doesn't work .. but that's what I would have expected to do though )
@@ -372,7 +376,11 @@ void Posix_PollInput() {
 					#ifdef XEVT_DBG2
 						printf("SE_CHAR %s\n", buf);
 					#endif
+#ifdef _SPLASHDAMAGE //karin: evValue2 also store 
+					Posix_QueEvent( SE_CHAR, s, s, 0, NULL);
+#else
 					Posix_QueEvent( SE_CHAR, s, 0, 0, NULL);
+#endif
 				}
 				if (!Posix_AddKeyboardPollEvent( s_scantokey[key_event->keycode], true ))
 					return;

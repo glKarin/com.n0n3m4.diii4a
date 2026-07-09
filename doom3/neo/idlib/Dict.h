@@ -104,6 +104,17 @@ class idDict
 			return sizeof(*this) + Allocated();
 		}
 
+#ifdef _SPLASHDAMAGE
+	    bool				Set( const char *key, const char *value );
+	    bool				SetFloat( const char *key, float val );
+	    bool				SetInt( const char *key, int val );
+	    bool				SetBool( const char *key, bool val );
+	    bool				SetVector( const char *key, const idVec3 &val );
+	    bool				SetVec2( const char *key, const idVec2 &val );
+	    bool				SetVec4( const char *key, const idVec4 &val );
+	    bool				SetAngles( const char *key, const idAngles &val );
+	    bool				SetMatrix( const char *key, const idMat3 &val );
+#else
 		void				Set(const char *key, const char *value);
 		void				SetFloat(const char *key, float val);
 		void				SetInt(const char *key, int val);
@@ -113,6 +124,7 @@ class idDict
 		void				SetVec4(const char *key, const idVec4 &val);
 		void				SetAngles(const char *key, const idAngles &val);
 		void				SetMatrix(const char *key, const idMat3 &val);
+#endif
 
 		// these return default values of 0.0, 0 and false
 		const char 		*GetString(const char *key, const char *defaultString = "") const;
@@ -171,12 +183,40 @@ class idDict
 // RAVEN END
 #endif
 
+#ifdef _SPLASHDAMAGE
+	    // parse dict from lexer
+	    bool				Parse( idLexer &parser );
+	
+	    // write the key value pairs to a file
+	    bool				WriteIndented( idFile* file, bool indentFirst = false ) const;
+	    bool				Set( int index, const char *value );
+	    bool				SetFloat( int index, float val );
+	    bool				SetInt( int index, int val );
+	    bool				SetBool( int index, bool val );
+	    bool				SetVector( int index, const idVec3 &val );
+	    bool				SetVec2( int index, const idVec2 &val );
+	    bool				SetVec4( int index, const idVec4 &val );
+	    bool				SetAngles( int index, const idAngles &val );
+	    bool				SetMatrix( int index, const idMat3 &val );
+	    // returns the index to the k/v pair with the given key, creates an empty one if not found
+	    int					GenerateKey( const char *key );
+	    void				Swap( idDict& rhs );
+	
+	    static void			SetGlobalPools( idStrPool* globalKeys, idStrPool* globalValues );
+	    static void			GetGlobalPools( idStrPool*& _globalKeys, idStrPool*& _globalValues );
+#endif
+
 	private:
 		idList<idKeyValue>	args;
 		idHashIndex			argHash;
 
+#ifdef _SPLASHDAMAGE
+	    static idStrPool*	globalKeys;
+	    static idStrPool*	globalValues;
+#else
 		static idStrPool	globalKeys;
 		static idStrPool	globalValues;
+#endif
 };
 
 
@@ -210,6 +250,47 @@ ID_INLINE void idDict::SetHashSize(int hashSize)
 	}
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idDict::SetFloat( const char *key, float val )
+{
+    return Set( key, va( "%f", val ) );
+}
+
+ID_INLINE bool idDict::SetInt( const char *key, int val )
+{
+    return Set( key, va( "%i", val ) );
+}
+
+ID_INLINE bool idDict::SetBool( const char *key, bool val )
+{
+    return Set( key, val ? "1" : "0" );
+}
+
+ID_INLINE bool idDict::SetVector( const char *key, const idVec3 &val )
+{
+    return Set( key, val.ToString() );
+}
+
+ID_INLINE bool idDict::SetVec4( const char *key, const idVec4 &val )
+{
+    return Set( key, val.ToString() );
+}
+
+ID_INLINE bool idDict::SetVec2( const char *key, const idVec2 &val )
+{
+    return Set( key, val.ToString() );
+}
+
+ID_INLINE bool idDict::SetAngles( const char *key, const idAngles &val )
+{
+    return Set( key, val.ToString() );
+}
+
+ID_INLINE bool idDict::SetMatrix( const char *key, const idMat3 &val )
+{
+    return Set( key, val.ToString( 6 ) );
+}
+#else
 ID_INLINE void idDict::SetFloat(const char *key, float val)
 {
 	Set(key, va("%f", val));
@@ -249,6 +330,7 @@ ID_INLINE void idDict::SetMatrix(const char *key, const idMat3 &val)
 {
 	Set(key, val.ToString());
 }
+#endif
 
 ID_INLINE bool idDict::GetString(const char *key, const char *defaultString, const char **out) const
 {
@@ -289,7 +371,11 @@ ID_INLINE const char *idDict::GetString(const char *key, const char *defaultStri
 
 ID_INLINE float idDict::GetFloat(const char *key, const char *defaultString) const
 {
+#ifdef _SPLASHDAMAGE
+    return static_cast< float >( atof( GetString( key, defaultString ) ) );
+#else
 	return atof(GetString(key, defaultString));
+#endif
 }
 
 ID_INLINE int idDict::GetInt(const char *key, const char *defaultString) const
@@ -350,5 +436,54 @@ ID_INLINE const idKeyValue *idDict::GetKeyVal(int index) const
 
 	return NULL;
 }
+
+#ifdef _SPLASHDAMAGE
+
+ID_INLINE bool idDict::SetFloat( int index, float val )
+{
+    return Set( index, va( "%f", val ) );
+}
+
+ID_INLINE bool idDict::SetInt( int index, int val )
+{
+    return Set( index, va( "%i", val ) );
+}
+
+ID_INLINE bool idDict::SetBool( int index, bool val )
+{
+    return Set( index, val ? "1" : "0" );
+}
+
+ID_INLINE bool idDict::SetVector( int index, const idVec3 &val )
+{
+    return Set( index, val.ToString() );
+}
+
+ID_INLINE bool idDict::SetVec4( int index, const idVec4 &val )
+{
+    return Set( index, val.ToString() );
+}
+
+ID_INLINE bool idDict::SetVec2( int index, const idVec2 &val )
+{
+    return Set( index, val.ToString() );
+}
+
+ID_INLINE bool idDict::SetAngles( int index, const idAngles &val )
+{
+    return Set( index, val.ToString() );
+}
+
+ID_INLINE bool idDict::SetMatrix( int index, const idMat3 &val )
+{
+    return Set( index, val.ToString( 6 ) );
+}
+
+ID_INLINE void idDict::Swap( idDict& rhs )
+{
+    args.Swap( rhs.args );
+    argHash.Swap( rhs.argHash );
+}
+#endif
 
 #endif /* !__DICT_H__ */

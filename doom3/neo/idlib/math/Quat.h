@@ -98,6 +98,11 @@ class idQuat
 		const char 	*ToString(int precision = 2) const;
 
 		idQuat 		&Slerp(const idQuat &from, const idQuat &to, float t);
+#ifdef _SPLASHDAMAGE
+	    idQuat &		SlerpFast( const idQuat &from, const idQuat &to, float t );
+	
+	    bool			FixDenormals( float epsilon = idMath::FLT_EPSILON );				// change tiny numbers to zero
+#endif
 };
 
 ID_INLINE idQuat::idQuat(void)
@@ -196,7 +201,11 @@ ID_INLINE idVec3 idQuat::operator*(const idVec3 &a) const
 
 	return idVec3(
 	               (xxzz + wwyy)*a.x		+ (xy2 + zw2)*a.y		+ (xz2 - yw2)*a.z,
+#ifdef _SPLASHDAMAGE
+	               (xy2 - zw2)*a.x			+ (xxzz - wwyy)*a.y		+ (yz2 + xw2)*a.z,
+#else
 	               (xy2 - zw2)*a.x			+ (y*y+w*w-x*x-z*z)*a.y	+ (yz2 + xw2)*a.z,
+#endif
 	               (xz2 + yw2)*a.x			+ (yz2 - xw2)*a.y		+ (wwyy - xxzz)*a.z
 	       );
 #endif
@@ -299,7 +308,7 @@ ID_INLINE idQuat &idQuat::Normalize(void)
 	len = this->Length();
 
 	if (len) {
-		ilength = 1 / len;
+        ilength = 1.0f / len;
 		x *= ilength;
 		y *= ilength;
 		z *= ilength;
@@ -330,6 +339,29 @@ ID_INLINE float *idQuat::ToFloatPtr(void)
 	return &x;
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idQuat::FixDenormals( float epsilon )
+{
+    bool denormal = false;
+    if ( fabs( x ) < epsilon ) {
+        x = 0.0f;
+        denormal = true;
+    }
+    if ( fabs( y ) < epsilon ) {
+        y = 0.0f;
+        denormal = true;
+    }
+    if ( fabs( z ) < epsilon ) {
+        z = 0.0f;
+        denormal = true;
+    }
+    if ( fabs( w ) < epsilon ) {
+        w = 0.0f;
+        denormal = true;
+    }
+    return denormal;
+}
+#endif
 
 /*
 ===============================================================================
@@ -369,6 +401,10 @@ class idCQuat
 		const float 	*ToFloatPtr(void) const;
 		float 			*ToFloatPtr(void);
 		const char 	*ToString(int precision = 2) const;
+#ifdef _SPLASHDAMAGE
+
+    bool			FixDenormals( float epsilon = idMath::FLT_EPSILON );	// change tiny numbers to zero
+#endif
 };
 
 ID_INLINE idCQuat::idCQuat(void)
@@ -453,5 +489,25 @@ ID_INLINE float *idCQuat::ToFloatPtr(void)
 {
 	return &x;
 }
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idCQuat::FixDenormals( float epsilon )
+{
+    bool denormal = false;
+    if ( fabs( x ) < epsilon ) {
+        x = 0.0f;
+        denormal = true;
+    }
+    if ( fabs( y ) < epsilon ) {
+        y = 0.0f;
+        denormal = true;
+    }
+    if ( fabs( z ) < epsilon ) {
+        z = 0.0f;
+        denormal = true;
+    }
+    return denormal;
+}
+#endif
 
 #endif /* !__MATH_QUAT_H__ */

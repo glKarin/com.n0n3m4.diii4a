@@ -827,7 +827,11 @@ void idAsyncClient::ProcessUnreliableServerMessage(const idBitMsg &msg)
 				session->MessageBox(MSG_ABORT, common->GetLanguageDict()->GetString("#str_04317"), common->GetLanguageDict()->GetString("#str_04318"), false, "pure_abort");
 			} else {
 				// load map
+#ifdef _SPLASHDAMAGE //karin: hide main menu
+				game->HideMainMenu();
+#else
 				session->SetGUI(NULL, NULL);
+#endif
 				sessLocal.ExecuteMapChange();
 			}
 
@@ -850,7 +854,11 @@ void idAsyncClient::ProcessUnreliableServerMessage(const idBitMsg &msg)
 			aheadOfServer = msg.ReadShort();
 
 			// read the game snapshot
+#ifdef _SPLASHDAMAGE
+			game->ClientReadSnapshot(snapshotSequence, snapshotGameFrame, snapshotGameTime, numDuplicatedUsercmds, aheadOfServer, msg, msg);
+#else
 			game->ClientReadSnapshot(clientNum, snapshotSequence, snapshotGameFrame, snapshotGameTime, numDuplicatedUsercmds, aheadOfServer, msg);
+#endif
 
 			// read user commands of other clients from the snapshot
 			for (last = NULL, i = msg.ReadByte(); i < MAX_ASYNC_CLIENTS; i = msg.ReadByte()) {
@@ -935,7 +943,11 @@ void idAsyncClient::ProcessReliableMessagePure(const idBitMsg &msg)
 	int			gamePakChecksum;
 	int			serverGameInitId;
 
+#ifdef _SPLASHDAMAGE //karin: hide main menu
+	game->HideMainMenu();
+#else
 	session->SetGUI(NULL, NULL);
+#endif
 
 	serverGameInitId = msg.ReadLong();
 
@@ -986,7 +998,11 @@ void idAsyncClient::ReadLocalizedServerString(const idBitMsg &msg, char *out, in
 {
 	msg.ReadString(out, maxLen);
 	// look up localized string. if the message is not an #str_ format, we'll just get it back unchanged
+#ifdef _SPLASHDAMAGE //karin: wchar
+	idStr::snPrintf(out, maxLen - 1, "%ls", common->GetLanguageDict()->GetString(out));
+#else
 	idStr::snPrintf(out, maxLen - 1, "%s", common->GetLanguageDict()->GetString(out));
+#endif
 }
 
 /*
@@ -1041,6 +1057,9 @@ void idAsyncClient::ProcessReliableServerMessages(void)
 
 #ifdef _RAVEN
 				game->SetUserInfo(clientNum, info, true);
+#elif defined(_SPLASHDAMAGE)
+				game->ValidateUserInfo(clientNum, info);
+				game->UserInfoChanged(clientNum);
 #else
 				game->SetUserInfo(clientNum, info, true, false);
 #endif
@@ -1085,7 +1104,12 @@ void idAsyncClient::ProcessReliableServerMessages(void)
 				int sequence;
 				sequence = msg.ReadLong();
 
-				if (!game->ClientApplySnapshot(clientNum, sequence)) {
+#ifdef _SPLASHDAMAGE
+				if (!game->ClientApplySnapshot(sequence))
+#else
+				if (!game->ClientApplySnapshot(clientNum, sequence))
+#endif
+				{
 					session->Stop();
 					common->Error("couldn't apply snapshot %d", sequence);
 				}
@@ -1109,6 +1133,9 @@ void idAsyncClient::ProcessReliableServerMessages(void)
 				SendUserInfoToServer();
 #ifdef _RAVEN
 				game->SetUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ], true);
+#elif defined(_SPLASHDAMAGE)
+				game->ValidateUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ]);
+				game->UserInfoChanged(clientNum);
 #else
 				game->SetUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ], true, false);
 #endif
@@ -1117,7 +1144,11 @@ void idAsyncClient::ProcessReliableServerMessages(void)
 			}
 			default: {
 				// pass reliable message on to game code
+#ifdef _SPLASHDAMAGE
+				game->ClientProcessReliableMessage(msg);
+#else
 				game->ClientProcessReliableMessage(clientNum, msg);
+#endif
 				break;
 			}
 		}
@@ -1216,7 +1247,11 @@ void idAsyncClient::ProcessConnectResponseMessage(const netadr_t from, const idB
 	InitGame(serverGameInitId, serverGameFrame, serverGameTime, serverSI);
 
 	// load map
+#ifdef _SPLASHDAMAGE //karin: hide main menu
+	game->HideMainMenu();
+#else
 	session->SetGUI(NULL, NULL);
+#endif
 	sessLocal.ExecuteMapChange();
 
 	clientPredictTime = clientPrediction = idMath::ClampInt(0, idAsyncNetwork::clientMaxPrediction.GetInteger(), clientTime - lastConnectTime);
@@ -1240,7 +1275,11 @@ void idAsyncClient::ProcessDisconnectMessage(const netadr_t from, const idBitMsg
 	}
 
 	session->Stop();
+#ifdef _SPLASHDAMAGE
+	session->MessageBox(MSG_OK, common->GetLanguageDict()->GetString("#str_04320"), L"", true);
+#else
 	session->MessageBox(MSG_OK, common->GetLanguageDict()->GetString("#str_04320"), NULL, true);
+#endif
 	session->StartMenu();
 }
 
@@ -1540,7 +1579,12 @@ bool idAsyncClient::ValidatePureServerChecksums(const netadr_t from, const idBit
 
 			if (idAsyncNetwork::clientDownload.GetInteger() == 0) {
 				// never any downloads
+#ifdef _SPLASHDAMAGE //karin: wchar
+				idStr message;
+				message = va(common->GetLanguageDict()->GetString("#str_07210"), Sys_NetAdrToString(from));
+#else
 				idStr message = va(common->GetLanguageDict()->GetString("#str_07210"), Sys_NetAdrToString(from));
+#endif
 
 				if (numMissingChecksums > 0) {
 					message += va(common->GetLanguageDict()->GetString("#str_06751"), numMissingChecksums, checksums.c_str());
@@ -1594,7 +1638,15 @@ bool idAsyncClient::ValidatePureServerChecksums(const netadr_t from, const idBit
 			return false;
 		}
 		case PURE_NODLL:
+#ifdef _SPLASHDAMAGE //karin: wchar
+			{
+				wchar_t tmp[1024] = {0};
+				idWStr::snPrintf(tmp, 1024, common->GetLanguageDict()->GetString("#str_07211"), Sys_NetAdrToString(from));
+				common->Printf("%ls", tmp);
+			}
+#else
 			common->Printf(common->GetLanguageDict()->GetString("#str_07211"), Sys_NetAdrToString(from));
+#endif
 			cmdSystem->BufferCommandText(CMD_EXEC_NOW, "disconnect");
 			return false;
 		default:
@@ -1984,10 +2036,15 @@ void idAsyncClient::RunFrame(void)
 
 	// check for user info changes
 	if (cvarSystem->GetModifiedFlags() & CVAR_USERINFO) {
+#if !defined(_SPLASHDAMAGE)
 		game->ThrottleUserInfo();
+#endif
 		SendUserInfoToServer();
 #ifdef _RAVEN
 		game->SetUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ], true);
+#elif defined(_SPLASHDAMAGE)
+		game->ValidateUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ]);
+		game->UserInfoChanged(clientNum);
 #else
 		game->SetUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ], true, false);
 #endif
@@ -2023,11 +2080,15 @@ void idAsyncClient::RunFrame(void)
 			// run client prediction
 #ifdef _HUMANHEAD
 			gameReturn_t ret = game->ClientPrediction(clientNum, userCmds[ snapshotGameFrame & (MAX_USERCMD_BACKUP - 1)]);
+#elif defined(_SPLASHDAMAGE)
+			game->ClientPrediction(userCmds[ snapshotGameFrame & (MAX_USERCMD_BACKUP - 1)], NULL);
 #else
 			gameReturn_t ret = game->ClientPrediction(clientNum, userCmds[ snapshotGameFrame & (MAX_USERCMD_BACKUP - 1)], lastPredictFrame);
 #endif
 
+#if !defined(_SPLASHDAMAGE)
 			idAsyncNetwork::ExecuteSessionCommand(ret.sessionCommand);
+#endif
 
 			snapshotGameFrame++;
 			snapshotGameTime += USERCMD_MSEC;
@@ -2057,6 +2118,19 @@ idAsyncClient::SendVersionCheck
 */
 void idAsyncClient::SendVersionCheck(bool fromMenu)
 {
+#ifdef _SPLASHDAMAGE //karin: fake check update
+	//HACK: it will execute checkNewVersion and open a dialog when game start in mainmenu.gui, so skip it
+	static int counter = 0;
+	// if (counter++ == 0)
+	// 	return;
+	common->Printf("Check updates(fake)......");
+	game->SetUpdateMessage(L"No availability update: not supported");
+	game->SetUpdateProgress(1.0f);
+	game->SetUpdateFromServer(false);
+	game->SetUpdateAvailability(UPDATE_AVAIL_NONE);
+	game->SetUpdateState(counter++ == 0 ? UPDATE_IDLE : UPDATE_PROMPT_READY);
+	common->Printf("No availability update: not supported");
+#else
 	idBitMsg	msg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
 
@@ -2080,6 +2154,7 @@ void idAsyncClient::SendVersionCheck(bool fromMenu)
 	updateState = UPDATE_SENT;
 	updateSentTime = clientTime;
 	showUpdateMessage = fromMenu;
+#endif
 }
 
 /*
@@ -2222,7 +2297,13 @@ void idAsyncClient::HandleDownloads(void)
 				fileSystem->BackgroundDownload(&backgroundDownload);
 				idStr dltitle;
 				// "Downloading %s"
+#ifdef _SPLASHDAMAGE //karin: wchar
+				wchar_t tmp[1024] = {0};
+				idWStr::snPrintf(tmp, 1024, common->GetLanguageDict()->GetString("#str_07213"), dlList[ 0 ].filename.c_str());
+				dltitle = WStrToStr(tmp);
+#else
 				sprintf(dltitle, common->GetLanguageDict()->GetString("#str_07213"), dlList[ 0 ].filename.c_str());
+#endif
 
 				if (numPaks > 1) {
 					dltitle += va(" (%d/%d)", pakCount, numPaks);

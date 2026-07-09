@@ -48,6 +48,10 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+class sdDeclSurfaceType;
+#endif
+
 // contact type
 typedef enum {
 	CONTACT_NONE,							// no contact
@@ -71,12 +75,22 @@ typedef struct {
 	idVec3					point;			// point of contact
 	idVec3					normal;			// contact plane normal
 	float					dist;			// contact plane distance
+#ifdef _SPLASHDAMAGE
+    float					separation;		// contact feature separation at initial position
+#endif
 	int						contents;		// contents at other side of surface
 	const idMaterial 		*material;		// surface material
+#ifdef _SPLASHDAMAGE
+    const sdDeclSurfaceType *surfaceType;	// surface type
+    idVec3					surfaceColor;	// surface color
+#endif
 	int						modelFeature;	// contact feature on model
 	int						trmFeature;		// contact feature on trace model
 	int						entityNum;		// entity the contact surface is a part of
 	int						id;				// id of clip model the contact surface is part of
+#ifdef _SPLASHDAMAGE
+    int						selfId;
+#endif
 #ifdef _RAVEN
 // RAVEN BEGIN
 // jscott: for material type code
@@ -94,13 +108,39 @@ typedef struct trace_s {
 	contactInfo_t			c;				// contact information, only valid if fraction < 1.0
 } trace_t;
 
-#ifdef _RAVEN
+#ifdef _SPLASHDAMAGE
+#define WORLD_MODEL_NAME	"worldMap"		// name of world model
+#define MAIN_THREAD_ID		1
+#endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 // collision model
 class idCollisionModel {
 public:
 	virtual						~idCollisionModel() { }
 								// Returns the name of the model.
 	virtual const char *		GetName( void ) const = 0;
+#ifdef _SPLASHDAMAGE
+	// Gets the bounds of the model.
+	virtual const idBounds&		GetBounds( void ) const = 0;
+    // Gets the bounds of the model, excluding/including surfaces of the appropriate surface type
+    virtual void				GetBounds( idBounds& bounds, int surfaceMask, bool inclusive ) const = 0;
+    // Gets all contents flags of brushes and polygons of the model ored together.
+    virtual int					GetContents( void ) const = 0;
+    // Gets a vertex of the model.
+    virtual const idVec3&		GetVertex( int vertexNum ) const = 0;
+    // Gets an edge of the model.
+    virtual void				GetEdge( int edgeNum, idVec3& start, idVec3& end ) const = 0;
+    // Gets a polygon of the model.
+    virtual void				GetPolygon( int polygonNum, idFixedWinding &winding ) const = 0;
+    virtual int					GetNumBrushPlanes( void ) const = 0;
+    virtual const idPlane&		GetBrushPlane( int planeNum ) const = 0;
+    virtual const idMaterial*	GetPolygonMaterial( int polygonNum ) const = 0;
+    virtual const idPlane&		GetPolygonPlane( int polygonNum ) const = 0;
+    virtual int					GetNumPolygons( void ) const = 0;
+    virtual bool				IsWorld( void ) const = 0;
+    virtual void				SetWorld( bool tf ) = 0;
+#else
 								// Gets the bounds of the model.
 	virtual bool				GetBounds( idBounds &bounds ) const = 0;
 								// Gets all contents flags of brushes and polygons of the model ored together.
@@ -111,6 +151,7 @@ public:
 	virtual bool				GetEdge( int edgeNum, idVec3 &start, idVec3 &end ) const = 0;
 								// Gets a polygon of the model.
 	virtual bool				GetPolygon( int polygonNum, idFixedWinding &winding ) const = 0;
+#endif
 };
 
 typedef idCollisionModel* cmHandle_t; // NULL is invalid; [0] is worldMap
@@ -118,7 +159,11 @@ typedef idCollisionModel* cmHandle_t; // NULL is invalid; [0] is worldMap
 typedef int cmHandle_t; // -1 is invalid; 0 is worldMap
 #endif
 
+#ifdef _SPLASHDAMAGE
+#define CM_CLIP_EPSILON		0.5f			// always stay this distance away from any model
+#else
 #define CM_CLIP_EPSILON		0.25f			// always stay this distance away from any model
+#endif
 #define CM_BOX_EPSILON		1.0f			// should always be larger than clip epsilon
 #define CM_MAX_TRACE_DIST	4096.0f			// maximum distance a trace model may be traced, point traces are unlimited
 
@@ -146,12 +191,6 @@ class idCollisionModelManager
         // Frees all the collision models.
         virtual void			FreeMap(const char* mapName) = 0;
 
-        // Creates a trace model from a collision model, returns true if succesfull.
-        virtual bool			TrmFromModel(const char* mapName, const char *modelName, idTraceModel &trm ) = 0;
-
-        // Frees a collision model.
-        virtual void	        FreeModel(cmHandle_t model) = 0;
-
         // sets up a trace model for collision with other trace models
         virtual cmHandle_t      ModelFromTrm(const char* mapName, const char* modelName, const idTraceModel &trm, const idMaterial *material ) = 0;
 
@@ -160,8 +199,6 @@ class idCollisionModelManager
         // Gets the clip handle for a model.
         virtual cmHandle_t      LoadModel(const char* mapName, const char *modelName, const bool precache = false ) = 0;
         virtual cmHandle_t      PreCacheModel(const char* mapName, const char *modelName ) = 0;
-
-        virtual void			DebugOutput( const idVec3 &viewOrigin, const idMat3 &viewAxis ) = 0;
 #endif
 #ifdef _HUMANHEAD
         // HUMANHEAD pdm: Support for level appending
@@ -178,6 +215,28 @@ class idCollisionModelManager
         virtual int				GetNumInlinedProcClipModels(void) = 0;
 #endif
         //HUMANHEAD END
+#endif
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+		// Free the given model.
+		virtual void			FreeModel( idCollisionModel *model ) = 0;
+        virtual void			DebugOutput( const idVec3 &viewOrigin, const idMat3 &viewAxis ) = 0;
+
+        // Creates a trace model from a collision model, returns true if succesfull.
+        virtual bool			TrmFromModel(const char* mapName, const char *modelName, idTraceModel &trm ) = 0;
+#endif
+#ifdef _SPLASHDAMAGE
+	    virtual void				AllocThread( void ) = 0;
+	    virtual void				FreeThread( void ) = 0;
+    	virtual int					GetThreadId( void ) = 0;
+    	virtual int					GetThreadCount( void ) = 0;
+	    // Loads collision models from a map file.
+	    virtual void				LoadMap( const char* fileName, bool forceReload ) = 0;
+	    // Purge all unused models.
+	    virtual void				PurgeModels( void ) = 0;
+	    
+	    // Sets up a trace model for collision with other trace models.
+	    virtual idCollisionModel *	ModelFromTrm( const char *mapName, const char *modelName, const idTraceModel &trm, bool includeBrushes ) = 0;
+		virtual idCollisionModel*	LoadModel( const char *mapName, const char *modelName ) = 0;
 #endif
 
 		// Gets the clip handle for a model.
@@ -216,6 +275,18 @@ class idCollisionModelManager
 		virtual int				Contacts(contactInfo_t *contacts, const int maxContacts, const idVec3 &start, const idVec6 &dir, const float depth,
 		                const idTraceModel *trm, const idMat3 &trmAxis, int contentMask,
 		                cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis) = 0;
+#ifdef _SPLASHDAMAGE
+	    virtual int				Contacts( contactInfo_t *contacts, const int maxContacts, const idVec3 &start, const idVec3 *dir, const float depth,
+	                                          const idTraceModel *trm, const idMat3 &trmAxis, int contentMask,
+	                                          idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis ) = 0;
+	                                          
+		// Draws a model.
+		virtual void			DrawModel( idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis, const idVec3 &viewOrigin, const idMat3 &viewAxis, const float radius, int lifetime ) = 0;
+
+    	virtual void			GetFullModelName( idStr& out, const char* mapName, const char* modelName ) const = 0;
+    	
+    	virtual void			DumpCollisionModelStats( void ) = 0;
+#endif
 
 		// Tests collision detection.
 		virtual void			DebugOutput(const idVec3 &origin) = 0;
@@ -223,7 +294,7 @@ class idCollisionModelManager
 		virtual void			DrawModel(cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis,
 		                const idVec3 &viewOrigin, const float radius) = 0;
 		// Prints model information, use -1 handle for accumulated model info.
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 		virtual void			ModelInfo(int num) = 0;
 #else
 		virtual void			ModelInfo(cmHandle_t model) = 0;

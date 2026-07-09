@@ -289,6 +289,9 @@ class idWaveFile
 		int				OpenOGG(const char *strFileName, waveformatex_t *pwfx = NULL);
 		int				ReadOGG(byte *pBuffer, int dwSizeToRead, int *pdwSizeRead);
 		int				CloseOGG(void);
+#ifdef _SPLASHDAMAGE
+		friend class idSoundSample;
+#endif
 };
 
 
@@ -596,6 +599,12 @@ class idSoundEmitterLocal : public idSoundEmitter
         virtual float		CurrentVoiceAmplitude( const s_channelType channel ) { (void)channel; return 0.0f; }
 #endif
 
+#ifdef _SPLASHDAMAGE
+		virtual const soundShaderParms_t&	GetChannelParms( const soundChannel_t channel );
+		virtual void						ModifySound( const soundChannel_t channel, const soundShaderParms_t& parms );
+		virtual void						SetChannelOffset( const soundChannel_t channel, int ms );
+#endif
+
 		virtual bool		CurrentlyPlaying(void) const;
 
 		// can pass SCHANNEL_ANY
@@ -770,6 +779,11 @@ class idSoundWorldLocal : public idSoundWorld
         virtual void			SetSpiritWalkEffect( bool active ) { (void)active; }
         virtual void			SetVoiceDucker( bool active ) { (void)active; }
 #endif
+#ifdef _SPLASHDAMAGE
+		virtual	void			PlaceListener( const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime );
+    	virtual	void			PlayShaderDirectly( const idSoundShader* shader, const soundChannel_t channel = SCHANNEL_ANY, int* length = NULL );
+#endif
+
 		//============================================
 
 		idRenderWorld 			*rw;				// for portals and debug drawing
@@ -782,13 +796,13 @@ class idSoundWorldLocal : public idSoundWorld
 		int						listenerArea;
 		idStr					listenerAreaName;
 #ifdef _OPENAL_EFX
-	ALuint					listenerEffect;
-	ALuint					listenerSlot;
-	bool					listenerAreFiltersInitialized;
-	ALuint					listenerFilters[2]; // 0 - direct; 1 - send.
-	float					listenerSlotReverbGain;
+		ALuint					listenerEffect;
+		ALuint					listenerSlot;
+		bool					listenerAreFiltersInitialized;
+		ALuint					listenerFilters[2]; // 0 - direct; 1 - send.
+		float					listenerSlotReverbGain;
 #else
-	int						listenerEnvironmentID;
+		int						listenerEnvironmentID;
 #endif
 
 		int						gameMsec;
@@ -1031,6 +1045,16 @@ public:
         idList<soundSubtitleList_s> soundSubtitleList; // static
         void 				SF_ShowSubtitle(void); // frontend, call in idSessionLocal::Frame
 #endif
+#ifdef _SPLASHDAMAGE
+		virtual bool			QuerySpeakers( int numSpeakers ) const;
+
+		virtual void			RefreshSoundDevices( void );
+
+		virtual const idWStrList*	ListSoundPlaybackDevices() const;
+		virtual const idWStrList*	ListSoundCaptureDevices() const;
+		virtual void				FreeDeviceList( const idWStrList* list ) const;
+		virtual int					GetAudioDeviceHash( const wchar_t* name ) const;
+#endif
 
 	//-------------------------
 
@@ -1265,4 +1289,7 @@ class idSoundCache
 		idList<idSoundSample *>	listCache;
 };
 
+#ifdef _SPLASHDAMAGE //karin: convert sound file name to generated ogg file name
+idStr S_SoundFileNameToOgg(const char *raw);
+#endif
 #endif /* !__SND_LOCAL_H__ */

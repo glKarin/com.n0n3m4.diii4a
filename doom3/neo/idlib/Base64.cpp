@@ -137,7 +137,11 @@ int idBase64::Decode(byte *to) const
 			w = IntForSixtets(in);
 
 			for (j = 0; j*8 < i*6; ++j) {
+#ifdef _SPLASHDAMAGE
+                *to++ = (byte)(w & 0xff);
+#else
 				*to++ = w & 0xff;
+#endif
 				++n;
 				w >>= 8;
 			}
@@ -146,8 +150,15 @@ int idBase64::Decode(byte *to) const
 			w = 0;
 		}
 	}
+#ifdef _SPLASHDAMAGE
+#pragma warning( push )
+#pragma warning( disable: 4267 )
+#endif
 
 	return n;
+#ifdef _SPLASHDAMAGE
+#pragma warning( pop )
+#endif
 }
 
 /*

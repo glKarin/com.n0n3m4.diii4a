@@ -10,6 +10,21 @@
 ===============================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+struct md5Context_t {
+    unsigned int	state[4];
+    unsigned int	bits[2];
+    unsigned char	in[64];
+};
+#endif
+
 unsigned int MD5_BlockChecksum(const void *data, int length);
+
+#ifdef _SPLASHDAMAGE
+void MD5_StartChecksum( md5Context_t& context );
+void MD5_UpdateChecksum( md5Context_t& context, const void *data, int length );
+unsigned int MD5_FinishChecksum( md5Context_t& context );
+unsigned int MD5_FinishChecksum( md5Context_t& context, unsigned char digest[16] );
+#endif
 
 #endif /* !__MD5_H__ */

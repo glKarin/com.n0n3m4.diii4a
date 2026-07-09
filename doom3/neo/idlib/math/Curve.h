@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MATH_CURVE_H__
 #define __MATH_CURVE_H__
 
+#ifdef _SPLASHDAMAGE
+#pragma warning ( push )
+#pragma warning ( disable : 4244 )
+
+#endif
 /*
 ===============================================================================
 
@@ -76,6 +81,14 @@ class idCurve
 		type 				*GetValueAddress(const int index) {
 			return &values[index];
 		}
+#ifdef _SPLASHDAMAGE
+	    type &				GetValueReference( const int index ) {
+	        return values[index];
+	    }
+	    const type &		GetValueReference( const int index ) const {
+	        return values[index];
+	    }
+#endif
 		float				GetTime(const int index) const {
 			return times[index];
 		}
@@ -386,7 +399,7 @@ idCurve::SetConstantSpeed
 template< class type >
 ID_INLINE void idCurve<type>::SetConstantSpeed(const float totalTime)
 {
-	int i, j;
+	int i;
 	float *length, totalLength, scale, t;
 
 	length = (float *) _alloca16(values.Num() * sizeof(float));
@@ -2805,5 +2818,10 @@ ID_INLINE float idCurve_NURBS<type>::WeightForIndex(const int index) const
 
 	return weights[index];
 }
+
+#ifdef _SPLASHDAMAGE
+
+#pragma warning ( pop )
+#endif
 
 #endif /* !__MATH_CURVE_H__ */

@@ -177,7 +177,12 @@ int idServerScan::InfoResponse(networkServer_t &server)
 	const idDeclEntityDef *mapDef = static_cast< const idDeclEntityDef * >(mapDecl);
 
 	if (mapDef) {
+#ifdef _SPLASHDAMAGE //karin: wchar
+		idStr tmp = WStrToStr(common->GetLanguageDict()->GetString(mapDef->dict.GetString("name", si_map)));
+		const char *mapName = tmp.c_str();
+#else
 		const char *mapName = common->GetLanguageDict()->GetString(mapDef->dict.GetString("name", si_map));
+#endif
 		server.serverInfo.Set("si_mapName", mapName);
 	} else {
 		server.serverInfo.Set("si_mapName", si_map);

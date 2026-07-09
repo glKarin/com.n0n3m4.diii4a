@@ -633,6 +633,15 @@ void idCollisionModelManagerLocal::RotateTrmEdgeThroughPolygon(cm_traceWork_t *t
 		if(poly->material)
 			tw->trace.c.materialType = poly->material->GetMaterialType();
 #endif
+#ifdef _SPLASHDAMAGE
+		if(poly->material)
+		{
+			tw->trace.c.surfaceType = poly->material->GetSurfaceType();
+			tw->trace.c.surfaceColor = poly->material->GetSurfaceColor();
+		}
+		tw->trace.c.separation = 0.0f;
+		tw->trace.c.selfId = 0;
+#endif
 		tw->trace.c.type = CONTACT_EDGE;
 		tw->trace.c.modelFeature = edgeNum;
 		tw->trace.c.trmFeature = trmEdge - tw->edges;
@@ -1025,6 +1034,15 @@ void idCollisionModelManagerLocal::RotateTrmVertexThroughPolygon(cm_traceWork_t 
 		if(poly->material)
 			tw->trace.c.materialType = poly->material->GetMaterialType();
 #endif
+#ifdef _SPLASHDAMAGE
+		if(poly->material)
+		{
+			tw->trace.c.surfaceType = poly->material->GetSurfaceType();
+			tw->trace.c.surfaceColor = poly->material->GetSurfaceColor();
+		}
+		tw->trace.c.separation = 0.0f;
+		tw->trace.c.selfId = 0;
+#endif
 		tw->trace.c.type = CONTACT_TRMVERTEX;
 		tw->trace.c.modelFeature = *reinterpret_cast<int *>(&poly);
 		tw->trace.c.trmFeature = v - tw->vertices;
@@ -1100,6 +1118,15 @@ void idCollisionModelManagerLocal::RotateVertexThroughTrmPolygon(cm_traceWork_t 
 #ifdef _RAVEN
 		if(poly->material)
 			tw->trace.c.materialType = poly->material->GetMaterialType();
+#endif
+#ifdef _SPLASHDAMAGE
+		if(poly->material)
+		{
+			tw->trace.c.surfaceType = poly->material->GetSurfaceType();
+			tw->trace.c.surfaceColor = poly->material->GetSurfaceColor();
+		}
+		tw->trace.c.separation = 0.0f;
+		tw->trace.c.selfId = 0;
 #endif
 		tw->trace.c.type = CONTACT_MODELVERTEX;
 		tw->trace.c.modelFeature = v - tw->model->vertices;
@@ -1340,7 +1367,7 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
 	cm_trmVertex_t *vert;
 	ALIGN16(static cm_traceWork_t tw);
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
 	if (!model) {
 		common->Printf("idCollisionModelManagerLocal::Rotation180: invalid model\n");
 		return;
@@ -1369,6 +1396,14 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
 	// jmarshall end
 	tw.trace.c.material = NULL; //kc
 #endif
+#ifdef _SPLASHDAMAGE // etqw trace
+	tw.trace.c.id = 0; // fix so we don't get garbage values.
+	tw.trace.c.material = NULL; //kc
+	tw.trace.c.surfaceType = NULL;
+	tw.trace.c.surfaceColor.Zero();
+	tw.trace.c.separation = 0.0f;
+	tw.trace.c.selfId = 0;
+#endif
 	tw.contents = contentMask;
 	tw.isConvex = true;
 	tw.rotation = true;
@@ -1383,7 +1418,7 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
     else if (tw.angle > 180.0f)
         tw.angle = 180.0f;
 	tw.maxTan = initialTan = idMath::Fabs(tan((idMath::PI / 360.0f) * tw.angle));
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
 	tw.model = static_cast<cm_model_t *>(model);
 #else
 	tw.model = idCollisionModelManagerLocal::models[model];
@@ -1509,6 +1544,18 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
 		else
 		{
 			results->c.materialType = NULL;
+		}
+#endif
+#ifdef _SPLASHDAMAGE
+		if (results->c.material)
+		{
+			results->c.surfaceType = results->c.material->GetSurfaceType();
+			results->c.surfaceColor = results->c.material->GetSurfaceColor();
+		}
+		else
+		{
+			results->c.surfaceType = NULL;
+			results->c.surfaceColor.Zero();
 		}
 #endif
 		return;
@@ -1757,6 +1804,18 @@ void idCollisionModelManagerLocal::Rotation180(trace_t *results, const idVec3 &r
 		results->c.materialType = NULL;
 	}
 #endif
+#ifdef _SPLASHDAMAGE
+	if (results->c.material)
+	{
+		results->c.surfaceType = results->c.material->GetSurfaceType();
+		results->c.surfaceColor = results->c.material->GetSurfaceColor();
+	}
+	else
+	{
+		results->c.surfaceType = NULL;
+		results->c.surfaceColor.Zero();
+	}
+#endif
 }
 
 /*
@@ -1772,6 +1831,9 @@ void idCollisionModelManagerLocal::Rotation(trace_t *results, const idVec3 &star
                 const idTraceModel *trm, const idMat3 &trmAxis, int contentMask,
                 cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis)
 {
+#ifdef _SPLASHDAMAGE //karin: lock in multi-threading
+	CM_LOCK_THREAD();
+#endif
 	idVec3 tmp;
 	float maxa, stepa, a, lasta;
 

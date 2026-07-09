@@ -50,6 +50,8 @@ If you have questions concerning this license or the applicable additional terms
 static idCVar harm_sys_sse2neon("harm_sys_sse2neon", "0", CVAR_SYSTEM | CVAR_INIT | CVAR_BOOL, "Emulate MMX/SSE/SSE2 SIMD by sse2neon");
 #endif
 
+extern void Android_OpenURL(const char *url);
+
 static idStr	basepath;
 static idStr	savepath;
 
@@ -575,10 +577,6 @@ Sys_OpenURL
 */
 void idSysLocal::OpenURL(const char *url, bool quit)
 {
-	const char	*script_path;
-	idFile		*script_file;
-	char		cmdline[ 1024 ];
-
 	static bool	quit_spamguard = false;
 
 	if (quit_spamguard) {
@@ -587,36 +585,13 @@ void idSysLocal::OpenURL(const char *url, bool quit)
 	}
 
 	common->Printf("Open URL: %s\n", url);
-	// opening an URL on *nix can mean a lot of things ..
-	// just spawn a script instead of deciding for the user :-)
-
-	// look in the savepath first, then in the basepath
-	script_path = fileSystem->BuildOSPath(cvarSystem->GetCVarString("fs_savepath"), "", "openurl.sh");
-	script_file = fileSystem->OpenExplicitFileRead(script_path);
-
-	if (!script_file) {
-		script_path = fileSystem->BuildOSPath(cvarSystem->GetCVarString("fs_basepath"), "", "openurl.sh");
-		script_file = fileSystem->OpenExplicitFileRead(script_path);
-	}
-
-	if (!script_file) {
-		common->Printf("Can't find URL script 'openurl.sh' in either savepath or basepath\n");
-		common->Printf("OpenURL '%s' failed\n", url);
-		return;
-	}
-
-	fileSystem->CloseFile(script_file);
 
 	// if we are going to quit, only accept a single URL before quitting and spawning the script
 	if (quit) {
 		quit_spamguard = true;
 	}
 
-	common->Printf("URL script: %s\n", script_path);
-
-	// StartProcess is going to execute a system() call with that - hence the &
-	idStr::snPrintf(cmdline, 1024, "%s '%s' &",  script_path, url);
-	sys->StartProcess(cmdline, quit);
+	Android_OpenURL(url);
 }
 
 /*

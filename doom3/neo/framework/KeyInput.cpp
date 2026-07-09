@@ -44,6 +44,142 @@ const char *OSX_GetLocalizedString(const char *);
 
 // names not in this list can either be lowercase ascii, or '0xnn' hex sequences
 keyname_t keynames[] = {
+#ifdef _SPLASHDAMAGE //karin: key loc name
+	{"TAB",				K_TAB,				"#str_00000001"},
+	{"ENTER",			K_ENTER,			"#str_00000002"},
+	{"ESCAPE",			K_ESCAPE,			"#str_00000003"},
+	{"SPACE",			K_SPACE,			"#str_00000004"},
+	{"BACKSPACE",		K_BACKSPACE,		"#str_00000005"},
+	{"UPARROW",			K_UPARROW,			"#str_00000006"},
+	{"DOWNARROW",		K_DOWNARROW,		"#str_00000007"},
+	{"LEFTARROW",		K_LEFTARROW,		"#str_00000008"},
+	{"RIGHTARROW",		K_RIGHTARROW,		"#str_00000009"},
+
+	{"ALT",				K_ALT,				"#str_00000010"},
+	{"RIGHTALT",		K_RIGHT_ALT,		"#str_00000121"},
+	{"CTRL",			K_CTRL,				"#str_00000011"},
+	{"SHIFT",			K_SHIFT,			"#str_00000012"},
+
+	{"LWIN", 			K_LWIN, 			"#str_00000013"},
+	{"RWIN", 			K_RWIN, 			"#str_00000014"},
+	{"MENU", 			K_MENU, 			"#str_00000015"},
+
+	{"COMMAND",			K_COMMAND,			"#str_00000016"},
+
+	{"CAPSLOCK",		K_CAPSLOCK,			"#str_00000017"},
+	{"SCROLL",			K_SCROLL,			"#str_00000018"},
+	{"PRINTSCR",		K_PRINT_SCR,		"#str_00000120"},
+
+	{"F1", 				K_F1, 				"#str_00000019"},
+	{"F2", 				K_F2, 				"#str_00000020"},
+	{"F3", 				K_F3, 				"#str_00000021"},
+	{"F4", 				K_F4, 				"#str_00000022"},
+	{"F5", 				K_F5, 				"#str_00000023"},
+	{"F6", 				K_F6, 				"#str_00000024"},
+	{"F7", 				K_F7, 				"#str_00000025"},
+	{"F8", 				K_F8, 				"#str_00000026"},
+	{"F9", 				K_F9, 				"#str_00000027"},
+	{"F10", 			K_F10, 				"#str_00000028"},
+	{"F11", 			K_F11, 				"#str_00000029"},
+	{"F12", 			K_F12, 				"#str_00000030"},
+	{"F13", 			K_F13, 				"#str_00000125"},
+	{"F14", 			K_F14, 				"#str_00000126"},
+	{"F15", 			K_F15, 				"#str_00000127"},
+	{"F16", 			K_F16, 				"#str_00000128"},
+
+	{"INS", 			K_INS, 				"#str_00000031"},
+	{"DEL", 			K_DEL, 				"#str_00000032"},
+	{"PGDN", 			K_PGDN, 			"#str_00000033"},
+	{"PGUP", 			K_PGUP, 			"#str_00000034"},
+	{"HOME", 			K_HOME, 			"#str_00000035"},
+	{"END",				K_END,				"#str_00000036"},
+
+	{"MOUSE1", 			K_MOUSE1, 			"#str_00000037"},
+	{"MOUSE2", 			K_MOUSE2, 			"#str_00000038"},
+	{"MOUSE3", 			K_MOUSE3, 			"#str_00000039"},
+	{"MOUSE4", 			K_MOUSE4, 			"#str_00000040"},
+	{"MOUSE5", 			K_MOUSE5, 			"#str_00000041"},
+	{"MOUSE6", 			K_MOUSE6, 			"#str_00000042"},
+	{"MOUSE7", 			K_MOUSE7, 			"#str_00000043"},
+	{"MOUSE8", 			K_MOUSE8, 			"#str_00000044"},
+
+	{"MWHEELUP",		K_MWHEELUP,			"#str_00000114"},
+	{"MWHEELDOWN",		K_MWHEELDOWN,		"#str_00000115"},
+
+	{"JOY1", 			K_JOY1, 			"#str_00000045"},
+	{"JOY2", 			K_JOY2, 			"#str_00000046"},
+	{"JOY3", 			K_JOY3, 			"#str_00000047"},
+	{"JOY4", 			K_JOY4, 			"#str_00000048"},
+	{"JOY5", 			K_JOY5, 			"#str_00000049"},
+	{"JOY6", 			K_JOY6, 			"#str_00000050"},
+	{"JOY7", 			K_JOY7, 			"#str_00000051"},
+	{"JOY8", 			K_JOY8, 			"#str_00000052"},
+	{"JOY9", 			K_JOY9, 			"#str_00000053"},
+	{"JOY10", 			K_JOY10, 			"#str_00000054"},
+	{"JOY11", 			K_JOY11, 			"#str_00000055"},
+	{"JOY12", 			K_JOY12, 			"#str_00000056"},
+	{"JOY13", 			K_JOY13, 			"#str_00000057"},
+	{"JOY14", 			K_JOY14, 			"#str_00000058"},
+	{"JOY15", 			K_JOY15, 			"#str_00000059"},
+	{"JOY16", 			K_JOY16, 			"#str_00000060"},
+	{"JOY17", 			K_JOY17, 			"#str_00000061"},
+	{"JOY18", 			K_JOY18, 			"#str_00000062"},
+	{"JOY19", 			K_JOY19, 			"#str_00000063"},
+	{"JOY20", 			K_JOY20, 			"#str_00000064"},
+	{"JOY21", 			K_JOY21, 			"#str_00000065"},
+	{"JOY22", 			K_JOY22, 			"#str_00000066"},
+	{"JOY23", 			K_JOY23, 			"#str_00000067"},
+	{"JOY24", 			K_JOY24, 			"#str_00000068"},
+	{"JOY25", 			K_JOY25, 			"#str_00000069"},
+	{"JOY26", 			K_JOY26, 			"#str_00000070"},
+	{"JOY27", 			K_JOY27, 			"#str_00000071"},
+	{"JOY28", 			K_JOY28, 			"#str_00000072"},
+	{"JOY29", 			K_JOY29, 			"#str_00000073"},
+	{"JOY30", 			K_JOY30, 			"#str_00000074"},
+	{"JOY31", 			K_JOY31, 			"#str_00000075"},
+	{"JOY32", 			K_JOY32, 			"#str_00000076"},
+
+	{"AUX1", 			K_AUX1, 			"#str_00000077"},
+	{"AUX2", 			K_AUX2, 			"#str_00000078"},
+	{"AUX3", 			K_AUX3, 			"#str_00000079"},
+	{"AUX4", 			K_AUX4, 			"#str_00000080"},
+	{"AUX5", 			K_AUX5, 			"#str_00000081"},
+	{"AUX6", 			K_AUX6, 			"#str_00000082"},
+	{"AUX7", 			K_AUX7, 			"#str_00000083"},
+	{"AUX8", 			K_AUX8, 			"#str_00000084"},
+	{"AUX9", 			K_AUX9, 			"#str_00000085"},
+	{"AUX10", 			K_AUX10, 			"#str_00000086"},
+	{"AUX11", 			K_AUX11, 			"#str_00000087"},
+	{"AUX12", 			K_AUX12, 			"#str_00000088"},
+	{"AUX13", 			K_AUX13, 			"#str_00000089"},
+	{"AUX14", 			K_AUX14, 			"#str_00000090"},
+	{"AUX15", 			K_AUX15, 			"#str_00000091"},
+	{"AUX16", 			K_AUX16, 			"#str_00000092"},
+
+	{"KP_HOME",			K_KP_HOME,			"#str_00000093"},
+	{"KP_UPARROW",		K_KP_UPARROW,		"#str_00000094"},
+	{"KP_PGUP",			K_KP_PGUP,			"#str_00000095"},
+	{"KP_LEFTARROW",	K_KP_LEFTARROW, 	"#str_00000096"},
+	{"KP_5",			K_KP_5,				"#str_00000097"},
+	{"KP_RIGHTARROW",	K_KP_RIGHTARROW,	"#str_00000098"},
+	{"KP_END",			K_KP_END,			"#str_00000099"},
+	{"KP_DOWNARROW",	K_KP_DOWNARROW,		"#str_00000100"},
+	{"KP_PGDN",			K_KP_PGDN,			"#str_00000101"},
+	{"KP_ENTER",		K_KP_ENTER,			"#str_00000102"},
+	{"KP_INS",			K_KP_INS, 			"#str_00000103"},
+	{"KP_DEL",			K_KP_DEL, 			"#str_00000104"},
+	{"KP_SLASH",		K_KP_SLASH, 		"#str_00000105"},
+	{"KP_MINUS",		K_KP_MINUS, 		"#str_00000106"},
+	{"KP_PLUS",			K_KP_PLUS,			"#str_00000107"},
+	{"KP_NUMLOCK",		K_KP_NUMLOCK,		"#str_00000108"},
+	{"KP_STAR",			K_KP_STAR,			"#str_00000109"},
+	{"KP_EQUALS",		K_KP_EQUALS,		"#str_00000110"},
+
+	{"PAUSE",			K_PAUSE,			"#str_00000111"},
+
+	{"SEMICOLON",		';',				"#str_00000112"},	// because a raw semicolon separates commands
+	{"APOSTROPHE",		'\'',				"#str_00000113"},	// because a raw apostrophe messes with parsing
+#else
 	{"TAB",				K_TAB,				"#str_07018"},
 	{"ENTER",			K_ENTER,			"#str_07019"},
 	{"ESCAPE",			K_ESCAPE,			"#str_07020"},
@@ -174,12 +310,16 @@ keyname_t keynames[] = {
 
 	{"SEMICOLON",		';',				"#str_07129"},	// because a raw semicolon separates commands
 	{"APOSTROPHE",		'\'',				"#str_07130"},	// because a raw apostrophe messes with parsing
+#endif
 
 	{NULL,				0,					NULL}
 };
 
 
 
+#ifdef _SPLASHDAMAGE //karin: move to header
+const int	MAX_KEYS = 256;
+#else
 static const int	MAX_KEYS = 256;
 
 class idKey
@@ -195,6 +335,7 @@ class idKey
 		idStr			binding;
 		int				usercmdAction;	// for testing by the asyncronous usercmd generation
 };
+#endif
 
 bool		key_overstrikeMode = false;
 idKey 		*keys = NULL;
@@ -358,6 +499,9 @@ const char *idKeyInput::KeyNumToString(int keynum, bool localized)
 	keyname_t	*kn;
 	static	char	tinystr[5];
 	int			i, j;
+#ifdef _SPLASHDAMAGE //karin: land dict is wstr
+	static idStr mbName;
+#endif
 
 	if (keynum == -1) {
 		return "<KEY NOT FOUND>";
@@ -391,12 +535,22 @@ const char *idKeyInput::KeyNumToString(int keynum, bool localized)
 						return OSX_GetLocalizedString(kn->name);
 						break;
 					default :
+#ifdef _SPLASHDAMAGE //karin: land dict is wstr
+						mbName = WStrToStr(common->GetLanguageDict()->GetString(kn->strId));
+						return mbName.c_str();
+#else
 						return common->GetLanguageDict()->GetString(kn->strId);
+#endif
 						break;
 				}
 
 #else
+#ifdef _SPLASHDAMAGE //karin: land dict is wstr
+				mbName = WStrToStr(common->GetLanguageDict()->GetString(kn->strId));
+				return mbName.c_str();
+#else
 				return common->GetLanguageDict()->GetString(kn->strId);
+#endif
 #endif
 			}
 		}
@@ -445,6 +599,18 @@ void idKeyInput::SetBinding(int keynum, const char *binding)
 	// consider this like modifying an archived cvar, so the
 	// file write will be triggered at the next oportunity
 	cvarSystem->SetModifiedFlags(CVAR_ARCHIVE);
+#ifdef _SPLASHDAMAGE //karin: get game key config
+	idKey &key = keys[keynum];
+	if(game && !key.binding.IsEmpty())
+	{
+		usercmdbuttonType_t type = game->SetupBinding(key.binding, key.usercmdAction);
+		key.type = type;
+	}
+	else
+		key.type = B_COMMAND;
+
+	key.command.Set(key.binding);
+#endif
 }
 
 
@@ -779,7 +945,12 @@ bool idKeyInput::ExecKeyBinding(int keynum)
 {
 	// commands that are used by the async thread
 	// don't add text
-	if (keys[keynum].usercmdAction) {
+#ifdef _SPLASHDAMAGE //karin: 0 is a valid action, -1 is invalid
+	if (keys[keynum].usercmdAction == UB_NONE || keys[keynum].type != B_COMMAND) 
+#else
+	if (keys[keynum].usercmdAction) 
+#endif
+	{
 		return false;
 	}
 
@@ -822,6 +993,31 @@ void idKeyInput::Init(void)
 {
 
 	keys = new idKey[MAX_KEYS];
+#ifdef _SPLASHDAMAGE //karin: fill extras key info for game
+	for(int i = 0; i < MAX_KEYS; i++)
+	{
+		idKey &key = keys[i];
+		key.id = i;
+		key.name = KeyNumToString(i, false);
+
+		keyname_t	*kn;
+		for (kn = keynames; kn->name; kn++) {
+			if (i == kn->keynum) {
+				if (kn->strId && kn->strId[0] && kn->strId[0] != '#')
+					key.locName = kn->strId;
+				else
+				{
+					idStr name = kn->name;
+					name.ToLower();
+					key.locName = "engine/keys/" + name;
+				}
+				break;
+			}
+		}
+
+		key.fixedText = StrToWStr(keys[i].name);
+	}
+#endif
 
 	// register our functions
 	cmdSystem->AddCommand("bind", Key_Bind_f, CMD_FL_SYSTEM, "binds a command to a key", idKeyInput::ArgCompletion_KeyName);
@@ -859,3 +1055,4 @@ const char * IN_FirstKeyFromBinding(const char *binding, int *keycode = NULL)
 	return NULL;
 }
 #endif
+

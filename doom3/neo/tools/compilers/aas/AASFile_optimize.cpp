@@ -46,6 +46,7 @@ idAASFileLocal::Optimize
 */
 void idAASFileLocal::Optimize(void)
 {
+#if !defined(_SPLASHDAMAGE) //karin: only used in tools
 	int i, j, k, faceNum, edgeNum, areaFirstFace, faceFirstEdge;
 	aasArea_t *area;
 	aasFace_t *face;
@@ -154,4 +155,8 @@ void idAASFileLocal::Optimize(void)
 	edgeIndex = newEdgeIndex;
 	faces = newFaces;
 	faceIndex = newFaceIndex;
+#else
+	// TODO
+	common->Error("Disable idAASFileLocal::Optimize()");
+#endif
 }

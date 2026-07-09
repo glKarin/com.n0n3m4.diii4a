@@ -177,3 +177,10 @@ unsigned int CRC32_BlockChecksum(const void *data, int length)
 	CRC32_FinishChecksum(crc);
 	return crc;
 }
+
+#ifdef _SPLASHDAMAGE
+void CRC32_UpdateChecksum(unsigned /* 64long */int &crcvalue, const byte data)
+{
+	crcvalue = crctable[(crcvalue ^ data) & 0xff ] ^(crcvalue >> 8);
+}
+#endif

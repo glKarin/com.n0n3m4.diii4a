@@ -42,6 +42,12 @@ If you have questions concerning this license or the applicable additional terms
 #define	YAW					1		// left / right
 #define	ROLL				2		// fall over
 
+#ifdef _SPLASHDAMAGE
+const int A_YAW				= 2;
+const int A_PITCH			= 1;
+const int A_ROLL			= 0;
+
+#endif
 class idVec3;
 class idQuat;
 class idRotation;
@@ -101,10 +107,19 @@ class idAngles
 		const char 	*ToString(int precision = 2) const;
 
 #ifdef _RAVEN
-	idAngles		Random( const idVec3& range, idRandom& random ) const;
-	idAngles&		Scale( const idAngles& scalar );
-	idAngles&		Remap( const int map[], const int dirMap[] );
-	float			Length( void ) const;
+        idAngles		Random( const idVec3& range, idRandom& random ) const;
+        idAngles&		Scale( const idAngles& scalar );
+        idAngles&		Remap( const int map[], const int dirMap[] );
+        float			Length( void ) const;
+#endif
+#ifdef _SPLASHDAMAGE
+	    void			ToMat3NoRoll( idMat3& mat ) const;
+	    static idMat3&	YawToMat3( float yaw, idMat3& mat );
+	    static idMat3&	PitchToMat3( float pitch, idMat3& mat );
+	    static idMat3&	RollToMat3( float roll, idMat3& mat );
+	    idMat3			ToMat3Maya( void ) const;
+	
+	    bool			FixDenormals( float epsilon = idMath::FLT_EPSILON );		// change tiny numbers to zero
 #endif
 };
 
@@ -324,6 +339,66 @@ ID_INLINE idAngles& idAngles::Remap( const int map[], const int dirMap[] ) {
 
 ID_INLINE float idAngles::Length( void ) const {
 		return idMath::Sqrt( yaw * yaw + pitch * pitch + roll * roll );
+}
+#endif
+
+#ifdef _SPLASHDAMAGE
+
+ID_INLINE idMat3& idAngles::YawToMat3( float yaw, idMat3& mat )
+{
+    float sy, cy;
+
+    idMath::SinCos( DEG2RAD( yaw ), sy, cy );
+
+    mat[ 0 ].Set( cy, sy, 0 );
+    mat[ 1 ].Set( -sy, cy, 0 );
+    mat[ 2 ].Set( 0, 0, 1 );
+
+    return mat;
+}
+
+ID_INLINE idMat3& idAngles::PitchToMat3( float pitch, idMat3& mat )
+{
+    float sp, cp;
+
+    idMath::SinCos( DEG2RAD( pitch ), sp, cp );
+
+    mat[ 0 ].Set( cp, 0, -sp );
+    mat[ 1 ].Set( 0, 1, 0 );
+    mat[ 2 ].Set( sp, 0, cp );
+
+    return mat;
+}
+
+ID_INLINE idMat3& idAngles::RollToMat3( float roll, idMat3& mat )
+{
+    float sr, cr;
+
+    idMath::SinCos( DEG2RAD( roll ), sr, cr );
+
+    mat[ 0 ].Set( 1, 0, 0 );
+    mat[ 1 ].Set( 0, cr, sr );
+    mat[ 2 ].Set( 0, -sr, cr );
+
+    return mat;
+}
+
+ID_INLINE bool idAngles::FixDenormals( float epsilon )
+{
+    bool denormal = false;
+    if ( fabs( yaw ) < epsilon ) {
+        yaw = 0.0f;
+        denormal = true;
+    }
+    if ( fabs( pitch ) < epsilon ) {
+        pitch = 0.0f;
+        denormal = true;
+    }
+    if ( fabs( roll ) < epsilon ) {
+        roll = 0.0f;
+        denormal = true;
+    }
+    return denormal;
 }
 #endif
 

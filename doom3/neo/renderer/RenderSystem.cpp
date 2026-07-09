@@ -29,6 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "tr_local.h"
+#ifdef _SPLASHDAMAGE //karin: cvars changed for shaders
+#include "renderer/RenderProgramManager.h"
+
+extern void R_UpdateOcclusionTesting(void);
+#endif
 
 idRenderSystemLocal	tr;
 idRenderSystem	*renderSystem = &tr;
@@ -171,6 +176,12 @@ static void R_IssueRenderCommands(volatile frameData_t *fd)
 // only main thread is running and render thread is waiting
 ID_INLINE static void R_OnlyMainThreadRunningAndRenderThreadWaiting(void)
 {
+#ifdef _SPLASHDAMAGE //karin: occlusion testing
+	// cvars changed for shaders
+	R_CheckRenderProgramCVars();
+	// occlusion query
+	R_UpdateOcclusionTesting();
+#endif
 //#ifdef _IMGUI
 //    R_ImGui_Render();
 //#endif
@@ -563,7 +574,11 @@ void idRenderSystemLocal::DrawSmallStringExt(int x, int y, const char *string, c
 				if (*(s+1) == C_COLOR_DEFAULT) {
 					SetColor(setColor);
 				} else {
+#ifdef _SPLASHDAMAGE
+					color = idStr::ColorForChar(*(s+1));
+#else
 					color = idStr::ColorForIndex(*(s+1));
+#endif
 					color[3] = setColor[3];
 					SetColor(color);
 				}
@@ -642,7 +657,11 @@ void idRenderSystemLocal::DrawBigStringExt(int x, int y, const char *string, con
 				if (*(s+1) == C_COLOR_DEFAULT) {
 					SetColor(setColor);
 				} else {
+#ifdef _SPLASHDAMAGE
+					color = idStr::ColorForChar(*(s+1));
+#else
 					color = idStr::ColorForIndex(*(s+1));
+#endif
 					color[3] = setColor[3];
 					SetColor(color);
 				}
@@ -676,12 +695,12 @@ void idRenderSystemLocal::SetBackEndRenderer()
 	}
 
 
-			backEndRenderer = BE_GLSL;
+	backEndRenderer = BE_GLSL;
 
 	backEndRendererMaxLight = 1.0;
 
-			common->Printf("using GLSL renderSystem\n");
-			backEndRendererMaxLight = 999;
+	common->Printf("using GLSL renderSystem\n");
+	backEndRendererMaxLight = 999;
 
 	r_renderer.ClearModified();
 }
@@ -698,7 +717,7 @@ void idRenderSystemLocal::BeginFrame(int windowWidth, int windowHeight)
 	if (!glConfig.isInitialized) {
 		return;
 	}
-#ifdef _RAVEN //karin: BSE
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
 	bse->UpdateRateTimes();
 #endif
 
@@ -787,6 +806,9 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 	}
 
 	// close any gui drawing
+#ifdef _SPLASHDAMAGE //karin: emit gui surfs to draw commands
+	gameGuiModel->Flush();
+#endif
 	guiModel->EmitFullScreen();
 	guiModel->Clear();
 
@@ -825,6 +847,9 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 	GLimp_CheckGLInitialized(); // check/wait EGL context
 
 	R_CheckBackEndCvars(); // check backend cvars state
+#ifdef _SPLASHDAMAGE //karin: cvars changed for shaders
+	R_CheckRenderProgramCVars();
+#endif
 
 	// start the back end up again with the new command list
 	R_IssueRenderCommands();
@@ -903,6 +928,9 @@ void	idRenderSystemLocal::CropRenderSize(int width, int height, bool makePowerOf
 	}
 
 	// close any gui drawing before changing the size
+#ifdef _SPLASHDAMAGE //karin: emit gui surfs to draw commands
+	gameGuiModel->Flush();
+#endif
 	guiModel->EmitFullScreen();
 	guiModel->Clear();
 
@@ -989,6 +1017,9 @@ void idRenderSystemLocal::UnCrop()
 	}
 
 	// close any gui drawing
+#ifdef _SPLASHDAMAGE //karin: emit gui surfs to draw commands
+	gameGuiModel->Flush();
+#endif
 	guiModel->EmitFullScreen();
 	guiModel->Clear();
 
@@ -1015,6 +1046,9 @@ void idRenderSystemLocal::CaptureRenderToImage(const char *imageName)
 		return;
 	}
 
+#ifdef _SPLASHDAMAGE //karin: emit gui surfs to draw commands
+	gameGuiModel->Flush();
+#endif
 	guiModel->EmitFullScreen();
 	guiModel->Clear();
 
@@ -1059,6 +1093,9 @@ void idRenderSystemLocal::CaptureRenderToFile(const char *fileName, bool fixAlph
 
 	renderCrop_t *rc = &renderCrops[currentRenderCrop];
 
+#ifdef _SPLASHDAMAGE //karin: emit gui surfs to draw commands
+	gameGuiModel->Flush();
+#endif
 	guiModel->EmitFullScreen();
 	guiModel->Clear();
 #ifdef _MULTITHREAD
@@ -1183,6 +1220,9 @@ void idRenderSystemLocal::EndFrame(byte *data, int *frontEndMsec, int *backEndMs
 	}
 
 	// close any gui drawing
+#ifdef _SPLASHDAMAGE //karin: emit gui surfs to draw commands
+	gameGuiModel->Flush();
+#endif
 	guiModel->EmitFullScreen();
 	guiModel->Clear();
 
@@ -1218,6 +1258,9 @@ void idRenderSystemLocal::EndFrame(byte *data, int *frontEndMsec, int *backEndMs
 	{
 		GLimp_CheckGLInitialized(); // check/wait EGL context
 		R_CheckBackEndCvars(); // check backend cvars state
+#ifdef _SPLASHDAMAGE //karin: cvars changed for shaders
+		R_CheckRenderProgramCVars();
+#endif
 
 		// start the back end up again with the new command list
 		R_IssueRenderCommands();

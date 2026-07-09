@@ -128,6 +128,17 @@ typedef struct {
 	int		totalSize;
 } memoryStats_t;
 
+#ifdef _SPLASHDAMAGE
+enum align_t {
+    ALIGN_NONE	= 0,
+    ALIGN_4		= 4,
+    ALIGN_8		= 8,		// memory is always at least aligned on an 8-byte boundary
+    ALIGN_16	= 16,
+    ALIGN_32	= 32,
+    ALIGN_64	= 64,
+    ALIGN_128	= 128
+};
+#endif
 
 void		Mem_Init(void);
 void		Mem_Shutdown(void);
@@ -139,6 +150,9 @@ void		Mem_Dump_f(const class idCmdArgs &args);
 void		Mem_DumpCompressed_f(const class idCmdArgs &args);
 void		Mem_AllocDefragBlock(void);
 
+#ifdef _SPLASHDAMAGE
+size_t		Mem_Size( void *ptr );
+#endif
 
 #ifndef ID_DEBUG_MEMORY
 
@@ -152,6 +166,11 @@ void		Mem_Free16(void *ptr);
 ID_INLINE void 		*Mem_Alloc(const int size, byte tag) { (void)tag; return Mem_Alloc(size); }
 ID_INLINE void 		*Mem_ClearedAlloc(const int size, byte tag) { (void)tag; return Mem_ClearedAlloc(size); }
 ID_INLINE void 		*Mem_Alloc16(const int size, byte tag) { (void)tag; return Mem_Alloc16(size); }
+#endif
+#ifdef _SPLASHDAMAGE
+void *		Mem_AllocAligned( const size_t size, const align_t align );
+void		Mem_FreeAligned( void *ptr );
+void *		Mem_ClearedAllocAligned( const size_t size, const align_t align );
 #endif
 
 #ifdef ID_REDIRECT_NEWDELETE
@@ -231,6 +250,11 @@ __inline void operator delete[](void *p)
 #define		Mem_CopyString( s )				Mem_CopyString( s, __FILE__, __LINE__ )
 #define		Mem_Alloc16( size )				Mem_Alloc16( size, __FILE__, __LINE__ )
 #define		Mem_Free16( ptr )				Mem_Free16( ptr, __FILE__, __LINE__ )
+#ifdef _SPLASHDAMAGE
+#define		Mem_AllocAligned( size, align )	Mem_AllocAligned( size, align, __FILE__, __LINE__ )
+#define		Mem_FreeAligned( ptr )			Mem_FreeAligned( ptr, __FILE__, __LINE__ )
+#define		Mem_ClearedAllocAligned( size, align )	Mem_ClearedAllocAligned( size, align, __FILE__, __LINE__ )
+#endif
 
 #endif /* ID_DEBUG_MEMORY */
 
@@ -267,6 +291,8 @@ ID_INLINE void Mem_FreeA( void* ptr, bool onStack )
 
 #ifdef _RAVEN
 template<class type, int blockSize, byte memoryTag = MA_NONE>
+#elif defined(_SPLASHDAMAGE)
+template<class type, int blockSize, bool threadSafe = false >
 #else
 template<class type, int blockSize>
 #endif
@@ -305,11 +331,17 @@ class idBlockAlloc
 		element_t 				*free;
 		int						total;
 		int						active;
+#ifdef _SPLASHDAMAGE
+    	sdLock					lock;					// lock for thread safe memory allocation
+#endif
 };
 
 #ifdef _RAVEN
 template<class type, int blockSize, byte memoryTag>
 idBlockAlloc<type,blockSize, memoryTag>::idBlockAlloc(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int blockSize, bool threadSafe>
+idBlockAlloc<type,blockSize,threadSafe>::idBlockAlloc( void )
 #else
 template<class type, int blockSize>
 idBlockAlloc<type,blockSize>::idBlockAlloc(void)
@@ -323,6 +355,9 @@ idBlockAlloc<type,blockSize>::idBlockAlloc(void)
 #ifdef _RAVEN
 template<class type, int blockSize, byte memoryTag>
 idBlockAlloc<type,blockSize, memoryTag>::~idBlockAlloc(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int blockSize, bool threadSafe>
+idBlockAlloc<type,blockSize,threadSafe>::~idBlockAlloc( void )
 #else
 template<class type, int blockSize>
 idBlockAlloc<type,blockSize>::~idBlockAlloc(void)
@@ -334,11 +369,19 @@ idBlockAlloc<type,blockSize>::~idBlockAlloc(void)
 #ifdef _RAVEN
 template<class type, int blockSize, byte memoryTag>
 type *idBlockAlloc<type,blockSize, memoryTag>::Alloc(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int blockSize, bool threadSafe>
+type *idBlockAlloc<type,blockSize,threadSafe>::Alloc( void )
 #else
 template<class type, int blockSize>
 type *idBlockAlloc<type,blockSize>::Alloc(void)
 #endif
 {
+#ifdef _SPLASHDAMAGE
+
+    sdScopedLock< threadSafe > scopedLock( lock );
+#endif
+
 	if (!free) {
 		block_t *block = new block_t;
 		block->next = blocks;
@@ -362,12 +405,27 @@ type *idBlockAlloc<type,blockSize>::Alloc(void)
 #ifdef _RAVEN
 template<class type, int blockSize, byte memoryTag>
 void idBlockAlloc<type,blockSize, memoryTag>::Free(type *t)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int blockSize, bool threadSafe>
+void idBlockAlloc<type,blockSize,threadSafe>::Free( type *t )
 #else
 template<class type, int blockSize>
 void idBlockAlloc<type,blockSize>::Free(type *t)
 #endif
 {
+#ifdef _SPLASHDAMAGE
+    if( t == NULL ) {
+        return;
+    }
+
+    sdScopedLock< threadSafe > scopedLock( lock );
+
+    element_t *element = (element_t *)( ( (unsigned char *) t ) - ( (UINT_PTR) &((element_t *)0)->t ) );
+    //element_t *element;
+    //element = ( element_t * )( ( (unsigned char *)t ) - offsetof( element_t, t ) );
+#else
 	element_t *element = (element_t *) t;
+#endif
 	element->next = free;
 	free = element;
 	active--;
@@ -376,11 +434,19 @@ void idBlockAlloc<type,blockSize>::Free(type *t)
 #ifdef _RAVEN
 template<class type, int blockSize, byte memoryTag>
 void idBlockAlloc<type,blockSize, memoryTag>::Shutdown(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int blockSize, bool threadSafe>
+void idBlockAlloc<type,blockSize,threadSafe>::Shutdown( void )
 #else
 template<class type, int blockSize>
 void idBlockAlloc<type,blockSize>::Shutdown(void)
 #endif
 {
+#ifdef _SPLASHDAMAGE
+
+    sdScopedLock< threadSafe > scopedLock( lock );
+
+#endif
 	while (blocks) {
 		block_t *block = blocks;
 		blocks = blocks->next;
@@ -406,6 +472,8 @@ void idBlockAlloc<type,blockSize>::Shutdown(void)
 
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag = MA_NONE>
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 #endif
@@ -462,6 +530,9 @@ class idDynamicAlloc
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::idDynamicAlloc(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+idDynamicAlloc<type, baseBlockSize, minBlockSize, threadSafe>::idDynamicAlloc( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicAlloc<type, baseBlockSize, minBlockSize>::idDynamicAlloc(void)
@@ -473,6 +544,9 @@ idDynamicAlloc<type, baseBlockSize, minBlockSize>::idDynamicAlloc(void)
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::~idDynamicAlloc(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+idDynamicAlloc<type, baseBlockSize, minBlockSize, threadSafe>::~idDynamicAlloc( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicAlloc<type, baseBlockSize, minBlockSize>::~idDynamicAlloc(void)
@@ -484,6 +558,9 @@ idDynamicAlloc<type, baseBlockSize, minBlockSize>::~idDynamicAlloc(void)
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Init(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Init( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Init(void)
@@ -494,6 +571,9 @@ void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Init(void)
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Shutdown(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Shutdown( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Shutdown(void)
@@ -505,6 +585,9 @@ void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Shutdown(void)
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 type *idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Alloc(const int num)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+type *idDynamicAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Alloc( const int num )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 type *idDynamicAlloc<type, baseBlockSize, minBlockSize>::Alloc(const int num)
@@ -518,12 +601,19 @@ type *idDynamicAlloc<type, baseBlockSize, minBlockSize>::Alloc(const int num)
 
 	numUsedBlocks++;
 	usedBlockMemory += num * sizeof(type);
+#ifdef _SPLASHDAMAGE
+    return (type *)Mem_AllocAligned( num * sizeof( type ), ALIGN_16 );
+#else
 	return Mem_Alloc16(num * sizeof(type));
+#endif
 }
 
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 type *idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Resize(type *ptr, const int num)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+type *idDynamicAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Resize( type *ptr, const int num )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 type *idDynamicAlloc<type, baseBlockSize, minBlockSize>::Resize(type *ptr, const int num)
@@ -548,6 +638,9 @@ type *idDynamicAlloc<type, baseBlockSize, minBlockSize>::Resize(type *ptr, const
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Free(type *ptr)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Free( type *ptr )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Free(type *ptr)
@@ -559,12 +652,19 @@ void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Free(type *ptr)
 		return;
 	}
 
+#ifdef _SPLASHDAMAGE
+    Mem_FreeAligned( ptr );
+#else
 	Mem_Free16(ptr);
+#endif
 }
 
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 const char *idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::CheckMemory(const type *ptr) const
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+const char *idDynamicAlloc<type, baseBlockSize, minBlockSize, threadSafe>::CheckMemory( const type *ptr ) const
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 const char *idDynamicAlloc<type, baseBlockSize, minBlockSize>::CheckMemory(const type *ptr) const
@@ -576,6 +676,9 @@ const char *idDynamicAlloc<type, baseBlockSize, minBlockSize>::CheckMemory(const
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Clear(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Clear( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Clear(void)
@@ -603,6 +706,10 @@ void idDynamicAlloc<type, baseBlockSize, minBlockSize>::Clear(void)
 #include "containers/BTree.h"
 
 //#define DYNAMIC_BLOCK_ALLOC_CHECK
+
+#ifdef _SPLASHDAMAGE
+const int MAX_DYNAMICBLOCK_SIZE = static_cast< unsigned int >( 1 << 31 ) - 1;
+#endif
 
 template<class type>
 class idDynamicBlock
@@ -634,6 +741,8 @@ class idDynamicBlock
 
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag = MA_NONE>
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe = false>
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 #endif
@@ -680,6 +789,9 @@ class idDynamicBlockAlloc
 		idBTree<idDynamicBlock<type>,int,4>freeTree;			// B-Tree with free memory blocks
 		bool							allowAllocs;			// allow base block allocations
 		bool							lockMemory;				// lock memory so it cannot get swapped out
+#ifdef _SPLASHDAMAGE
+    	sdLock							lock;					// lock for thread safe memory allocation
+#endif
 
 #ifdef DYNAMIC_BLOCK_ALLOC_CHECK
 		int								blockId[3];
@@ -708,6 +820,9 @@ class idDynamicBlockAlloc
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::idDynamicBlockAlloc(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::idDynamicBlockAlloc( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::idDynamicBlockAlloc(void)
@@ -719,6 +834,9 @@ idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::idDynamicBlockAlloc(void
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::~idDynamicBlockAlloc(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::~idDynamicBlockAlloc( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::~idDynamicBlockAlloc(void)
@@ -730,6 +848,9 @@ idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::~idDynamicBlockAlloc(voi
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Init(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Init( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Init(void)
@@ -741,6 +862,9 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Init(void)
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Shutdown(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Shutdown( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Shutdown(void)
@@ -758,11 +882,15 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Shutdown(void)
 		firstBlock = block->next;
 		assert(block->IsBaseBlock());
 
+#ifdef _SPLASHDAMAGE
+        Mem_FreeAligned( block );
+#else
 		if (lockMemory) {
 			idLib::sys->UnlockMemory(block, block->GetSize() + (int)sizeof(idDynamicBlock<type>));
 		}
 
 		Mem_Free16(block);
+#endif
 	}
 
 	freeTree.Shutdown();
@@ -773,6 +901,9 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Shutdown(void)
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::SetFixedBlocks(int numBlocks)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::SetFixedBlocks( int numBlocks )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::SetFixedBlocks(int numBlocks)
@@ -781,11 +912,15 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::SetFixedBlocks(int 
 	idDynamicBlock<type> *block;
 
 	for (int i = numBaseBlocks; i < numBlocks; i++) {
+#ifdef _SPLASHDAMAGE
+        block = ( idDynamicBlock<type> * ) Mem_AllocAligned( baseBlockSize, ALIGN_16 );
+#else
 		block = (idDynamicBlock<type> *) Mem_Alloc16(baseBlockSize);
 
 		if (lockMemory) {
 			idLib::sys->LockMemory(block, baseBlockSize);
 		}
+#endif
 
 #ifdef DYNAMIC_BLOCK_ALLOC_CHECK
 		memcpy(block->id, blockId, sizeof(block->id));
@@ -816,6 +951,9 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::SetFixedBlocks(int 
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::SetLockMemory(bool lock)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::SetLockMemory(bool lock)
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::SetLockMemory(bool lock)
@@ -827,6 +965,9 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::SetLockMemory(bool 
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::FreeEmptyBaseBlocks(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::FreeEmptyBaseBlocks( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::FreeEmptyBaseBlocks(void)
@@ -870,6 +1011,9 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::FreeEmptyBaseBlocks
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 int idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::GetNumEmptyBaseBlocks(void) const
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+int idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::GetNumEmptyBaseBlocks( void ) const
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 int idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::GetNumEmptyBaseBlocks(void) const
@@ -892,6 +1036,9 @@ int idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::GetNumEmptyBaseBlock
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Alloc(const int num)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Alloc( const int num )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Alloc(const int num)
@@ -930,6 +1077,9 @@ type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Alloc(const int nu
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Resize(type *ptr, const int num)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Resize( type *ptr, const int num )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Resize(type *ptr, const int num)
@@ -969,12 +1119,19 @@ type *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Resize(type *ptr, 
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Free(type *ptr)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Free( type *ptr )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Free(type *ptr)
 #endif
 {
 
+#ifdef _SPLASHDAMAGE
+    sdScopedLock< threadSafe > scopedLock( lock );
+
+#endif
 	numFrees++;
 
 	if (ptr == NULL) {
@@ -996,6 +1153,9 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Free(type *ptr)
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 const char *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::CheckMemory(const type *ptr) const
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+const char *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::CheckMemory( const type *ptr ) const
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 const char *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::CheckMemory(const type *ptr) const
@@ -1045,6 +1205,9 @@ const char *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::CheckMemory(
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::Clear(void)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::Clear( void )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Clear(void)
@@ -1073,25 +1236,43 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Clear(void)
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::AllocInternal(const int num)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::AllocInternal( const int num )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::AllocInternal(const int num)
 #endif
 {
 	idDynamicBlock<type> *block;
+#ifdef _SPLASHDAMAGE
+    size_t alignedNum = ( num * sizeof( type ) + 15 ) & ~15;
+
+    if ( alignedNum > MAX_DYNAMICBLOCK_SIZE ) {
+        return NULL;
+    }
+
+    int alignedBytes = static_cast< int >( alignedNum );
+#else
 	int alignedBytes = (num * sizeof(type) + 15) & ~15;
+#endif
 
 	block = freeTree.FindSmallestLargerEqual(alignedBytes);
 
 	if (block != NULL) {
 		UnlinkFreeInternal(block);
 	} else if (allowAllocs) {
+#ifdef _SPLASHDAMAGE
+        int allocSize = Max( baseBlockSize, alignedBytes + static_cast< int >( sizeof( idDynamicBlock<type> ) ) );
+        block = ( idDynamicBlock<type> * ) Mem_AllocAligned( allocSize, ALIGN_16 );
+#else
 		int allocSize = Max(baseBlockSize, alignedBytes + (int)sizeof(idDynamicBlock<type>));
 		block = (idDynamicBlock<type> *) Mem_Alloc16(allocSize);
 
 		if (lockMemory) {
 			idLib::sys->LockMemory(block, baseBlockSize);
 		}
+#endif
 
 #ifdef DYNAMIC_BLOCK_ALLOC_CHECK
 		memcpy(block->id, blockId, sizeof(block->id));
@@ -1120,6 +1301,9 @@ idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Al
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::ResizeInternal(idDynamicBlock<type> *block, const int num)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::ResizeInternal( idDynamicBlock<type> *block, const int num )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::ResizeInternal(idDynamicBlock<type> *block, const int num)
@@ -1197,6 +1381,9 @@ idDynamicBlock<type> *idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::Re
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::FreeInternal(idDynamicBlock<type> *block)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::FreeInternal( idDynamicBlock<type> *block )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::FreeInternal(idDynamicBlock<type> *block)
@@ -1247,6 +1434,9 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::FreeInternal(idDyna
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::LinkFreeInternal(idDynamicBlock<type> *block)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::LinkFreeInternal( idDynamicBlock<type> *block )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::LinkFreeInternal(idDynamicBlock<type> *block)
@@ -1260,6 +1450,9 @@ ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::LinkFreeI
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::UnlinkFreeInternal(idDynamicBlock<type> *block)
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::UnlinkFreeInternal( idDynamicBlock<type> *block )
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::UnlinkFreeInternal(idDynamicBlock<type> *block)
@@ -1274,6 +1467,9 @@ ID_INLINE void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::UnlinkFre
 #ifdef _RAVEN
 template<class type, int baseBlockSize, int minBlockSize, byte memoryTag>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, memoryTag>::CheckMemory(void) const
+#elif defined(_SPLASHDAMAGE)
+template<class type, int baseBlockSize, int minBlockSize, bool threadSafe>
+void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize, threadSafe>::CheckMemory( void ) const
 #else
 template<class type, int baseBlockSize, int minBlockSize>
 void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::CheckMemory(void) const
@@ -1281,6 +1477,10 @@ void idDynamicBlockAlloc<type, baseBlockSize, minBlockSize>::CheckMemory(void) c
 {
 	idDynamicBlock<type> *block;
 
+#ifdef _SPLASHDAMAGE
+    sdScopedLock< threadSafe > scopedLock( lock );
+
+#endif
 	for (block = firstBlock; block != NULL; block = block->next) {
 		// make sure the block is properly linked
 		if (block->prev == NULL) {

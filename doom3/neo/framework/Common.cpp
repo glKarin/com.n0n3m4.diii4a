@@ -34,6 +34,24 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/imgui/r_imgui.h"
 #endif
 
+#ifdef _SPLASHDAMAGE //karin: engine to game interface
+#include "decllib/declLocStr.h"
+#include "framework/AdManager.h"
+#include "framework/NotificationSystem.h"
+#include "framework/GraphManager.h"
+#include "framework/KeyInputManager_Local.h"
+#include "renderer/DeviceContext.h"
+#include "renderer/FontManager.h"
+#include "sdnet/SDNet.h"
+#include "sdnet/SDNet_local.h"
+
+static idStrPool *globalKeyPool;
+static idStrPool *globalValuePool;
+
+static stringDataAllocator_t globalStringDataAllocator;
+static wideStringDataAllocator_t globalWideStringDataAllocator;
+#endif
+
 #define	MAX_PRINT_MSG_SIZE	4096
 #define MAX_WARNING_LIST	256
 
@@ -134,7 +152,7 @@ idGame 		*game = NULL;
 idGameEdit 	*gameEdit = NULL;
 #endif
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
 bool com_debugHudActive = false;
 #endif
 
@@ -237,18 +255,32 @@ class idCommonLocal : public idCommon
 		virtual int GetUserCmdMSec(void) { return 16; } 
 		virtual int GetUserCmdHz(void) { return 60; }
 
-	virtual void				ModViewThink ( void ) { }
-	virtual void				RunAlwaysThinkGUIs ( int time ) { (void)time; }
-	virtual void				DebuggerCheckBreakpoint ( idInterpreter* interpreter, idProgram* program, int instructionPointer ) { (void)interpreter; (void)program; (void)instructionPointer; }
-	virtual bool				DoingDeclValidation( void ) { return false; }
-	virtual void				LoadToolsDLL( void ) { }
-	virtual int					GetRModeForMachineSpec( int machineSpec ) const { (void)machineSpec; return 0; };
-	virtual void				SetDesiredMachineSpec( int machineSpec ) { (void)machineSpec; };
+        virtual void				ModViewThink ( void ) { }
+        virtual void				RunAlwaysThinkGUIs ( int time ) { (void)time; }
+        virtual void				DebuggerCheckBreakpoint ( idInterpreter* interpreter, idProgram* program, int instructionPointer ) { (void)interpreter; (void)program; (void)instructionPointer; }
+        virtual bool				DoingDeclValidation( void ) { return false; }
+        virtual void				LoadToolsDLL( void ) { }
+        virtual int					GetRModeForMachineSpec( int machineSpec ) const { (void)machineSpec; return 0; };
+        virtual void				SetDesiredMachineSpec( int machineSpec ) { (void)machineSpec; };
 #endif
 #ifdef _HUMANHEAD
-	virtual void				FixupKeyTranslations(const char *src, char *dst, int lengthAllocated) { (void) src; (void)dst; (void)lengthAllocated; }
-	virtual void				MaterialKeyForBinding(const char *binding, char *keyMaterial, char *key, bool &isBound);
-	virtual void				SetGameSensitivityFactor(float factor) { (void) factor; }
+        virtual void				FixupKeyTranslations(const char *src, char *dst, int lengthAllocated) { (void) src; (void)dst; (void)lengthAllocated; }
+        virtual void				MaterialKeyForBinding(const char *binding, char *keyMaterial, char *key, bool &isBound);
+        virtual void				SetGameSensitivityFactor(float factor) { (void) factor; }
+#endif
+#ifdef _SPLASHDAMAGE
+		virtual void				PacifierUpdate( void );
+
+		// arguments is a list of strings that will be formatted into the result
+		virtual idWStr				LocalizeText( const char* declName, const idWStrList& arguments = idWStrList() );
+		virtual idWStr				LocalizeText( const sdDeclLocStr* loc, const idWStrList& arguments = idWStrList() );
+
+		virtual int					GetNumVideoModes( void ) const;
+		virtual vidmode_t&			GetVideoMode( int index ) const;
+
+		virtual idSoundWorld*		GetGameSoundWorld( void );
+		virtual idSoundWorld*		GetMenuSoundWorld( void );
+		virtual void				PrintLoadingMessage( const wchar_t *msg );
 #endif
 };
 
@@ -1215,6 +1247,9 @@ void idCommonLocal::WriteConfiguration(void)
 	com_developer.SetBool(false);
 
 	WriteConfigToFile(CONFIG_FILE);
+#ifdef _SPLASHDAMAGE //karin: sync modified cvar/key bindings to user profile
+	networkServiceLocal.SaveUserModified();
+#endif
 	session->WriteCDKey();
 
 	// restore the developer cvar
@@ -1776,7 +1811,11 @@ void idCommonLocal::FilterLangList(idStrList *list, idStr lang)
 
 	for (int i = 0; i < list->Num(); i++) {
 		temp = (*list)[i];
+#ifdef _SPLASHDAMAGE //karin: lang in localization/
+		temp = temp.Right(temp.Length()-strlen("localization/"));
+#else
 		temp = temp.Right(temp.Length()-strlen("strings/"));
+#endif
 		temp = temp.Left(lang.Length());
 
 		if (idStr::Icmp(temp, lang) != 0) {
@@ -1801,7 +1840,11 @@ void idCommonLocal::InitLanguageDict(void)
 	//similar to the way pak files work. So you can place english001.lang
 	//to add new strings to the english language dictionary
 	idFileList	*langFiles;
+#ifdef _SPLASHDAMAGE //karin: lang in localization/
+	langFiles =  fileSystem->ListFilesTree("localization", ".lang", true);
+#else
 	langFiles =  fileSystem->ListFilesTree("strings", ".lang", true);
+#endif
 
 	idStrList langList = langFiles->GetList();
 
@@ -1853,7 +1896,11 @@ void idCommonLocal::LocalizeSpecificMapData(const char *fileName, idLangDict &la
 					const char *temp = ent->epairs.GetString(kv->key);
 
 					if (temp && *temp) {
+#ifdef _SPLASHDAMAGE //karin: wstr to str
+						idStr val = WStrToStr(kv->value);
+#else
 						idStr val = kv->value;
+#endif
 
 						if (val == temp) {
 							ent->epairs.Set(kv->key, langDict.AddString(temp));
@@ -2546,7 +2593,11 @@ Com_FinishBuild_f
 void Com_FinishBuild_f(const idCmdArgs &args)
 {
 	if (game) {
+#ifdef _SPLASHDAMAGE
+		game->CacheDictionaryMedia(idDict());
+#else
 		game->CacheDictionaryMedia(NULL);
+#endif
 	}
 
 	globalImages->FinishBuild((args.Argc() > 1));
@@ -2702,6 +2753,8 @@ void idCommonLocal::PrintLoadingMessage(const char *msg)
 	int len = strlen(msg);
 #ifdef _RAVEN // quake4 bigchar font
 	renderSystem->DrawSmallStringExt((640 - len * SMALLCHAR_WIDTH) / 2, 410, msg, idVec4(0.94f, 0.62f, 0.05f, 1.0f), true, declManager->FindMaterial("fonts/english/bigchars"));
+#elif defined(_SPLASHDAMAGE) //karin: splash text color
+	renderSystem->DrawSmallStringExt((640 - len * SMALLCHAR_WIDTH) / 2, 410, msg, idVec4(1.0f, 0.5f, 0.0f, 0.85f), true, declManager->FindMaterial("textures/bigchars"));
 #else
 	renderSystem->DrawSmallStringExt((640 - len * SMALLCHAR_WIDTH) / 2, 410, msg, idVec4(0.0f, 0.81f, 0.94f, 1.0f), true, declManager->FindMaterial("textures/bigchars"));
 #endif
@@ -2935,6 +2988,8 @@ void idCommonLocal::Async(void)
 #define _HARM_BASE_GAME_DLL "q4game"
 #elif defined(_HUMANHEAD) // prey game dll
 #define _HARM_BASE_GAME_DLL "preygame"
+#elif defined(_SPLASHDAMAGE) // ETQW game dll
+#define _HARM_BASE_GAME_DLL "etqwgame"
 #else
 #define _HARM_BASE_GAME_DLL "game"
 #endif
@@ -3047,6 +3102,19 @@ void idCommonLocal::LoadGameDLL(void)
 				gameDLL = sys->DLL_Load(dllFile);
 				common->Printf("Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
 			}
+#elif defined(_SPLASHDAMAGE) // ETQW base game dll
+			if(!fsgame.Icmp("etqwbase") 
+#if !defined(__ANDROID__)
+					|| !fsgame.Icmp("base")
+#endif
+					|| fsgame.IsEmpty()) // load ETQW game so.
+			{
+				common->Printf("Load ETQW game......\n");
+				idStr dllFile(dir);
+				dllFile.AppendPath(DLL_NAME("etqwgame"));
+				gameDLL = sys->DLL_Load(dllFile);
+				common->Printf("Load dynamic library `%s` %s!\n", dllFile.c_str(), LOAD_RESULT(gameDLL));
+			}
 #else // doom3 base game dll
 			if(!fsgame.Icmp("base") || fsgame.IsEmpty()) // doom3 base game dll
 			{
@@ -3141,12 +3209,32 @@ void idCommonLocal::LoadGameDLL(void)
 	gameImport.renderSystem				= ::renderSystem;
 	gameImport.soundSystem				= ::soundSystem;
 	gameImport.renderModelManager		= ::renderModelManager;
+#if !defined(_SPLASHDAMAGE) //karin: sdUserInterfaceManager on ETQW game
 	gameImport.uiManager				= ::uiManager;
+#endif
 	gameImport.declManager				= ::declManager;
 	gameImport.AASFileManager			= ::AASFileManager;
 	gameImport.collisionModelManager	= ::collisionModelManager;
-#ifdef _RAVEN // bse
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
 	gameImport.bse						= ::bse;
+#endif
+#ifdef _SPLASHDAMAGE //karin: engine to game interface
+	gameImport.deviceContext			= ::deviceContext;
+#ifndef _XENON
+	gameImport.networkService			= ::networkService;
+#endif
+	//karin: make same key/value allocator for idDict in engine and game, because idDict of engine maybe modified in game
+	idStrPool *keypool = NULL;
+	idStrPool *valuepool = NULL;
+	idDict::GetGlobalPools(globalKeyPool, globalValuePool);
+	gameImport.adManager				= ::adManager;
+	gameImport.keyInputManager			= ::keyInputManager;
+	gameImport.notificationSystem		= ::notificationSystem;
+	gameImport.globalKeys				= keypool;
+	gameImport.globalValues				= valuepool;
+	gameImport.stringAllocator			= &::globalStringDataAllocator;
+	gameImport.wideStringAllocator		= &::globalWideStringDataAllocator;
+	gameImport.graphManager				= ::graphManager;
 #endif
 
 	gameExport							= *GetGameAPI(&gameImport);
@@ -3166,6 +3254,10 @@ void idCommonLocal::LoadGameDLL(void)
 	// initialize the game object
 	if (game != NULL) {
 		game->Init();
+#ifdef _SPLASHDAMAGE
+		game->OnLanguageInit();
+		game->OnInputInit();
+#endif
 	}
 }
 
@@ -3179,6 +3271,10 @@ void idCommonLocal::UnloadGameDLL(void)
 
 	// shut down the game object
 	if (game != NULL) {
+#ifdef _SPLASHDAMAGE
+		game->OnInputShutdown();
+		game->OnLanguageShutdown();
+#endif
 		game->Shutdown();
 	}
 
@@ -3268,6 +3364,14 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 		idLib::fileSystem	= fileSystem;
 
 		// initialize idLib
+#ifdef _SPLASHDAMAGE //karin: must call before idLib::Init
+		//karin: must in heap
+		globalKeyPool = new idStrPool;
+		globalValuePool = new idStrPool;
+		idDict::SetGlobalPools(globalKeyPool, globalValuePool);
+		idStr::SetStringAllocator(&globalStringDataAllocator);
+		idWStr::SetStringAllocator(&globalWideStringDataAllocator);
+#endif
 		idLib::Init();
 
 		// clear warning buffer
@@ -3542,7 +3646,13 @@ void idCommonLocal::InitGame(void)
 	PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04349"));
 
 	// initialize the user interfaces
+#ifdef _SPLASHDAMAGE
+	fontManager->Init();
+	deviceContext->Reset();
+	networkService->Init();
+#else
 	uiManager->Init();
+#endif
 
 	// startup the script debugger
 	// DebuggerServerInit();
@@ -3556,6 +3666,10 @@ void idCommonLocal::InitGame(void)
 
 	// init the session
 	session->Init();
+
+#ifdef _SPLASHDAMAGE
+	keyInputManagerLocal.Init();
+#endif
 
 	// have to do this twice.. first one sets the correct r_mode for the renderer init
 	// this time around the backend is all setup correct.. a bit fugly but do not want
@@ -3572,10 +3686,10 @@ void idCommonLocal::InitGame(void)
     if(!binding || !binding[0])
     {
         common->Printf("Bind F10 to command 'idTech4AmmSettings'\n");
-		idKeyInput::SetBinding(K_F10, "idTech4AmmSettings");
+        idKeyInput::SetBinding(K_F10, "idTech4AmmSettings");
     }
-    else
-    	common->Printf("Command 'idTech4AmmSettings' not be binding\n");
+	else
+        common->Printf("Command 'idTech4AmmSettings' not be binding\n");
 #endif
 }
 
@@ -3604,8 +3718,12 @@ void idCommonLocal::ShutdownGame(bool reloading)
 	// shut down the session
 	session->Shutdown();
 
+#ifdef _SPLASHDAMAGE
+	networkService->Shutdown();
+#else
 	// shut down the user interfaces
 	uiManager->Shutdown();
+#endif
 
 	// shut down the sound system
 	soundSystem->Shutdown();
@@ -3622,11 +3740,18 @@ void idCommonLocal::ShutdownGame(bool reloading)
 	// shut down the renderSystem
 	renderSystem->Shutdown();
 
+#if !defined(_SPLASHDAMAGE) //karin: move to after game shutdown, because call declManager->UnregisterXXX on game shutdown
 	// shutdown the decl manager
 	declManager->Shutdown();
+#endif
 
 	// unload the game dll
 	UnloadGameDLL();
+
+#ifdef _SPLASHDAMAGE //karin: move to after game shutdown, because call declManager->UnregisterXXX on game shutdown
+	// shutdown the decl manager
+	declManager->Shutdown();
+#endif
 
 	// dump warnings to "warnings.txt"
 #ifdef DEBUG
@@ -3683,6 +3808,58 @@ void idCommonLocal::MaterialKeyForBinding(const char *binding, char *keyMaterial
 #undef MAX_KEY_MATERIAL_LENGTH
 #undef MAX_KEY_NAME_LENGTH
 }
+#endif
+
+#ifdef _SPLASHDAMAGE
+void idCommonLocal::PacifierUpdate( void ) {
+	session->PacifierUpdate();
+}
+
+// arguments is a list of strings that will be formatted into the result
+idWStr idCommonLocal::LocalizeText( const char* declName, const idWStrList& arguments ) {
+	const idDecl *decl = declManager->FindType(DECL_LOCSTR, declName, false);
+	if (!decl)
+		return L"";
+	return LocalizeText((const sdDeclLocStr *)decl, arguments);
+}
+
+idWStr idCommonLocal::LocalizeText( const sdDeclLocStr* loc, const idWStrList& arguments ) {
+	idWStr ret;
+	if (loc)
+		loc->Format(ret, arguments);
+	return ret;
+}
+
+extern vidmode_t r_vidModes[];
+extern int	s_numVidModes;
+int idCommonLocal::GetNumVideoModes( void ) const {
+	return s_numVidModes;
+}
+
+vidmode_t& idCommonLocal::GetVideoMode( int index ) const {
+	return r_vidModes[index];
+}
+
+idSoundWorld* idCommonLocal::GetGameSoundWorld( void ) {
+	return session->sw;
+}
+
+idSoundWorld* idCommonLocal::GetMenuSoundWorld( void ) {
+	return session->menuSoundWorld;
+}
+
+void idCommonLocal::PrintLoadingMessage( const wchar_t *msg ) {
+	idStr str = WStrToStr(msg);
+	PrintLoadingMessage(str);
+}
+
+//karin: cvar must exists on GUI event
+idCVar net_clientPunkbusterEnabled("net_clientPunkbusterEnabled", "0", CVAR_BOOL, "");
+idCVar in_toggleSprint("in_toggleSprint", "0", CVAR_BOOL, "");
+idCVar com_gpuSpec("com_gpuSpec", "0", CVAR_INTEGER | CVAR_SYSTEM, "");
+
+//karin: cvar used on game, must not null
+idCVar com_unlockFPS("com_unlockFPS", "0", CVAR_BOOL | CVAR_SYSTEM, "");
 #endif
 
 #include <zlib.h>

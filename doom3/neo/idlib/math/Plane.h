@@ -124,6 +124,11 @@ class idPlane
 		const float 	*ToFloatPtr(void) const;
 		float 			*ToFloatPtr(void);
 		const char 	*ToString(int precision = 2) const;
+#ifdef _SPLASHDAMAGE
+	    void			Set( float x, float y, float z, float dist );
+	    bool			FromPointsHighPrecision( const idVec3 &p0, const idVec3 &p1, const idVec3 &p2, bool fixDegenerate );
+	    bool			LineIntersection( const idVec3 &start, const idVec3 &end, float &fraction ) const;
+#endif
 
 	private:
 		float			a;
@@ -442,5 +447,74 @@ ID_INLINE float *idPlane::ToFloatPtr(void)
 {
 	return reinterpret_cast<float *>(&a);
 }
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE void idPlane::Set( float a, float b, float c, float d )
+{
+    this->a = a;
+    this->b = b;
+    this->c = c;
+    this->d = d;
+}
+
+ID_INLINE bool idPlane::FromPointsHighPrecision( const idVec3 &p0, const idVec3 &p1, const idVec3 &p2, bool fixDegenerate )
+{
+    // Take the cross product of the edge directions of the two shortest edges for maximum precision.
+    // The shortest two edges of a triangle are also the two edges that are most orthogonal to each other.
+#if 0
+    float l0 = ( p2 - p1 ).LengthSqr();
+    float l1 = ( p0 - p2 ).LengthSqr();
+    float l2 = ( p1 - p0 ).LengthSqr();
+
+    if ( l0 > l1 && l0 > l2 ) {
+        idVec3 v1 = p1 - p0;
+        idVec3 v2 = p2 - p0;
+        Normal() = v1.Cross( v2 );
+    } else if ( l1 > l0 && l1 > l2 ) {
+        idVec3 v1 = p2 - p1;
+        idVec3 v2 = p0 - p1;
+        Normal() = v1.Cross( v2 );
+    } else {
+        idVec3 v1 = p0 - p2;
+        idVec3 v2 = p1 - p2;
+        Normal() = v1.Cross( v2 );
+    }
+    bool r = Normalize( fixDegenerate ) != 0.0f;
+    FitThroughPoint( p0 );
+    return r;
+#else
+    const idVec3 *p[3] = { &p0, &p1, &p2 };
+    float l0 = ( p2 - p1 ).LengthSqr();
+    float l1 = ( p0 - p2 ).LengthSqr();
+    float l2 = ( p1 - p0 ).LengthSqr();
+    int index = Max3Index( l0, l1, l2 );
+    idVec3 v1 = *p[(index+1)%3] - *p[index];
+    idVec3 v2 = *p[(index+2)%3] - *p[index];
+    Normal() = v1.Cross( v2 );
+    bool r = Normalize( fixDegenerate ) != 0.0f;
+    FitThroughPoint( p0 );
+    return r;
+#endif
+}
+
+ID_INLINE bool idPlane::LineIntersection( const idVec3 &start, const idVec3 &end, float &fraction ) const
+{
+    float d1, d2;
+
+    d1 = Normal() * start + d;
+    d2 = Normal() * end + d;
+    if ( d1 == d2 ) {
+        return false;
+    }
+    if ( d1 > 0.0f && d2 > 0.0f ) {
+        return false;
+    }
+    if ( d1 < 0.0f && d2 < 0.0f ) {
+        return false;
+    }
+    fraction = ( d1 / ( d1 - d2 ) );
+    return ( fraction >= 0.0f && fraction <= 1.0f );
+}
+#endif
 
 #endif /* !__MATH_PLANE_H__ */

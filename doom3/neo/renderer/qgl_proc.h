@@ -183,6 +183,7 @@ QGLPROC(glProgramBinary, void, (GLuint program, GLenum binaryFormat, const void 
 QGLPROC(glGetProgramBinary, void, (GLuint program, GLsizei bufsize, GLsizei *length, GLenum *binaryFormat, void *binary))
 
 // GLES3.1
+// debug
 QGLPROC(glDebugMessageControl, void, (GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled))
 // QGLPROC(glDebugMessageInsert, void, (GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *buf))
 QGLPROC(glDebugMessageCallback, void, (GLDEBUGPROC callback, const void *userParam))
@@ -199,11 +200,21 @@ QGLPROC(glBindBufferBase, void, (GLenum target, GLuint index, GLuint buffer))
 QGLPROC(glUniformBlockBinding, void, (GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding))
 #endif
 
+// sync
 typedef struct __GLsync *GLsync;
 QGLPROC(glClientWaitSync, GLenum, (GLsync sync, GLbitfield flags, GLuint64 timeout))
 QGLPROC(glIsSync, GLboolean, (GLsync sync))
 QGLPROC(glDeleteSync, void, (GLsync sync))
 QGLPROC(glFenceSync, GLsync, (GLenum condition, GLbitfield flags))
+
+// query
+QGLPROC(glGenQueries, void, (GLsizei n, GLuint *ids))
+QGLPROC(glDeleteQueries, void, (GLsizei n, const GLuint *ids))
+QGLPROC(glIsQuery, GLboolean, (GLuint id))
+QGLPROC(glBeginQuery, void, (GLenum target, GLuint id))
+QGLPROC(glEndQuery, void, (GLenum target))
+QGLPROC(glGetQueryiv, void, (GLenum target, GLenum pname, GLint *params))
+QGLPROC(glGetQueryObjectuiv, void, (GLuint id, GLenum pname, GLuint *params))
 
 #endif
 

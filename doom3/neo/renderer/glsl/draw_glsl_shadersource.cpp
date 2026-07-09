@@ -174,109 +174,6 @@ static int RB_GLSL_ReadExternalShaderSource(idStr &fullPath, idStr &buffer)
 
 
 
-static void R_ExportGLSLShaderSource_f(const idCmdArgs &args)
-{
-    const char *vs;
-    const char *fs;
-    const char *macros;
-    idList<GLSLShaderProp> Props;
-    idStr path = NULL;
-    idStrList target;
-
-    RB_GLSL_GetShaderSources(Props);
-    if(args.Argc() > 1)
-        path = args.Argv(args.Argc() - 1);
-
-    for(int i = 1; i < args.Argc() - 1; i++)
-    {
-        target.Append(args.Argv(i));
-    }
-
-    if(path.IsEmpty())
-        path = RB_GLSL_GetExternalShaderSourcePath();
-
-    if(!path.IsEmpty() && path[path.Length() - 1] != '/')
-        path += "/";
-
-    common->Printf("Save GLSL shader source to '%s'\n", path.c_str());
-
-    for(int i = 0; i < Props.Num(); i++)
-    {
-        const GLSLShaderProp &prop = Props[i];
-        if(target.Num() > 0 && target.FindIndex(prop.name) < 0)
-            continue;
-
-        vs = prop.default_vertex_shader_source.c_str();
-        fs = prop.default_fragment_shader_source.c_str();
-        macros = prop.macros.c_str();
-
-        idStr vsSrc;
-        RB_GLSL_ExpandMacros(vsSrc, vs, macros, harm_r_useHighPrecision.GetInteger());
-        idStr p(path);
-        p.Append(prop.vertex_shader_source_file);
-        fileSystem->WriteFile(p.c_str(), vsSrc.c_str(), vsSrc.Length(), "fs_basepath");
-        common->Printf("GLSL vertex shader: '%s'\n", p.c_str());
-
-        idStr fsSrc;
-        RB_GLSL_ExpandMacros(fsSrc, fs, macros, harm_r_useHighPrecision.GetInteger());
-        p = path;
-        p.Append(prop.fragment_shader_source_file);
-        fileSystem->WriteFile(p.c_str(), fsSrc.c_str(), fsSrc.Length(), "fs_basepath");
-        common->Printf("GLSL fragment shader: '%s'\n", p.c_str());
-    }
-}
-
-static void R_PrintGLSLShaderSource(const idStr &source)
-{
-    int i = 0;
-    while(i < source.Length())
-    {
-        idStr str = source.Mid(i, 1024);
-        common->Printf("%s", str.c_str());
-        i += str.Length();
-    }
-}
-
-static void R_PrintGLSLShaderSource_f(const idCmdArgs &args)
-{
-    const char *vs;
-    const char *fs;
-    const char *macros;
-    idList<GLSLShaderProp> Props;
-    idStrList target;
-
-    RB_GLSL_GetShaderSources(Props);
-
-    for(int i = 1; i < args.Argc(); i++)
-    {
-        target.Append(args.Argv(i));
-    }
-
-    for(int i = 0; i < Props.Num(); i++)
-    {
-        const GLSLShaderProp &prop = Props[i];
-        if(target.Num() > 0 && target.FindIndex(prop.name) < 0)
-            continue;
-
-        vs = prop.default_vertex_shader_source.c_str();
-        fs = prop.default_fragment_shader_source.c_str();
-        macros = prop.macros.c_str();
-        common->Printf("GLSL shader: %s\n\n", prop.name.c_str());
-
-        idStr vsSrc;
-        RB_GLSL_ExpandMacros(vsSrc, vs, macros, harm_r_useHighPrecision.GetInteger());
-        common->Printf("  Vertex shader: \n");
-        R_PrintGLSLShaderSource(vsSrc);
-        common->Printf("\n");
-
-        idStr fsSrc;
-        RB_GLSL_ExpandMacros(fsSrc, fs, macros, harm_r_useHighPrecision.GetInteger());
-        common->Printf("  Fragment shader: \n");
-        R_PrintGLSLShaderSource(fsSrc);
-        common->Printf("\n");
-    }
-}
-
 // Convert OpenGL2.0(GLSL 120) shader to GLES2.0(GLSL 100es) or GLES3.x(GLSL 3xx es) for Quake 4 GLSL progs
 /**
  * Vertex shader
@@ -346,15 +243,21 @@ void RB_GLSL_ConvertGL2ESVertexShader(idStr &ret, const char *text, int version)
     ret += "\n";
     ret += "precision highp float;\n";
     ret += "\n";
+	ret += "#define BYTE_COLOR(x) ( ( x ) / 255.0 )\n";
+    ret += "\n";
 
     ret += attribute + " highp vec4 attr_Vertex;\n";
     ret += attribute + " highp vec4 attr_TexCoord;\n";
     ret += attribute + " lowp vec4 attr_Color;\n";
     ret += attribute + " vec3 attr_Normal;\n";
+    ret += attribute + " vec3 attr_Tangent;\n";
+    ret += attribute + " vec3 attr_Bitangent;\n";
     ret += "\n";
 
     ret += "uniform lowp vec4 u_glColor;\n";
     ret += "uniform highp mat4 u_modelViewProjectionMatrix;\n";
+	//ret += "uniform lowp float u_colorModulate; // 0 or 1/255\n";
+	//ret += "uniform lowp float u_colorAdd; // 0 or 1\n";
     ret += "\n";
 
     ret += source;

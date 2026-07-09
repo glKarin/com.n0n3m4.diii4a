@@ -50,6 +50,22 @@ typedef enum {
 	LEXFL_NOERRORS						= BIT(0),	// don't print any errors
 	LEXFL_NOWARNINGS					= BIT(1),	// don't print any warnings
 	LEXFL_NOFATALERRORS					= BIT(2),	// errors aren't fatal
+#ifdef _SPLASHDAMAGE
+    LEXFL_VCSTYLEREPORTS				= BIT(3),	// warnings and errors are reported in M$ VC style
+    LEXFL_NOSTRINGCONCAT				= BIT(4),	// multiple strings separated by whitespaces are not concatenated
+    LEXFL_NOSTRINGESCAPECHARS			= BIT(5),	// no escape characters inside strings
+    LEXFL_NODOLLARPRECOMPILE			= BIT(6),	// don't use the $ sign for precompilation
+    LEXFL_NOBASEINCLUDES				= BIT(7),	// don't include files embraced with < >
+    LEXFL_ALLOWPATHNAMES				= BIT(8),	// allow path separators in names
+    LEXFL_ALLOWNUMBERNAMES				= BIT(9),	// allow names to start with a number
+    LEXFL_ALLOWIPADDRESSES				= BIT(10),	// allow ip addresses to be parsed as numbers
+    LEXFL_ALLOWFLOATEXCEPTIONS			= BIT(11),	// allow float exceptions like 1.#INF or 1.#IND to be parsed
+    LEXFL_ALLOWMULTICHARLITERALS		= BIT(12),	// allow multi character literals
+    LEXFL_ALLOWBACKSLASHSTRINGCONCAT	= BIT(13),	// allow multiple strings seperated by '\' to be concatenated
+    LEXFL_ONLYSTRINGS					= BIT(14),	// parse as whitespace deliminated strings (quoted strings keep quotes)
+    LEXFL_NOEMITSTRINGESCAPECHARS		= BIT(15),	// no escape characters inside strings
+    LEXFL_ALLOWRAWSTRINGBLOCKS			= BIT(16),	// allow raw text blocks embraced with <% %>
+#else
 	LEXFL_NOSTRINGCONCAT				= BIT(3),	// multiple strings seperated by whitespaces are not concatenated
 	LEXFL_NOSTRINGESCAPECHARS			= BIT(4),	// no escape characters inside strings
 	LEXFL_NODOLLARPRECOMPILE			= BIT(5),	// don't use the $ sign for precompilation
@@ -61,6 +77,7 @@ typedef enum {
 	LEXFL_ALLOWMULTICHARLITERALS		= BIT(11),	// allow multi character literals
 	LEXFL_ALLOWBACKSLASHSTRINGCONCAT	= BIT(12),	// allow multiple strings seperated by '\' to be concatenated
 	LEXFL_ONLYSTRINGS					= BIT(13)	// parse as whitespace deliminated strings (quoted strings keep quotes)
+#endif
 #ifdef _RAVEN
 // RAVEN BEGIN
 // jsinger: added to support binary writing from the lexer in either byte swapped or non-byte swapped formats
@@ -99,6 +116,45 @@ typedef enum {
 #define P_RSHIFT					21
 #define P_LSHIFT					22
 
+#ifdef _SPLASHDAMAGE
+#define P_SCOPE_RESOLUTION			23
+#define P_MEMBER_SELECTION_OBJECT	24
+#define P_MEMBER_SELECTION_POINTER	25
+#define P_POINTER_TO_MEMBER_OBJECT	26
+#define P_POINTER_TO_MEMBER_POINTER	27
+
+#define P_MUL						28
+#define P_DIV						29
+#define P_MOD						30
+#define P_ADD						31
+#define P_SUB						32
+#define P_ASSIGN					33
+
+#define P_BIN_AND					34
+#define P_BIN_OR					35
+#define P_BIN_XOR					36
+#define P_BIN_NOT					37
+
+#define P_LOGIC_NOT					38
+#define P_LOGIC_GREATER				39
+#define P_LOGIC_LESS				40
+
+#define P_COMMA						41
+#define P_SEMICOLON					42
+#define P_COLON						43
+#define P_QUESTIONMARK				44
+
+#define P_PARENTHESESOPEN			45
+#define P_PARENTHESESCLOSE			46
+#define P_BRACEOPEN					47
+#define P_BRACECLOSE				48
+#define P_SQBRACKETOPEN				49
+#define P_SQBRACKETCLOSE			50
+#define P_BACKSLASH					51
+
+#define P_PRECOMP					52
+#define P_DOLLAR					53
+#else
 #define P_POINTERREF				23
 #define P_CPP1						24
 #define P_CPP2						25
@@ -140,7 +196,14 @@ typedef enum {
 #define P_INVERTED_QUERY			54
  // RAVEN END
 #endif
+#endif
 
+#ifdef _SPLASHDAMAGE
+#define P_POINTERREF P_MEMBER_SELECTION_POINTER
+#define P_CPP1 P_SCOPE_RESOLUTION
+#define P_CPP2 P_POINTER_TO_MEMBER_OBJECT
+#define P_REF P_MEMBER_SELECTION_OBJECT
+#endif
 
 // punctuation
 typedef struct punctuation_s {
@@ -158,15 +221,33 @@ class idLexer
 		// constructor
 		idLexer();
 		idLexer(int flags);
+#ifdef _SPLASHDAMAGE
+	    idLexer( const char *filename, int flags = 0, bool OSPath = false, int startLine = 1 );
+	    idLexer( const char *ptr, int length, const char *name, int flags = 0, int startLine = 1 );
+#else
 		idLexer(const char *filename, int flags = 0, bool OSPath = false);
 		idLexer(const char *ptr, int length, const char *name, int flags = 0);
+#endif
 		// destructor
 		~idLexer();
 		// load a script from the given file at the given offset with the given length
+#ifdef _SPLASHDAMAGE
+    	bool			LoadFile( const char *filename, bool OSPath = false, int startLine = 1 );
+#else
 		int				LoadFile(const char *filename, bool OSPath = false);
+#endif
 		// load a script from the given memory with the given length and a specified line offset,
 		// so source strings extracted from a file can still refer to proper line numbers in the file
 		// NOTE: the ptr is expected to point at a valid C string: ptr[length] == '\0'
+#ifdef _SPLASHDAMAGE
+	    // Load a binary token table and indices as a token stream
+	    bool			LoadMemoryBinary( const byte* ptr, int length, const char *name, idTokenCache* globals = NULL );
+	    bool			LoadTokenStream( const idList<unsigned short>& indices, const idTokenCache& tokens, const char* name );
+	
+	
+	    idLexerBinary&	GetBinary() ;
+	    const idLexerBinary&	GetBinary() const;
+#endif
 		int				LoadMemory(const char *ptr, int length, const char *name, int startLine = 1);
 		// free the script
 		void			FreeSource(void);
@@ -191,11 +272,21 @@ class idLexer
 		// returns true if the next token equals the given type but does not remove the token from the source
 		int				PeekTokenType(int type, int subtype, idToken *token);
 		// skip tokens until the given token string is read
+#ifdef _SPLASHDAMAGE
+    	bool			SkipUntilString( const char *string, idToken* token = NULL );
+#else
 		int				SkipUntilString(const char *string);
+#endif
 		// skip the rest of the current line
 		int				SkipRestOfLine(void);
 		// skip the braced section
 		int				SkipBracedSection(bool parseFirstBrace = true);
+#ifdef _SPLASHDAMAGE
+	    // skip the braced section, maintaining indents and newlines
+	    bool			SkipBracedSectionExact( int tabs = -1, bool parseFirstBrace = true );
+	    // skips spaces, tabs, C-like comments etc.
+	    int				SkipWhiteSpace( bool currentLine );
+#endif
 		// unread the given token
 		void			UnreadToken(const idToken *token);
 		// read a token only if on the same line
@@ -212,15 +303,32 @@ class idLexer
 		// issue an Error().  If it isn't NULL, it will issue a Warning() and set *errorFlag = true
 		float			ParseFloat(bool *errorFlag = NULL);
 		// parse matrices with floats
+#ifdef _SPLASHDAMAGE
+    	int				Parse1DMatrix( int x, float *m, bool expectCommas = false );
+#else
 		int				Parse1DMatrix(int x, float *m);
+#endif
 		int				Parse2DMatrix(int y, int x, float *m);
 		int				Parse3DMatrix(int z, int y, int x, float *m);
+#ifdef _SPLASHDAMAGE
+	    // parse a braced section into a string
+	    const char *	ParseBracedSection( idStr &out, int tabs = -1, bool parseFirstBrace = true, char intro = '{', char outro = '}' );
+	    // parse a braced section into a string, maintaining indents and newlines
+	    bool			ParseBracedSectionExact( idStr &out, int tabs = -1, bool parseFirstBrace = true );
+#else
 		// parse a braced section into a string
 		const char 	*ParseBracedSection(idStr &out);
 		// parse a braced section into a string, maintaining indents and newlines
 		const char 	*ParseBracedSectionExact(idStr &out, int tabs = -1);
+#endif
 		// parse the rest of the line
 		const char 	*ParseRestOfLine(idStr &out);
+#ifdef _SPLASHDAMAGE
+	    // pulls the entire line, including the \n at the end
+	    const char *	ParseCompleteLine( idStr &out );
+	    // retrieves the white space after the last read token
+	    int				GetNextWhiteSpace( idStr &whiteSpace, bool currentLine );
+#endif
 		// retrieves the white space characters before the last read token
 		int				GetLastWhiteSpace(idStr &whiteSpace) const;
 		// returns start index into text buffer of last white space
@@ -245,6 +353,12 @@ class idLexer
 		const char 	*GetFileName(void);
 		// get offset in script
 		const int		GetFileOffset(void);
+#ifdef _SPLASHDAMAGE
+	    // get offset in script
+	    int				GetLastFileOffset( void ) const;
+	    // get total size of script
+	    int				GetFileSize( void ) const;
+#endif
 		// get file time
 		const ID_TIME_T	GetFileTime(void);
 		// returns the current line number
@@ -255,6 +369,10 @@ class idLexer
 		void			Warning(const char *str, ...) id_attribute((format(printf,2,3)));
 		// returns true if Error() was called with LEXFL_NOFATALERRORS or LEXFL_NOERRORS set
 		bool			HadError(void) const;
+#ifdef _SPLASHDAMAGE
+	    // returns true if any warnings were printed
+	    bool			HadWarning( void ) const;
+#endif
 
 		// set the base folder to load files from
 		static void		SetBaseFolder(const char *path);
@@ -275,6 +393,10 @@ class idLexer
 // RAVEN END
 #endif
 
+#ifdef _SPLASHDAMAGE
+	private:
+	    idLexer( const idLexer& rhs );
+#endif
 	private:
 		int				loaded;					// set when a script file is loaded from file or memory
 		idStr			filename;				// file name of the script
@@ -294,9 +416,18 @@ class idLexer
 		const punctuation_t *punctuations;		// the punctuations used in the script
 		int 			*punctuationtable;		// ASCII table with punctuations
 		int 			*nextpunctuation;		// next punctuation in chain
+#ifdef _SPLASHDAMAGE
+    	idList< idToken >	tokens;			// available token
+#else
 		idToken			token;					// available token
+#endif
 		idLexer 		*next;					// next script in a chain
 		bool			hadError;				// set by idLexer::Error, even if the error is supressed
+#ifdef _SPLASHDAMAGE
+	    bool			hadWarning;				// set by idLexer::Warning, even if the warning is suppressed
+	
+	    idLexerBinary	binary;
+#endif
 
 		static char		baseFolder[ 256 ];		// base folder to load files from
 
@@ -307,6 +438,9 @@ class idLexer
 		int				ReadString(idToken *token, int quote);
 		int				ReadName(idToken *token);
 		int				ReadNumber(idToken *token);
+#ifdef _SPLASHDAMAGE
+    	int				ReadRawStringBlock( idToken *token );
+#endif
 		int				ReadPunctuation(idToken *token);
 		int				ReadPrimitive(idToken *token);
 		int				CheckString(const char *str) const;
@@ -330,6 +464,13 @@ ID_INLINE const int idLexer::GetFileOffset(void)
 	return idLexer::script_p - idLexer::buffer;
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE int idLexer::GetFileSize( void ) const
+{
+    return this->end_p - this->buffer;
+}
+#endif
+
 ID_INLINE const ID_TIME_T idLexer::GetFileTime(void)
 {
 	return idLexer::fileTime;
@@ -349,6 +490,18 @@ ID_INLINE int idLexer::GetFlags(void)
 {
 	return idLexer::flags;
 }
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE idLexerBinary& idLexer::GetBinary()
+{
+    return binary;
+}
+
+ID_INLINE const idLexerBinary& idLexer::GetBinary() const
+{
+    return binary;
+}
+#endif
 
 #ifdef _RAVEN
 // RAVEN BEGIN

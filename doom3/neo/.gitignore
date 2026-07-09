@@ -1,4 +1,5 @@
 cmake-*
+.idea
 
 # VSMC
 *.dir

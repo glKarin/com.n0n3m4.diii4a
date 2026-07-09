@@ -37,6 +37,10 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _SPLASHDAMAGE //karin: USERCMD_** in game, it is different with DOOM3 engine
+const int ETQW_USERCMD_HZ			= 30;			// 30 frames per second
+const int ETQW_USERCMD_MSEC			= 1000 / ETQW_USERCMD_HZ;
+#endif
 const int USERCMD_HZ			= 60;			// 60 frames per second
 const int USERCMD_MSEC			= 1000 / USERCMD_HZ;
 #ifdef _HUMANHEAD
@@ -46,7 +50,9 @@ const float	USERCMD_ONE_OVER_HZ = (1.0f / USERCMD_HZ); // HUMANHEAD JRM
 // usercmd_t->button bits
 const int BUTTON_ATTACK			= BIT(0);
 const int BUTTON_RUN			= BIT(1);
+#if !defined(_SPLASHDAMAGE) //karin: sync with userButtons_t
 const int BUTTON_ZOOM			= BIT(2);
+#endif
 #ifdef _RAVEN // quake4 user cmd
 const int BUTTON_SCORES			= BIT(3);
 const int BUTTON_MLOOK			= BIT(4);
@@ -78,6 +84,16 @@ const int BUTTON_SCORES			= BIT(4);
 const int BUTTON_MLOOK			= BIT(5);
 const int BUTTON_6				= BIT(6);
 const int BUTTON_7				= BIT(7);
+#elif defined(_SPLASHDAMAGE) //karin: sync with userButtons_t
+const int BUTTON_MODE_SWITCH	= BIT(2);
+const int BUTTON_LOOKOFF		= BIT(3);
+const int BUTTON_SPRINT			= BIT(4);
+const int BUTTON_ACTIVATE		= BIT(5);
+const int BUTTON_ALTATTACK		= BIT(6);
+const int BUTTON_LEANLEFT		= BIT(7);
+const int BUTTON_LEANRIGHT		= BIT(8);
+const int BUTTON_TOP_HAT		= BIT(9);
+#define BUTTON_ZOOM BUTTON_MODE_SWITCH
 #else
 const int BUTTON_SCORES			= BIT(3);
 const int BUTTON_MLOOK			= BIT(4);
@@ -175,16 +191,115 @@ const int IMPULSE_127			= 127;			// UNUSED
 // RITUAL END
 #endif
 
+#ifdef _SPLASHDAMAGE
+struct userButtons_t {
+#ifdef _XENON
+    bool			pad0		: 1; // Nerve: Padding is used to align the buttons
+    bool			pad1		: 1; // to the least signifigant part of the short
+    bool			pad2		: 1; // That this struct is unioned with
+    bool			pad3		: 1;
+    bool			pad4		: 1;
+    bool			pad5		: 1;
+#endif
+    bool			attack		: 1;
+    bool			run			: 1;
+    bool			modeSwitch	: 1;
+    bool			mLookOff	: 1;
+    bool			sprint		: 1;
+    bool			activate	: 1;
+    bool			altAttack	: 1;
+    bool			leanLeft	: 1;
+    bool			leanRight	: 1;
+    bool			tophat		: 1;
+}; // update the define below whenever you change this struct, all fields MUST be single bits
+
+#define USERCMD_NUM_BUTTONS 10
+
+typedef struct clientButtons_s {
+    bool			showScores		: 1;
+    bool			voice			: 1;
+    bool			teamVoice		: 1;
+    bool			fireteamVoice	: 1;
+} clientButtons_t;
+
+enum usercmdbuttonType_t {
+    B_BUTTON,
+    B_IMPULSE,
+    B_LOCAL_IMPULSE,
+    B_COMMAND,
+};
+
+enum usercmdButton_t {
+	UB_UP,
+	UB_DOWN,
+	UB_LEFT,
+	UB_RIGHT,
+	UB_FORWARD,
+	UB_BACK,
+	UB_LOOKUP,
+	UB_LOOKDOWN,
+	UB_STRAFE,
+	UB_MOVELEFT,
+	UB_MOVERIGHT,
+
+	UB_ATTACK,
+	UB_SPEED,
+	UB_MODESWITCH,
+	UB_SPRINT,
+	UB_ACTIVATE,
+	UB_SHOWSCORES,
+	UB_VOICE,
+	UB_TEAMVOICE,
+	UB_FIRETEAMVOICE,
+	UB_MLOOK,
+	UB_ALTATTACK,
+	UB_TOPHAT,
+	UB_LEANLEFT,
+	UB_LEANRIGHT,
+
+	UB_MAX_BUTTONS
+
+	, UB_NONE = -1,
+};
+#endif
+
+
 // usercmd_t->flags
 const int UCF_IMPULSE_SEQUENCE	= 0x0001;		// toggled every time an impulse command is sent
 
+#ifdef _SPLASHDAMAGE
+union userButtonsUnion_t {
+    short				btnValue;	// this has to be at least as wide as the btn struct
+    userButtons_t		btn;
+
+	//karin: compat for DOOM3
+	userButtonsUnion_t& operator=(int b) {
+		btnValue = b;
+		return *this;
+	}
+
+	userButtonsUnion_t& operator&=(int b) {
+		btnValue &= b;
+		return *this;
+	}
+
+	operator byte() const {
+		return btnValue;
+	}
+};
+
+#endif
 class usercmd_t
 {
 	public:
 		int			gameFrame;						// frame number
 		int			gameTime;						// game time
 		int			duplicateCount;					// duplication count for networking
+#ifdef _SPLASHDAMAGE
+    	userButtonsUnion_t		buttons;						// buttons
+#else
 		byte		buttons;						// buttons
+#endif
 		signed char	forwardmove;					// forward/backward movement
 		signed char	rightmove;						// left/right movement
 		signed char	upmove;							// up/down movement
@@ -196,6 +311,9 @@ class usercmd_t
 		int			sequence;						// just for debugging
 #ifdef _RAVEN
 		int			realTime;						// real game time
+#endif
+#ifdef _SPLASHDAMAGE
+    	clientButtons_t			clientButtons;					// new sets of buttons ( client only )
 #endif
 
 	public:

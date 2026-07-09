@@ -530,11 +530,18 @@ void Sys_SyncState(void)
             state |= STATE_LOADING;
         else
         {
-            idUserInterface *gui = sessLocal.GetActiveMenu();
-            if(!gui)
-                state |= STATE_GAME;
-            else
+#ifdef _SPLASHDAMAGE //karin: check GUI is actived
+            if(game->IsMainMenuActive())
                 state |= STATE_MENU;
+            else
+                state |= STATE_GAME;
+#else
+            idUserInterface *gui = sessLocal.GetActiveMenu();
+            if(gui)
+                state |= STATE_MENU;
+            else
+                state |= STATE_GAME;
+#endif
         }
         if(console->Active())
             state |= STATE_CONSOLE;
@@ -557,7 +564,11 @@ void Q3E_KeyEvent(int state,int key,int character)
     if ((character != 0) && (state == 1))
     {
         if(!ctrl_state || character == '\b')
+#ifdef _SPLASHDAMAGE //karin: evValue2 also store 
+        Posix_QueEvent(SE_CHAR, character, character, 0, NULL);
+#else
         Posix_QueEvent(SE_CHAR, character, 0, 0, NULL);
+#endif
     }
 #ifdef _IMGUI
     if(!R_ImGui_IsRunning())

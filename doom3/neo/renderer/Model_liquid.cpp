@@ -122,7 +122,11 @@ modelSurface_t idRenderModelLiquid::GenerateSurface(float lerp)
 	}
 
 	surf.geometry	= tri;
+#ifdef _SPLASHDAMAGE
+	surf.material		= shader;
+#else
 	surf.shader		= shader;
+#endif
 
 	return surf;
 }

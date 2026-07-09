@@ -494,6 +494,78 @@ int idBitMsg::ReadString(char *buffer, int bufferSize) const
 	return l;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+================
+idBitMsg::WriteString
+================
+*/
+void idBitMsg::WriteString( const wchar_t *s, int maxLength )
+{
+    if ( s == NULL ) {
+        WriteData( L"", NET_SIZEOF_WCHAR );
+    } else {
+        int l = idWStr::Length( s );
+        if ( maxLength >= 0 && l >= maxLength ) {
+            l = maxLength - 1;
+        }
+
+        if ( NET_SIZEOF_WCHAR == sizeof( wchar_t ) ) {
+            if ( l > 0 ) {
+                WriteData( s, l * NET_SIZEOF_WCHAR );
+            }
+        } else {
+#ifdef MACOS_X
+            assert(0);
+//DAJ FIXME #error This may have endian-related issues on big endian systems. Please check
+#endif
+            byte *buf = (byte*)s;
+            for ( int i = 0; i < l; i++ ) {
+                WriteData( buf + i * sizeof( wchar_t ), NET_SIZEOF_WCHAR );
+            }
+        }
+        WriteData( L"", NET_SIZEOF_WCHAR );
+    }
+}
+
+/*
+================
+idBitMsg::ReadString
+================
+*/
+int idBitMsg::ReadString( wchar_t *buffer, int bufferSize ) const
+{
+    int	l, d;
+    wchar_t c;
+
+    ReadByteAlign();
+    l = 0;
+    while ( true ) {
+        d = ReadBits( NET_SIZEOF_WCHAR * 8 );
+        if ( d == -1 ) {
+            break;
+        }
+
+        c = (wchar_t)d;
+
+        if ( c == L'\0' ) {
+            break;
+        }
+
+        // we will read past any excessively long string, so
+        // the following data can be read, but the string will
+        // be truncated
+        if ( l < bufferSize - 1 ) {
+            buffer[l] = c;
+            l++;
+        }
+    }
+
+    buffer[l] = L'\0';
+    return l;
+}
+#endif
+
 /*
 ================
 idBitMsg::ReadData

@@ -2449,3 +2449,32 @@ void idSoundWorldLocal::SetEnviroSuit(bool active)
 	enviroSuitActive = active;
 }
 
+#ifdef _SPLASHDAMAGE
+void idSoundWorldLocal::PlaceListener( const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime ) {
+	PlaceListener(origin, axis, listenerId, gameTime, "Undefined");
+}
+
+void idSoundWorldLocal::PlayShaderDirectly( const idSoundShader* shader, const soundChannel_t channel, int* length ) {
+	if (localSound && channel == -1) {
+		localSound->StopSound(SCHANNEL_ANY);
+	} else if (localSound) {
+		localSound->StopSound(channel);
+	}
+
+	if (!shader) {
+		return;
+	}
+
+	if (!localSound) {
+		localSound = AllocLocalSoundEmitter();
+	}
+
+	static idRandom	rnd;
+	float	diversity = rnd.RandomFloat();
+
+	localSound->StartSound(shader, (channel == -1) ? SCHANNEL_ONE : channel , diversity, SSF_GLOBAL);
+
+	// in case we are at the console without a game doing updates, force an update
+	ForegroundUpdate(soundSystemLocal.GetCurrent44kHzTime());
+}
+#endif

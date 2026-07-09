@@ -28,7 +28,11 @@ If you have questions concerning this license or the applicable additional terms
 rvBSEManagerLocal bseLocal;
 rvBSEManager* bse = &bseLocal;
 
+#ifdef _SPLASHDAMAGE
+static idCVar _g_decals(              "g_decals",                                       "1",         CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "show decals such as bullet holes" );
+#else
 static idCVar _g_decals(              "g_decals",                                       "1",         CVAR_GAME | PC_CVAR_ARCHIVE | CVAR_BOOL, "show decals such as bullet holes" );
+#endif
 idMat3  rvBSEManagerLocal::mModelToBSE;
 float rvBSEManagerLocal::mEffectRates[EC_MAX];
 float rvBSEManagerLocal::effectCosts[EC_MAX];
@@ -162,7 +166,11 @@ bool rvBSEManagerLocal::Init()
     declManager->FindEffect("_default", true);
     declManager->FindMaterial("_default", true);
     declManager->FindMaterial("gfx/effects/particles_shapes/motionblur", true);
+#ifdef _SPLASHDAMAGE
+    declManager->FindType(DECL_TABLE, "halfsintable", true);
+#else
     declManager->FindType(DECL_TABLE, "halfsintable", true, false);
+#endif
     renderModelManager->FindModel("_default");
 
 	//karin: null if game dll not loaded(it should not happen)
@@ -225,6 +233,7 @@ void rvBSEManagerLocal::StartFrame()
 //──────────────────────────────────────────────────────────────────────────────
 void rvBSEManagerLocal::EndFrame()
 {
+#if !defined(_SPLASHDAMAGE) //karin: all GUIs not in engine
 	if ( DebugHudActive() )
 	{
 		game->DebugSetInt("fx_num_active", mPerfCounters[PERF_NUM_BSE]);
@@ -234,6 +243,7 @@ void rvBSEManagerLocal::EndFrame()
 		game->DebugSetFloat("fx_num_texels", v1);
 		game->DebugSetInt("fx_num_segments", mPerfCounters[PERF_NUM_SEGMENTS]/* dword_1137DDB8 */);
 	}
+#endif
 }
 //──────────────────────────────────────────────────────────────────────────────
 void rvBSEManagerLocal::UpdateRateTimes()
@@ -420,7 +430,11 @@ void rvBSEManagerLocal::BSE_Stats_f(const idCmdArgs& args)
    
    for (int i = 0; i < numDecls; ++i)
    {
+#ifdef _SPLASHDAMAGE
+       const rvDeclEffect* effect = static_cast<const rvDeclEffect *>(declManager->DeclByIndex(DECL_EFFECT, i, forceParseAll));
+#else
        const rvDeclEffect* effect = declManager->EffectByIndex(i, forceParseAll);
+#endif
 	   if(!effect)
 		   continue;
 
@@ -476,7 +490,11 @@ void rvBSEManagerLocal::BSE_Log_f(const idCmdArgs& /*args*/)
 
     for (int i = 0; i < numDecls; ++i)
     {
+#ifdef _SPLASHDAMAGE
+		const rvDeclEffect* e = static_cast<const rvDeclEffect *>(declManager->DeclByIndex(DECL_EFFECT, i, false));
+#else
         const rvDeclEffect* e = declManager->EffectByIndex(i, false);
+#endif
         if (!e) continue;
 
         const int plays = e->mPlayCount;

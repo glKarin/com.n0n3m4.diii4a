@@ -114,6 +114,7 @@ idAASReach::Reachability_Fly
 */
 void idAASReach::Reachability_Fly(int areaNum)
 {
+#if !defined(_SPLASHDAMAGE) //karin: only used in tools
 	int i, faceNum, otherAreaNum;
 	aasArea_t *area;
 	aasFace_t *face;
@@ -152,6 +153,10 @@ void idAASReach::Reachability_Fly(int areaNum)
 
 		AddReachabilityToArea(reach, areaNum);
 	}
+#else
+	// TODO
+	common->Error("Disable idAASReach::Reachability_Fly(%d)", areaNum);
+#endif
 }
 
 /*
@@ -161,6 +166,7 @@ idAASReach::Reachability_Swim
 */
 void idAASReach::Reachability_Swim(int areaNum)
 {
+#if !defined(_SPLASHDAMAGE) //karin: only used in tools
 	int i, faceNum, otherAreaNum;
 	aasArea_t *area;
 	aasFace_t *face;
@@ -207,6 +213,10 @@ void idAASReach::Reachability_Swim(int areaNum)
 
 		AddReachabilityToArea(reach, areaNum);
 	}
+#else
+	// TODO
+	common->Error("Disable idAASReach::Reachability_Swim(%d)", areaNum);
+#endif
 }
 
 /*
@@ -216,6 +226,7 @@ idAASReach::Reachability_EqualFloorHeight
 */
 void idAASReach::Reachability_EqualFloorHeight(int areaNum)
 {
+#if !defined(_SPLASHDAMAGE) //karin: only used in tools
 	int i, k, l, m, n, faceNum, face1Num, face2Num, otherAreaNum, edge1Num, edge2Num;
 	aasArea_t *area, *otherArea;
 	aasFace_t *face, *face1, *face2;
@@ -300,6 +311,10 @@ void idAASReach::Reachability_EqualFloorHeight(int areaNum)
 			AddReachabilityToArea(reach, areaNum);
 		}
 	}
+#else
+	// TODO
+	common->Error("Disable idAASReach::Reachability_EqualFloorHeight(%d)", areaNum);
+#endif
 }
 
 /*
@@ -309,6 +324,7 @@ idAASReach::Reachability_Step_Barrier_WaterJump_WalkOffLedge
 */
 bool idAASReach::Reachability_Step_Barrier_WaterJump_WalkOffLedge(int area1num, int area2num)
 {
+#if !defined(_SPLASHDAMAGE) //karin: only used in tools
 	int i, j, k, l, edge1Num, edge2Num, areas[10];
 	int floor_bestArea1FloorEdgeNum, floor_bestArea2FloorEdgeNum, floor_foundReach;
 	int water_bestArea1FloorEdgeNum, water_bestArea2FloorEdgeNum, water_foundReach;
@@ -808,6 +824,10 @@ bool idAASReach::Reachability_Step_Barrier_WaterJump_WalkOffLedge(int area1num, 
 			}
 		}
 	}
+#else
+	// TODO
+	common->Error("Disable idAASReach::Reachability_Swim(%d, %d)", area1num, area2num);
+#endif
 
 	return false;
 }
@@ -819,6 +839,7 @@ idAASReach::Reachability_WalkOffLedge
 */
 void idAASReach::Reachability_WalkOffLedge(int areaNum)
 {
+#if !defined(_SPLASHDAMAGE) //karin: only used in tools
 	int i, j, faceNum, edgeNum, side, reachAreaNum, p, areas[10];
 	aasArea_t *area;
 	aasFace_t *face;
@@ -910,6 +931,10 @@ void idAASReach::Reachability_WalkOffLedge(int areaNum)
 			AddReachabilityToArea(reach, areaNum);
 		}
 	}
+#else
+	// TODO
+	common->Error("Disable idAASReach::Reachability_WalkOffLedge(%d)", areaNum);
+#endif
 }
 
 /*

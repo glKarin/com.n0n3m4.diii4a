@@ -31,6 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Model_local.h"
 #include "tr_local.h"	// just for R_FreeWorldInteractions and R_CreateWorldInteractions
+#ifdef _SPLASHDAMAGE //karin: clust model
+#include "renderer/Model_clust.h"
+#endif
 
 
 class idRenderModelManagerLocal : public idRenderModelManager
@@ -55,6 +58,9 @@ class idRenderModelManagerLocal : public idRenderModelManager
 		virtual void			EndLevelLoad();
 
 		virtual	void			PrintMemInfo(MemInfo_t *mi);
+#ifdef _SPLASHDAMAGE
+		virtual	idRenderModel *	GetModel( const char *modelName );
+#endif
 
 	private:
 		idList<idRenderModel *>	models;
@@ -313,15 +319,16 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 		model->InitFromFile(modelName);
 	} else if (extension.Icmp(MD5_MESH_EXT) == 0) {
 		model = new idRenderModelMD5;
+		model->InitFromFile(modelName);
 #ifdef _MODEL_MD5_EXT
-		if(fileSystem->ReadFile(modelName, NULL, NULL) < 0) // if md5mesh not exists, try convert from other supported animation model types
+		if((model->IsDefaultModel() || !model->IsLoaded()) && fileSystem->ReadFile(modelName, NULL, NULL) < 0) // if md5mesh not exists, try convert from other supported animation model types
 		{
 			idStr str(modelName);
 			str.StripFileExtension();
             R_Model_ConvertToMd5(str.c_str());
+			model->InitFromFile(modelName);
 		}
 #endif
-		model->InitFromFile(modelName);
 	} else if (extension.Icmp("md3") == 0) {
 		model = new idRenderModelMD3;
 		model->InitFromFile(modelName);
@@ -383,6 +390,17 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 	} else if (extension.Icmp("beam") == 0) {
 		model = new hhRenderModelBeam;
 		model->InitFromFile(modelName);
+#endif
+#ifdef _SPLASHDAMAGE //karin: binary modelb/BSE/clust model
+	} else if (extension.Icmp("modelb") == 0) {
+		model = new idRenderModelStatic;
+		model->InitFromFile(modelName);
+    } else if (extension.Icmp("bse") == 0) {
+        model = new rvRenderModelBSE;
+    	model->InitFromFile(modelName);
+    } else if (extension.Icmp("clust") == 0) {
+    	model = new sdRenderModelClust;
+    	model->InitFromFile(modelName);
 #endif
 	} else {
 
@@ -718,3 +736,8 @@ void idRenderModelManagerLocal::PrintMemInfo(MemInfo_t *mi)
 	fileSystem->CloseFile(f);
 }
 
+#ifdef _SPLASHDAMAGE
+idRenderModel *	idRenderModelManagerLocal::GetModel( const char *modelName ) {
+	return GetModel(modelName, false);
+}
+#endif

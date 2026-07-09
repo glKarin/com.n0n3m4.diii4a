@@ -35,6 +35,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../sound/snd_local.h"
 #endif
 
+#ifdef _SPLASHDAMAGE
+#include "decllib/declLocStr.h"
+#include "../etqw/Common.h"
+#endif
+
 idCVar	idSessionLocal::gui_configServerRate("gui_configServerRate", "0", CVAR_GUI | CVAR_ARCHIVE | CVAR_ROM | CVAR_INTEGER, "");
 
 // implements the setup for, and commands from, the main menu
@@ -56,7 +61,12 @@ idSessionLocal::StartMainMenu
 */
 void idSessionLocal::StartMenu(bool playIntro)
 {
-	if (guiActive == guiMainMenu) {
+#ifdef _SPLASHDAMAGE
+	if(game->IsMainMenuActive())
+#else
+	if (guiActive == guiMainMenu)
+#endif
+	{
 		return;
 	}
 
@@ -73,6 +83,9 @@ void idSessionLocal::StartMenu(bool playIntro)
 	// start playing the menu sounds
 	soundSystem->SetPlayingSoundWorld(menuSoundWorld);
 
+#ifdef _SPLASHDAMAGE
+	game->ShowMainMenu();
+#else
 	SetGUI(guiMainMenu, NULL);
 	guiMainMenu->HandleNamedEvent(playIntro ? "playIntro" : "noIntro");
 
@@ -82,6 +95,7 @@ void idSessionLocal::StartMenu(bool playIntro)
 	} else {
 		guiMainMenu->SetStateString("game_list", common->GetLanguageDict()->GetString("#str_07212"));
 	}
+#endif
 
 	console->Close();
 
@@ -94,6 +108,7 @@ idSessionLocal::SetGUI
 */
 void idSessionLocal::SetGUI(idUserInterface *gui, HandleGuiCommand_t handle)
 {
+#if !defined(_SPLASHDAMAGE) //karin: UI engine move to game in ETQW
 	const char	*cmd;
 
 	guiActive = gui;
@@ -121,6 +136,7 @@ void idSessionLocal::SetGUI(idUserInterface *gui, HandleGuiCommand_t handle)
 
 	cmd = guiActive->HandleEvent(&ev, com_frameTime);
 	guiActive->Activate(true, com_frameTime);
+#endif
 }
 
 /*
@@ -130,7 +146,11 @@ idSessionLocal::ExitMenu
 */
 void idSessionLocal::ExitMenu(void)
 {
+#ifdef _SPLASHDAMAGE
+	game->HideMainMenu();
+#else
 	guiActive = NULL;
+#endif
 
 	// go back to the game sounds
 	soundSystem->SetPlayingSoundWorld(sw);
@@ -654,7 +674,7 @@ void idSessionLocal::HandleMainMenuCommands(const char *menuCommand)
 
 		// always let the game know the command is being run
 		if (game) {
-#if !defined(_HUMANHEAD)
+#if !defined(_HUMANHEAD) && !defined(_SPLASHDAMAGE)
 			game->HandleMainMenuCommands(cmd, guiActive);
 #endif
 		}
@@ -791,7 +811,11 @@ void idSessionLocal::HandleMainMenuCommands(const char *menuCommand)
 				dict = fileSystem->GetMapDecl(i);
 
 				if (dict && dict->GetBool(gametype)) {
+#ifdef _SPLASHDAMAGE //karin: wchar
+					idStr mapName = dict->GetString("name");
+#else
 					const char *mapName = dict->GetString("name");
+#endif
 
 					if (mapName[ 0 ] == '\0') {
 						mapName = dict->GetString("path");
@@ -1403,6 +1427,7 @@ void idSessionLocal::DispatchCommand(idUserInterface *gui, const char *menuComma
 		HandleLoadingCommands(menuCommand);
 #endif
 	} else if (game && guiActive && guiActive->State().GetBool("gameDraw")) {
+#if !defined(_SPLASHDAMAGE)
 		const char *cmd = game->HandleGuiCommands(menuCommand);
 
 		if (!cmd) {
@@ -1419,6 +1444,7 @@ void idSessionLocal::DispatchCommand(idUserInterface *gui, const char *menuComma
 			// pipe the GUI sound commands not handled by the game to the main menu code
 			HandleMainMenuCommands(cmd);
 		}
+#endif
 	} else if (guiHandle) {
 		if ((*guiHandle)(menuCommand)) {
 			return;
@@ -1442,6 +1468,53 @@ Executes any commands returned by the gui
 */
 void idSessionLocal::MenuEvent(const sysEvent_t *event)
 {
+#ifdef _SPLASHDAMAGE //karin: send UI event to game
+	if (!game->IsMainMenuActive()) {
+		return;
+	}
+
+	//karin: convert to gui event if key down, hardcode
+	if(event->evType == SE_KEY && event->evValue2 == 1)
+	{
+		int value; //karin: see in guis/UIWindow.cpp
+		switch(event->evValue)
+		{
+			case K_ESCAPE: // escape/space: cancel/back
+				value = ULI_MENU_EVENT_CANCEL;
+				break;
+			case K_SPACE:
+			case K_ENTER: // enters: ok
+			case K_KP_ENTER:
+				value = ULI_MENU_EVENT_ACCEPT;
+				break;
+			case K_RIGHTARROW: // right/down: nav to next
+			case K_DOWNARROW:
+				value = ULI_MENU_EVENT_NAV_FORWARD;
+				break;
+			case K_LEFTARROW: // left/up: nav to previous
+			case K_UPARROW:
+				value = ULI_MENU_EVENT_NAV_BACKWARD;
+				break;
+			case K_TAB: // tab: nav to next | shift+tab: nav to previous
+				value = idKeyInput::IsDown(K_SHIFT) ? ULI_MENU_EVENT_NAV_BACKWARD : ULI_MENU_EVENT_NAV_FORWARD;
+			break;
+			default:
+				value = -1;
+				break;
+		}
+		if(value != -1)
+		{
+			sysEvent_t ev;
+			ev.Memset();
+			ev.evType = SE_GUI;
+			ev.evValue = value;
+			if(game->HandleGuiEvent(&ev))
+				return;
+		}
+	}
+
+	(void)game->HandleGuiEvent(event);
+#else
 	const char	*menuCommand;
 
 	if (guiActive == NULL) {
@@ -1460,6 +1533,7 @@ void idSessionLocal::MenuEvent(const sysEvent_t *event)
 	}
 
 	DispatchCommand(guiActive, menuCommand);
+#endif
 }
 
 /*
@@ -1475,12 +1549,20 @@ void idSessionLocal::GuiFrameEvents()
 
 	// stop generating move and button commands when a local console or menu is active
 	// running here so SP, async networking and no game all go through it
-	if (console->Active() || guiActive) {
+#ifdef _SPLASHDAMAGE //karin: main menu gui visible
+	if (console->Active() || game->IsMainMenuActive())
+#else
+	if (console->Active() || guiActive)
+#endif
+	{
 		usercmdGen->InhibitUsercmd(INHIBIT_SESSION, true);
 	} else {
 		usercmdGen->InhibitUsercmd(INHIBIT_SESSION, false);
 	}
 
+#ifdef _SPLASHDAMAGE //karin: update GUI
+	game->GuiFrameEvents(false);
+#else
 	if (guiTest) {
 		gui = guiTest;
 	} else if (guiActive) {
@@ -1497,6 +1579,7 @@ void idSessionLocal::GuiFrameEvents()
 	if (cmd && cmd[0]) {
 		DispatchCommand(guiActive, cmd);
 	}
+#endif
 }
 
 /*
@@ -1511,6 +1594,10 @@ bool idSessionLocal::BoxDialogSanityCheck(void)
 		return false;
 	}
 
+#ifdef _SPLASHDAMAGE
+	if (!game)
+		return false;
+#else
 	if (!guiMsg) {
 		return false;
 	}
@@ -1519,6 +1606,7 @@ bool idSessionLocal::BoxDialogSanityCheck(void)
 		common->DPrintf("message box sanity check: recursed\n");
 		return false;
 	}
+#endif
 
 	if (cvarSystem->GetCVarInteger("net_serverDedicated")) {
 		common->DPrintf("message box sanity check: not compatible with dedicated server\n");
@@ -1542,6 +1630,11 @@ const char *idSessionLocal::MessageBox(msgBoxType_t type, const char *message, c
 		return NULL;
 	}
 
+#ifdef _SPLASHDAMAGE
+	const sdDeclLocStr *placeholder = static_cast<const sdDeclLocStr *>(declManager->FindType(DECL_LOCSTR, "_default", true));
+	idWStr wstr = StrToWStr(message);
+	game->MessageBox(type, wstr.c_str(), placeholder);
+#else
 	guiMsg->SetStateString("title", title ? title : "");
 	guiMsg->SetStateString("message", message ? message : "");
 
@@ -1683,6 +1776,7 @@ const char *idSessionLocal::MessageBox(msgBoxType_t type, const char *message, c
 			return msgFireBack[ msgRetIndex ].c_str();
 		}
 	}
+#endif
 
 	return NULL;
 }
@@ -1694,6 +1788,7 @@ idSessionLocal::DownloadProgressBox
 */
 void idSessionLocal::DownloadProgressBox(backgroundDownload_t *bgl, const char *title, int progress_start, int progress_end)
 {
+#if !defined(_SPLASHDAMAGE)
 	int dlnow = 0, dltotal = 0;
 	int startTime = Sys_Milliseconds();
 	int lapsed;
@@ -1777,6 +1872,7 @@ void idSessionLocal::DownloadProgressBox(backgroundDownload_t *bgl, const char *
 		guiActive = guiMsg;
 		msgRunning = true;
 	}
+#endif
 }
 
 /*
@@ -1786,9 +1882,13 @@ idSessionLocal::StopBox
 */
 void idSessionLocal::StopBox()
 {
+#ifdef _SPLASHDAMAGE
+	game->CloseMessageBox();
+#else
 	if (guiActive == guiMsg) {
 		HandleMsgCommands("stop");
 	}
+#endif
 }
 
 /*
@@ -2098,4 +2198,25 @@ void idSessionLocal::HandleLoadingCommands(const char *menuCommand)
 	}
 }
 
+#endif
+
+#ifdef _SPLASHDAMAGE //karin: message box with char/wchar
+const char * idSessionLocal::MessageBox(msgBoxType_t type, const wchar_t *message, const wchar_t *title, bool wait, const char *fire_yes, const char *fire_no, bool network)
+{
+	idStr msg = WStrToStr(message);
+	idStr t = WStrToStr(title);
+	return MessageBox(type, msg, t, wait, fire_yes, fire_no, network);
+}
+
+const char * idSessionLocal::MessageBox(msgBoxType_t type, const char *message, const wchar_t *title, bool wait, const char *fire_yes, const char *fire_no, bool network)
+{
+	idStr t = WStrToStr(title);
+	return MessageBox(type, message, t, wait, fire_yes, fire_no, network);
+}
+
+const char * idSessionLocal::MessageBox(msgBoxType_t type, const wchar_t *message, const char *title, bool wait, const char *fire_yes, const char *fire_no, bool network)
+{
+	idStr msg = WStrToStr(message);
+	return MessageBox(type, msg, title, wait, fire_yes, fire_no, network);
+}
 #endif

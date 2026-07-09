@@ -51,6 +51,10 @@ class idDeclEntityDef : public idDecl
 #endif
 		virtual void			FreeData(void);
 		virtual void			Print(void) const;
+
+#ifdef _SPLASHDAMAGE
+    	static void				CacheFromDict( const idDict& dict );
+#endif
 };
 
 #endif /* !__DECLENTITYDEF_H__ */

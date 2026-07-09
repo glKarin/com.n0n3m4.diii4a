@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 
 project(doom3)
 
-set(IDTECH4AMM_ENGINE_PATCH 72)
+set(IDTECH4AMM_ENGINE_PATCH 73)
 set(IDTECH4AMM_ENGINE_VERSION "1.1.0harmattan${IDTECH4AMM_ENGINE_PATCH}")
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND FALSE)
 string(TIMESTAMP IDTECH4AMM_BUILDTIME "%Y-%m-%d %H:%M:%S")
@@ -114,6 +114,7 @@ endif()
 option(BUILD_D3								"Build DOOM 3"																ON)
 option(BUILD_Q4								"Build Quake 4"																ON)
 option(BUILD_PREY							"Build Prey"																ON)
+option(BUILD_ETQW							"Build Enemy Territory: Quake Wars"											ON)
 option(BUILD_D3_MOD							"Build all DOOM3 mods"														ON)
 option(BUILD_Q4_MOD							"Build all Quake4 mods"														ON)
 
@@ -205,6 +206,12 @@ option(PREY									"Build the prey game code" 													ON)
 option(PREY_MOD_FULL_BODY_AWARENESS			"Build prey full body awareness mod support" 								ON)
 endif()
 
+# Enemy Territory: Quake Wars
+if(BUILD_ETQW)
+option(SPLASHDAMAGE							"Build the splashdamage core" 												ON)
+option(ETQW									"Build the ETQW game code" 													ON)
+endif()
+
 set(ENABLE_ETC2 ${ETC2_IMAGE})
 
 # Print env
@@ -233,7 +240,7 @@ endif()
 
 # ETC2 support: but using C++11, so build a static library
 if(ENABLE_ETC2)
-if(CORE OR RAVEN OR HUMANHEAD)
+if(CORE OR RAVEN OR HUMANHEAD OR SPLASHDAMAGE)
 add_subdirectory(renderer/etc/EtcLib)
 set(local_libs "idtech4_EtcLib")
 
@@ -1372,7 +1379,7 @@ if(ANDROID)
 include_directories("sys/android")
 endif()
 
-if(CORE OR RAVEN OR HUMANHEAD)
+if(CORE OR RAVEN OR HUMANHEAD OR SPLASHDAMAGE)
 
 if(USE_SYSTEM_CURL)
 		find_package(CURL QUIET)
@@ -1932,6 +1939,67 @@ if(HUMANHEAD OR PREY)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_humanhead})
 endif()
 
+# splashdamage
+if(SPLASHDAMAGE OR ETQW)
+	set(splashdamage_idlib_src
+			splashdamage/idlib/Callable.cpp
+			splashdamage/idlib/Color.cpp
+			splashdamage/idlib/FunctionSignals.cpp
+			splashdamage/idlib/ImagePacker.cpp
+			splashdamage/idlib/PoolAllocator.cpp
+			splashdamage/idlib/Properties.cpp
+			splashdamage/idlib/TextUtilities.cpp
+			splashdamage/idlib/bv/Bounds2D.cpp
+			splashdamage/idlib/bv/BoundsShort.cpp
+			splashdamage/idlib/geometry/Surface_Traceable.cpp
+			splashdamage/idlib/geometry/TraceSurface.cpp
+			splashdamage/idlib/hashing/CRC16.cpp
+			splashdamage/idlib/hashing/CRC8.cpp
+			splashdamage/idlib/hashing/Honeyman.cpp
+			splashdamage/idlib/math/Mat3x4.cpp
+			splashdamage/idlib/math/Perlin.cpp
+			splashdamage/idlib/math/Random.cpp
+			splashdamage/idlib/math/Radians.cpp
+			#splashdamage/idlib/math/Simd_Xenon.cpp
+			splashdamage/idlib/text/LexerBinary.cpp
+			splashdamage/idlib/text/StrBuilder.cpp
+			splashdamage/idlib/text/StrSimple.cpp
+			splashdamage/idlib/text/UTF8.cpp
+			splashdamage/idlib/text/WLexer.cpp
+			splashdamage/idlib/text/WStr.cpp
+			splashdamage/idlib/text/WToken.cpp
+			splashdamage/idlib/threading/Lock.cpp
+			splashdamage/idlib/threading/Signal.cpp
+			splashdamage/idlib/threading/Thread.cpp
+			)
+	if(MSVC)
+		set(splashdamage_idlib_platform_src
+				splashdamage/idlib/sys/threading/SysSignal_win.cpp
+				splashdamage/idlib/sys/threading/SysThread_win.cpp
+				splashdamage/idlib/sys/threading/SysLock_win.cpp
+		)
+	else()
+		set(splashdamage_idlib_platform_src
+				splashdamage/idlib/sys/threading/SysThread_posix.cpp
+				splashdamage/idlib/sys/threading/SysSignal_posix.cpp
+				splashdamage/idlib/sys/threading/SysLock_posix.cpp
+		)
+	endif()
+	set(src_idlib_splashdamage
+			${src_idlib}
+			${splashdamage_idlib_src}
+			${splashdamage_idlib_platform_src}
+			)
+	add_library(idlib_splashdamage STATIC ${src_idlib_splashdamage})
+	if(NOT MSVC)
+		set_target_properties(idlib_splashdamage PROPERTIES COMPILE_FLAGS "-fPIC")
+	endif()
+	set_target_properties(idlib_splashdamage PROPERTIES COMPILE_DEFINITIONS "_SPLASHDAMAGE;_RAVEN_BSE")
+	target_include_directories(idlib_splashdamage PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage" "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage/idlib")
+
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_splashdamage})
+endif()
+
 # DOOM3
 if(CORE)
 	message(STATUS "Build core")
@@ -1997,6 +2065,13 @@ if(HUMANHEAD)
 endif()
 if(PREY)
 	message(STATUS "Build prey")
+endif()
+# Enemy Territory: Quake Wars
+if(SPLASHDAMAGE)
+	message(STATUS "Build splashdamage core")
+endif()
+if(ETQW)
+	message(STATUS "Build ETQW")
 endif()
 
 message(STATUS "=================================")
@@ -3065,4 +3140,423 @@ if(PREY)
 				ARCHIVE DESTINATION "${libdir}"
 				)
 	endif()
+endif()
+
+
+
+if(SPLASHDAMAGE)
+	# splashdamage engine source
+	set(splashdamage_sdnet_src
+			splashdamage/sdnet/SDNet.cpp
+			splashdamage/sdnet/SDNetAccount.cpp
+			splashdamage/sdnet/SDNetFriend.cpp
+			splashdamage/sdnet/SDNetFriendsManager.cpp
+			splashdamage/sdnet/SDNetMessage.cpp
+			splashdamage/sdnet/SDNetMessageHistory.cpp
+			splashdamage/sdnet/SDNetProfile.cpp
+			splashdamage/sdnet/SDNetSession.cpp
+			splashdamage/sdnet/SDNetSessionManager.cpp
+			splashdamage/sdnet/SDNetStatsManager.cpp
+			splashdamage/sdnet/SDNetTask.cpp
+			splashdamage/sdnet/SDNetTeamManager.cpp
+			splashdamage/sdnet/SDNetTeamMember.cpp
+			splashdamage/sdnet/SDNetUser.cpp
+	)
+	set(splashdamage_engine_src
+			splashdamage/framework/AdManager.cpp
+			splashdamage/framework/BuildVersion.cpp
+			splashdamage/framework/GraphManager.cpp
+			splashdamage/framework/NotificationSystem.cpp
+			splashdamage/framework/KeyInputManager.cpp
+			splashdamage/sys/sys_ime.cpp
+			splashdamage/sys/sys_keyboard.cpp
+	)
+	set(splashdamage_renderer_src
+			splashdamage/renderer/DeviceContext.cpp
+			splashdamage/renderer/FontManager.cpp
+			splashdamage/renderer/RenderProgram.cpp
+			splashdamage/renderer/RenderProgramManager.cpp
+			splashdamage/renderer/PostprocessBuffer.cpp
+			splashdamage/renderer/Model_clust.cpp
+			splashdamage/renderer/ImposterGeometry.cpp
+			splashdamage/renderer/OcclusionTest.cpp
+			splashdamage/renderer/draw_ambient.cpp
+			splashdamage/renderer/draw_atmosphere.cpp
+			splashdamage/renderer/Model_decal.cpp
+	)
+	set(splashdamage_decl_src
+			splashdamage/decllib/declAmbientCubeMap.cpp
+			splashdamage/decllib/declAtmosphere.cpp
+			splashdamage/decllib/declDecal.cpp
+			splashdamage/decllib/declImposter.cpp
+			splashdamage/decllib/declLocStr.cpp
+			splashdamage/decllib/declRenderBinding.cpp
+			splashdamage/decllib/declRenderProgram.cpp
+			splashdamage/decllib/declStuffType.cpp
+			splashdamage/decllib/DeclSurfaceType.cpp
+			splashdamage/decllib/DeclType.cpp
+			splashdamage/decllib/DeclTemplate.cpp
+			splashdamage/decllib/DeclSurfaceTypeMap.cpp
+	)
+	set(splashdamage_bse_src
+			raven/bse/BSE_Effect.cpp
+			raven/bse/BSE_EffectTemplate.cpp
+			raven/bse/bse_electricity.cpp
+			raven/bse/BSE_Envelopes.cpp
+			raven/bse/BSE_Light.cpp
+			raven/bse/BSE_Manager.cpp
+			raven/bse/BSE_ParseParticle2.cpp
+			raven/bse/BSE_Particle.cpp
+			raven/bse/BSE_Segment.cpp
+			raven/bse/bse_render.cpp
+			raven/bse/BSE_SegmentTemplate.cpp
+			raven/bse/BSE_SpawnDomains.cpp
+			raven/renderer/Model_bse.cpp
+	)
+	add_globbed_headers(splashdamage_sdnet_src "splashdamage")
+
+	set(src_core_splashdamage
+			${src_renderer}
+			${src_framework}
+			${splashdamage_sdnet_src}
+			${src_cm}
+			${src_aas}
+			${src_roq}
+			${src_snd}
+			${src_ui}
+			${src_tools}
+			${src_renderbump}
+			${src_dmap}
+			${splashdamage_engine_src}
+			${splashdamage_renderer_src}
+			${splashdamage_bse_src}
+			${splashdamage_decl_src}
+	)
+
+	if(ANDROID)
+		set(ETQWBINARY "etqw")
+		add_library(${ETQWBINARY} SHARED
+				${src_core_splashdamage}
+				${src_sys_base}
+				${src_sys_core}
+				${src_editor_tools}
+		)
+	else()
+		set(ETQWBINARY "ETQW")
+		if(CONSOLE)
+			add_executable(${ETQWBINARY}
+					${src_core_splashdamage}
+					${src_sys_base}
+					${src_sys_core}
+					${src_editor_tools}
+			)
+		else()
+			add_executable(${ETQWBINARY} WIN32 MACOSX_BUNDLE
+					${src_core_splashdamage}
+					${src_sys_base}
+					${src_sys_core}
+					${src_editor_tools}
+			)
+		endif()
+		if(WIN32 AND MSVC AND NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+			target_include_directories(${ETQWBINARY} PRIVATE ${DIRECTXSDK_INCLUDE_PATH})
+		endif()
+	endif()
+
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_splashdamage} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
+	set_target_properties(${ETQWBINARY} PROPERTIES COMPILE_DEFINITIONS "_SPLASHDAMAGE;_RAVEN_BSE;${CORE_DEFINES}")
+	set_target_properties(${ETQWBINARY} PROPERTIES LINK_FLAGS "${ldflags}")
+	target_include_directories(${ETQWBINARY} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage" "${CMAKE_CURRENT_SOURCE_DIR}/raven" "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage/idlib" "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage/idlib/sys")
+	#target_compile_options(${ETQWBINARY} PRIVATE -fno-inline) # allow check this is NULL
+
+	target_link_libraries(${ETQWBINARY}
+			idlib_splashdamage
+			${sys_libs}
+			${local_libs}
+	)
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS ${ETQWBINARY}
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+		)
+	endif()
+endif()
+
+if(ETQW)
+	# ETQW game source
+	set(src_etqw ${base_game_src})
+	set(etqw_game_src
+			Waypoints/LocationMarker.cpp
+			anim/Anim_FrameCommands.cpp
+			botai/aas/AAS.cpp
+			botai/aas/AASCallback_AvoidLocation.cpp
+			botai/aas/AASCallback_FindAreaOutOfRange.cpp
+			botai/aas/AASCallback_FindCoverArea.cpp
+			botai/aas/AASCallback_FindFlaggedArea.cpp
+			botai/aas/AAS_debug.cpp
+			botai/aas/AAS_pathing.cpp
+			botai/aas/AAS_routing.cpp
+			botai/aas/ObstacleAvoidance.cpp
+			botai/Bot.cpp
+			botai/BotAI_Actions.cpp
+			botai/BotAI_CombatNet.cpp
+			botai/BotAI_DMNet.cpp
+			botai/BotAI_Debug.cpp
+			botai/BotAI_FightUtils.cpp
+			botai/BotAI_Goals.cpp
+			botai/BotAI_LTGNet.cpp
+			botai/BotAI_Main.cpp
+			botai/BotAI_MoveNet.cpp
+			botai/BotAI_MoveUtils.cpp
+			botai/BotAI_NBGNet.cpp
+			botai/BotAI_Navigation.cpp
+			botai/BotAI_NodeCommands.cpp
+			botai/BotAI_Obstacles.cpp
+			botai/BotAI_Routes.cpp
+			botai/BotAI_Utils.cpp
+			botai/BotAI_VCombatNet.cpp
+			botai/BotAI_VCombatUtils.cpp
+			botai/BotAI_VDMNet.cpp
+			botai/BotAI_VMain.cpp
+			botai/BotAI_VMoveNet.cpp
+			botai/BotAI_VNodes.cpp
+			botai/BotAI_VUtils.cpp
+			botai/BotThread.cpp
+			botai/BotThreadData.cpp
+			client/ClientEffect.cpp
+			client/ClientEntity.cpp
+			client/ClientMoveable.cpp
+			decls/DeclAOR.cpp
+			decls/DeclAmmoType.cpp
+			decls/DeclCampaign.cpp
+			decls/DeclDamage.cpp
+			decls/DeclDamageFilter.cpp
+			decls/DeclDeployMask.cpp
+			decls/DeclDeployableObject.cpp
+			decls/DeclDeployableZone.cpp
+			decls/DeclGUI.cpp
+			decls/DeclGUITheme.cpp
+			decls/DeclHeightMap.cpp
+			decls/DeclInvItem.cpp
+			decls/DeclInvItemType.cpp
+			decls/DeclInvSlot.cpp
+			decls/DeclItemPackage.cpp
+			decls/DeclKeyBinding.cpp
+			decls/DeclMapInfo.cpp
+			decls/DeclPlayerClass.cpp
+			decls/DeclPlayerTask.cpp
+			decls/DeclProficiencyItem.cpp
+			decls/DeclProficiencyType.cpp
+			decls/DeclQuickChat.cpp
+			decls/DeclRadialMenu.cpp
+			decls/DeclRank.cpp
+			decls/DeclRating.cpp
+			decls/DeclRequirement.cpp
+			decls/DeclStringMap.cpp
+			decls/DeclTargetInfo.cpp
+			decls/DeclToolTip.cpp
+			decls/DeclVehiclePath.cpp
+			decls/DeployMask.cpp
+			decls/GameDeclIdentifiers.cpp
+			decls/GameDeclInfo.cpp
+			decls/HeightMap.cpp
+			decls/declVehicleScript.cpp
+			decls/precompiled.cpp
+			demos/DemoAnalyzer.cpp
+			demos/DemoCamera.cpp
+			demos/DemoManager.cpp
+			demos/DemoScript.cpp
+			docs/wiki.cpp
+			effects/Effects.cpp
+			effects/Flares.cpp
+			effects/FootPrints.cpp
+			effects/HardcodedParticleSystem.cpp
+			effects/RainEffect.cpp
+			effects/SnowEffect.cpp
+			effects/TireTread.cpp
+			effects/Wakes.cpp
+			effects/WaterEffects.cpp
+			gamesys/DeviceContextHelper.cpp
+			gamesys/Pvs.cpp
+			guis/GuiSurface.cpp
+			guis/GuiSurfaceRenderable.cpp
+			guis/UIBinder.cpp
+			guis/UICinematic.cpp
+			guis/UICreditScroll.cpp
+			guis/UICrosshairInfo.cpp
+			guis/UIEdit.cpp
+			guis/UIEditW.cpp
+			guis/UIIconNotification.cpp
+			guis/UILayout.cpp
+			guis/UIList.cpp
+			guis/UIList_Script.cpp
+			guis/UIMarquee.cpp
+			guis/UINews.cpp
+			guis/UIObject.cpp
+			guis/UIObjectScriptState.cpp
+			guis/UIProgress.cpp
+			guis/UIRadialMenu.cpp
+			guis/UIRenderWorld.cpp
+			guis/UISlider.cpp
+			guis/UITimeline.cpp
+			guis/UIWindow.cpp
+			guis/UIWindow_Script.cpp
+			guis/UIWindow_Shaped.cpp
+			guis/UserInterfaceExpressions.cpp
+			guis/UserInterfaceLocal.cpp
+			guis/UserInterfaceLocal_Eval.cpp
+			guis/UserInterfaceLocal_Script.cpp
+			guis/UserInterfaceLocal_Script_Game.cpp
+			guis/UserInterfaceManagerLocal.cpp
+			guis/UserInterfaceScript.cpp
+			guis/UserInterfaceTypes.cpp
+			interfaces/TaskInterface.cpp
+			misc/AdEntity.cpp
+			misc/DefenceTurret.cpp
+			misc/DeliveryVehicle.cpp
+			misc/Door.cpp
+			misc/General.cpp
+			misc/Parachute.cpp
+			misc/PlayerBody.cpp
+			misc/ProfileHelper.cpp
+			misc/RenderEntityBundle.cpp
+			misc/RepairDrone.cpp
+			network/SnapshotState.cpp
+			physics/ClipModel.cpp
+			physics/Force.cpp
+			physics/PhysicsEvent.cpp
+			physics/Physics_JetPack.cpp
+			physics/Physics_Linear.cpp
+			physics/Physics_Parabola.cpp
+			physics/Physics_RigidBodyMultiple.cpp
+			physics/Physics_Simple.cpp
+			physics/Physics_SimpleRigidBody.cpp
+			physics/Physics_SimpleSpline.cpp
+			physics/TraceModelCache.cpp
+			proficiency/ProficiencyManager.cpp
+			proficiency/StatsTracker.cpp
+			roles/FireTeams.cpp
+			roles/HudModule.cpp
+			roles/Inventory.cpp
+			roles/ObjectiveManager.cpp
+			roles/RoleManager.cpp
+			roles/Tasks.cpp
+			roles/WayPointManager.cpp
+			rules/AdminSystem.cpp
+			rules/GameRules.cpp
+			rules/GameRules_Campaign.cpp
+			rules/GameRules_DeathMatch.cpp
+			rules/GameRules_Multiplayer.cpp
+			rules/GameRules_Objective.cpp
+			rules/GameRules_StopWatch.cpp
+			rules/GUIDState.cpp
+			rules/UserGroup.cpp
+			rules/VoteManager.cpp
+			script/ScriptEntityHelpers.cpp
+			script/Script_DLL.cpp
+			script/Script_Exporter.cpp
+			script/Script_Helper.cpp
+			script/Script_Interface.cpp
+			script/Script_ScriptObject.cpp
+			script/Script_SysCall.cpp
+#			script/compiledscript/CompiledScript_Base.cpp
+#			script/compiledscript/CompiledScript_Class.cpp
+#			script/compiledscript/CompiledScript_Event.cpp
+#			script/compiledscript/CompiledScript_TypeInfo.cpp
+#			script/compiledscript/CompiledScripts_Types.cpp
+#			script/compiledscript/Precompiled.cpp
+			sdnet/SDNetManager.cpp
+			sdnet/SDNetProperties.cpp
+			structures/CommandMapPost.cpp
+			structures/DeployMask.cpp
+			structures/DeployRequest.cpp
+			structures/DeployZone.cpp
+			structures/TeamManager.cpp
+			vehicles/Attachments.cpp
+			vehicles/JetPack.cpp
+			vehicles/Pathing.cpp
+			vehicles/RouteConstraint.cpp
+			vehicles/SoundControl.cpp
+			vehicles/Transport.cpp
+			vehicles/TransportComponents.cpp
+			vehicles/TransportExtras.cpp
+			vehicles/TransportSystems.cpp
+			vehicles/VehicleControl.cpp
+			vehicles/VehicleIK.cpp
+			vehicles/VehicleSuspension.cpp
+			vehicles/VehicleView.cpp
+			vehicles/VehicleWeapon.cpp
+			vehicles/Vehicle_RigidBody.cpp
+			vehicles/Walker.cpp
+			# weapons/ClientProjectile.cpp
+			AORManager.cpp
+			AnimatedEntity.cpp
+			AntiLag.cpp
+			Atmosphere.cpp
+			AtmosphereRenderable.cpp
+			CommandMapInfo.cpp
+			CrosshairInfo.cpp
+			Effect.cpp
+			Game_Repeater.cpp
+			Game_ui.cpp
+			InputMode.cpp
+			LimboProperties.cpp
+			PlayerProperties.cpp
+			PredictionErrorDecay.cpp
+			ScriptEntity.cpp
+			StuffSystem.cpp
+			Teleporter.cpp
+			UpdateManager.cpp
+	)
+	list(REMOVE_ITEM src_etqw
+			BrittleFracture.cpp
+			Fx.cpp
+			MultiplayerGame.cpp
+			SecurityCamera.cpp
+			SmokeParticles.cpp
+			ai/AAS.cpp
+			ai/AAS_debug.cpp
+			ai/AAS_pathing.cpp
+			ai/AAS_routing.cpp
+			ai/AI.cpp
+			ai/AI_events.cpp
+			ai/AI_pathing.cpp
+			ai/AI_Vagary.cpp
+			gamesys/TypeInfo.cpp
+	)
+	list(APPEND src_etqw ${etqw_game_src})
+	set_src_dir(src_etqw "etqw" ${src_etqw})
+	list(APPEND src_etqw splashdamage/decllib/DeclType.cpp
+			splashdamage/framework/BuildVersion.cpp
+	)
+	add_globbed_headers(src_etqw "etqw")
+
+	add_library(etqwgame SHARED ${src_etqw})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_etqw})
+	#set_target_properties(quake4 PROPERTIES PREFIX "")
+	set(etqw_compile_definitions "GAME_DLL;_SPLASHDAMAGE;_ETQW")
+	set_target_properties(etqwgame PROPERTIES COMPILE_DEFINITIONS "${etqw_compile_definitions}")
+	target_include_directories(etqwgame PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/etqw")
+	set_target_properties(etqwgame PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(etqwgame PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(etqwgame idlib_splashdamage)
+	target_include_directories(etqwgame PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage" "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage/idlib" "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage/idlib/sys")
+	if(NOT MSVC)
+		#target_compile_options(etqwgame PRIVATE -Wno-format-security)
+		#target_compile_options(etqwgame PRIVATE -Wno-format-security -fno-delete-null-pointer-checks -fno-inline) # allow check this is NULL
+		#target_compile_options(etqwgame PRIVATE -Wno-format-security -fno-delete-null-pointer-checks) # allow check this is NULL
+		target_compile_options(etqwgame PRIVATE -Wno-format-security -fno-delete-null-pointer-checks -ffinite-math-only) # -ffp-model=fast
+	endif()
+	#target_compile_options(app3 PRIVATE -U_WLANG)
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS etqwgame
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+		)
+	endif()
+
 endif()

@@ -27,10 +27,14 @@ If you have questions concerning this license or the applicable additional terms
 */
 #ifndef __BUILD_VERSION__
 #define __BUILD_VERSION__
-#ifdef _HUMANHEAD
-const int BUILD_NUMBER = 116;
-#elif defined(_RAVEN)
+#ifdef _RAVEN
 const int BUILD_NUMBER = 1283;
+#elif defined(_HUMANHEAD)
+const int BUILD_NUMBER = 116;
+#elif defined(_SPLASHDAMAGE)
+extern int ENGINE_SRC_REVISION;
+extern int ENGINE_MEDIA_REVISION;
+#define BUILD_NUMBER ENGINE_SRC_REVISION
 #else
 const int BUILD_NUMBER = 1304;
 #endif

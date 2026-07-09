@@ -1181,6 +1181,125 @@ void R_LoadImage(const char *cname, byte **pic, int *width, int *height, ID_TIME
 }
 
 
+#ifdef _SPLASHDAMAGE //karin: export to idFileSystem
+void R_LoadTGA(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp) {
+	LoadTGA(name, pic, width, height, timestamp);
+}
+
+extern void R_GetCubeVector(int i, int cubesize, int x, int y, float *vector);
+
+bool R_LoadHalfSphereToCube(const char *imgName, byte *pics[6], int *outSize, ID_TIME_T *timestamp)
+{
+	byte **pic;
+	int scaled_height;
+	size_t size;
+	int stride;
+	float v9;
+	double v10;
+	int width_v12;
+	int v13;
+	int v14;
+	int offset;
+	byte *block;
+	int height;
+	int x;
+	float v21;
+	int width;
+	int y;
+	int side;
+	ID_TIME_T thisTime;
+	float v26;
+	float dir[3];
+
+	if ( pics )
+	{
+		R_LoadImageProgram(imgName, &block, &width, &height, &thisTime);
+		if ( !block )
+			return false;
+	}
+	else
+	{
+		R_LoadImageProgram(imgName, NULL, &width, &height, &thisTime);
+	}
+	if ( timestamp )
+		*timestamp = thisTime;
+	if ( thisTime == FILE_NOT_FOUND_TIMESTAMP )
+		return false;
+	scaled_height = 1;
+	for (scaled_height = 1 ; scaled_height < height ; scaled_height<<=1) ;
+	if ( outSize )
+		*outSize = scaled_height;
+	if ( !pics )
+		return true;
+
+	pic = pics;
+	size = 4 * scaled_height * scaled_height;
+	for ( side = 0; side < 6; side++, pic++ )
+	{
+		*pic = (byte *)Mem_Alloc(size);
+		if ( scaled_height > 0 )
+		{
+			for ( x = 0; x < scaled_height; x++ )
+			{
+				stride = 4 * x;
+				for ( y = 0; y < scaled_height; y++ )
+				{
+					R_GetCubeVector(side, scaled_height, x, y, dir);
+					v21 = fabs(dir[2]);
+					dir[2] = v21;
+					v9 = v21;
+					if ( v21 > -1.0 )
+					{
+						if ( v9 < 1.0 )
+						{
+							v21 = acos(v9);
+							v10 = v21;
+						}
+						else
+						{
+							v10 = 0.0;
+						}
+					}
+					else
+					{
+						v10 = 3.1415927;
+					}
+					v21 = v10;
+					v26 = atan2(dir[1], dir[0]);
+					width_v12 = width;
+					v26 = v26 / 3.1415927;
+					v26 = (v26 * 0.5 + 0.5) * (width - 1.0f);
+					v26 = floor(v26);
+					v13 = (int)v26;
+					v26 = v21 / 3.1415927;
+					v14 = v13 % width_v12;
+					v26 = (v26 + v26) * (height - 1.0f);
+					v26 = floor(v26);
+					offset = 4 * (width * ((int)v26 % height) + v14);
+					(*pic)[stride] = block[offset];
+					(*pic)[stride + 1] = block[offset + 1];
+					(*pic)[stride + 2] = block[offset + 2];
+					(*pic)[stride + 3] = block[offset + 3];
+					stride += 4 * scaled_height;
+				}
+			}
+		}
+
+#if 0 // debug to files
+		idStr filename="half/";
+		filename.Append(imgName);
+		filename.StripFileExtension();
+		filename.Append(va("_%d.png", side));
+		R_WritePNG(filename, *pic, scaled_height, scaled_height, 4);
+#endif
+	}
+	Mem_Free(block);
+
+	return true;
+}
+
+#endif
+
 /*
 =======================
 R_LoadCubeImages
@@ -1202,6 +1321,10 @@ bool R_LoadCubeImages(const char *imgName, cubeFiles_t extensions, byte *pics[6]
 	char	fullName[MAX_IMAGE_NAME];
 	int		width, height, size = 0;
 
+#ifdef _SPLASHDAMAGE // cubemap with single image
+	if(extensions == CF_HALFSPHERE)
+		return R_LoadHalfSphereToCube(imgName, pics, outSize, timestamp);
+#endif
 	if (extensions == CF_CAMERA) {
 		sides = cameraSides;
 	} else {

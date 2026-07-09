@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
+#ifdef _SPLASHDAMAGE
+const char sdPoolAllocator_idToken[] = "idToken";
+#endif
 
 /*
 ================
@@ -109,10 +112,15 @@ void idToken::NumberValue(void)
 	} else if (subtype & TT_DECIMAL) {
 		while (*p) {
 			intvalue = intvalue * 10 + (*p - '0');
+#ifdef _SPLASHDAMAGE
+            floatvalue = floatvalue * 10.0 + (double) (*p - '0');
+#endif
 			p++;
 		}
 
+#if !defined(_SPLASHDAMAGE)
 		floatvalue = intvalue;
+#endif
 	} else if (subtype & TT_IPADDRESS) {
 		c = 0;
 

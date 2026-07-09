@@ -148,6 +148,12 @@ class idUserInterfaceLocal : public idUserInterface
     private:
         int                         translateFont;
 #endif
+#ifdef _SPLASHDAMAGE //karin: unuse id's GUI in ETQW
+		virtual void				SetStateString(const char *varName, const wchar_t *value) {
+			idStr tmp = WStrToStr(value);
+			SetStateString(varName, tmp.c_str());
+		}
+#endif
 
 	private:
 #ifdef _RAVEN //k: check UI is interactive or desktop is interactive

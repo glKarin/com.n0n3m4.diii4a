@@ -37,6 +37,10 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+#include "../splashdamage/common/common.h"
+#else
+
 // Win32
 #if defined(WIN32) || defined(_WIN32)
 
@@ -71,7 +75,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #define assertmem( x, y )				assert( _CrtIsValidPointer( x, y, true ) )
 
-bool Sys_IsMainThread();
 #endif
 
 // Mac OSX
@@ -97,7 +100,7 @@ bool Sys_IsMainThread();
 #endif
 
 #define _alloca							alloca
-#define _alloca16( x )					((void *)((((int)alloca( (x)+15 )) + 15) & ~15))
+#define _alloca16( x )					((void *)((((uintptr_t)alloca( (x)+15 )) + 15) & ~15))
 
 #define PATHSEPERATOR_STR				"/"
 #define PATHSEPERATOR_CHAR				'/'
@@ -127,12 +130,12 @@ bool Sys_IsMainThread();
 #define CPUSTRING					"x86_64"
 #elif defined(__aarch64__)
 #define	BUILD_STRING				"android-arm64"
-#define CPUSTRING					"arm64"
 #define BUILD_OS_ID					2
+#define CPUSTRING					"arm64"
 #elif defined(__arm__)
 #define	BUILD_STRING				"android-arm"
-#define CPUSTRING					"arm"
 #define BUILD_OS_ID					2
+#define CPUSTRING					"arm"
 #endif
 
 #else
@@ -154,12 +157,12 @@ bool Sys_IsMainThread();
 #define CPUSTRING					"arm"
 #elif defined(__aarch64__)
 #define	BUILD_STRING				"linux-arm64"
-#define CPUSTRING					"arm64"
 #define BUILD_OS_ID					2
+#define CPUSTRING					"arm64"
 #elif defined(__e2k__)
 #define	BUILD_STRING				"linux-e2k"
-#define CPUSTRING					"e2k"
 #define BUILD_OS_ID					2
+#define CPUSTRING					"e2k"
 #endif
 
 #endif
@@ -188,6 +191,8 @@ bool Sys_IsMainThread();
 
 #endif
 
+#endif
+
 #ifdef __GNUC__
 #define id_attribute(x) __attribute__(x)
 #else
@@ -202,6 +207,7 @@ enum sysPath_t {
     PATH_EXE
 };
 #endif
+#if !defined(_SPLASHDAMAGE) //karin: defined on common/common.h
 typedef enum {
 	CPUID_NONE							= 0x00000,
 	CPUID_UNSUPPORTED					= 0x00001,	// unsupported (386/486)
@@ -219,6 +225,7 @@ typedef enum {
 	CPUID_FTZ							= 0x04000,	// Flush-To-Zero mode (denormal results are flushed to zero)
 	CPUID_DAZ							= 0x08000	// Denormals-Are-Zero mode (denormal source operands are set to zero)
 } cpuid_t;
+#endif
 
 typedef enum {
 	FPU_EXCEPTION_INVALID_OPERATION		= 1,
@@ -252,6 +259,22 @@ typedef enum {
 	MAX_JOYSTICK_AXIS
 } joystickAxis_t;
 
+#ifdef _SPLASHDAMAGE
+typedef enum {
+    AXIS_1,
+    AXIS_2,
+    AXIS_3,
+    AXIS_4,
+    AXIS_5,
+    AXIS_6,
+    AXIS_7,
+    AXIS_8,
+    MAX_CONTROLLER_AXIS,
+} controllerAxis_t;
+
+#include "sys/sys_input.h"
+#endif
+
 typedef enum {
 	SE_NONE,				// evTime is still valid
 	SE_KEY,					// evValue is a key code, evValue2 is the down flag
@@ -259,6 +282,15 @@ typedef enum {
 	SE_MOUSE,				// evValue and evValue2 are reletive signed x / y moves
 	SE_JOYSTICK_AXIS,		// evValue is an axis number and evValue2 is the current state (-127 to 127)
 	SE_CONSOLE				// evPtr is a char*, from typing something at a non-game console
+#ifdef _SPLASHDAMAGE
+	, 
+    SE_MOUSE_BUTTON,		// value is a mouse button number
+    SE_CONTROLLER_MOUSE,	// like a mouse movement, but caused by a controller, will not be used by usercmdgen
+    SE_CONTROLLER_AXIS,		// value is an axis number and value2 is the current state (-127 to 127)
+    SE_CONTROLLER_BUTTON,	// value is the button number, value2 is the controller hash << 1 OR'ed with the down flag
+    SE_GUI,					// an event generated specifically for guis
+    SE_IME,					// value is the event number,
+#endif
 } sysEventType_t;
 
 typedef enum {
@@ -276,12 +308,114 @@ typedef enum {
 } sys_mEvents;
 
 typedef struct sysEvent_s {
+#ifdef _SPLASHDAMAGE
+#if 0 //karin: make as POD
+public:
+								sysEvent_s() :
+									evPtrLength( 0 ),
+									evPtr( NULL ) {
+#if 1 //karin: compat for DOOM3
+									evType = SE_NONE;
+									evValue = evValue2 = 0;
+#endif
+								}
+								~sysEvent_s( void );
+	sysEvent_s&					operator=( const sysEvent_s& rhs );
+#endif
+
+	void						Memset();
+
+	void						Init( sysEventType_t _type = SE_NONE, int _value = 0, int _value2 = 0, int _ptrLength = 0, void* _ptr = NULL );
+
+	void						FreeData( void );
+
+	bool						IsKeyEvent( void ) const { return evType == SE_KEY
+		&& !(evValue >= K_MOUSE1 && evValue <= K_MWHEELUP) //karin: compat for DOOM3
+		; }
+	bool						IsCharEvent( void ) const { return evType == SE_CHAR; }
+	bool						IsRealMouseEvent( void ) const { return evType == SE_MOUSE; }
+	bool						IsMouseEvent( void ) const { return evType == SE_MOUSE || evType == SE_CONTROLLER_MOUSE; }
+	bool						IsControllerMouseEvent( void ) const { return evType == SE_CONTROLLER_MOUSE; }
+	bool						IsMouseButtonEvent( void ) const { return 
+		(evType == SE_KEY && evValue >= K_MOUSE1 && evValue <= K_MWHEELUP) || //karin: compat for DOOM3
+		evType == SE_MOUSE_BUTTON; }
+	bool						IsConsoleEvent( void ) const { return evType == SE_CONSOLE; }
+	bool						IsControllerButtonEvent( void ) const { return evType == SE_CONTROLLER_BUTTON; }
+	bool						IsGuiEvent( void ) const { return evType == SE_GUI; }
+	bool						IsIMEEvent( void ) const { return evType == SE_IME; }
+
+	float						GetXCoord( void ) const { return static_cast< float >( evValue ); }
+	float						GetYCoord( void ) const { return static_cast< float >( evValue2 ); }
+
+	const char*					GetCommand( void ) const { return reinterpret_cast< const char* >( evPtr ); }
+
+	bool						IsKeyDown( void ) const { return ( evValue2 & 0x1 ) != 0; }
+#if defined( MACOS_X ) || defined( __linux__ )
+	unsigned int				GetScanCode( void ) const { return static_cast< unsigned int >( evValue ); }
+	keyNum_e					GetKey( void ) const { return static_cast< keyNum_e >( evValue ); }
+#else
+	unsigned int				GetScanCode( void ) const { return static_cast< unsigned int >( evValue & 0xFF ); }
+	keyNum_e					GetKey( void ) const { return static_cast< keyNum_e >( ( evValue & 0xFF00 ) >> 8 ); }
+#endif
+	wchar_t						GetChar( void ) const { return evValue2; }
+
+	bool						IsKeyRepeat( void ) const { return ( evValue2 & 0x2 ) != 0; }
+
+	mouseButton_e				GetMouseButton() const
+	{
+		static const mouseButton_t maps[] = {
+			M_MOUSE1,
+			M_MOUSE2,
+			M_MOUSE3,
+			M_MOUSE4,
+			M_MOUSE5,
+			M_MOUSE6,
+			M_MOUSE7,
+			M_MOUSE8,
+			M_MWHEELDOWN,
+			M_MWHEELUP,
+		};
+		return (evValue >= K_MOUSE1 && evValue <= K_MWHEELUP) ? maps[ evValue - K_MOUSE1 ] : M_INVALID;
+	}
+
+	int							GetGuiAction( void ) const { return evValue; }
+
+	bool						IsButtonDown( void ) const { return ( evValue2 & 0x1 ) != 0; }
+	int							GetControllerHash( void ) const { return evValue2 >> 1; }
+	int							GetButton( void ) const { return evValue; }
+
+	// SE_IME
+	imeEvent_e					GetIMEEvent() const { return static_cast< imeEvent_e >( evValue ); }
+	const wchar_t*				GetCompositionString() const { return reinterpret_cast< const wchar_t* >( evPtr ); }
+
+#if !defined(_SPLASHDAMAGE)
+	idLinkList< sdSysEvent >&	GetNode( void ) { return node; }
+#endif
+
+	void						Save( class idFile* file );
+	void						Restore( class idFile* file );
+
+#endif
 	sysEventType_t	evType;
 	int				evValue;
 	int				evValue2;
 	int				evPtrLength;		// bytes of data pointed to by evPtr, for journaling
 	void 			*evPtr;				// this must be manually freed if not NULL
 } sysEvent_t;
+
+#ifdef _SPLASHDAMAGE
+struct sysTime_t {
+    int tm_sec;     /* seconds after the minute - [0,59] */
+    int tm_min;     /* minutes after the hour - [0,59] */
+    int tm_hour;    /* hours since midnight - [0,23] */
+    int tm_mday;    /* day of the month - [1,31] */
+    int tm_mon;     /* months since January - [0,11] */
+    int tm_year;    /* years since 1900 */
+    int tm_wday;    /* days since Sunday - [0,6] */
+    int tm_yday;    /* days since January 1 - [0,365] */
+    int tm_isdst;   /* daylight savings time flag */
+};
+#endif
 
 typedef struct sysMemoryStats_s {
 	int memoryLoad;
@@ -295,6 +429,14 @@ typedef struct sysMemoryStats_s {
 } sysMemoryStats_t;
 
 typedef unsigned long address_t;
+
+#ifdef _SPLASHDAMAGE
+struct cpuInfo_t {
+    int logicalNum;				// logical number of CPUs
+    int physicalNum;			// physical number of CPUs
+    int hyperThreadedStatus;	// one of the above HT_ constants
+};
+#endif
 
 template<class type> class idList;		// for Sys_ListFiles
 
@@ -441,7 +583,11 @@ const char 	*Sys_EXEPath(void);
 
 // use fs_debug to verbose Sys_ListFiles
 // returns -1 if directory was not found (the list is cleared)
+#ifdef _SPLASHDAMAGE
+int				Sys_ListFiles(const char *directory, const char *extension, class idStrList &list);
+#else
 int				Sys_ListFiles(const char *directory, const char *extension, idList<class idStr> &list);
+#endif
 
 // know early if we are performing a fatal error shutdown so the error message doesn't get lost
 void			Sys_SetFatalError(const char *error);
@@ -478,6 +624,18 @@ typedef struct {
 	unsigned char	ip[4];
 	unsigned short	port;
 } netadr_t;
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool operator==( const netadr_t& lhs, const netadr_t& rhs )
+{
+    return ( ( lhs.type == rhs.type ) &&
+             ( lhs.ip[ 0 ] == rhs.ip[ 0 ] ) &&
+             ( lhs.ip[ 1 ] == rhs.ip[ 1 ] ) &&
+             ( lhs.ip[ 2 ] == rhs.ip[ 2 ] ) &&
+             ( lhs.ip[ 3 ] == rhs.ip[ 3 ] ) &&
+             ( lhs.port == rhs.port ) );
+}
+#endif
 
 #define	PORT_ANY			-1
 
@@ -558,10 +716,17 @@ void			Sys_ShutdownNetworking(void);
 typedef void *(*xthread_t)(void *);
 
 typedef enum {
+#ifdef _SPLASHDAMAGE
+    THREAD_LOWEST,
+    THREAD_BELOW_NORMAL,
+#endif
 	THREAD_NORMAL,
 	THREAD_ABOVE_NORMAL,
 	THREAD_HIGHEST
 } xthreadPriority;
+#ifdef _SPLASHDAMAGE
+typedef xthreadPriority threadPriority_e;
+#endif
 
 #define XTHREAD_ID(thread) (thread).threadId
 #define XTHREAD_HANDLE_WRAP(x) (xthreadHandle_t)(x)
@@ -692,6 +857,10 @@ void				Sys_TriggerEvent(int index = TRIGGER_EVENT_ZERO);
 ==============================================================
 */
 
+#ifdef _SPLASHDAMAGE
+class sdIME;
+#endif
+
 class idSys
 {
 	public:
@@ -701,6 +870,17 @@ class idSys
 		virtual double			GetClockTicks(void) = 0;
 		virtual double			ClockTicksPerSecond(void) = 0;
 		virtual int			    GetProcessorId(void) = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual void			GetCPUInfo( cpuInfo_t& info ) = 0;
+    	virtual int				Milliseconds() = 0;
+    	virtual time_t			RealTime( sysTime_t* sysTime ) = 0;
+    	virtual const char*		TimeToSystemStr( const sysTime_t& sysTime ) = 0;
+    	virtual const char*		TimeAndDateToSystemStr( const sysTime_t& sysTime ) = 0;
+    	virtual time_t			TimeDiff( const sysTime_t& from, const sysTime_t& to ) = 0;
+    	virtual void			SecondsToTime( const time_t t, sysTime_t& out, bool localTime = false ) = 0;
+    	
+    	virtual const char *	GetCurCallStackStr( int depth ) = 0;
+#endif
 		virtual const char 	*GetProcessorString(void) = 0;
 		virtual const char 	*FPU_GetState(void) = 0;
 		virtual bool			FPU_StackIsEmpty(void) = 0;
@@ -720,10 +900,20 @@ class idSys
 		virtual uintptr_t		DLL_Load(const char *dllName) = 0;
 		virtual void 			*DLL_GetProcAddress(uintptr_t dllHandle, const char *procName) = 0;
 		virtual void			DLL_Unload(uintptr_t dllHandle) = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual void *			DLL_Load( const char *dllName, bool checkFullPathMatch ) = 0;
+    	virtual void *			DLL_GetProcAddress( void* dllHandle, const char *procName ) = 0;
+    	virtual void			DLL_Unload( void* dllHandle ) = 0;
+#endif
 		virtual void			DLL_GetFileName(const char *baseName, char *dllName, int maxLength) = 0;
 
+#ifdef _SPLASHDAMAGE
+	    virtual const sdSysEvent*	GenerateMouseButtonEvent( int button, bool down ) = 0;
+	    virtual const sdSysEvent*	GenerateMouseMoveEvent( int deltax, int deltay ) = 0;
+#else
 		virtual sysEvent_t		GenerateMouseButtonEvent(int button, bool down) = 0;
 		virtual sysEvent_t		GenerateMouseMoveEvent(int deltax, int deltay) = 0;
+#endif
 
 		virtual void			OpenURL(const char *url, bool quit) = 0;
 		virtual void			StartProcess(const char *exePath, bool quit) = 0;
@@ -736,6 +926,29 @@ class idSys
         virtual bool			LGLCD_Valid(void) = 0;
         virtual void			LGLCD_UploadImage(unsigned char *pixels, int w, int h, bool highPriority, bool flipColor) = 0;
         //HUMANHEAD END
+#endif
+#ifdef _SPLASHDAMAGE
+    	virtual void			ProcessOSEvents() = 0;
+    	
+    	virtual const sdSysEvent*	GenerateGuiEvent( int value ) = 0;
+    	virtual void			FreeEvent( const sdSysEvent* event ) = 0;
+    	
+    	virtual idWStr			GetClipboardData( void ) = 0;
+    	virtual void			SetClipboardData( const wchar_t *string ) = 0;
+
+    	virtual void			SetServerInfo( const char* key, const char* value ) = 0;
+    	virtual void			FlushServerInfo( void ) = 0;
+    	
+    	virtual idKeyboard&		Keyboard() = 0;
+    	virtual sdIME&			IME() = 0;
+
+	    // switch to the user's locale
+	    virtual void			SetSystemLocale() = 0;
+    	
+	    // switch to the default C locale
+	    virtual void			SetDefaultLocale() = 0;
+    	virtual const char *	NetAdrToString( const netadr_t& a ) const = 0;
+    	virtual bool			StringToNetAdr( const char *s, netadr_t *a, bool doDNSResolve ) const = 0;
 #endif
 };
 
@@ -769,6 +982,10 @@ bool Sys_ThreadIsRunning(const xthreadInfo *thread);
 #else
 #define THREAD_CANCELED(x) false
 #endif
+#endif
+
+#if defined(WIN32) || defined(_WIN32)
+bool Sys_IsMainThread();
 #endif
 
 void			Sys_Trap(void);

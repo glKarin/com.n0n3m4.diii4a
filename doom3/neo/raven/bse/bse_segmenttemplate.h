@@ -79,6 +79,9 @@ public:
       mSoundVolume(idVec2(0.0f, 0.0f)),
       mFreqShift(idVec2(1.0f, 1.0f)),
       mBSEEffect(NULL)
+#ifdef _SPLASHDAMAGE
+	  , mDecalAxis(0)
+#endif
     {
         for(int i = 0; i < sizeof(mEffects) / sizeof(mEffects[0]); i++)
             mEffects[i] = NULL;
@@ -87,16 +90,20 @@ public:
 
     /* construction helpers ------------------------------------------------ */
     void             Init(rvDeclEffect* decl);
-    bool             Parse(rvDeclEffect* effect,
-        int            segmentType,
-        idLexer* lexer);
+#ifdef _SPLASHDAMAGE //karin: using idParser instead of idLexer
+    bool             Parse(rvDeclEffect* effect, int segmentType, idParser* lexer);
+#else
+    bool             Parse(rvDeclEffect* effect, int segmentType, idLexer* lexer);
+#endif
     bool             Finish(rvDeclEffect* effect);
     void             EvaluateTrailSegment(rvDeclEffect* effect);
 
     /* particle helpers ---------------------------------------------------- */
-    void             CreateParticleTemplate(rvDeclEffect* effect,
-        idLexer* lexer,
-        int           particleType);
+#ifdef _SPLASHDAMAGE //karin: using idParser instead of idLexer
+    void             CreateParticleTemplate(rvDeclEffect* effect, idParser* lexer, int particleType);
+#else
+    void             CreateParticleTemplate(rvDeclEffect* effect, idLexer* lexer, int particleType);
+#endif
 
     /* run-time queries ----------------------------------------------------- */
     int              GetTexelCount() const;
@@ -153,4 +160,7 @@ public:
     rvBSE*                  mBSEEffect;
 
     idStr                  mSegmentName;
+#ifdef _SPLASHDAMAGE
+	int						mDecalAxis;						// Axis to project decals along
+#endif
 };

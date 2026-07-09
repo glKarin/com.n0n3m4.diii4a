@@ -956,7 +956,6 @@ void idFile_Memory::SetData(const char *data, int length)
 	curPtr = const_cast<char *>(data);
 }
 
-
 /*
 =================================================================================
 
@@ -1508,4 +1507,125 @@ int idFile::WriteVec5(const idVec5& vec) {
 	LittleRevBytes(&v, sizeof(float), sizeof(v) / sizeof(float));
 	return Write(&v, sizeof(v));
 }
+#endif
+
+#ifdef _SPLASHDAMAGE
+int idFile::ReadCQuat( idCQuat& quat ) {
+	int result = Read(&quat, sizeof(quat));
+	LittleRevBytes(&quat, sizeof(float), sizeof(quat)/sizeof(float));
+	return result;
+}
+
+int idFile::ReadAngles( idAngles& angles ) {
+	int result = Read(&angles, sizeof(angles));
+	LittleRevBytes(&angles, sizeof(float), sizeof(angles)/sizeof(float));
+	return result;
+}
+
+int idFile::Read1DFloatArray( float* dst ) {
+	int num;
+	int res = ReadInt(num);
+	if(res < 4)
+		return res;
+	return 4 + ReadFloatArray(dst, num);
+}
+
+int idFile::ReadFloatArray( float* src, const int num ) {
+	int result = Read(src, num * sizeof(float));
+	LittleRevBytes(src, sizeof(float), num);
+	return result;
+}
+
+int idFile::WriteDouble( const double value ) {
+	double v = LittleDouble(value);
+	return Write(&v, sizeof(v));
+}
+
+int idFile::WriteCQuat( const idCQuat& quat ) {
+	idCQuat v = quat;
+	LittleRevBytes(&v, sizeof(float), sizeof(v)/sizeof(float));
+	return Write(&v, sizeof(v));
+}
+
+int idFile::WriteAngles( const idAngles& angles ) {
+	idAngles v = angles;
+	LittleRevBytes(&v, sizeof(float), sizeof(v)/sizeof(float));
+	return Write(&v, sizeof(v));
+}
+
+int idFile::Write1DFloatArray( const int num, const float* src ) {
+	return 0;
+}
+
+int idFile::WriteFloatArray( const float* src, const int num ) {
+	int ret = 0;
+	for (int i = 0; i < num; i++) {
+		ret += WriteFloat(src[i]);
+	}
+	return ret;
+}
+
+
+
+#ifdef _SPLASHDAMAGE //karin: idFile_Buffered fake implemention, NON-buffered
+idFile_Buffered::idFile_Buffered( const int granularity )
+: source(NULL),
+	granularity(granularity),
+	available(-1),
+	sourceOffset(0),
+	filePtr(NULL),
+	curPtr(NULL)
+{
+
+}
+
+idFile_Buffered::idFile_Buffered( idFile* source, const int granularity )
+: source(source),
+	granularity(granularity),
+	available(-1),
+	sourceOffset(0),
+	filePtr(NULL),
+	curPtr(NULL)
+{
+}
+
+idFile_Buffered::~idFile_Buffered( void ) {
+	if (source)
+		fileSystem->CloseFile(source);
+}
+
+int idFile_Buffered::Read( void *buffer, int len ) {
+	assert(source);
+	return source->Read(buffer, len);
+}
+
+int idFile_Buffered::Tell( void ) {
+	assert(source);
+	return source->Tell();
+}
+
+int idFile_Buffered::Seek( long offset, fsOrigin_t origin ) {
+	assert(source);
+	return source->Seek(offset, origin);
+}
+
+void idFile_Buffered::SetSource( idFile* source ) {
+	this->source = source;
+}
+
+void idFile_Buffered::ReleaseSource() {
+	source = NULL;
+}
+
+int idFile_Buffered::ReadInternal( void* buffer, int len ) {
+	assert(0);
+	return -1;
+}
+
+void idFile_Buffered::SeekInternal( long offset ) {
+	assert(0);
+}
+
+#endif
+
 #endif

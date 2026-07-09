@@ -65,6 +65,10 @@ typedef enum {
 // command function
 typedef void (*cmdFunction_t)(const idCmdArgs &args);
 
+#ifdef _SPLASHDAMAGE
+typedef void ( *argCompletionCallback_t )( const char* );
+#endif
+
 // argument completion function
 typedef void (*argCompletion_t)(const idCmdArgs &args, void(*callback)(const char *s));
 
@@ -99,6 +103,12 @@ class idCmdSystem
 		virtual void		ArgCompletion_FolderExtension(const idCmdArgs &args, void(*callback)(const char *s), const char *folder, bool stripFolder, ...) = 0;
 		// Base for decl name auto-completion.
 		virtual void		ArgCompletion_DeclName(const idCmdArgs &args, void(*callback)(const char *s), int type) = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual void		PushFrameCommand( const char* command ) = 0;
+    	
+	    // Base for decl name auto-completion.
+	    virtual void		ArgCompletion_DeclName( const idCmdArgs &args, argCompletionCallback_t, const char* typeName ) = 0;
+#endif
 
 		// Adds to the command buffer in tokenized form ( CMD_EXEC_NOW or CMD_EXEC_APPEND only )
 		virtual void		BufferCommandArgs(cmdExecution_t exec, const idCmdArgs &args) = 0;
@@ -133,6 +143,10 @@ class idCmdSystem
 #endif
 #if defined(_RAVEN) || 1
 		static void			ArgCompletion_GuiName( const idCmdArgs &args, void(*callback)(const char *s) );
+#endif
+#ifdef _SPLASHDAMAGE
+    	static void			ArgCompletion_EntitiesName( const idCmdArgs &args, argCompletionCallback_t );
+    	static void			ArgCompletion_AtmosphereName( const idCmdArgs &args, argCompletionCallback_t );
 #endif
 };
 
@@ -259,6 +273,18 @@ ID_INLINE void idCmdSystem::ArgCompletion_ForceModelMarine( const idCmdArgs &arg
 ID_INLINE void idCmdSystem::ArgCompletion_GuiName( const idCmdArgs &args, void(*callback)( const char *s ) )
 {
 	cmdSystem->ArgCompletion_FolderExtension( args, callback, "guis/", false, ".gui", false );
+}
+#endif
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE void idCmdSystem::ArgCompletion_EntitiesName( const idCmdArgs &args, argCompletionCallback_t callback )
+{
+    cmdSystem->ArgCompletion_FolderExtension( args, callback, "maps/", true, ".entities", NULL );
+}
+
+ID_INLINE void idCmdSystem::ArgCompletion_AtmosphereName( const idCmdArgs &args, argCompletionCallback_t callback )
+{
+    cmdSystem->ArgCompletion_DeclName( args, callback, "atmosphere" );
 }
 #endif
 

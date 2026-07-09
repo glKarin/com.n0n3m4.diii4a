@@ -153,6 +153,10 @@ class idUserInterface
         virtual void				CallStartup() = 0;
         // HUMANHEAD END
 #endif
+
+#ifdef _SPLASHDAMAGE //karin: unuse id's GUI in ETQW
+		virtual void				SetStateString(const char *varName, const wchar_t *value) = 0;
+#endif
 };
 
 

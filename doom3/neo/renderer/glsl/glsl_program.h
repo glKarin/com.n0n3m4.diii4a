@@ -8,6 +8,7 @@ GLSL_PROGRAM_PROC shaderProgram_t shadowShader; // stencil shadow shader
 GLSL_PROGRAM_PROC shaderProgram_t defaultShader; // default texture and color shader
 GLSL_PROGRAM_PROC shaderProgram_t depthFillShader; // z-fill shader
 GLSL_PROGRAM_PROC shaderProgram_t depthFillClipShader; //k: z-fill shader(clipped)
+GLSL_PROGRAM_PROC shaderProgram_t depthFillNoAlphaTestShader; // z-fill shader(no alpha test)
 GLSL_PROGRAM_PROC shaderProgram_t cubemapShader; //k: skybox shader
 GLSL_PROGRAM_PROC shaderProgram_t environmentShader; //k: reflection shader(environment)
 GLSL_PROGRAM_PROC shaderProgram_t bumpyEnvironmentShader; //k: reflection shader(Bumpy environment)
@@ -24,6 +25,10 @@ GLSL_PROGRAM_PROC shaderProgram_t diffuseCubemapShader; //k: diffuse cubemap sha
 GLSL_PROGRAM_PROC shaderProgram_t depthToColorShader; //k: depth to color shader
 GLSL_PROGRAM_PROC shaderProgram_t stencilToColorShader; //k: stencil index to color shader
 GLSL_PROGRAM_PROC shaderProgram_t texgenShader; //k: texgen shader
+#ifdef _SPLASHDAMAGE //karin: Occlusion testing
+GLSL_PROGRAM_PROC shaderProgram_t occlusionTestShader; //k: occlusion testing
+#endif
+												
 #ifdef _POSTPROCESS
 GLSL_PROGRAM_PROC shaderProgram_t retro2BitShader; //k: 2Bit postprocess shader
 GLSL_PROGRAM_PROC shaderProgram_t retroC64Shader; //k: C64 postprocess shader

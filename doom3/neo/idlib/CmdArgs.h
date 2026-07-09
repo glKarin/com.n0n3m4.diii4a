@@ -47,7 +47,11 @@ class idCmdArgs
 			TokenizeString(text, keepAsStrings);
 		}
 
+#ifdef _SPLASHDAMAGE
+    	idCmdArgs&				operator=( const idCmdArgs& rhs );
+#else
 		void					operator=(const idCmdArgs &args);
+#endif
 
 		// The functions that execute commands get their parameters with these functions.
 		int						Argc(void) const {

@@ -1,5 +1,11 @@
 #include "RenderThread.h"
 
+#ifdef _SPLASHDAMAGE //karin: render threading
+#include "renderer/RenderProgramManager.h"
+
+extern void RB_QueryOcclusionTesting(void);
+#endif
+
 #define RENDER_THREAD_STARTED() (Sys_ThreadIsRunning(&render_thread))
 
 bool multithreadActive = false;
@@ -88,8 +94,16 @@ ID_INLINE static void RB_OnlyRenderThreadRunningAndMainThreadWaiting(void)
 {
     // Load custom GLSL shader or reload GLSL shaders
     RB_GLSL_HandleShaders();
+#ifdef _SPLASHDAMAGE //karin: reload render programs
+    // reload render programs
+    RB_ReloadRenderPrograms();
+#endif
     // debug tools
     RB_SetupRenderTools();
+#ifdef _SPLASHDAMAGE //karin: occlusion testing
+    // occlusion query
+    RB_QueryOcclusionTesting();
+#endif
 //#ifdef _IMGUI
     // start imgui
     //RB_ImGui_Start();

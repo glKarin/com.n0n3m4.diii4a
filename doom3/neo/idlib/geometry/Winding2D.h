@@ -37,7 +37,11 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _SPLASHDAMAGE //karin: macro compat
+#define	MAX_POINTS_ON_WINDING_2D		idWinding2D::MAX_POINTS
+#else
 #define	MAX_POINTS_ON_WINDING_2D		16
+#endif
 
 
 class idWinding2D
@@ -86,9 +90,33 @@ class idWinding2D
 		static idVec3	Plane2DFromVecs(const idVec2 &start, const idVec2 &dir, const bool normalize = false);
 		static bool		Plane2DIntersection(const idVec3 &plane1, const idVec3 &plane2, idVec2 &point);
 
+#ifdef _SPLASHDAMAGE
+	    static const int MAX_POINTS = 32;
+	    idWinding2D( const int numPoints, const idVec2* points, const idVec2* st );
+	    idVec2&			GetST( int index );
+	    const idVec2&	GetST( int index ) const;
+	    void			AddPoint( float x, float y );
+	    void			AddPoint( float x, float y, float s, float t );
+	    void			AddPoint( const idVec2 &point, const idVec2 &st );
+	    void			SetPointST( int index, float s, float t );
+	    bool			SplitEdgesByLine( const idVec2& start, const idVec2& end, const float epsilon = ON_EPSILON );
+	    bool			ClipByBounds( const sdBounds2D& bounds, const float epsilon = ON_EPSILON );
+	    idWinding2D&	ReverseSelf( void );
+	    void			GetBounds( sdBounds2D& bounds ) const;
+	    void			GetBoundsST( sdBounds2D& bounds ) const;
+	    void			Rotation( const idVec2& org, float angle );
+	    void			RotationST( const idVec2& org, float angle );
+	    void			Scale( const idVec2& scale );
+    
+#endif
 	private:
 		int				numPoints;
+#ifdef _SPLASHDAMAGE
+	    idVec2			p[idWinding2D::MAX_POINTS];
+	    idVec2			st[idWinding2D::MAX_POINTS];
+#else
 		idVec2			p[MAX_POINTS_ON_WINDING_2D];
+#endif
 };
 
 ID_INLINE idWinding2D::idWinding2D(void)
@@ -102,6 +130,9 @@ ID_INLINE idWinding2D &idWinding2D::operator=(const idWinding2D &winding)
 
 	for (i = 0; i < winding.numPoints; i++) {
 		p[i] = winding.p[i];
+#ifdef _SPLASHDAMAGE
+        st[i] = winding.st[i];
+#endif
 	}
 
 	numPoints = winding.numPoints;
@@ -125,6 +156,12 @@ ID_INLINE void idWinding2D::Clear(void)
 
 ID_INLINE void idWinding2D::AddPoint(const idVec2 &point)
 {
+#ifdef _SPLASHDAMAGE
+    if ( numPoints >= idWinding2D::MAX_POINTS ) {
+        assert( false );
+        return;
+    }
+#endif
 	p[numPoints++] = point;
 }
 
@@ -181,5 +218,83 @@ ID_INLINE bool idWinding2D::Plane2DIntersection(const idVec3 &plane1, const idVe
 	point.y = f0 * plane1.y + f1 * plane2.y;
 	return true;
 }
+
+#ifdef _SPLASHDAMAGE
+
+ID_INLINE idWinding2D::idWinding2D( const int numPoints, const idVec2* points, const idVec2* st ) :
+    numPoints( numPoints )
+{
+    ::memcpy( p, points, numPoints * sizeof( idVec2 ) );
+    ::memcpy( this->st, st, numPoints * sizeof( idVec2 ) );
+}
+
+ID_INLINE idVec2&	idWinding2D::GetST( int index )
+{
+    return st[ index ];
+}
+
+ID_INLINE const idVec2&	idWinding2D::GetST( int index ) const
+{
+    return st[ index ];
+}
+
+ID_INLINE void idWinding2D::AddPoint( const idVec2 &point, const idVec2 &_st )
+{
+    if ( numPoints >= idWinding2D::MAX_POINTS ) {
+        assert( false );
+        return;
+    }
+    p[numPoints] = point;
+    this->st[numPoints] = _st;
+    numPoints++;
+}
+
+ID_INLINE void idWinding2D::SetPointST( int index, float s, float t )
+{
+    st[ index ].x = s;
+    st[ index ].y = t;
+}
+
+ID_INLINE void idWinding2D::AddPoint( float x, float y )
+{
+    p[numPoints].x = x;
+    p[numPoints].y = y;
+    numPoints++;
+}
+
+ID_INLINE void idWinding2D::AddPoint( float x, float y, float s, float t )
+{
+    p[numPoints].x = x;
+    p[numPoints].y = y;
+    st[numPoints].x = s;
+    st[numPoints].y = t;
+    numPoints++;
+}
+
+ID_INLINE void idWinding2D::GetBounds( sdBounds2D& bounds ) const
+{
+    bounds.Clear();
+
+    if ( !numPoints ) {
+        return;
+    }
+
+    for ( int i = 0; i < numPoints; i++ ) {
+        bounds.AddPoint( p[ i ] );
+    }
+}
+
+ID_INLINE void idWinding2D::GetBoundsST( sdBounds2D& bounds ) const
+{
+    bounds.Clear();
+    if ( !numPoints ) {
+        return;
+    }
+
+    for ( int i = 0; i < numPoints; i++ ) {
+        bounds.AddPoint( st[ i ] );
+    }
+}
+#endif
 
 #endif /* !__WINDING2D_H__ */

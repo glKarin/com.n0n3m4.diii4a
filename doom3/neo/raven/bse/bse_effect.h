@@ -34,7 +34,11 @@ public:
       mOriginDistanceToCamera(0.0f),
       mShortestDistanceToCamera(0.0f),
       mBrightness(0.0f),
+#ifdef _SPLASHDAMAGE
+      mReferenceSound(NULL),
+#else
       mReferenceSoundHandle(-1), // 0
+#endif
       mShortestDistanceDummy(0.0f)
     {}
 	~rvBSE();                                           //  Destroy()
@@ -176,7 +180,11 @@ public:
 	//----------------------------------
 	//  Audio
 	//----------------------------------
+#ifdef _SPLASHDAMAGE
+	idSoundEmitter      *mReferenceSound;
+#else
 	int                 mReferenceSoundHandle;
+#endif
 
 	//----------------------------------
 	//  Misc

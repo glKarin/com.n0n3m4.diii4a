@@ -36,6 +36,9 @@ If you have questions concerning this license or the applicable additional terms
 #define TOKEN_FL_RECURSIVE_DEFINE	1
 
 define_t *idParser::globaldefines;
+#ifdef _SPLASHDAMAGE
+#include "common/common.h"
+#endif
 
 /*
 ================
@@ -264,10 +267,20 @@ define_t *idParser::CopyDefine(define_t *define)
 	define_t *newdefine;
 	idToken *token, *newtoken, *lasttoken;
 
+#ifdef _SPLASHDAMAGE
+    int nameLength;
+    nameLength = idStr::Length( define->name ) + 1;
+    newdefine = (define_t *) Mem_Alloc( sizeof(define_t) + nameLength );
+#else
 	newdefine = (define_t *) Mem_Alloc(sizeof(define_t) + strlen(define->name) + 1);
+#endif
 	//copy the define name
 	newdefine->name = (char *) newdefine + sizeof(define_t);
+#ifdef _SPLASHDAMAGE
+    idStr::Copynz( newdefine->name, define->name, nameLength );
+#else
 	strcpy(newdefine->name, define->name);
+#endif
 	newdefine->flags = define->flags;
 	newdefine->builtin = define->builtin;
 	newdefine->numparms = define->numparms;
@@ -338,12 +351,22 @@ define_t *idParser::DefineFromString(const char *string)
 	idParser src;
 	define_t *def;
 
-	if (!src.LoadMemory(string, strlen(string), "*defineString")) {
+#ifdef _SPLASHDAMAGE
+    if ( !src.LoadMemory( string, idStr::Length( string ), "*defineString" ) ) 
+#else
+	if (!src.LoadMemory(string, strlen(string), "*defineString")) 
+#endif
+	{
 		return NULL;
 	}
 
 	// create a define from the source
-	if (!src.Directive_define()) {
+#ifdef _SPLASHDAMAGE
+    if ( !src.Directive_define( false ) ) 
+#else
+	if (!src.Directive_define()) 
+#endif
+	{
 		src.FreeSource();
 		return NULL;
 	}
@@ -392,6 +415,90 @@ void idParser::Warning(const char *str, ...) const
 	}
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+================
+idParser::PushIndent
+================
+*/
+void idParser::PushIndent( int type, int skip, int skipElse )
+{
+    indent_t *indent;
+
+    indent = (indent_t *) Mem_Alloc( sizeof( indent_t ) );
+    indent->type = type;
+    indent->script = this->scriptstack;
+    indent->skip = ( skip != 0 );
+    indent->skipElse = ( skipElse != 0 );
+    this->skip += indent->skip;
+    indent->next = this->indentstack;
+    this->indentstack = indent;
+}
+
+/*
+================
+idParser::PopIndent
+================
+*/
+void idParser::PopIndent( int &type, int &skip, int &skipElse )
+{
+    indent_t *indent;
+
+    type = 0;
+    skip = 0;
+
+    indent = this->indentstack;
+    if ( !indent ) {
+        return;
+    }
+
+    // must be an indent from the current script
+    if ( this->indentstack->script != this->scriptstack ) {
+        return;
+    }
+
+    type = indent->type;
+    skip = indent->skip;
+    skipElse = indent->skipElse;
+    this->indentstack = this->indentstack->next;
+    this->skip -= indent->skip;
+    Mem_Free( indent );
+}
+
+/*
+================
+idParser::PushScript
+================
+*/
+bool idParser::PushScript( idLexer *script )
+{
+    idLexer *s;
+
+    for ( s = scriptstack; s != NULL; s = s->next ) {
+        if ( !idStr::Icmp( s->GetFileName(), script->GetFileName() ) ) {
+            //Warning( "'%s' recursively included", script->GetFileName() );
+            return false;
+        }
+    }
+    //push the script on the script stack
+    script->next = scriptstack;
+    scriptstack = script;
+
+    // add dependency
+    if ( OSPath ) {
+        const char* relativePath = idLib::fileSystem->OSPathToRelativePath( script->GetFileName() );
+        if ( relativePath == NULL || relativePath[0] == '\0' ) {
+            dependencies.AddUnique( script->GetFileName() );
+        } else {
+            dependencies.AddUnique( relativePath );
+        }
+    } else {
+        dependencies.AddUnique( script->GetFileName() );
+    }
+
+    return true;
+}
+#else
 /*
 ================
 idParser::PushIndent
@@ -458,6 +565,58 @@ void idParser::PushScript(idLexer *script)
 	script->next = idParser::scriptstack;
 	idParser::scriptstack = script;
 }
+#endif
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idParser::PushDependencies
+============
+*/
+void idParser::PushDependencies()
+{
+    dependencyStateStack.Push( dependencies.Num() );
+}
+
+/*
+============
+idParser::PopDependencies
+============
+*/
+void idParser::PopDependencies()
+{
+    if( dependencyStateStack.Empty() ) {
+        idLib::common->Error( "idParser::PopDependencies: stack underflow" );
+    }
+    int num = GetCurrentDependency();
+    dependencies.SetNum( num );
+    dependencyStateStack.Pop();
+}
+
+/*
+============
+idParser::GetNextDependency
+============
+*/
+const char* idParser::GetNextDependency( int& index  ) const
+{
+    if( index < 0 || index >= dependencies.Num() ) {
+        return NULL;
+    }
+    return dependencies[ index++ ];
+}
+
+
+/*
+============
+idParser::GetCurrentDependency
+============
+*/
+int idParser::GetCurrentDependency( void ) const
+{
+    return dependencyStateStack.Top();
+}
+#endif
 
 /*
 ================
@@ -496,7 +655,12 @@ int idParser::ReadSourceToken(idToken *token)
 			// remove all indents of the script
 			while (idParser::indentstack && idParser::indentstack->script == idParser::scriptstack) {
 				idParser::Warning("missing #endif");
+#ifdef _SPLASHDAMAGE
+    			int skipElse;
+                PopIndent( type, skip, skipElse );
+#else
 				idParser::PopIndent(&type, &skip);
+#endif
 			}
 
 			changedScript = 1;
@@ -536,6 +700,15 @@ int idParser::UnreadSourceToken(idToken *token)
 	idParser::tokens = t;
 	return true;
 }
+#ifdef _SPLASHDAMAGE
+bool idParser::UnreadSourceToken( const idToken& token )
+{
+    idToken* t = new idToken( token );
+    t->next = tokens;
+    tokens = t;
+    return true;
+}
+#endif
 
 /*
 ================
@@ -1036,6 +1209,36 @@ reads a token from the current line, continues reading on the next
 line only if a backslash '\' is found
 ================
 */
+#ifdef _SPLASHDAMAGE
+int idParser::ReadLine( idToken *token, bool multiline )
+{
+    int crossline;
+
+    if ( multiline ) {
+        while ( ReadSourceToken( token ) ) {
+            if ( *token == "%>" ) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    crossline = 0;
+    do {
+        if ( !ReadSourceToken( token ) ) {
+            return false;
+        }
+
+        if ( token->linesCrossed > crossline ) {
+            UnreadSourceToken( *token );
+            return false;
+        }
+        crossline = 1;
+    } while( (*token) == "\\" );
+    return true;
+}
+#else
 int idParser::ReadLine(idToken *token)
 {
 	int crossline;
@@ -1057,6 +1260,7 @@ int idParser::ReadLine(idToken *token)
 
 	return true;
 }
+#endif
 
 /*
 ================
@@ -1081,6 +1285,10 @@ int idParser::Directive_include(void)
 
 	if (token.type == TT_STRING) {
 		script = new idLexer;
+#ifdef _SPLASHDAMAGE
+        script->SetFlags( flags );
+        script->SetPunctuations( punctuations );
+#endif
 		// try relative to the current file
 		path = scriptstack->GetFileName();
 		path.StripFilename();
@@ -1093,15 +1301,30 @@ int idParser::Directive_include(void)
 		path += "/";
 		path += token;
 
-		if (!script->LoadFile(path, OSPath)) {
+#ifdef _SPLASHDAMAGE
+        if ( !script->LoadFile( path, OSPath, startLine ) )
+#else
+		if (!script->LoadFile(path, OSPath))
+#endif
+		{
 			// try absolute path
 			path = token;
 
-			if (!script->LoadFile(path, OSPath)) {
+#ifdef _SPLASHDAMAGE
+            if ( !script->LoadFile( path, OSPath, startLine ) )
+#else
+			if (!script->LoadFile(path, OSPath))
+#endif
+			{
 				// try from the include path
 				path = includepath + token;
 
-				if (!script->LoadFile(path, OSPath)) {
+#ifdef _SPLASHDAMAGE
+                if ( !script->LoadFile( path, OSPath, startLine ) )
+#else
+				if (!script->LoadFile(path, OSPath))
+#endif
+				{
 					delete script;
 					script = NULL;
 				}
@@ -1138,7 +1361,14 @@ int idParser::Directive_include(void)
 
 		script = new idLexer;
 
-		if (!script->LoadFile(includepath + path, OSPath)) {
+#ifdef _SPLASHDAMAGE
+        script->SetFlags( flags );
+        script->SetPunctuations( punctuations );
+        if ( !script->LoadFile( includepath + path, OSPath, startLine ) )
+#else
+		if (!script->LoadFile(includepath + path, OSPath))
+#endif
+		{
 			delete script;
 			script = NULL;
 		}
@@ -1152,9 +1382,16 @@ int idParser::Directive_include(void)
 		return false;
 	}
 
+#ifdef _SPLASHDAMAGE
+    if ( !PushScript( script ) ) {
+        delete script;
+        script = NULL;
+    }
+#else
 	script->SetFlags(idParser::flags);
 	script->SetPunctuations(idParser::punctuations);
 	idParser::PushScript(script);
+#endif
 	return true;
 }
 
@@ -1184,7 +1421,12 @@ int idParser::Directive_undef(void)
 	hash = PC_NameHash(token.c_str());
 
 	for (lastdefine = NULL, define = idParser::definehash[hash]; define; define = define->hashnext) {
-		if (!strcmp(define->name, token.c_str())) {
+#ifdef _SPLASHDAMAGE
+		if ( !idStr::Cmp( define->name, token.c_str() ) )
+#else
+		if (!strcmp(define->name, token.c_str()))
+#endif
+		{
 			if (define->flags & DEFINE_FIXED) {
 				idParser::Warning("can't undef '%s'", token.c_str());
 			} else {
@@ -1211,12 +1453,22 @@ int idParser::Directive_undef(void)
 idParser::Directive_define
 ================
 */
+#ifdef _SPLASHDAMAGE
+int idParser::Directive_define( bool isTemplate )
+#else
 int idParser::Directive_define(void)
+#endif
+
 {
 	idToken token, *t, *last;
 	define_t *define;
 
-	if (!idParser::ReadLine(&token)) {
+#ifdef _SPLASHDAMAGE
+    if ( !ReadLine( &token, isTemplate ) )
+#else
+	if (!idParser::ReadLine(&token))
+#endif
+	{
 		idParser::Error("#define without name");
 		return false;
 	}
@@ -1255,7 +1507,12 @@ int idParser::Directive_define(void)
 	AddDefineToHash(define, idParser::definehash);
 
 	// if nothing is defined, just return
-	if (!idParser::ReadLine(&token)) {
+#ifdef _SPLASHDAMAGE
+    if ( !ReadLine( &token, isTemplate ) )
+#else
+	if (!idParser::ReadLine(&token))
+#endif
+	{
 		return true;
 	}
 
@@ -1266,7 +1523,12 @@ int idParser::Directive_define(void)
 
 		if (!idParser::CheckTokenString(")")) {
 			while (1) {
-				if (!idParser::ReadLine(&token)) {
+#ifdef _SPLASHDAMAGE
+                if ( !ReadLine( &token, isTemplate ) )
+#else
+				if (!idParser::ReadLine(&token))
+#endif
+				{
 					idParser::Error("expected define parameter");
 					return false;
 				}
@@ -1294,7 +1556,12 @@ int idParser::Directive_define(void)
 				define->numparms++;
 
 				// read next token
-				if (!idParser::ReadLine(&token)) {
+#ifdef _SPLASHDAMAGE
+                if ( !ReadLine( &token, isTemplate ) )
+#else
+				if (!idParser::ReadLine(&token))
+#endif
+				{
 					idParser::Error("define parameters not terminated");
 					return false;
 				}
@@ -1311,7 +1578,12 @@ int idParser::Directive_define(void)
 			}
 		}
 
-		if (!idParser::ReadLine(&token)) {
+#ifdef _SPLASHDAMAGE
+		if ( !ReadLine( &token, isTemplate ) ) 
+#else
+		if (!idParser::ReadLine(&token)) 
+#endif
+		{
 			return true;
 		}
 	}
@@ -1320,21 +1592,40 @@ int idParser::Directive_define(void)
 	last = NULL;
 
 	do {
+#ifdef _SPLASHDAMAGE
+        if ( isTemplate && token.type == TT_PUNCTUATION && token == "$" ) {
+            idToken end;
+            ReadLine( &end, isTemplate );
+            if ( end == "endtemplate" ) {
+                break;
+            }
+            UnreadSourceToken( end );
+        }
+#endif
 		t = new idToken(token);
 
 		if (t->type == TT_NAME && !strcmp(t->c_str(), define->name)) {
 			t->flags |= TOKEN_FL_RECURSIVE_DEFINE;
-			idParser::Warning("recursive define (removed recursion)");
+			idParser::Warning("recursive define of '%s' (removed recursion)", define->name);
 		}
 
+#ifdef _SPLASHDAMAGE
+        t->whiteSpaceStart_p = t->whiteSpaceEnd_p = NULL;
+#else
 		t->ClearTokenWhiteSpace();
+#endif
 		t->next = NULL;
 
 		if (last) last->next = t;
 		else define->tokens = t;
 
 		last = t;
-	} while (idParser::ReadLine(&token));
+	} 
+#ifdef _SPLASHDAMAGE
+	while( ReadLine( &token, isTemplate ) );
+#else
+	while (idParser::ReadLine(&token));
+#endif
 
 	if (last) {
 		// check for merge operators at the beginning or end
@@ -1355,6 +1646,12 @@ idParser::AddDefine
 int idParser::AddDefine(const char *string)
 {
 	define_t *define;
+
+#ifdef _SPLASHDAMAGE
+    if ( definehash == NULL ) {
+        definehash = (define_t **) Mem_ClearedAlloc( DEFINEHASHSIZE * sizeof(define_t *) );
+    }
+#endif
 
 	define = DefineFromString(string);
 
@@ -1381,6 +1678,52 @@ void idParser::AddGlobalDefinesToSource(void)
 	}
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+================
+idParser::AddInclude
+================
+*/
+int idParser::AddInclude( const char *string )
+{
+    idStr str = va( "#include <%s>", string );
+    idLexer src( str, str.Length(), "AddInclude", LEXFL_ALLOWPATHNAMES );
+
+    idToken token1;
+    idToken token2;
+    idToken token3;
+    idToken token4;
+    idToken token5;
+    src.ReadToken( &token1 );
+    src.ReadToken( &token2 );
+    src.ReadToken( &token3 );
+    src.ReadToken( &token4 );
+    src.ReadToken( &token5 );
+    UnreadToken( token5 );
+    UnreadToken( token4 );
+    UnreadToken( token3 );
+    UnreadToken( token2 );
+    UnreadToken( token1 );
+
+    //return Directive_include();
+    return 1;
+}
+
+/*
+============
+idParser::AddIncludes
+============
+*/
+int	idParser::AddIncludes( const idStrList& includes )
+{
+    int result = 0;
+    for( int i = includes.Num() - 1; i >= 0 ; i-- ) {
+        result |= AddInclude( includes[ i ] );
+    }
+    return result;
+}
+#endif
+
 /*
 ================
 idParser::Directive_if_def
@@ -1405,7 +1748,11 @@ int idParser::Directive_if_def(int type)
 
 	d = FindHashedDefine(idParser::definehash, token.c_str());
 	skip = (type == INDENT_IFDEF) == (d == NULL);
+#ifdef _SPLASHDAMAGE
+	PushIndent( type, skip, !skip );
+#else
 	idParser::PushIndent(type, skip);
+#endif
 	return true;
 }
 
@@ -1436,9 +1783,15 @@ idParser::Directive_else
 */
 int idParser::Directive_else(void)
 {
+#ifdef _SPLASHDAMAGE
+	int type, skip, skipElse;
+
+	PopIndent( type, skip, skipElse );
+#else
 	int type, skip;
 
 	idParser::PopIndent(&type, &skip);
+#endif
 
 	if (!type) {
 		idParser::Error("misplaced #else");
@@ -1450,7 +1803,11 @@ int idParser::Directive_else(void)
 		return false;
 	}
 
+#ifdef _SPLASHDAMAGE
+	PushIndent( INDENT_ELSE, skipElse, 1 );
+#else
 	idParser::PushIndent(INDENT_ELSE, !skip);
+#endif
 	return true;
 }
 
@@ -1461,9 +1818,15 @@ idParser::Directive_endif
 */
 int idParser::Directive_endif(void)
 {
+#ifdef _SPLASHDAMAGE
+	int type, skip, skipElse;
+
+	PopIndent( type, skip, skipElse );
+#else
 	int type, skip;
 
 	idParser::PopIndent(&type, &skip);
+#endif
 
 	if (!type) {
 		idParser::Error("misplaced #endif");
@@ -1486,6 +1849,14 @@ typedef struct operator_s {
 } operator_t;
 
 typedef struct value_s {
+#ifdef _SPLASHDAMAGE
+    enum {
+        TYPE_STRING,
+        TYPE_INT,
+        TYPE_FLOAT
+    }				type;
+    idStr			string;
+#endif
 	signed/* 64long */ int intvalue;
 	double floatvalue;
 	int parentheses;
@@ -1647,6 +2018,9 @@ int idParser::EvaluateTokens(idToken *tokens, signed/* 64long */ int *intvalue, 
 					v->floatvalue = 0;
 				}
 
+#ifdef _SPLASHDAMAGE
+            	v->type = value_t::TYPE_INT;
+#endif
 				v->parentheses = parentheses;
 				v->next = NULL;
 				v->prev = lastvalue;
@@ -1671,6 +2045,38 @@ int idParser::EvaluateTokens(idToken *tokens, signed/* 64long */ int *intvalue, 
 				lastwasvalue = 1;
 				break;
 			}
+#ifdef _SPLASHDAMAGE
+	        case TT_STRING: {
+	            if ( lastwasvalue ) {
+	                Error( "syntax error in #if/#elif" );
+	                error = 1;
+	                break;
+	            }
+	            if ( lastoperator != NULL ) {
+	                if ( lastoperator->op != P_LOGIC_EQ && lastoperator->op != P_LOGIC_UNEQ ) {
+	                    Error( "only == and != are allowed on strings" );
+	                    error = 1;
+	                    break;
+	                }
+	            }
+	            AllocValue( v );
+	            v->string = *t;
+	            v->type = value_t::TYPE_STRING;
+	            v->parentheses = parentheses;
+	            v->next = NULL;
+	            v->prev = lastvalue;
+	            if ( lastvalue != NULL ) {
+	                lastvalue->next = v;
+	            } else {
+	                firstvalue = v;
+	            }
+	            lastvalue = v;
+	            // last token was a value
+	            lastwasvalue = 1;
+	            negativevalue = 0;
+	            break;
+	        }
+#endif
 			case TT_NUMBER: {
 				if (lastwasvalue) {
 					idParser::Error("syntax error in #if/#elif");
@@ -1688,6 +2094,13 @@ int idParser::EvaluateTokens(idToken *tokens, signed/* 64long */ int *intvalue, 
 					v->intvalue = t->GetIntValue();
 					v->floatvalue = t->GetFloatValue();
 				}
+#ifdef _SPLASHDAMAGE
+	            if ( ( t->subtype & TT_INTEGER ) != 0 ) {
+	                v->type = value_t::TYPE_INT;
+	            } else {
+	                v->type = value_t::TYPE_FLOAT;
+	            }
+#endif
 
 				v->parentheses = parentheses;
 				v->next = NULL;
@@ -1735,6 +2148,15 @@ int idParser::EvaluateTokens(idToken *tokens, signed/* 64long */ int *intvalue, 
 						break;
 					}
 				}
+#ifdef _SPLASHDAMAGE
+	            if ( lastwasvalue && lastvalue->type == value_t::TYPE_STRING ) {
+	                if ( t->subtype != P_LOGIC_EQ && t->subtype != P_LOGIC_UNEQ ) {
+	                    Error( "illegal operator '%s' on string operands", t->c_str() );
+	                    error = 1;
+	                    break;
+	                }
+	            }
+#endif
 
 				switch (t->subtype) {
 					case P_LOGIC_NOT:
@@ -1954,12 +2376,22 @@ int idParser::EvaluateTokens(idToken *tokens, signed/* 64long */ int *intvalue, 
 				v1->floatvalue = v1->floatvalue <= v2->floatvalue;
 				break;
 			case P_LOGIC_EQ:
+#ifdef _SPLASHDAMAGE
+	            v1->intvalue = ( v1->type == value_t::TYPE_STRING ) ? ( v1->string.Icmp( v2->string ) == 0 ) : ( v1->intvalue == v2->intvalue );
+	            v1->floatvalue = ( v1->type == value_t::TYPE_STRING ) ? ( v1->string.Icmp( v2->string ) == 0 ) : ( v1->floatvalue == v2->floatvalue );
+#else
 				v1->intvalue = v1->intvalue == v2->intvalue;
 				v1->floatvalue = v1->floatvalue == v2->floatvalue;
+#endif
 				break;
 			case P_LOGIC_UNEQ:
+#ifdef _SPLASHDAMAGE
+	            v1->intvalue = ( v1->type == value_t::TYPE_STRING ) ? ( v1->string.Icmp( v2->string ) != 0 ) : ( v1->intvalue != v2->intvalue );
+	            v1->floatvalue = ( v1->type == value_t::TYPE_STRING ) ? ( v1->string.Icmp( v2->string ) != 0 ) : ( v1->floatvalue != v2->floatvalue );
+#else
 				v1->intvalue = v1->intvalue != v2->intvalue;
 				v1->floatvalue = v1->floatvalue != v2->floatvalue;
+#endif
 				break;
 			case P_LOGIC_GREATER:
 				v1->intvalue = v1->intvalue > v2->intvalue;
@@ -2268,7 +2700,12 @@ int idParser::DollarEvaluate(signed/* 64long*/ int *intvalue, double *floatvalue
 			}
 		}
 		//if the token is a number or a punctuation
-		else if (token.type == TT_NUMBER || token.type == TT_PUNCTUATION) {
+#ifdef _SPLASHDAMAGE
+        else if ( token.type == TT_STRING || token.type == TT_NUMBER || token.type == TT_PUNCTUATION ) 		// if the token is a string, number or a punctuation
+#else
+		else if (token.type == TT_NUMBER || token.type == TT_PUNCTUATION) 
+#endif
+		{
 			if (token[0] == '(') indent++;
 			else if (token[0] == ')') indent--;
 
@@ -2324,6 +2761,27 @@ idParser::Directive_elif
 */
 int idParser::Directive_elif(void)
 {
+#ifdef _SPLASHDAMAGE
+	signed/* 64long */ int value = 0;
+    int type, skip, skipElse;
+
+    PopIndent( type, skip, skipElse );
+    if ( !type || type == INDENT_ELSE ) {
+        Error( "misplaced #elif" );
+        return false;
+    }
+    if ( !this->skip ) {
+        if ( !Evaluate( &value, NULL, true ) ) {
+            return false;
+        }
+        skip = skipElse || ( value == 0 );
+    } else {
+        skip = 1;
+    }
+
+    skipElse = skipElse || !skip;
+    PushIndent( INDENT_ELIF, skip, skipElse );
+#else
 	signed/* 64long */ int value;
 	int type, skip;
 
@@ -2340,6 +2798,7 @@ int idParser::Directive_elif(void)
 
 	skip = (value == 0);
 	idParser::PushIndent(INDENT_ELIF, skip);
+#endif
 	return true;
 }
 
@@ -2350,6 +2809,21 @@ idParser::Directive_if
 */
 int idParser::Directive_if(void)
 {
+#ifdef _SPLASHDAMAGE
+	signed/* 64long */ int value = 0;
+    int skip;
+
+    if ( !this->skip ) {
+        if ( !Evaluate( &value, NULL, true ) ) {
+            return false;
+        }
+        skip = ( value == 0 );
+    } else {
+        skip = 1;
+    }
+
+    PushIndent( INDENT_IF, skip, !skip );
+#else
 	signed/* 64long */ int value;
 	int skip;
 
@@ -2359,6 +2833,7 @@ int idParser::Directive_if(void)
 
 	skip = (value == 0);
 	idParser::PushIndent(INDENT_IF, skip);
+#endif
 	return true;
 }
 
@@ -2424,10 +2899,26 @@ int idParser::Directive_pragma(void)
 {
 	idToken token;
 
+#ifdef _SPLASHDAMAGE
+    idStr pragma;
+
+    while( ReadLine( &token, false ) ) {
+        pragma += token + " ";
+    }
+    pragma.StripTrailing( " " );
+
+    if ( pragmaCallback != NULL ) {
+        pragmaCallback( pragmaData, pragma );
+    } else {
+        Warning( "#pragma directive '%s' not supported", pragma.c_str() );
+    }
+#else
 	idParser::Warning("#pragma directive not supported");
 
 	while (idParser::ReadLine(&token)) {
 	}
+#endif
+
 
 	return true;
 }
@@ -2564,7 +3055,11 @@ int idParser::ReadDirective(void)
 			if (token == "include") {
 				return idParser::Directive_include();
 			} else if (token == "define") {
+#ifdef _SPLASHDAMAGE
+            	return Directive_define( false );
+#else
 				return idParser::Directive_define();
+#endif
 			} else if (token == "undef") {
 				return idParser::Directive_undef();
 			} else if (token == "line") {
@@ -2681,11 +3176,38 @@ int idParser::ReadDollarDirective(void)
 
 	// if if is a name
 	if (token.type == TT_NAME) {
+#ifdef _SPLASHDAMAGE
+        if ( token == "if" ) {
+            return DollarDirective_if();
+        } else if ( token == "ifdef" ) {
+            return DollarDirective_ifdef();
+        } else if ( token == "ifndef" ) {
+            return DollarDirective_ifndef();
+        } else if ( token == "elif" ) {
+            return DollarDirective_elif();
+        } else if ( token == "else" ) {
+            return DollarDirective_else();
+        } else if ( token == "endif" ) {
+            return DollarDirective_endif();
+        } else if ( token == "breakonparse" ) {
+            return true;
+        }
+
+        if ( skip > 0 ) {
+            return true;
+        }
+#endif
+
 		if (token == "evalint") {
 			return idParser::DollarDirective_evalint();
 		} else if (token == "evalfloat") {
 			return idParser::DollarDirective_evalfloat();
 		}
+#ifdef _SPLASHDAMAGE
+        else if ( token == "template" ) {
+            return Directive_define( true );
+        }
+#endif
 	}
 
 	idParser::UnreadSourceToken(&token);
@@ -2705,6 +3227,19 @@ int idParser::ReadToken(idToken *token)
 		if (!idParser::ReadSourceToken(token)) {
 			return false;
 		}
+#ifdef _SPLASHDAMAGE
+        // if dollar directives are allowed
+        if ( ( scriptstack->GetFlags() & LEXFL_NODOLLARPRECOMPILE ) == 0 ) {
+            // check for special precompiler directives
+            if ( token->type == TT_PUNCTUATION && ( *token)[0] == '$' && (*token)[1] == '\0' ) {
+                // read the precompiler directive
+                if ( ReadDollarDirective() ) {
+                    continue;
+                }
+                return true;
+            }
+        }
+#endif
 
 		// check for precompiler directives
 		if (token->type == TT_PUNCTUATION && (*token)[0] == '#' && (*token)[1] == '\0') {
@@ -2734,6 +3269,7 @@ int idParser::ReadToken(idToken *token)
 			}
 		}
 
+#if !defined(_SPLASHDAMAGE)
 		//
 		if (!(idParser::scriptstack->GetFlags() & LEXFL_NODOLLARPRECOMPILE)) {
 			// check for special precompiler directives
@@ -2744,6 +3280,7 @@ int idParser::ReadToken(idToken *token)
 				}
 			}
 		}
+#endif
 
 		// if the token is a name
 		if (token->type == TT_NAME && !(token->flags & TOKEN_FL_RECURSIVE_DEFINE)) {
@@ -2771,6 +3308,24 @@ int idParser::ReadToken(idToken *token)
 idParser::ExpectTokenString
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idParser::ExpectTokenString( const char* string, idToken* other )
+{
+    idToken temp;
+    idToken* token = other ? other : &temp;
+
+    if ( !idParser::ReadToken( token ) ) {
+        idParser::Error( "couldn't find expected '%s'", string );
+        return false;
+    }
+
+    if ( *token != string ) {
+        idParser::Error( "expected '%s' but found '%s'", string, token->c_str() );
+        return false;
+    }
+    return true;
+}
+#else
 int idParser::ExpectTokenString(const char *string)
 {
 	idToken token;
@@ -2787,6 +3342,7 @@ int idParser::ExpectTokenString(const char *string)
 
 	return true;
 }
+#endif
 
 /*
 ================
@@ -2979,6 +3535,17 @@ int idParser::PeekTokenType(int type, int subtype, idToken *token)
 idParser::SkipUntilString
 ================
 */
+#ifdef _SPLASHDAMAGE
+int idParser::SkipUntilString( const char *string, idToken* token )
+{
+    while( ReadToken( token ) ) {
+        if ( *token == string ) {
+            return true;
+        }
+    }
+    return false;
+}
+#endif
 int idParser::SkipUntilString(const char *string)
 {
 	idToken token;
@@ -3056,7 +3623,12 @@ Maintains the exact formating of the braced section
 */
 const char *idParser::ParseBracedSectionExact(idStr &out, int tabs)
 {
+#ifdef _SPLASHDAMAGE
+	scriptstack->ParseBracedSectionExact(out, tabs);
+	return out.c_str();
+#else
 	return scriptstack->ParseBracedSectionExact(out, tabs);
+#endif
 }
 
 /*
@@ -3068,6 +3640,67 @@ Parses until a matching close brace is found.
 Internal brace depths are properly skipped.
 =================
 */
+#ifdef _SPLASHDAMAGE
+const char* idParser::ParseBracedSection( idStr& out, int tabs, bool parseFirstBrace, char intro, char outro )
+{
+    idToken token;
+    int i, depth;
+    bool doTabs;
+
+    char temp[ 2 ] = { 0, 0 };
+    *temp = intro;
+
+    out.Empty();
+    if ( parseFirstBrace ) {
+        if ( !ExpectTokenString( temp ) ) {
+            return out.c_str();
+        }
+        out = temp;
+    }
+    depth = 1;
+    doTabs = ( tabs >= 0 );
+    do {
+        if ( !ReadToken( &token ) ) {
+            Error( "missing closing brace" );
+            return out.c_str();
+        }
+
+        // if the token is on a new line
+        for ( i = 0; i < token.linesCrossed; i++ ) {
+            out += "\r\n";
+        }
+
+        if ( doTabs && token.linesCrossed ) {
+            i = tabs;
+            if ( token[ 0 ] == outro && i > 0 ) {
+                i--;
+            }
+            while( i-- > 0 ) {
+                out += "\t";
+            }
+        }
+        if ( token.type != TT_STRING ) {
+            if ( token[ 0 ] == intro ) {
+                depth++;
+                if ( doTabs ) {
+                    tabs++;
+                }
+            } else if ( token[ 0 ] == outro ) {
+                depth--;
+                if ( doTabs ) {
+                    tabs--;
+                }
+            }
+            out += token;
+        } else {
+            out += "\"" + token + "\"";
+        }
+        out += " ";
+    } while( depth );
+
+    return out.c_str();
+}
+#else
 const char *idParser::ParseBracedSection(idStr &out, int tabs)
 {
 	idToken token;
@@ -3137,6 +3770,7 @@ const char *idParser::ParseBracedSection(idStr &out, int tabs)
 
 	return out.c_str();
 }
+#endif
 
 /*
 =================
@@ -3176,6 +3810,12 @@ void idParser::UnreadToken(idToken *token)
 {
 	idParser::UnreadSourceToken(token);
 }
+#ifdef _SPLASHDAMAGE
+void idParser::UnreadToken( const idToken& token )
+{
+    UnreadSourceToken( token );
+}
+#endif
 
 /*
 ================
@@ -3247,11 +3887,26 @@ bool idParser::ParseBool(void)
 idParser::ParseFloat
 ================
 */
+#ifdef _SPLASHDAMAGE
+float idParser::ParseFloat( bool* hadError )
+#else
 float idParser::ParseFloat(void)
+#endif
 {
 	idToken token;
 
+#ifdef _SPLASHDAMAGE
+    if( hadError != NULL ) {
+        *hadError = false;
+    }
+#endif
+
 	if (!idParser::ReadToken(&token)) {
+#ifdef _SPLASHDAMAGE
+        if( hadError != NULL ) {
+            *hadError = true;
+        }
+#endif
 		idParser::Error("couldn't read expected floating point number");
 		return 0.0f;
 	}
@@ -3260,6 +3915,11 @@ float idParser::ParseFloat(void)
 		idParser::ExpectTokenType(TT_NUMBER, 0, &token);
 		return -token.GetFloatValue();
 	} else if (token.type != TT_NUMBER) {
+#ifdef _SPLASHDAMAGE
+        if( hadError != NULL ) {
+            *hadError = true;
+        }
+#endif
 		idParser::Error("expected float value, found '%s'", token.c_str());
 	}
 
@@ -3342,6 +4002,23 @@ int idParser::Parse3DMatrix(int z, int y, int x, float *m)
 	return true;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+================
+idParser::GetNextWhiteSpace
+================
+*/
+int idParser::GetNextWhiteSpace( idStr &whiteSpace, bool currentLine )
+{
+    if ( scriptstack ) {
+        scriptstack->GetNextWhiteSpace( whiteSpace, currentLine );
+    } else {
+        whiteSpace.Clear();
+    }
+    return whiteSpace.Length();
+}
+#endif
+
 /*
 ================
 idParser::GetLastWhiteSpace
@@ -3410,6 +4087,19 @@ void idParser::GetStringFromMarker(idStr &out, bool clean)
 	*p = save;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+================
+idParser::SetPragmaCallback
+================
+*/
+void idParser::SetPragmaCallback( void *data, pragmaFunc_t func )
+{
+    pragmaCallback = func;
+    pragmaData = data;
+}
+#endif
+
 /*
 ================
 idParser::SetIncludePath
@@ -3473,7 +4163,11 @@ int idParser::GetFlags(void) const
 idParser::LoadFile
 ================
 */
+#ifdef _SPLASHDAMAGE
+int idParser::LoadFile( const char *filename, bool OSPath, int startLine )
+#else
 int idParser::LoadFile(const char *filename, bool OSPath)
+#endif
 {
 	idLexer *script;
 
@@ -3482,15 +4176,25 @@ int idParser::LoadFile(const char *filename, bool OSPath)
 		return false;
 	}
 
+#ifdef _SPLASHDAMAGE
+	script = new idLexer;
+    script->SetFlags( this->flags );
+    script->SetPunctuations( this->punctuations );
+    if ( !script->LoadFile( filename, OSPath, startLine ) ) 
+#else
 	script = new idLexer(filename, 0, OSPath);
 
-	if (!script->IsLoaded()) {
+	if (!script->IsLoaded()) 
+#endif
+	{
 		delete script;
 		return false;
 	}
 
+#if !defined(_SPLASHDAMAGE)
 	script->SetFlags(idParser::flags);
 	script->SetPunctuations(idParser::punctuations);
+#endif
 	script->next = NULL;
 	idParser::OSPath = OSPath;
 	idParser::filename = filename;
@@ -3519,24 +4223,38 @@ int idParser::LoadFile(const char *filename, bool OSPath)
 idParser::LoadMemory
 ================
 */
+#ifdef _SPLASHDAMAGE
+int idParser::LoadMemory( const char *ptr, int length, const char *name, int startLine )
+#else
 int idParser::LoadMemory(const char *ptr, int length, const char *name)
+#endif
 {
 	idLexer *script;
 
 	if (idParser::loaded) {
-		idLib::common->FatalError("idParser::loadMemory: another source already loaded");
+		idLib::common->FatalError("idParser::LoadMemory: another source already loaded");
 		return false;
 	}
 
+#ifdef _SPLASHDAMAGE
+    script = new idLexer;
+    script->SetFlags( this->flags );
+    script->SetPunctuations( this->punctuations );
+    if ( !script->LoadMemory( ptr, length, name, startLine ) ) 
+#else
 	script = new idLexer(ptr, length, name);
 
-	if (!script->IsLoaded()) {
+	if (!script->IsLoaded()) 
+#endif
+	{
 		delete script;
 		return false;
 	}
 
+#if !defined(_SPLASHDAMAGE)
 	script->SetFlags(idParser::flags);
 	script->SetPunctuations(idParser::punctuations);
+#endif
 	script->next = NULL;
 	idParser::filename = name;
 	idParser::scriptstack = script;
@@ -3554,6 +4272,57 @@ int idParser::LoadMemory(const char *ptr, int length, const char *name)
 	return true;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+================
+idParser::LoadMemoryBinary
+================
+*/
+int idParser::LoadMemoryBinary( const byte *ptr, int length, const char *name, idTokenCache* globals )
+{
+    idLexer *script;
+    this->startLine = 0;
+
+    if ( loaded ) {
+        idLib::common->FatalError("idParser::LoadMemoryBinary: another source already loaded");
+        return false;
+    }
+    script = new idLexer;
+    script->SetFlags( this->flags );
+    script->SetPunctuations( this->punctuations );
+    if ( !script->LoadMemoryBinary( ptr, length, name, globals ) ) {
+        delete script;
+        return false;
+    }
+
+    script->next = NULL;
+    filename = name;
+    scriptstack = script;
+    tokens = NULL;
+    indentstack = NULL;
+    skip = 0;
+    loaded = true;
+    pragmaCallback = NULL;
+    pragmaData = NULL;
+
+    if ( definehash == NULL ) {
+        defines = NULL;
+        definehash = (define_t **) Mem_ClearedAlloc( DEFINEHASHSIZE * sizeof(define_t *) );
+        AddGlobalDefinesToSource();
+    }
+
+#if 0 //karin: output binary source for debug
+	extern void OutputTextSource(idParser &src, sdStringBuilder_Heap &buf);
+	sdStringBuilder_Heap buf;
+	OutputTextSource(*this, buf);
+	printf("|%s|\n",buf.c_str());
+	ResetBinaryParsing();
+#endif
+
+    return true;
+}
+#endif
+
 /*
 ================
 idParser::FreeSource
@@ -3566,6 +4335,10 @@ void idParser::FreeSource(bool keepDefines)
 	define_t *define;
 	indent_t *indent;
 	int i;
+
+#ifdef _SPLASHDAMAGE
+    dependencies.Clear();
+#endif
 
 	// free all the scripts
 	while (scriptstack) {
@@ -3672,6 +4445,12 @@ idParser::idParser()
 	this->defines = NULL;
 	this->tokens = NULL;
 	this->marker_p = NULL;
+#ifdef _SPLASHDAMAGE
+    pragmaCallback = NULL;
+    pragmaData = NULL;
+    startLine = 1;
+    skip = 0;
+#endif
 }
 
 /*
@@ -3691,6 +4470,12 @@ idParser::idParser(int flags)
 	this->defines = NULL;
 	this->tokens = NULL;
 	this->marker_p = NULL;
+#ifdef _SPLASHDAMAGE
+    pragmaCallback = NULL;
+    pragmaData = NULL;
+    startLine = 1;
+    skip = 0;
+#endif
 }
 
 /*
@@ -3701,7 +4486,11 @@ idParser::idParser
 idParser::idParser(const char *filename, int flags, bool OSPath)
 {
 	this->loaded = false;
+#ifdef _SPLASHDAMAGE
+    this->OSPath = OSPath;
+#else
 	this->OSPath = true;
+#endif
 	this->punctuations = 0;
 	this->flags = flags;
 	this->scriptstack = NULL;
@@ -3710,6 +4499,12 @@ idParser::idParser(const char *filename, int flags, bool OSPath)
 	this->defines = NULL;
 	this->tokens = NULL;
 	this->marker_p = NULL;
+#ifdef _SPLASHDAMAGE
+    pragmaCallback = NULL;
+    pragmaData = NULL;
+    startLine = 1;
+    skip = 0;
+#endif
 	LoadFile(filename, OSPath);
 }
 
@@ -3730,7 +4525,15 @@ idParser::idParser(const char *ptr, int length, const char *name, int flags)
 	this->defines = NULL;
 	this->tokens = NULL;
 	this->marker_p = NULL;
+#ifdef _SPLASHDAMAGE
+    pragmaCallback = NULL;
+    pragmaData = NULL;
+    startLine = 1;
+    skip = 0;
+    LoadMemory( ptr, length, name, startLine );
+#else
 	LoadMemory(ptr, length, name);
+#endif
 }
 
 /*
@@ -3808,6 +4611,267 @@ int idParser::Parse1DMatrix( int x, float *m, bool ravenMatrix) {
 		}
 	}
 	return true;
+}
+#endif
+
+#ifdef _SPLASHDAMAGE
+
+/*
+================
+idParser::WriteBinary
+================
+*/
+void idParser::WriteBinary( idFile* f, idTokenCache* tokenCache )
+{
+    if( scriptstack != NULL ) {
+        idToken token;
+        idLexer* base = scriptstack;
+
+        int numTokens = 0;
+        while( ReadToken( &token ) ) {
+            base->GetBinary().AddToken( token, tokenCache );
+            numTokens++;
+        }
+        base->GetBinary().Write( f );
+
+        /*
+        idLib::common->DPrintf( "%s: %i total tokens\n", filename.c_str(), numTokens );
+        */
+
+        base->GetBinary().SetData( NULL, tokenCache );
+
+        // dump out a text version of everything
+#if 0
+        ResetBinaryParsing();
+
+        idStr filename = this->filename;
+        filename.SetFileExtension( ".bdump" );
+        idFile* f = idLib::fileSystem->OpenFileAppend( filename );
+        if( f != NULL ) {
+            while( ReadToken( &token ) ) {
+                if( token.linesCrossed ) {
+                    f->WriteFloatString( "\n" );
+                }
+                f->WriteFloatString( "%s%s%s ", token.type == TT_STRING ? "\"" : "", token.c_str(), token.type == TT_STRING ? "\"" : "" );
+            }
+            f->WriteFloatString( "\n" );
+            f->WriteFloatString( "\n" );
+        }
+        idLib::fileSystem->CloseFile( f );
+#endif
+    }
+}
+
+
+/*
+============
+idParser::ResetBinaryParsing
+============
+*/
+void idParser::ResetBinaryParsing()
+{
+    if( scriptstack == NULL ) {
+        return;
+    }
+    scriptstack->GetBinary().ResetParsing();
+}
+
+/*
+================
+idParser::DollarDirective_if_def
+
+   multi-line if with parenthesis
+================
+*/
+int idParser::DollarDirective_if_def( int type )
+{
+    idToken token;
+    define_t *d;
+    int skip;
+
+    if ( !ReadSourceToken( &token ) ) {
+        Error( "$ifdef without name" );
+        return false;
+    }
+    if ( token.type != TT_NAME ) {
+        UnreadSourceToken( token );
+        Error( "expected name after $ifdef, found '%s'", token.c_str() );
+        return false;
+    }
+    d = FindHashedDefine( definehash, token.c_str() );
+    skip = ( type == INDENT_IFDEF ) == ( d == NULL );
+    PushIndent( type, skip, !skip );
+    return true;
+}
+
+/*
+================
+idParser::DollarDirective_ifdef
+================
+*/
+int idParser::DollarDirective_ifdef( void )
+{
+    return DollarDirective_if_def( INDENT_IFDEF );
+}
+
+/*
+================
+idParser::DollarDirective_ifndef
+================
+*/
+int idParser::DollarDirective_ifndef( void )
+{
+    return DollarDirective_if_def( INDENT_IFNDEF );
+}
+
+/*
+================
+idParser::DollarDirective_else
+================
+*/
+int idParser::DollarDirective_else( void )
+{
+    int type, skip, skipElse;
+
+    PopIndent( type, skip, skipElse );
+    if ( !type ) {
+        Error( "misplaced $else" );
+        return false;
+    }
+    if ( type == INDENT_ELSE ) {
+        Error( "$else after $else" );
+        return false;
+    }
+    PushIndent( INDENT_ELSE, skipElse, 1 );
+    return true;
+}
+
+/*
+================
+idParser::DollarDirective_endif
+================
+*/
+int idParser::DollarDirective_endif( void )
+{
+    int type, skip, skipElse;
+
+    PopIndent( type, skip, skipElse );
+    if ( !type ) {
+        Error( "misplaced $endif" );
+        return false;
+    }
+    return true;
+}
+
+/*
+================
+idParser::DollarDirective_if
+================
+*/
+int idParser::DollarDirective_if( void )
+{
+    signed /*long */int value = 0;
+    int skip;
+
+    if ( !this->skip ) {
+        if ( !DollarEvaluate( &value, NULL, true ) ) {
+            return false;
+        }
+        skip = ( value == 0 );
+    } else {
+        skip = 1;
+    }
+
+    PushIndent( INDENT_IF, skip, !skip );
+    return true;
+}
+
+/*
+================
+idParser::DollarDirective_elif
+
+   multi-line elif with parenthesis
+================
+*/
+int idParser::DollarDirective_elif( void )
+{
+    signed /*long */int value = 0;
+    int type, skip, skipElse;
+
+    PopIndent( type, skip, skipElse );
+    if ( !type || type == INDENT_ELSE ) {
+        Error( "misplaced $elif" );
+        return false;
+    }
+    if ( !this->skip ) {
+        if ( !DollarEvaluate( &value, NULL, true ) ) {
+            return false;
+        }
+        skip = skipElse || ( value == 0 );
+    } else {
+        skip = 1;
+    }
+
+    skipElse = skipElse || !skip;
+    PushIndent( INDENT_ELIF, skip, skipElse );
+    return true;
+}
+
+//karin: for debug
+void OutputTextSource(idParser &src, sdStringBuilder_Heap &buf) {
+	idToken token2;
+	int intent = 0;
+	bool nl    = false;
+	while (src.ReadToken(&token2)) {
+		nl = token2.linesCrossed;
+		if (token2.type != TT_STRING) {
+			if (token2 == "}") {
+				intent--;
+				//nl = true;
+			}
+		}
+		if (nl) {
+			buf.Append("\n");
+			for (int m = 0; m < intent; m++) {
+				buf.Append("    ");
+			}
+			//nl = false;
+		}
+		if (token2.type == TT_STRING) {
+			buf.Append("\"");
+		}
+		buf.Append(token2.c_str());
+		if (token2.type == TT_STRING) {
+			buf.Append("\"");
+		}
+		if (token2.type != TT_STRING) {
+			if (token2 == ";") {
+				//nl = true;
+			}
+			else if (token2 == "{") {
+				intent++;
+				//nl = true;
+			}
+			else if (token2 == "}") {
+				//nl = true;
+			}
+			else {
+				//nl = false;
+				buf.Append(" ");
+			}
+		}
+		else {
+			//nl = false;
+			buf.Append(" ");
+		}
+	}
+}
+
+void OutputFormatSource(idParser &src, const char *fileName, const char *name) {
+	idFile *f = idLib::fileSystem->OpenFileWrite(va("formatted/%s/%s", name, fileName));
+	sdStringBuilder_Heap buf;
+	OutputTextSource(src, buf);
+	idLib::fileSystem->CloseFile(f);
 }
 #endif
 

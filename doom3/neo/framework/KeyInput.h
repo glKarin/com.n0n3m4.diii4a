@@ -43,6 +43,7 @@ If you have questions concerning this license or the applicable additional terms
 // western european keyboards are inserted in this table so that those keys
 // are bindable (otherwise they get bound as one of the special keys in this
 // table)
+#if !defined(_SPLASHDAMAGE)
 typedef enum {
 	K_TAB = 9,
 	K_ENTER = 13,
@@ -190,6 +191,9 @@ typedef enum {
 	K_RIGHT_ALT = 253,	// used by some languages as "Alt-Gr"
 	K_LAST_KEY  = 254	// this better be < 256!
 } keyNum_t;
+#else
+#include "sys/keynum.h"
+#endif
 
 
 class idKeyInput
@@ -217,6 +221,227 @@ class idKeyInput
 		static const char 	*BindingFromKey(const char *key);
 		static bool			KeyIsBoundTo(int keyNum, const char *binding);
 		static void			WriteBindings(idFile *f);
+
+		class Modifier {
+			static bool			Shift(void) {
+				return IsDown(K_SHIFT);
+			}
+			static bool			Ctrl(void) {
+				return IsDown(K_CTRL);
+			}
+			static bool			Alt(void) {
+				return IsDown(K_ALT);
+			}
+		};
 };
+
+#ifdef _SPLASHDAMAGE
+extern const int MAX_KEYS;
+extern idKey *keys;
+
+class sdKeyCommand
+{
+public:
+    sdKeyCommand( void );
+
+    void					Set( const char* _binding );
+    int						GetAction( void ) const
+    {
+        return action;
+    }
+    const char*				GetBinding( void ) const
+    {
+        return binding.c_str();
+    }
+    usercmdbuttonType_t		GetType( void ) const
+    {
+        return type;
+    }
+    void					FixupBind( void );
+
+private:
+    idStr					binding;
+    int						action;
+    usercmdbuttonType_t		type;
+};
+
+enum
+{
+	KM_CTRL,
+	KM_SHIFT,
+	KM_ALT,
+	KM_COMMAND,
+	KM_RCTRL,
+	KM_RSHIFT,
+	KM_RALT,
+	KM_RCOMMAND,
+	KM_TOTAL
+};
+
+class sdKeyBind
+{
+public:
+    static const int MAX_MODIFIERS = 8;
+    typedef sdPair< int, sdKeyCommand > pair_t;
+
+    void					ClearCommand( int modifier );
+    void					SetCommand( int modifier, const char* command );
+    sdKeyCommand&			GetCommand( void );
+    sdKeyCommand&			GetCommand( int modifier );
+    void					Write( idFile* f, const char* context, const char* keyName );
+    void					UnBindBinding( const char* binding );
+    void					SetupBinds( void );
+
+private:
+    sdKeyCommand							defaultCommand;
+    idStaticList< pair_t, MAX_MODIFIERS >	modifierCommands;
+};
+
+class sdBindContext
+{
+public:
+    typedef sdPair< int, sdKeyBind* > pair_t;
+
+    sdBindContext( const char* _name )
+    {
+        name = _name;
+		//karin: add HACK: ignore menu, bindmenu, radialmenu
+		isMenu = !idStr::Icmp(_name, "menu") || !idStr::Icmp(_name, "radialmenu") || !idStr::Icmp(_name, "bindmenu");
+    }
+    ~sdBindContext( void )
+    {
+        UnBindAll();
+    }
+
+    sdKeyBind*				AllocBind( int key );
+    sdKeyBind*				GetBind( int key );
+    const char*				GetName( void ) const
+    {
+        return name.c_str();
+    }
+    sdKeyCommand*			GetCommand( int key );
+    void					WriteBindings( idFile* f );
+    void					Bind( int key, int modifierKey, const char* binding );
+    void					UnBind( int key, int modifierKey );
+    void					UnBindAll( void );
+    void					UnBindBinding( const char* binding );
+    void					SetupBinds( void );
+
+	//karin: add HACK: save is handle command event
+	bool					IsMenu(void) const {
+		return isMenu;
+	}
+
+private:
+    idList< pair_t >		keys;
+    idHashIndex				keyHash;
+    idStr					name;
+	//karin: add HACK: ignore key command in menu
+	bool					isMenu;
+};
+
+class idKey
+{
+public:
+    idKey( int _id, const char* _name, const char* _locName, const wchar_t* _fixedText ) : down( false ), id( _id ), activeCommand( NULL )
+    {
+        name = _name;
+        if ( _locName != NULL ) {
+            locName = _locName;
+        }
+        if ( _fixedText != NULL ) {
+            fixedText = _fixedText;
+        }
+
+    	//karin: compat for DOOM3
+    	repeats = 0;
+    	usercmdAction = UB_NONE;
+    }
+
+    void					SetDown( bool _down );
+    bool					IsDown( void ) const
+    {
+        return down;
+    }
+
+    int						GetId( void ) const
+    {
+        return id;
+    }
+
+    void					GetLocalizedText( idWStr& text )
+    {
+        if ( locName.Length() > 0 ) {
+            text = common->LocalizeText( locName.c_str() );
+            return;
+        }
+        text = fixedText;
+    }
+
+    void					SetActiveCommand( sdKeyCommand* cmd )
+    {
+        activeCommand = cmd;
+    }
+    sdKeyCommand*			GetActiveCommand( void ) const
+    {
+        return activeCommand;
+    }
+
+    const char*				GetName( void ) const
+    {
+        return name.c_str();
+    }
+
+    bool					down;
+    int						id;
+    idStr					name;
+    idStr					locName;
+    idWStr					fixedText;
+    sdKeyCommand*			activeCommand;
+
+	//karin: compat for DOOM3
+	int				repeats;		// if > 1, it is autorepeating
+	idStr			binding;
+	int				usercmdAction;	// for testing by the asyncronous usercmd generation
+    usercmdbuttonType_t		type;
+
+	sdKeyCommand			command;
+
+	idKey() : down( false ), id( 0 ), activeCommand( NULL ), repeats(0), usercmdAction(UB_NONE), type(B_COMMAND)
+	{}
+};
+
+class sdKeyInputManager
+{
+public:
+    virtual ~sdKeyInputManager() {}
+
+    virtual void			SetBinding( sdBindContext* context, idKey& key, const char* binding, idKey* modifierKey ) = 0;
+    virtual const char*		GetBinding( sdBindContext* context, idKey& key, idKey* modifierKey ) = 0;
+
+    virtual void			UnbindBinding( sdBindContext* context, const char *bind ) = 0;
+    virtual void			KeysFromBinding( sdBindContext* context, const char* binding, bool useBindStrWhenEmpty, idWStr& keyName ) = 0;
+
+    // pass NULL for keys to find the number of keys to allocate
+    virtual void			KeysFromBinding( sdBindContext* context, const char* binding, int& numKeys, idKey** keys ) = 0;
+
+    virtual bool			IsDown( const idKey& key ) = 0;
+    virtual bool			IsDown( keyNum_e key ) = 0;
+    virtual idKey*			GetKey( const char* name ) = 0;
+    virtual idKey*			GetKeyForEvent( const sdSysEvent& evt, bool& down ) = 0;
+
+    virtual void			ProcessUserCmdEvent( const sdSysEvent& event ) = 0;
+
+    virtual sdKeyCommand*	GetCommand( sdBindContext* context, const idKey& key ) = 0;
+
+    virtual sdBindContext*	AllocBindContext( const char* context ) = 0;
+
+    virtual void			UnbindKey(  sdBindContext* context, idKey& key, idKey* modifier = NULL ) = 0;
+
+    virtual bool			AnyKeysDown( void ) = 0;
+};
+
+extern sdKeyInputManager* keyInputManager;
+#endif
 
 #endif /* !__KEYINPUT_H__ */

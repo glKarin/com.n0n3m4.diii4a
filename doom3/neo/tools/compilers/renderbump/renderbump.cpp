@@ -964,7 +964,11 @@ static idRenderModel *CombineModelSurfaces(idRenderModel *model)
 
 	surf.id = 0;
 	surf.geometry = newTri;
+#ifdef _SPLASHDAMAGE
+	surf.material = tr.defaultMaterial;
+#else
 	surf.shader = tr.defaultMaterial;
+#endif
 
 	idRenderModel *newModel = renderModelManager->AllocModel();
 	newModel->AddSurface(surf);

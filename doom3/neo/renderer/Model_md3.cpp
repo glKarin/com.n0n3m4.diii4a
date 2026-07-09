@@ -354,8 +354,12 @@ idRenderModel *idRenderModelMD3::InstantiateDynamicModel(const struct renderEnti
 		//64 surf.shader = shaders->shader;
         // FIXME: theoretically there can be multiple shaders?
         // DG: turned md3Shader_t::shader (pointer) into an int (index)
-        int shaderIdx = shaders->shaderIndex;
+		int shaderIdx = shaders->shaderIndex;
+#ifdef _SPLASHDAMAGE
+        surf.material = (shaderIdx >= 0) ? this->shaders[shaderIdx] : NULL;
+#else
         surf.shader = (shaderIdx >= 0) ? this->shaders[shaderIdx] : NULL;
+#endif
 
 		LerpMeshVertexes(tri, surface, backlerp, frame, oldframe);
 

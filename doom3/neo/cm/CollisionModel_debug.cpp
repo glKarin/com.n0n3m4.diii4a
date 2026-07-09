@@ -107,6 +107,35 @@ const char *cm_contentsNameByIndex[] = {
 	"hunterclip",					// 27
 
 	// END HUMANHEAD
+#elif defined(_SPLASHDAMAGE) //karin: must sync with renderer/Material.h
+	"none",							// 0
+	"solid",						// 1
+	"opaque",						// 2
+	"water",						// 3
+	"playerclip",					// 4
+	"walkerclip",					// 5
+	"moveableclip",					// 6
+	"ikclip",						// 7
+	"slidemover",					// 8
+	"body",							// 9
+	"projectile",					// 10
+	"corpse",						// 11
+	"rendermodel",					// 12
+	"trigger",						// 13
+	"vehicleclip",					// 14
+	"explosion",					// 15
+	"monster",						// 16
+	"forcefield",					// 17
+	"shadowcollision",				// 18
+	"crosshair",					// 19
+	"flyerhive",					// 20
+	"aassolidplayer",				// 21
+	"aassolidvehicle",				// 22
+	"aasclusterportal",				// 23
+	"aasobstacle",					// 24
+	"areaportal",					// 25
+	"nocsg",						// 26
+	"occluder",						// 27
 #else
 	"none",							// 0
 	"solid",						// 1
@@ -185,6 +214,37 @@ int cm_contentsFlagByIndex[] = {
 	CONTENTS_SHOOTABLEBYARROW,		// 26
 	CONTENTS_HUNTERCLIP,			// 27
 	// END HUMANHEAD
+#elif defined(_SPLASHDAMAGE) //karin: must sync with renderer/Material.h
+	-1,								// 0
+	CONTENTS_SOLID,					// 1
+	CONTENTS_OPAQUE,				// 2
+	CONTENTS_WATER,					// 3
+	CONTENTS_PLAYERCLIP,			// 4
+	CONTENTS_WALKERCLIP,			// 5
+	CONTENTS_MOVEABLECLIP,			// 6
+	CONTENTS_IKCLIP,				// 7
+	CONTENTS_SLIDEMOVER,			// 8
+	CONTENTS_BODY,					// 9
+	CONTENTS_PROJECTILE,			// 10
+	CONTENTS_CORPSE,				// 11
+	CONTENTS_RENDERMODEL,			// 12
+	CONTENTS_TRIGGER,				// 13
+	CONTENTS_VEHICLECLIP,			// 14
+	CONTENTS_EXPLOSIONSOLID,		// 15
+	CONTENTS_MONSTER,				// 16
+	CONTENTS_FORCEFIELD,			// 17
+	CONTENTS_SHADOWCOLLISION,		// 18
+	CONTENTS_CROSSHAIRSOLID,		// 19
+	CONTENTS_FLYERHIVECLIP,			// 20
+
+	CONTENTS_AAS_SOLID_PLAYER,		// 21
+	CONTENTS_AAS_SOLID_VEHICLE,		// 22
+	CONTENTS_AAS_CLUSTER_PORTAL,	// 23
+	CONTENTS_AAS_OBSTACLE,			// 24
+
+	CONTENTS_AREAPORTAL,			// 25
+	CONTENTS_NOCSG,					// 26
+	CONTENTS_OCCLUDER,				// 27
 #else
 	-1,								// 0
 	CONTENTS_SOLID,					// 1
@@ -465,7 +525,7 @@ void idCollisionModelManagerLocal::DrawModel(cmHandle_t handle, const idVec3 &mo
 	cm_model_t *model;
 	idVec3 viewPos;
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
 	if(!handle)
 #else
 	if (handle < 0 && handle >= numModels)
@@ -479,7 +539,7 @@ void idCollisionModelManagerLocal::DrawModel(cmHandle_t handle, const idVec3 &mo
 		cm_drawColor.ClearModified();
 	}
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
 	model = static_cast<cm_model_t *>(handle);
 #else
 	model = models[ handle ];
@@ -588,7 +648,7 @@ void idCollisionModelManagerLocal::DebugOutput(const idVec3 &origin)
 	timer.Start();
 
 	for (i = 0; i < cm_testTimes.GetInteger(); i++) {
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
 		int index = cm_testModel.GetInteger();
 		if (index >= 0 && index <= MAX_SUBMODELS && index <= maxModels && models[index])
 		Translation(&trace, start, testend[i], &itm, boxAxis, CONTENTS_SOLID|CONTENTS_PLAYERCLIP, models[index], vec3_origin, modelAxis);
@@ -644,7 +704,7 @@ void idCollisionModelManagerLocal::DebugOutput(const idVec3 &origin)
 
 		for (i = 0; i < cm_testTimes.GetInteger(); i++) {
 			rotation.SetOrigin(testend[i]);
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
 			int index = cm_testModel.GetInteger();
 			if (index >= 0 && index <= MAX_SUBMODELS && index <= maxModels && models[index])
 				Rotation(&trace, start, rotation, &itm, boxAxis, CONTENTS_SOLID|CONTENTS_PLAYERCLIP, models[index], vec3_origin, modelAxis);

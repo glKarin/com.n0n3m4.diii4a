@@ -69,6 +69,64 @@ void idLangDict::Clear(void)
 idLangDict::Load
 ============
 */
+#ifdef _SPLASHDAMAGE
+bool idLangDict::Load( const char* fileName, bool clear )
+{
+    if ( clear ) {
+        Clear();
+    }
+
+    idFile* file = idLib::fileSystem->OpenFileRead( fileName );
+    if ( file == NULL ) {
+        return false;
+    }
+
+    sdUTF8 utf8( file );
+
+    fileSystem->CloseFile( file );
+
+    int numChars = utf8.DecodeLength();
+    wchar_t* ucs2 = static_cast< wchar_t* >( Mem_Alloc( ( numChars + 1 ) * sizeof( wchar_t ) ) );
+
+    utf8.Decode( ucs2 );
+
+    idWLexer src( ucs2, idWStr::Length( ucs2 ), fileName );
+    if ( !src.IsLoaded() ) {
+        Mem_Free( ucs2 );
+        return false;
+    }
+
+    idWToken tok, tok2;
+    src.ExpectTokenString( L"{" );
+    while ( src.ReadToken( &tok ) ) {
+        if ( tok == L"}" ) {
+            break;
+        }
+        if ( src.ReadToken( &tok2 ) ) {
+            if ( tok2 == L"}" ) {
+                break;
+            }
+            idLangKeyValue kv;
+            kv.key = va( "%ls", tok.c_str() );	// FIXME: do this nicer?
+            if( kv.key.Cmpn( STRTABLE_ID, STRTABLE_ID_LENGTH ) != 0 ) {
+                src.Warning( "Bad string id '%s' found", kv.key.c_str() );
+                src.SkipRestOfLine();
+                continue;
+            }
+            if( FindKeyValue( kv.key.c_str() ) != NULL ) {
+                src.Warning( "Duplicate string id '%s' found", kv.key.c_str() );
+            }
+            kv.value = tok2;
+            hash.Add( GetHashKey( kv.key ), args.Append( kv ) );
+        }
+    }
+    idLib::common->Printf( "%i strings read from %s\n", args.Num(), fileName );
+
+    Mem_Free( ucs2 );
+
+    return true;
+}
+#else
 bool idLangDict::Load(const char *fileName, bool clear /* _D3XP */)
 {
 
@@ -174,6 +232,7 @@ bool idLangDict::Load(const char *fileName, bool clear /* _D3XP */)
 
 	return true;
 }
+#endif
 
 /*
 ============
@@ -182,6 +241,7 @@ idLangDict::Save
 */
 void idLangDict::Save(const char *fileName)
 {
+#if !defined(_SPLASHDAMAGE)
 	idFile *outFile = idLib::fileSystem->OpenFileWrite(fileName);
 	outFile->WriteFloatString("// string table\n// english\n//\n\n{\n");
 
@@ -218,6 +278,27 @@ void idLangDict::Save(const char *fileName)
 
 	outFile->WriteFloatString("\n}\n");
 	idLib::fileSystem->CloseFile(outFile);
+#endif
+}
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idLangDict::FindKeyValue
+============
+*/
+const idLangKeyValue* idLangDict::FindKeyValue( const char* str ) const
+{
+    if ( str == NULL || str[0] == '\0' ) {
+        return NULL;
+    }
+    int hashKey = GetHashKey( str );
+    for ( int i = hash.GetFirst( hashKey ); i != -1; i = hash.GetNext( i ) ) {
+        if ( args[i].key.Cmp( str ) == 0 ) {
+            return &args[i];
+        }
+    }
+    return NULL;
 }
 
 /*
@@ -225,7 +306,34 @@ void idLangDict::Save(const char *fileName)
 idLangDict::GetString
 ============
 */
+const wchar_t* idLangDict::GetString( const char *str ) const
+{
+    if ( str == NULL || str[0] == '\0' ) {
+        return L"";
+    }
+
+    int hashKey = GetHashKey( str );
+    for ( int i = hash.GetFirst( hashKey ); i != -1; i = hash.GetNext( i ) ) {
+        if ( args[i].key.Cmp( str ) == 0 ) {
+            return args[i].value.c_str();
+        }
+    }
+
+    //idLib::common->Warning( "Unknown String ID '%s'", str );
+    return va( L"###Bad String %hs###", str );
+}
+#endif
+
+/*
+============
+idLangDict::GetString
+============
+*/
+#ifdef _SPLASHDAMAGE
+const char *idLangDict::GetStringMb(const char *str) const
+#else
 const char *idLangDict::GetString(const char *str) const
+#endif
 {
 
 	if (str == NULL || str[0] == '\0') {
@@ -276,7 +384,11 @@ const char *idLangDict::GetString(const char *str) const
 
 	for (int i = hash.First(hashKey); i != -1; i = hash.Next(i)) {
 		if (args[i].key.Cmp(str) == 0) {
+#ifdef _SPLASHDAMAGE //karin: TODO compat mb string
+			return (const char *)args[i].value.c_str();
+#else
 			return args[i].value;
+#endif
 		}
 	}
 
@@ -300,7 +412,13 @@ const char *idLangDict::AddString(const char *str)
 	int c = args.Num();
 
 	for (int j = 0; j < c; j++) {
-		if (idStr::Cmp(args[j].value, str) == 0) {
+#ifdef _SPLASHDAMAGE
+		idStr tmp = WStrToStr(args[j].value);
+		if (idStr::Cmp(tmp, str) == 0)
+#else
+		if (idStr::Cmp(args[j].value, str) == 0)
+#endif
+		{
 			return args[j].key;
 		}
 	}
@@ -315,11 +433,15 @@ const char *idLangDict::AddString(const char *str)
 	kv.key = va("#str_%08i", id);
 	// kv.key = va( "#str_%05i", id );
 #endif
+#ifdef _SPLASHDAMAGE
+	kv.value = StrToWStr(str);
+#else
 	kv.value = str;
 #ifdef _WCHAR_LANG
     bool isUtf8 = idStr::IsValidUTF8(str, (int)strlen(str));
     if(isUtf8)
         kv.value.ConvertToUTF8();
+#endif
 #endif
 	c = args.Append(kv);
 	assert(kv.key.Cmpn(STRTABLE_ID, STRTABLE_ID_LENGTH) == 0);
@@ -356,15 +478,29 @@ void idLangDict::AddKeyVal(const char *key, const char *val)
 {
 	idLangKeyValue kv;
 	kv.key = key;
+#ifdef _SPLASHDAMAGE
+	kv.value = StrToWStr(val);
+#else
 	kv.value = val;
 #ifdef _WCHAR_LANG
     bool isUtf8 = idStr::IsValidUTF8(val, (int)strlen(val));
     if(isUtf8)
         kv.value.ConvertToUTF8();
 #endif
+#endif
 	assert(kv.key.Cmpn(STRTABLE_ID, STRTABLE_ID_LENGTH) == 0);
 	hash.Add(GetHashKey(kv.key), args.Append(kv));
 }
+
+#ifdef _SPLASHDAMAGE
+void idLangDict::AddKeyVal( const char *key, const wchar_t *val ) {
+	idLangKeyValue kv;
+	kv.key = key;
+	kv.value = val;
+	assert(kv.key.Cmpn(STRTABLE_ID, STRTABLE_ID_LENGTH) == 0);
+	hash.Add(GetHashKey(kv.key), args.Append(kv));
+}
+#endif
 
 /*
 ============
@@ -468,6 +604,9 @@ idLangDict::Load
 */
 bool idLangDict::LoadUTF8( const byte* buffer, const int bufferLen, const char* name )
 {
+#ifdef _SPLASHDAMAGE
+    return false;
+#else
     if( buffer == NULL || bufferLen <= 0 )
     {
         // let whoever called us deal with the failure (so sys_lang can be reset)
@@ -622,5 +761,6 @@ bool idLangDict::LoadUTF8( const byte* buffer, const int bufferLen, const char* 
     //mem.PopHeap();
 
     return true;
+#endif
 }
 #endif

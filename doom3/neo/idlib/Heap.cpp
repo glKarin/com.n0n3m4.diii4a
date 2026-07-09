@@ -34,10 +34,31 @@ If you have questions concerning this license or the applicable additional terms
 	//it was removed from Doom 3 BFG, and most likely it is worse than the now-default LFH
 	//besides, using standard heap makes it easier to analyze crash dumps and integrate heap profiling applications
 #define USE_LIBC_MALLOC		1 // 0
+#ifdef _SPLASHDAMAGE
+#if USE_LIBC_MALLOC
+#if defined( _WIN32 ) && ( _MSC_VER >= 1300 ) && defined( _DEBUG ) && !defined( ID_REDIRECT_NEWDELETE )
+#include <crtdbg.h>
+#endif
+#endif
+#endif
+#endif
+
+#ifdef _SPLASHDAMAGE
+
+#pragma warning( push )
+#pragma warning( disable: 4267 4312 4311 )
+
 #endif
 
 #ifndef CRASH_ON_STATIC_ALLOCATION
 //	#define CRASH_ON_STATIC_ALLOCATION
+#endif
+
+#ifdef _SPLASHDAMAGE
+#if USE_LIBC_MALLOC
+// uncomment to turn on all CRT heap debugging... SLOW!!
+//#define FULL_CRT_DEBUG	1
+#endif
 #endif
 
 //===============================================================
@@ -71,6 +92,10 @@ class idHeap
 		void			Init(void);					// initialize
 		void 			*Allocate(const dword bytes);	// allocate memory
 		void			Free(void *p);				// free memory
+#ifdef _SPLASHDAMAGE
+	    void *			AllocateAligned( const size_t bytes, align_t align );
+	    void			FreeAligned( void *p );
+#endif
 		void 			*Allocate16(const dword bytes);  // allocate 16 byte aligned memory
 		void			Free16(void *p);				// free 16 byte aligned memory
 		dword			Msize(void *p);				// return size of data block
@@ -182,6 +207,23 @@ void idHeap::Init()
 	mediumFirstUsedPage	= NULL;
 
 	c_heapAllocRunningCount = 0;
+	
+#ifdef _SPLASHDAMAGE
+#if !defined( SD_SDK_BUILD )
+#if USE_LIBC_MALLOC && ( _MSC_VER >= 1300 ) && !defined( _XENON ) && !defined( ID_REDIRECT_NEWDELETE )
+#if defined( _DEBUG )
+#if FULL_CRT_DEBUG
+    // check on every allocation
+    _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_LEAK_CHECK_DF );
+#else
+    // always check intermittently in debug builds so these bugs don't go unnoticed!
+    //_CrtSetDbgFlag( _CRTDBG_CHECK_EVERY_1024_DF );
+    _CrtSetDbgFlag( 0 );
+#endif
+#endif
+#endif
+#endif // SD_SDK_BUILD
+#endif
 }
 
 /*
@@ -344,6 +386,66 @@ void idHeap::Free(void *p)
 
 #endif
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+================
+idHeap::AllocateAligned
+================
+*/
+void *idHeap::AllocateAligned( const size_t bytes, const align_t align )
+{
+    byte *ptr, *alignedPtr;
+
+    if ( align != ALIGN_NONE && align != ALIGN_4 && align != ALIGN_8 && align != ALIGN_16 && align != ALIGN_32 && align != ALIGN_64 && align != ALIGN_128 ) {
+        idLib::common->FatalError( "idHeap::AllocateAligned: bad alignment %d", align );
+    }
+
+    ptr = (byte *) malloc( bytes + align + sizeof( UINT_PTR ) );
+    if ( !ptr ) {
+        if ( defragBlock ) {
+            idLib::common->Printf( "Freeing defragBlock on alloc of %li.\n", bytes );
+            free( defragBlock );
+            defragBlock = NULL;
+            ptr = (byte *) malloc( bytes + align + sizeof( UINT_PTR ) );
+            AllocDefragBlock();
+        }
+        if ( !ptr ) {
+#if defined( _WIN32 ) && !defined( _XENON )
+            MEMORYSTATUSEX statex;
+            statex.dwLength = sizeof( statex );
+            GlobalMemoryStatusEx( &statex );
+            common->Printf( "\nTotal Physical Memory: %I64d bytes\nAvailable Physical Memory: %I64d bytes\nMemory Utilization: %d %%\n\n",
+                            statex.ullTotalPhys, statex.ullAvailPhys, (int)statex.dwMemoryLoad );
+#endif
+#if defined( SD_PUBLIC_BUILD )
+            *( intptr_t* )( 0x00000000 ) = 7;
+#endif // SD_PUBLIC_BUILD
+            common->FatalError( "idHeap::AllocateAligned request for %li bytes aligned at %i failed", bytes, align );
+        }
+    }
+    if ( align == ALIGN_NONE ) {
+        alignedPtr = ptr + sizeof( UINT_PTR );
+    } else {
+        alignedPtr = (byte *) ( ( (UINT_PTR)ptr + ( align - 1 ) ) & ~( align - 1 ) );
+        if ( alignedPtr - ptr < sizeof( UINT_PTR ) ) {
+            alignedPtr += align;
+        }
+    }
+    *((UINT_PTR *)( (UINT_PTR)alignedPtr - sizeof( UINT_PTR ) )) = (UINT_PTR) ptr;
+    return (void *) alignedPtr;
+}
+
+/*
+================
+idHeap::Free
+================
+*/
+void idHeap::FreeAligned( void *p )
+{
+    free( (void *) *((intptr_t *) (( (byte *) p ) - sizeof( uintptr_t ))) );
+}
+#endif
 
 /*
 ================
@@ -534,7 +636,18 @@ idHeap::page_s *idHeap::AllocatePage(dword bytes)
 			}
 
 			if (!p) {
+#ifdef _SPLASHDAMAGE
+#if defined( _WIN32 ) && !defined( _XENON )
+                MEMORYSTATUSEX statex;
+                statex.dwLength = sizeof( statex );
+                GlobalMemoryStatusEx( &statex );
+                common->Printf( "\nTotal Physical Memory: %I64d bytes\nAvailable Physical Memory: %I64d bytes\nMemory Utilization: %i %%\n\n",
+                                statex.ullTotalPhys, statex.ullAvailPhys, (int)statex.dwMemoryLoad );
+#endif
+                common->FatalError( "idHeap::AllocatePage request for %i bytes failed", bytes );
+#else
 				common->FatalError("malloc failure for %i", bytes);
+#endif
 			}
 		}
 
@@ -754,6 +867,10 @@ void *idHeap::MediumAllocate(dword bytes)
 		if (p->largestFree >= sizeNeeded) {
 			break;
 		}
+#ifdef _SPLASHDAMAGE
+
+        assert( p->next != mediumFirstFreePage );	// this should never happen
+#endif
 	}
 
 	if (!p) {								// need to allocate new page?
@@ -1062,7 +1179,11 @@ void idHeap::LargeFree(void *ptr)
 #undef new
 
 static idHeap 			*mem_heap = NULL;
+#ifdef _SPLASHDAMAGE
+static memoryStats_t	mem_total_allocs = { 0, 0x0fffffff, 0, 0 };
+#else
 static memoryStats_t	mem_total_allocs = { 0, 0x0fffffff, -1, 0 };
+#endif
 static memoryStats_t	mem_frame_allocs;
 static memoryStats_t	mem_frame_frees;
 
@@ -1075,7 +1196,11 @@ void Mem_ClearFrameStats(void)
 {
 	mem_frame_allocs.num = mem_frame_frees.num = 0;
 	mem_frame_allocs.minSize = mem_frame_frees.minSize = 0x0fffffff;
+#ifdef _SPLASHDAMAGE
+    mem_frame_allocs.maxSize = mem_frame_frees.maxSize = 0;
+#else
 	mem_frame_allocs.maxSize = mem_frame_frees.maxSize = -1;
+#endif
 	mem_frame_allocs.totalSize = mem_frame_frees.totalSize = 0;
 }
 
@@ -1143,6 +1268,17 @@ void Mem_UpdateFreeStats(int size)
 	mem_total_allocs.totalSize -= size;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+==================
+Mem_Size
+==================
+*/
+size_t Mem_Size( void *ptr )
+{
+    return mem_heap->Msize(ptr);
+}
+#endif
 
 #ifndef ID_DEBUG_MEMORY
 
@@ -1166,6 +1302,18 @@ void *Mem_Alloc(const int size)
 
 	void *mem = mem_heap->Allocate(size);
 	Mem_UpdateAllocStats(mem_heap->Msize(mem));
+#ifdef _SPLASHDAMAGE
+    if ( !mem ) {
+#if defined( _WIN32 ) && !defined( _XENON )
+        MEMORYSTATUSEX statex;
+        statex.dwLength = sizeof( statex );
+        GlobalMemoryStatusEx( &statex );
+        common->Printf( "\nTotal Physical Memory: %I64d bytes\nAvailable Physical Memory: %I64d bytes\nMemory Utilization: %i %%\n\n",
+                        statex.ullTotalPhys, statex.ullAvailPhys, (int)statex.dwMemoryLoad );
+#endif
+        common->FatalError( "Mem_Alloc request for %i bytes failed", size );
+    }
+#endif
 	return mem;
 }
 
@@ -1191,6 +1339,65 @@ void Mem_Free(void *ptr)
 	Mem_UpdateFreeStats(mem_heap->Msize(ptr));
 	mem_heap->Free(ptr);
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+==================
+Mem_AllocAligned
+==================
+*/
+void *Mem_AllocAligned( const size_t size, const align_t align )
+{
+#if !defined(_XENON)
+    // DirectX relies on being able to allocate 0 bytes and get back a legit pointer
+    if ( !size ) {
+        return NULL;
+    }
+#endif
+    if ( !mem_heap ) {
+#ifdef CRASH_ON_STATIC_ALLOCATION
+        *((intptr_t*)0x0) = 1;
+#endif
+        return malloc( size );
+    }
+    void *mem = mem_heap->AllocateAligned( size, align );
+    // make sure the memory is aligned
+    assert( align == ALIGN_NONE || ( ((intptr_t)mem) & (align-1)) == 0 );
+    return mem;
+}
+
+/*
+==================
+Mem_FreeAligned
+==================
+*/
+void Mem_FreeAligned( void *ptr )
+{
+    if ( !ptr ) {
+        return;
+    }
+    if ( !mem_heap ) {
+#ifdef CRASH_ON_STATIC_ALLOCATION
+        *((intptr_t*)0x0) = 1;
+#endif
+        free( ptr );
+        return;
+    }
+    mem_heap->FreeAligned( ptr );
+}
+
+/*
+===============
+Mem_ClearedAllocAligned
+===============
+*/
+void *Mem_ClearedAllocAligned( const size_t size, const align_t align )
+{
+    void *mem = Mem_AllocAligned( size, align );
+    SIMDProcessor->Memset( mem, 0, size );
+    return mem;
+}
+#endif
 
 /*
 ==================
@@ -1271,7 +1478,12 @@ char *Mem_CopyString(const char *in)
 {
 	char	*out;
 
+#ifdef _SPLASHDAMAGE
+    out = (char *)Mem_Alloc( idStr::Length( in ) + 1 );
+#else
 	out = (char *)Mem_Alloc(strlen(in) + 1);
+#endif
+
 	strcpy(out, in);
 	return out;
 }
@@ -1334,9 +1546,88 @@ void Mem_EnableLeakTest(const char *name)
 #undef		Com_ClearedReAlloc
 #undef		Mem_Free
 #undef		Mem_CopyString
+#ifdef _SPLASHDAMAGE
+#undef		Mem_AllocAligned
+#undef		Mem_FreeAligned
+#undef		Mem_ClearedAllocAligned
+#else
 #undef		Mem_Alloc16
 #undef		Mem_Free16
+#endif
 
+#ifdef _SPLASHDAMAGE
+#define MAX_CALLSTACK_DEPTH				16
+#define DEBUG_MEMORY_INFO_HASH_SIZE		1024
+
+struct debugMemoryInfo_t {
+    const char *			fileName;
+    int						lineNumber;
+    int						size;
+    address_t				callStack[MAX_CALLSTACK_DEPTH];
+    debugMemoryInfo_t *		next;
+};
+
+// size of this struct must be a multiple of 8 bytes
+struct debugMemory_t {
+    debugMemoryInfo_t *		info;
+    short					frameNumber;
+    short					offset;
+    debugMemory_t *			prev;
+    debugMemory_t *			next;
+};
+
+assert_sizeof_8_byte_multiple( debugMemory_t );
+static debugMemoryInfo_t *	mem_debugMemoryInfo[DEBUG_MEMORY_INFO_HASH_SIZE];
+
+/*
+==================
+Mem_CleanupFileName
+==================
+*/
+debugMemoryInfo_t *Mem_FindDebugMemoryInfo( const debugMemoryInfo_t &info )
+{
+    int i, j, hash;
+    debugMemoryInfo_t *ip;
+
+    hash = idStr::Hash( info.fileName );
+    hash ^= info.lineNumber ^ info.size;
+    for ( i = 0; i < MAX_CALLSTACK_DEPTH; i++ ) {
+        hash ^= info.callStack[i] << i;
+    }
+    hash &= ( DEBUG_MEMORY_INFO_HASH_SIZE - 1 );
+
+    for ( ip = mem_debugMemoryInfo[hash]; ip != NULL; ip = ip->next ) {
+        if ( ip->lineNumber != info.lineNumber ) {
+            continue;
+        }
+        if ( ip->size != info.size ) {
+            continue;
+        }
+        for ( j = 0; j < MAX_CALLSTACK_DEPTH; j++ ) {
+            if ( ip->callStack[j] != info.callStack[j] ) {
+                break;
+            }
+        }
+        if ( j < MAX_CALLSTACK_DEPTH ) {
+            continue;
+        }
+        if ( idStr::Cmp( ip->fileName, info.fileName ) != 0 ) {
+            continue;
+        }
+        return ip;
+    }
+
+    ip = (debugMemoryInfo_t *) malloc( sizeof( debugMemoryInfo_t ) );
+    ip->fileName = info.fileName;
+    ip->lineNumber = info.lineNumber;
+    ip->size = info.size;
+    memcpy( ip->callStack, info.callStack, sizeof( ip->callStack ) );
+    ip->next = mem_debugMemoryInfo[hash];
+    mem_debugMemoryInfo[hash] = ip;
+
+    return ip;
+}
+#else
 #define MAX_CALLSTACK_DEPTH		6
 
 // size of this struct must be a multiple of 16 bytes
@@ -1349,6 +1640,7 @@ typedef struct debugMemory_s {
 	struct debugMemory_s 	*prev;
 	struct debugMemory_s 	*next;
 } debugMemory_t;
+#endif
 
 static debugMemory_t 	*mem_debugMemory = NULL;
 static char				mem_leakName[256] = "";
@@ -1395,6 +1687,490 @@ const char *Mem_CleanupFileName(const char *fileName)
 	return newFileNames[index];
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+==================
+Mem_GetNonIdLibSourceFile
+==================
+*/
+const char *Mem_GetNonIdLibSourceFile( address_t callStack[MAX_CALLSTACK_DEPTH] )
+{
+    int i;
+    idStr sourceFile;
+    static char staticSourceFile[MAX_STRING_CHARS];
+
+    for ( i = 0; i < MAX_CALLSTACK_DEPTH && callStack[i] != 0; i++ ) {
+        sourceFile = idLib::sys->GetFunctionSourceFile( callStack[i] );
+        if ( sourceFile.Length() == 0 ) {
+            continue;
+        }
+        // skip source files from idlib/
+        if ( sourceFile.Find( "idlib", false ) != idStr::INVALID_POSITION ) {
+            continue;
+        }
+        // skip .obj files that may show up for functions without a line number
+        if ( sourceFile.Find( ".obj", false ) != idStr::INVALID_POSITION ) {
+            continue;
+        }
+        int index = sourceFile.Find( "quack", false );
+        if ( index != idStr::INVALID_POSITION ) {
+            idStr::Copynz( staticSourceFile, sourceFile.c_str() + index + 6, sizeof( staticSourceFile ) );
+        } else {
+            idStr::Copynz( staticSourceFile, sourceFile.c_str(), sizeof( staticSourceFile ) );
+        }
+        return staticSourceFile;
+    }
+    return "";
+}
+
+/*
+==================
+Mem_Dump
+==================
+*/
+void Mem_Dump( const char *fileName )
+{
+    int i, numBlocks, totalSize;
+    char dump[32], *ptr;
+    debugMemory_t *b;
+    idStr module, funcName;
+    FILE *f;
+
+    f = fopen( fileName, "wb" );
+    if ( !f ) {
+        return;
+    }
+
+    totalSize = 0;
+    for ( numBlocks = 0, b = mem_debugMemory; b; b = b->next, numBlocks++ ) {
+        ptr = ((char *) b) + sizeof(debugMemory_t);
+        totalSize += b->info->size;
+        for ( i = 0; i < (sizeof(dump)-1) && i < b->info->size; i++) {
+            if ( ptr[i] >= 32 && ptr[i] < 127 ) {
+                dump[i] = ptr[i];
+            } else {
+                dump[i] = '_';
+            }
+        }
+        dump[i] = '\0';
+        if ( ( b->info->size >> 10 ) != 0 ) {
+            fprintf( f, "size: %6d kB: %s, line: %d [%s], call stack: %s\r\n", ( b->info->size >> 10 ), Mem_CleanupFileName( b->info->fileName ), b->info->lineNumber, dump, idLib::sys->GetCallStackStr( b->info->callStack, MAX_CALLSTACK_DEPTH ) );
+        } else {
+            fprintf( f, "size: %7d B: %s, line: %d [%s], call stack: %s\r\n", b->info->size, Mem_CleanupFileName( b->info->fileName ), b->info->lineNumber, dump, idLib::sys->GetCallStackStr( b->info->callStack, MAX_CALLSTACK_DEPTH ) );
+        }
+    }
+
+    idLib::sys->ShutdownSymbols();
+
+    fprintf( f, "%8d total memory blocks allocated\r\n", numBlocks );
+    fprintf( f, "%8d kB memory allocated\r\n", ( totalSize >> 10 ) );
+
+    fclose( f );
+}
+
+/*
+==================
+Mem_DumpCompressed
+==================
+*/
+struct allocInfo_t {
+    char *					fileName;
+    int						lineNumber;
+    int						size;
+    int						numAllocs;
+    address_t				callStack[MAX_CALLSTACK_DEPTH];
+    allocInfo_t *			next;
+};
+
+void Mem_DumpCompressed( const char *fileName, memoryGroupType_t memGroup, memorySortType_t memSort, int sortCallStack, int numFrames, bool xlFriendly )
+{
+    int numBlocks, totalSize, r, j, lineNumber;
+    debugMemory_t *b;
+    allocInfo_t *a, *nexta, *allocInfo = NULL, *sortedAllocInfo = NULL, *prevSorted, *nextSorted;
+    idStr module, funcName, path;
+    FILE *f;
+
+    // build list with memory allocations
+    totalSize = 0;
+    numBlocks = 0;
+    for ( b = mem_debugMemory; b; b = b->next ) {
+
+        if ( numFrames && b->frameNumber < idLib::frameNumber - numFrames ) {
+            continue;
+        }
+
+        numBlocks++;
+        totalSize += b->info->size;
+
+        path = Mem_GetNonIdLibSourceFile( b->info->callStack );
+        lineNumber = b->info->lineNumber;
+
+        if ( memGroup == MEMGROUP_FOLDER ) {
+            path.StripFilename();
+            path += "\\";
+            lineNumber = idStr::Hash( path );
+        } else if ( memGroup == MEMGROUP_FILE ) {
+            lineNumber = idStr::Hash( path );
+        }
+
+        // search for an allocation from the same source location
+        for ( a = allocInfo; a; a = a->next ) {
+            if ( a->lineNumber != lineNumber ) {
+                continue;
+            }
+            if ( memGroup == MEMGROUP_LINE ) {
+                for ( j = 0; j < MAX_CALLSTACK_DEPTH; j++ ) {
+                    if ( a->callStack[j] != b->info->callStack[j] ) {
+                        break;
+                    }
+                }
+                if ( j < MAX_CALLSTACK_DEPTH ) {
+                    continue;
+                }
+            }
+            if ( path.Cmp( a->fileName ) != 0 ) {
+                continue;
+            }
+            a->numAllocs++;
+            a->size += b->info->size;
+            break;
+        }
+
+        // if this is an allocation from a new source location
+        if ( !a ) {
+            int len = path.Length() + 1;
+            a = (allocInfo_t *) ::malloc( sizeof( allocInfo_t ) + len );
+            a->fileName = ((char *)a) + sizeof( allocInfo_t );
+            idStr::Copynz( a->fileName, path, len );
+            a->lineNumber = lineNumber;
+            a->size = b->info->size;
+            a->numAllocs = 1;
+            for ( j = 0; j < MAX_CALLSTACK_DEPTH; j++ ) {
+                a->callStack[j] = b->info->callStack[j];
+            }
+            a->next = allocInfo;
+            allocInfo = a;
+        }
+    }
+
+    // sort list
+    for ( a = allocInfo; a; a = nexta ) {
+        nexta = a->next;
+
+        prevSorted = NULL;
+        switch( memSort ) {
+        // sort on size
+        case MEMSORT_SIZE: {
+            for ( nextSorted = sortedAllocInfo; nextSorted; nextSorted = nextSorted->next ) {
+                if ( a->size > nextSorted->size ) {
+                    break;
+                }
+                prevSorted = nextSorted;
+            }
+            break;
+        }
+        // sort on file name and line number
+        case MEMSORT_LOCATION: {
+            for ( nextSorted = sortedAllocInfo; nextSorted; nextSorted = nextSorted->next ) {
+                r = idStr::IcmpPath( a->fileName, nextSorted->fileName );
+                if ( r < 0 || ( r == 0 && a->lineNumber < nextSorted->lineNumber ) ) {
+                    break;
+                }
+                prevSorted = nextSorted;
+            }
+            break;
+        }
+        // sort on the number of allocations
+        case MEMSORT_NUMALLOCS: {
+            for ( nextSorted = sortedAllocInfo; nextSorted; nextSorted = nextSorted->next ) {
+                if ( a->numAllocs > nextSorted->numAllocs ) {
+                    break;
+                }
+                prevSorted = nextSorted;
+            }
+            break;
+        }
+        // sort on call stack
+        case MEMSORT_CALLSTACK: {
+            for ( nextSorted = sortedAllocInfo; nextSorted; nextSorted = nextSorted->next ) {
+                if ( a->callStack[sortCallStack] < nextSorted->callStack[sortCallStack] ) {
+                    break;
+                }
+                prevSorted = nextSorted;
+            }
+            break;
+        }
+        }
+        if ( !prevSorted ) {
+            a->next = sortedAllocInfo;
+            sortedAllocInfo = a;
+        } else {
+            prevSorted->next = a;
+            a->next = nextSorted;
+        }
+    }
+
+    f = fopen( fileName, "wb" );
+    if ( !f ) {
+        idLib::common->Warning( "Could not open '%s' for writing", fileName );
+        return;
+    }
+
+    if ( xlFriendly ) {
+        if ( memGroup == MEMGROUP_FILE || memGroup == MEMGROUP_FOLDER ) {
+            fprintf( f, "  Size Allocs File\r\n" );
+        } else {
+            fprintf( f, "  Size Allocs  Line File Call Stack\r\n" );
+        }
+    }
+    // write list to file
+    if ( xlFriendly ) {
+        if ( memGroup == MEMGROUP_FILE || memGroup == MEMGROUP_FOLDER ) {
+            for ( a = sortedAllocInfo; a; a = nexta ) {
+                nexta = a->next;
+                fprintf( f, "%6d %6d %s\r\n", ( a->size >> 10 ), a->numAllocs, a->fileName );
+                ::free( a );
+            }
+        } else {
+            for ( a = sortedAllocInfo; a; a = nexta ) {
+                nexta = a->next;
+                fprintf( f, "%6d %6d %5d %s %s\r\n", ( a->size >> 10 ), a->numAllocs, a->lineNumber, a->fileName, idLib::sys->GetCallStackStr( a->callStack, MAX_CALLSTACK_DEPTH ) );
+                ::free( a );
+            }
+        }
+    } else {
+        if ( memGroup == MEMGROUP_FILE || memGroup == MEMGROUP_FOLDER ) {
+            for ( a = sortedAllocInfo; a; a = nexta ) {
+                nexta = a->next;
+                fprintf( f, "size: %6d kB, allocs: %5d: %s\r\n", ( a->size >> 10 ), a->numAllocs, a->fileName );
+                ::free( a );
+            }
+        } else {
+            for ( a = sortedAllocInfo; a; a = nexta ) {
+                nexta = a->next;
+                fprintf( f, "size: %6d kB, allocs: %5d: %s, line: %d, call stack: %s\r\n", ( a->size >> 10 ), a->numAllocs, a->fileName, a->lineNumber, idLib::sys->GetCallStackStr( a->callStack, MAX_CALLSTACK_DEPTH ) );
+                ::free( a );
+            }
+        }
+    }
+
+    idLib::sys->ShutdownSymbols();
+
+    if ( !xlFriendly ) {
+        fprintf( f, "%8d total memory blocks allocated\r\n", numBlocks );
+        fprintf( f, "%8d KB memory allocated\r\n", ( totalSize >> 10 ) );
+    }
+
+    fclose( f );
+}
+
+/*
+==================
+Mem_DumpPerClass
+==================
+*/
+struct allocClass_t {
+    char				className[MAX_STRING_CHARS];
+    int					totalSize;
+    int					numAllocs;
+    allocClass_t *		next;
+};
+
+#define ALLOC_CLASS_HASH_SIZE		4096
+
+void Mem_DumpPerClass( const char *fileName )
+{
+    int i, j, numBlocks, totalBlocks, totalSize;
+    const char *funcName, *colon;
+    char className[MAX_CALLSTACK_DEPTH][MAX_STRING_CHARS];
+    debugMemory_t *b;
+    FILE *f;
+    allocClass_t * allocClass[ALLOC_CLASS_HASH_SIZE];
+    allocClass_t * a, *nexta;
+
+    f = fopen( fileName, "wb" );
+    if ( !f ) {
+        return;
+    }
+
+    idLib::common->SetRefreshOnPrint( true );
+
+    memset( allocClass, 0, sizeof( allocClass ) );
+
+    for ( totalBlocks = 0, b = mem_debugMemory; b != NULL; b = b->next, totalBlocks++ ) {
+    }
+
+    int lastPercentage = 0;
+
+    totalSize = 0;
+    for ( numBlocks = 0, b = mem_debugMemory; b != NULL; b = b->next, numBlocks++ ) {
+        totalSize += b->info->size;
+
+        for ( i = 0; i < MAX_CALLSTACK_DEPTH; i++ ) {
+            funcName = idLib::sys->GetFunctionName( b->info->callStack[i] );
+            colon = strstr( funcName, "::" );
+            if ( colon == NULL ) {
+                continue;
+            }
+            idStr::Copynz( className[i], funcName, colon - funcName + 1 );
+
+            for ( j = 0; j < i; j++ ) {
+                if ( idStr::Cmp( className[j], className[i] ) == 0 ) {
+                    break;
+                }
+            }
+            if ( j < i ) {
+                continue;
+            }
+
+            int hash = idStr::Hash( className[i] ) & ( ALLOC_CLASS_HASH_SIZE - 1 );
+
+            for ( a = allocClass[hash]; a; a = a->next ) {
+                if ( idStr::Cmp( a->className, className[i] ) == 0 ) {
+                    a->totalSize += b->info->size;
+                    a->numAllocs++;
+                    break;
+                }
+            }
+            if ( a == NULL ) {
+                a = (allocClass_t *) ::malloc( sizeof( allocClass_t ) );
+                idStr::Copynz( a->className, className[i], sizeof( a->className ) );
+                a->totalSize = b->info->size;
+                a->numAllocs = 1;
+                a->next = allocClass[hash];
+                allocClass[hash] = a;
+            }
+        }
+
+        int percentage = numBlocks * 100 / totalBlocks;
+        if ( percentage != lastPercentage ) {
+            idLib::common->Printf( "\r%3d%%", percentage );
+            lastPercentage = percentage;
+        }
+    }
+
+    for ( i = 0; i < ALLOC_CLASS_HASH_SIZE; i++ ) {
+        for ( a = allocClass[i]; a; a = nexta ) {
+            nexta = a->next;
+            fprintf( f, "size: %6d kB, allocs: %5d: %s\r\n", ( a->totalSize >> 10 ), a->numAllocs, a->className );
+            ::free( a );
+        }
+    }
+
+    idLib::common->Printf( "\r100%%" );
+    idLib::common->SetRefreshOnPrint( false );
+
+    idLib::sys->ShutdownSymbols();
+
+    fprintf( f, "%8d total memory blocks allocated\r\n", numBlocks );
+    fprintf( f, "%8d kB memory allocated\r\n", ( totalSize >> 10 ) );
+
+    fclose( f );
+}
+
+/*
+==================
+Mem_AllocDebugMemory
+==================
+*/
+void *Mem_AllocDebugMemory( const size_t size, const char *fileName, const int lineNumber, const align_t align )
+{
+    void *p;
+    debugMemory_t *m;
+    debugMemoryInfo_t info;
+    short offset = 0;
+
+    if ( !size ) {
+        return NULL;
+    }
+
+    if ( !mem_heap ) {
+#ifdef CRASH_ON_STATIC_ALLOCATION
+        *((intptr_t*)0x0) = 1;
+#endif
+        // NOTE: set a breakpoint here to find memory allocations before mem_heap is initialized
+        return malloc( size );
+    }
+
+    if ( align > ALIGN_8 ) {
+        offset = ( ( sizeof( debugMemory_t ) + align - 1 ) / align ) * align - sizeof( debugMemory_t ) ;
+        p = mem_heap->AllocateAligned( size + sizeof( debugMemory_t ) + offset, align );
+    } else {
+        p = mem_heap->Allocate( size + sizeof( debugMemory_t ) );
+    }
+
+    Mem_UpdateAllocStats( size );
+
+    info.fileName = fileName;
+    info.lineNumber = lineNumber;
+    info.size = size;
+    idLib::sys->GetCurCallStack( info.callStack, MAX_CALLSTACK_DEPTH );
+    info.next = NULL;
+
+    m = (debugMemory_t *) ( ( (byte *) p ) + offset );
+    m->info = Mem_FindDebugMemoryInfo( info );
+    m->frameNumber = idLib::frameNumber;
+    m->offset = offset;
+    m->next = mem_debugMemory;
+    m->prev = NULL;
+    if ( mem_debugMemory ) {
+        mem_debugMemory->prev = m;
+    }
+    mem_debugMemory = m;
+
+    return ( ( (byte *) p ) + sizeof( debugMemory_t ) + offset );
+}
+
+/*
+==================
+Mem_FreeDebugMemory
+==================
+*/
+void Mem_FreeDebugMemory( void *p, const char *fileName, const int lineNumber, const bool aligned )
+{
+    debugMemory_t *m;
+    short offset;
+
+    if ( !p ) {
+        return;
+    }
+
+    if ( !mem_heap ) {
+#ifdef CRASH_ON_STATIC_ALLOCATION
+        *((intptr_t*)0x0) = 1;
+#endif
+        // NOTE: set a breakpoint here to find memory being freed before mem_heap is initialized
+        free( p );
+        return;
+    }
+
+    m = (debugMemory_t *) ( ( (byte *) p ) - sizeof( debugMemory_t ) );
+
+    if ( m->offset < 0 ) {
+        idLib::common->FatalError( "memory freed twice, first from %s, now from %s", idLib::sys->GetCallStackStr( m->info->callStack, MAX_CALLSTACK_DEPTH ), idLib::sys->GetCurCallStackStr( MAX_CALLSTACK_DEPTH ) );
+    }
+
+    Mem_UpdateFreeStats( m->info->size );
+
+    if ( m->next ) {
+        m->next->prev = m->prev;
+    }
+    if ( m->prev ) {
+        m->prev->next = m->next;
+    } else {
+        mem_debugMemory = m->next;
+    }
+
+    offset = m->offset;
+    m->offset = -1;
+
+    if ( aligned ) {
+        mem_heap->FreeAligned( ( ( byte * )m ) - offset );
+    } else {
+        mem_heap->Free( m );
+    }
+}
+#else
 /*
 ==================
 Mem_Dump
@@ -1801,6 +2577,7 @@ void Mem_FreeDebugMemory(void *p, const char *fileName, const int lineNumber, co
 		mem_heap->Free(m);
 	}
 }
+#endif
 
 /*
 ==================
@@ -1813,7 +2590,11 @@ void *Mem_Alloc(const int size, const char *fileName, const int lineNumber)
 		return NULL;
 	}
 
+#ifdef _SPLASHDAMAGE
+    return Mem_AllocDebugMemory( size, fileName, lineNumber, ALIGN_8 );
+#else
 	return Mem_AllocDebugMemory(size, fileName, lineNumber, false);
+#endif
 }
 
 /*
@@ -1830,6 +2611,36 @@ void Mem_Free(void *ptr, const char *fileName, const int lineNumber)
 	Mem_FreeDebugMemory(ptr, fileName, lineNumber, false);
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+==================
+Mem_AllocAligned
+==================
+*/
+void *Mem_AllocAligned( const size_t size, const align_t align, const char *fileName, const int lineNumber )
+{
+    if ( !size ) {
+        return NULL;
+    }
+    void *mem = Mem_AllocDebugMemory( size, fileName, lineNumber, align );
+    // make sure the memory is aligned
+    assert( align == ALIGN_NONE || ( ((intptr_t)mem) & (align-1)) == 0 );
+    return mem;
+}
+
+/*
+==================
+Mem_FreeAligned
+==================
+*/
+void Mem_FreeAligned( void *ptr, const char *fileName, const int lineNumber )
+{
+    if ( !ptr ) {
+        return;
+    }
+    Mem_FreeDebugMemory( ptr, fileName, lineNumber, true );
+}
+#endif
 /*
 ==================
 Mem_Alloc16
@@ -1875,6 +2686,20 @@ void *Mem_ClearedAlloc(const int size, const char *fileName, const int lineNumbe
 	return mem;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+===============
+Mem_ClearedAllocAligned
+===============
+*/
+void *Mem_ClearedAllocAligned( const size_t size, const align_t align, const char *fileName, const int lineNumber )
+{
+    void *mem = Mem_AllocAligned( size, align, fileName, lineNumber );
+    SIMDProcessor->Memset( mem, 0, size );
+    return mem;
+}
+#endif
+
 /*
 ==================
 Mem_CopyString
@@ -1884,8 +2709,13 @@ char *Mem_CopyString(const char *in, const char *fileName, const int lineNumber)
 {
 	char	*out;
 
+#ifdef _SPLASHDAMAGE
+    out = (char *)Mem_Alloc( idStr::Length( in ) + 1, fileName, lineNumber );
+    idStr::Copynz( out, in, idStr::Length( in ) + 1 );
+#else
 	out = (char *)Mem_Alloc(strlen(in) + 1, fileName, lineNumber);
 	strcpy(out, in);
+#endif
 	return out;
 }
 
@@ -1908,9 +2738,15 @@ void Mem_Shutdown(void)
 {
 
 	if (mem_leakName[0] != '\0') {
+#ifdef _SPLASHDAMAGE
+        Mem_DumpCompressed( va( "%s_leak_size.txt", mem_leakName ), MEMGROUP_LINE, MEMSORT_SIZE, 0, 0, false );
+        Mem_DumpCompressed( va( "%s_leak_location.txt", mem_leakName ), MEMGROUP_LINE, MEMSORT_LOCATION, 0, 0, false );
+        Mem_DumpCompressed( va( "%s_leak_cs1.txt", mem_leakName ), MEMGROUP_LINE, MEMSORT_CALLSTACK, 2, 0, false );
+#else
 		Mem_DumpCompressed(va("%s_leak_size.txt", mem_leakName), MEMSORT_SIZE, 0, 0);
 		Mem_DumpCompressed(va("%s_leak_location.txt", mem_leakName), MEMSORT_LOCATION, 0, 0);
 		Mem_DumpCompressed(va("%s_leak_cs1.txt", mem_leakName), MEMSORT_CALLSTACK, 2, 0);
+#endif
 	}
 
 	idHeap *m = mem_heap;
@@ -1927,5 +2763,9 @@ void Mem_EnableLeakTest(const char *name)
 {
 	idStr::Copynz(mem_leakName, name, sizeof(mem_leakName));
 }
+
+#ifdef _SPLASHDAMAGE
+#pragma warning( pop )
+#endif
 
 #endif /* !ID_DEBUG_MEMORY */

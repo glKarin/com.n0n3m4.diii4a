@@ -39,6 +39,10 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+class idRenderModel;
+#endif
+
 class idRenderModelManager
 {
 	public:
@@ -68,6 +72,12 @@ class idRenderModelManager
 
 		// returns NULL if not loadable
 		virtual	idRenderModel 	*CheckModel(const char *modelName) = 0;
+
+#ifdef _SPLASHDAMAGE
+	    // returns NULL if not loaded
+	    virtual	idRenderModel *	GetModel( const char *modelName ) = 0;
+	    virtual	idRenderModel *	GetModel( const char *modelName, bool createIfNotFound ) = 0;
+#endif
 
 		// returns the default cube model
 		virtual	idRenderModel 	*DefaultModel() = 0;

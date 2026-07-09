@@ -31,6 +31,15 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef _SPLASHDAMAGE //karin: vis dist check
+idCVar harm_r_skipVisDistCheck("harm_r_skipVisDistCheck", "0", CVAR_BOOL | CVAR_RENDERER, "skip entity visible distance check");
+idCVar harm_r_visDistCheckType("harm_r_visDistCheckType", "0", CVAR_INTEGER | CVAR_RENDERER, "entity visible distance check type. 0 = bounds, 1 = origin, 2 = sphere", 0, 2, idCmdSystem::ArgCompletion_Integer<0, 2>);
+idCVar harm_r_drawVisDistCheck("harm_r_drawVisDistCheck", "0", CVAR_INTEGER | CVAR_RENDERER, "draw entity visible distance check");
+idCVar harm_r_visDistLightFallOff("harm_r_visDistLightFallOff", "0.2", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "light fade by view distance");
+idCVar harm_r_visDistEntityFallOff("harm_r_visDistEntityFallOff", "0.2", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "entity fade by view distance");
+idCVar harm_r_skipVisDistFade("harm_r_skipVisDistFade", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "skip visible distance fade");
+#endif
+
 /*
 
 
@@ -787,6 +796,67 @@ void idRenderWorldLocal::AddAreaEntityRefs(int areaNum, const portalStack_t *ps)
 				continue;
 		}
 #endif
+#ifdef _SPLASHDAMAGE //karin: vis dist check
+		//karin: skip entity with inst infos
+		if (entity->parms.numInsts || entity->parms.insts) {
+			continue;
+		}
+
+		//karin: check visible distance range
+		bool checkVisDist = false;
+		float distance = 0.0f;
+		if ((entity->parms.minVisDist > 0.0f || entity->parms.maxVisDist > 0.0f)
+			//&& entity->parms.flags.disableLODs
+			&& !entity->parms.imposter //karin: using imposter if too far
+			&& !harm_r_skipVisDistCheck.GetBool()) 
+		{
+			if(harm_r_visDistCheckType.GetInteger() == 0)
+			{
+				idBounds bounds = entity->GetVisDistWorldBounds(NULL);
+				distance = bounds.ShortestDistance(tr.viewDef->renderView.vieworg);
+				if(harm_r_drawVisDistCheck.GetBool())
+					DebugBounds(colorGreen, bounds, vec3_origin, 1);
+			}
+			else if(harm_r_visDistCheckType.GetInteger() == 2)
+			{
+				idBounds bounds = entity->GetVisDistWorldBounds(NULL);
+				idVec3 center = bounds.GetCenter();
+				distance = tr.viewDef->renderView.vieworg.Dist(center) - bounds.GetRadius(center);
+				if(harm_r_drawVisDistCheck.GetBool())
+				{
+					idBounds b(center);
+					b.ExpandSelf(bounds.GetRadius(center));
+					DebugBounds(colorGreen, b, vec3_origin, 1);
+				}
+			}
+			else
+			{
+				idVec3 origin = entity->GetVisDistOrigin();
+				distance = tr.viewDef->renderView.vieworg.Dist(origin);
+			}
+
+			if(harm_r_drawVisDistCheck.GetInteger() & 1)
+			{
+				idVec3 origin = entity->GetVisDistOrigin();
+				const idVec4 *color;
+				if ((entity->parms.minVisDist > 0.0f && distance < entity->parms.minVisDist) || (entity->parms.maxVisDist > 0.0f && distance > entity->parms.maxVisDist))
+					color = &colorRed;
+				else
+					color = &colorGreen;
+				idVec3 dir = origin - tr.viewDef->renderView.vieworg;
+				dir.Normalize();
+				idVec3 dpos = origin + idVec3(0, 0, 100);
+				DebugArrow(*color, dpos, origin, 10);
+				DrawText(va("%d < %f < %d", entity->parms.minVisDist, distance, entity->parms.maxVisDist), dpos, 1, *color, dir.ToMat3());
+			}
+
+			if (entity->parms.minVisDist > 0.0f && distance < entity->parms.minVisDist)
+				continue;
+			if (entity->parms.maxVisDist > 0.0f && distance > entity->parms.maxVisDist)
+				continue;
+			checkVisDist = true;
+		}
+#endif
 		// check for completely suppressing the model
 		if (!r_skipSuppress.GetBool()) {
 			if (entity->parms.suppressSurfaceInViewID
@@ -811,6 +881,41 @@ void idRenderWorldLocal::AddAreaEntityRefs(int areaNum, const portalStack_t *ps)
 		entity->parms.weaponDepthHack = entity->parms.weaponDepthHackInViewID == tr.viewDef->renderView.viewID;
 #endif
 		vEnt = R_SetEntityDefViewEntity(entity);
+#ifdef _SPLASHDAMAGE //karin: copy area ambient to viewEntity
+		if (entity->parms.ambientCubeMap)
+			vEnt->areaAmbient = entity->parms.ambientCubeMap;
+		else if (area->cubeMapDecl)
+			vEnt->areaAmbient = area->cubeMapDecl;
+		else if (atmosphere && !entity->parms.flags.dontCastFromAtmosLight)
+			vEnt->areaAmbient = atmosphere->GetAmbientCubeMap();
+
+		vEnt->fadeFraction = 0.0f;
+		if (checkVisDist && !harm_r_skipVisDistFade.GetBool())
+		{
+		    float falloff = entity->parms.visDistFalloff > 0.0f ? entity->parms.visDistFalloff : harm_r_visDistEntityFallOff.GetFloat();
+#if 1
+			if (entity->parms.maxVisDist > entity->parms.minVisDist && falloff > 0.0f)
+#else // test
+			static idCVar harm_r_visDistFalloff("harm_r_visDistFalloff", "0", CVAR_RENDERER | CVAR_FLOAT, "test visDistFalloff");
+			if (entity->parms.maxVisDist > entity->parms.minVisDist && harm_r_visDistFalloff.GetFloat() > 0.0f)
+#endif
+			{
+				float range = entity->parms.maxVisDist - entity->parms.minVisDist;
+#if 1
+				float fadeRange = range * falloff;
+#else // test
+				float fadeRange = range * harm_r_visDistFalloff.GetFloat();
+#endif
+				float nofadeRange = range - fadeRange;
+				distance -= entity->parms.minVisDist;
+
+				if (distance > nofadeRange) {
+					vEnt->fadeFraction = /*1.0f - */idMath::ClampFloat(0.0f, 1.0f, (distance - nofadeRange) / fadeRange);
+					// fade = 1.0 - fadeFraction, so 0.0 is full light
+				}
+			}
+		}
+#endif
 
 		// possibly expand the scissor rect
 		vEnt->scissorRect.Union(ps->rect);
@@ -994,7 +1099,7 @@ void idRenderWorldLocal::AddAreaLightRefs(int areaNum, const portalStack_t *ps)
 			|| r_noLight.GetBool()
 #endif
 	  )
-	return;
+		return;
 
 	area = &portalAreas[ areaNum ];
 
@@ -1009,6 +1114,31 @@ void idRenderWorldLocal::AddAreaLightRefs(int areaNum, const portalStack_t *ps)
 		}
 
 
+#ifdef _SPLASHDAMAGE //karin: vis dist check
+		//karin: check visible distance range
+		bool checkVisDist = false;
+		if (light->parms.maxVisDist > 0.0f && !harm_r_skipVisDistCheck.GetBool()) {
+			float distance = tr.viewDef->renderView.vieworg.Dist(light->parms.origin);
+			if(harm_r_drawVisDistCheck.GetInteger() & 2)
+			{
+				const idVec4 *color;
+				if (distance > light->parms.maxVisDist)
+					color = &colorRed;
+				else
+					color = &colorOrange;
+				idVec3 dir = light->parms.origin - tr.viewDef->renderView.vieworg;
+				dir.Normalize();
+				idVec3 dpos = light->parms.origin + idVec3(0, 0, 100);
+				DebugArrow(*color, dpos, light->parms.origin, 10);
+				DrawText(va("%f < %d", distance, light->parms.maxVisDist), dpos, 1, *color, dir.ToMat3());
+			}
+
+			if (distance > light->parms.maxVisDist)
+				continue;
+			checkVisDist = true;
+		}
+#endif
+
 #ifdef _D3BFG_CULLING
         if (harm_r_occlusionCulling.GetBool()) {
             // nbohr1more: disable the player in void light optimization when light area culling is disabled
@@ -1020,9 +1150,14 @@ void idRenderWorldLocal::AddAreaLightRefs(int areaNum, const portalStack_t *ps)
 
             // check for being closed off behind a door
             // stgatilov #5172: there are many conditions when this should not be done, we just set areaNum = -1 in bad cases
-            if (r_useLightAreaCulling.GetInteger() &&
+        	if (r_useLightAreaCulling.GetInteger() &&
+#ifdef _SPLASHDAMAGE
+                !light->parms.flags.noShadows && light->lightShader->LightCastsShadows() &&
+                light->areaNum != -1 && !tr.viewDef->connectedAreas[light->areaNum]
+#else
                 !light->parms.noShadows && light->lightShader->LightCastsShadows() &&
                 light->areaNum != -1 && !tr.viewDef->connectedAreas[light->areaNum]
+#endif
                     ) {
                 // a light that doesn't cast shadows will still light even if it is behind a door
                 //k assert( !light->parms.noShadows && light->lightShader->LightCastsShadows() );
@@ -1044,8 +1179,14 @@ void idRenderWorldLocal::AddAreaLightRefs(int areaNum, const portalStack_t *ps)
         // check for being closed off behind a door
         // a light that doesn't cast shadows will still light even if it is behind a door
         if (r_useLightCulling.GetInteger() >= 3 &&
+#ifdef _SPLASHDAMAGE
+            !light->parms.flags.noShadows && light->lightShader->LightCastsShadows()
+            && light->areaNum != -1 && !tr.viewDef->connectedAreas[ light->areaNum ]
+#else
             !light->parms.noShadows && light->lightShader->LightCastsShadows()
-            && light->areaNum != -1 && !tr.viewDef->connectedAreas[ light->areaNum ]) {
+            && light->areaNum != -1 && !tr.viewDef->connectedAreas[ light->areaNum ]
+#endif
+		) {
             continue;
         }
 #ifdef _D3BFG_CULLING
@@ -1060,6 +1201,19 @@ void idRenderWorldLocal::AddAreaLightRefs(int areaNum, const portalStack_t *ps)
 		}
 
 		vLight = R_SetLightDefViewLight(light);
+#ifdef _SPLASHDAMAGE //karin: light fade by distance
+		vLight->fadeFraction = 0.0f;
+		if (checkVisDist && harm_r_visDistLightFallOff.GetFloat() > 0.0f && !light->parms.flags.atmosphereLight && light->parms.flags.pointLight)
+		{
+			float fadeRange = light->parms.maxVisDist * harm_r_visDistLightFallOff.GetFloat();
+			float nofadeRange = light->parms.maxVisDist - fadeRange;
+			float distance = tr.viewDef->renderView.vieworg.Dist(light->parms.origin);
+			if (distance > nofadeRange) {
+				vLight->fadeFraction = /*1.0f - */idMath::ClampFloat(0.0f, 1.0f, (distance - nofadeRange) / fadeRange);
+				// fade = 1.0 - fadeFraction, so 0.0 is full light
+			}
+		}
+#endif
 
 		// expand the scissor rect
 		vLight->scissorRect.Union(ps->rect);
@@ -1083,7 +1237,7 @@ void idRenderWorldLocal::AddAreaRefs(int areaNum, const portalStack_t *ps)
 	// add the models and lights, using more precise culling to the planes
 	AddAreaEntityRefs(areaNum, ps);
 	AddAreaLightRefs(areaNum, ps);
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 #ifdef _RAVEN_BSE
     AddAreaEffectRefs(areaNum, ps);
 #endif
@@ -1166,7 +1320,7 @@ void idRenderWorldLocal::FindViewLightsAndEntities(void)
 	// clear the visible lightDef and entityDef lists
 	tr.viewDef->viewLights = NULL;
 	tr.viewDef->viewEntitys = NULL;
-#ifdef _RAVEN // particle
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 #ifdef _RAVEN_BSE
     tr.viewDef->viewEffects = NULL;
 #endif
@@ -1637,7 +1791,9 @@ void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, c
 	}
 }
 #endif
+#endif
 
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 #ifdef _RAVEN_BSE
 void idRenderWorldLocal::AddAreaEffectRefs(int areaNum, const portalStack_s *ps) {
     areaReference_s *p_effectRefs; // ebp
@@ -1649,7 +1805,29 @@ void idRenderWorldLocal::AddAreaEffectRefs(int areaNum, const portalStack_s *ps)
 
     p_effectRefs = &portalAreas[areaNum].effectRefs;
     for (i = p_effectRefs->areaNext; i != p_effectRefs; i = i->areaNext) {
-        effect = i->effect;
+    	effect = i->effect;
+#ifdef _SPLASHDAMAGE //karin: vis dist check
+    	//karin: check visible distance range
+    	if (effect->parms.maxVisDist > 0.0f && !harm_r_skipVisDistCheck.GetBool()) {
+    		float distance = tr.viewDef->renderView.vieworg.Dist(effect->parms.origin);
+    		if(harm_r_drawVisDistCheck.GetInteger() & 4)
+    		{
+    			const idVec4 *color;
+    			if (distance > effect->parms.maxVisDist)
+    				color = &colorRed;
+    			else
+    				color = &colorBlue;
+    			idVec3 dir = effect->parms.origin - tr.viewDef->renderView.vieworg;
+    			dir.Normalize();
+    			idVec3 dpos = effect->parms.origin + idVec3(0, 0, 100);
+    			DebugArrow(*color, dpos, effect->parms.origin, 10);
+    			DrawText(va("%f < %f", distance, effect->parms.maxVisDist), dpos, 1, *color, dir.ToMat3());
+    		}
+
+    		if (distance > effect->parms.maxVisDist)
+    			continue;
+    	}
+#endif
         if (!r_skipSuppress.GetBool()) {
             suppressSurfaceInViewID = effect->parms.suppressSurfaceInViewID;
             if (suppressSurfaceInViewID) {

@@ -29,12 +29,24 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "tr_local.h"
+#ifdef _SPLASHDAMAGE //karin: custom stage shader
+#include "renderer/RenderProgram.h"
+extern idCVar harm_r_areaAmbientScale;
+#endif
 
 #ifdef _K_DEV //karin: debug shader pass
 #define _HARM_SKIP_RENDER_SHADER_PASS
 #endif
 #ifdef _HARM_SKIP_RENDER_SHADER_PASS
 static idCVar harm_r_skipShaderPass("harm_r_skipShaderPass", "0", CVAR_INTEGER|CVAR_RENDERER, "1. TG_EXPLICIT, 2. TG_DIFFUSE_CUBE, 3. TG_REFLECT_CUBE, 4. TG_SKYBOX_CUBE, 5. TG_WOBBLESKY_CUBE, 6. TG_SCREEN, 7. TG_SCREEN2, 8. TG_GLASSWARP, 9. TG_REFLECT_CUBE(Bumpy), 9000. All. greater than 0: skip, less than 0: only, 0 disabled.");
+#endif
+
+extern const float zero[] = { 0.0f };
+extern const float one[] = { 1.0f };
+extern const float negOne[] = { -1.0f };
+#ifdef COLOR_MODULATE_IS_NORMALIZED
+extern const float oneModulate[] = { 1.0f / 255.0f };
+extern const float negOneModulate[] = { -1.0f / 255.0f };
 #endif
 
 /*
@@ -628,6 +640,280 @@ ID_INLINE static void RB_STD_T_SetNewShaderPassesUniforms(const drawSurf_t *surf
     // window coord to 0.0 to 1.0 conversion
     RB_SetProgramEnvironment();
 }
+
+#ifdef _SPLASHDAMAGE //karin: custom stage shader
+
+//#define _TEST_RENDER_PROGRAM 1
+#if _TEST_RENDER_PROGRAM
+#include "framework/CmdSystemDeclCompletion.h"
+static idCVar harm_r_testRenderProgram("harm_r_testRenderProgram", "", CVAR_RENDERER, "test render program", idArgCompletionDecl_f<DECLTYPE_RENDERPROGRAM>);
+#endif
+
+// call in backend render thread
+static void RB_SetBuiltinProgramEnvironment(void)
+{
+	float	parm[4];
+	int		pot;
+
+	// screen power of two correction factor, assuming the copy to _currentRender
+	// also copied an extra row and column for the bilerp
+	int	 w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
+	pot = globalImages->currentRenderImage->uploadWidth;
+	parm[0] = w;
+	//parm[2] = pot;
+
+	int	 h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
+	pot = globalImages->currentRenderImage->uploadHeight;
+	parm[1] = h;
+	//parm[3] = pot;
+
+	// window coord to 0.0 to 1.0 conversion
+	parm[2] = 1.0f / (float)w;
+	parm[3] = 1.0f / (float)h;
+
+	// SCREEN_WIDTH, SCREEN_HEIGHT, 1.0f / SCREEN_WIDTH, 1.0f / SCREEN_HEIGHT // 640 480 0.0015625 0.0020833
+	backEnd.parms.currentRenderTexelSize[0] = parm[0];
+	backEnd.parms.currentRenderTexelSize[1] = parm[1];
+	backEnd.parms.currentRenderTexelSize[2] = parm[2];
+	backEnd.parms.currentRenderTexelSize[3] = parm[3];
+}
+
+// call in frontend thread
+void R_AddCopyParmsCmd(const viewDef_t *view)
+{
+	copyParmsCommand_t	*cmd;
+
+	cmd = (copyParmsCommand_t *)R_GetCommandBuffer(sizeof(*cmd));
+	cmd->commandId = RC_COPY_PARMS;
+
+	materialStageBuiltinUniform_s &builtinUniforms = cmd->parms;
+	const sdDeclAtmosphere *atmosphere;
+	const sdDeclAmbientCubeMap *amb;
+
+	// atmosphere
+	if(view->renderWorld && view->renderWorld->GetAtmosphere())
+	{
+		atmosphere = view->renderWorld->GetAtmosphere();
+
+		const sdDeclAtmosphere::postProcessParms_t &ppParms = atmosphere->GetPostProcessParms();
+
+		// postprocess
+		builtinUniforms.postTint = ppParms.tint;
+		builtinUniforms.postSaturationContrast.Set(ppParms.saturation, ppParms.contrast);
+		builtinUniforms.postGlareParameters = ppParms.glareParms;
+		// sun
+		builtinUniforms.sunDir = atmosphere->GetSunDirection();
+		builtinUniforms.sunColor = atmosphere->GetSunColor();
+		builtinUniforms.sunHaloParameters.Set(atmosphere->GetSunHaloScale(), atmosphere->GetSunHaloBias());
+		// fog
+		builtinUniforms.fogColor = atmosphere->GetFogColor();
+		builtinUniforms.fogParams.Set(1.0f / atmosphere->GetFogDistHalf(), 1.0f / atmosphere->GetFogHeightHalf(), atmosphere->GetFogHeightOffset());
+		const float fogStart = atmosphere->GetFogStart();
+		const float fogEnd = atmosphere->GetFogEnd();
+		builtinUniforms.fogDepths.Set(fogStart, fogEnd, 1.0f / (fogEnd - fogStart), -fogStart / (fogEnd - fogStart));
+
+		// ambient
+		builtinUniforms.skyGradientCubeMap = atmosphere->GetSkyGradientImage();
+		amb = atmosphere->GetAmbientCubeMap();
+		if(amb)
+		{
+			builtinUniforms.ambientBrightness = amb->GetBrightness();
+			builtinUniforms.ambientAvgColor = amb->GetAvgAmbientColor();
+			builtinUniforms.environmentCubeMap = globalImages->ImageFromFile(amb->GetEnvironmentMap(), TF_DEFAULT, true, TR_CLAMP, TD_DEFAULT, CF_NATIVE);
+		}
+		else
+		{
+			builtinUniforms.ambientBrightness = 1.0f;
+			builtinUniforms.ambientAvgColor.Set(1.0f, 1.0f, 1.0f, 1.0f);
+			builtinUniforms.environmentCubeMap = globalImages->ambientNormalMap;
+		}
+	}
+	else
+	{
+		// postprocess
+		builtinUniforms.postTint.Set(1.0f, 1.0f, 1.0f);
+		builtinUniforms.postSaturationContrast.Set(1.0f, 1.0f);
+		builtinUniforms.postGlareParameters.Set(1.0f, 0.0f, 1.0f, 1.0f);
+		// sun
+		builtinUniforms.sunDir.Set(0.0f, 0.0f, -1.0f);
+		builtinUniforms.sunColor.Set(1.0f, 1.0f, 1.0f);
+		builtinUniforms.sunHaloParameters.Set(1.0f, 0.0f);
+		// fog
+		builtinUniforms.fogColor.Set(1.0f, 1.0f, 1.0f);
+		builtinUniforms.fogParams.Set(0.0f, 0.0, 0.0f);
+		builtinUniforms.fogDepths.Set(0.0f, 0.0f, 0.0f, 0.0f);
+		// ambient
+		builtinUniforms.skyGradientCubeMap = globalImages->ambientNormalMap;
+		builtinUniforms.ambientBrightness = 1.0f;
+		builtinUniforms.ambientAvgColor.Set(1.0f, 1.0f, 1.0f, 1.0f);
+		builtinUniforms.environmentCubeMap = globalImages->ambientNormalMap;
+	}
+
+	// cvars
+	builtinUniforms.ambientScale = harm_r_areaAmbientScale.GetFloat();
+}
+
+void RB_CopyParms(const void *data)
+{
+	const copyParmsCommand_t	*cmd;
+
+	cmd = (const copyParmsCommand_t *)data;
+
+	backEnd.parms = cmd->parms;
+}
+
+static void RB_BindBuiltinProgramEnvironment(const sdRenderProgram *program, const drawSurf_t *surf)
+{
+	// postprocess
+	program->BindVector("postTint", backEnd.parms.postTint);
+	program->BindVector("postSaturationContrast", backEnd.parms.postSaturationContrast);
+	program->BindVector("postGlareParameters", backEnd.parms.postGlareParameters);
+	// sun
+	program->BindVector("sunDirectionWorld", backEnd.parms.sunDir);
+	program->BindVector("sunColor", backEnd.parms.sunColor);
+	program->BindVector("sunHaloParameters", backEnd.parms.sunHaloParameters);
+    idVec3 localSunDir;
+    R_GlobalVectorToLocal(surf->space->modelMatrix, backEnd.parms.sunDir, localSunDir);
+	program->BindVector("sunDirection", localSunDir);
+	// fog
+	program->BindVector("fogColor", backEnd.parms.fogColor);
+	program->BindVector("fogParams", backEnd.parms.fogParams);
+	program->BindVector("fogDepths", backEnd.parms.fogDepths);
+	program->BindVector("fogRotation_x", 1.0f, 0.0f, 0.0f, 1.0f);
+	program->BindVector("fogRotation_y", 0.0f, 1.0f, 0.0f, 1.0f);
+	program->BindVector("fogRotation_z", 0.0f, 0.0f, 1.0f, 1.0f);
+
+	// matrix
+	// model matrix
+    idMat4 modelMatrix;
+    memcpy(&modelMatrix, surf->space->modelMatrix, sizeof(modelMatrix));
+    modelMatrix.TransposeSelf();
+	program->BindVector("transposedModelMatrix_x", modelMatrix[0]);
+	program->BindVector("transposedModelMatrix_y", modelMatrix[1]);
+	program->BindVector("transposedModelMatrix_z", modelMatrix[2]);
+	//program->BindMat4("transposedModelMatrix", modelMatrix);
+
+	// modelview matrix
+	program->BindMat4("u_modelViewMatrix", surf->space->modelViewMatrix);
+	float mat[16];
+	R_TransposeGLMatrix(surf->space->modelViewMatrix, mat);
+	program->BindMat4("transposedModelViewMatrix", mat);
+
+	// projection matrix
+	//program->BindMat4("u_projectionMatrix", backEnd.viewDef->projectionMatrix);
+	R_TransposeGLMatrix(backEnd.viewDef->projectionMatrix, mat);
+	program->BindMat4("transposedProjectionMatrix", mat);
+
+	// view
+    idVec4 localViewOrigin;
+    R_GlobalPointToLocal(surf->space->modelMatrix, backEnd.viewDef->renderView.vieworg, localViewOrigin.ToVec3());
+    localViewOrigin[3] = 1.0f;
+	program->BindVector("viewOrigin", localViewOrigin);
+	program->BindVector("viewOriginWorld", backEnd.viewDef->renderView.vieworg);
+
+	// ambient
+	program->BindVector("ambientBrightness", backEnd.parms.ambientBrightness);
+	program->BindVector("ambientAvgColor", backEnd.parms.ambientAvgColor);
+	program->BindVector("ambientScale", backEnd.parms.ambientScale);
+	// ambient map
+	idImage *ambientCubeMap = NULL;
+	idImage *environmentCubeMap = NULL;
+	idImage *skyGradientCubeMap = NULL;
+	if (surf->space->areaAmbient)
+	{
+		ambientCubeMap = surf->space->areaAmbient->GetAmbientCubeMap();
+		environmentCubeMap = surf->space->areaAmbient->GetEnvironmentCubeMap();
+		skyGradientCubeMap = surf->space->areaAmbient->GetGradientMap();
+	}
+	if(!ambientCubeMap)
+		ambientCubeMap = backEnd.parms.ambientCubeMap;
+	if(!environmentCubeMap)
+		environmentCubeMap = backEnd.parms.environmentCubeMap;
+	if(!skyGradientCubeMap)
+		skyGradientCubeMap = backEnd.parms.skyGradientCubeMap;
+
+	if(!ambientCubeMap)
+		ambientCubeMap = globalImages->blackCubeMapImage;
+	if(!environmentCubeMap)
+		environmentCubeMap = globalImages->blackCubeMapImage;
+	if(!skyGradientCubeMap)
+		skyGradientCubeMap = globalImages->blackCubeMapImage;
+
+	program->BindImage("ambientCubeMap", ambientCubeMap);
+	program->BindImage("environmentCubeMap", environmentCubeMap);
+	program->BindImage("skyGradientCubeMap", skyGradientCubeMap);
+
+	// unknown/constants
+	program->BindVector("stuffParameters", 1.0f, 0.0f, 0.0f, 1.0f);
+	program->BindVector("currentRenderTexelSize", backEnd.parms.currentRenderTexelSize); // SCREEN_WIDTH, SCREEN_HEIGHT, 1.0f / SCREEN_WIDTH, 1.0f / SCREEN_HEIGHT // 640 480 0.0015625 0.0020833
+}
+
+ID_INLINE static void RB_OcclusionTesting(void)
+{
+	occlusionTestManager->Render();
+}
+
+void R_UpdateOcclusionTesting(void)
+{
+	occlusionTestManager->Update();
+}
+
+void RB_QueryOcclusionTesting(void)
+{
+	occlusionTestManager->Query();
+	occlusionTestManager->Ready();
+}
+
+// postprocess buffer width and height is 1/4
+ID_INLINE static void RB_BeginDrawPostprocess(int destinationBuffer)
+{
+	postprocessBuffer.Begin(destinationBuffer);
+#if 1
+	// set the window clipping
+	qglViewport(0, 0, postprocessBuffer.RenderWidth(), postprocessBuffer.RenderHeight());
+	// the scissor may be smaller than the viewport for subviews
+	if (r_useScissor.GetBool())
+		qglScissor(0, 0, postprocessBuffer.RenderWidth(), postprocessBuffer.RenderHeight());
+#else
+	// set the window clipping
+	qglViewport(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
+			tr.viewportOffset[1] + backEnd.viewDef->viewport.y1,
+			(backEnd.viewDef->viewport.x2 + 1 - backEnd.viewDef->viewport.x1) * 0.25f,
+			(backEnd.viewDef->viewport.y2 + 1 - backEnd.viewDef->viewport.y1) * 0.25f);
+
+	// the scissor may be smaller than the viewport for subviews
+	if (r_useScissor.GetBool()) {
+		qglScissor(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+				tr.viewportOffset[1] + backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
+				(backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1) * 0.25f,
+				(backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1) * 0.25f);
+	}
+#endif
+}
+
+ID_INLINE static void RB_EndDrawPostprocess(void)
+{
+	postprocessBuffer.End();
+
+	// set the window clipping
+	qglViewport(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1,
+			tr.viewportOffset[1] + backEnd.viewDef->viewport.y1,
+			backEnd.viewDef->viewport.x2 + 1 - backEnd.viewDef->viewport.x1,
+			backEnd.viewDef->viewport.y2 + 1 - backEnd.viewDef->viewport.y1);
+
+	// the scissor may be smaller than the viewport for subviews
+	if (r_useScissor.GetBool()) {
+		qglScissor(tr.viewportOffset[0] + backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+				tr.viewportOffset[1] + backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
+				backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
+				backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1);
+	}
+}
+
+extern void RB_DrawAreaAmbient( drawSurf_t **drawSurfs, int numDrawSurfs );
+extern void RB_DrawAtmosphere( drawSurf_t **drawSurfs, int numDrawSurfs );
+#endif
+
 /*
 ==================
 RB_STD_T_RenderShaderPasses
@@ -658,6 +944,9 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
     // Custom new stage state
     idList<int> customNewStageAttrIsSet(SHADER_MAX_CUSTOM);
     idList<int> customNewStageUniformIsSet(SHADER_MAX_CUSTOM);
+#endif
+#ifdef _SPLASHDAMAGE //karin: custom stage shader
+	idList<int> materialBuiltinVariablesLoaded(surf->material->GetNumStages());
 #endif
 
 	tri = surf->geo;
@@ -810,6 +1099,157 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Normal));
 
 			newShaderStage->Unbind();
+
+			continue;
+		}
+#endif
+
+#ifdef _SPLASHDAMAGE //karin: custom stage shader
+		// see if we are a new-style stage
+
+		const sdRenderProgram *renderProgram = pStage->renderProgram;
+
+		if (renderProgram && renderProgram->IsValid()) {
+			if ( r_skipNewAmbient.GetBool() ) {
+				continue;
+			}
+
+#if _TEST_RENDER_PROGRAM
+			if(harm_r_testRenderProgram.GetString() && harm_r_testRenderProgram.GetString()[0] && idStr::Icmp(harm_r_testRenderProgram.GetString(), renderProgram->GetDeclRenderProgram()->GetName()))
+				continue;
+#endif
+
+			if(!renderProgram->Bind(pStage, shader, regs))
+				continue;
+
+			if(pStage->destinationBuffer != -1)
+			{
+				RB_BeginDrawPostprocess(pStage->destinationBuffer);
+			}
+
+			GL_State( pStage->drawStateBits );
+
+			int oldDrawBits = renderProgram->SetupState();
+
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Normal));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Tangent));
+			GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Bitangent));
+
+			if(materialBuiltinVariablesLoaded.FindIndex(renderProgram->GetShaderProgram()) == -1) {
+				RB_SetBuiltinProgramEnvironment();
+
+				// bind builtin program variables
+				RB_BindBuiltinProgramEnvironment(renderProgram, surf);
+
+				// set standard transformations
+				GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), rb_MVP);
+
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
+#ifdef NORMALIZE_BYTE_COLOR
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), &ac->color);
+#else
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), &ac->color);
+#endif
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
+				GL_VertexAttribPointer(SHADER_PARM_ADDR(attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
+
+				materialBuiltinVariablesLoaded.Append(renderProgram->GetShaderProgram());
+			}
+
+			// set the color([0, 255])
+			color[0] = regs[ pStage->color.registers[0] ];
+			color[1] = regs[ pStage->color.registers[1] ];
+			color[2] = regs[ pStage->color.registers[2] ];
+			color[3] = regs[ pStage->color.registers[3] ];
+#ifdef NORMALIZE_BYTE_COLOR
+			float vertexColorMod = one[0];
+#else
+			float vertexColorMod = oneModulate[0];
+#endif
+			float colorPointerMod = one[0];
+			if (surf->space->fadeFraction > 0.0f) {
+				const float fade = 1.0f - surf->space->fadeFraction;
+				color[0] *= fade;
+				color[1] *= fade;
+				color[2] *= fade;
+				color[3] *= fade;
+
+				vertexColorMod *= fade;
+				colorPointerMod *= fade;
+			}
+
+			switch (pStage->vertexColor) {
+			case SVC_MODULATE:
+				// glColorPointer() -> vertex.color(UB[0,255]) * (1.0/255.0) + 0.0 -> output float [0,1]
+				renderProgram->BindVector("colorModulate", vertexColorMod);
+				renderProgram->BindVector("colorAdd", zero[0]);
+				// glColorPointer() -> vertex.color(UB[0,255]) * 1.0 + 0.0 -> output float [0,255]
+				renderProgram->BindVector("u_glColorPointer", colorPointerMod);
+				renderProgram->BindVector("u_glColor4ub", zero[0]);
+				break;
+			case SVC_INVERSE_MODULATE:
+				// glColorPointer() -> vertex.color(UB[0,255]) * -(1.0/255.0) + 0.0 -> output float [-1,0]
+				vertexColorMod = -vertexColorMod;
+				renderProgram->BindVector("colorModulate", vertexColorMod);
+				renderProgram->BindVector("colorAdd", one[0]);
+				// glColorPointer() -> vertex.color(UB[0,255]) * 1.0 + 0.0 -> output float [0,255]
+				renderProgram->BindVector("u_glColorPointer", colorPointerMod);
+				renderProgram->BindVector("u_glColor4ub", zero[0]);
+				break;
+			case SVC_MODULATE_ALPHA:
+				// glColorPointer() -> vertex.color(UB[0,255]) * (1.0/255.0) + 0.0 -> output float [0,1]
+				renderProgram->BindVector("colorModulate", zero[0], zero[0], zero[0], vertexColorMod);
+				renderProgram->BindVector("colorAdd", zero[0]);
+				// glColorPointer() -> vertex.color(UB[0,255]) * 1.0 + 0.0 -> output float [0,255]
+				renderProgram->BindVector("u_glColorPointer", zero[0], zero[0], zero[0], colorPointerMod);
+				renderProgram->BindVector("u_glColor4ub", zero[0]);
+				break;
+			case SVC_IGNORE:
+			default:
+				// glColor() -> vertex.color(UB[0,255]) * 0.0 + glColor -> output float [0,1]
+				renderProgram->BindVector("colorModulate", zero[0]);
+				renderProgram->BindVector("colorAdd", color);
+				// glColor() -> vertex.color(UB[0,255]) * 0.0 + glColor -> output float [0,255]
+				renderProgram->BindVector("u_glColorPointer", zero[0]);
+#ifdef NORMALIZE_BYTE_COLOR
+				renderProgram->BindVector("u_glColor4ub", color);
+#else
+				renderProgram->BindVector("u_glColor4ub", color[0] * 255.0f, color[1] * 255.0f, color[2] * 255.0f, color[3] * 255.0f);
+#endif
+				break;
+			}
+
+			if((backEnd.glState.glStateBits & GLS_POLYMODE_LINE) == 0)
+				RB_DrawElementsWithCounters( tri );
+			else
+			{
+				qglLineWidth(pStage->lineWidth);
+				RB_DrawElementsWithCountersLines(tri);
+				if(pStage->lineWidth != 1.0f)
+					qglLineWidth(1);
+			}
+
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_TexCoord));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Color));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Normal));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Tangent));
+			GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Bitangent));
+
+			if(oldDrawBits)
+				GL_State(oldDrawBits);
+
+			if(pStage->destinationBuffer != -1)
+			{
+				RB_EndDrawPostprocess();
+			}
+
+			renderProgram->Unbind(/*pStage*/);
 
 			continue;
 		}
@@ -1029,6 +1469,13 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 				break;
 		}
 
+#ifdef _SPLASHDAMAGE //karin: postprocess buffer
+		if(pStage->destinationBuffer != -1)
+		{
+			RB_BeginDrawPostprocess(pStage->destinationBuffer);
+		}
+#endif
+
 		GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
 		if(usingTexCoord)
@@ -1061,6 +1508,33 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 //        static const float one[4] = { 1, 1, 1, 1 };
 //        static const float negOne[4] = { -1, -1, -1, -1 };
 
+#ifdef _SPLASHDAMAGE //karin: fade by distance
+		if (surf->space->fadeFraction > 0.0f) {
+			const float fade = 1.0f - surf->space->fadeFraction;
+			color[0] *= fade;
+			color[1] *= fade;
+			color[2] *= fade;
+			color[3] *= fade;
+			float vertexColorMod = oneModulate[0] * fade;
+			switch (pStage->vertexColor) {
+				case SVC_MODULATE:
+					GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), &vertexColorMod);
+					GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), zero);
+					break;
+				case SVC_INVERSE_MODULATE:
+					vertexColorMod = -vertexColorMod;
+					GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), &vertexColorMod);
+					GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
+					break;
+				case SVC_IGNORE:
+				default:
+					GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), zero);
+					GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
+					break;
+			}
+		}
+		else
+#endif
 		switch (pStage->vertexColor) {
 			case SVC_MODULATE:
 				GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), oneModulate);
@@ -1132,6 +1606,13 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 
 		GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+
+#ifdef _SPLASHDAMAGE //karin: postprocess buffer
+		if(pStage->destinationBuffer != -1)
+		{
+			RB_EndDrawPostprocess();
+		}
+#endif
 	}
 
 	// reset polygon offset
@@ -1166,13 +1647,16 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 #ifdef _RAVEN //karin: sniper's blur is 2D and has flag `MF_NEED_CURRENT_RENDER`
 		|| drawSurfs[0]->material->TestMaterialFlag(MF_NEED_CURRENT_RENDER)
 #endif
+#ifdef _SPLASHDAMAGE //karin: `MF_UPDATECURRENTRENDER`
+		|| drawSurfs[0]->material->TestMaterialFlag(MF_UPDATECURRENTRENDER)
+#endif
 	) {
 		if (r_skipPostProcess.GetBool()) {
 			return 0;
 		}
 
 		// only dump if in a 3d view
-#if !defined(_RAVEN) && !defined(_HUMANHEAD) //karin: sniper's blur is 2D on Quake4 and spiritWalk and deathwalk on Prey //TODO: check it for avoid unused operation
+#if !defined(_RAVEN) && !defined(_HUMANHEAD) && !defined(_SPLASHDAMAGE) //karin: sniper's blur is 2D on Quake4 and spiritWalk and deathwalk on Prey //TODO: check it for avoid unused operation
 		if (backEnd.viewDef->viewEntitys)
 #endif
 		{
@@ -1181,6 +1665,9 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 			                backEnd.viewDef->viewport.y2 -  backEnd.viewDef->viewport.y1 + 1, true);
 		}
 
+#ifdef _SPLASHDAMAGE //karin: clear all postprocess images
+		postprocessBuffer.ClearAll();
+#endif
 		backEnd.currentRenderCopied = true;
 	}
 
@@ -1203,8 +1690,15 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 		}
 
 		// we need to draw the post process shaders after we have drawn the fog lights
-		if (surf->material->GetSort() >= SS_POST_PROCESS
-		    && !backEnd.currentRenderCopied) {
+		if ( (
+				surf->material->GetSort() >= SS_POST_PROCESS
+#ifdef _RAVEN //karin: sniper's blur is 2D and has flag `MF_NEED_CURRENT_RENDER`
+				|| drawSurfs[0]->material->TestMaterialFlag(MF_NEED_CURRENT_RENDER)
+#endif
+#ifdef _SPLASHDAMAGE //karin: `MF_UPDATECURRENTRENDER`
+				|| drawSurfs[0]->material->TestMaterialFlag(MF_UPDATECURRENTRENDER)
+#endif
+		) && !backEnd.currentRenderCopied) {
 			break;
 		}
 /* //k2023
@@ -2016,6 +2510,10 @@ void	RB_STD_DrawView(void)
 	// subviews
 	RB_STD_FillDepthBuffer(drawSurfs, numDrawSurfs);
 
+#ifdef _SPLASHDAMAGE //karin: render occlusion testing
+	RB_OcclusionTesting();
+#endif
+
 	// main light renderer
 	if (r_lightingModel != LM_NOLIGHTING
 #ifdef _NO_LIGHT
@@ -2023,6 +2521,9 @@ void	RB_STD_DrawView(void)
 #endif
 	   )
     {
+#ifdef _SPLASHDAMAGE //karin: render areas ambient
+		RB_DrawAreaAmbient(drawSurfs, numDrawSurfs);
+#endif
 #ifdef _GLOBAL_ILLUMINATION
         if(HARM_RENDER_GLOBAL_ILLUMINATION())
             RB_DrawGlobalIlluminations(drawSurfs, numDrawSurfs);
@@ -2034,6 +2535,9 @@ void	RB_STD_DrawView(void)
 	// disable stencil shadow test
 	qglStencilFunc(GL_ALWAYS, 128, 255);
 
+#ifdef _SPLASHDAMAGE //karin: render atmosphere
+	RB_DrawAtmosphere(drawSurfs, numDrawSurfs);
+#endif
 	// uplight the entire screen to crutch up not having better blending range
 	RB_STD_LightScale();
 
@@ -2047,7 +2551,5 @@ void	RB_STD_DrawView(void)
 	if (processed < numDrawSurfs) {
 		RB_STD_DrawShaderPasses(drawSurfs+processed, numDrawSurfs-processed);
 	}
-	#ifndef ANDROID_NOGLERRHACK
 	RB_RenderDebugTools(drawSurfs, numDrawSurfs);
-	#endif
 }

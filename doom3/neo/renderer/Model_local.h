@@ -157,6 +157,35 @@ class idRenderModelStatic : public idRenderModel
         void					    SetGameUpdatedModel(bool gum) { bIsGUM = gum; }
 #endif //HUMANHEAD END
 #endif
+#ifdef _SPLASHDAMAGE
+		virtual void				DirtyVertexAmbientCache();
+
+		// Returns the number of GUI surfaces
+		virtual int					NumGUISurfaces( void ) const;
+
+		// Returns the GUI surfaces
+		virtual const guiSurface_t*	GetGUISurface( int guiSurfaceNum ) const;
+		// Returns the id of the surface with the given name (-1 if not supported or not found)
+		virtual int					FindSurfaceId( const char *surfaceName );
+
+		virtual void				SetBounds( idBounds const &bb );
+		// Purges any partial loadable images referenced by this model
+		virtual void				PurgePartialLoadableImages( void );
+
+		// Schedules loading of any partial loadable images referenced by this model
+		virtual void				LoadPartialLoadableImages( bool blocking = false );
+
+		// All surfaces have finished any pending partial image loads
+		virtual bool				IsFinishedPartialLoading( void ) const;
+		virtual int					NumMeshes( const int lod = 0 ) const;
+		virtual idBounds			CalcMeshBounds( int meshIndex, const idJointMat *joints, const idVec3 &offset, const idMat3 &axis, bool useDefaultAnim );
+		bool						LoadModelBinary(const char *fileName);
+
+	protected:
+		idList<guiSurface_t>		guiSurfaces;
+	private:
+		idStr						ModelBinaryName(const char *fileName);
+#endif
 
 	public:
 		idList<modelSurface_t>		surfaces;
@@ -214,6 +243,25 @@ class idMD5Mesh
 		int							NumVerts(void) const;
 		int							NumTris(void) const;
 		int							NumWeights(void) const;
+#ifdef _SPLASHDAMAGE //karin: md5 binary mesh parsing
+		struct binaryVert_t {
+			idVec2 st;
+			byte color[4];
+			int num;
+			int joints[4];
+			float weights[4];
+			idVec3 offsets[4];
+		};
+		struct binaryVertGroup_t {
+			idList<binaryVert_t> verts;
+			const idMaterial *shader;
+			bool noAnimate;
+		};
+		bool						ReadBinary(idFile *file, int numJoints, const void *transforms, const idJointMat *joints, idList<binaryVertGroup_t> &retVerts);
+
+	private:
+		int							FindBinaryVert(const idList<binaryVertGroup_t> &list) const;
+#endif
 
 	private:
 		idList<idVec2>				texCoords;			// texture coordinates
@@ -227,6 +275,18 @@ class idMD5Mesh
 
 		void						TransformVerts(idDrawVert *verts, const idJointMat *joints);
 		void						TransformScaledVerts(idDrawVert *verts, const idJointMat *joints, float scale);
+#ifdef _SPLASHDAMAGE //karin: md5mesh version 11: color/flags
+		struct vertColor_t {
+			byte r, g, b, a;
+			vertColor_t() : r(0), g(0), b(0), a(0) {}
+		};
+		idList<vertColor_t>			vertColors;
+		struct {
+			bool vertexColor : 1;
+			bool noAnimate : 1;
+		} flags;
+		idStr						meshName;
+#endif
 };
 
 class idRenderModelMD5 : public idRenderModelStatic
@@ -259,6 +319,12 @@ class idRenderModelMD5 : public idRenderModelStatic
 	    idRenderModelStatic *       DynamicModelSnapshot(void) { return staticModelInstance; }
 	    void                        ClearDynamicModelSnapshot(void) { staticModelInstance = NULL; }
 #endif
+#ifdef _SPLASHDAMAGE //karin: has mesh name on md5mesh version 11
+		virtual int					FindSurfaceId( const char *surfaceName );
+		virtual idBounds			CalcMeshBounds( int meshIndex, const idJointMat *joints, const idVec3 &offset, const idMat3 &axis, bool useDefaultAnim );
+		bool						LoadMD5Binary(void);
+		int							ParseGUISurfaces(idFile *file);
+#endif
 
 	private:
 		idList<idMD5Joint>			joints;
@@ -269,6 +335,10 @@ class idRenderModelMD5 : public idRenderModelStatic
 		void						GetFrameBounds(const renderEntity_t *ent, idBounds &bounds) const;
 		void						DrawJoints(const renderEntity_t *ent, const struct viewDef_s *view) const;
 		void						ParseJoint(idLexer &parser, idMD5Joint *joint, idJointQuat *defaultPose);
+#ifdef _SPLASHDAMAGE
+		bool						ParseJoint_Binary(idFile *file, idMD5Joint *joint, idJointQuat *defaultPose, idJointMat *poseMat3);
+		bool						SkipLOD(idFile *file) const;
+#endif
 
 #ifdef _RAVEN //k: show/hide surface
 		idList<idStr>               surfaceShaderList;
@@ -507,7 +577,7 @@ class idRenderModelSprite : public idRenderModelStatic
 		virtual	idBounds		Bounds(const struct renderEntity_s *ent) const;
 };
 
-#ifdef _RAVEN // bse model
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE model
 #ifdef _RAVEN_BSE
 #include "../raven/renderer/Model_bse.h"
 #else

@@ -44,6 +44,12 @@ If you have questions concerning this license or the applicable additional terms
 class idVec3;
 class idMat3;
 class idBounds;
+#ifdef _SPLASHDAMAGE
+class idMaterial;
+
+typedef const idMaterial* ( trmMaterialForName_t )( const char* name );
+typedef const char* ( trmNameForMaterial_t )( const idMaterial* material );
+#endif
 
 // trace model type
 typedef enum {
@@ -91,6 +97,9 @@ class idTraceModel
 		traceModelEdge_t	edges[MAX_TRACEMODEL_EDGES+1];
 		int					numPolys;
 		traceModelPoly_t	polys[MAX_TRACEMODEL_POLYS];
+#ifdef _SPLASHDAMAGE
+    	const idMaterial*	polyMaterials[MAX_TRACEMODEL_POLYS];
+#endif
 		idVec3				offset;			// offset to center of model
 		idBounds			bounds;			// bounds of model
 		bool				isConvex;		// true when model is convex
@@ -114,7 +123,11 @@ class idTraceModel
 		void				SetupDodecahedron(const idBounds &dodBounds);
 		void				SetupDodecahedron(const float size);
 		// cylinder approximation
+#ifdef _SPLASHDAMAGE
+    	void				SetupCylinder( const idBounds &cylBounds, const int numSides, float offset = 0, int axis = 0 );
+#else
 		void				SetupCylinder(const idBounds &cylBounds, const int numSides);
+#endif
 		void				SetupCylinder(const float height, const float width, const int numSides);
 		// cone approximation
 		void				SetupCone(const idBounds &coneBounds, const int numSides);
@@ -143,14 +156,37 @@ class idTraceModel
 		int					GetParallelProjectionSilhouetteEdges(const idVec3 &projectionDir, int silEdges[MAX_TRACEMODEL_EDGES]) const;
 		// calculate mass properties assuming an uniform density
 		void				GetMassProperties(const float density, float &mass, idVec3 &centerOfMass, idMat3 &inertiaTensor) const;
+		
+#ifdef _SPLASHDAMAGE
+	    // extruded polygonal prism
+	    void				SetupPolygonPrism( const idWinding &w, float thickness );
+	
+	    // basically a box, but with the top verts pushed out
+	    void				SetupFrustum( const idBounds& boxBounds, float topOffset );
+	
+	    void				SetNullPolygonMaterials( void );
+	    // test whether or not the model is convex and set isConvex accordingly
+	    void				TestConvexity( void );
+	    // clear unused spots in the arrays
+	    void				ClearUnused( void );
+	    // make sure the trace model is well formed
+	    bool				Verify( void );
+	    bool				ContainsPoint( const idVec3& point ) const;
+	
+	    // returns true of the model is a closed surface
+	    bool				IsClosedSurface( void ) const;
+	    
+	    void				Write( idFile* fp, trmNameForMaterial_t lookup ) const;
+	    void				Read( idFile* fp, trmMaterialForName_t lookup );
+#endif
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 	public:
 #else
 	private:
 #endif
 		void				InitBox(void);
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 	private:
 #endif
 		void				InitOctahedron(void);

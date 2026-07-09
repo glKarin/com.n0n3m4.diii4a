@@ -225,17 +225,13 @@ void SpawnGetNormal(idVec3* normal, const idVec3& pos, const idVec3* centre)
     void name(float* out, const rvParticleParms&,                      \
               idVec3*, const idVec3*) { out[0] = v0; out[1] = v1; }
 
-#define SPAWN_VEC3_CONST(name, vx, vy, vz)                             \
-    void name(idVec3* out, const rvParticleParms&,                     \
-              idVec3* n, const idVec3* c) {                            \
-        *out = idVec3(vx, vy, vz);                                     \
-        SpawnGetNormal(n, *out, c);                                    \
-    }
-
 #define SPAWN_FLOAT3_CONST(name, vx, vy, vz)                             \
     void name(float* out, const rvParticleParms& p,                     \
               idVec3* n, const idVec3* c) {                            \
-        name((idVec3 *)out, p, n, c);                                     \
+        out[0] = vx;                                                    \
+        out[1] = vy;                                                    \
+        out[2] = vz;                                                    \
+        SpawnGetNormal(n, *(idVec3 *)out, c);                                    \
     }
 
 //───────────────────────────────────────────────────────────────────────────────
@@ -243,7 +239,6 @@ void SpawnGetNormal(idVec3* normal, const idVec3& pos, const idVec3* centre)
 //───────────────────────────────────────────────────────────────────────────────
 SPAWN_SCALAR(SpawnNone1, 0.0f)
 SPAWN_SCALAR2(SpawnNone2, 0.0f, 0.0f)
-SPAWN_VEC3_CONST(SpawnNone3, 0.0f, 0.0f, 0.0f)
 SPAWN_FLOAT3_CONST(SpawnNone3, 0.0f, 0.0f, 0.0f)
 
 //───────────────────────────────────────────────────────────────────────────────
@@ -251,10 +246,9 @@ SPAWN_FLOAT3_CONST(SpawnNone3, 0.0f, 0.0f, 0.0f)
 //───────────────────────────────────────────────────────────────────────────────
 SPAWN_SCALAR(SpawnOne1, 1.0f)
 SPAWN_SCALAR2(SpawnOne2, 1.0f, 1.0f)
-SPAWN_VEC3_CONST(SpawnOne3, 1.0f, 1.0f, 1.0f)
 SPAWN_FLOAT3_CONST(SpawnOne3, 1.0f, 1.0f, 1.0f)
 
-void SpawnStub(float *,class rvParticleParms const &,class idVec3 *,class idVec3 const *)
+void SpawnStub(float *, rvParticleParms const &, idVec3 *, idVec3 const *)
 {
  
 }
@@ -275,17 +269,13 @@ void SpawnPoint2(float* out, const rvParticleParms& p,
     out[1] = p.mMins.y;
 }
 
-void SpawnPoint3(idVec3* out, const rvParticleParms& p,
-    idVec3* n, const idVec3* c)
-{
-    *out = p.mMins;
-    SpawnGetNormal(n, *out, c);
-}
-
 void SpawnPoint3(float* out, const rvParticleParms& p,
                  idVec3* n, const idVec3* c)
 {
-    SpawnPoint3((idVec3 *)out, p, n, c);
+    out[0] = p.mMins[0];
+    out[1] = p.mMins[1];
+    out[2] = p.mMins[2];
+    SpawnGetNormal(n, *(idVec3 *)out, c);
 }
 
 //───────────────────────────────────────────────────────────────────────────────
@@ -303,84 +293,52 @@ void SpawnLinear2(float* out, const rvParticleParms& p,
     out[1] = f * (p.mMaxs.y - p.mMins.y) + p.mMins.y;
 }
 
-void SpawnLinear3(idVec3* out, const rvParticleParms& p,
-    idVec3* n, const idVec3* c)
-{
-    const float f = (p.mFlags & PPFLAG_LINEARSPACING/* 0x10 */) ? out->x : rvRandom::flrand(0.f, 1.f);
-    out->x = f * (p.mMaxs.x - p.mMins.x) + p.mMins.x;
-    out->y = f * (p.mMaxs.y - p.mMins.y) + p.mMins.y;
-    out->z = f * (p.mMaxs.z - p.mMins.z) + p.mMins.z;
-    SpawnGetNormal(n, *out, c);
-}
-
 void SpawnLinear3(float* out, const rvParticleParms& p,
                   idVec3* n, const idVec3* c)
 {
-    SpawnLinear3((idVec3 *)out, p, n, c);
+    const float f = (p.mFlags & PPFLAG_LINEARSPACING/* 0x10 */) ? out[0] : rvRandom::flrand(0.f, 1.f);
+    out[0] = f * (p.mMaxs.x - p.mMins.x) + p.mMins.x;
+    out[1] = f * (p.mMaxs.y - p.mMins.y) + p.mMins.y;
+    out[2] = f * (p.mMaxs.z - p.mMins.z) + p.mMins.z;
+    SpawnGetNormal(n, *(idVec3 *)out, c);
 }
 
 //───────────────────────────────────────────────────────────────────────────────
 //  Box helpers
 //───────────────────────────────────────────────────────────────────────────────
-void SpawnBox1(float* out, const rvParticleParms& p)
+void SpawnBox1(float* out, const rvParticleParms& p,
+                  idVec3*, const idVec3*)
 {
     *out = rvRandom::flrand(p.mMins.x, p.mMaxs.x);
 }
 
-void SpawnBox1(float* out, const rvParticleParms& p,
-                  idVec3* n, const idVec3* c)
-{
-    (void)n;
-    (void)c;
-    SpawnBox1(out, p);
-}
-
-void SpawnBox2(float* out, const rvParticleParms& p)
+void SpawnBox2(float* out, const rvParticleParms& p,
+               idVec3*, const idVec3*)
 {
     out[0] = rvRandom::flrand(p.mMins.x, p.mMaxs.x);
     out[1] = rvRandom::flrand(p.mMins.y, p.mMaxs.y);
 }
 
-void SpawnBox2(float* out, const rvParticleParms& p,
-               idVec3* n, const idVec3* c)
-{
-    (void)n;
-    (void)c;
-    SpawnBox2(out, p);
-}
-
-void SpawnBox3(idVec3* out, const rvParticleParms& p,
-    idVec3* n, const idVec3* c)
-{
-    out->x = rvRandom::flrand(p.mMins.x, p.mMaxs.x);
-    out->y = rvRandom::flrand(p.mMins.y, p.mMaxs.y);
-    out->z = rvRandom::flrand(p.mMins.z, p.mMaxs.z);
-    SpawnGetNormal(n, *out, c);
-}
-
 void SpawnBox3(float* out, const rvParticleParms& p,
                idVec3* n, const idVec3* c)
 {
-    SpawnBox3((idVec3 *)out, p, n, c);
+    out[0] = rvRandom::flrand(p.mMins.x, p.mMaxs.x);
+    out[1] = rvRandom::flrand(p.mMins.y, p.mMaxs.y);
+    out[2] = rvRandom::flrand(p.mMins.z, p.mMaxs.z);
+    SpawnGetNormal(n, *(idVec3 *)out, c);
 }
 
 //───────────────────────────────────────────────────────────────────────────────
 //  Surface-box helpers
 //───────────────────────────────────────────────────────────────────────────────
-void SpawnSurfaceBox1(float* out, const rvParticleParms& p)
+void SpawnSurfaceBox1(float* out, const rvParticleParms& p,
+                      idVec3*, const idVec3*)
 {
     out[0] = (&p.mMins.x)[rvRandom::irand(0, 1)];
 }
 
-void SpawnSurfaceBox1(float* out, const rvParticleParms& p,
-                      idVec3* n, const idVec3* c)
-{
-    (void)n;
-    (void)c;
-    SpawnSurfaceBox1(out, p);
-}
-
-void SpawnSurfaceBox2(float* out, const rvParticleParms& p)
+void SpawnSurfaceBox2(float* out, const rvParticleParms& p,
+                      idVec3*, const idVec3*)
 {
     switch (rvRandom::irand(0, 3))
     {
@@ -395,17 +353,10 @@ void SpawnSurfaceBox2(float* out, const rvParticleParms& p)
     }
 }
 
-void SpawnSurfaceBox2(float* out, const rvParticleParms& p,
-                      idVec3* n, const idVec3* c)
-{
-    (void)n;
-    (void)c;
-    SpawnSurfaceBox2(out, p);
-}
-
-void SpawnSurfaceBox3(idVec3* out, const rvParticleParms& p,
+void SpawnSurfaceBox3(float* _out, const rvParticleParms& p,
     idVec3* n, const idVec3* c)
 {
+    idVec3 *out = (idVec3 *)_out;
     const int face = rvRandom::irand(0, 5);
     switch (face)
     {
@@ -449,11 +400,6 @@ void SpawnSurfaceBox3(idVec3* out, const rvParticleParms& p,
     }
 }
 
-void SpawnSurfaceBox3(float* out, const rvParticleParms& p,
-                      idVec3* n, const idVec3* c)
-{
-    SpawnSurfaceBox3((idVec3 *)out, p, n, c);
-}
 //───────────────────────────────────────────────────────────────────────────────
 //  Sphere helpers – identical maths, cleaned naming
 //───────────────────────────────────────────────────────────────────────────────
@@ -468,7 +414,8 @@ static inline void RandomUnitVector2D(float& x, float& y)
     }
 }
 
-void SpawnSphere2(float* out, const rvParticleParms& p)
+void SpawnSphere2(float* out, const rvParticleParms& p,
+                  idVec3*, const idVec3*)
 {
     const float originX = 0.5f * (p.mMins.x + p.mMaxs.x);
     const float originY = 0.5f * (p.mMins.y + p.mMaxs.y);
@@ -480,15 +427,7 @@ void SpawnSphere2(float* out, const rvParticleParms& p)
     out[1] = rvRandom::flrand(0.f, radiusY) * ny + originY;
 }
 
-void SpawnSphere2(float* out, const rvParticleParms& p,
-                  idVec3* n, const idVec3* c)
-{
-    (void)n;
-    (void)c;
-    SpawnSphere2(out, p);
-}
-
-void SpawnSphere3(idVec3* out, const rvParticleParms& p,
+void SpawnSphere3(float* out, const rvParticleParms& p,
     idVec3* n, const idVec3* c)
 {
     const idVec3 origin(
@@ -507,23 +446,18 @@ void SpawnSphere3(idVec3* out, const rvParticleParms& p,
         rvRandom::flrand(-1.f, 1.f));
     NormaliseSafe(dir);
 
-    out->x = rvRandom::flrand(0.f, radius.x) * dir.x + origin.x;
-    out->y = rvRandom::flrand(0.f, radius.y) * dir.y + origin.y;
-    out->z = rvRandom::flrand(0.f, radius.z) * dir.z + origin.z;
-    SpawnGetNormal(n, *out, c);
-}
-
-void SpawnSphere3(float* out, const rvParticleParms& p,
-                  idVec3* n, const idVec3* c)
-{
-    SpawnSphere3((idVec3 *)out, p, n, c);
+    out[0] = rvRandom::flrand(0.f, radius.x) * dir.x + origin.x;
+    out[1] = rvRandom::flrand(0.f, radius.y) * dir.y + origin.y;
+    out[2] = rvRandom::flrand(0.f, radius.z) * dir.z + origin.z;
+    SpawnGetNormal(n, *(idVec3 *)out, c);
 }
 
 
 // ──────────────────────────────────────────────────────────────────────────────
 //  SpawnSurfaceSphere2  – random point on circumference (2-D slice)
 // ──────────────────────────────────────────────────────────────────────────────
-void SpawnSurfaceSphere2(float* outXY, const rvParticleParms& p)
+void SpawnSurfaceSphere2(float* outXY, const rvParticleParms& p,
+                         idVec3*, const idVec3*)
 {
     const float originX = 0.5f * (p.mMaxs.x + p.mMins.x);
     const float originY = 0.5f * (p.mMaxs.y + p.mMins.y);
@@ -539,16 +473,8 @@ void SpawnSurfaceSphere2(float* outXY, const rvParticleParms& p)
     outXY[1] = originY + radiusY * dy * invLen;
 }
 
-void SpawnSurfaceSphere2(float* outXY, const rvParticleParms& p,
-                         idVec3* normal, const idVec3* centre)
-{
-    (void)normal;
-    (void)centre;
-    SpawnSurfaceSphere2(outXY, p);
-}
-
 // ──────────────────────────────────────────────────────────────────────────────
-void SpawnSurfaceSphere3(idVec3* outXYZ, const rvParticleParms& p,
+void SpawnSurfaceSphere3(float* outXYZ, const rvParticleParms& p,
     idVec3* normal, const idVec3* centre)
 {
     // Sphere centre & radii
@@ -570,21 +496,15 @@ void SpawnSurfaceSphere3(idVec3* outXYZ, const rvParticleParms& p,
     const float invLen = 1.0f / sqrt(dx * dx + dy * dy + dz * dz);
     dx *= invLen; dy *= invLen; dz *= invLen;
 
-    outXYZ->x = origin.x + radius.x * dx;
-    outXYZ->y = origin.y + radius.y * dy;
-    outXYZ->z = origin.z + radius.z * dz;
+    outXYZ[0] = origin.x + radius.x * dx;
+    outXYZ[1] = origin.y + radius.y * dy;
+    outXYZ[2] = origin.z + radius.z * dz;
 
-    SpawnGetNormal(normal, *outXYZ, centre);
-}
-
-void SpawnSurfaceSphere3(float* outXYZ, const rvParticleParms& p,
-                         idVec3* normal, const idVec3* centre)
-{
-    SpawnSurfaceSphere3((idVec3 *)outXYZ, p, normal, centre);
+    SpawnGetNormal(normal, *(idVec3 *)outXYZ, centre);
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-void SpawnCylinder3(idVec3* outXYZ, const rvParticleParms& p,
+void SpawnCylinder3(float* outXYZ, const rvParticleParms& p,
     idVec3* normal, const idVec3* centre)
 {
     // YZ ellipse radii, X height
@@ -605,21 +525,15 @@ void SpawnCylinder3(idVec3* outXYZ, const rvParticleParms& p,
     const float invLen = 1.0f / sqrt(dy * dy + dz * dz);
     dy *= invLen; dz *= invLen;
 
-    outXYZ->x = p.mMins.x + t;
-    outXYZ->y = 0.5f * (p.mMaxs.y + p.mMins.y) + rY * tp * dy;
-    outXYZ->z = 0.5f * (p.mMaxs.z + p.mMins.z) + rZ * tp * dz;
+    outXYZ[0] = p.mMins.x + t;
+    outXYZ[1] = 0.5f * (p.mMaxs.y + p.mMins.y) + rY * tp * dy;
+    outXYZ[2] = 0.5f * (p.mMaxs.z + p.mMins.z) + rZ * tp * dz;
 
-    SpawnGetNormal(normal, *outXYZ, centre);
-}
-
-void SpawnCylinder3(float* outXYZ, const rvParticleParms& p,
-                    idVec3* normal, const idVec3* centre)
-{
-    SpawnCylinder3((idVec3 *)outXYZ, p, normal, centre);
+    SpawnGetNormal(normal, *(idVec3 *)outXYZ, centre);
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-void SpawnSurfaceCylinder3(idVec3* outXYZ, const rvParticleParms& p,
+void SpawnSurfaceCylinder3(float* outXYZ, const rvParticleParms& p,
     idVec3* normal, const idVec3* centre)
 {
     // Same maths as SpawnCylinder3 but the point is forced to the surface
@@ -637,9 +551,9 @@ void SpawnSurfaceCylinder3(idVec3* outXYZ, const rvParticleParms& p,
     const float invLen = 1.0f / sqrt(dy * dy + dz * dz);
     dy *= invLen; dz *= invLen;
 
-    outXYZ->x = p.mMins.x + t;
-    outXYZ->y = 0.5f * (p.mMaxs.y + p.mMins.y) + rY * tp * dy;
-    outXYZ->z = 0.5f * (p.mMaxs.z + p.mMins.z) + rZ * tp * dz;
+    outXYZ[0] = p.mMins.x + t;
+    outXYZ[1] = 0.5f * (p.mMaxs.y + p.mMins.y) + rY * tp * dy;
+    outXYZ[2] = 0.5f * (p.mMaxs.z + p.mMins.z) + rZ * tp * dz;
 
     // Normal is either the radial direction (surface) or axis-aligned if taper == 0
     if (normal)
@@ -673,19 +587,14 @@ void SpawnSurfaceCylinder3(idVec3* outXYZ, const rvParticleParms& p,
         }
         else
         {
-            SpawnGetNormal(normal, *outXYZ, NULL);
+            SpawnGetNormal(normal, *(idVec3 *)outXYZ, NULL);
         }
     }
 }
 
-void SpawnSurfaceCylinder3(float* outXYZ, const rvParticleParms& p,
-                           idVec3* normal, const idVec3* centre)
-{
-    SpawnSurfaceCylinder3((idVec3 *)outXYZ, p, normal, centre);
-}
-
 // ──────────────────────────────────────────────────────────────────────────────
-void SpawnSpiral2(float* outXY, const rvParticleParms& p)
+void SpawnSpiral2(float* outXY, const rvParticleParms& p,
+                  idVec3*, const idVec3*)
 {
     // X == distance along spiral axis
     if (p.mFlags & PPFLAG_LINEARSPACING/* 0x10 */)
@@ -699,18 +608,11 @@ void SpawnSpiral2(float* outXY, const rvParticleParms& p)
     outXY[1] = r * cos(theta);
 }
 
-void SpawnSpiral2(float* outXYZ, const rvParticleParms& p,
-                  idVec3* normal, const idVec3* centre)
-{
-    (void)normal;
-    (void)centre;
-    SpawnSpiral2(outXYZ, p);
-}
-
 // ──────────────────────────────────────────────────────────────────────────────
-void SpawnSpiral3(idVec3* outXYZ, const rvParticleParms& p,
+void SpawnSpiral3(float* _outXYZ, const rvParticleParms& p,
     idVec3* normal, const idVec3* centre)
 {
+    idVec3 *outXYZ = (idVec3 *)_outXYZ;
     // X coordinate: either pre-initialised (flags & 0x10) or random
     if (p.mFlags & PPFLAG_LINEARSPACING/* 0x10 */)
         outXYZ->x = (p.mMaxs.x - p.mMins.x) * outXYZ->x + p.mMins.x;
@@ -730,12 +632,6 @@ void SpawnSpiral3(idVec3* outXYZ, const rvParticleParms& p,
     outXYZ->z = c * rz + s * ry;
 
     SpawnGetNormal(normal, *outXYZ, centre);
-}
-
-void SpawnSpiral3(float* outXYZ, const rvParticleParms& p,
-                  idVec3* normal, const idVec3* centre)
-{
-    SpawnSpiral3((idVec3 *)outXYZ, p, normal, centre);
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -779,9 +675,9 @@ void SpawnSpiral3(float* outXYZ, const rvParticleParms& p,
 //  NOTE: this code still depends on Doom-3’s internal surface structs;
 //        the call to R_DeriveFacePlanes() is left intact.
 // ──────────────────────────────────────────────────────────────────────────────
-void SpawnModel3(float* result, const rvParticleParms* parms, idVec3* normal, const idVec3* center) {
+void SpawnModel3(float* result, const rvParticleParms &parms, idVec3* normal, const idVec3* center) {
     // Get a random surface from the model and derive face planes if necessary
-    const idRenderModelStatic* misc = (const idRenderModelStatic *)parms->mMisc;
+    const idRenderModelStatic* misc = (const idRenderModelStatic *)parms.mMisc;
     int numSurfaces = misc->NumSurfaces();
     int surfaceIndex = rvRandom::irand(0, numSurfaces - 1);
     srfTriangles_s* surface = misc->Surface(surfaceIndex)->geometry;
@@ -817,8 +713,8 @@ void SpawnModel3(float* result, const rvParticleParms* parms, idVec3* normal, co
     float newZ = transform[0].z * position.x + transform[1].z * position.y + transform[2].z * position.z;
 
     // Scale the point to fit within the specified bounds
-    idVec3 mins = parms->mMins;
-    idVec3 maxs = parms->mMaxs;
+    idVec3 mins = parms.mMins;
+    idVec3 maxs = parms.mMaxs;
     float scaleX = (maxs.x - mins.x) / (transform[0].x * surface->bounds[1].x + transform[1].x * surface->bounds[1].y + transform[2].x * surface->bounds[1].z -
         (transform[0].x * surface->bounds[0].x + transform[1].x * surface->bounds[0].y + transform[2].x * surface->bounds[0].z));
     float scaleY = (maxs.y - mins.y) / (transform[0].y * surface->bounds[1].x + transform[1].y * surface->bounds[1].y + transform[2].y * surface->bounds[1].z -
@@ -864,8 +760,4 @@ void SpawnModel3(float* result, const rvParticleParms* parms, idVec3* normal, co
             normal->z *= invLength;
         }
     }
-}
-
-void SpawnModel3(float* result, const rvParticleParms& parms, idVec3* normal, const idVec3* center) {
-    SpawnModel3(result, &parms, normal, center);
 }

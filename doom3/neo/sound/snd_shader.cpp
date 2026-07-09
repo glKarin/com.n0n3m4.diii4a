@@ -31,6 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "snd_local.h"
 
+#ifdef _SPLASHDAMAGE
+#include "framework/DeclParseHelper.h"
+#endif
 
 /*
 ===============
@@ -55,6 +58,12 @@ void idSoundShader::Init(void)
 #endif
 #ifdef _HUMANHEAD
 	parms.subIndex = -1;
+#endif
+#ifdef _SPLASHDAMAGE
+	lowPriority = false;
+	parms.pitchShift = 0.0f;
+	parms.soundArea = 0;
+	parms.farDistance = 0;
 #endif
 }
 
@@ -155,10 +164,18 @@ bool idSoundShader::Parse(const char *text, const int textLength, bool noCaching
 bool idSoundShader::Parse(const char *text, const int textLength)
 #endif
 {
+#ifdef _SPLASHDAMAGE //karin: using idParser instead of idLexer
+	idParser src;
+
+	src.SetFlags(DECL_LEXER_FLAGS);
+	//src.LoadMemory( text, textLength, GetFileName(), GetLineNum() );
+	sdDeclParseHelper declHelper( this, text, textLength, src );
+#else
 	idLexer	src;
 
 	src.LoadMemory(text, textLength, GetFileName(), GetLineNum());
 	src.SetFlags(DECL_LEXER_FLAGS);
+#endif
 	src.SkipUntilString("{");
 
 	// deeper functions can set this, which will cause MakeDefault() to be called at the end
@@ -177,7 +194,11 @@ bool idSoundShader::Parse(const char *text, const int textLength)
 idSoundShader::ParseShader
 ===============
 */
+#ifdef _SPLASHDAMAGE //karin: using idParser instead of idLexer
+bool idSoundShader::ParseShader(idParser &src)
+#else
 bool idSoundShader::ParseShader(idLexer &src)
+#endif
 {
 	int			i;
 	idToken		token;
@@ -199,6 +220,12 @@ bool idSoundShader::ParseShader(idLexer &src)
 #endif
 #ifdef _HUMANHEAD
 	parms.subIndex = -1;
+#endif
+#ifdef _SPLASHDAMAGE
+	lowPriority = false;
+	parms.pitchShift = 0.0f;
+	parms.soundArea = 0;
+	parms.farDistance = 0;
 #endif
 
 	speakerMask = 0;
@@ -285,6 +312,23 @@ bool idSoundShader::ParseShader(idLexer &src)
 		{
 			parms.shakes = 0.0f;
 			noShakes = true;
+		}
+#endif
+#ifdef _SPLASHDAMAGE //karin: sound shader parsing
+		else if (!token.Icmp("compression")) { // compression wav
+			src.ExpectAnyToken(&token);
+		}
+		else if (!token.Icmp("occlude_once")) {
+			parms.soundShaderFlags |= SSF_OCCLUDE_ONCE;
+		}
+		else if (!token.Icmp("farDistance")) { // farDistance 100
+			parms.farDistance = src.ParseFloat();
+		}
+		else if (!token.Icmp("randomize")) {
+			parms.soundShaderFlags |= SSF_RANDOMIZE;
+		}
+		else if (!token.Icmp("lowPriority")) { // lowPriority
+			lowPriority = true;
 		}
 #endif
 		// shakes screen
@@ -679,6 +723,16 @@ bool idSoundShader::ParseShader(idLexer &src)
 				numEntries++;
 			}
 #endif
+#ifdef _SPLASHDAMAGE //karin: ignore bik video
+		} else if (token.Find(".bik", false) != -1) {
+			// add to the wav list
+			if (soundSystemLocal.soundCache && numEntries < maxSamples) {
+				token.BackSlashesToSlashes();
+				token.SetFileExtension(".wav");
+				entries[ numEntries ] = soundSystemLocal.soundCache->FindSound(token.c_str(), onDemand);
+				numEntries++;
+			}
+#endif
 		} else {
 			src.Warning("unknown token '%s'", token.c_str());
 			return false;
@@ -867,13 +921,15 @@ const char *idSoundShader::GetSound(int index) const
 	return "";
 }
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 ID_INLINE int GetDurationMS(const idSoundSample* sample)
 {
   int samples = sample->LengthIn44kHzSamples();
   return soundSystemLocal.SamplesToMilliseconds(samples);
 }
+#endif
 
+#ifdef _RAVEN
 float idSoundShader::GetTimeLength(void) const
 {
 	int v2; // esi
@@ -895,4 +951,40 @@ float idSoundShader::GetTimeLength(void) const
 	return longest;
 }
 
+#endif
+
+#ifdef _SPLASHDAMAGE
+int idSoundShader::GetTimeLength( void ) const {
+	int v2; // esi
+	const idSoundSample *entry; // edi
+	float v4; // st7
+	float longest; // [esp+8h] [ebp-4h]
+
+	longest = 0.0;
+	for ( v2 = 0; v2 < numEntries; v2++ )
+	{
+		entry = entries[v2];
+		if ( entry )
+		{
+			v4 = GetDurationMS(entry) * 0.001f;
+			if ( v4 > longest )
+				longest = v4;
+		}
+	}
+	return (int)longest;
+}
+
+bool idSoundShader::IsOGGCompressed( void ) const {
+	return false;
+}
+
+void idSoundShader::CacheFromDict( const idDict& dict ) {
+	const idKeyValue* kv = NULL;
+
+	while( kv = dict.MatchPrefix( "snd", kv ) ) {
+		if ( kv->GetValue().Length() ) {
+			declSoundType[ kv->GetValue() ];
+		}
+	}
+}
 #endif

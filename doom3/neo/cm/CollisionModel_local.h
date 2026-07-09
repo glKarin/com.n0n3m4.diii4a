@@ -41,8 +41,25 @@ If you have questions concerning this license or the applicable additional terms
 #define CM_MAX_POLYGON_EDGES				64
 #define CIRCLE_APPROXIMATION_LENGTH			64.0f
 
-#ifdef _RAVEN
-#define	MAX_SUBMODELS						4096 //k: include trace models
+#ifdef _SPLASHDAMAGE //karin: is multi-threading in game
+#include "idlib/threading/ThreadLocal.h"
+
+//karin: using thread lock, because models also must be `thread local`
+#define CM_LOCK_IN_COLLISION_TESTING 1
+
+#if CM_LOCK_IN_COLLISION_TESTING
+#define CM_LOCK_THREAD() sdScopedLock<true> _guard(lock)
+#else
+#define CM_LOCK_THREAD()
+typedef sdThreadLocal<int> thread_local_int_t;
+typedef sdThreadLocal<bool> thread_local_bool_t;
+typedef sdThreadLocal<contactInfo_t *> thread_local_contactInfo_ptr_t;
+#endif
+
+#endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: include trace models
+#define	MAX_SUBMODELS						4096
 #else
 #define	MAX_SUBMODELS						2048
 #endif
@@ -163,7 +180,7 @@ typedef struct cm_nodeBlock_s {
 	struct cm_nodeBlock_s *next;				// next block with nodes
 } cm_nodeBlock_t;
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
 struct cm_model_t : public idCollisionModel
 #else
 typedef struct cm_model_s 
@@ -201,25 +218,50 @@ typedef struct cm_model_s
 	int						numMergedPolys;
 	int						usedMemory;
 
-#ifdef _RAVEN // quake4 trm
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: quake4/ETQW trm
 	bool					isTrmModel;
 	bool                    markRemove; //k: if ture, marked can replace
 	bool                    isTraceModel; //k: if true, returned by ModelFromTrm
 	cm_polygonRef_t         *_trmPolygons[MAX_TRACEMODEL_POLYS];
 	cm_brushRef_t           *_trmBrushes[1];
 	int                     refCount;
+#ifdef _SPLASHDAMAGE //karin: for GetXXX methods
+	idList<cm_polygon_t *>	polygons;
+	idList<cm_brush_t *>	brushes;
+	bool					isWorld;
+#endif
 
 	cm_model_t(void);
+#endif
 
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 	virtual const char *	GetName( void ) const;
+#endif
+
+#ifdef _RAVEN
 	virtual bool			GetBounds( idBounds &bounds ) const;
 	virtual bool			GetContents( int &contents ) const;
 	virtual bool			GetVertex( int vertexNum, idVec3 &vertex ) const;
 	virtual bool			GetEdge( int edgeNum, idVec3 &start, idVec3 &end ) const;
 	virtual bool			GetPolygon( int polygonNum, idFixedWinding &winding ) const;
 #endif
+#ifdef _SPLASHDAMAGE
+	virtual const idBounds&		GetBounds( void ) const;
+	virtual void				GetBounds( idBounds& bounds, int surfaceMask, bool inclusive ) const;
+	virtual int					GetContents( void ) const;
+	virtual const idVec3&		GetVertex( int vertexNum ) const;
+	virtual void				GetEdge( int edgeNum, idVec3& start, idVec3& end ) const;
+	virtual void				GetPolygon( int polygonNum, idFixedWinding &winding ) const;
+	virtual int					GetNumBrushPlanes( void ) const;
+	virtual const idPlane&		GetBrushPlane( int planeNum ) const;
+	virtual const idMaterial*	GetPolygonMaterial( int polygonNum ) const;
+	virtual const idPlane&		GetPolygonPlane( int polygonNum ) const;
+	virtual int					GetNumPolygons( void ) const;
+	virtual bool				IsWorld( void ) const;
+	virtual void				SetWorld( bool tf );
+#endif
 }
-#if !defined(_RAVEN)
+#if !defined(_RAVEN) && !defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
  cm_model_t
 #endif
  ;
@@ -338,13 +380,9 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		// frees all the collision models
 		void			FreeMap(void);
 #ifdef _RAVEN
-		virtual void	FreeModel(cmHandle_t model);
 		void			FreeMap(const char* mapName) { FreeMap(); };
 		// Loads collision models from a map file.
 		void			LoadMap( const idMapFile *mapFile, bool forceCreateMap );
-
-		// create trace model from a collision model, returns true if succesfull
-		bool			TrmFromModel(const char* mapName, const char *modelName, idTraceModel &trm ) { (void)mapName; return TrmFromModel(modelName, trm); }; //k DIFF_IMPL
 
 		// sets up a trace model for collision with other trace models
 		cmHandle_t      ModelFromTrm(const char* mapName, const char* modelName, const idTraceModel &trm, const idMaterial *material );
@@ -359,11 +397,6 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 			(void)mapName;
 			return LoadModel(modelName, true);
 		}
-
-        virtual void	DebugOutput( const idVec3 &viewOrigin, const idMat3 &viewAxis ) {
-            (void)viewAxis;
-            DebugOutput(viewOrigin);
-        }
 		virtual  void	DrawModel(cmHandle_t handle, const idVec3& modelOrigin, const idMat3& modelAxis, const idVec3& viewOrigin, const idMat3& viewAxis, const float radius) {
 		    (void)viewAxis;
 		    DrawModel(handle, modelOrigin, modelAxis, viewOrigin, radius);
@@ -412,7 +445,16 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			DrawModel(cmHandle_t model, const idVec3 &origin, const idMat3 &axis,
 		                                  const idVec3 &viewOrigin, const float radius);
 		// print model information, use -1 handle for accumulated model info
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+		virtual void	FreeModel( idCollisionModel *model );
+
+		virtual void	DebugOutput( const idVec3 &viewOrigin, const idMat3 &viewAxis ) {
+			(void)viewAxis;
+			DebugOutput(viewOrigin);
+		}
+
+		// create trace model from a collision model, returns true if succesfull
+		bool			TrmFromModel(const char* mapName, const char *modelName, idTraceModel &trm ) { (void)mapName; return TrmFromModel(modelName, trm); }; //k DIFF_IMPL
 		void			ModelInfo(int num);
 #else
 		void			ModelInfo(cmHandle_t model);
@@ -427,6 +469,28 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 	    int				GetNumInlinedProcClipModels(void);
 #endif
 	    //HUMANHEAD END
+#endif
+#ifdef _SPLASHDAMAGE
+		virtual void				AllocThread( void );
+		virtual void				FreeThread( void );
+		virtual int					GetThreadId( void );
+		virtual int					GetThreadCount( void );
+		virtual void				LoadMap( const char* fileName, bool forceReload );
+		virtual void				PurgeModels( void );
+
+		virtual idCollisionModel *	ModelFromTrm( const char *mapName, const char *modelName, const idTraceModel &trm, bool includeBrushes );
+
+		virtual int				Contacts( contactInfo_t *contacts, const int maxContacts, const idVec3 &start, const idVec3 *dir, const float depth,
+										  const idTraceModel *trm, const idMat3 &trmAxis, int contentMask,
+										  idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis );
+
+		virtual void				DrawModel( idCollisionModel *model, const idVec3 &modelOrigin, const idMat3 &modelAxis,
+											   const idVec3 &viewOrigin, const idMat3 &viewAxis, const float radius, int lifetime );
+
+		virtual void				GetFullModelName( idStr& out, const char* mapName, const char* modelName ) const;
+
+		virtual void				DumpCollisionModelStats( void );
+		virtual idCollisionModel*	LoadModel( const char *mapName, const char *modelName );
 #endif
 
 	private:			// CollisionMap_translate.cpp
@@ -495,10 +559,11 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			FreePolygon(cm_model_t *model, cm_polygon_t *poly);
 		void			FreeBrush(cm_model_t *model, cm_brush_t *brush);
 		void			FreeTree_r(cm_model_t *model, cm_node_t *headNode, cm_node_t *node);
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 		cm_model_t 	    *AllocModel(cm_model_t * &model);
 		void            ClearModel(cm_model_t *model);
 		void			FreeModel_memory(cm_model_t *model);
+		cmHandle_t		FindModelAndIndex(const char *name, int &index);
 #else
 		void			FreeModel(cm_model_t *model);
 #endif
@@ -563,7 +628,7 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			OptimizeArrays(cm_model_t *model);
 		void			FinishModel(cm_model_t *model);
 		void			BuildModels(const idMapFile *mapFile);
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 	    void			BuildModels( const idMapFile *mapFile, bool forceCreateMap);
 #endif
 		cmHandle_t		FindModel(const char *name);
@@ -589,6 +654,18 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			ParseBrushes(idLexer *src, cm_model_t *model);
 		bool			ParseCollisionModel(idLexer *src);
 		bool			LoadCollisionModelFile(const char *name, unsigned int mapFileCRC);
+#ifdef _SPLASHDAMAGE //karin: parse binary cmb file
+		cm_node_t 		*ParseNodes_Binary(idFile *file, cm_model_t *model, cm_node_t *parent);
+		void			ParseVertices_Binary(idFile *file, cm_model_t *model);
+		void			ParseEdges_Binary(idFile *file, cm_model_t *model);
+		void			ParsePolygons_Binary(idFile *file, cm_model_t *model, const idStrList &materials);
+		void			ParseBrushes_Binary(idFile *file, cm_model_t *model);
+		bool			ParseCollisionModel_Binary(idFile *file);
+		bool			LoadCollisionModelFile_Binary(const char *name, unsigned int mapFileCRC);
+		void			ParseMaterials_Binary(idFile *file, idStrList &materials);
+
+		void			InitModels(void);
+#endif
 
 	private:			// CollisionMap_debug
 		int				ContentsFromString(const char *string) const;
@@ -601,21 +678,17 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 #endif
 		void			DrawNodePolygons(cm_model_t *model, cm_node_t *node, const idVec3 &origin, const idMat3 &axis,
 		                const idVec3 &viewOrigin, const float radius);
-#ifdef _RAVEN // quake4 cm file
-	private:
-		cmHandle_t		FindModelAndIndex(const char *name, int &index);
-
-	    int				numInlinedProcClipModels;
-        idStr           cmVersion;
-        idStr           cmWriteVersion; //karin: for compat doom3 cm
-#endif
 
 	private:			// collision map data
 		idStr			mapName;
 		ID_TIME_T			mapFileTime;
 		int				loaded;
 		// for multi-check avoidance
+#if 0 // defined(_SPLASHDAMAGE) && !CM_LOCK_IN_COLLISION_TESTING //karin: is multi-threading in game
+		thread_local_int_t				checkCount;
+#else
 		int				checkCount;
+#endif
 		// models
 		int				maxModels;
 		int				numModels;
@@ -628,10 +701,22 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		int				numProcNodes;
 		cm_procNode_t 	*procNodes;
 		// for retrieving contact points
+#ifdef _SPLASHDAMAGE //karin: is multi-threading in game
+		mutable sdLock			lock;				// lock for multi-threading
+		int threadCount;
+		sdThreadLocal<uintptr_t>				threadId;
+#endif
+#if 0 // defined(_SPLASHDAMAGE) && !CM_LOCK_IN_COLLISION_TESTING //karin: is multi-threading in game
+		thread_local_bool_t			getContacts;
+		thread_local_contactInfo_ptr_t contacts;
+		thread_local_int_t				maxContacts;
+		thread_local_int_t				numContacts;
+#else
 		bool			getContacts;
 		contactInfo_t 	*contacts;
 		int				maxContacts;
 		int				numContacts;
+#endif
 #ifdef _HUMANHEAD
 	    //HUMANHEAD rww
 #if _HH_INLINED_PROC_CLIPMODELS
@@ -640,6 +725,11 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
         bool					anyInlinedProcClipMats;
 #endif
 	    //HUMANHEAD END
+#endif
+#ifdef _RAVEN // quake4 cm file
+	    int				numInlinedProcClipModels;
+        idStr           cmVersion;
+        idStr           cmWriteVersion; //karin: for compat doom3 cm
 #endif
 };
 

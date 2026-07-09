@@ -159,6 +159,9 @@ class idProgram;
 
 // RAVEN BEGIN
 // bdube: added timing dict
+#endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
 extern bool                        com_debugHudActive;                // The debug hud is active in the game
 // RAVEN END
 #endif
@@ -300,6 +303,24 @@ class idCommon
         //HUMANHEAD rww
         virtual void				SetGameSensitivityFactor(float factor) = 0; //allows game logic to set a sensitivity factor for input
         //HUMANHEAD END
+#endif
+
+#ifdef _SPLASHDAMAGE
+		virtual void				PacifierUpdate( void ) = 0;
+
+		// arguments is a list of strings that will be formatted into the result
+		virtual idWStr				LocalizeText( const char* declName, const idWStrList& arguments = idWStrList() ) = 0;
+		virtual idWStr				LocalizeText( const sdDeclLocStr* loc, const idWStrList& arguments = idWStrList() ) = 0;
+		virtual void				PrintLoadingMessage( const char *msg ) = 0;
+
+		virtual int					GetNumVideoModes( void ) const = 0;
+		virtual vidmode_t&			GetVideoMode( int index ) const = 0;
+
+		virtual idSoundWorld*		GetGameSoundWorld( void ) = 0;
+		virtual idSoundWorld*		GetMenuSoundWorld( void ) = 0;
+
+		//karin: compat for DOOM3
+		virtual void				PrintLoadingMessage( const wchar_t *msg ) = 0;
 #endif
 };
 
