@@ -128,6 +128,8 @@ jobs:
         cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libq4game.so Q3E/libs/${arch}
         cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libhardqore.so Q3E/libs/${arch}
         cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libpreygame.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libetqw.so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libetqwgame.so Q3E/libs/${arch}
         cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libqc.so Q3E/libs/${arch}
         cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libICARUS.so Q3E/libs/${arch}
         ls Q3E/libs/${arch}
