@@ -356,6 +356,9 @@ class Q3EGameHelper
                             case Q3EGameConstants.GAME_QUAKE4:
                                 fs_game = Q3EGameConstants.GAME_BASE_QUAKE4;
                                 break;
+                            case Q3EGameConstants.GAME_ETQW:
+                                fs_game = Q3EGameConstants.GAME_BASE_ETQW;
+                                break;
                             case Q3EGameConstants.GAME_DOOM3:
                             default:
                                 fs_game = Q3EGameConstants.GAME_BASE_DOOM3;
