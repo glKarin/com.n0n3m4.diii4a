@@ -331,7 +331,14 @@ void idAsyncNetwork::SpawnServer_f(const idCmdArgs &args)
 {
 
 	if (args.Argc() > 1) {
+#ifdef _SPLASHDAMAGE //karin: prepend `maps/` prefix, it caused crash if `levelshot/generic` material missing  when map loading start by `spawn xxx.entites` without `maps/` prefix
+		idStr mapName = args.Argv(1);
+		if(idStr::Icmpn(mapName, "maps/", 5))
+			mapName.Insert("maps/", 0);
+		cvarSystem->SetCVarString("si_map", mapName.c_str());
+#else
 		cvarSystem->SetCVarString("si_map", args.Argv(1));
+#endif
 	}
 
 	// don't let a server spawn with singleplayer game type - it will crash
