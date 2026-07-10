@@ -7,4 +7,4 @@ cmake-*
 cmake_install.cmake
 build
 Release
-Debug
+/Debug

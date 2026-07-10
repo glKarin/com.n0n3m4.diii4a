@@ -1,6 +1,6 @@
 
-#include "debug/simpleVertexTexcoord.vert.h"
+#include "tools/simpleVertexTexcoord.vert.h"
 
-#include "debug/depthToColor.frag.h"
+#include "tools/depthToColor.frag.h"
 
-#include "debug/stencilToColor.frag.h"
+#include "tools/stencilToColor.frag.h"
