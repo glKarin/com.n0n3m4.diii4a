@@ -243,7 +243,7 @@ void R_CreateEntityRefs(idRenderEntityLocal *def)
     else
     {
 #endif
-#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+#if 0 // defined(_RAVEN) || defined(_SPLASHDAMAGE)
     // bump the view count so we can tell if an
     // area already has a reference
     tr.viewCount++;
@@ -852,7 +852,7 @@ void R_CreateLightRefs(idRenderLightLocal *light)
 		else
 #endif
 		// push these points down the BSP tree into areas
-#ifdef _RAVEN
+#if 0 // def _RAVEN
 		{
 			if (light->parms.pointLight)
 			{
@@ -865,7 +865,7 @@ void R_CreateLightRefs(idRenderLightLocal *light)
 				light->world->PushPolytopeIntoTree(NULL, light, NULL, &box, points, tri->numVerts);
 			}
 		}
-#elif defined(_SPLASHDAMAGE)
+#elif 0 // defined(_SPLASHDAMAGE)
 		{
 			if (light->parms.flags.pointLight)
 			{

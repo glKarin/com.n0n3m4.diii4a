@@ -1482,7 +1482,7 @@ void idSessionLocal::MenuEvent(const sysEvent_t *event)
 			case K_ESCAPE: // escape/space: cancel/back
 				value = ULI_MENU_EVENT_CANCEL;
 				break;
-			case K_SPACE:
+			//case K_SPACE:
 			case K_ENTER: // enters: ok
 			case K_KP_ENTER:
 				value = ULI_MENU_EVENT_ACCEPT;
