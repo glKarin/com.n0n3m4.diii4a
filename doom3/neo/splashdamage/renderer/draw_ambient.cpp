@@ -12,13 +12,14 @@ static idCVar harm_r_builtinAreaAmbient("harm_r_builtinAreaAmbient", "0", CVAR_B
 idCVar harm_r_areaAmbientScale("harm_r_areaAmbientScale", "1.0", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "area ambient scale");
 idCVar harm_r_areaAmbientAlpha("harm_r_areaAmbientAlpha", "1.0", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "area ambient alpha");
 
-extern void RB_CreateSingleDrawAreaAmbient(const drawSurf_t *drawSurf, void (*DrawInteraction)(const drawInteraction_t *));
+extern void RB_CreateSingleDrawAreaAmbient_external(const drawSurf_t *drawSurf, void (*DrawInteraction)(const drawInteraction_t *));
+extern void RB_CreateSingleDrawAreaAmbient_builtin(const drawSurf_t *drawSurf, void (*DrawInteraction)(const drawInteraction_t *));
 
 static const sdRenderProgram *ambientBasicShader;
 
 static void RB_DrawAreaAmbient_builtin(const drawInteraction_t *din)
 {
-    GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), din->surf->space->areaAmbient->GetBrightness());
+    GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), din->surf->space->areaAmbient->GetBrightness() * harm_r_areaAmbientScale.GetFloat());
 
     // load all the vertex program parameters
     GL_Uniform4fv(offsetof(shaderProgram_t, localViewOrigin), din->localViewOrigin.ToFloatPtr());
@@ -181,7 +182,7 @@ static void RB_CreateDrawAreaAmbient_external(const drawSurf_t *surf)
 
     // this may cause RB_GLSL_DrawInteraction to be exacuted multiple
     // times with different colors and images if the surface or light have multiple layers
-    RB_CreateSingleDrawAreaAmbient(surf, RB_DrawAreaAmbient_external);
+    RB_CreateSingleDrawAreaAmbient_external(surf, RB_DrawAreaAmbient_external);
 
     // disable features
     ambientBasicShader->BindImage("bumpMap", NULL);
@@ -222,7 +223,7 @@ static void RB_CreateDrawAreaAmbient_builtin(const drawSurf_t *surf)
 
     // this may cause RB_GLSL_DrawInteraction to be exacuted multiple
     // times with different colors and images if the surface or light have multiple layers
-    RB_CreateSingleDrawAreaAmbient(surf, RB_DrawAreaAmbient_builtin);
+    RB_CreateSingleDrawAreaAmbient_builtin(surf, RB_DrawAreaAmbient_builtin);
 
     // disable features
     GL_SelectTextureNoClient(2);
