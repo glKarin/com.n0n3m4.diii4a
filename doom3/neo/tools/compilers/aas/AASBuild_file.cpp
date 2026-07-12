@@ -304,6 +304,7 @@ idAASBuild::GetAreaForLeafNode
 */
 bool idAASBuild::GetAreaForLeafNode(idBrushBSPNode *node, int *areaNum)
 {
+#if !defined(_SPLASHDAMAGE) //karin: only used in tools
 	int s, faceNum;
 	idBrushBSPPortal *p;
 	aasArea_t area;
@@ -351,6 +352,10 @@ bool idAASBuild::GetAreaForLeafNode(idBrushBSPNode *node, int *areaNum)
 	file->areas.Append(area);
 
 	DisplayRealTimeString("\r%6d", file->areas.Num());
+#else
+	// TODO
+	common->Error("Disable idAASBuild::GetAreaForLeafNode(%d)", node->GetAreaNum());
+#endif
 
 	return true;
 }

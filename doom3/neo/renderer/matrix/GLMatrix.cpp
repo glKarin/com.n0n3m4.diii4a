@@ -247,7 +247,11 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 	//
 	// set up projection matrix
 	//
+#ifdef _SPLASHDAMAGE
+	const float zNear = ( viewDef->renderView.flags.cramZNear ) ? ( r_znear.GetFloat() * 0.25f ) : r_znear.GetFloat();
+#else
 	const float zNear = ( viewDef->renderView.cramZNear ) ? ( r_znear.GetFloat() * 0.25f ) : r_znear.GetFloat();
+#endif
 	
 	float ymax = zNear * tan( viewDef->renderView.fov_y * idMath::PI / 360.0f );
 	float ymin = -ymax;

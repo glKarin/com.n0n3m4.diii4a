@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
+#ifdef _SPLASHDAMAGE
+#include "framework/DeclParseHelper.h"
+#endif
+
 
 /*
 =================
@@ -61,11 +65,21 @@ bool idDeclEntityDef::Parse(const char *text, const int textLength, bool noCachi
 bool idDeclEntityDef::Parse(const char *text, const int textLength)
 #endif
 {
+#ifdef _SPLASHDAMAGE //karin: using idParser instead of idLexer
+	idParser src;
+#else
 	idLexer src;
+#endif
 	idToken	token, token2;
 
+#ifdef _SPLASHDAMAGE
+	src.SetFlags(DECL_LEXER_FLAGS);
+	//src.LoadMemory( text, textLength, GetFileName(), GetLineNum() );
+	sdDeclParseHelper declHelper( this, text, textLength, src );
+#else
 	src.LoadMemory(text, textLength, GetFileName(), GetLineNum());
 	src.SetFlags(DECL_LEXER_FLAGS);
+#endif
 	src.SkipUntilString("{");
 
 	while (1) {
@@ -134,7 +148,11 @@ bool idDeclEntityDef::Parse(const char *text, const int textLength)
 	// precache all referenced media
 	// do this as long as we arent in modview
 	if (!(com_editors & (EDITOR_RADIANT|EDITOR_AAS))) {
+#ifdef _SPLASHDAMAGE
+		game->CacheDictionaryMedia(dict);
+#else
 		game->CacheDictionaryMedia(&dict);
+#endif
 	}
 
 	return true;
@@ -164,3 +182,15 @@ void idDeclEntityDef::Print(void) const
 {
 	dict.Print();
 }
+
+#ifdef _SPLASHDAMAGE
+void idDeclEntityDef::CacheFromDict( const idDict& dict ) {
+	const idKeyValue* kv = NULL;
+
+	while( kv = dict.MatchPrefix( "def", kv ) ) {
+		if ( kv->GetValue().Length() ) {
+			declEntityDefType[ kv->GetValue() ];
+		}
+	}
+}
+#endif

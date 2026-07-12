@@ -30,6 +30,11 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "tr_local.h"
+#ifdef _SPLASHDAMAGE //karin: imposter
+#include "renderer/ImposterGeometry.h"
+
+static idCVar harm_r_skipImposter("harm_r_skipImposter", "0", CVAR_BOOL | CVAR_RENDERER, "skip imposter rendering for static model");
+#endif
 
 static const float CHECK_BOUNDS_EPSILON = 1.0f;
 
@@ -290,7 +295,11 @@ viewEntity_t *R_SetEntityDefViewEntity(idRenderEntityLocal *def)
 	// copy the model and weapon depth hack for back-end use
 	vModel->modelDepthHack = def->parms.modelDepthHack;
 
+#ifdef _SPLASHDAMAGE
+	vModel->weaponDepthHack = def->parms.flags.weaponDepthHack;
+#else
 	vModel->weaponDepthHack = def->parms.weaponDepthHack;
+#endif
 
 	R_AxisToModelMatrix(def->parms.axis, def->parms.origin, vModel->modelMatrix);
 
@@ -432,8 +441,13 @@ viewLight_t *R_SetLightDefViewLight(idRenderLightLocal *light)
 #ifdef _SHADOW_MAPPING
     ID_RENDER_MATRIX_ASSIGN(vLight->baseLightProject, light->baseLightProject);
 	ID_RENDER_MATRIX_ASSIGN(vLight->inverseBaseLightProject, light->inverseBaseLightProject);
-    vLight->pointLight = light->parms.pointLight;
-    vLight->parallel = light->parms.parallel;
+#ifdef _SPLASHDAMAGE
+	vLight->pointLight = light->parms.flags.pointLight;
+	vLight->parallel = light->parms.flags.parallel;
+#else
+	vLight->pointLight = light->parms.pointLight;
+	vLight->parallel = light->parms.parallel;
+#endif
     vLight->lightCenter = light->parms.lightCenter;
 	vLight->lightRadius = light->parms.lightRadius;
 	vLight->shadowLOD = 0;
@@ -514,7 +528,13 @@ void idRenderWorldLocal::CreateLightDefInteractions(idRenderLightLocal *ldef)
 
 			// some big outdoor meshes are flagged to not create any dynamic interactions
 			// when the level designer knows that nearby moving lights shouldn't actually hit them
-			if (edef->parms.noDynamicInteractions && edef->world->generateAllInteractionsCalled) {
+			if (
+#ifdef _SPLASHDAMAGE
+				edef->parms.flags.noDynamicInteractions
+#else
+				edef->parms.noDynamicInteractions
+#endif
+				 && edef->world->generateAllInteractionsCalled) {
 				continue;
 			}
 
@@ -752,7 +772,12 @@ idScreenRect	R_CalcLightScissorRectangle(viewLight_t *vLight)
 	idPlane			eye, clip;
 	idVec3			ndc;
 
-	if (vLight->lightDef->parms.pointLight) {
+#ifdef _SPLASHDAMAGE
+	if (vLight->lightDef->parms.flags.pointLight)
+#else
+	if (vLight->lightDef->parms.pointLight)
+#endif
+	{
 		idBounds bounds;
 		idRenderLightLocal *lightDef = vLight->lightDef;
 		tr.viewDef->viewFrustum.ProjectionBounds(idBox(lightDef->parms.origin, lightDef->parms.lightRadius, lightDef->parms.axis), bounds);
@@ -1027,6 +1052,53 @@ void R_AddLightSurfaces(void)
 
 			R_LinkLightSurf(&vLight->globalShadows, tri, NULL, light, NULL, vLight->scissorRect, true /* FIXME? */);
 		}
+#ifdef _SPLASHDAMAGE //karin: multi prelights in light
+		if (light->parms.numPrelightModels > 0 && !light->parms.flags.atmosphereLight && r_useOptimizedShadows.GetBool()) {
+			for (int i = 0; i < light->parms.numPrelightModels; i++)
+			{
+				idRenderModel *shadowModel = light->parms.prelightModels[i];
+
+				if (!shadowModel->NumSurfaces()) {
+					common->Error("no surfs in prelight model '%s'", shadowModel->Name());
+				}
+
+				srfTriangles_t	*tri = shadowModel->Surface(0)->geometry;
+
+				if (!tri->shadowVertexes) {
+					common->Error("R_AddLightSurfaces: prelight model '%s' without shadowVertexes", shadowModel->Name());
+				}
+
+				// these shadows will all have valid bounds, and can be culled normally
+				if (r_useShadowCulling.GetBool()) {
+					if (R_CullLocalBox(tri->bounds, tr.viewDef->worldSpace.modelMatrix, 5, tr.viewDef->frustum)) {
+						continue;
+					}
+				}
+
+				// if we have been purged, re-upload the shadowVertexes
+				if (!tri->shadowCache) {
+					R_CreatePrivateShadowCache(tri);
+
+					if (!tri->shadowCache) {
+						continue;
+					}
+				}
+
+				// touch the shadow surface so it won't get purged
+				vertexCache.Touch(tri->shadowCache);
+
+				if (!tri->indexCache) {
+					vertexCache.Alloc(tri->indexes, tri->numIndexes * sizeof(tri->indexes[0]), &tri->indexCache, true);
+				}
+
+				if (tri->indexCache) {
+					vertexCache.Touch(tri->indexCache);
+				}
+
+				R_LinkLightSurf(&vLight->globalShadows, tri, NULL, light, NULL, vLight->scissorRect, true /* FIXME? */);
+			}
+		}
+#endif
 	}
 }
 
@@ -1050,9 +1122,25 @@ bool R_IssueEntityDefCallback(idRenderEntityLocal *def)
 	tr.pc.c_entityDefCallbacks++;
 
 	if (tr.viewDef) {
+#ifdef _SPLASHDAMAGE //karin: don't update if last call renderEntity_t::callback game time not modified: cause call R_FreeStaticTriSurfVertexCaches after ambientCache has allocated in idMd5Mesh::UpdateSurface on same frame
+		int lastModifiedGameTime = 0;
+		update = def->parms.callback(&def->parms, &tr.viewDef->renderView, lastModifiedGameTime);
+		if(update && lastModifiedGameTime == def->lastModifiedGameTime)
+			update = false;
+		def->lastModifiedGameTime = lastModifiedGameTime;
+#else
 		update = def->parms.callback(&def->parms, &tr.viewDef->renderView);
+#endif
 	} else {
+#ifdef _SPLASHDAMAGE //karin: don't update if last call renderEntity_t::callback game time not modified: cause call R_FreeStaticTriSurfVertexCaches after ambientCache has allocated in idMd5Mesh::UpdateSurface on same frame
+		int lastModifiedGameTime = 0;
+		update = def->parms.callback(&def->parms, NULL, lastModifiedGameTime);
+		if(update && lastModifiedGameTime == def->lastModifiedGameTime)
+			update = false;
+		def->lastModifiedGameTime = lastModifiedGameTime;
+#else
 		update = def->parms.callback(&def->parms, NULL);
+#endif
 	}
 
 	if (!def->parms.hModel) {
@@ -1073,6 +1161,21 @@ bool R_IssueEntityDefCallback(idRenderEntityLocal *def)
 
 	return update;
 }
+
+#ifdef _SPLASHDAMAGE //karin: imposter
+static void R_ClearEntityDefImposterModel(idRenderEntityLocal *def)
+{
+	// free all the interaction surfaces
+	for (idInteraction *inter = def->firstInteraction; inter != NULL && !inter->IsEmpty(); inter = inter->entityNext) {
+		inter->FreeSurfaces();
+	}
+
+	// clear the imposter model if present
+	if (def->imposterModel) {
+		def->imposterModel = NULL;
+	}
+}
+#endif
 
 /*
 ===================
@@ -1104,6 +1207,52 @@ idRenderModel *R_EntityDefDynamicModel(idRenderEntityLocal *def)
 	if (model->IsDynamicModel() == DM_STATIC) {
 		def->dynamicModel = NULL;
 		def->dynamicModelFrameCount = 0;
+#ifdef _SPLASHDAMAGE //karin: imposter
+		if (def->parms.imposter && !harm_r_skipImposter.GetBool() && tr.viewDef
+			&& (def->parms.flags.forceImposter
+				|| (def->parms.maxVisDist <= 0.0f || tr.viewDef->renderView.vieworg.Dist(def->parms.origin) > def->parms.maxVisDist))
+			) {
+			if (!def->imposterModel) {
+				def->imposterModel = imposterGeometryManager->FindModel(def->parms.imposter);
+			}
+
+			if (def->imposterModel) {
+				model = def->imposterModel;
+				//karin: force face to view
+				idVec3 dir = def->parms.origin - tr.viewDef->renderView.vieworg;
+				dir.z = 0.0f; // only axis to Z
+				dir.Normalize();
+				static idMat3 _flipXMat(-1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+				def->parms.axis = _flipXMat * dir.ToMat3();
+
+				if (r_checkBounds.GetBool()) {
+					idBounds b = def->imposterModel->Bounds();
+
+					if (b[0][0] < def->referenceBounds[0][0] - CHECK_BOUNDS_EPSILON ||
+							b[0][1] < def->referenceBounds[0][1] - CHECK_BOUNDS_EPSILON ||
+							b[0][2] < def->referenceBounds[0][2] - CHECK_BOUNDS_EPSILON ||
+							b[1][0] > def->referenceBounds[1][0] + CHECK_BOUNDS_EPSILON ||
+							b[1][1] > def->referenceBounds[1][1] + CHECK_BOUNDS_EPSILON ||
+							b[1][2] > def->referenceBounds[1][2] + CHECK_BOUNDS_EPSILON) {
+						common->Printf("entity %i imposter model exceeded reference bounds\n", def->index);
+							}
+				}
+
+				if (model->DepthHack() != 0.0f) {
+					idPlane eye, clip;
+					idVec3 ndc;
+					R_TransformModelToClip(def->parms.origin, tr.viewDef->worldSpace.modelViewMatrix, tr.viewDef->projectionMatrix, eye, clip);
+					R_TransformClipToDevice(clip, tr.viewDef, ndc);
+					def->parms.modelDepthHack = model->DepthHack() * (1.0f - ndc.z);
+				}
+			}
+		}
+		else if(def->imposterModel)
+		{
+			R_ClearEntityDefImposterModel(def);
+			def->imposterModel = NULL;
+		}
+#endif
 		return model;
 	}
 
@@ -1189,6 +1338,9 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 	drawSurf->material = shader;
 	drawSurf->scissorRect = scissor;
 	drawSurf->sort = shader->GetSort() + tr.sortOffset;
+#ifdef _SPLASHDAMAGE //karin: entity sortOffset
+	drawSurf->sort += renderEntity->sortOffset;
+#endif
 	drawSurf->dsFlags = 0;
 
 	// bumping this offset each time causes surfaces with equal sort orders to still
@@ -1259,7 +1411,7 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 			oldFloatTime = tr.viewDef->floatTime;
 			oldTime = tr.viewDef->renderView.time;
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 			tr.viewDef->floatTime = tr.viewDef->renderView.time * 0.001;
 #else
 			tr.viewDef->floatTime = game->GetTimeGroupTime(space->entityDef->parms.timeGroup) * 0.001;
@@ -1295,6 +1447,7 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 			break;
 	}
 
+#if !defined(_SPLASHDAMAGE) //karin: gui in game
 	// check for gui surfaces
 	idUserInterface	*gui = NULL;
 
@@ -1338,6 +1491,7 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEntity_t *space, const r
 		tr.viewDef->floatTime = oldFloatTime;
 		tr.viewDef->renderView.time = oldTime;
 	}
+#endif
 
 	// we can't add subviews at this point, because that would
 	// increment tr.viewCount, messing up the rest of the surface
@@ -1365,6 +1519,10 @@ static void R_AddAmbientDrawsurfs(viewEntity_t *vEntity)
 
 	if (def->dynamicModel) {
 		model = def->dynamicModel;
+#ifdef _SPLASHDAMAGE //karin: imposter model
+	} else if (def->imposterModel) {
+		model = def->imposterModel;
+#endif
 	} else {
 		model = def->parms.hModel;
 	}
@@ -1377,6 +1535,10 @@ static void R_AddAmbientDrawsurfs(viewEntity_t *vEntity)
 
 #ifdef _RAVEN //k: for ShowSurface/HideSurface, shader mask is not 0 will skip render
 		if(SUPPRESS_SURFACE_MASK_CHECK(def->parms.suppressSurfaceMask, i))
+			continue;
+#endif
+#ifdef _SPLASHDAMAGE //karin: hide surfaces
+		if(def->parms.hideSurfaceMask.Get(i))
 			continue;
 #endif
 
@@ -1395,7 +1557,11 @@ static void R_AddAmbientDrawsurfs(viewEntity_t *vEntity)
 			continue;
 		}
 
+#ifdef _SPLASHDAMAGE
+		shader = surf->material;
+#else
 		shader = surf->shader;
+#endif
 		shader = R_RemapShaderBySkin(shader, def->parms.customSkin, def->parms.customShader);
 
 		R_GlobalShaderOverride(&shader);
@@ -1522,7 +1688,7 @@ void R_AddModelSurfaces(void)
 		float oldFloatTime = 0.0f;
 		int oldTime = 0.0f;
 
-#if !defined(_RAVEN)
+#if !defined(_RAVEN) && !defined(_SPLASHDAMAGE)
 		game->SelectTimeGroup(vEntity->entityDef->parms.timeGroup);
 #endif
 
@@ -1530,7 +1696,7 @@ void R_AddModelSurfaces(void)
 			oldFloatTime = tr.viewDef->floatTime;
 			oldTime = tr.viewDef->renderView.time;
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 			tr.viewDef->floatTime = tr.viewDef->renderView.time * 0.001;
 #else
 			tr.viewDef->floatTime = game->GetTimeGroupTime(vEntity->entityDef->parms.timeGroup) * 0.001;
@@ -1719,7 +1885,7 @@ void R_RemoveUnecessaryViewLights(void)
 #include "tr/tr_lightmatrix.cpp"
 #endif
 
-#ifdef _RAVEN // particle
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
 #ifdef _RAVEN_BSE
 idRenderModel * R_EffectDefDynamicModel(rvRenderEffectLocal *def)
 {
@@ -1870,10 +2036,15 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEffect_s *space, const r
 	espace->entityDef->parms.allowSurfaceInViewID = space->effectDef->parms.allowSurfaceInViewID;
     espace->entityDef->parms.origin = space->effectDef->parms.origin;
     espace->entityDef->parms.axis = space->effectDef->parms.axis;
+#ifdef _SPLASHDAMAGE
+    espace->entityDef->parms.referenceSound = space->effectDef->parms.referenceSound;
+    espace->entityDef->parms.flags.weaponDepthHack = space->effectDef->parms.weaponDepthHackInViewID == tr.viewDef->renderView.viewID;
+#else
     espace->entityDef->parms.referenceSoundHandle = space->effectDef->parms.referenceSoundHandle;
     espace->entityDef->parms.weaponDepthHackInViewID = space->effectDef->parms.weaponDepthHackInViewID;
-    espace->entityDef->parms.modelDepthHack = space->effectDef->parms.modelDepthHack;
     espace->entityDef->parms.weaponDepthHack = space->effectDef->parms.weaponDepthHackInViewID == tr.viewDef->renderView.viewID;
+#endif
+	espace->entityDef->parms.modelDepthHack = space->effectDef->parms.modelDepthHack;
     memcpy(espace->entityDef->parms.shaderParms, space->effectDef->parms.shaderParms, sizeof(espace->entityDef->parms.shaderParms));
 #endif
     drawSurf->space = (viewEntity_s *)espace;
@@ -1958,7 +2129,11 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEffect_s *space, const r
         }
 #endif
 
+#ifdef _SPLASHDAMAGE
+        shader->EvaluateRegisters(regs, shaderParms, tr.viewDef, renderEntity->referenceSound);
+#else
         shader->EvaluateRegisters(regs, shaderParms, tr.viewDef, renderEntity->referenceSoundHandle);
+#endif
 
 #if 0
         if (space->entityDef && space->entityDef->parms.timeGroup) {
@@ -1980,52 +2155,6 @@ void R_AddDrawSurf(const srfTriangles_t *tri, const viewEffect_s *space, const r
         case TG_WOBBLESKY_CUBE:
             R_WobbleskyTexGen(drawSurf, tr.viewDef->renderView.vieworg);
             break;
-    }
-#endif
-
-#if 0
-    // check for gui surfaces
-    idUserInterface	*gui = NULL;
-
-    if (!space->entityDef) {
-        gui = shader->GlobalGui();
-    } else {
-        int guiNum = shader->GetEntityGui() - 1;
-
-        if (guiNum >= 0 && guiNum < MAX_RENDERENTITY_GUI) {
-            gui = renderEntity->gui[ guiNum ];
-        }
-
-        if (gui == NULL) {
-            gui = shader->GlobalGui();
-        }
-    }
-
-    if (gui) {
-        // force guis on the fast time
-        float oldFloatTime;
-        int oldTime;
-
-        oldFloatTime = tr.viewDef->floatTime;
-        oldTime = tr.viewDef->renderView.time;
-
-#ifdef _RAVEN
-        tr.viewDef->floatTime = tr.viewDef->renderView.time * 0.001;
-#else
-        tr.viewDef->floatTime = game->GetTimeGroupTime(1) * 0.001;
-		tr.viewDef->renderView.time = game->GetTimeGroupTime(1);
-#endif
-
-        idBounds ndcBounds;
-
-        if (!R_PreciseCullSurface(drawSurf, ndcBounds)) {
-            // did we ever use this to forward an entity color to a gui that didn't set color?
-//			memcpy( tr.guiShaderParms, shaderParms, sizeof( tr.guiShaderParms ) );
-            R_RenderGuiSurf(gui, drawSurf);
-        }
-
-        tr.viewDef->floatTime = oldFloatTime;
-        tr.viewDef->renderView.time = oldTime;
     }
 #endif
 
@@ -2051,7 +2180,11 @@ void R_AddAmbientEffectDrawsurfs(viewEffect_s *vEffect) {
         v4 = v2->geometry;
         if (v4) {
             if (v4->numIndexes) {
+#ifdef _SPLASHDAMAGE
+                v5 = v2->material;
+#else
                 v5 = v2->shader;
+#endif
                 if (v5) {
                     if (/*((int) v5[66] > 0 || v5[19] || v5[20])
                         && //k??? TODO some idMaterial property as condition, need get property name by memory offset in 32bits */ !R_CullLocalBox(v4->bounds, vEffect->modelMatrix, 5, tr.viewDef->frustum)) {
@@ -2122,3 +2255,4 @@ void R_AddEffectSurfaces(void) {
 }
 #endif
 #endif
+

@@ -29,13 +29,67 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
-#ifdef _RAVEN // quake4 guide
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
 #ifdef _RAVEN_BSE
 #include "../raven/bse/BSE.h"
 #else
 #include "../raven/fx/BSE.h"
 #endif
+#endif
 
+#ifdef _SPLASHDAMAGE //karin: binary data info
+
+#define GENERATED_PREFIX "generated"
+#define GENERATED_DECLB "declb"
+
+#define CACHEB_MAGIC 1212367428
+#define CACHEB_MAGIC_CHARS "DBCH"
+#define CACHEB_VERSION 2
+
+#define DCLB_MAGIC 1112294212
+#define DCLB_MAGIC_CHARS "DCLB"
+#define DCLB_VERSION 3
+
+#define GLOBALTOKENS_CACHEB "globaltokens.cache"
+
+#define DECL_CUSTOMER_TYPE(x) (DECL_MAPDEF + 1 + (x))
+
+extern const char* declIdentifierList[];
+
+struct binaryTokenCache_t {
+	int version; // 2
+	unsigned int uncompressedLength;
+	unsigned int compressedLength;
+	idList<byte> compressedData;
+};
+
+struct binaryDeclEntry_t {
+	idStr type;
+	idStr name;
+	//byte whitespace;
+	unsigned int offset;
+
+	unsigned int uncompressedLength;
+	unsigned int compressedLength;
+	idList<byte> data;
+
+	bool IsCompressed() const {
+		return uncompressedLength != compressedLength; // invalid, maybe equals
+	}
+};
+
+struct binaryDecl_t {
+	int version; // 3
+
+	int checksum;
+	int num;
+
+	idList<binaryDeclEntry_t> entries;
+};
+
+#endif
+
+#ifdef _RAVEN
 // jmarshall: Quake 4 Guide(template) support
 struct rvGuideTemplate
 {
@@ -79,9 +133,12 @@ missing reload over a previously explicit definition
 
 */
 
+//#if !defined(_SPLASHDAMAGE)
 #define USE_COMPRESSED_DECLS
 //#define GET_HUFFMAN_FREQUENCIES
+//#endif
 
+#if !defined(_SPLASHDAMAGE) //karin: move to heaeder
 class idDeclType
 {
 	public:
@@ -89,6 +146,7 @@ class idDeclType
 		declType_t					type;
 		idDecl *(*allocator)(void);
 };
+#endif
 
 class idDeclFolder
 {
@@ -127,6 +185,15 @@ class idDeclLocal : public idDeclBase
 		virtual bool				SourceFileChanged(void) const;
 		virtual void				MakeDefault(void);
 		virtual bool				EverReferenced(void) const;
+#ifdef _SPLASHDAMAGE
+		virtual void			SetBinarySource( const byte* source, int length );
+		virtual void			GetBinarySource( byte*& source, int& length ) const;
+		virtual void			FreeSourceBuffer( byte* buffer ) const;
+		virtual bool			HasBinaryBuffer() const;
+		virtual const idStrList&	GetIncludeDependencies() const;
+    	virtual const idStrList*	GetFileLevelIncludeDependencies() const;
+		void					AddIncludeDependency(const char *file);
+#endif
 
 	protected:
 		virtual bool				SetDefaultText(void);
@@ -176,6 +243,10 @@ class idDeclLocal : public idDeclBase
 		bool						redefinedInReload;		// used during file reloading to make sure a decl that has
 		// its source removed will be defaulted
 		idDeclLocal 				*nextInFile;				// next decl in the decl file
+#ifdef _SPLASHDAMAGE //karin: binary decls
+		idStrList					includeDependencies;
+		idList<byte>				binarySource;
+#endif
 };
 
 class idDeclFile
@@ -199,10 +270,14 @@ class idDeclFile
 		idDeclLocal 				*decls;
 #ifdef _RAVEN // quake4 guide
 // jmarshall: guide support
-private:
-    idStr						PreprocessGuides(const char* buffer, int length);
-    idStr						PreprocessInlineGuides(const char* buffer, int length);
+	private:
+	    idStr						PreprocessGuides(const char* buffer, int length);
+	    idStr						PreprocessInlineGuides(const char* buffer, int length);
 // jmarshall end
+#endif
+#ifdef _SPLASHDAMAGE //karin: binary decls
+		void						MakeBinaryFilename(idStr &filename);
+		int							LoadAndParseBinary(void);
 #endif
 };
 
@@ -243,6 +318,10 @@ class idDeclManagerLocal : public idDeclManager
 		virtual const idMaterial 		*FindMaterial(const char *name, bool makeDefault = true);
 		virtual const idDeclSkin 		*FindSkin(const char *name, bool makeDefault = true);
 		virtual const idSoundShader 	*FindSound(const char *name, bool makeDefault = true);
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: recurse subfolders
+	    void						RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList, bool norecurse = false);
+		void						RegisterDeclFolderWrapper( const char *folder, const char *extension, declType_t defaultType, bool unique = false, bool norecurse = false );
+#endif
 #ifdef _RAVEN
 		virtual const idDeclTable *		FindTable( const char *name, bool makeDefault = true );
 		// RAVEN BEGIN
@@ -260,40 +339,33 @@ class idDeclManagerLocal : public idDeclManager
 
 // RAVEN BEGIN
 // jscott: precache any guide (template) files
-    virtual void				ParseGuides(void);
-    virtual	void				ShutdownGuides(void) { }
-    virtual bool				EvaluateGuide(idStr& name, idLexer* src, idStr& definition)
-    {
-        return false;
-    }
-    virtual bool				EvaluateInlineGuide(idStr& name, idStr& definition)
-    {
-        return false;
-    }
+		virtual void				ParseGuides(void);
+		virtual	void				ShutdownGuides(void) { }
+		virtual bool				EvaluateGuide(idStr& name, idLexer* src, idStr& definition) {
+			return false;
+		}
+		virtual bool				EvaluateInlineGuide(idStr& name, idStr& definition) {
+			return false;
+		}
 // RAVEN END
 
-// jmarshall
-    void						RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList, bool norecurse = false);
-// jmarshall end
+		virtual bool					GetPlaybackData( const rvDeclPlayback *playback, int control, int now, int last, class rvDeclPlaybackData *pbd ) { (void)playback; (void)control; (void)now; (void)last; (void) pbd; return false; }
+		virtual bool					SetPlaybackData(rvDeclPlayback* playback, int now, int control, class rvDeclPlaybackData* pbd) { (void)playback; (void)control; (void)now; (void) pbd; return false; }
+		virtual void					StartPlaybackRecord(rvDeclPlayback* playback) { (void)playback; }
+		virtual bool					FinishPlayback( rvDeclPlayback *playback ) { (void)playback; return false; }
 
-	virtual bool					GetPlaybackData( const rvDeclPlayback *playback, int control, int now, int last, class rvDeclPlaybackData *pbd ) { (void)playback; (void)control; (void)now; (void)last; (void) pbd; return false; }
-	virtual bool					SetPlaybackData(rvDeclPlayback* playback, int now, int control, class rvDeclPlaybackData* pbd) { (void)playback; (void)control; (void)now; (void) pbd; return false; }
-	virtual void					StartPlaybackRecord(rvDeclPlayback* playback) { (void)playback; }
-	virtual bool					FinishPlayback( rvDeclPlayback *playback ) { (void)playback; return false; }
+		virtual const idDecl *	FindType( declType_t type, const char *name, bool makeDefault, bool noCaching ) { (void)noCaching; return FindType(type, name, makeDefault); }
 
-	virtual const idDecl *	FindType( declType_t type, const char *name, bool makeDefault, bool noCaching ) { (void)noCaching; return FindType(type, name, makeDefault); }
-
-	//k: find map def
-	virtual const idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) const {
-		return GetMapDef(mapName, entityFilter);
-	}
-	virtual idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) {
-		return const_cast<idDeclEntityDef *>(GetMapDef(mapName, entityFilter));
-	}
-	virtual void			RegisterDeclFolderWrapper( const char *folder, const char *extension, declType_t defaultType, bool unique = false, bool norecurse = false );
+		//k: find map def
+		virtual const idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) const {
+			return GetMapDef(mapName, entityFilter);
+		}
+		virtual idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) {
+			return const_cast<idDeclEntityDef *>(GetMapDef(mapName, entityFilter));
+		}
 
 	private:
-	const idDeclEntityDef * GetMapDef(const char *mapName, const char *entityFilter) const;
+		const idDeclEntityDef * GetMapDef(const char *mapName, const char *entityFilter) const;
 
 	public:
 		// jmarshall - Quake 4 guide(template) support
@@ -310,6 +382,40 @@ class idDeclManagerLocal : public idDeclManager
             return inLevelLoad;
         }
 #endif
+#ifdef _SPLASHDAMAGE
+		// Returns the system token cache
+		virtual idTokenCache&	GetGlobalTokenCache();
+
+		// Registers a new decl type.
+		virtual void			RegisterDeclType( idDeclTypeInterface* type );
+		virtual void			UnregisterDeclType( idDeclTypeInterface* type );
+
+		// Registers a new folder with decl files.
+		virtual void			RegisterDeclFolder( const char *folder, const char *extension );
+
+		//Unregister a previously-registered folder
+		virtual void			UnregisterDeclFolder( const char *folder, const char *extension );
+
+		// Called when finished registering decl folders
+		// attempts to find binary decls without a source text file and load them properly
+		virtual void			FinishedRegistering();
+		virtual void			ListType( const idCmdArgs &args, const char* typeName );
+		virtual void			PrintType( const idCmdArgs &args, const char* typeName );
+		virtual int						GetNumMaterials( void );
+		virtual void					CacheFromDict( const idDict& dict );
+		virtual	const rvDeclEffect *	FindEffect( const char *name, bool makeDefault = true );
+		virtual idDeclTypeInterface*	GetDeclType( const char* typeName ) const;
+		virtual idDeclTypeInterface*	GetDeclType( qhandle_t typeHandle ) const;
+		virtual qhandle_t				GetDeclTypeHandle( const char* typeName ) const;
+		virtual const char*				GetDeclTypeName( qhandle_t typeHandle ) const;
+
+		virtual void					AddDependency( const idDecl* decl, const idDecl* dependency );
+		virtual void					AddDependency( const idDecl* decl, const char* fileName );
+		virtual void					AddDependencies( const idDecl* decl, const idParser& parser );
+
+		bool							LoadGlobalTokenCache(void);
+		void							RegisterDeclFolderWrapperBinary( idDeclFolder *declFolder, bool unique = false, bool norecurse = false );
+#endif
 
 		virtual const idMaterial 		*MaterialByIndex(int index, bool forceParse = true);
 		virtual const idDeclSkin 		*SkinByIndex(int index, bool forceParse = true);
@@ -322,9 +428,11 @@ public:
 		static void					MakeNameCanonical(const char *name, char *result, int maxLength);
 		idDeclLocal 				*FindTypeWithoutParsing(declType_t type, const char *name, bool makeDefault = true);
 
+#if !defined(_SPLASHDAMAGE)
 		idDeclType 				*GetDeclType(int type) const {
 			return declTypes[type];
 		}
+#endif
 		const idDeclFile 			*GetImplicitDeclFile(void) const {
 			return &implicitDecls;
 		}
@@ -348,11 +456,22 @@ public:
 #ifdef _HUMANHEAD
         bool						inLevelLoad;
 #endif
+#ifdef _SPLASHDAMAGE
+		idTokenCache				globalTokencache;
+		mutable idStrList			declTypeTables;
+
+private:
+		static void					DeclbToText_f(const idCmdArgs &args);
+		static void					ExportDeclSource_f(const idCmdArgs &args);
+		static void					ExportDeclExpandSource_f(const idCmdArgs &args);
+		void						ExportDeclSource(const char *savePath, const char *filePath = NULL, bool expand = false);
+#endif
 
 	private:
 		static void					ListDecls_f(const idCmdArgs &args);
 		static void					ReloadDecls_f(const idCmdArgs &args);
 		static void					TouchDecl_f(const idCmdArgs &args);
+		static void					ParseAllDecls_f(const idCmdArgs &args);
 };
 
 idCVar idDeclManagerLocal::decl_show("decl_show", "0", CVAR_SYSTEM, "set to 1 to print parses, 2 to also print references", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2>);
@@ -751,7 +870,11 @@ int c_savedMemory = 0;
 int idDeclFile::LoadAndParse()
 {
 	int			i, numTypes;
+#ifdef _SPLASHDAMAGE //karin: idParser instead of idLexer
+	idParser	src;
+#else
 	idLexer		src;
+#endif
 	idToken		token;
 	int			startMarker;
 	char 		*buffer;
@@ -772,8 +895,15 @@ int idDeclFile::LoadAndParse()
 	length = fileSystem->ReadFile(fileName, (void **)&buffer, &timestamp);
 
 	if (length == -1) {
+#ifdef _SPLASHDAMAGE //karin: try parse binary declb file if ascii file load failed
+		if(!LoadAndParseBinary())
+		{
+#endif
 		common->FatalError("couldn't load %s", fileName.c_str());
 		return 0;
+#ifdef _SPLASHDAMAGE
+		}
+#endif
 	}
 
 #ifdef _RAVEN // quake4 guide
@@ -801,9 +931,19 @@ int idDeclFile::LoadAndParse()
 	if (!src.LoadMemory(buffer, length, fileName))
 #endif
 	{
-		common->Error("Couldn't parse %s", fileName.c_str());
+#ifdef _SPLASHDAMAGE //karin: try parse binary declb file if ascii file load failed
 		Mem_Free(buffer);
+		if(!LoadAndParseBinary())
+		{
+#endif
+		common->Error("Couldn't parse %s", fileName.c_str());
+#if !defined(_SPLASHDAMAGE)
+		Mem_Free(buffer);
+#endif
 		return 0;
+#ifdef _SPLASHDAMAGE
+		}
+#endif
 	}
 
 	// mark all the defs that were from the last reload of this file
@@ -822,7 +962,15 @@ int idDeclFile::LoadAndParse()
 	fileSize = length;
 
 	// scan through, identifying each individual declaration
+#ifdef _SPLASHDAMAGE //karin: don't need to add include files if first decl
+	src.PushDependencies();
+	bool isFirst = true; // if is first decl in this file
+#endif
 	while (1) {
+#ifdef _SPLASHDAMAGE //karin: fisrt decl source since postion 0, the source has include depences, so it don't need add depence includes
+		const bool addIncludes = !isFirst;
+		isFirst = false; // mark not first decl now
+#endif
 
 		startMarker = src.GetFileOffset();
 		sourceLine = src.GetLineNum();
@@ -838,7 +986,11 @@ int idDeclFile::LoadAndParse()
 		numTypes = declManagerLocal.GetNumDeclTypes();
 
 		for (i = 0; i < numTypes; i++) {
+#ifdef _SPLASHDAMAGE
+			idDeclTypeInterface *typeInfo = declManagerLocal.GetDeclType(i);
+#else
 			idDeclType *typeInfo = declManagerLocal.GetDeclType(i);
+#endif
 
 			if (typeInfo && typeInfo->typeName.Icmp(token) == 0) {
 				identifiedType = (declType_t) typeInfo->type;
@@ -886,17 +1038,31 @@ int idDeclFile::LoadAndParse()
 			src.SkipBracedSection();
 			continue;
 		}
+#ifdef _SPLASHDAMAGE //karin: save decl include files
+		idStrList dependencies;
+		int cd = src.GetCurrentDependency();
+		for(const char *d = src.GetNextDependency(cd); d; d = src.GetNextDependency(cd)) {
+			dependencies.AddUnique(d);
+		}
+		src.PushDependencies();
+#endif
 
 		name = token;
 
 		// make sure there's a '{'
 		if (!src.ReadToken(&token)) {
 			src.Warning("Type without definition at end of file");
+#ifdef _SPLASHDAMAGE //karin: save decl include files
+			src.PopDependencies();
+#endif
 			break;
 		}
 
 		if (token != "{") {
 			src.Warning("Expecting '{' but found '%s'", token.c_str());
+#ifdef _SPLASHDAMAGE //karin: save decl include files
+			src.PopDependencies();
+#endif
 			continue;
 		}
 
@@ -915,6 +1081,9 @@ int idDeclFile::LoadAndParse()
 			if (newDecl->sourceFile != this || newDecl->redefinedInReload) {
 				src.Warning("%s '%s' previously defined at %s:%i", declManagerLocal.GetDeclNameFromType(identifiedType),
 				            name.c_str(), newDecl->sourceFile->fileName.c_str(), newDecl->sourceLine);
+#ifdef _SPLASHDAMAGE //karin: save decl include files
+				src.PopDependencies();
+#endif
 				continue;
 			}
 
@@ -946,12 +1115,30 @@ int idDeclFile::LoadAndParse()
 		newDecl->sourceLine = sourceLine;
 		newDecl->declState = DS_UNPARSED;
 
+#ifdef _SPLASHDAMAGE //karin: add include files to decl text source
+		if(addIncludes)
+		{
+			cd = src.GetCurrentDependency();
+			for(const char *d = src.GetNextDependency(cd); d; d = src.GetNextDependency(cd)) {
+				newDecl->AddIncludeDependency(d);
+			}
+			for(int m = 0; m < dependencies.Num(); m++) {
+				newDecl->AddIncludeDependency(dependencies[m]);
+			}
+		}
+#endif
 		// if it is currently in use, reparse it immedaitely
 		if (reparse) {
 			newDecl->ParseLocal();
 		}
+#ifdef _SPLASHDAMAGE //karin: save decl include files
+		src.PopDependencies();
+#endif
 	}
 
+#ifdef _SPLASHDAMAGE //karin: save decl include files
+	src.PopDependencies();
+#endif
 	numLines = src.GetLineNum();
 
 	Mem_Free(buffer);
@@ -969,6 +1156,222 @@ int idDeclFile::LoadAndParse()
 	return checksum;
 }
 
+#ifdef _SPLASHDAMAGE //karin: parse binary declb file/global binary token cache
+static void Com_MakeBinaryFilename(idStr &filename, const char *type, const char *name) {
+	filename = GENERATED_PREFIX "/" GENERATED_DECLB;
+	if (type && type[0]) {
+		filename.AppendPath(type);
+	}
+	if(name && name[0])
+	{
+		filename.AppendPath(name);
+		filename.Append("b");
+	}
+}
+
+// huffman compression
+static int DecompressDeclb(binaryDeclEntry_t &entry, idList<byte> &out) {
+	//Sys_Printf("EEE %s|%s|%d|%d|%d\n", entry.type.c_str(), entry.name.c_str(), entry.uncompressedLength, entry.compressedLength,strlen((char *)entry.data.Ptr()));
+
+	idCompressor *compressor = idCompressor::AllocHuffman();
+	idFile_Memory f("declb", (const char *)entry.data.Ptr(), entry.compressedLength); // FS_READ mode
+	compressor->Init(&f, false, 16);
+	out.SetNum(entry.uncompressedLength * 2 + 2);
+	int uncompressedLength = compressor->Read(out.Ptr(), out.Num());
+
+	delete compressor;
+	return uncompressedLength;
+}
+
+void idDeclFile::MakeBinaryFilename(idStr &filename) {
+	Com_MakeBinaryFilename(filename, NULL, fileName.c_str());
+}
+
+static int LoadBinaryDeclHeader(binaryDecl_t &header, idFile *file) {
+	int magic;
+
+	file->ReadInt(magic);
+	if(magic != DCLB_MAGIC)
+	{
+		common->Warning("decl binary : encountered unknown fileid");
+		return -1;
+	}
+
+	file->ReadInt(header.version); // version == 3
+	if(header.version != DCLB_VERSION)
+	{
+		common->Warning("decl binary : wrong version (%i should be %i)", header.version, DCLB_VERSION);
+		return -1;
+	}
+
+	file->ReadInt(header.checksum);
+	file->ReadInt(header.num);
+
+	if (header.num > 0) {
+		header.entries.SetNum(header.num);
+		for (int i = 0; i < header.num; ++i) {
+			binaryDeclEntry_t &entry = header.entries[i];
+			file->ReadString(entry.type);
+			file->ReadString(entry.name);
+			byte whitespace;
+			file->ReadUnsignedChar(whitespace);
+			file->ReadUnsignedInt(entry.offset);
+			if((int)entry.offset >= file->Length())
+			{
+				common->Warning("Decl binary entry %s %s invalid offset: %d", entry.type.c_str(), entry.name.c_str(), entry.offset);
+				return false;
+			}
+		}
+	}
+
+	return header.checksum;
+}
+
+int idDeclFile::LoadAndParseBinary(void)
+{
+	int			i, numTypes;
+	idDeclLocal *newDecl;
+	bool		reparse;
+	idFile *file;
+	idStr path;
+	MakeBinaryFilename(path);
+
+	common->DPrintf("Load decl binary '%s'...\n", path.c_str());
+
+	file = fileSystem->OpenFileRead(path);
+
+	if(!file)
+	{
+		common->Warning("Decl binary file not exists: %s", path.c_str());
+		return 0;
+	}
+
+	binaryDecl_t header;
+	if (LoadBinaryDeclHeader(header, file) == -1) {
+		common->Warning("Decl binary read 0 entries: %s", path.c_str());
+		fileSystem->CloseFile(file);
+		return 0;
+	}
+
+	// mark all the defs that were from the last reload of this file
+	for (idDeclLocal *decl = decls; decl; decl = decl->nextInFile) {
+		decl->redefinedInReload = false;
+	}
+
+	fileSize = file->Length();
+
+	for (int m = 0; m < header.num; ++m) {
+		binaryDeclEntry_t &entry = header.entries[m];
+
+		declType_t identifiedType = DECL_MAX_TYPES;
+
+		// get the decl type from the type name
+		numTypes = declManagerLocal.GetNumDeclTypes();
+
+		for (i = 0; i < numTypes; i++) {
+			idDeclTypeInterface *typeInfo = declManagerLocal.GetDeclType(i);
+
+			if (typeInfo && typeInfo->typeName.Icmp(entry.type) == 0) {
+				identifiedType = (declType_t) typeInfo->type;
+				break;
+			}
+		}
+
+		if (i >= numTypes) {
+			if (defaultType == DECL_MAX_TYPES) {
+				common->Warning("No btype");
+				continue;
+			}
+			// use the default type
+			identifiedType = defaultType;
+		}
+
+		//Sys_Printf("fff %s %s\n", entry.type.c_str(), entry.name.c_str());
+		const idStr &name = entry.name;
+
+		// look it up, possibly getting a newly created default decl
+		reparse = false;
+		newDecl = declManagerLocal.FindTypeWithoutParsing(identifiedType, name, false);
+
+		if (newDecl) {
+			// update the existing copy
+			if (newDecl->sourceFile != this || newDecl->redefinedInReload) {
+				common->Warning("%s '%s' previously defined at %s:%i", declManagerLocal.GetDeclNameFromType(identifiedType),
+				            name.c_str(), newDecl->sourceFile->fileName.c_str(), newDecl->sourceLine);
+				continue;
+			}
+
+			if (newDecl->declState != DS_UNPARSED) {
+				reparse = true;
+			}
+		} else {
+			// allow it to be created as a default, then add it to the per-file list
+			newDecl = declManagerLocal.FindTypeWithoutParsing(identifiedType, name, true);
+			newDecl->nextInFile = this->decls;
+			this->decls = newDecl;
+		}
+
+		newDecl->redefinedInReload = true;
+
+		if (newDecl->textSource) {
+			Mem_Free(newDecl->textSource);
+			newDecl->textSource = NULL;
+		}
+		newDecl->SetBinarySource(NULL, 0);
+
+		//int pos = file->Tell();
+		file->Seek(entry.offset, FS_SEEK_SET);
+		file->ReadUnsignedInt(entry.uncompressedLength);
+		file->ReadUnsignedInt(entry.compressedLength);
+		entry.data.SetNum(entry.compressedLength);
+		file->Read(entry.data.Ptr(), entry.compressedLength);
+		//file->Seek(pos, FS_SEEK_SET);
+
+		idList<byte> out;
+		DecompressDeclb(entry, out);
+
+		if(out[0] == 6 && !idStr::Cmpn((const char *)&out[4], LEXB_VERSION, 6)) // is binary lex: like idFile::ReadString() num:int32 chars[num]
+		{
+			newDecl->SetBinarySource(&out[0], entry.uncompressedLength);
+			newDecl->sourceTextLength = 0;
+			//Sys_Printf("is bin|%s\n", fileName.c_str());
+		}
+		else
+		{
+			newDecl->SetTextLocal((const char *)entry.data.Ptr(), entry.uncompressedLength);
+			newDecl->sourceTextLength = entry.uncompressedLength;
+			//Sys_Printf("is text1|%s|%s|\n", fileName.c_str(),(const char *)entry.data.Ptr());
+		}
+
+		newDecl->sourceFile = this;
+		newDecl->sourceTextOffset = 0;
+		newDecl->sourceLine = 1;
+		newDecl->declState = DS_UNPARSED;
+
+		// if it is currently in use, reparse it immedaitely
+		if (reparse) {
+			newDecl->ParseLocal();
+		}
+	}
+
+	numLines = 1;
+
+	fileSystem->CloseFile(file);
+
+	// any defs that weren't redefinedInReload should now be defaulted
+	for (idDeclLocal *decl = decls ; decl ; decl = decl->nextInFile) {
+		if (decl->redefinedInReload == false) {
+			decl->MakeDefault();
+			decl->sourceTextOffset = decl->sourceFile->fileSize;
+			decl->sourceTextLength = 0;
+			decl->sourceLine = decl->sourceFile->numLines;
+		}
+	}
+
+	return header.checksum;
+}
+#endif
+
 /*
 ====================================================================================
 
@@ -979,6 +1382,64 @@ int idDeclFile::LoadAndParse()
 
 const char *listDeclStrings[] = { "current", "all", "ever", NULL };
 
+#ifdef _SPLASHDAMAGE //karin: decl info defines
+sdDeclInfo declTableInfo("table", DIF_ALLOW_TEMPLATES);
+sdDeclInfo declMaterialInfo("material", DIF_ALLOW_TEMPLATES, idMaterial::CacheFromDict);
+sdDeclInfo declSkinInfo("skin", DIF_ALLOW_TEMPLATES, idDeclSkin::CacheFromDict);
+sdDeclInfo declSoundInfo("sound", DIF_ALLOW_TEMPLATES, idSoundShader::CacheFromDict);
+sdDeclInfo declEntityDefInfo("entityDef", DIF_ALLOW_TEMPLATES, idDeclEntityDef::CacheFromDict);
+sdDeclInfo declMapDefInfo("mapDef");
+sdDeclInfo declFxInfo("fx");
+sdDeclInfo declParticleInfo("particle");
+sdDeclInfo declAFInfo("articulatedFigure", DIF_ALLOW_TEMPLATES, idDeclAF::CacheFromDict);
+sdDeclInfo declPDAInfo("pda");
+sdDeclInfo declEmailInfo("email");
+sdDeclInfo declVideoInfo("video");
+sdDeclInfo declAudioInfo("audio");
+
+sdDeclInfo declEffectInfo("effect", DIF_ALLOW_TEMPLATES/*, idDeclEntityDef::CacheFromDict*/);
+sdDeclInfo declAtmosphereInfo("atmosphere", DIF_ALLOW_TEMPLATES);
+sdDeclInfo declAmbientCubeMapInfo("ambientCubemap", DIF_ALLOW_TEMPLATES, sdDeclAmbientCubeMap::CacheFromDict);
+sdDeclInfo declDecalInfo("decal", DIF_ALLOW_TEMPLATES);
+sdDeclInfo declSurfaceTypeInfo("surfaceType", DIF_ALLOW_TEMPLATES);
+sdDeclInfo declImposterInfo("imposter", DIF_ALLOW_TEMPLATES, sdDeclImposter::CacheFromDict);
+sdDeclInfo declImposterGeneratorInfo("imposterGenerator");
+sdDeclInfo declStuffTypeInfo("stuffType", DIF_ALLOW_TEMPLATES);
+sdDeclInfo declRenderBindingInfo("renderBinding", DIF_ALLOW_TEMPLATES);
+sdDeclInfo declRenderProgramInfo("renderProgram", DIF_ALLOW_TEMPLATES);
+sdDeclInfo declLocStrInfo("locString", DIF_ALLOW_TEMPLATES);
+sdDeclInfo declTemplateInfo("template", 0); //karin: template don't expend automatic
+sdDeclInfo declSurfaceTypeMapInfo("surfaceTypeMap", DIF_ALLOW_TEMPLATES);
+
+
+idDeclTypeTemplate< idDeclTable, &declTableInfo > declTableType;
+idDeclTypeTemplate< idMaterial, &declMaterialInfo > declMaterialType;
+idDeclTypeTemplate< idDeclSkin, &declSkinInfo > declSkinType;
+idDeclTypeTemplate< idSoundShader, &declSoundInfo > declSoundType;
+idDeclTypeTemplate< idDeclEntityDef, &declEntityDefInfo > declEntityDefType;
+idDeclTypeTemplate< idDeclEntityDef, &declMapDefInfo > declMapDefType;
+idDeclTypeTemplate< idDeclFX, &declFxInfo > declFxType;
+idDeclTypeTemplate< idDeclParticle, &declParticleInfo > declParticleType;
+idDeclTypeTemplate< idDeclAF, &declAFInfo > declAFType;
+idDeclTypeTemplate< idDeclPDA, &declPDAInfo > declPDAType;
+idDeclTypeTemplate< idDeclEmail, &declEmailInfo > declEmailType;
+idDeclTypeTemplate< idDeclVideo, &declVideoInfo > declVideoType;
+idDeclTypeTemplate< idDeclAudio, &declAudioInfo > declAudioType;
+idDeclTypeTemplate< rvDeclEffect, &declEffectInfo > declEffectType;
+idDeclTypeTemplate< sdDeclAtmosphere, &declAtmosphereInfo > declAtmosphereType;
+idDeclTypeTemplate< sdDeclAmbientCubeMap, &declAmbientCubeMapInfo > declAmbientCubeMapType;
+idDeclTypeTemplate< sdDeclDecal, &declDecalInfo > declDecalType;
+idDeclTypeTemplate< sdDeclSurfaceType, &declSurfaceTypeInfo > declSurfaceTypeType;
+idDeclTypeTemplate< sdDeclSurfaceTypeMap, &declSurfaceTypeMapInfo > declSurfaceTypeMapType;
+idDeclTypeTemplate< sdDeclImposter, &declImposterInfo > declImposterType;
+idDeclTypeTemplate< sdDeclImposterGenerator, &declImposterGeneratorInfo > declImposterGeneratorType;
+idDeclTypeTemplate< sdDeclStuffType, &declStuffTypeInfo > declStuffTypeType;
+idDeclTypeTemplate< sdDeclRenderBinding, &declRenderBindingInfo > declRenderBindingType;
+idDeclTypeTemplate< sdDeclRenderProgram, &declRenderProgramInfo > declRenderProgramType;
+idDeclTypeTemplate< sdDeclLocStr, &declLocStrInfo > declLocStrType;
+idDeclTypeTemplate< sdDeclTemplate, &declTemplateInfo > declTemplateType;
+
+#endif
 /*
 ===================
 idDeclManagerLocal::Init
@@ -1009,6 +1470,59 @@ void idDeclManagerLocal::Init(void)
 // jmarshall end
 #endif
 
+#ifdef _SPLASHDAMAGE //karin: init decl type name table
+	LoadGlobalTokenCache();
+
+	declTypeTables.Clear();
+	declTypeTables.SetNum(DECL_CUSTOMER_TYPE(0));
+	for(int i = 0; i <= DECL_MODELEXPORT; i++)
+	{
+		declTypeTables[i] = declIdentifierList[i];
+	}
+	// compat for DOOM3
+	declTypeTables[DECL_FONT] = "font";
+	declTypeTables[DECL_MODELDEF] = "modelDef";
+	declTypeTables[DECL_FX] = "fx";
+	declTypeTables[DECL_PARTICLE] = "particle";
+	declTypeTables[DECL_PDA] = "pda";
+	declTypeTables[DECL_VIDEO] = "video";
+	declTypeTables[DECL_AUDIO] = "audio";
+	declTypeTables[DECL_EMAIL] = "email";
+	declTypeTables[DECL_MAPDEF] = "mapDef";
+#endif
+
+#ifdef _SPLASHDAMAGE //karin: register decl by info
+	// decls used throughout the engine
+	RegisterDeclType(&declTableType);
+	RegisterDeclType(&declMaterialType);
+	RegisterDeclType(&declSkinType);
+	RegisterDeclType(&declSoundType);
+	RegisterDeclType(&declEntityDefType);
+	RegisterDeclType(&declEffectType);
+	RegisterDeclType(&declAFType);
+	RegisterDeclType(&declAtmosphereType);
+	RegisterDeclType(&declAmbientCubeMapType);
+	RegisterDeclType(&declStuffTypeType);
+	RegisterDeclType(&declSurfaceTypeType);
+	RegisterDeclType(&declSurfaceTypeMapType);
+	RegisterDeclType(&declRenderProgramType);
+	RegisterDeclType(&declRenderBindingType);
+	RegisterDeclType(&declTemplateType);
+	RegisterDeclType(&declImposterType);
+	RegisterDeclType(&declImposterGeneratorType);
+	RegisterDeclType(&declLocStrType);
+	RegisterDeclType(&declDecalType);
+	// DECL_MODELEXPORT
+	// DECL_FONT
+	// DECL_MODELDEF
+	RegisterDeclType(&declFxType);
+	RegisterDeclType(&declParticleType);
+	RegisterDeclType(&declPDAType);
+	RegisterDeclType(&declVideoType);
+	RegisterDeclType(&declAudioType);
+	RegisterDeclType(&declEmailType);
+	RegisterDeclType(&declMapDefType);
+#else
 	// decls used throughout the engine
 	RegisterDeclType("table",				DECL_TABLE,			idDeclAllocator<idDeclTable>);
 	RegisterDeclType("material",			DECL_MATERIAL,		idDeclAllocator<idMaterial>);
@@ -1024,6 +1538,7 @@ void idDeclManagerLocal::Init(void)
 	RegisterDeclType("email",				DECL_EMAIL,			idDeclAllocator<idDeclEmail>);
 	RegisterDeclType("video",				DECL_VIDEO,			idDeclAllocator<idDeclVideo>);
 	RegisterDeclType("audio",				DECL_AUDIO,			idDeclAllocator<idDeclAudio>);
+#endif
 
 #ifdef _RAVEN // quake4 new decl
 // jmarshall: Raven Decl Support
@@ -1039,9 +1554,18 @@ void idDeclManagerLocal::Init(void)
     RegisterDeclType(	"beam",			DECL_BEAM,		idDeclAllocator<hhDeclBeam>);
 #endif
 
+#ifdef _SPLASHDAMAGE //karin: register template first
+	RegisterDeclFolder("templates",		".template",				DECL_TEMPLATE);
+    RegisterDeclFolder("renderprogs",			".rprog",				DECL_RENDERPROGRAM);
+    RegisterDeclFolder("renderprogs",			".rprog",				DECL_RENDERBINDING);
+#endif
 	RegisterDeclFolder("materials",		".mtr",				DECL_MATERIAL);
 	RegisterDeclFolder("skins",			".skin",			DECL_SKIN);
+#ifdef _SPLASHDAMAGE //karin: sound<s>/*.sndshd
+	RegisterDeclFolder("sounds",			".sndshd",			DECL_SOUND);
+#else
 	RegisterDeclFolder("sound",			".sndshd",			DECL_SOUND);
+#endif
 
 #ifdef _RAVEN // quake4 new decl
 // jmarshall: Raven Decl Support
@@ -1054,6 +1578,19 @@ void idDeclManagerLocal::Init(void)
 
 #ifdef _HUMANHEAD
     RegisterDeclFolder("beams",			".beam",				DECL_BEAM);
+#endif
+
+#ifdef _SPLASHDAMAGE
+    RegisterDeclFolder("localization",			".locstr",				DECL_LOCSTR);
+    RegisterDeclFolder("effects",			".effect",				DECL_EFFECT);
+    RegisterDeclFolder("atmosphere",			".atm",				DECL_ATMOSPHERE);
+    RegisterDeclFolder("ambientCubemap",			".atm",				DECL_AMBIENTCUBEMAP);
+    RegisterDeclFolder("decals",			".decal",				DECL_DECAL);
+    RegisterDeclFolder("surfacetypes",			".stp",				DECL_SURFACETYPE);
+    RegisterDeclFolder("surfacetypes",			".stmap",				DECL_SURFACETYPEMAP);
+    RegisterDeclFolder("imposters",			".imp",				DECL_IMPOSTER);
+    RegisterDeclFolder("imposters",			".imp",				DECL_IMPOSTERGENERATOR);
+    RegisterDeclFolder("stuff",			".stuff",				DECL_STUFFTYPE);
 #endif
 
 	// add console commands
@@ -1093,6 +1630,15 @@ void idDeclManagerLocal::Init(void)
 	cmdSystem->AddCommand("printAudio", idPrintDecls_f<DECL_AUDIO>, CMD_FL_SYSTEM, "prints an Video", idCmdSystem::ArgCompletion_Decl<DECL_AUDIO>);
 
 	cmdSystem->AddCommand("listHuffmanFrequencies", ListHuffmanFrequencies_f, CMD_FL_SYSTEM, "lists decl text character frequencies");
+
+	cmdSystem->AddCommand("parseAllDecls", ParseAllDecls_f, CMD_FL_SYSTEM, "parse all entries of a decl");
+	
+#ifdef _SPLASHDAMAGE
+	cmdSystem->AddCommand("declbToText", DeclbToText_f, CMD_FL_SYSTEM, "convert declb to text files");
+	cmdSystem->AddCommand("exportDeclSource", ExportDeclSource_f, CMD_FL_SYSTEM, "export decl source text files");
+	cmdSystem->AddCommand("exportDeclExpandSource", ExportDeclExpandSource_f, CMD_FL_SYSTEM, "export decl expand source text files");
+	cmdSystem->AddCommand("exportRenderPrograms", sdDeclRenderProgram::ExportDeclRenderPrograms_f, CMD_FL_SYSTEM, "export all render programs");
+#endif
 
 	common->Printf("------------------------------\n");
 }
@@ -1201,7 +1747,7 @@ void idDeclManagerLocal::RegisterDeclType(const char *typeName, declType_t type,
 	idDeclType *declType;
 
 	if (type < declTypes.Num() && declTypes[(int)type]) {
-		common->Warning("idDeclManager::RegisterDeclType: type '%s' already exists", typeName);
+		common->Warning("idDeclManager::RegisterDeclType: type '%s' already exists %s", typeName, declTypes[type]->typeName.c_str());
 		return;
 	}
 
@@ -1209,6 +1755,9 @@ void idDeclManagerLocal::RegisterDeclType(const char *typeName, declType_t type,
 	declType->typeName = typeName;
 	declType->type = type;
 	declType->allocator = allocator;
+#ifdef _SPLASHDAMAGE //karin: callback when decl type registered
+	declType->OnRegister(type);
+#endif
 
 	if ((int)type + 1 > declTypes.Num()) {
 		declTypes.AssureSize((int)type + 1, NULL);
@@ -1224,8 +1773,9 @@ idDeclManagerLocal::RegisterDeclFolder
 */
 void idDeclManagerLocal::RegisterDeclFolder(const char *folder, const char *extension, declType_t defaultType)
 {
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: find all subfolder files
 	RegisterDeclFolderWrapper(folder, extension, defaultType, false, false);
+	//Sys_Printf("RegisterDeclFolder(%s, %s, %d)\n", folder, extension, defaultType);
 #else
 	int i, j;
 	idStr fileName;
@@ -1473,6 +2023,10 @@ const idDecl *idDeclManagerLocal::DeclByIndex(declType_t type, int index, bool f
 		common->FatalError("idDeclManager::DeclByIndex: bad type: %i", typeIndex);
 	}
 
+#ifdef _SPLASHDAMAGE //karin: not found, return NULL if index == -1, don't throw exception
+	if(index == -1)
+		return NULL;
+#endif
 	if (index < 0 || index >= linearLists[ typeIndex ].Num()) {
 		common->Error("idDeclManager::DeclByIndex: out of range");
 	}
@@ -2509,7 +3063,15 @@ idDeclLocal::AllocateSelf
 void idDeclLocal::AllocateSelf(void)
 {
 	if (self == NULL) {
+#ifdef _SPLASHDAMAGE //karin: if has allocator of decl info
+		const idDeclTypeInterface *dt = declManagerLocal.GetDeclType((int)type);
+		if(dt->allocator)
+			self = dt->allocator();
+		else
+			self = const_cast<idDeclTypeInterface *>(dt)->Alloc();
+#else
 		self = declManagerLocal.GetDeclType((int)type)->allocator();
+#endif
 		self->base = this;
 	}
 }
@@ -2531,7 +3093,12 @@ void idDeclLocal::ParseLocal(void)
 	declManagerLocal.MediaPrint("parsing %s %s\n", declManagerLocal.declTypes[type]->typeName.c_str(), name.c_str());
 
 	// if no text source try to generate default text
-	if (textSource == NULL) {
+#ifdef _SPLASHDAMAGE //karin: if text source and binary source are all empty
+	if (textSource == NULL && !HasBinaryBuffer()) 
+#else
+	if (textSource == NULL) 
+#endif
+	{
 		generatedDefaultText = self->SetDefaultText();
 	}
 
@@ -2539,7 +3106,12 @@ void idDeclLocal::ParseLocal(void)
 	declManagerLocal.indent++;
 
 	// no text immediately causes a MakeDefault()
-	if (textSource == NULL) {
+#ifdef _SPLASHDAMAGE //karin: if text source and binary source are all empty
+	if (textSource == NULL && !HasBinaryBuffer()) 
+#else
+	if (textSource == NULL) 
+#endif
+	{
 		MakeDefault();
 		declManagerLocal.indent--;
 		return;
@@ -2550,7 +3122,36 @@ void idDeclLocal::ParseLocal(void)
 	// parse
 	char *declText = (char *) _alloca((GetTextLength() + 1) * sizeof(char));
 	GetText(declText);
+#ifdef _SPLASHDAMAGE //karin: make final decl source text(applied templates)
+	idStr finalPreprocessedBuffer;
+	//Sys_Printf("rrr|%s|%s|\n\n", GetFileName(), GetName()/*,idStr(declText,0,GetTextLength()).c_str()*/ );
+	//karin: 1. expand template if has useTemplate keyword
+	// NOTE: template should not expand template when parse, because some template use other template as parameter into this template - karin
+	if (!declManagerLocal.GetDeclType(type)->AllowTemplateEvaluation() || !sdDeclTemplate::ExpandTemplate(finalPreprocessedBuffer, declText, GetTextLength()))
+		finalPreprocessedBuffer.Append(declText, GetTextLength());
+	//karin: include depences
+	const idStrList &includeDependencies = GetIncludeDependencies();
+	if(includeDependencies.Num() > 0)
+	{
+		sdStringBuilder_Heap buf;
+		for(int i = 0; i < includeDependencies.Num(); i++)
+		{
+			buf.Append("#include \"");
+			buf.Append(includeDependencies[i]);
+			buf.Append("\"\n");
+		}
+		buf.Append(finalPreprocessedBuffer.c_str());
+		finalPreprocessedBuffer = buf.c_str();
+	}
+	//Sys_Printf("OOO|%s|\n----------------\nPPP|%s|\n", idStr(declText,0,GetTextLength()).c_str(), finalPreprocessedBuffer.c_str());
+	self->Parse(finalPreprocessedBuffer.c_str(), finalPreprocessedBuffer.Length());
+
+	const idDeclType *dt = (const idDeclType *)declManagerLocal.GetDeclType((int)type);
+	if (dt->ref)
+		dt->ref->PostParse(self);
+#else
 	self->Parse(declText, GetTextLength());
+#endif
 
 	// free generated text
 	if (generatedDefaultText) {
@@ -2607,7 +3208,11 @@ const idDecl * idDeclManagerLocal::AddDeclDef(const char *defname, declType_t ty
 
     int numTypes = declManagerLocal.GetNumDeclTypes();
     for (int i = 0; i < numTypes; i++) {
+#ifdef _SPLASHDAMAGE
+        idDeclType *typeInfo = static_cast<idDeclType *>(declManagerLocal.GetDeclType(i));
+#else
         idDeclType *typeInfo = declManagerLocal.GetDeclType(i);
+#endif
 
         if (typeInfo && typeInfo->type == type) {
             typeInfoFound = typeInfo;
@@ -2706,6 +3311,50 @@ bool idDeclManagerLocal::EntityDefSet(const char *name, const char *key, const c
 		entityDef->dict.Delete(key);
 
 	return true;
+}
+
+void idDeclManagerLocal::ParseAllDecls_f(const idCmdArgs &args)
+{
+	if(args.Argc() < 2) {
+		common->Printf("Usage: %s <type>\n", args.Argv(0));
+		common->Printf("valid types: ");
+
+		for (int i = 0 ; i < declManagerLocal.declTypes.Num() ; i++) {
+			if (declManagerLocal.declTypes[i]) {
+				common->Printf("%s ", declManagerLocal.declTypes[i]->typeName.c_str());
+			}
+		}
+
+		common->Printf("\n");
+		return;
+	}
+
+	const char *type = args.Argv(1);
+	const idDeclType *declType = NULL;
+
+	for (int i = 0; i < declManagerLocal.declTypes.Num(); i++) {
+		if (declManagerLocal.declTypes[i] && declManagerLocal.declTypes[i]->typeName.Icmp(args.Argv(1)) == 0) {
+			declType = declManagerLocal.declTypes[i];
+			break;
+		}
+	}
+
+	if (!declType) {
+		common->Printf("unknown decl type '%s'\n", type);
+		return;
+	}
+
+	int numDecls = declManagerLocal.GetNumDecls(declType->type);
+	common->Printf("Parse: %s decls %d entries\n", type, numDecls);
+	soundSystem->SetMute(true);
+
+	for(int m = 0; m < numDecls; m++)
+	{
+		const idDecl *decl = declManagerLocal.DeclByIndex(declType->type, m, true);
+		common->Printf("%s\n", decl->GetName());
+	}
+
+	soundSystem->SetMute(false);
 }
 
 #ifdef _RAVEN // quake4 guide
@@ -2932,40 +3581,6 @@ const idDeclTable* idDeclManagerLocal::FindTable(const char* name, bool makeDefa
 	return static_cast<const idDeclTable*>(FindType(DECL_TABLE, name, makeDefault));
 }
 
-/*
-===================
-RegisterDeclSubFolder
-===================
-*/
-// jmarshall
-void idDeclManagerLocal::RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList, bool norecurse)
-{
-    // Find all
-    {
-        idFileList* list = fileSystem->ListFiles(folder, extension, true);
-
-        for (int d = 0; d < list->GetNumFiles(); d++)
-        {
-            fileList.Append(va("%s/%s", folder, list->GetFile(d)));
-        }
-
-        fileSystem->FreeFileList(list);
-    }
-
-	if(!norecurse)
-	{
-		idFileList* dirList = fileSystem->ListFiles(folder, "/", true);
-		for (int i = 0; i < dirList->GetNumFiles(); i++)
-		{
-			idStr dir = va("%s/%s", folder, dirList->GetFile(i));
-			RegisterDeclSubFolder(dir, extension, fileList);
-		}
-
-		fileSystem->FreeFileList(dirList);
-	}
-}
-// jmarshall end
-
 // jmarshall: Quake 4 Guide Support
 /*
 =========================
@@ -3066,12 +3681,45 @@ const idDeclEntityDef * idDeclManagerLocal::GetMapDef(const char *mapName, const
 	return mapDef;
 }
 
+#endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+/*
+===================
+RegisterDeclSubFolder
+===================
+*/
+// jmarshall
+void idDeclManagerLocal::RegisterDeclSubFolder(const char* folder, const char* extension, idList<idStr>& fileList, bool norecurse)
+{
+    // Find all
+    {
+        idFileList* list = fileSystem->ListFiles(folder, extension, true);
+
+        for (int d = 0; d < list->GetNumFiles(); d++)
+        {
+            fileList.Append(va("%s/%s", folder, list->GetFile(d)));
+        }
+
+        fileSystem->FreeFileList(list);
+    }
+
+	if(!norecurse)
+	{
+		idFileList* dirList = fileSystem->ListFiles(folder, "/", true);
+		for (int i = 0; i < dirList->GetNumFiles(); i++)
+		{
+			idStr dir = va("%s/%s", folder, dirList->GetFile(i));
+			RegisterDeclSubFolder(dir, extension, fileList);
+		}
+
+		fileSystem->FreeFileList(dirList);
+	}
+}
+
 void idDeclManagerLocal::RegisterDeclFolderWrapper( const char *folder, const char *extension, declType_t defaultType, bool unique, bool norecurse )
 {
-	(void)unique;
-
 	int i, j;
-	idStr fileName;
 	idDeclFolder *declFolder;
     idList<idStr> fileList;
 	idDeclFile *df;
@@ -3101,7 +3749,7 @@ void idDeclManagerLocal::RegisterDeclFolderWrapper( const char *folder, const ch
 	// load and parse decl files
     for ( i = 0; i < fileList.Num(); i++ )
 	{
-        fileName = fileList[i];
+        const idStr &fileName = fileList[i];
 
 		// check whether this file has already been loaded
 		for (j = 0; j < loadedFiles.Num(); j++) {
@@ -3119,8 +3767,13 @@ void idDeclManagerLocal::RegisterDeclFolderWrapper( const char *folder, const ch
 
 		df->LoadAndParse();
 	}
+	
+#ifdef _SPLASHDAMAGE //karin: parse binary declb files finally
+	RegisterDeclFolderWrapperBinary(declFolder, unique, norecurse);
+#endif
 }
 
+// jmarshall end
 #endif
 
 #ifdef _HUMANHEAD
@@ -3133,4 +3786,588 @@ const hhDeclBeam *		idDeclManagerLocal::BeamByIndex( int index, bool forceParse 
 {
 	return static_cast<const hhDeclBeam*>(DeclByIndex(DECL_BEAM, index, forceParse));
 }
+#endif
+
+#ifdef _SPLASHDAMAGE //karin: parse binary declb file and binary global token cache file
+void idDeclLocal::SetBinarySource( const byte* source, int length ) {
+	if(length > 0)
+	{
+		binarySource.SetNum(length);
+		memcpy(binarySource.Ptr(), source, length);
+	}
+	else
+		binarySource.Clear();
+}
+
+void idDeclLocal::GetBinarySource( byte*& source, int& length ) const {
+	if(binarySource.Num())
+	{
+		source = (byte *)Mem_Alloc(binarySource.Num());
+		memcpy(source, binarySource.Ptr(), binarySource.Num());
+		length = binarySource.Num();
+	}
+	else
+	{
+		source = NULL;
+		length = 0;
+	}
+}
+
+void idDeclLocal::FreeSourceBuffer( byte* buffer ) const {
+	Mem_Free(buffer);
+}
+
+bool idDeclLocal::HasBinaryBuffer() const {
+	return binarySource.Num() > 0;
+}
+
+const idStrList& idDeclLocal::GetIncludeDependencies() const
+{
+	return includeDependencies;
+}
+
+const idStrList* idDeclLocal::GetFileLevelIncludeDependencies() const {
+	return NULL; //&includeDependencies;
+}
+
+void idDeclLocal::AddIncludeDependency(const char *file)
+{
+	includeDependencies.AddUnique(file);
+}
+
+
+
+void idDeclManagerLocal::RegisterDeclFolderWrapperBinary( idDeclFolder *declFolder, bool unique, bool norecurse )
+{
+	(void)unique;
+
+	int i, j;
+	idStr fileName;
+    idList<idStr> fileList;
+	idDeclFile *df;
+
+	idStr binExt = declFolder->extension;
+	binExt.Append("b");
+	idStr binFolder;
+	Com_MakeBinaryFilename(binFolder, declFolder->folder, NULL);
+
+	// scan for decl files
+    RegisterDeclSubFolder(binFolder.c_str(), binExt.c_str(), fileList, norecurse);
+	idStr binDir;
+	Com_MakeBinaryFilename(binDir, NULL, NULL);
+
+	// load and parse decl files
+    for ( i = 0; i < fileList.Num(); i++ )
+	{
+        fileName = fileList[i].Right(fileList[i].Length() - binDir.Length() - 1);
+		fileName.StripTrailingOnce("b");
+
+		// check whether this file has already been loaded
+		for (j = 0; j < loadedFiles.Num(); j++) {
+			if (fileName.Icmp(loadedFiles[j]->fileName) == 0) {
+				break;
+			}
+		}
+
+		if (j < loadedFiles.Num()) {
+			//df = loadedFiles[j];
+			continue;
+		} else {
+			df = new idDeclFile(fileName, declFolder->defaultType);
+			loadedFiles.Append(df);
+		}
+
+		df->LoadAndParseBinary();
+	}
+}
+
+// Returns the system token cache
+idTokenCache& idDeclManagerLocal::GetGlobalTokenCache() {
+	return globalTokencache;
+}
+
+void idDeclManagerLocal::RegisterDeclType( idDeclTypeInterface* type ) {
+	qhandle_t h = GetDeclTypeHandle(type->GetName());
+	//Sys_Printf("RegisterDeclType(%s, %d, %d)\n", type->GetName(), type->GetHandle(), h);
+	type->type = h;
+	type->ref = type;
+	type->OnRegister(h);
+	RegisterDeclType(type->GetName(), h, NULL);
+
+	idDeclTypeInterface *declType = GetDeclType(h);
+	declType->ref = type;
+	//FinishedRegistering();
+}
+
+void idDeclManagerLocal::UnregisterDeclType( idDeclTypeInterface* declType ) {
+	int type = declType->type;
+
+	if (type >= declTypes.Num() || !declTypes[(int)type]) {
+		common->Warning("idDeclManager::UnregisterDeclType: type '%s' not be registered", declType->typeName.c_str());
+		return;
+	}
+
+	//Sys_Printf("UnregisterDeclType(%s, %d, %d)\n", declType->GetName(), declType->GetHandle(), declType->type);
+	int			i = type, j;
+	idDeclLocal *decl;
+
+	// free decls
+	for (j = 0; j < linearLists[i].Num(); j++) {
+		decl = linearLists[i][j];
+
+		if (decl->self != NULL) {
+			decl->self->FreeData();
+			delete decl->self;
+		}
+
+		if (decl->textSource) {
+			Mem_Free(decl->textSource);
+			decl->textSource = NULL;
+		}
+
+		delete decl;
+	}
+
+	linearLists[i].Clear();
+	hashTables[i].Free();
+
+	delete declTypes[type];
+	declTypes[type] = NULL;
+}
+
+void idDeclManagerLocal::RegisterDeclFolder( const char *folder, const char *extension ) {
+	// in game/decls/GameDeclIdentifiers.*
+	declType_t defaultType;
+	if (!idStr::Icmp(extension, ".def"))
+		defaultType = DECL_ENTITYDEF;
+	else if (!idStr::Icmp(extension, ".af"))
+		defaultType = DECL_AF;
+	else if (!idStr::Icmp(extension, ".effect"))
+		defaultType = DECL_EFFECT;
+	else if (!idStr::Icmp(extension, ".decal"))
+		defaultType = DECL_DECAL;
+	else if (!idStr::Icmp(extension, ".vscript"))
+		defaultType = GetDeclTypeFromName("vehicleDef");
+	else if (!idStr::Icmp(extension, ".qc"))
+		defaultType = GetDeclTypeFromName("quickChatDef");
+	else if (!idStr::Icmp(extension, ".txt"))
+		defaultType = GetDeclTypeFromName("mapInfoDef");
+	else if (!idStr::Icmp(extension, ".md"))
+		defaultType = GetDeclTypeFromName("mapInfoDef");
+	else if (!idStr::Icmp(extension, ".gui"))
+		defaultType = GetDeclTypeFromName("gui");
+	else if (!idStr::Icmp(extension, ".guitheme"))
+		defaultType = GetDeclTypeFromName("guiTheme");
+	else if (!idStr::Icmp(extension, ".binding"))
+		defaultType = GetDeclTypeFromName("keyBindings");
+	else if (!idStr::Icmp(extension, ".radialmenu"))
+		defaultType = GetDeclTypeFromName("radialMenuDef ");
+	else
+		defaultType = DECL_ENTITYDEF;
+	declManagerLocal.RegisterDeclFolder(folder, extension, defaultType);
+}
+
+void idDeclManagerLocal::UnregisterDeclFolder( const char *folder, const char *extension ) {
+	//Sys_Printf("UnregisterDeclFolder(%s, %s)\n", folder, extension);
+
+	int i, j;
+	idStr fileName;
+	idList<idStr> fileList;
+
+	// check whether this folder / extension combination already exists
+	for (i = 0; i < declFolders.Num(); i++) {
+		if (declFolders[i]->folder.Icmp(folder) == 0 && declFolders[i]->extension.Icmp(extension) == 0) {
+			break;
+		}
+	}
+
+	if (i >= declFolders.Num()) {
+		common->Warning("idDeclManager::UnregisterDeclFolder: folder '%s' and extension '%s' not be registered", folder, extension);
+		return;
+	}
+
+	declFolders.RemoveIndex(i);
+
+	// check whether this file has already been loaded
+	idList<idDeclFile *> rmList;
+	for (j = 0; j < loadedFiles.Num(); j++) {
+		if (loadedFiles[j]->fileName.IcmpPrefixPath(folder)) {
+			continue;
+		}
+		idStr ext;
+		loadedFiles[j]->fileName.ExtractFileExtension(ext);
+		ext.Insert('.', 0);
+		if (ext.Icmp(extension)) {
+			continue;
+		}
+
+		// free decl files
+		rmList.AddUnique(loadedFiles[j]);
+	}
+
+	for (j = 0; j < rmList.Num(); j++) {
+		loadedFiles.Remove(rmList[j]);
+	}
+	rmList.DeleteContents(true);
+}
+
+void idDeclManagerLocal::FinishedRegistering() {
+}
+
+void idDeclManagerLocal::ListType( const idCmdArgs &args, const char* typeName ) {
+}
+
+void idDeclManagerLocal::PrintType( const idCmdArgs &args, const char* typeName ) {
+}
+
+int idDeclManagerLocal::GetNumMaterials( void ) {
+	return declManagerLocal.GetNumDecls(DECL_MATERIAL);
+}
+
+void idDeclManagerLocal::CacheFromDict( const idDict& dict ) {
+	for(int i = 0; i < declTypes.Num(); i++)
+	{
+		const idDeclType *declType = declTypes[i];
+		if(declType && !declType->NotPrecached() && declType->type <= DECL_MAPDEF)
+		{
+			declType->CacheFromDict(dict);
+		}
+	}
+}
+
+const rvDeclEffect * idDeclManagerLocal::FindEffect( const char *name, bool makeDefault ) {
+	return static_cast<const rvDeclEffect*>(FindType(DECLTYPE_EFFECT, name, makeDefault));
+}
+
+idDeclTypeInterface* idDeclManagerLocal::GetDeclType( const char* typeName ) const {
+	for (int i = 0; i < declTypes.Num(); ++i) {
+		idDeclTypeInterface *declType = declTypes[i];
+		if(!declType)
+			continue;
+		if (!idStr::Cmp(declType->GetName(), typeName))
+			return declType;
+	}
+	return NULL;
+}
+
+idDeclTypeInterface* idDeclManagerLocal::GetDeclType( qhandle_t typeHandle ) const {
+	return declTypes[typeHandle];
+}
+
+qhandle_t idDeclManagerLocal::GetDeclTypeHandle( const char* typeName ) const {
+	// 1. Find if exists
+	for(int i = 0; i < declTypeTables.Num(); i++)
+	{
+		if(!idStr::Icmp(declTypeTables[i], typeName))
+			return i;
+	}
+	// 2. Find empty slot for inserting
+	for(int i = DECL_CUSTOMER_TYPE(0); i < declTypeTables.Num(); i++)
+	{
+		if(declTypeTables[i].IsEmpty())
+		{
+			declTypeTables[i] = typeName;
+			return i;
+		}
+	}
+	// 3. Append last
+	return declTypeTables.Append(typeName);
+}
+
+const char* idDeclManagerLocal::GetDeclTypeName( qhandle_t typeHandle ) const {
+	return declTypeTables[typeHandle].c_str();
+}
+
+void idDeclManagerLocal::AddDependency( const idDecl* decl, const idDecl* dependency ) {
+}
+
+void idDeclManagerLocal::AddDependency( const idDecl* decl, const char* fileName ) {
+}
+
+void idDeclManagerLocal::AddDependencies( const idDecl* decl, const idParser& parser ) {
+}
+
+static int ReadTokenCacheData(binaryTokenCache_t &header, idFile *file) {
+	header.compressedData.SetNum(header.compressedLength);
+	return file->Read(header.compressedData.Ptr(), header.compressedLength);
+}
+
+// huffman compression
+static int DecompressTokenCache(binaryTokenCache_t &header, idList<byte> &out) {
+	idCompressor *compressor;
+
+	compressor = idCompressor::AllocHuffman();
+	idFile_Memory f("globaltokens.cacheb", (const char *)header.compressedData.Ptr(), header.compressedLength); // FS_READ mode
+	compressor->Init(&f, false, 8);
+	out.SetNum(header.uncompressedLength * 2 + 2); // +2
+	header.uncompressedLength = compressor->Read(out.Ptr(), out.Num());
+	delete compressor;
+	return header.uncompressedLength;
+}
+
+bool idDeclManagerLocal::LoadGlobalTokenCache(void)
+{
+	int magic;
+	idFile *file;
+	idStr path;
+	Com_MakeBinaryFilename(path, NULL, GLOBALTOKENS_CACHEB);
+
+	common->Printf("Decompressing the global token cache '%s'...\n", path.c_str());
+	globalTokencache.Clear();
+
+	file = fileSystem->OpenFileRead(path);
+
+	if(!file)
+	{
+		common->Warning("Token cache file not exists: %s", path.c_str());
+		return false;
+	}
+
+	file->ReadInt(magic);
+	if(magic != CACHEB_MAGIC)
+	{
+		common->Warning("decl token cache : encountered unknown fileid");
+		fileSystem->CloseFile(file);
+		return false;
+	}
+
+	binaryTokenCache_t header;
+	file->ReadInt(header.version); // version == 2
+	if(header.version != CACHEB_VERSION)
+	{
+		common->Warning("decl token cache : wrong version (%i should be %i)", header.version, CACHEB_VERSION);
+		fileSystem->CloseFile(file);
+		return false;
+	}
+
+	file->ReadUnsignedInt(header.uncompressedLength);
+	file->ReadUnsignedInt(header.compressedLength);
+	ReadTokenCacheData(header, file);
+	//assert(file->Tell() == file->Length());
+	fileSystem->CloseFile(file);
+
+	// huffman compression
+	idList<byte> out;
+	unsigned int uncompressedLength = DecompressTokenCache(header, out);
+
+#if 0
+	int num;
+	fileSystem->WriteFile("globaltokens.cacheb.bin", &out[0], uncompressedLength);
+
+	file = fileSystem->OpenFileRead("globaltokens.cacheb.bin");
+	file->ReadInt(num);
+	common->Printf("tokens: %d\n", num);
+
+	idFile *os = fileSystem->OpenFileWrite("globaltokens.cacheb.txt");
+	idToken token;
+	for(int i = 0; i < num; i++)
+	{
+		file->ReadString(token);
+		char c;
+		file->ReadChar( c );
+		token.type = c;
+		file->ReadInt( token.subtype );
+
+		int linesCrossed, flags;
+		file->ReadInt( linesCrossed );
+
+		file->ReadInt( flags );
+
+		char whiteSpace;
+		file->ReadChar( whiteSpace );
+
+		os->Printf("%5d: |%s|%d,%d: %d 0x%X %d\n", i, token.c_str(), token.type, token.subtype, linesCrossed, flags, whiteSpace);
+		common->Printf("%5d: |%s|%d,%d: %d 0x%X %d\n", i, token.c_str(), token.type, token.subtype, linesCrossed, flags, whiteSpace);
+	}
+
+	fileSystem->CloseFile(os);
+	fileSystem->CloseFile(file);
+#endif
+
+	globalTokencache.ReadBuffer(&out[0], uncompressedLength);
+
+	common->Printf("%ziKb\n", globalTokencache.Allocated());
+#if 0
+	for(int i = 0; i < globalTokencache.Num(); i++)
+	{
+		printf("%5d: %s\n", i,globalTokencache[i].c_str());
+	}
+#endif
+
+	return true;
+}
+
+extern void OutputTextSource(idParser &src, sdStringBuilder_Heap &buf);
+void idDeclManagerLocal::DeclbToText_f(const idCmdArgs &args) {
+	idStr folder = GENERATED_PREFIX "/" GENERATED_DECLB;
+	const char *extension = "";
+	idFile *file;
+	idStr outPath = "";
+	if (args.Argc() > 1) {
+		outPath.Append(args.Argv(1));
+		outPath.Append("/");
+	}
+	if (args.Argc() > 2) {
+		folder.AppendPath(args.Argv(2));
+	}
+	soundSystem->SetMute(true);
+
+	idFileList* list = fileSystem->ListFilesTree(folder, extension, true);
+
+	for (int d = 0; d < list->GetNumFiles(); d++)
+	{
+		const char *path = list->GetFile(d);
+
+		file = fileSystem->OpenFileRead(path);
+
+		if(!file)
+		{
+			common->Warning("declb file can't load: %s", path);
+			continue;
+		}
+
+		binaryDecl_t header;
+		if (LoadBinaryDeclHeader(header, file) == -1) {
+			common->Warning("Decl binary read 0 entries: %s", path);
+			fileSystem->CloseFile(file);
+			continue;
+		}
+
+		sdStringBuilder_Heap buf;
+		for (int m = 0; m < header.num; ++m) {
+			binaryDeclEntry_t &entry = header.entries[m];
+			/*buf.Append(entry.type.c_str());
+			buf.Append(" ");
+			buf.Append(entry.name.c_str());
+			buf.Append(" {\n");*/
+
+			file->Seek(entry.offset, FS_SEEK_SET);
+			file->ReadUnsignedInt(entry.uncompressedLength);
+			file->ReadUnsignedInt(entry.compressedLength);
+			entry.data.SetNum(entry.compressedLength);
+			file->Read(entry.data.Ptr(), entry.compressedLength);
+			//file->Seek(pos, FS_SEEK_SET);
+
+			idList<byte> out;
+			DecompressDeclb(entry, out);
+
+			if(out[0] == 6 && !idStr::Cmpn((const char *)&out[4], LEXB_VERSION, 6)) // is binary lex: like idFile::ReadString() num:int32 chars[num]
+			{
+				idParser src;
+				src.LoadMemoryBinary(&out[0], entry.uncompressedLength, "<declbToText>", &declManagerLocal.globalTokencache);
+				src.SetFlags(DECL_LEXER_FLAGS);
+				OutputTextSource(src, buf);
+				buf.Append("\n");
+			}
+			else
+			{
+				buf.Append((const char *)entry.data.Ptr(), entry.uncompressedLength);
+				buf.Append("\n");
+			}
+
+			buf.Append("\n");
+		}
+
+		idStr out = va("%s%s", outPath.c_str(), path);
+		out.StripTrailingOnce("b");
+		fileSystem->WriteFile(out, buf.c_str(), buf.Length());
+		common->Printf("Output declb to text: %s\n", out.c_str());
+
+		fileSystem->CloseFile(file);
+	}
+
+	fileSystem->FreeFileList(list);
+	soundSystem->SetMute(false);
+}
+
+void idDeclManagerLocal::ExportDeclSource(const char *savePath, const char *target, bool expand) {
+	idStr outPath;
+	if (savePath && savePath[0]) {
+		outPath.Append(savePath);
+	}
+
+	soundSystem->SetMute(true);
+
+	const idDeclFile *df;
+	for (int d = 0; d < declManagerLocal.loadedFiles.Num(); d++)
+	{
+		df = declManagerLocal.loadedFiles[d];
+		if(target && df->fileName.Icmp(target))
+			continue;
+
+		idStr out = outPath;
+		out.AppendPath(df->fileName);
+		idFile *file = fileSystem->OpenFileWrite(out);
+
+		int c = 0;
+		for (idDeclLocal *decl = df->decls; decl; decl = decl->nextInFile) {
+			char *declText = (char *) _alloca((decl->GetTextLength() + 1) * sizeof(char));
+			decl->GetText(declText);
+			idStr finalPreprocessedBuffer;
+			if (!expand || !GetDeclType(decl->GetType())->AllowTemplateEvaluation() || !sdDeclTemplate::ExpandTemplate(finalPreprocessedBuffer, declText, decl->GetTextLength()))
+				finalPreprocessedBuffer.Append(declText, decl->GetTextLength());
+			const idStrList &includeDependencies = decl->GetIncludeDependencies();
+			if(includeDependencies.Num() > 0)
+			{
+				sdStringBuilder_Heap buf;
+				for(int i = 0; i < includeDependencies.Num(); i++)
+				{
+					buf.Append("#include \"");
+					buf.Append(includeDependencies[i]);
+					buf.Append("\"\n");
+				}
+				buf.Append(finalPreprocessedBuffer.c_str());
+				finalPreprocessedBuffer = buf.c_str();
+			}
+
+			sdStringBuilder_Heap buf;
+			if(expand)
+			{
+				idParser src;
+				idStr tmpPath = df->fileName;
+				tmpPath.SetFileExtension(".exportDeclSource"); //karin: using same path for find include files
+				src.LoadMemory(finalPreprocessedBuffer.c_str(), finalPreprocessedBuffer.Length(), tmpPath.c_str());
+				src.SetFlags(DECL_LEXER_FLAGS);
+				src.SkipUntilString("{");
+				idToken token;
+				token = "{";
+				src.UnreadToken(&token);
+
+				buf.Append(declManager->GetDeclNameFromType(decl->type));
+				buf.Append(" ");
+				buf.Append(decl->GetName());
+				buf.Append(" ");
+				OutputTextSource(src, buf);
+			}
+			else
+			{
+				buf.Append("// ");
+				buf.Append(va("%d ", c));
+				buf.Append(decl->GetName());
+				buf.Append(": BEGIN\n");
+				buf.Append(finalPreprocessedBuffer);
+				buf.Append("\n// ");
+				buf.Append(decl->GetName());
+				buf.Append(": END\n");
+			}
+
+			buf.Append("\n\n");
+			file->Write(buf.c_str(), buf.Length());
+			c++;
+		}
+		common->Printf("Output %d decl source to file: %s\n", c, out.c_str());
+		fileSystem->CloseFile(file);
+	}
+
+	soundSystem->SetMute(false);
+}
+
+void idDeclManagerLocal::ExportDeclSource_f(const idCmdArgs &args) {
+	declManagerLocal.ExportDeclSource(args.Argc() > 1 ? args.Argv(1) : NULL, args.Argc() > 2 ? args.Argv(2) : NULL, false);
+}
+
+void idDeclManagerLocal::ExportDeclExpandSource_f(const idCmdArgs &args) {
+	declManagerLocal.ExportDeclSource(args.Argc() > 1 ? args.Argv(1) : NULL, args.Argc() > 2 ? args.Argv(2) : NULL, true);
+}
+
 #endif

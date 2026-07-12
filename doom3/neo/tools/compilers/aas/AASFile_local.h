@@ -66,7 +66,24 @@ class idAASFileLocal : public idAASFile
 		bool						Load(const idStr &fileName, unsigned int mapFileCRC);
 		bool						Write(const idStr &fileName, unsigned int mapFileCRC);
 
+#ifdef _SPLASHDAMAGE //karin: parse binary aasb file
+		bool						LoadBinary(const idStr &fileName, unsigned int mapFileCRC);
+		bool						ParseIndexBinary(idFile *file, idList<aasIndex_t> &indexes);
+		bool						ParsePlanesBinary(idFile *file);
+		bool						ParseVerticesBinary(idFile *file);
+		bool						ParseEdgesBinary(idFile *file);
+		bool						ParseReachabilitiesBinary(idFile *file);
+		bool						ParseAreasBinary(idFile *file);
+		bool						ParseNodesBinary(idFile *file);
+		bool						ParsePortalsBinary(idFile *file);
+		bool						ParseClustersBinary(idFile *file);
+		bool						ParseObstaclePVSsBinary(idFile *file);
+		bool						ParseReachabilityNamesBinary(idFile *file);
+
+		size_t						MemorySize(void) const;
+#else
 		int							MemorySize(void) const;
+#endif
 		void						ReportRoutingEfficiency(void) const;
 		void						Optimize(void);
 		void						LinkReversedReachability(void);
@@ -88,28 +105,67 @@ class idAASFileLocal : public idAASFile
 		bool						ParsePortals(idLexer &src);
 		bool						ParseClusters(idLexer &src);
 #ifdef _RAVEN
-	virtual void					ClearTactical(void) { }
+		virtual void					ClearTactical(void) { }
 
-	virtual	int						GetNumFeatureIndexes(void) const { return featureIndexes.Num(); }
-	virtual	aasIndex_t& GetFeatureIndex(int index) { return featureIndexes[index]; }
-	virtual int						AppendFeatureIndex(aasIndex_t& featureIdx) { return featureIndexes.Append(featureIdx); }
+		virtual	int						GetNumFeatureIndexes(void) const { return featureIndexes.Num(); }
+		virtual	aasIndex_t& GetFeatureIndex(int index) { return featureIndexes[index]; }
+		virtual int						AppendFeatureIndex(aasIndex_t& featureIdx) { return featureIndexes.Append(featureIdx); }
 
-	virtual	int						GetNumFeatures(void) const { return features.Num(); }
-	virtual	aasFeature_t& GetFeature(int index) { return features[index]; }
-	virtual int						AppendFeature(aasFeature_t& cluster) { return features.Append(cluster); }
-	virtual bool					IsDummyFile( unsigned int mapFileCRC ) { (void)mapFileCRC; return false; }
-	virtual size_t					GetMemorySize( void ) {
-		return MemorySize();
-	}
+		virtual	int						GetNumFeatures(void) const { return features.Num(); }
+		virtual	aasFeature_t& GetFeature(int index) { return features[index]; }
+		virtual int						AppendFeature(aasFeature_t& cluster) { return features.Append(cluster); }
+		virtual bool					IsDummyFile( unsigned int mapFileCRC ) { (void)mapFileCRC; return false; }
+		virtual size_t					GetMemorySize( void ) {
+			return MemorySize();
+		}
+#endif
+#ifdef _SPLASHDAMAGE
+		virtual int					FindReachabilityByName( const char *name ) const;
+		virtual bool				PushPointIntoArea( int areaNum, idVec3 &point ) const;
 #endif
 
 	private:
 		int							BoundsReachableAreaNum_r(int nodeNum, const idBounds &bounds, const int areaFlags, const int excludeTravelFlags) const;
+		int							BoundsReachableAreaNum_r(const idBounds *bounds, int nodeNum, int areaFlags, int excludeTravelFlags) const;
 		void						MaxTreeDepth_r(int nodeNum, int &depth, int &maxDepth) const;
 		int							MaxTreeDepth(void) const;
 		int							AreaContentsTravelFlags(int areaNum) const;
 		idVec3						AreaReachableGoal(int areaNum) const;
 		int							NumReachabilities(void) const;
+#ifdef _SPLASHDAMAGE
+		void						LinkReachability(void);
+		void						FlagNoPushAreas(void);
+
+		// sample
+		struct floorEdgeSplitPoint_t {
+			idVec3	point;
+			float	distance;
+			int		edgeIndex;
+		};
+		struct bestReachableArea_t {
+			float	v0;
+			float	v1;
+			int		areaFlags;
+			int		excludeTravelFlags;
+			int		areaNum1;
+			float	distance1;
+			int		areaNum2;
+			float	distance2;
+		};
+
+		virtual bool				TraceHeight( aasTraceHeight_t &trace, const idVec3 &start, const idVec3 &end ) const;
+		virtual bool				TraceFloor( aasTraceFloor_t &trace, const idVec3 &start, int startAreaNum, const idVec3 &end, int endAreaNum, int travelFlags ) const;
+		bool						SplitFloorWinding(int areaNum, const idPlane *plane, float retDists[], int retSides[]) const;
+		bool						GetFloorEdgeSplitPoints(floorEdgeSplitPoint_t *minSplitPoint, floorEdgeSplitPoint_t *maxSplitPoint, int areaNum, const idPlane *toLeftSplitPlane, const idPlane *toForwardRefPlane) const;
+		float						GetFloorDistance(int areaNum, const idPlane *plane, const idVec3 *origin_a4, float minDist_a5, float maxDist_a6) const;
+		void						BoundsBestReachableAreaNum(const idBounds *bounds, const idVec3 *origin, int nodeNum, const idPlane *plane, bestReachableArea_t *bestReachableArea) const;
+		void						PointBestReachableAreaNum(const idVec3 *origin, bestReachableArea_t *bestReachableArea) const;
+
+		bool						Trace(aasTrace_t *trace_a2, const idVec3 *start_a3, const idVec3 *end_a4) const;
+
+		// offset is 103 * 4 = 412
+		idList<int>					searchAreaList; // search area index
+#endif
 };
 
 #endif /* !__AASFILELOCAL_H__ */

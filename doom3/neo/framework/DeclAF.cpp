@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
+#ifdef _SPLASHDAMAGE
+#include "framework/DeclParseHelper.h"
+#endif
+
 /*
 ===============================================================================
 
@@ -54,7 +58,11 @@ idAFVector::idAFVector(void)
 idAFVector::Parse
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idAFVector::Parse(idParser &src)
+#else
 bool idAFVector::Parse(idLexer &src)
+#endif
 {
 	idToken token;
 
@@ -825,7 +833,11 @@ size_t idDeclAF::Size(void) const
 idDeclAF::ParseContents
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idDeclAF::ParseContents(idParser &src, int &c) const
+#else
 bool idDeclAF::ParseContents(idLexer &src, int &c) const
+#endif
 {
 	idToken token;
 	idStr str;
@@ -849,7 +861,11 @@ bool idDeclAF::ParseContents(idLexer &src, int &c) const
 idDeclAF::ParseBody
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idDeclAF::ParseBody(idParser &src)
+#else
 bool idDeclAF::ParseBody(idLexer &src)
+#endif
 {
 	bool hasJoint = false;
 	idToken token;
@@ -1045,7 +1061,11 @@ bool idDeclAF::ParseBody(idLexer &src)
 idDeclAF::ParseFixed
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idDeclAF::ParseFixed(idParser &src)
+#else
 bool idDeclAF::ParseFixed(idLexer &src)
+#endif
 {
 	idToken token;
 	idDeclAF_Constraint *constraint = new idDeclAF_Constraint;
@@ -1085,7 +1105,11 @@ bool idDeclAF::ParseFixed(idLexer &src)
 idDeclAF::ParseBallAndSocketJoint
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idDeclAF::ParseBallAndSocketJoint(idParser &src)
+#else
 bool idDeclAF::ParseBallAndSocketJoint(idLexer &src)
+#endif
 {
 	idToken token;
 	idDeclAF_Constraint *constraint = new idDeclAF_Constraint;
@@ -1175,7 +1199,11 @@ bool idDeclAF::ParseBallAndSocketJoint(idLexer &src)
 idDeclAF::ParseUniversalJoint
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idDeclAF::ParseUniversalJoint(idParser &src)
+#else
 bool idDeclAF::ParseUniversalJoint(idLexer &src)
+#endif
 {
 	idToken token;
 	idDeclAF_Constraint *constraint = new idDeclAF_Constraint;
@@ -1260,7 +1288,11 @@ bool idDeclAF::ParseUniversalJoint(idLexer &src)
 idDeclAF::ParseHinge
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idDeclAF::ParseHinge(idParser &src)
+#else
 bool idDeclAF::ParseHinge(idLexer &src)
+#endif
 {
 	idToken token;
 	idDeclAF_Constraint *constraint = new idDeclAF_Constraint;
@@ -1329,7 +1361,11 @@ bool idDeclAF::ParseHinge(idLexer &src)
 idDeclAF::ParseSlider
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idDeclAF::ParseSlider(idParser &src)
+#else
 bool idDeclAF::ParseSlider(idLexer &src)
+#endif
 {
 	idToken token;
 	idDeclAF_Constraint *constraint = new idDeclAF_Constraint;
@@ -1377,7 +1413,11 @@ bool idDeclAF::ParseSlider(idLexer &src)
 idDeclAF::ParseSpring
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idDeclAF::ParseSpring(idParser &src)
+#else
 bool idDeclAF::ParseSpring(idLexer &src)
+#endif
 {
 	idToken token;
 	idDeclAF_Constraint *constraint = new idDeclAF_Constraint;
@@ -1441,7 +1481,11 @@ bool idDeclAF::ParseSpring(idLexer &src)
 idDeclAF::ParseSettings
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idDeclAF::ParseSettings(idParser &src)
+#else
 bool idDeclAF::ParseSettings(idLexer &src)
+#endif
 {
 	idToken token;
 
@@ -1552,11 +1596,21 @@ bool idDeclAF::Parse(const char *text, const int textLength)
 #endif
 {
 	int i, j;
+#ifdef _SPLASHDAMAGE //karin: using idParser instead of idLexer
+	idParser src;
+#else
 	idLexer src;
+#endif
 	idToken token;
 
+#ifdef _SPLASHDAMAGE
+	src.SetFlags(DECL_LEXER_FLAGS);
+	//src.LoadMemory( text, textLength, GetFileName(), GetLineNum() );
+	sdDeclParseHelper declHelper( this, text, textLength, src );
+#else
 	src.LoadMemory(text, textLength, GetFileName(), GetLineNum());
 	src.SetFlags(DECL_LEXER_FLAGS);
+#endif
 	src.SkipUntilString("{");
 
 	while (src.ReadToken(&token)) {
@@ -1887,3 +1941,15 @@ idDeclAF::~idDeclAF(void)
 	bodies.DeleteContents(true);
 	constraints.DeleteContents(true);
 }
+
+#ifdef _SPLASHDAMAGE
+void idDeclAF::CacheFromDict( const idDict& dict ) {
+	const idKeyValue* kv = NULL;
+
+	while( kv = dict.MatchPrefix( "skin", kv ) ) {
+		if ( kv->GetValue().Length() ) {
+			declAFType[ kv->GetValue() ];
+		}
+	}
+}
+#endif

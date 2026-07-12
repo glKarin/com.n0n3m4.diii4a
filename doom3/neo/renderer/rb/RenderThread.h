@@ -1,7 +1,7 @@
 #ifndef _RENDERTHREAD_H
 #define _RENDERTHREAD_H
 
-#include "QueueList.h"
+#include "../containers/QueueList.h"
 
 #define RENDER_THREAD_NAME "render_thread"
 
@@ -66,7 +66,7 @@ public:
     void                    SyncState( void );
 
 private:
-    idQueueList<ActuallyLoadImage_data_t>	imagesAlloc; //List for the backend thread
+    idQueueList<ActuallyLoadImage_data_t> imagesAlloc; //List for the backend thread
     idQueueList<idImage *>	imagesPurge; //List for the backend thread
 	int						requestState;
 

@@ -1082,7 +1082,12 @@ void R_MakeShadowFrustums(idRenderLightLocal *light)
 {
 	int		i, j;
 
-	if (light->parms.pointLight) {
+#ifdef _SPLASHDAMAGE
+	if (light->parms.flags.pointLight)
+#else
+	if (light->parms.pointLight)
+#endif
+	{
 #if 0
 		idVec3	adjustedRadius;
 

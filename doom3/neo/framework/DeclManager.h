@@ -31,8 +31,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #define DECL_PROGRAM_GENERATED_DIRECTORY "_program_generated"
 
-#ifdef _RAVEN // quake4 new decl
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
 class rvDeclEffect;
+#endif
+#ifdef _RAVEN // quake4 new decl
 class rvDeclPlayback;
 class rvDeclLipSync;
 class rvDeclMatType;
@@ -77,15 +79,37 @@ typedef enum {
 	DECL_SKIN,
 	DECL_SOUND,
 	DECL_ENTITYDEF,
+#ifdef _SPLASHDAMAGE //karin: sync with declIdentifierType_t
+	DECL_EFFECT,
+	DECL_AF,
+	DECL_ATMOSPHERE,
+	DECL_AMBIENTCUBEMAP,
+	DECL_STUFFTYPE,
+	DECL_SURFACETYPE,
+	DECL_SURFACETYPEMAP,
+	DECL_RENDERPROGRAM,
+	DECL_RENDERBINDING,
+	DECL_TEMPLATE,
+	DECL_IMPOSTER,
+	DECL_IMPOSTERGENERATOR,
+	DECL_LOCSTR,
+	DECL_DECAL,
+	DECL_MODELEXPORT,
+	DECL_FONT,
+#endif
 	DECL_MODELDEF,
 	DECL_FX,
 	DECL_PARTICLE,
+#if !defined(_SPLASHDAMAGE) //karin: sync with declIdentifierType_t
 	DECL_AF,
+#endif
 	DECL_PDA,
 	DECL_VIDEO,
 	DECL_AUDIO,
 	DECL_EMAIL,
+#if !defined(_SPLASHDAMAGE) //karin: sync with declIdentifierType_t
 	DECL_MODELEXPORT,
+#endif
 	DECL_MAPDEF,
 
 	// new decl types can be added here
@@ -93,12 +117,12 @@ typedef enum {
 #ifdef _RAVEN // quake4 new decl
 	// RAVEN BEGIN
 // jscott: added new decls
-        DECL_MATERIALTYPE,
-        DECL_LIPSYNC,
-        DECL_PLAYBACK,
-        DECL_EFFECT,
+    DECL_MATERIALTYPE,
+    DECL_LIPSYNC,
+    DECL_PLAYBACK,
+    DECL_EFFECT,
 // rjohnson: camera is now contained in a def for frame commands
-        DECL_CAMERADEF,
+    DECL_CAMERADEF,
 // jscott: don't use these
 //      DECL_FX,
 //      DECL_PARTICLE,
@@ -111,8 +135,67 @@ typedef enum {
 #ifdef _HUMANHEAD
     DECL_BEAM, // HUMANHEAD CJR
 #endif
+#ifdef _SPLASHDAMAGE //karin: increment num decl types, but I think it should be dynamic-length
+	DECL_MAX_TYPES			= 96
+#else
 	DECL_MAX_TYPES			= 32
-} declType_t;
+#endif
+}
+#ifdef _SPLASHDAMAGE
+;
+typedef qhandle_t declType_t;
+#else
+declType_t;
+#endif
+
+#ifdef _SPLASHDAMAGE
+extern const char* declTableIdentifier;
+extern const char* declMaterialIdentifier;
+extern const char* declSkinIdentifier;
+extern const char* declSoundShaderIdentifier;
+extern const char* declEntityDefIdentifier;
+extern const char* declEffectsIdentifier;
+extern const char* declAFIdentifier;
+extern const char* declAtmosphereIdentifier;
+extern const char* declAmbientCubeMapIdentifier;
+extern const char* declStuffTypeIdentifier;
+extern const char* declDecalIdentifier;
+extern const char* declSurfaceTypeIdentifier;
+extern const char* declSurfaceTypeMapIdentifier;
+extern const char* declRenderProgramIdentifier;
+extern const char* declRenderBindingIdentifier;
+extern const char* declTemplateIdentifier;
+extern const char* declImposterIdentifier;
+extern const char* declImposterGeneratorIdentifier;
+extern const char* declLocStrIdentifier;
+extern const char* declModelExportIdentifier;
+
+typedef enum declIdentifierType_e {
+    DECLTYPE_TABLE,
+    DECLTYPE_MATERIAL,
+    DECLTYPE_SKIN,
+    DECLTYPE_SOUND,
+    DECLTYPE_ENTITYDEF,
+    DECLTYPE_EFFECT,
+    DECLTYPE_AF,
+    DECLTYPE_ATMOSPHERE,
+    DECLTYPE_AMBIENTCUBEMAP,
+    DECLTYPE_STUFFTYPE,
+    DECLTYPE_SURFACETYPE,
+    DECLTYPE_SURFACETYPEMAP,
+    DECLTYPE_RENDERPROGRAM,
+    DECLTYPE_RENDERBINDING,
+    DECLTYPE_TEMPLATE,
+    DECLTYPE_IMPOSTER,
+    DECLTYPE_IMPOSTERGENERATOR,
+    DECLTYPE_LOCSTR,
+    DECLTYPE_DECAL,
+    DECLTYPE_MODELEXPORT,
+    DECLTYPE_FONT,
+} declIdentifierType_t;
+
+extern const char* declIdentifierList[];
+#endif
 
 typedef enum {
 	DS_UNPARSED,
@@ -120,12 +203,24 @@ typedef enum {
 	DS_PARSED
 } declState_t;
 
+#ifdef _SPLASHDAMAGE
+const int DECL_LEXER_FLAGS	=	LEXFL_NOSTRINGCONCAT				// multiple strings seperated by whitespaces are not concatenated
+								| LEXFL_NOSTRINGESCAPECHARS			// no escape characters inside strings
+//								| LEXFL_NODOLLARPRECOMPILE			// don't use the $ sign for precompilation
+								| LEXFL_ALLOWPATHNAMES				// allow path seperators in names
+								| LEXFL_ALLOWMULTICHARLITERALS		// allow multi character literals
+								| LEXFL_ALLOWBACKSLASHSTRINGCONCAT	// allow multiple strings seperated by '\' to be concatenated
+//								| LEXFL_NOFATALERRORS				// just set a flag instead of fatal erroring
+								| LEXFL_ALLOWRAWSTRINGBLOCKS		// allow raw text blocks embraced with <% %>
+								;
+#else
 const int DECL_LEXER_FLAGS	=	LEXFL_NOSTRINGCONCAT |				// multiple strings seperated by whitespaces are not concatenated
                                         LEXFL_NOSTRINGESCAPECHARS |			// no escape characters inside strings
                                         LEXFL_ALLOWPATHNAMES |				// allow path seperators in names
                                         LEXFL_ALLOWMULTICHARLITERALS |		// allow multi character literals
                                         LEXFL_ALLOWBACKSLASHSTRINGCONCAT |	// allow multiple strings seperated by '\' to be concatenated
                                         LEXFL_NOFATALERRORS;				// just set a flag instead of fatal erroring
+#endif
 
 
 class idDeclBase
@@ -145,6 +240,12 @@ class idDeclBase
 		virtual const char 	*GetFileName(void) const = 0;
 		virtual void			GetText(char *text) const = 0;
 		virtual int				GetTextLength(void) const = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual void			SetBinarySource( const byte* source, int length ) = 0;
+	    virtual void			GetBinarySource( byte*& source, int& length ) const = 0;
+    	virtual void			FreeSourceBuffer( byte* buffer ) const = 0;
+	    virtual bool			HasBinaryBuffer() const = 0;
+#endif
 		virtual void			SetText(const char *text) = 0;
 		virtual bool			ReplaceSourceFileText(void) = 0;
 		virtual bool			SourceFileChanged(void) const = 0;
@@ -161,6 +262,10 @@ class idDeclBase
 		virtual size_t			Size(void) const = 0;
 		virtual void			List(void) const = 0;
 		virtual void			Print(void) const = 0;
+#ifdef _SPLASHDAMAGE
+		virtual const idStrList&	GetIncludeDependencies() const = 0;
+    	virtual const idStrList*	GetFileLevelIncludeDependencies() const = 0;
+#endif
 };
 
 #ifdef _RAVEN // quake4 guide
@@ -282,6 +387,19 @@ class idDecl
 			base->SetText(text);
 		}
 
+#ifdef _SPLASHDAMAGE
+		// Sets new binary source data.
+		void					SetBinarySource( const byte* source, int length )  { base->SetBinarySource( source, length ); }
+
+		// Retrieve binary source data. FreeSourceBuffer must be called when the client is finished with source.
+		void					GetBinarySource( byte*& source, int& length ) const { base->GetBinarySource( source, length ); }
+
+		// Frees the buffer allocated by a previous call to GetBinarySource.
+		void					FreeSourceBuffer( byte* source ) const { base->FreeSourceBuffer( source ); }
+
+		bool					HasBinaryBuffer() const { return base->HasBinaryBuffer(); }
+#endif
+
 		// Saves out new text for the decl.
 		// Used by decl editors to replace the decl text in the source file.
 		bool					ReplaceSourceFileText(void) {
@@ -362,6 +480,10 @@ class idDecl
 		virtual void			Print(void) const {
 			base->Print();
 		}
+#ifdef _SPLASHDAMAGE
+		virtual const idStrList&	GetIncludeDependencies() const { return base->GetIncludeDependencies(); }
+		virtual const idStrList*	GetFileLevelIncludeDependencies() const { return base->GetFileLevelIncludeDependencies(); }
+#endif
 
 	public:
 		idDeclBase 			*base;
@@ -373,6 +495,385 @@ ID_INLINE idDecl *idDeclAllocator(void)
 {
 	return new type;
 }
+
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idDeclLocal
+============
+*/
+class idDeclLocal;
+
+class idDeclTypeInterface
+{
+public:
+    typedef void ( *pfnOnPostParse )( idDecl* decl );
+
+    virtual						~idDeclTypeInterface( void ) { }
+
+    virtual bool				SkipChecksum( void ) const = 0;
+    virtual bool				AllowTemplateEvaluation( void ) const = 0;
+    virtual bool				SkipParsing( void ) const = 0;
+    virtual bool				NotPrecached( void ) const = 0;
+    virtual bool				AlwaysGenerateBinary( void ) const = 0;
+    virtual bool				UsePrivateTokens( void ) const = 0;
+    virtual bool				WriteBinary( void ) const = 0;
+    virtual bool				NeverStoreBinary( void ) const = 0;
+
+    virtual void				OnRegister( qhandle_t handle ) = 0;
+    virtual qhandle_t			GetHandle( void ) const = 0;
+
+    virtual idDecl*				Alloc( void ) = 0;
+    virtual void				OnReload( idDecl* decl ) const = 0;
+    virtual idDecl*				Create( const char *name, const char *fileName ) const = 0;
+    virtual const idDecl*		FindByIndex( int index, bool forceParse = true ) const = 0;
+    virtual const idDecl*		Find( const char* name, bool makeDefault = true ) const = 0;
+    virtual int					Num( void ) const = 0;
+    virtual const char*			GetName( void ) const = 0;
+    virtual void				CacheFromDict( const idDict& dict ) const = 0;
+    virtual bool				CanCacheFromDict() const = 0;
+    virtual void				PostParse( idDecl* decl ) const = 0;
+
+    virtual void				RegisterPostParse( pfnOnPostParse postParse ) const = 0;
+	virtual void				UnregisterPostParse( pfnOnPostParse postParse ) const = 0;
+
+#ifdef _SPLASHDAMAGE
+	public:
+		idStr					typeName;
+		declType_t				type;
+		idDecl *(*allocator)(void);
+		idDeclTypeInterface *ref; // from game
+#endif
+};
+
+
+/*
+============
+idDeclType
+============
+*/
+class idDeclType : public idDeclTypeInterface
+{
+public:
+    idDeclType( void );
+    virtual						~idDeclType( void ) {}
+
+    virtual void				OnRegister( qhandle_t handle );
+    virtual qhandle_t			GetHandle( void ) const
+    {
+        return declTypeHandle;
+    }
+
+    virtual idDecl*				Create( const char *name, const char *fileName ) const;
+    virtual const idDecl*		FindByIndex( int index, bool forceParse = true ) const;
+    virtual const idDecl*		Find( const char* name, bool makeDefault = true ) const;
+    virtual int					Num( void ) const;
+
+#ifdef _SPLASHDAMAGE //karin: for compat
+	virtual bool				SkipChecksum( void ) const;
+	virtual bool				AllowTemplateEvaluation( void ) const;
+	virtual bool				SkipParsing( void ) const;
+	virtual bool				NotPrecached( void ) const;
+	virtual bool				AlwaysGenerateBinary( void ) const;
+	virtual bool				UsePrivateTokens( void ) const;
+	virtual bool				WriteBinary( void ) const;
+	virtual bool				NeverStoreBinary( void ) const;
+
+	virtual idDecl*				Alloc( void );
+	virtual void				OnReload( idDecl* decl ) const;
+	virtual const char*			GetName( void ) const;
+	virtual void				CacheFromDict( const idDict& dict ) const;
+	virtual bool				CanCacheFromDict() const;
+	virtual void				PostParse( idDecl* decl ) const;
+
+	virtual void				RegisterPostParse( pfnOnPostParse postParse ) const;
+	virtual void				UnregisterPostParse( pfnOnPostParse postParse ) const;
+#endif
+private:
+    qhandle_t					declTypeHandle;
+};
+
+
+/*
+============
+sdDeclInfo
+============
+*/
+enum declInfoFlags_e {
+    DIF_NONE						= 0,
+    DIF_ALLOW_TEMPLATES 			= BITT< 0 >::VALUE,		// allow decl template evaluation
+    DIF_SKIP_PARSING				= BITT< 1 >::VALUE,		// don't parse text when touched
+    DIF_NOT_PRECACHED				= BITT< 2 >::VALUE,		// not explicitly pre-cached; always write during binary builds
+    DIF_SKIP_CHECKSUM				= BITT< 3 >::VALUE,		// not checksummed for pure
+    DIF_ALWAYS_GENERATE_BINARY		= BITT< 4 >::VALUE,		// always generate binary data, even when com_writeBinaryDecls is disabled
+    DIF_USE_PRIVATE_TOKENS			= BITT< 5 >::VALUE,		// don't use the global binary token pool
+    DIF_WRITE_BINARY				= BITT< 6 >::VALUE,		// allow writing of binary data when com_writeBinaryDecls is enabled
+    DIF_NEVER_STORE_BINARY			= BITT< 7 >::VALUE,		// never store text or binary data when com_writeBinaryDecls is enabled
+};
+
+class sdDeclInfo
+{
+public:
+    static const int MAX_DECLINFO_STRING = 256;
+    typedef void ( *pfnCacheFromDict )( const idDict& dict );
+    typedef void ( *pfnOnReload )( idDecl* );
+    typedef void ( *pfnOnPostParse )( idDecl* );
+
+    sdDeclInfo( const char* typeName, int flags = DIF_ALLOW_TEMPLATES, pfnCacheFromDict cacheFromDict = NULL, pfnOnReload onReload = NULL );
+
+    const char*					GetTypeName( void ) const
+    {
+        return _typeName;
+    }
+    pfnCacheFromDict			CacheFromDict( void ) const
+    {
+        return _cacheFromDictFunction;
+    }
+    pfnOnReload					OnReload( void ) const
+    {
+        return _onReload;
+    }
+
+    bool						SkipChecksum( void ) const
+    {
+        return ( _flags & DIF_SKIP_CHECKSUM ) != 0;
+    }
+    bool						AllowTemplateEvaluation( void ) const
+    {
+        return ( _flags & DIF_ALLOW_TEMPLATES ) != 0;
+    }
+    bool						SkipParsing( void ) const
+    {
+        return ( _flags & DIF_SKIP_PARSING ) != 0;
+    }
+    bool						NotPrecached( void ) const
+    {
+        return ( _flags & DIF_NOT_PRECACHED ) != 0;
+    }
+    bool						AlwaysGenerateBinary( void ) const
+    {
+        return ( _flags & DIF_ALWAYS_GENERATE_BINARY ) != 0;
+    }
+    bool						UsePrivateTokens( void ) const
+    {
+        return ( _flags & DIF_USE_PRIVATE_TOKENS ) != 0;
+    }
+    bool						WriteBinary( void ) const
+    {
+        return ( _flags & DIF_WRITE_BINARY ) != 0;
+    }
+    bool						NeverStoreBinary( void ) const
+    {
+        return ( _flags & DIF_NEVER_STORE_BINARY ) != 0;
+    }
+
+    // jrad - postParse callbacks
+    void						RegisterPostParse( pfnOnPostParse postParse ) const
+    {
+        assert( postParse != NULL );
+        _onPostParse.AddUnique( postParse );
+    }
+
+    void						UnregisterPostParse( pfnOnPostParse postParse ) const
+    {
+        assert( postParse );
+        _onPostParse.Remove( postParse );
+    }
+    void						PostParse( idDecl* decl ) const
+    {
+        for( int i = 0; i < _onPostParse.Num(); i++ ) {
+            assert( _onPostParse[ i ] != NULL );
+            _onPostParse[ i ]( decl );
+        }
+    }
+private:
+    int									_flags;
+    char								_typeName[ MAX_DECLINFO_STRING ];
+    pfnCacheFromDict					_cacheFromDictFunction;
+    pfnOnReload							_onReload;
+    mutable idList<	pfnOnPostParse >	_onPostParse;
+};
+
+/*
+============
+idDeclTypeTemplate
+============
+*/
+template< typename DECLTYPE, const sdDeclInfo* INFO >
+class idDeclTypeTemplate : public idDeclType
+{
+public:
+    typedef DECLTYPE			DeclType;
+
+    virtual						~idDeclTypeTemplate( void ) {}
+
+    virtual idDecl*				Alloc( void )
+    {
+        return new DECLTYPE;
+    }
+
+    DECLTYPE*					LocalCreate( const char *name, const char *fileName ) const
+    {
+        return static_cast< DECLTYPE* >( Create( name, fileName) );
+    }
+    const DECLTYPE*				LocalFind( const char* name, bool makeDefault = true ) const
+    {
+        return static_cast< const DECLTYPE* >( Find( name, makeDefault ) );
+    }
+    const DECLTYPE*				LocalFindByIndex( int index, bool forceParse = true ) const
+    {
+        return static_cast< const DECLTYPE* >( FindByIndex( index, forceParse ) );
+    }
+    const DECLTYPE*				operator[]( const char* name ) const
+    {
+        return static_cast< const DECLTYPE* >( Find( name, false ) );
+    }
+    const DECLTYPE*				operator[]( int index ) const
+    {
+        return static_cast< const DECLTYPE* >( FindByIndex( index, true ) );
+    }
+    const DECLTYPE*				SafeIndex( int index ) const
+    {
+        return ( index < 0 || index >= Num() ) ? NULL : static_cast< const DECLTYPE* >( FindByIndex( index, true ) );
+    }
+
+    virtual bool				SkipChecksum( void ) const
+    {
+        return INFO->SkipChecksum();
+    }
+    virtual bool				SkipParsing( void ) const
+    {
+        return INFO->SkipParsing();
+    }
+    virtual bool				NotPrecached( void ) const
+    {
+        return INFO->NotPrecached();
+    }
+    virtual bool				AlwaysGenerateBinary( void ) const
+    {
+        return INFO->AlwaysGenerateBinary();
+    }
+    virtual bool				UsePrivateTokens( void ) const
+    {
+        return INFO->UsePrivateTokens();
+    }
+    virtual bool				WriteBinary( void ) const
+    {
+        return INFO->WriteBinary();
+    }
+    virtual bool				NeverStoreBinary( void ) const
+    {
+        return INFO->NeverStoreBinary();
+    }
+    virtual const char*			GetName( void ) const
+    {
+        return INFO->GetTypeName();
+    }
+    virtual void				CacheFromDict( const idDict& dict ) const
+    {
+        if ( INFO->CacheFromDict() ) {
+            INFO->CacheFromDict()( dict );
+        }
+    }
+    virtual bool				CanCacheFromDict() const
+    {
+        return INFO->CacheFromDict() != NULL;
+    }
+    virtual void				OnReload( idDecl* decl ) const
+    {
+        if ( INFO->OnReload() ) {
+            INFO->OnReload()( decl );
+        }
+    }
+    virtual bool				AllowTemplateEvaluation( void ) const
+    {
+        return INFO->AllowTemplateEvaluation();
+    }
+
+    virtual void				PostParse( idDecl* decl ) const
+    {
+        INFO->PostParse( decl );
+    }
+    virtual void				RegisterPostParse( pfnOnPostParse postParse ) const
+    {
+        assert( postParse );
+        INFO->RegisterPostParse( postParse );
+        for( int i = 0; i < this->Num(); i++ ) {
+            idDecl* decl = const_cast< idDecl* >( FindByIndex( i, false ));
+            declState_t state = decl->GetState();
+            if( state == DS_PARSED || state == DS_DEFAULTED )  {
+                postParse( decl );
+            }
+        }
+    }
+    virtual void				UnregisterPostParse( pfnOnPostParse postParse ) const
+    {
+        INFO->UnregisterPostParse( postParse );
+    }
+};
+
+
+/*
+============
+sdDeclWrapper
+============
+*/
+class sdDeclWrapper
+{
+public:
+    sdDeclWrapper( void );
+
+    void						Init( const char* identifier );
+
+    const idDecl*				FindByIndex( int index, bool forceParse = true ) const;
+    const idDecl*				Find( const char* name, bool makeDefault = true ) const;
+    int							Num( void ) const;
+    qhandle_t					GetHandle( void ) const
+    {
+        return declTypeHandle;
+    }
+    const idDecl*				CreateNewDecl( const char *name, const char *file ) const;
+
+private:
+    qhandle_t					declTypeHandle;
+};
+
+/*
+============
+sdDeclWrapperTemplate
+============
+*/
+template< typename DECLTYPE >
+class sdDeclWrapperTemplate : public sdDeclWrapper
+{
+public:
+    const DECLTYPE*				New( const char* name, const char* file ) const
+    {
+        return reinterpret_cast< const DECLTYPE* >( CreateNewDecl( name, file ) );
+    }
+    const DECLTYPE*				operator[]( const char* name ) const
+    {
+        return reinterpret_cast< const DECLTYPE* >( Find( name, false ) );
+    }
+    const DECLTYPE*				operator[]( int index ) const
+    {
+        return reinterpret_cast< const DECLTYPE* >( FindByIndex( index, true ) );
+    }
+    const DECLTYPE*				SafeIndex( int index ) const
+    {
+        return ( index < 0 || index >= Num() ) ? NULL : reinterpret_cast< const DECLTYPE* >( FindByIndex( index, true ) );
+    }
+    const DECLTYPE*				LocalFind( const char* name, bool makeDefault = true ) const
+    {
+        return reinterpret_cast< const DECLTYPE* >( Find( name, makeDefault ) );
+    }
+    const DECLTYPE*				LocalFindByIndex( int index, bool forceParse = true ) const
+    {
+        return reinterpret_cast< const DECLTYPE* >( FindByIndex( index, forceParse ) );
+    }
+};
+#endif
 
 
 class idMaterial;
@@ -399,6 +900,24 @@ class idDeclManager
 		virtual void			BeginLevelLoad() = 0;
 		virtual void			EndLevelLoad() = 0;
 
+#ifdef _SPLASHDAMAGE
+	    // Returns the system token cache
+	    virtual idTokenCache&	GetGlobalTokenCache() = 0;
+
+    	// Registers a new decl type.
+    	virtual void			RegisterDeclType( idDeclTypeInterface* type ) = 0;
+    	virtual void			UnregisterDeclType( idDeclTypeInterface* type ) = 0;
+
+	    // Registers a new folder with decl files.
+	    virtual void			RegisterDeclFolder( const char *folder, const char *extension ) = 0;
+
+	    //Unregister a previously-registered folder
+	    virtual void			UnregisterDeclFolder( const char *folder, const char *extension ) = 0;
+
+	    // Called when finished registering decl folders
+	    // attempts to find binary decls without a source text file and load them properly
+	    virtual void			FinishedRegistering() = 0;
+#endif
 		// Registers a new decl type.
 		virtual void			RegisterDeclType(const char *typeName, declType_t type, idDecl *(*allocator)(void)) = 0;
 
@@ -437,6 +956,10 @@ class idDeclManager
 		// List and print decls.
 		virtual void			ListType(const idCmdArgs &args, declType_t type) = 0;
 		virtual void			PrintType(const idCmdArgs &args, declType_t type) = 0;
+#ifdef _SPLASHDAMAGE
+	    virtual void			ListType( const idCmdArgs &args, const char* typeName ) = 0;
+	    virtual void			PrintType( const idCmdArgs &args, const char* typeName ) = 0;
+#endif
 
 		// Creates a new default decl of the given type with the given name in
 		// the given file used by editors to create a new decls.
@@ -456,38 +979,38 @@ class idDeclManager
 		virtual const idDeclSkin 		*FindSkin(const char *name, bool makeDefault = true) = 0;
 		virtual const idSoundShader 	*FindSound(const char *name, bool makeDefault = true) = 0;
 #ifdef _RAVEN
-	virtual const idDeclTable *		FindTable( const char *name, bool makeDefault = true ) = 0;
+		virtual const idDeclTable *		FindTable( const char *name, bool makeDefault = true ) = 0;
 // RAVEN BEGIN
 // jscott: for new Raven decls
-	virtual const rvDeclMatType *	FindMaterialType( const char *name, bool makeDefault = true ) = 0;
-	virtual	const rvDeclLipSync *	FindLipSync( const char *name, bool makeDefault = true ) = 0;
-	virtual	const rvDeclPlayback *	FindPlayback( const char *name, bool makeDefault = true ) = 0;
-	virtual	const rvDeclEffect *	FindEffect( const char *name, bool makeDefault = true ) = 0;
+		virtual const rvDeclMatType *	FindMaterialType( const char *name, bool makeDefault = true ) = 0;
+		virtual	const rvDeclLipSync *	FindLipSync( const char *name, bool makeDefault = true ) = 0;
+		virtual	const rvDeclPlayback *	FindPlayback( const char *name, bool makeDefault = true ) = 0;
+		virtual	const rvDeclEffect *	FindEffect( const char *name, bool makeDefault = true ) = 0;
 // RAVEN END
 // RAVEN BEGIN
 // jscott: for new Raven decls
-	virtual const rvDeclMatType *	MaterialTypeByIndex( int index, bool forceParse = true ) = 0;
-	virtual const rvDeclLipSync *	LipSyncByIndex( int index, bool forceParse = true ) = 0;
-	virtual	const rvDeclPlayback *	PlaybackByIndex( int index, bool forceParse = true ) = 0;
-	virtual const rvDeclEffect *	EffectByIndex( int index, bool forceParse = true ) = 0;
+		virtual const rvDeclMatType *	MaterialTypeByIndex( int index, bool forceParse = true ) = 0;
+		virtual const rvDeclLipSync *	LipSyncByIndex( int index, bool forceParse = true ) = 0;
+		virtual	const rvDeclPlayback *	PlaybackByIndex( int index, bool forceParse = true ) = 0;
+		virtual const rvDeclEffect *	EffectByIndex( int index, bool forceParse = true ) = 0;
 
-	virtual bool					GetPlaybackData( const rvDeclPlayback *playback, int control, int now, int last, class rvDeclPlaybackData *pbd ) = 0;
-	virtual bool					SetPlaybackData(rvDeclPlayback* playback, int now, int control, class rvDeclPlaybackData* pbd) = 0;
-	virtual void					StartPlaybackRecord(rvDeclPlayback* playback) = 0;
-	virtual bool					FinishPlayback( rvDeclPlayback *playback ) = 0;
+		virtual bool					GetPlaybackData( const rvDeclPlayback *playback, int control, int now, int last, class rvDeclPlaybackData *pbd ) = 0;
+		virtual bool					SetPlaybackData(rvDeclPlayback* playback, int now, int control, class rvDeclPlaybackData* pbd) = 0;
+		virtual void					StartPlaybackRecord(rvDeclPlayback* playback) = 0;
+		virtual bool					FinishPlayback( rvDeclPlayback *playback ) = 0;
 // RAVEN END
 
 							// If makeDefault is true, a default decl of appropriate type will be created
 							// if an explicit one isn't found. If makeDefault is false, NULL will be returned
 							// if the decl wasn't explcitly defined.
-	virtual const idDecl *	FindType( declType_t type, const char *name, bool makeDefault, bool noCaching ) = 0;
-	//k: find map def
-	virtual const idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) const = 0;
-	virtual idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) = 0;
+		virtual const idDecl *	FindType( declType_t type, const char *name, bool makeDefault, bool noCaching ) = 0;
+		//karin: find map def
+		virtual const idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) const = 0;
+		virtual idDeclEntityDef * FindMapDef(const char *mapName, const char *entityFilter = 0) = 0;
 // RAVEN BEGIN
 // jscott: for timing
 							// Registers a new folder with decl files.
-	virtual void			RegisterDeclFolderWrapper( const char *folder, const char *extension, declType_t defaultType, bool unique = false, bool norecurse = false ) = 0;
+		virtual void			RegisterDeclFolderWrapper( const char *folder, const char *extension, declType_t defaultType, bool unique = false, bool norecurse = false ) = 0;
 // RAVEN END
 #endif
 
@@ -502,6 +1025,20 @@ class idDeclManager
 
         virtual void					SetInsideLevelLoad(bool b) = 0;
         virtual bool					GetInsideLevelLoad(void) = 0;
+#endif
+
+#ifdef _SPLASHDAMAGE
+    	virtual int						GetNumMaterials( void ) = 0;
+    	virtual void					CacheFromDict( const idDict& dict ) = 0;
+		virtual	const rvDeclEffect *	FindEffect( const char *name, bool makeDefault = true ) = 0;
+	    virtual idDeclTypeInterface*	GetDeclType( const char* typeName ) const = 0;
+	    virtual idDeclTypeInterface*	GetDeclType( qhandle_t typeHandle ) const = 0;
+    	virtual qhandle_t				GetDeclTypeHandle( const char* typeName ) const = 0;
+    	virtual const char*				GetDeclTypeName( qhandle_t typeHandle ) const = 0;
+    	
+	    virtual void					AddDependency( const idDecl* decl, const idDecl* dependency ) = 0;
+	    virtual void					AddDependency( const idDecl* decl, const char* fileName ) = 0;
+    	virtual void					AddDependencies( const idDecl* decl, const idParser& parser ) = 0;
 #endif
 
         virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false) = 0;
@@ -522,5 +1059,10 @@ ID_INLINE void idPrintDecls_f(const idCmdArgs &args)
 {
 	declManager->PrintType(args, type);
 }
+
+
+#ifdef _SPLASHDAMAGE
+#include "decllib/declType.h"
+#endif
 
 #endif /* !__DECLMANAGER_H__ */

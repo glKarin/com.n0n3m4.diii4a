@@ -112,6 +112,15 @@ bool idCollisionModelManagerLocal::TestTrmVertsInBrush(cm_traceWork_t *tw, cm_br
 			if(b->material)
 				tw->trace.c.materialType = b->material->GetMaterialType();
 #endif
+#ifdef _SPLASHDAMAGE
+			if(b->material)
+			{
+				tw->trace.c.surfaceType = b->material->GetSurfaceType();
+				tw->trace.c.surfaceColor = b->material->GetSurfaceColor();
+			}
+			tw->trace.c.separation = 0.0f;
+			tw->trace.c.selfId = 0;
+#endif
 			tw->trace.c.point = *p;
 			tw->trace.c.modelFeature = 0;
 			tw->trace.c.trmFeature = j;
@@ -251,6 +260,15 @@ bool idCollisionModelManagerLocal::TestTrmInPolygon(cm_traceWork_t *tw, cm_polyg
 					if(p->material)
 						tw->trace.c.materialType = p->material->GetMaterialType();
 #endif
+#ifdef _SPLASHDAMAGE
+					if(p->material)
+					{
+						tw->trace.c.surfaceType = p->material->GetSurfaceType();
+						tw->trace.c.surfaceColor = p->material->GetSurfaceColor();
+					}
+					tw->trace.c.separation = 0.0f;
+					tw->trace.c.selfId = 0;
+#endif
 					tw->trace.c.point = v->p;
 					tw->trace.c.modelFeature = edge->vertexNum[j];
 					tw->trace.c.trmFeature = 0;
@@ -339,6 +357,15 @@ bool idCollisionModelManagerLocal::TestTrmInPolygon(cm_traceWork_t *tw, cm_polyg
 #ifdef _RAVEN
 			if(p->material)
 				tw->trace.c.materialType = p->material->GetMaterialType();
+#endif
+#ifdef _SPLASHDAMAGE
+			if(p->material)
+			{
+				tw->trace.c.surfaceType = p->material->GetSurfaceType();
+				tw->trace.c.surfaceColor = p->material->GetSurfaceColor();
+			}
+			tw->trace.c.separation = 0.0f;
+			tw->trace.c.selfId = 0;
 #endif
 			tw->trace.c.point = tw->vertices[tw->edges[i].vertexNum[ !flip ]].p;
 			tw->trace.c.modelFeature = *reinterpret_cast<int *>(&p);
@@ -435,6 +462,15 @@ bool idCollisionModelManagerLocal::TestTrmInPolygon(cm_traceWork_t *tw, cm_polyg
 				if(p->material)
 					tw->trace.c.materialType = p->material->GetMaterialType();
 #endif
+#ifdef _SPLASHDAMAGE
+				if(p->material)
+				{
+					tw->trace.c.surfaceType = p->material->GetSurfaceType();
+					tw->trace.c.surfaceColor = p->material->GetSurfaceColor();
+				}
+				tw->trace.c.separation = 0.0f;
+				tw->trace.c.selfId = 0;
+#endif
 				tw->trace.c.point = tw->model->vertices[edge->vertexNum[ !flip ]].p;
 				tw->trace.c.modelFeature = edgeNum;
 				tw->trace.c.trmFeature = j;
@@ -484,7 +520,7 @@ int idCollisionModelManagerLocal::PointContents(const idVec3 p, cmHandle_t model
 	cm_brush_t *b;
 	idPlane *plane;
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
 	node = idCollisionModelManagerLocal::PointNode(p, static_cast<cm_model_t *>(model));
 #else
 	node = idCollisionModelManagerLocal::PointNode(p, idCollisionModelManagerLocal::models[model]);
@@ -572,8 +608,17 @@ int idCollisionModelManagerLocal::ContentsTrm(trace_t *results, const idVec3 &st
 		results->endpos = start;
 		results->endAxis = trmAxis;
 #ifdef _RAVEN
+		//results->c.id = 0;
 		results->c.material = NULL;
 		results->c.materialType = NULL;
+#endif
+#ifdef _SPLASHDAMAGE
+		//results->c.id = 0;
+		results->c.material = NULL;
+		results->c.surfaceType = NULL;
+		results->c.surfaceColor.Zero();
+		results->c.separation = 0.0f;
+		results->c.selfId = 0;
 #endif
 
 		return results->c.contents;
@@ -591,6 +636,14 @@ int idCollisionModelManagerLocal::ContentsTrm(trace_t *results, const idVec3 &st
 	// jmarshall end
 	tw.trace.c.material = NULL; //kc
 #endif
+#ifdef _SPLASHDAMAGE // etqw trace
+	tw.trace.c.id = 0; // fix so we don't get garbage values.
+	tw.trace.c.material = NULL; //kc
+	tw.trace.c.surfaceType = NULL;
+	tw.trace.c.surfaceColor.Zero();
+	tw.trace.c.separation = 0.0f;
+	tw.trace.c.selfId = 0;
+#endif
 	tw.contents = contentMask;
 	tw.isConvex = true;
 	tw.rotation = false;
@@ -598,7 +651,7 @@ int idCollisionModelManagerLocal::ContentsTrm(trace_t *results, const idVec3 &st
 	tw.pointTrace = false;
 	tw.quickExit = false;
 	tw.numContacts = 0;
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
 	tw.model = static_cast<cm_model_t *>(model);
 #else
 	tw.model = idCollisionModelManagerLocal::models[model];
@@ -725,6 +778,18 @@ int idCollisionModelManagerLocal::ContentsTrm(trace_t *results, const idVec3 &st
 		results->c.materialType = NULL;
 	}
 #endif
+#ifdef _SPLASHDAMAGE
+	if (results->c.material)
+	{
+		results->c.surfaceType = results->c.material->GetSurfaceType();
+		results->c.surfaceColor = results->c.material->GetSurfaceColor();
+	}
+	else
+	{
+		results->c.surfaceType = NULL;
+		results->c.surfaceColor.Zero();
+	}
+#endif
 
 	return results->c.contents;
 }
@@ -738,9 +803,12 @@ int idCollisionModelManagerLocal::Contents(const idVec3 &start,
                 const idTraceModel *trm, const idMat3 &trmAxis, int contentMask,
                 cmHandle_t model, const idVec3 &modelOrigin, const idMat3 &modelAxis)
 {
+#ifdef _SPLASHDAMAGE //karin: lock in multi-threading
+	CM_LOCK_THREAD();
+#endif
 	trace_t results;
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: idCollisionModel vs. handler
 	if(!model) {
 		common->Printf("idCollisionModelManagerLocal::Contents: invalid model\n");
 		return 0;

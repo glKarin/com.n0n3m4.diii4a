@@ -520,6 +520,8 @@ void idConsoleLocal::Clear()
 	for (i = 0 ; i < CON_TEXTSIZE ; i++) {
 #ifdef _RAVEN
 		text[i] = (idStr::ColorIndex(C_COLOR_CONSOLE)<<8) | ' ';
+#elif defined(_SPLASHDAMAGE)
+		text[i] = (idStr::ColorChar(C_COLOR_CYAN)<<8) | ' ';
 #else
 		text[i] = (idStr::ColorIndex(C_COLOR_CYAN)<<8) | ' ';
 #endif
@@ -1021,6 +1023,8 @@ void idConsoleLocal::Linefeed()
 	for (i = 0; i < LINE_WIDTH; i++) {
 #ifdef _RAVEN
 		text[(current%TOTAL_LINES)*LINE_WIDTH+i] = (idStr::ColorIndex(C_COLOR_CONSOLE)<<8) | ' ';
+#elif defined(_SPLASHDAMAGE)
+		text[(current%TOTAL_LINES)*LINE_WIDTH+i] = (idStr::ColorChar(C_COLOR_CYAN)<<8) | ' ';
 #else
 		text[(current%TOTAL_LINES)*LINE_WIDTH+i] = (idStr::ColorIndex(C_COLOR_CYAN)<<8) | ' ';
 #endif
@@ -1052,6 +1056,8 @@ void idConsoleLocal::Print(const char *txt)
 
 #ifdef _RAVEN
 	color = idStr::ColorIndex(C_COLOR_CONSOLE);
+#elif defined(_SPLASHDAMAGE)
+	color = idStr::ColorChar(C_COLOR_CYAN);
 #else
 	color = idStr::ColorIndex(C_COLOR_CYAN);
 #endif
@@ -1061,11 +1067,17 @@ void idConsoleLocal::Print(const char *txt)
 			if (*(txt+1) == C_COLOR_DEFAULT) {
 #ifdef _RAVEN
 				color = idStr::ColorIndex(C_COLOR_CONSOLE);
+#elif defined(_SPLASHDAMAGE)
+				color = idStr::ColorChar(C_COLOR_CYAN);
 #else
 				color = idStr::ColorIndex(C_COLOR_CYAN);
 #endif
 			} else {
+#ifdef _SPLASHDAMAGE
+				color = idStr::ColorChar(*(txt+1));
+#else
 				color = idStr::ColorIndex(*(txt+1));
+#endif
 			}
 
 			txt += 2;
@@ -1099,7 +1111,11 @@ void idConsoleLocal::Print(const char *txt)
 			case '\t':
 
 				do {
+#ifdef _SPLASHDAMAGE
 					text[y *LINE_WIDTH+x] = (color << 8) | ' ';
+#else
+					text[y *LINE_WIDTH+x] = (color << 8) | ' ';
+#endif
 					x++;
 
 					if (x >= LINE_WIDTH) {
@@ -1113,7 +1129,11 @@ void idConsoleLocal::Print(const char *txt)
 				x = 0;
 				break;
 			default:	// display character and advance
+#ifdef _SPLASHDAMAGE
 				text[y *LINE_WIDTH+x] = (color << 8) | c;
+#else
+				text[y *LINE_WIDTH+x] = (color << 8) | c;
+#endif
 				x++;
 
 				if (x >= LINE_WIDTH) {
@@ -1169,6 +1189,8 @@ void idConsoleLocal::DrawInput()
 
 #ifdef _RAVEN
 	renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CONSOLE));
+#elif defined(_SPLASHDAMAGE)
+	renderSystem->SetColor(idStr::ColorForChar(C_COLOR_CYAN));
 #else
 	renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CYAN));
 #endif
@@ -1198,8 +1220,13 @@ void idConsoleLocal::DrawNotify()
 		return;
 	}
 
+#ifdef _SPLASHDAMAGE
+	currentColor = idStr::ColorChar(C_COLOR_WHITE);
+	renderSystem->SetColor(idStr::ColorForChar(currentColor));
+#else
 	currentColor = idStr::ColorIndex(C_COLOR_WHITE);
 	renderSystem->SetColor(idStr::ColorForIndex(currentColor));
+#endif
 
 	v = 0;
 
@@ -1227,10 +1254,17 @@ void idConsoleLocal::DrawNotify()
 				continue;
 			}
 
+#ifdef _SPLASHDAMAGE
+			if (idStr::ColorChar(text_p[x]>>8) != currentColor) {
+				currentColor = idStr::ColorChar(text_p[x]>>8);
+				renderSystem->SetColor(idStr::ColorForChar(currentColor));
+			}
+#else
 			if (idStr::ColorIndex(text_p[x]>>8) != currentColor) {
 				currentColor = idStr::ColorIndex(text_p[x]>>8);
 				renderSystem->SetColor(idStr::ColorForIndex(currentColor));
 			}
+#endif
 
 			renderSystem->DrawSmallChar((x+1)*SMALLCHAR_WIDTH, v, text_p[x] & 0xff, localConsole.charSetShader);
 		}
@@ -1302,6 +1336,8 @@ void idConsoleLocal::DrawSolidConsole(float frac)
 	{
 #ifdef _RAVEN
 	renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CONSOLE));
+#elif defined(_SPLASHDAMAGE)
+	renderSystem->SetColor(idStr::ColorForChar(C_COLOR_CYAN));
 #else
 	renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CYAN));
 #endif
@@ -1328,6 +1364,8 @@ void idConsoleLocal::DrawSolidConsole(float frac)
 		// draw arrows to show the buffer is backscrolled
 #ifdef _RAVEN
 		renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CONSOLE));
+#elif defined(_SPLASHDAMAGE)
+		renderSystem->SetColor(idStr::ColorForChar(C_COLOR_CYAN));
 #else
 		renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CYAN));
 #endif
@@ -1346,8 +1384,13 @@ void idConsoleLocal::DrawSolidConsole(float frac)
 		row--;
 	}
 
+#ifdef _SPLASHDAMAGE
+	currentColor = idStr::ColorChar(C_COLOR_WHITE);
+	renderSystem->SetColor(idStr::ColorForChar(currentColor));
+#else
 	currentColor = idStr::ColorIndex(C_COLOR_WHITE);
 	renderSystem->SetColor(idStr::ColorForIndex(currentColor));
+#endif
 
 	for (i = 0; i < rows; i++, y -= SMALLCHAR_HEIGHT, row--) {
 		if (row < 0) {
@@ -1366,10 +1409,17 @@ void idConsoleLocal::DrawSolidConsole(float frac)
 				continue;
 			}
 
+#ifdef _SPLASHDAMAGE
+			if (idStr::ColorChar(text_p[x]>>8) != currentColor) {
+				currentColor = idStr::ColorChar(text_p[x]>>8);
+				renderSystem->SetColor(idStr::ColorForChar(currentColor));
+			}
+#else
 			if (idStr::ColorIndex(text_p[x]>>8) != currentColor) {
 				currentColor = idStr::ColorIndex(text_p[x]>>8);
 				renderSystem->SetColor(idStr::ColorForIndex(currentColor));
 			}
+#endif
 
 			renderSystem->DrawSmallChar((x+1)*SMALLCHAR_WIDTH, idMath::FtoiFast(y), text_p[x] & 0xff, localConsole.charSetShader);
 		}
@@ -1570,6 +1620,8 @@ void idConsoleLocal::DrawFloatConsole(void)
 	{
 #ifdef _RAVEN
 		renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CONSOLE));
+#elif defined(_SPLASHDAMAGE)
+		renderSystem->SetColor(idStr::ColorForChar(C_COLOR_CYAN));
 #else
 		renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CYAN));
 #endif
@@ -1595,6 +1647,8 @@ void idConsoleLocal::DrawFloatConsole(void)
 		// draw arrows to show the buffer is backscrolled
 #ifdef _RAVEN
 		renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CONSOLE));
+#elif defined(_SPLASHDAMAGE)
+		renderSystem->SetColor(idStr::ColorForChar(C_COLOR_CYAN));
 #else
 		renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CYAN));
 #endif
@@ -1613,8 +1667,13 @@ void idConsoleLocal::DrawFloatConsole(void)
 		row--;
 	}
 
+#ifdef _SPLASHDAMAGE
+	currentColor = idStr::ColorChar(C_COLOR_WHITE);
+	renderSystem->SetColor(idStr::ColorForChar(currentColor));
+#else
 	currentColor = idStr::ColorIndex(C_COLOR_WHITE);
 	renderSystem->SetColor(idStr::ColorForIndex(currentColor));
+#endif
 
 	for (i = 0; i < rows; i++, row--) {
 		if (row < 0) {
@@ -1645,10 +1704,17 @@ void idConsoleLocal::DrawFloatConsole(void)
 		int nx = 0;
 		for (x = 0; x < chars; x++) {
 			if ((text_p[x] & 0xff) != ' ') {
+#ifdef _SPLASHDAMAGE
+				if (idStr::ColorChar(text_p[x]>>8) != currentColor) {
+					currentColor = idStr::ColorChar(text_p[x]>>8);
+					renderSystem->SetColor(idStr::ColorForChar(currentColor));
+				}
+#else
 				if (idStr::ColorIndex(text_p[x]>>8) != currentColor) {
 					currentColor = idStr::ColorIndex(text_p[x]>>8);
 					renderSystem->SetColor(idStr::ColorForIndex(currentColor));
 				}
+#endif
 
 				renderSystem->DrawSmallChar((nx+1)*SMALLCHAR_WIDTH + consoleX, idMath::FtoiFast(baseY) + consoleY, text_p[x] & 0xff, localConsole.charSetShader);
 			}
@@ -1685,6 +1751,8 @@ void idConsoleLocal::DrawFloatConsole(void)
 
 #ifdef _RAVEN
 		renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CONSOLE));
+#elif defined(_SPLASHDAMAGE)
+		renderSystem->SetColor(idStr::ColorForChar(C_COLOR_CYAN));
 #else
 		renderSystem->SetColor(idStr::ColorForIndex(C_COLOR_CYAN));
 #endif

@@ -43,6 +43,9 @@ If you have questions concerning this license or the applicable additional terms
 #define PROC_FILE_ID					"PROC"
 #define PROC_FILEVERSION				"4" // jmarshall: changed to string. 
 #define	PROC_FILE_DOOM3_ID				"mapProcFile003"
+#elif defined(_SPLASHDAMAGE) //karin: proc file on ETQW
+#include "Material.h"
+#define	PROC_FILE_ID			"mapProcFile010"
 #else
 #define	PROC_FILE_ID				"mapProcFile003"
 #endif
@@ -78,6 +81,13 @@ const int SHADERPARM_BEAM_WIDTH		= 11;
 
 const int SHADERPARM_SPRITE_WIDTH		= 8;
 const int SHADERPARM_SPRITE_HEIGHT		= 9;
+#ifdef _SPLASHDAMAGE
+const int SHADERPARM_SPRITE_OFFSET		= 10;
+
+const int SHADERPARM_FADE_ORIGIN_X		= 8;
+const int SHADERPARM_FADE_ORIGIN_Y		= 9;
+const int SHADERPARM_FADE_ORIGIN_Z		= 10;
+#endif
 
 const int SHADERPARM_PARTICLE_STOPTIME = 8;	// don't spawn any more particles after this time
 
@@ -126,12 +136,14 @@ typedef struct hhBeamNodes_s {
 // END HUMANHEAD
 #endif
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 // RAVEN BEGIN
 // jscott: for effect brightness
 const int SHADERPARM_BRIGHTNESS		= 6;	// for the overall brightness of effects
 // RAVEN END
+#endif
 
+#ifdef _RAVEN
 // RAVEN BEGIN
 // dluetscher: added a default value for light detail levels
 #define DEFAULT_LIGHT_DETAIL_LEVEL	10.f
@@ -168,55 +180,54 @@ enum
 // RAVEN END
 
 #endif
+#ifdef _SPLASHDAMAGE
+class sdDeclImposter;
+class sdDeclAmbientCubeMap;
+class idDemoFile;
+class sdDeclAtmosphere;
 
-typedef bool(*deferredEntityCallback_t)(renderEntity_s *, const renderView_s *);
+const int MAX_SURFACE_BITS = 64;
 
-#ifdef _RAVEN // particle
-// RAVEN BEGIN
-// jscott: for handling of effects
-typedef struct renderEffect_s {
+const unsigned short MIRROR_VIEW_ID			= 0xFFFF;
+const unsigned short FAST_MIRROR_VIEW_ID	= 0xFFFE;
+const		   int	 WORLD_SPAWN_ID			= 0xFFFF0000;
 
-	const idDecl			*declEffect;
-
-	float					startTime;
-	int						suppressSurfaceInViewID;
-	int						allowSurfaceInViewID;
-	int						groupID;
-
-	idVec3					origin;
-	idMat3					axis;
-
-	idVec3					gravity;
-	idVec3					endOrigin;
-
-	float					attenuation;
-	bool					hasEndOrigin;
-	bool					loop;						// effect is looping
-	bool					ambient;					// effect is from an entity
-	bool					inConnectedArea;
-	int						weaponDepthHackInViewID;	// squash depth range so view weapons don't poke into walls
-	float					modelDepthHack;	
-
-	int						referenceSoundHandle;		// for shader sound tables, allowing effects to vary with sounds
-
-	float					shaderParms[ MAX_ENTITY_SHADER_PARMS ];	// can be used in any way by shader or model generation
-} renderEffect_t;
-// RAVEN END
-
-// RAVEN BEGIN
-// jscott: effect handling in the renderer
-class rvRenderEffect {
-public:
-	virtual					~rvRenderEffect(void) {}
+struct sdInstCommon {
+    byte	color[4];
+    idVec3	origin;
+    idMat3	axis;
+    union {
+        float   dist; // overloaded
+        float	maxVisDist;
+    };
 };
-// RAVEN END
+
+struct sdInstInfo {
+    sdInstCommon inst;
+    float	maxVisDist;
+    float	minVisDist;
+    idVec3	fadeOrigin;
+};
+#endif
+
+#ifdef _SPLASHDAMAGE
+typedef bool( *deferredEntityCallback_t )( renderEntity_s*, const renderView_s*, int& lastModifiedGameTime );
+#else
+typedef bool(*deferredEntityCallback_t)(renderEntity_s *, const renderView_s *);
 #endif
 
 typedef struct renderEntity_s {
 	idRenderModel 			*hModel;				// this can only be null if callback is set
 
+#ifdef _SPLASHDAMAGE
+    int						spawnID;//entityNum;
+#else
 	int						entityNum;
+#endif
 	int						bodyId;
+#ifdef _SPLASHDAMAGE
+    int						mapId;
+#endif
 
 	// Entities that are expensive to generate, like skeletal models, can be
 	// deferred until their bounds are found to be in view, in the frustum
@@ -246,6 +257,14 @@ typedef struct renderEntity_s {
 	// if non-zero, the surface and shadow (if it casts one)
 	// will only show up in the specific view, ie: player weapons
 	int						allowSurfaceInViewID;
+	
+#ifdef _SPLASHDAMAGE
+    // if non-zero, the surface will act as a noSelfShadow in the specified view
+    unsigned short					noSelfShadowInViewID;
+    
+    unsigned char					drawSpec;
+    unsigned char					shadowSpec;
+#endif
 
 	// positioning
 	// axis rotation vectors must be unit length for many
@@ -294,7 +313,76 @@ typedef struct renderEntity_s {
 	// NULL if non-deformable model.  NOT freed by renderer
 
 	float					modelDepthHack;			// squash depth range so particle effects don't clip into walls
+#ifdef _SPLASHDAMAGE
+    bool							foliageDepthHack;
 
+    float							sortOffset;				// Override material sort form render entity
+
+    float							coverage;				// used when flag overridencoverage is specified
+
+    short							minGpuSpec;
+    short							numInsts;
+    sdInstInfo *					insts;					//
+
+    int								numVisDummies;
+    idVec3							*dummies;
+
+    int								numAreas;
+    int	*							areas;
+    
+    struct renderEntityFlags_t {
+        // options to override surface shader flags (replace with material parameters?)
+        bool	noSelfShadow					: 1;	// cast shadows onto other objects,but not self
+        bool	noShadow						: 1;	// no shadow at all
+
+        bool	noDynamicInteractions			: 1;	// don't create any light / shadow interactions after
+        // the level load is completed.  This is a performance hack
+        // for the gigantic outdoor meshes in the monorail map, so
+        // all the lights in the moving monorail don't touch the meshes
+
+        bool	noHardwareSkinning				: 1;
+
+        bool	weaponDepthHack					: 1;	// squash depth range so view weapons don't poke into walls
+        // this automatically implies noShadow
+        bool	forceUpdate						: 1;	// force an update (NOTE: not a bool to keep this struct a multiple of 4 bytes)
+        bool	pushIntoConnectedOutsideAreas	: 1;	// forces the entityDef to be pushed in all connected outside areas
+        bool	pushIntoOutsideAreas			: 1;	// forces the entityDef to be pushed in all connected outside areas
+
+        bool	forceImposter					: 1;	// Never render the actual entity always the imposter
+        bool	useFadeOrigin					: 1;	// Use an offset stored in the shaderparms for imposter fade calculations
+        bool	pushByOrigin					: 1;	// Use origin in push
+        bool	pushByCenter					: 1;	// Use center of bounds in push
+        bool	pushByInstances					: 1;	// Use center of bounds in push
+
+        bool	overridenBounds					: 1;
+
+        bool	overridenCoverage				: 1;
+        bool	occlusionTest					: 1;
+
+        bool	foliageDepthHack				: 1;
+
+        bool	dontCastFromAtmosLight			: 1;
+
+        bool	usePointTestForAmbientCubeMaps	: 1;
+
+        bool	disableLODs						: 1;
+
+        bool	jointsAllocated					: 1;
+    };
+    float							weaponDepthHackFOV_x;
+    float							weaponDepthHackFOV_y;
+    renderEntityFlags_t				flags;
+
+    float							shadowVisDistMult;		// max distance this entity will be drawn at
+    int								maxVisDist;				// max distance this entity will be drawn at
+    int								minVisDist;				// min distance this entity will be drawn at
+    float							visDistFalloff;			// fraction of range spent fading in
+
+    sdBitField< MAX_SURFACE_BITS - 1 >	hideSurfaceMask;		// mask to hide surfaces within a model
+
+    const sdDeclImposter*			imposter;				// Imposter to use for entity (screen space based unless forceImposter is on)
+    const sdDeclAmbientCubeMap*		ambientCubeMap;			// Override the ambient cubemap for this model (instead of the one specified by the area)
+#else
 	// options to override surface shader flags (replace with material parameters?)
 	bool					noSelfShadow;			// cast shadows onto other objects,but not self
 	bool					noShadow;				// no shadow at all
@@ -307,6 +395,7 @@ typedef struct renderEntity_s {
 	bool					weaponDepthHack;		// squash depth range so view weapons don't poke into walls
 	// this automatically implies noShadow
 	int						forceUpdate;			// force an update (NOTE: not a bool to keep this struct a multiple of 4 bytes)
+#endif
 #ifdef _HUMANHEAD
 	const hhDeclBeam*		declBeam;			// HUMANHEAD beam information
 	hhBeamNodes_t*			beamNodes;			// HUMANHEAD beam node array (sized to the number of beams in the system)
@@ -326,8 +415,16 @@ typedef struct renderEntity_s {
 
 	int						timeGroup;
 	int						xrayIndex;
+#ifdef _SPLASHDAMAGE //karin: missing in SDK, if build SaveGame.cpp
+	float					groundRadiosity;
+	int						forceOutside;
+#endif
 } renderEntity_t;
 
+#ifdef _SPLASHDAMAGE
+const int MAX_LIGHT_AREAS = 8;
+const int MAX_PRELIGHTS = 5;
+#endif
 
 typedef struct renderLight_s {
 	idMat3					axis;				// rotation vectors, must be unit length
@@ -341,6 +438,21 @@ typedef struct renderLight_s {
 	// if non-zero, the light will only show up in the specific view
 	// which can allow player gun gui lights and such to not effect everyone
 	int						allowLightInViewID;
+#ifdef _SPLASHDAMAGE
+    int						mapId;
+
+    struct renderLightFlags_t {
+        bool				noShadows		: 1;	// (should we replace this with material parameters on the shader?)
+        bool				noSpecular		: 1;	// (should we replace this with material parameters on the shader?)
+
+        bool				pointLight		: 1;	// otherwise a projection light (should probably invert the sense of this, because points are way more common)
+        bool				parallel		: 1;	// lightCenter gives the direction to the light at infinity
+
+        bool				atmosphereLight	: 1;	// special case atmosphere light, used for terrain lighting
+        bool				insideLight		: 1;
+    };
+    renderLightFlags_t		flags;
+#else
 
 	// I am sticking the four bools together so there are no unused gaps in
 	// the padded structure, which could confuse the memcmp that checks for redundant
@@ -348,15 +460,16 @@ typedef struct renderLight_s {
 	bool					noShadows;			// (should we replace this with material parameters on the shader?)
 	bool					noSpecular;			// (should we replace this with material parameters on the shader?)
 
-#ifdef _HUMANHEAD
-	bool					lowSkippable;		// HUMANHEAD bjk: True if skippable in low quality
-#endif
-
 	bool					pointLight;			// otherwise a projection light (should probably invert the sense of this, because points are way more common)
 	bool					parallel;			// lightCenter gives the direction to the light at infinity
+#endif
 	idVec3					lightRadius;		// xyz radius for point lights
 	idVec3					lightCenter;		// offset the lighting direction for shading and
 	// shadows, relative to origin
+
+#ifdef _HUMANHEAD
+	bool					lowSkippable;		// HUMANHEAD bjk: True if skippable in low quality
+#endif
 
 	// frustum definition for projected lights, all reletive to origin
 	// FIXME: we should probably have real plane equations here, and offer
@@ -370,13 +483,22 @@ typedef struct renderLight_s {
 	// Dmap will generate an optimized shadow volume named _prelight_<lightName>
 	// for the light against all the _area* models in the map.  The renderer will
 	// ignore this value if the light has been moved after initial creation
+#ifdef _SPLASHDAMAGE
+    int						numPrelightModels;
+    idRenderModel *			prelightModels[ MAX_PRELIGHTS ];
+    int						maxVisDist;
+#endif
 	idRenderModel 			*prelightModel;
 
 	// muzzle flash lights will not cast shadows from player and weapon world models
 	int						lightId;
 
 
+#ifdef _SPLASHDAMAGE
+    const idMaterial *		material;			// NULL = either lights/defaultPointLight or lights/defaultProjectedLight
+#else
 	const idMaterial 		*shader;				// NULL = either lights/defaultPointLight or lights/defaultProjectedLight
+#endif
 	float					shaderParms[MAX_ENTITY_SHADER_PARMS];		// can be used in any way by shader
 #ifdef _RAVEN
 // RAVEN BEGIN
@@ -391,8 +513,105 @@ typedef struct renderLight_s {
 #else
 	idSoundEmitter 		    *referenceSound;		// for shader sound tables, allowing effects to vary with sounds
 #endif
+#ifdef _SPLASHDAMAGE
+    int						drawSpec;
+    int						shadowSpec;
+
+    // light polytope doesn't get pushed down the tree, instead, only add to the specified areas
+    int						numAreas;
+	int						areas[ MAX_LIGHT_AREAS ];
+	
+    struct atmosLightProjection_t *atmosLightProjection;
+
+	dword					minSpecShadowColor;
+#endif
 } renderLight_t;
 
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) // BSE particle
+// RAVEN BEGIN
+// jscott: for handling of effects
+typedef struct renderEffect_s {
+
+#ifdef _SPLASHDAMAGE
+    const class rvDeclEffect*		declEffect;
+#else
+	const idDecl			*declEffect;
+#endif
+
+	float					startTime;
+	int						suppressSurfaceInViewID;
+	int						allowSurfaceInViewID;
+#ifdef _SPLASHDAMAGE
+    unsigned short			suppressLightsInViewID;
+#endif
+	int						groupID;
+
+	idVec3					origin;
+	idMat3					axis;
+
+	idVec3					gravity;
+	idVec3					endOrigin;
+#ifdef _SPLASHDAMAGE
+    idVec3					windVector;
+    idVec3					materialColor;
+#endif
+
+	float					attenuation;
+	bool					hasEndOrigin;
+	bool					loop;						// effect is looping
+#ifdef _SPLASHDAMAGE
+    bool					useRenderBounds;
+    bool					isStatic;
+#endif
+	bool					ambient;					// effect is from an entity
+	bool					inConnectedArea;
+	int						weaponDepthHackInViewID;	// squash depth range so view weapons don't poke into walls
+	float					modelDepthHack;	
+#ifdef _SPLASHDAMAGE
+    float					distanceOffset;
+    float					maxVisDist;
+
+	idSoundEmitter 		    *referenceSound;		// for shader sound tables, allowing effects to vary with sounds
+#else
+	int						referenceSoundHandle;		// for shader sound tables, allowing effects to vary with sounds
+#endif
+
+	float					shaderParms[ MAX_ENTITY_SHADER_PARMS ];	// can be used in any way by shader or model generation
+} renderEffect_t;
+// RAVEN END
+
+// RAVEN BEGIN
+// jscott: effect handling in the renderer
+class rvRenderEffect {
+public:
+	virtual					~rvRenderEffect(void) {}
+};
+// RAVEN END
+#endif
+
+#ifdef _SPLASHDAMAGE
+struct occlusionTest_t {
+    idMat3		axis;
+    idVec3		origin;
+    idBounds	bb;
+    int			view;
+};
+
+class sdOcclusionTest {
+public:
+	virtual					~sdOcclusionTest( void ) {}
+
+	virtual void			FreeOcclusionTest( void ) = 0;
+	virtual void			UpdateOcclusionTest( const occlusionTest_t *def ) = 0;
+};
+
+struct cheapDecalParameters_t {
+    idVec3				origin;
+    idVec3				normal;
+    int					jointIdx;
+    const class sdDeclDecal*	decl;
+};
+#endif
 
 typedef struct renderView_s {
 	// player views will set this to a non-zero integer for model suppress / allow
@@ -405,9 +624,23 @@ typedef struct renderView_s {
 	float					fov_x, fov_y;
 	idVec3					vieworg;
 	idMat3					viewaxis;			// transformation matrix, view looks down the positive X axis
+#ifdef _SPLASHDAMAGE
+    idMat3					lastViewAxis;					// transformation matrix, view looks down the positive X axis
+    idVec3					lastViewOrg;
+#endif
 
+#ifdef _SPLASHDAMAGE
+    struct renderViewFlags_t {
+        bool				cramZNear			: 1;	// for cinematics, we want to set ZNear much lower
+        bool				forceUpdate			: 1;	// for an update
+        bool				forceViewIDOnly		: 1;	// only render entities with a matching viewID
+        bool				forceDefsVisible	: 1;
+    };
+    renderViewFlags_t		flags;
+#else
 	bool					cramZNear;			// for cinematics, we want to set ZNear much lower
 	bool					forceUpdate;		// for an update
+#endif
 
 #ifdef _HUMANHEAD
 	bool			        viewSpiritEntities; // HUMANHEAD cjr: this renderView can see all onlyVisibleInSpirit entities
@@ -420,6 +653,15 @@ typedef struct renderView_s {
 	int						time;
 	float					shaderParms[MAX_GLOBAL_SHADER_PARMS];		// can be used in any way by shader
 	const idMaterial		*globalMaterial;							// used to override everything draw
+	
+#ifdef _SPLASHDAMAGE
+    const idDeclSkin*		globalSkin;								// apply this skin to everything
+    
+    idVec4					clearColor;
+    float					foliageDepthHack;
+    
+    int						forceClear;
+#endif
 } renderView_t;
 
 
@@ -427,8 +669,15 @@ typedef struct renderView_s {
 typedef struct {
 	int					areas[2];		// areas connected by this portal
 	const idWinding		*w;				// winding points have counter clockwise ordering seen from areas[0]
+#ifdef _SPLASHDAMAGE
+    idPlane				plane;
+    //idVec3				center;
+#endif
 	int					blockingBits;	// PS_BLOCK_VIEW, PS_BLOCK_AIR, etc
 	qhandle_t			portalHandle;
+#ifdef _SPLASHDAMAGE
+    int					portalFlags;
+#endif
 } exitPortal_t;
 
 
@@ -439,6 +688,9 @@ typedef struct {
 #ifdef _HUMANHEAD
 	float				frac;
 #endif
+#ifdef _SPLASHDAMAGE
+	idVec3	worldPos;
+#endif
 } guiPoint_t;
 
 
@@ -448,6 +700,10 @@ typedef struct modelTrace_s {
 	idVec3					point;				// end point of trace in global space
 	idVec3					normal;				// hit triangle normal vector in global space
 	const idMaterial 		*material;			// material of hit surface
+#ifdef _SPLASHDAMAGE
+    const class sdDeclSurfaceType *	surfaceType;
+    idVec3						surfaceColor;
+#endif
 	const renderEntity_t 	*entity;				// render entity that was hit
 	int						jointNumber;		// md5 joint nearest to the hit triangle
 #ifdef _RAVEN // quake4 trace
@@ -517,6 +773,28 @@ class idRenderWorld
 		virtual	void			FreeLightDef(qhandle_t lightHandle) = 0;
 		virtual const renderLight_t *GetRenderLight(qhandle_t lightHandle) const = 0;
 
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+// RAVEN BEGIN
+    	// jscott: handling of effects
+        virtual qhandle_t		AddEffectDef( const renderEffect_t *reffect, int time ) = 0;
+        virtual bool			UpdateEffectDef( qhandle_t effectHandle, const renderEffect_t *reffect, int time ) = 0;
+        virtual void			StopEffectDef( qhandle_t effectHandle ) = 0;
+        virtual void			FreeEffectDef( qhandle_t effectHandle ) = 0;
+// RAVEN END
+#endif
+
+#ifdef _SPLASHDAMAGE
+    	virtual void			RestartEffectDef( qhandle_t effectHandle ) = 0;
+    	virtual void			FreeStoppedEffectDefs( void ) = 0;
+    	
+// Game side occlusion tests
+    	virtual qhandle_t		AddOcclusionTestDef( const occlusionTest_t *occtest ) = 0;
+    	virtual void			UpdateOcclusionTestDef( qhandle_t occtestHandle, const occlusionTest_t *occtest ) = 0;
+    	virtual bool			IsVisibleOcclusionTestDef( qhandle_t occtestHandle ) = 0;
+    	virtual	void			FreeOcclusionTestDef( qhandle_t occtestHandle ) = 0;
+    	virtual int				CountVisibleOcclusionTestDef( qhandle_t occtestHandle ) = 0;
+		virtual void			UpdateOcclusionTests( void ) = 0;
+#endif
 		// Force the generation of all light / surface interactions at the start of a level
 		// If this isn't called, they will all be dynamically generated
 		virtual	void			GenerateAllInteractions() = 0;
@@ -526,12 +804,22 @@ class idRenderWorld
 
 		//-------------- Decals and Overlays  -----------------
 
+#ifdef _SPLASHDAMAGE
+    	virtual idRenderModel*	CreateDecalModel() = 0;
+    	virtual void 			AddToProjectedDecal( const idFixedWinding& winding, const idVec3 &projectionOrigin, const bool parallel, const idVec4& color, idRenderModel* model, int entityNum, const idMaterial** onlyMaterials = NULL, const int numOnlyMaterials = 1 ) = 0;
+    	virtual void			ResetDecalModel( idRenderModel* model ) = 0;
+#endif
+
 		// Creates decals on all world surfaces that the winding projects onto.
 		// The projection origin should be infront of the winding plane.
 		// The decals are projected onto world geometry between the winding plane and the projection origin.
 		// The decals are depth faded from the winding plane to a certain distance infront of the
 		// winding plane and the same distance from the projection origin towards the winding.
 		virtual void			ProjectDecalOntoWorld(const idFixedWinding &winding, const idVec3 &projectionOrigin, const bool parallel, const float fadeDepth, const idMaterial *material, const int startTime) = 0;
+#ifdef _SPLASHDAMAGE
+	    // Arnout: FIXME as soon as there is a nicer way to get the current game time in the engine, stop passing in currentTime
+	    virtual void			ProjectDecalOntoWorld( const idFixedWinding &winding, const idVec3 &projectionOrigin, const bool parallel, const float fadeDepth, const idMaterial *material, const int startTime, const int currentTime ) = 0;
+#endif
 
 		// Creates decals on static models.
 		virtual void			ProjectDecal(qhandle_t entityHandle, const idFixedWinding &winding, const idVec3 &projectionOrigin, const bool parallel, const float fadeDepth, const idMaterial *material, const int startTime) = 0;
@@ -541,6 +829,16 @@ class idRenderWorld
 
 		// Removes all decals and overlays from the given entity def.
 		virtual void			RemoveDecals(qhandle_t entityHandle) = 0;
+		
+#ifdef _SPLASHDAMAGE
+	    virtual void			AddCheapDecal( qhandle_t entityHandle, const cheapDecalParameters_t &params, float time ) = 0;
+	    
+    	virtual void			ClearDecals( void ) = 0;
+
+	    //-------------- Env Bounds -----------------
+	
+	    virtual void			AddEnvBounds( idVec3 const &origin, idVec3 const &scale, const char *cubemap ) = 0;
+#endif
 
 		//-------------- Scene Rendering -----------------
 
@@ -549,17 +847,12 @@ class idRenderWorld
 		virtual void			SetRenderView(const renderView_t *renderView) = 0;
 
 #ifdef _RAVEN
+        virtual const class rvRenderEffectLocal* GetEffectDef( qhandle_t effectHandle ) const = 0;
+        virtual bool			EffectDefHasSound( const renderEffect_s *reffect ) = 0;
+        
     // jscott: for portal skies
         virtual bool			HasSkybox( int areaNum ) = 0;
         virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas ) = 0;
-
-    // jscott: handling of effects
-        virtual qhandle_t		AddEffectDef( const renderEffect_t *reffect, int time ) = 0;
-        virtual bool			UpdateEffectDef( qhandle_t effectHandle, const renderEffect_t *reffect, int time ) = 0;
-        virtual void			StopEffectDef( qhandle_t effectHandle ) = 0;
-        virtual const class rvRenderEffectLocal* GetEffectDef( qhandle_t effectHandle ) const = 0;
-        virtual void			FreeEffectDef( qhandle_t effectHandle ) = 0;
-        virtual bool			EffectDefHasSound( const renderEffect_s *reffect ) = 0;
 
         virtual void			DebugClear(int time) = 0;		// a time of 0 will clear all lines and text
     // jscott: want to be able to specify depth test
@@ -588,10 +881,17 @@ class idRenderWorld
 		// multiple bits can be set to block multiple things, ie: ( PS_VIEW | PS_LOCATION | PS_AIR )
 		virtual	void			SetPortalState(qhandle_t portal, int blockingBits) = 0;
 		virtual int				GetPortalState(qhandle_t portal) = 0;
-
+		
+#ifdef _SPLASHDAMAGE
+		virtual void			UpdatePortalOccTestView( int viewID ) = 0;
+#endif
 		// returns true only if a chain of portals without the given connection bits set
 		// exists between the two areas (a door doesn't separate them, etc)
 		virtual	bool			AreasAreConnected(int areaNum1, int areaNum2, portalConnection_t connection) = 0;
+#ifdef _SPLASHDAMAGE
+	    virtual	bool			AreasAreConnected( int areaNum1, int areaNum2, portalFlags_t flag ) = 0;
+	    virtual	bool			AreasAreConnected( int areaNum1, int areaNum2 ) = 0;
+#endif
 
 		// returns the number of portal areas in a map, so game code can build information
 		// tables for the different areas
@@ -611,6 +911,15 @@ class idRenderWorld
 		// returns one portal from an area
 		virtual exitPortal_t	GetPortal(int areaNum, int portalNum) = 0;
 
+#ifdef _SPLASHDAMAGE
+		// set portal flags on areas directly; primarely for editor reasons
+		virtual void			SetAreaPortalFlags( int areaNum, int flags ) = 0;
+    	virtual int				GetAreaPortalFlags( int areaNum ) const = 0;
+    	
+	    // set the ambient lighting & atmosphere to use for this area
+	    virtual void			SetAreaAmbientCubeMap( int areaNum, const sdDeclAmbientCubeMap *cubeMapDecl ) = 0;
+    	virtual void			SetCubemapSunProperties( const sdDeclAmbientCubeMap *cubeMapDecl, const idVec3 &sunDir, const idVec3 &sunColor ) = 0;
+#endif
 		//-------------- Tracing  -----------------
 
 		// Checks a ray trace against any gui surfaces in an entity, returning the
@@ -624,6 +933,9 @@ class idRenderWorld
 
 		// Traces vs the render model, possibly instantiating a dynamic version, and returns true if something was hit
 		virtual bool			ModelTrace(modelTrace_t &trace, qhandle_t entityHandle, const idVec3 &start, const idVec3 &end, const float radius) const = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual bool			ModelTrace( modelTrace_t &trace, qhandle_t entityHandle, const idVec3 &start, const idVec3 &end, const float radius, int surfCollision/* = SURF_COLLISION*/ ) const = 0;
+#endif
 
 		// Traces vs the whole rendered world. FIXME: we need some kind of material flags.
 		virtual bool			Trace(modelTrace_t &trace, const idVec3 &start, const idVec3 &end, const float radius, bool skipDynamic = true, bool skipPlayer = false) const = 0;
@@ -656,10 +968,16 @@ class idRenderWorld
 		virtual void			DebugClearLines(int time) = 0;		// a time of 0 will clear all lines and text
 		virtual void			DebugLine(const idVec4 &color, const idVec3 &start, const idVec3 &end, const int lifetime = 0, const bool depthTest = false) = 0;
 		virtual void			DebugArrow(const idVec4 &color, const idVec3 &start, const idVec3 &end, int size, const int lifetime = 0) = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual void			DebugArrow( const idVec4 &color, const idVec3 &start, const idVec3 &end, int size, const int lifetime/* = 0*/, bool depthTest/* = false*/ ) = 0;
+#endif
 		virtual void			DebugWinding(const idVec4 &color, const idWinding &w, const idVec3 &origin, const idMat3 &axis, const int lifetime = 0, const bool depthTest = false) = 0;
 		virtual void			DebugCircle(const idVec4 &color, const idVec3 &origin, const idVec3 &dir, const float radius, const int numSteps, const int lifetime = 0, const bool depthTest = false) = 0;
 		virtual void			DebugSphere(const idVec4 &color, const idSphere &sphere, const int lifetime = 0, bool depthTest = false) = 0;
 		virtual void			DebugBounds(const idVec4 &color, const idBounds &bounds, const idVec3 &org = vec3_origin, const int lifetime = 0) = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual void			DebugBounds( const idVec4 &color, const idBounds &bounds, const idVec3 &org/* = vec3_origin*/, const idMat3& axes/* = mat3_identity*/, const int lifetime = 0 ) = 0;
+#endif
 		virtual void			DebugBox(const idVec4 &color, const idBox &box, const int lifetime = 0) = 0;
 		virtual void			DebugFrustum(const idVec4 &color, const idFrustum &frustum, const bool showFromOrigin = false, const int lifetime = 0) = 0;
 		virtual void			DebugCone(const idVec4 &color, const idVec3 &apex, const idVec3 &dir, float radius1, float radius2, const int lifetime = 0) = 0;
@@ -671,6 +989,17 @@ class idRenderWorld
 
 		// Text drawing for debug visualization.
 		virtual void			DrawText(const char *text, const idVec3 &origin, float scale, const idVec4 &color, const idMat3 &viewAxis, const int align = 1, const int lifetime = 0, bool depthTest = false) = 0;
+		
+#ifdef _SPLASHDAMAGE
+	    // Atmosphere / Ambient Systems.
+	    virtual void			SetAtmosphere( const sdDeclAtmosphere* atmosphere ) = 0;
+
+    	virtual const sdDeclAtmosphere*	GetAtmosphere() const = 0;
+
+    	virtual void			SetupMatrices( const renderView_t* renderView, float* projectionMatrix, float* modelViewMatrix, const bool allowJitter ) = 0;
+
+    	virtual struct atmosLightProjection_t *FindAtmosLightProjection( int lightID ) = 0;
+#endif
 
 #ifdef _HUMANHEAD
 	    //HUMANHEAD rww
@@ -703,4 +1032,22 @@ class idRenderWorld
         // HUMANHEAD END
 #endif
 };
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+sdUserInterface
+============
+*/
+class sdUserInterface
+{
+public:
+    virtual					~sdUserInterface( void ) {}
+    virtual void			Draw( void ) = 0;
+    virtual void			Activate( void ) = 0;
+    virtual void			OnInputInit( void ) = 0;
+    virtual void			OnInputShutdown( void ) = 0;
+};
+#endif
+
 #endif /* !__RENDERWORLD_H__ */

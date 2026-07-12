@@ -71,6 +71,7 @@ ID_INLINE type *idListNewElement(void)
 	return new type;
 }
 
+#if !defined(_SPLASHDAMAGE) //karin: move to Sort.h for Sort function
 /*
 ================
 idSwap<type>
@@ -83,6 +84,7 @@ ID_INLINE void idSwap(type &a, type &b)
 	a = b;
 	b = c;
 }
+#endif
 
 template< class type >
 class idList
@@ -98,12 +100,31 @@ class idList
 		typedef int     filter_t( const type * );
 #endif
 
+#ifdef _SPLASHDAMAGE
+	    typedef const type		ConstType;
+	    typedef type			Type;
+	    typedef Type*			Iterator;
+	    typedef ConstType*		ConstIterator;
+	    template< class Iter >
+	    explicit		idList( Iter begin, Iter end ) :
+	        list( NULL ),
+	        granularity( DEFAULT_GRANULARITY )
+	    {
+	        Clear();
+	        CopyFromRange( begin, end );
+	    }
+		static const int		DEFAULT_GRANULARITY = 16;
+#endif
+
 		idList(int newgranularity = 16);
 		idList(const idList<type> &other);
 		~idList<type>(void);
 
 		void			Clear(void);										// clear the list
 		int				Num(void) const;									// returns number of elements in list
+#ifdef _SPLASHDAMAGE
+    	bool			Empty( void ) const;								// returns true if number elements in list is 0
+#endif
 		int				NumAllocated(void) const;							// returns number of elements allocated for
 		void			SetGranularity(int newgranularity);				// set new granularity
 		int				GetGranularity(void) const;						// get the current granularity
@@ -123,6 +144,9 @@ class idList
 		void			AssureSize(int newSize);							// assure list has given number of elements, but leave them uninitialized
 		void			AssureSize(int newSize, const type &initValue);	// assure list has given number of elements and initialize any new elements
 		void			AssureSizeAlloc(int newSize, new_t *allocator);	// assure the pointer list has the given number of elements and allocate any new elements
+#ifdef _SPLASHDAMAGE
+    	void			PreAllocate( int newSize );
+#endif
 
 		type 			*Ptr(void);										// returns a pointer to the list
 		const type 	*Ptr(void) const;									// returns a pointer to the list
@@ -133,31 +157,186 @@ class idList
 		int				Insert(const type &obj, int index = 0);			// insert the element at the given index
 		int				FindIndex(const type &obj) const;				// find the index for the given element
 		type 			*Find(type const &obj) const;						// find pointer to the given element
+#ifdef _SPLASHDAMAGE
+	    int				FindIndexBinary ( const type & key, cmp_t *compare = ( cmp_t * )&idListSortCompare<type> ) const;
+	    type *			FindElement( const type & obj ) const;				// find pointer to the given element
+#endif
 		int				FindNull(void) const;								// find the index for the first NULL pointer in the list
+#ifdef _SPLASHDAMAGE
+
+    void			Fill( int num, const type & obj );					// resize the list, if neccessary and set all items to obj
+
+#endif
 		int				IndexOf(const type *obj) const;					// returns the index for the pointer to an element in the list
 		bool			RemoveIndex(int index);							// remove the element at the given index
+#ifdef _SPLASHDAMAGE
+    	bool			RemoveIndexFast( int index );						// remove the element at the given index and put the last
+#endif
 		bool			Remove(const type &obj);							// remove the element
+#ifdef _SPLASHDAMAGE
+    	bool			RemoveFast( const type & obj );						// remove the element, move the last element into its spot
+#endif
 		void			Sort(cmp_t *compare = (cmp_t *)&idListSortCompare<type>);
 		void			SortSubSection(int startIndex, int endIndex, cmp_t *compare = (cmp_t *)&idListSortCompare<type>);
 		void			Swap(idList<type> &other);						// swap the contents of the lists
 		void			DeleteContents(bool clear);						// delete the contents of the list
 #ifdef _RAVEN
-	// gcc 4.0: see ListGame.h
-	void			RemoveContents( bool clear );
-	void                    RemoveNull();
-// ddynerman: range remove
-	bool			RemoveRange( int low, int high );
-	int				TypeSize() const { return sizeof(type); }
+        // gcc 4.0: see ListGame.h
+        void			RemoveContents( bool clear );
+        void                    RemoveNull();
+    // ddynerman: range remove
+        bool			RemoveRange( int low, int high );
+        int				TypeSize() const { return sizeof(type); }
 
-// cdr : added Heap & Stack & Sort functionality
-	void			StackAdd( const type & obj );						// add to the stack
-	void			StackPop( void );									// remove from the stack
-	type &			StackTop( void );									// get the top element of the stack
-	void			HeapAdd( const type & obj );						// add to the heap, and resort
-	void			HeapPop( void );									// pop off the top of the heap & resort
+    // cdr : added Heap & Stack & Sort functionality
+        void			StackAdd( const type & obj );						// add to the stack
+        void			StackPop( void );									// remove from the stack
+        type &			StackTop( void );									// get the top element of the stack
+        void			HeapAdd( const type & obj );						// add to the heap, and resort
+        void			HeapPop( void );									// pop off the top of the heap & resort
 #endif
 
-#ifdef _HUMANHEAD
+#ifdef _SPLASHDAMAGE
+	    // members for compatibility with STL algorithms
+	    Iterator		Begin( void );										// return list[ 0 ]
+	    Iterator		End( void );										// return list[ num ]	(one past end)
+
+	    ConstIterator	Begin( void ) const;								// return list[ 0 ]
+	    ConstIterator	End( void ) const;									// return list[ num ]	(one past end)
+
+	    type&			Front();											// return *list[ 0 ]
+	    const type&		Front() const;										// return *list[ 0 ]
+
+	    type&			Back();												// return *list[ num - 1 ]
+	    const type&		Back() const;										// return *list[ num - 1 ]
+
+	    bool			Remove( Iterator iter );
+
+	    // Comparison functions
+	    // find an object that passes the predicate
+	    // IMPORTANT: unlike Find, this returns End() if the element is not found, NOT NULL
+	    template< class Cmp >
+	    Iterator		FindIteratorIf( Cmp predicate )
+	    {
+	        Iterator begin = Begin();
+	        Iterator end = End();
+	        while( begin != end ) {
+	            if( predicate( *begin ) ) {
+	                break;
+	            }
+	            ++begin;
+	        }
+	        return begin;
+	    }
+
+	    // find an object that passes the predicate
+	    // IMPORTANT: unlike Find, this returns End() if the element is not found, NOT NULL
+	    template< class Cmp >
+	    ConstIterator	FindIteratorIf( Cmp predicate ) const
+	    {
+	        ConstIterator begin = Begin();
+	        ConstIterator end = End();
+	        while( begin != end ) {
+	            if( predicate( *begin ) ) {
+	                break;
+	            }
+	            ++begin;
+	        }
+	        return begin;
+	    }
+
+	    // Comparison functions
+	    // find an object that passes the predicate
+	    // IMPORTANT: unlike Find, this returns End() if the element is not found, NOT NULL
+	    template< class Cmp >
+	    Iterator		FindIteratorIf( const type& element, const Cmp predicate )
+	    {
+	        Iterator begin = Begin();
+	        Iterator end = End();
+	        while( begin != end ) {
+	            if( predicate( element, *begin ) ) {
+	                break;
+	            }
+	            ++begin;
+	        }
+	        return begin;
+	    }
+
+	    // find an object that passes the predicate
+	    // IMPORTANT: unlike Find, this returns End() if the element is not found, NOT NULL
+	    template< class Cmp >
+	    ConstIterator	FindIteratorIf( const type& element, Cmp predicate ) const
+	    {
+	        ConstIterator begin = Begin();
+	        ConstIterator end = End();
+	        while( begin != end ) {
+	            if( predicate( element, *begin ) ) {
+	                break;
+	            }
+	            ++begin;
+	        }
+	        return begin;
+	    }
+
+	    Iterator		FindIterator( type const & obj )
+	    {
+	        Iterator begin = Begin();
+	        Iterator end = End();
+	        while( begin != end ) {
+	            if( *begin == obj ) {
+	                break;
+	            }
+	            ++begin;
+	        }
+	        return begin;
+	    }
+
+	    ConstIterator	FindIterator( type const & obj ) const
+	    {
+	        ConstIterator begin = Begin();
+	        ConstIterator end = End();
+	        while( begin != end ) {
+	            if( *begin == obj ) {
+	                break;
+	            }
+	            ++begin;
+	        }
+	        return begin;
+	    }
+
+	    // Sorting functions
+	    template< class Cmp >
+	    void			Sort( Cmp compare )
+	    {
+	        sdQuickSort( Begin(), End(), compare );
+	    }
+
+	    // Searching functions
+	    // IMPORTANT: unlike FindElement, this returns End() if the element is not found, NOT NULL
+	    template< class Cmp >
+	    Iterator		FindIteratorBinary( const type& searchElement, Cmp compare )
+	    {
+	        return sdBinarySearch( searchElement, Begin(), End(), compare );
+	    }
+
+	    // IMPORTANT: unlike FindElement, this returns End() if the element is not found, NOT NULL
+	    template< class Cmp >
+	    ConstIterator	FindIteratorBinary( const type& searchElement, Cmp compare ) const
+	    {
+	        return sdBinarySearch( searchElement, Begin(), End(), compare );
+	    }
+
+	    template< class Iter >
+	    void			CopyFromRange( Iter begin, Iter end )
+	    {
+	        AssureSize( end - begin );
+	        for( int i = 0; i < num; i++, ++begin ) {
+	            list[ i ] = *begin;
+	        }
+	    }
+#endif
+
+#if defined(_HUMANHEAD) || defined(_SPLASHDAMAGE)
 	protected:
 #elif defined(_HEXENEOC)
 	public:
@@ -468,6 +647,13 @@ ID_INLINE void idList<type>::Resize(int newsize, int newgranularity)
 		Clear();
 		return;
 	}
+	
+#ifdef _SPLASHDAMAGE
+    if ( newsize == size ) {
+        // not changing the size, so just exit
+        return;
+    }
+#endif
 
 	temp	= list;
 	size	= newsize;
@@ -546,6 +732,33 @@ ID_INLINE void idList<type>::AssureSize(int newSize, const type &initValue)
 	num = newNum;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+================
+idList< class type >::PreAllocate
+
+Makes sure the list has at least the given number of elements
+allocated but don't actually change the number of items.
+================
+*/
+template< class type >
+ID_INLINE void idList< type >::PreAllocate( int newSize )
+{
+    int newNum = newSize;
+
+    if ( newSize > size ) {
+
+        if ( granularity == 0 ) {	// this is a hack to fix our memset classes
+            granularity = 16;
+        }
+
+        newSize += granularity - 1;
+        newSize -= newSize % granularity;
+        Resize( newSize );
+    }
+}
+#endif
+
 /*
 ================
 idList<type>::AssureSizeAlloc
@@ -590,6 +803,11 @@ Copies the contents and size attributes of another list.
 template< class type >
 ID_INLINE idList<type> &idList<type>::operator=(const idList<type> &other)
 {
+#ifdef _SPLASHDAMAGE
+    if( &other == this ) {
+        return *this;
+    }
+#endif
 	int	i;
 
 	Clear();
@@ -794,6 +1012,11 @@ ID_INLINE int idList<type>::Append(const idList<type> &other)
 
 		Resize(granularity);
 	}
+#ifdef _SPLASHDAMAGE
+ 	else {
+        Resize( num + other.Num() );
+    }
+#endif
 
 	int n = other.Num();
 
@@ -824,6 +1047,28 @@ ID_INLINE int idList<type>::AddUnique(type const &obj)
 
 	return index;
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+================
+idList<type>::FindIndexBinary
+Assumes the list is sorted and does a binary search for the given key
+================
+*/
+template< class type >
+ID_INLINE int idList<type>::FindIndexBinary ( const type & key, cmp_t *compare ) const
+{
+
+    typedef int cmp_c(const void *, const void *);
+    cmp_c *vCompare = (cmp_c *)compare;
+
+    type* found = (type*) bsearch( ( void * )( &key ), ( void * )list, ( size_t )num, sizeof( type ), vCompare );
+    if (found) {
+        return IndexOf(found);
+    }
+    return -1;
+}
+#endif
 
 /*
 ================
@@ -867,6 +1112,28 @@ ID_INLINE type *idList<type>::Find(type const &obj) const
 
 	return NULL;
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+================
+idList<type>::Find
+
+Searches for the specified data in the list and returns its address. Returns NULL if the data is not found.
+================
+*/
+template< class type >
+ID_INLINE type *idList<type>::FindElement( type const & obj ) const
+{
+    int i;
+
+    i = FindIndex( obj );
+    if ( i >= 0 ) {
+        return &list[ i ];
+    }
+
+    return NULL;
+}
+#endif
 
 /*
 ================
@@ -947,6 +1214,42 @@ ID_INLINE bool idList<type>::RemoveIndex(int index)
 	return true;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+===============
+idList<type>::RemoveIndexFast
+
+Removes the element at the specified index and moves the last element into
+it's spot, rather than moving the whole array down by one.  Of course, this
+doesn't maintain the order of elements!
+The number of elements in the list is reduced by one.  Returns false if the
+index is outside the bounds of the list. Note that the element is not destroyed,
+so any memory used by it may not be freed until the destruction of the list.
+===============
+*/
+template< class type >
+ID_INLINE bool idList< type >::RemoveIndexFast( int index )
+{
+    assert( list != NULL );
+    assert( index >= 0 );
+    assert( index < num );
+
+    if ( ( index < 0 ) || ( index >= num ) ) {
+        return false;
+    }
+
+    num--;
+
+    // nothing to do
+    if( index == num )  {
+        return true;
+    }
+
+    list[ index ] = list[ num ];
+
+    return true;
+}
+#endif
 /*
 ================
 idList<type>::Remove
@@ -969,6 +1272,193 @@ ID_INLINE bool idList<type>::Remove(type const &obj)
 
 	return false;
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+================
+idList<type>::RemoveFast
+
+Removes the element if it is found within the list and moves the last element into the gap.
+The number of elements in the list is reduced by one.  Returns false if the data is not found in the list.  Note that
+the element is not destroyed, so any memory used by it may not be freed until the destruction of the list.
+================
+*/
+template< class type >
+ID_INLINE bool idList<type>::RemoveFast( type const & obj )
+{
+    int index;
+
+    index = FindIndex( obj );
+    if ( index >= 0 ) {
+        return RemoveIndexFast( index );
+    }
+
+    return false;
+}
+/*
+================
+idList<type>::Begin
+
+Returns the first element of the list
+================
+*/
+template< class type >
+ID_INLINE typename idList<type>::Iterator idList<type>::Begin( void )
+{
+    if( num == 0 ) {
+        return End();
+    }
+    return list;
+}
+
+/*
+================
+idList<type>::End
+
+Returns one past the end of the list
+================
+*/
+template< class type >
+ID_INLINE typename idList<type>::Iterator idList<type>::End( void )
+{
+    return list + num;
+}
+
+/*
+================
+idList<type>::Begin
+
+Returns the first element of the list
+================
+*/
+template< class type >
+ID_INLINE typename idList<type>::ConstIterator idList<type>::Begin( void ) const
+{
+    if( num == 0 ) {
+        return End();
+    }
+    return list;
+}
+
+/*
+================
+idList<type>::End
+
+Returns one past the end of the list
+================
+*/
+template< class type >
+ID_INLINE typename idList<type>::ConstIterator idList<type>::End( void ) const
+{
+    return list + num;
+}
+
+/*
+================
+idList<type>::Back
+
+returns the last element
+================
+*/
+template< class type >
+ID_INLINE type& idList<type>::Back()
+{
+    assert( num != 0 );
+    return list[ num - 1 ];
+}
+
+/*
+================
+idList<type>::Back
+
+returns the last element
+================
+*/
+template< class type >
+ID_INLINE const type& idList<type>::Back() const
+{
+    assert( num != 0 );
+    return list[ num - 1 ];
+}
+
+/*
+================
+idList<type>::Front
+
+returns the first element
+================
+*/
+template< class type >
+ID_INLINE type& idList<type>::Front()
+{
+    assert( num != 0 );
+    return list[ 0 ];
+}
+
+/*
+================
+idList<type>::Front
+
+returns the first element
+================
+*/
+template< class type >
+ID_INLINE const type& idList<type>::Front() const
+{
+    assert( num != 0 );
+    return list[ 0 ];
+}
+
+/*
+================
+idList<type>::Remove
+================
+*/
+template< class type >
+ID_INLINE bool idList<type>::Remove( Iterator iter )
+{
+    int index = iter - list;
+    return RemoveIndex( index );
+}
+
+/*
+================
+idList<type>::Empty
+================
+*/
+template< class type >
+ID_INLINE bool idList<type>::Empty() const
+{
+    return num == 0 || list == NULL;
+}
+
+/*
+============
+idList<type>::Fill
+============
+*/
+template< class type >
+ID_INLINE void idList<type>::Fill( int num, const type & obj )
+{
+
+    // inserting one of the list items does not work because the list may be reallocated
+    assert( &obj < list || &obj >= list + num );
+
+    AssureSize( num );
+    for( int i = 0; i < num; i++ ) {
+        list[ i ] = obj;
+    }
+}
+
+template< class type >
+class idListGranularityOne : public idList<type>
+{
+public:
+    idListGranularityOne( int gran = 1 ) : idList<type>( gran )
+    {
+    }
+};
+#endif
 
 /*
 ================

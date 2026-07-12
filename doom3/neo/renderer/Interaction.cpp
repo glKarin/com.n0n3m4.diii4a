@@ -31,6 +31,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef _SPLASHDAMAGE //karin: vis dist check
+extern idCVar harm_r_skipVisDistCheck;
+extern idCVar harm_r_visDistCheckType;
+#endif
+
 /*
 ===========================================================================
 
@@ -420,8 +425,14 @@ static srfTriangles_t *R_CreateLightTris(const idRenderEntityLocal *ent,
 
 	// it is debatable if non-shadowing lights should light back faces. we aren't at the moment
 	if (r_lightAllBackFaces.GetBool() || light->lightShader->LightEffectsBackSides()
-	    || shader->ReceivesLightingOnBackSides()
-	    || ent->parms.noSelfShadow || ent->parms.noShadow) {
+		|| shader->ReceivesLightingOnBackSides()
+#ifdef _SPLASHDAMAGE
+	    || ent->parms.flags.noSelfShadow || ent->parms.flags.noShadow
+#else
+	    || ent->parms.noSelfShadow || ent->parms.noShadow
+#endif
+	)
+	{
 		includeBackFaces = true;
 	} else {
 		includeBackFaces = false;
@@ -811,7 +822,11 @@ idInteraction::HasShadows
 */
 ID_INLINE bool idInteraction::HasShadows(void) const
 {
+#ifdef _SPLASHDAMAGE
+	return (!lightDef->parms.flags.noShadows && !entityDef->parms.flags.noShadow && lightDef->lightShader->LightCastsShadows());
+#else
 	return (!lightDef->parms.noShadows && !entityDef->parms.noShadow && lightDef->lightShader->LightCastsShadows());
+#endif
 }
 
 /*
@@ -897,7 +912,12 @@ idScreenRect idInteraction::CalcInteractionScissorRectangle(const idFrustum &vie
 	}
 
 	// calculate bounds of the interaction frustum projected into the view frustum
-	if (lightDef->parms.pointLight) {
+#ifdef _SPLASHDAMAGE
+	if (lightDef->parms.flags.pointLight)
+#else
+	if (lightDef->parms.pointLight)
+#endif
+	{
 		viewFrustum.ClippedProjectionBounds(frustum, idBox(lightDef->parms.origin, lightDef->parms.lightRadius, lightDef->parms.axis), projectionBounds);
 	} else {
 		viewFrustum.ClippedProjectionBounds(frustum, idBox(lightDef->frustumTris->bounds), projectionBounds);
@@ -945,7 +965,12 @@ bool idInteraction::CullInteractionByViewFrustum(const idFrustum &viewFrustum)
 			return false;
 		}
 
-		if (lightDef->parms.pointLight) {
+#ifdef _SPLASHDAMAGE
+		if (lightDef->parms.flags.pointLight)
+#else
+		if (lightDef->parms.pointLight)
+#endif
+		{
 			frustum.ConstrainToBox(idBox(lightDef->parms.origin, lightDef->parms.lightRadius, lightDef->parms.axis));
 		} else {
 			frustum.ConstrainToBox(idBox(lightDef->frustumTris->bounds));
@@ -986,6 +1011,8 @@ The results of this are cached and valid until the light or entity change.
 */
 #ifdef _RAVEN
 void idInteraction::CreateInteraction(const idRenderModel *model, int suppressSurfaceMask)
+#elif defined(_SPLASHDAMAGE) //karin: hide surfaces
+void idInteraction::CreateInteraction(const idRenderModel *model, const renderEntity_t *parms)
 #else
 void idInteraction::CreateInteraction(const idRenderModel *model)
 #endif
@@ -1045,6 +1072,10 @@ void idInteraction::CreateInteraction(const idRenderModel *model)
 		if(SUPPRESS_SURFACE_MASK_CHECK(suppressSurfaceMask, c))
 			continue;
 #endif
+#ifdef _SPLASHDAMAGE //karin: hide surfaces
+		if(parms && parms->hideSurfaceMask.Get(c))
+			continue;
+#endif
 
 		const modelSurface_t	*surf;
 		srfTriangles_t	*tri;
@@ -1058,7 +1089,11 @@ void idInteraction::CreateInteraction(const idRenderModel *model)
 		}
 
 		// determine the shader for this surface, possibly by skinning
+#ifdef _SPLASHDAMAGE
+		shader = surf->material;
+#else
 		shader = surf->shader;
+#endif
 		shader = R_RemapShaderBySkin(shader, entityDef->parms.customSkin, entityDef->parms.customShader);
 
 		if (!shader) {
@@ -1113,8 +1148,60 @@ void idInteraction::CreateInteraction(const idRenderModel *model)
 		// if the interaction has shadows and this surface casts a shadow
 		if (HasShadows() && shader->SurfaceCastsShadow() && tri->silEdges != NULL) {
 
+#ifdef _SPLASHDAMAGE //karin: prelight shadow model of interaction
+			if (entityDef->parms.mapId && !lightDef->parms.flags.atmosphereLight /*&& model->IsStaticWorldModel()*/ && r_useOptimizedShadows.GetBool())
+			{
+				const char *shadowModelName = va("_prelightinteraction_%d_%d_%d", lightDef->parms.mapId, entityDef->parms.mapId, c);
+				idRenderModel *shadowModel = renderModelManager->GetModel(shadowModelName, false);
+				if (shadowModel)
+				{
+					if (shadowModel->NumSurfaces()) {
+						srfTriangles_t	*shadowTri = shadowModel->Surface(0)->geometry;
+
+						if (shadowTri->shadowVertexes) {
+							// copy new, because cause double free when free idRenderWorld
+							sint->shadowTris = R_AllocStaticTriSurf();
+							sint->shadowTris->numVerts = shadowTri->numVerts;
+							sint->shadowTris->numShadowIndexesNoCaps = shadowTri->numShadowIndexesNoCaps;
+							sint->shadowTris->numShadowIndexesNoFrontCaps = shadowTri->numShadowIndexesNoFrontCaps;
+							sint->shadowTris->numIndexes = shadowTri->numIndexes;
+							sint->shadowTris->shadowCapPlaneBits = shadowTri->shadowCapPlaneBits;
+							R_AllocStaticTriSurfShadowVerts(sint->shadowTris, sint->shadowTris->numVerts);
+							SIMDProcessor->Memcpy(sint->shadowTris->shadowVertexes, shadowTri->shadowVertexes, sint->shadowTris->numVerts * sizeof(sint->shadowTris->shadowVertexes[0]));
+							R_AllocStaticTriSurfIndexes(sint->shadowTris, sint->shadowTris->numIndexes);
+							SIMDProcessor->Memcpy(sint->shadowTris->indexes, shadowTri->indexes, sint->shadowTris->numIndexes * sizeof(sint->shadowTris->indexes[0]));
+
+							if (shader->Coverage() != MC_OPAQUE || (!r_skipSuppress.GetBool() && entityDef->parms.suppressSurfaceInViewID)) {
+								// if any surface is a shadow-casting perforated or translucent surface, or the
+								// base surface is suppressed in the view (world weapon shadows) we can't use
+								// the external shadow optimizations because we can see through some of the faces
+								sint->shadowTris->numShadowIndexesNoCaps = sint->shadowTris->numIndexes;
+								sint->shadowTris->numShadowIndexesNoFrontCaps = sint->shadowTris->numIndexes;
+							}
+						}
+						else
+						{
+							common->Warning("idInteraction::CreateInteraction: prelight model '%s' without shadowVertexes", shadowModel->Name());
+						}
+					}
+					else
+					{
+						common->Warning("no surfs in prelight model '%s'", shadowModel->Name());
+					}
+				}
+			}
+
+			if (!sint->shadowTris)
+			{
+#endif
+
 			// if the light has an optimized shadow volume, don't create shadows for any models that are part of the base areas
-			if (lightDef->parms.prelightModel == NULL || !model->IsStaticWorldModel() || !r_useOptimizedShadows.GetBool()) {
+#ifdef _SPLASHDAMAGE //karin: multi prelights in light
+			if ((lightDef->parms.prelightModel == NULL && lightDef->parms.numPrelightModels == 0) || lightDef->parms.flags.atmosphereLight || !model->IsStaticWorldModel() || !r_useOptimizedShadows.GetBool())
+#else
+			if (lightDef->parms.prelightModel == NULL || !model->IsStaticWorldModel() || !r_useOptimizedShadows.GetBool())
+#endif
+			{
 
 				// this is the only place during gameplay (outside the utilities) that R_CreateShadowVolume() is called
 				sint->shadowTris = R_CreateShadowVolume(entityDef, tri, lightDef, shadowGen, sint->cullInfo);
@@ -1131,6 +1218,9 @@ void idInteraction::CreateInteraction(const idRenderModel *model)
 
 				interactionGenerated = true;
 			}
+#ifdef _SPLASHDAMAGE //karin: prelight shadow model of interaction
+			}
+#endif
 		}
 
 #ifdef _SHADOW_MAPPING //karin: perforated surface for shadow mapping
@@ -1194,7 +1284,12 @@ static bool R_PotentiallyInsideInfiniteShadow(const srfTriangles_t *occluder,
 	// chops a volume edge, the zpass rendering would fail.
 	float	znear = r_znear.GetFloat();
 
-	if (tr.viewDef->renderView.cramZNear) {
+#ifdef _SPLASHDAMAGE
+	if (tr.viewDef->renderView.flags.cramZNear)
+#else
+	if (tr.viewDef->renderView.cramZNear)
+#endif
+	{
 		znear *= 0.25f;
 	}
 
@@ -1363,6 +1458,60 @@ void idInteraction::AddActiveInteraction(void)
 			return;
 	}
 #endif
+#ifdef _SPLASHDAMAGE //karin: vis dist check for shadow
+	//karin: skip entity with inst infos
+	if (entityDef->parms.numInsts || entityDef->parms.insts) {
+		return;
+	}
+
+	//karin: check visible distance range
+	if ((entityDef->parms.minVisDist > 0.0f || entityDef->parms.maxVisDist > 0.0f)
+		//&& entityDef->parms.flags.disableLODs
+		&& !entityDef->parms.imposter //karin: using imposter if too far
+		&& !harm_r_skipVisDistCheck.GetBool())
+	{
+		float distance;
+		if(harm_r_visDistCheckType.GetInteger() == 0)
+		{
+			idBounds bounds = entityDef->GetVisDistWorldBounds(model);
+			distance = bounds.ShortestDistance(tr.viewDef->renderView.vieworg);
+			//session->rw->DebugBounds(colorGreen, bounds, vec3_origin, 1);
+		}
+		else if(harm_r_visDistCheckType.GetInteger() == 2)
+		{
+			idBounds bounds = entityDef->GetVisDistWorldBounds(model);
+			idVec3 center = bounds.GetCenter();
+			distance = tr.viewDef->renderView.vieworg.Dist(center) - bounds.GetRadius(center);
+			//idBounds b(center);
+			//b.ExpandSelf(bounds.GetRadius(center));
+			//session->rw->DebugBounds(colorRed, b, vec3_origin, 1);
+		}
+		else
+		{
+			idVec3 origin = entityDef->GetVisDistOrigin();
+			distance = tr.viewDef->renderView.vieworg.Dist(origin);
+		}
+
+		if (entityDef->parms.minVisDist > 0.0f && distance < entityDef->parms.minVisDist)
+			return;
+		if (entityDef->parms.maxVisDist > 0.0f)
+		{
+			float maxVisDist;
+#if 1
+			if (entityDef->parms.shadowVisDistMult > 0.0f)
+				maxVisDist = entityDef->parms.maxVisDist * (1.0f - entityDef->parms.shadowVisDistMult);
+#else // test
+			static idCVar harm_r_shadowVisDistMult("harm_r_shadowVisDistMult", "0", CVAR_RENDERER | CVAR_FLOAT, "test shadowVisDistMult");
+			if (harm_r_shadowVisDistMult.GetFloat() > 0.0f)
+				maxVisDist = entityDef->parms.maxVisDist * (1.0f - harm_r_shadowVisDistMult.GetFloat());
+#endif
+			else
+				maxVisDist = entityDef->parms.maxVisDist;
+			if (distance > maxVisDist)
+				return;
+		}
+	}
+#endif
 
 	// the dynamic model may have changed since we built the surface list
 	if (!IsDeferred() && entityDef->dynamicModelFrameCount != dynamicModelFrameCount) {
@@ -1375,6 +1524,8 @@ void idInteraction::AddActiveInteraction(void)
 	if (IsDeferred()) {
 #ifdef _RAVEN
 		CreateInteraction(model, entityDef->parms.suppressSurfaceMask);
+#elif defined(_SPLASHDAMAGE) //karin: hide surfaces
+		CreateInteraction(model, &entityDef->parms);
 #else
 		CreateInteraction(model);
 #endif
@@ -1444,7 +1595,13 @@ void idInteraction::AddActiveInteraction(void)
 					if (sint->shader->Coverage() == MC_TRANSLUCENT) {
 						R_LinkLightSurf(&vLight->translucentInteractions, lightTris,
 						                vEntity, lightDef, shader, lightScissor, false);
-					} else if (!lightDef->parms.noShadows && sint->shader->TestMaterialFlag(MF_NOSELFSHADOW)) {
+					} else if (
+#ifdef _SPLASHDAMAGE
+						!lightDef->parms.flags.noShadows && sint->shader->TestMaterialFlag(MF_NOSELFSHADOW)
+#else
+						!lightDef->parms.noShadows && sint->shader->TestMaterialFlag(MF_NOSELFSHADOW)
+#endif
+					) {
 						R_LinkLightSurf(&vLight->localInteractions, lightTris,
 						                vEntity, lightDef, shader, lightScissor, false);
 					} else {

@@ -225,6 +225,9 @@ class idAsyncClient
 		bool				CheckTimeout(void);
 		void				ProcessDownloadInfoMessage(const netadr_t from, const idBitMsg &msg);
 		int					GetDownloadRequest(const int checksums[ MAX_PURE_PAKS ], int count, int gamePakChecksum);
+#ifdef _SPLASHDAMAGE
+		friend class idNetworkSystem;
+#endif
 };
 
 #endif /* !__ASYNCCLIENT_H__ */

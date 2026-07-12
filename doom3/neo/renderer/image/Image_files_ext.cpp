@@ -159,6 +159,7 @@ void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_
 
     int w=0, h=0, comp=0;
     byte* decodedImageData = stbi_dds_load_from_memory( fbuffer, len, &w, &h, &comp, STBI_rgb_alpha );
+	//Sys_Printf("DXT: %s: %d x %d comp=%d\n", filename, w, h, comp);
 
     Mem_Free( fbuffer );
 
@@ -178,6 +179,152 @@ void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_
     *height = h;
     // now that decodedImageData has been copied into *pic, it's not needed anymore
     stbi_image_free( decodedImageData );
+}
+
+#define DDS_FOURCC_ATI2 DDS_MAKEFOURCC('A', 'T', 'I', '2')
+#define DDS_FOURCC_DXN2 DDS_FOURCC_ATI2
+bool Image_CheckDXT(const byte *s, int length, int *r_img_x, int *r_img_y, int *r_img_n, int *r_is_compressed, int *r_has_alpha, int *r_has_mipmap, int *r_cubemap_faces, int *r_DXT_family) {
+	//	all variables go up front
+	int flags, DXT_family;
+	int has_alpha, has_mipmap;
+	int is_compressed, cubemap_faces;
+	int img_x, img_y, img_n;
+	DDS_header header;
+	//	load the header
+	if (length < 128)
+		return false;
+	if( sizeof( DDS_header ) != 128 )
+		return false;
+    memcpy(&header, s, 128);
+	//	and do some checking
+	if( header.dwMagic != (('D' << 0) | ('D' << 8) | ('S' << 16) | (' ' << 24)) ) return false;
+	if( header.dwSize != 124 ) return false;
+	flags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT;
+	if( (header.dwFlags & flags) != flags ) return false;
+	/*	According to the MSDN spec, the dwFlags should contain
+		DDSD_LINEARSIZE if it's compressed, or DDSD_PITCH if
+		uncompressed.  Some DDS writers do not conform to the
+		spec, so I need to make my reader more tolerant	*/
+	if( header.sPixelFormat.dwSize != 32 ) return false;
+	flags = DDPF_FOURCC | DDPF_RGB;
+	if( (header.sPixelFormat.dwFlags & flags) == 0 ) return false;
+	if( (header.sCaps.dwCaps1 & DDSCAPS_TEXTURE) == 0 ) return false;
+	DXT_family = 1 + (header.sPixelFormat.dwFourCC >> 24) - '1';
+	if( (DXT_family < 1) || (DXT_family > 5) ) return false;
+	//	get the image data
+	img_x = header.dwWidth;
+	img_y = header.dwHeight;
+	is_compressed = (header.sPixelFormat.dwFlags & DDPF_FOURCC) / DDPF_FOURCC;
+	has_alpha = (header.sPixelFormat.dwFlags & DDPF_ALPHAPIXELS) / DDPF_ALPHAPIXELS;
+	has_mipmap = (header.sCaps.dwCaps1 & DDSCAPS_MIPMAP) && (header.dwMipMapCount > 1);
+	cubemap_faces = (header.sCaps.dwCaps2 & DDSCAPS2_CUBEMAP) / DDSCAPS2_CUBEMAP;
+	/*	I need cubemaps to have square faces	*/
+	// cubemap_faces &= (s->img_x == s->img_y);
+	// cubemap_faces *= 5;
+	// cubemap_faces += 1;
+	// block_pitch = (s->img_x+3) >> 2;
+	// num_blocks = block_pitch * ((s->img_y+3) >> 2);
+
+	if (is_compressed) {
+		img_n = 4;
+	}
+	else {
+		if (has_alpha)
+			img_n = 4;
+		else
+			img_n = 3;
+	}
+#define DDPF_BUMP (0x00080000)
+#define DDSCAPS2_BUMPMAP (0x00000008)
+
+	if (r_img_x) *r_img_x = img_x;
+	if (r_img_y) *r_img_y = img_y;
+	if (r_img_n) *r_img_n = img_n;
+	if (r_is_compressed) *r_is_compressed = is_compressed;
+	if (r_has_alpha) *r_has_alpha = has_alpha;
+	if (r_has_mipmap) *r_has_mipmap = has_mipmap;
+	if (r_cubemap_faces) *r_cubemap_faces = cubemap_faces;
+	if (r_DXT_family) *r_DXT_family = header.sPixelFormat.dwFourCC;
+
+	return true;
+}
+
+void LoadDXT(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp)
+{
+
+	byte	*fbuffer;
+	int	len;
+
+	if (pic) {
+		*pic = NULL;		// until proven otherwise
+	}
+
+	{
+		idFile *f;
+
+		f = fileSystem->OpenFileRead(filename);
+
+		if (!f) {
+			return;
+		}
+
+		len = f->Length();
+
+		if (timestamp) {
+			*timestamp = f->Timestamp();
+		}
+
+		if (!pic) {
+			fileSystem->CloseFile(f);
+			return;	// just getting timestamp
+		}
+
+		fbuffer = (byte *)Mem_ClearedAlloc(len);
+		f->Read(fbuffer, len);
+		fileSystem->CloseFile(f);
+	}
+
+	int w=0, h=0, comp=0, isCompressed=0, hasAlpha=0, DXTFamily = 0;
+	if (!Image_CheckDXT(fbuffer, len, &w, &h, &comp, & isCompressed, &hasAlpha, NULL, NULL, &DXTFamily)) {
+		Mem_Free( fbuffer );
+		common->Warning( "LoadDXT: not DXT file%s\n", filename);
+		return;
+	}
+
+	//Sys_Printf("DXT: %s: %d x %d comp=%d compression=%d alpha=%d DXT%d\n", filename, w, h, comp, isCompressed, hasAlpha, DXTFamily);
+
+	if (DXTFamily == DDS_FOURCC_ATI2) { // ATI2 | DXN2 normal map
+		int size = w*h*4;
+		byte *decodedImageData = (byte *)R_StaticAlloc( size );
+		idDxtDecoder decoder;
+		decoder.DecompressNormalMapDXN2(fbuffer, decodedImageData, w, h);
+		*pic = decodedImageData;
+	}
+	else {
+		byte* decodedImageData = stbi_dds_load_from_memory( fbuffer, len, &w, &h, &comp, STBI_rgb_alpha );
+
+		if ( decodedImageData != NULL ) {
+			// *pic must be allocated with R_StaticAlloc(), but stb_image allocates with malloc()
+			// (and as there is no R_StaticRealloc(), #define STBI_MALLOC etc won't help)
+			// so the decoded data must be copied once
+			int size = w*h*4;
+			*pic = (byte *)R_StaticAlloc( size );
+			memcpy( *pic, decodedImageData, size );
+
+			// now that decodedImageData has been copied into *pic, it's not needed anymore
+			stbi_image_free( decodedImageData );
+		} else {
+			common->Warning( "stb_image was unable to load PNG %s : %s\n",
+							 filename, stbi_failure_reason());
+		}
+	}
+
+	Mem_Free( fbuffer );
+
+	if (*pic) {
+		*width = w;
+		*height = h;
+	}
 }
 
 // Utility

@@ -166,3 +166,27 @@ void idSphere::FromPoints(const idVec3 *points, const int numPoints)
 
 	radius = idMath::Sqrt(radiusSqr);
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idSphere::IntersectsBounds
+============
+*/
+bool idSphere::IntersectsBounds( const idBounds& bounds ) const
+{
+    const idVec3& mins = bounds.GetMins();
+    const idVec3& maxs = bounds.GetMaxs();
+
+    float dmin = 0;
+    int i;
+    for( i = 0; i < 3; i++ ) {
+        if( origin[ i ] < mins[ i ] ) {
+            dmin += Square( origin[ i ] - mins[ i ] );
+        } else if( origin[ i ] > maxs[ i ] ) {
+            dmin += Square( origin[ i ] - maxs[ i ] );
+        }
+    }
+    return dmin <= Square( radius );
+}
+#endif

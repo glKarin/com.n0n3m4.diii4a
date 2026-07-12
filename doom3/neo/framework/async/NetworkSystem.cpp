@@ -282,9 +282,16 @@ const char* idNetworkSystem::GetServerAddress(void)
 		return "";
 }
 
-int idNetworkSystem::GetNumScannedServers(void) { return 0; }
+int idNetworkSystem::GetNumScannedServers(void) {
+	return idAsyncNetwork::client.serverList.Num();
+}
 
-const scannedServer_t* idNetworkSystem::GetScannedServerInfo(int serverNum) { (void)serverNum; return 0; }
+const scannedServer_t* idNetworkSystem::GetScannedServerInfo(int serverNum) {
+	if (serverNum < 0 || serverNum >= idAsyncNetwork::client.serverList.Num())
+		return NULL;
+
+	return &idAsyncNetwork::client.serverList[serverNum];
+}
 
 void idNetworkSystem::UseSortFunction(const sortInfo_t& sortInfo, bool use) { (void)sortInfo; (void)use; }
 
@@ -294,12 +301,175 @@ bool idNetworkSystem::RemoveSortFunction(const sortInfo_t& sortInfo) { (void)sor
 
 const char* idNetworkSystem::GetClientGUID(int clientNum) { (void)clientNum; return 0; }
 
-int idNetworkSystem::ServerGetClientNum(int clientId) { (void)clientId; return 0; }
+int idNetworkSystem::ServerGetClientNum(int clientId) {
+	for (int i = 0; i < MAX_ASYNC_CLIENTS; i++) {
+		if (idAsyncNetwork::server.clients[i].clientId == clientId)
+			return i;
+	}
+	return -1;
+}
 
-int idNetworkSystem::ServerGetServerTime(void) { return 0; }
+int idNetworkSystem::ServerGetServerTime(void) {
+	return idAsyncNetwork::server.gameTime;
+}
 
 void idNetworkSystem::AddFriend(int clientNum) { (void)clientNum; }
 
 void idNetworkSystem::RemoveFriend(int clientNum) { (void)clientNum; }
+#endif
+
+#ifdef _SPLASHDAMAGE
+#include "../Session_local.h"
+#include "sdnet/SDNet.h"
+
+void idNetworkSystem::ServerGetClientNetworkInfo( int clientNum, clientNetworkAddress_t& info ) {
+	const netadr_t &addr = idAsyncNetwork::server.clients[clientNum].channel.GetRemoteAddress();
+	memcpy(&info.ip[0], &addr.ip[0], sizeof(info.ip));
+	info.port = addr.port;
+}
+
+void idNetworkSystem::ServerGetClientNetId( int clientNum, sdNetClientId& netClientId ) {
+	netClientId.id[0] = clientNum;
+	netClientId.id[1] = clientNum;
+}
+
+void idNetworkSystem::ServerKickClient( int clientNum, const char* reason, bool localizedReason ) {
+	idAsyncNetwork::server.DropClient(clientNum, reason);
+}
+
+int idNetworkSystem::AllocateClientSlotForBot( int maxPlayersOnServer ) {
+	return idAsyncNetwork::server.AllocOpenClientSlotForAI(maxPlayersOnServer);
+}
+
+int idNetworkSystem::ServerSetBotUserCommand( int clientNum, int frameNum, const usercmd_t& cmd ) {
+	return idAsyncNetwork::server.ServerSetBotUserCommand(clientNum, frameNum, cmd);
+}
+
+int idNetworkSystem::ServerSetBotUserName( int clientNum, const char* playerName ) {
+	sessLocal.mapSpawnData.userInfo[clientNum].Set("ui_name", playerName);
+	// must sync to game: else it maybe cause forever loop on sdBotThreadData::ChangeBotName
+	game->ValidateUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ]);
+	game->UserInfoChanged(clientNum);
+	return clientNum;
+}
+
+void idNetworkSystem::WriteClientUserCmds( int clientNum, idBitMsg& msg ) {
+}
+
+void idNetworkSystem::ReadClientUserCmds( int clientNum, const idBitMsg& msg ) {
+}
+
+bool idNetworkSystem::IsDedicated( void ) {
+#ifdef ID_DEDICATED
+	return true;
+#else
+	return false;
+#endif
+}
+
+bool idNetworkSystem::IsLANServer( void ) {
+	return true;
+}
+
+bool idNetworkSystem::IsActive( void ) {
+	return idAsyncNetwork::server.IsActive() || idAsyncNetwork::client.IsActive();
+}
+
+
+netadr_t idNetworkSystem::ClientGetServerAddress( void ) const {
+	return idAsyncNetwork::client.serverAddress;
+}
+
+void idNetworkSystem::idNetworkSystem::EnableVoip( voiceMode_t mode ) {
+}
+
+void idNetworkSystem::idNetworkSystem::DisableVoip( void ) {
+}
+
+int idNetworkSystem::GetLastVoiceSentTime( void ) {
+	return 0;
+}
+
+int idNetworkSystem::GetLastVoiceReceivedTime( int clientIndex ) {
+	return 0;
+}
+
+int idNetworkSystem::ClientGetFrameTime( void ) {
+	return idAsyncNetwork::client.clientTime;
+}
+
+int idNetworkSystem::GetDemoState( int& time, int& position, int& length, int& startPosition, int& endPosition, int &cutStartMarker, int &cutEndMarker ) {
+	enum { // in demos/DemoManager.h
+		DS_NONE = -1,
+		DS_RECORDING = 0,
+		DS_PLAYING = 1,
+		DS_PAUSED = 2
+	};
+	return DS_NONE;
+}
+
+const char* idNetworkSystem::GetDemoName( void ) {
+	return "";
+}
+
+bool idNetworkSystem::idNetworkSystem::CanPlayDemo( const char* fileName ) {
+	return false;
+}
+
+const idDict& idNetworkSystem::GetUserInfo( int clientNum ) {
+	return sessLocal.mapSpawnData.userInfo[ clientNum ];
+}
+
+bool idNetworkSystem::idNetworkSystem::IsRankedServer( void ) {
+	return false;
+}
+
+void idNetworkSystem::idNetworkSystem::StartSoundTest( int duration ) {
+}
+
+bool idNetworkSystem::idNetworkSystem::IsSoundTestActive( void ) {
+	return false;
+}
+
+bool idNetworkSystem::idNetworkSystem::IsSoundTestPlaybackActive( void ) {
+	return false;
+}
+
+float idNetworkSystem::idNetworkSystem::GetSoundTestProgress( void ) {
+	return 1.0f;
+}
+
+voiceMode_t idNetworkSystem::GetVoiceMode( void ) {
+	return VO_GLOBAL;
+}
+
+void idNetworkSystem::idNetworkSystem::RegisterServerInterest( const netadr_t& address ) {
+}
+
+#ifdef SD_SUPPORT_REPEATER
+void idNetworkSystem::RepeaterSendReliableMessage( int clientNum, const idBitMsg& msg, bool ignoreRelays ) {
+
+}
+		
+void idNetworkSystem::RepeaterSetInfo( const idDict& info ) {
+
+}
+
+const idDict& idNetworkSystem::RepeaterGetClientInfo( int clientNum ) {
+	return sessLocal.mapSpawnData.userInfo[ clientNum ];
+}
+
+void idNetworkSystem::SetClientRepeaterUserOrigin( const repeaterUserOrigin_t& origin ) {
+
+}
+
+#endif // SD_SUPPORT_REPEATER
+
+#if !defined( SD_PUBLIC_TOOLS )
+bool idNetworkSystem::idNetworkSystem::HTTPEnable( bool enable ) {
+	return false;
+}
+#endif // !SD_PUBLIC_TOOLS
+
 #endif
 

@@ -30,7 +30,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "roq.h"
 
+#if !defined(_SPLASHDAMAGE) //karin: has included
 void R_LoadImage(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, bool makePowerOf2, bool disableRoundDown = false);
+#endif
 
 NSBitmapImageRep::NSBitmapImageRep(void)
 {

@@ -31,6 +31,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef _SPLASHDAMAGE
+#include "renderer/RenderProgramManager.h"
+#include "framework/CmdSystemDeclCompletion.h"
+#include "renderer/ImposterGeometry.h"
+#endif
+
 // functions that are not called every frame
 
 glconfig_t	glConfig;
@@ -207,6 +213,8 @@ idCVar r_showOverDraw("r_showOverDraw", "0", CVAR_RENDERER | CVAR_INTEGER, "1 = 
 
 idCVar r_lockSurfaces("r_lockSurfaces", "0", CVAR_RENDERER | CVAR_BOOL, "allow moving the view point without changing the composition of the scene, including culling");
 idCVar r_useEntityCallbacks("r_useEntityCallbacks", "1", CVAR_RENDERER | CVAR_BOOL, "if 0, issue the callback immediately at update time, rather than defering");
+
+idCVar harm_r_debugDistance("harm_r_debugDistance", "1000", CVAR_RENDERER | CVAR_FLOAT, "max show distance for r_showSurfaceInfo...");
 
 #ifdef _RAVEN //k: r_showSkel diff with renderer
 idCVar r_showSkel( "r_showSkel", "0", CVAR_RENDERER | CVAR_INTEGER, "draw the skeleton when model animates, 1 = draw model with skeleton, 2 = draw skeleton only, 3 = draw joints only", 0, 3, idCmdSystem::ArgCompletion_Integer<0,3> );
@@ -499,10 +507,12 @@ the values from r_customWidth, amd r_customHeight
 will be used instead.
 ====================
 */
+#if !defined(_SPLASHDAMAGE)
 typedef struct vidmode_s {
 	const char *description;
 	int         width, height;
 } vidmode_t;
+#endif
 
 vidmode_t r_vidModes[] = {
 	{ "Mode  0: 320x240",		320,	240 },
@@ -542,7 +552,11 @@ vidmode_t r_vidModes[] = {
     { "Mode 31: 5120x1440",		5120,   1440 },
     { "Mode 32: 7680x2160",		7680,   2160 },
 };
+#ifdef _SPLASHDAMAGE
+int	s_numVidModes = (sizeof(r_vidModes) / sizeof(r_vidModes[0]));
+#else
 static int	s_numVidModes = (sizeof(r_vidModes) / sizeof(r_vidModes[0]));
+#endif
 
 #if MACOS_X
 bool R_GetModeInfo(int *width, int *height, int mode)
@@ -703,9 +717,9 @@ void R_InitOpenGL(void)
 	{
         for(int vertexCacheFrame = vertexCache.GetNextListNum(); vertexCacheFrame < NUM_FRAME_DATA; vertexCacheFrame++)
         {
-			vertexCache.BeginBackEnd(vertexCacheFrame);
-			vertexCache.EndBackEnd(vertexCacheFrame);
-			vertexCache.EndFrame();
+            vertexCache.BeginBackEnd(vertexCacheFrame);
+            vertexCache.EndBackEnd(vertexCacheFrame);
+            vertexCache.EndFrame();
         }
 
 		cmdSystem->AddCommand("multithread", /*idRenderThread::*/R_EnableRenderThread_f, CMD_FL_RENDERER, "enable/disable multi-threading rendering");
@@ -1001,6 +1015,12 @@ void R_ReportImageDuplication_f(const idCmdArgs &args)
 			// ignore procedural images
 			continue;
 		}
+#ifdef _SPLASHDAMAGE //karin: image generator functor
+		if (image1->generatorFunctor) {
+			// ignore procedural images
+			continue;
+		}
+#endif
 
 		if (image1->cubeFiles != CF_2D) {
 			// ignore cube maps
@@ -1026,6 +1046,11 @@ void R_ReportImageDuplication_f(const idCmdArgs &args)
 			if (image2->generatorFunction) {
 				continue;
 			}
+#ifdef _SPLASHDAMAGE //karin: image generator functor
+			if (image2->generatorFunctor) {
+				continue;
+			}
+#endif
 
 			if (image2->cubeFiles != CF_2D) {
 				continue;
@@ -2196,7 +2221,10 @@ void R_VidRestart_f(const idCmdArgs &args)
 		globalImages->PurgeAllImages();
 
         // delete framebuffer: shadow map, stencil texture
-        Framebuffer::Shutdown();
+		Framebuffer::Shutdown();
+#ifdef _SPLASHDAMAGE //karin: free occlusion test
+		occlusionTestManager->Shutdown();
+#endif
         // delete all shaders
         R_GLSL_Shutdown();
 
@@ -2392,6 +2420,12 @@ void R_InitCommands(void)
 #ifdef _MODEL_MD5_EXT
     R_Model_AddCommand();
 #endif
+
+#ifdef _SPLASHDAMAGE //karin: shader commands
+	cmdSystem->AddCommand("loadRenderProgram", sdRenderProgramManager::LoadRenderProgram_f, CMD_FL_RENDERER, "load shader program", idArgCompletionDecl_f<DECLTYPE_RENDERPROGRAM>);
+	cmdSystem->AddCommand("listRenderPrograms", sdRenderProgramManager::ListRenderPrograms_f, CMD_FL_RENDERER, "list shader programs");
+	cmdSystem->AddCommand("reloadRenderPrograms", sdRenderProgramManager::ReloadAllRenderPrograms_f, CMD_FL_RENDERER, "reload all shader programs");
+#endif
 }
 
 /*
@@ -2440,6 +2474,9 @@ void idRenderSystemLocal::Clear(void)
 	shuttleView = false;
 	lastRenderSkybox = -1;
 #endif
+#ifdef _SPLASHDAMAGE //karin: sdGuiModel
+	gameGuiModel = NULL;
+#endif
 }
 
 /*
@@ -2473,6 +2510,11 @@ void idRenderSystemLocal::Init(void)
 
 	demoGuiModel = new idGuiModel;
 	demoGuiModel->Clear();
+
+#ifdef _SPLASHDAMAGE //karin: sdGuiModel
+	gameGuiModel = new sdGuiModel;
+	gameGuiModel->Clear();
+#endif
 
 	R_InitTriSurfData();
 
@@ -2532,7 +2574,11 @@ void idRenderSystemLocal::Shutdown(void)
 	globalImages->Shutdown();
 
     // delete framebuffer: shadow map, stencil texture
-    Framebuffer::Shutdown();
+	Framebuffer::Shutdown();
+
+#ifdef _SPLASHDAMAGE //karin: free occlusion test
+	occlusionTestManager->Shutdown();
+#endif
 
 	// close the r_logFile
 	if (logFile) {
@@ -2547,12 +2593,18 @@ void idRenderSystemLocal::Shutdown(void)
 	// free the vertex cache, which should have nothing allocated now
 	vertexCache.Shutdown();
 
+#ifdef _SPLASHDAMAGE //karin: imposter model
+	imposterGeometryManager->Shutdown();
+#endif
 	R_ShutdownTriSurfData();
 
 	RB_ShutdownDebugTools();
 
 	delete guiModel;
 	delete demoGuiModel;
+#ifdef _SPLASHDAMAGE //karin: sdGuiModel
+	delete gameGuiModel;
+#endif
 
 	Clear();
 
@@ -2723,6 +2775,65 @@ bool GL_CheckErrors(const char *name)
     }
     return i == 0;
 }
+
+#ifdef _SPLASHDAMAGE
+bool idRenderSystemLocal::UploadImage(const char *imageName, const byte *data, int width, int height, bool generateMipMaps, bool copy) {
+	return UploadImage(imageName, data, width, height);
+}
+
+void idRenderSystemLocal::SyncRenderSystem(void) {
+}
+
+int idRenderSystemLocal::GetNumMSAAModes(void) const {
+	return 0;
+}
+
+const char * idRenderSystemLocal::GetMSAAMode(int idx, int &val) const {
+	return "0x";
+}
+
+void idRenderSystemLocal::LockThreads(void) {
+}
+
+void idRenderSystemLocal::UnlockThreads(void) {
+}
+
+int idRenderSystemLocal::GetSyncNum(void) {
+	return 0;
+}
+
+int idRenderSystemLocal::RegisterPtr(void *ptr) {
+	if(!ptr)
+		return -1;
+
+	int index = registerPtrs.FindNull();
+	if(index != -1)
+	{
+		registerPtrs[index] = ptr;
+		return index;
+	}
+	return registerPtrs.Append(ptr);
+}
+
+void idRenderSystemLocal::UnregisterPtr(int uid) {
+	if(uid >= 0 && uid < registerPtrs.Num())
+		registerPtrs[uid] = NULL;
+}
+
+void * idRenderSystemLocal::PtrForUID(int uid) {
+	if(uid < 0 || uid >= registerPtrs.Num())
+		return NULL;
+	return registerPtrs[uid];
+}
+
+class idRenderModel * idRenderSystemLocal::InstantiateDynamicModel(class idRenderModel *model, struct renderEntity_s *ent) {
+	return model->InstantiateDynamicModel(ent, viewDef, NULL);
+}
+
+bool idRenderSystemLocal::IsSMPEnabled(void) {
+	return false;
+}
+#endif
 
 #ifdef _SHADOW_MAPPING
 // RB: shadow mapping parameters

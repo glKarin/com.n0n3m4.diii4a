@@ -342,9 +342,164 @@ static void R_BlackImage(idImage *image)
 
 	// solid black texture
 	memset(data, 0, sizeof(data));
+#ifdef _SPLASHDAMAGE //karin: fill alpha bit to 1.0 for console background material. it not necessary in OpenGL, but it is fully transparent in OpenGLES
+#if 0 // !defined(__ANDROID__)
+	if(!USING_GL)
+#endif
+	for (int y = 0; y < DEFAULT_SIZE; y++)
+	{
+		for (int x = 0; x < DEFAULT_SIZE; x++)
+		{
+			data[y][x][3] = 255;
+		}
+	}
+#endif
 	image->GenerateImage((byte *)data, DEFAULT_SIZE, DEFAULT_SIZE,
 	                     TF_DEFAULT, false, TR_REPEAT, TD_DEFAULT);
 }
+
+#ifdef _SPLASHDAMAGE //karin: globals built-in images
+static void R_GrayImage(idImage *image)
+{
+	byte	data[DEFAULT_SIZE][DEFAULT_SIZE][4];
+
+	// solid white texture
+	memset(data, 0x77, sizeof(data));
+	image->GenerateImage((byte *)data, DEFAULT_SIZE, DEFAULT_SIZE,
+	                     TF_DEFAULT, false, TR_REPEAT, TD_DEFAULT); // 16, 16, 3, 0, 0, 2
+}
+
+static void R_MakeBlackCubeMap(idImage *image)
+{
+	byte	*pixels[6];
+	byte	*v1;
+	int		size;
+	int		i, j, k = 0;
+
+	size = 2;
+
+	pixels[0] = (GLubyte *) Mem_Alloc(size*size*4*6); // 96
+	for ( i = 0; i < 96; i += 16 )
+	{
+		v1 = pixels[0] + i;
+		for ( j = 0; j < 16; j += 8 )
+		{
+			v1[j] = 0;
+			v1[j + 1] = 0;
+			v1[j + 2] = 0;
+			v1[j + 3] = 255;
+			v1[j + 4] = 0;
+			v1[j + 5] = 0;
+			v1[j + 6] = 0;
+			v1[j + 7] = 255;
+		}
+		pixels[k++] = v1;
+	}
+
+	image->GenerateCubeImage((const byte **)pixels, size,
+	                         TF_LINEAR, false, TD_HIGH_QUALITY); // 0, 0, 4
+
+	Mem_Free(pixels[0]);
+}
+
+static void R_DefaultDitherDiffusionMask(idImage *image)
+{
+	int x, y;
+	byte data[DEFAULT_SIZE][DEFAULT_SIZE][4];
+	const byte noiseMap[] = // 256
+	{
+		0xC0, 0x0B, 0xB7, 0x7D, 0x1A, 0x91, 0x2C, 0xF4, 0x08, 0xA8,
+		0x8B, 0x26, 0xAE, 0x1B, 0x8D, 0x2B, 0x73, 0xD3, 0x96, 0x44,
+		0xC2, 0x58, 0xB1, 0x83, 0x3D, 0xDE, 0x57, 0xEE, 0x4A, 0xE0,
+		0x64, 0xEB, 0x3B, 0x21, 0x60, 0xEF, 0x33, 0xE8, 0x10, 0xD2,
+		0x75, 0x20, 0xBB, 0x01, 0x9D, 0x79, 0x0E, 0xA5, 0xF8, 0x80,
+		0xD9, 0x02, 0xA3, 0x69, 0x9A, 0x51, 0xF7, 0x95, 0x61, 0xCD,
+		0x34, 0xB6, 0xD1, 0x54, 0x14, 0xAC, 0x50, 0x8C, 0xCA, 0x29,
+		0xB9, 0x37, 0x18, 0xC5, 0x41, 0x81, 0xFC, 0x23, 0x46, 0x93,
+		0xC9, 0x3F, 0xBD, 0x1C, 0x5A, 0xFE, 0x74, 0xDB, 0x89, 0x6B,
+		0xE7, 0x11, 0x90, 0x77, 0xE4, 0x6D, 0x2E, 0xF5, 0x67, 0xE5,
+		0x86, 0x0D, 0x43, 0xA2, 0x06, 0xAA, 0x2F, 0xB2, 0x4C, 0xC1,
+		0x04, 0xA7, 0x85, 0x09, 0x9F, 0x36, 0xAF, 0x7C, 0xE1, 0x5D,
+		0xF2, 0x4F, 0xD6, 0x63, 0xF1, 0x38, 0xDD, 0x5C, 0xBA, 0xDA,
+		0x4E, 0xD0, 0x25, 0xC4, 0x19, 0xBC, 0x2A, 0x8E, 0x1D, 0x9E,
+		0x15, 0x82, 0x9C, 0x28, 0x66, 0x1F, 0x94, 0x6F, 0xEA, 0x55,
+		0x97, 0x78, 0xCF, 0x71, 0xFE, 0x56, 0xB8, 0xD4, 0x45, 0xEC,
+		0xB0, 0x49, 0xFD, 0x00, 0x8A, 0x3A, 0xF9, 0x47, 0x0A, 0xAD,
+		0x3E, 0xC8, 0x32, 0x72, 0x0C, 0x7B, 0x17, 0xCC, 0x76, 0xBF,
+		0x5B, 0xB5, 0x13, 0xA4, 0xD8, 0x65, 0xE9, 0x03, 0x87, 0xA9,
+		0xF6, 0x98, 0xDF, 0x3C, 0x8F, 0x30, 0xF0, 0x22, 0xDC, 0x52,
+		0x84, 0x24, 0x92, 0x6A, 0xE3, 0x1E, 0x5F, 0x31, 0x53, 0xA6,
+		0x12, 0xC7, 0x62, 0x9B, 0x7A, 0x35, 0xED, 0xB3, 0x39, 0xBE,
+		0x4D, 0xC3, 0x7F, 0xB4, 0xE6, 0x6C, 0xD7, 0x40, 0xAB, 0x05,
+		0xCE, 0xA1, 0x16, 0x5E, 0xFB, 0x0F, 0x99, 0x2D, 0xF3, 0x07,
+		0x48, 0x88, 0x27, 0xFA, 0x68, 0xE2, 0x4B, 0x70, 0xC6, 0x7E,
+		0x42, 0xD5, 0x6E, 0xCB, 0x59, 0xA0
+	};
+
+	memset(data, 0, sizeof(data));
+	for (y = 0; y < DEFAULT_SIZE; y++)
+	{
+		for (x = 0; x < DEFAULT_SIZE; x++)
+		{
+			data[y][x][0] = 255;
+			data[y][x][1] = 255;
+			data[y][x][2] = 255;
+			data[y][x][3] = noiseMap[y * DEFAULT_SIZE + x];
+		}
+	}
+#if 0
+	v1 = (char *)&noiseMap;
+	v2 = &data[1];
+	do
+	{
+		for ( int i = 0; i < DEFAULT_SIZE; ++i )
+		{
+			v4 = v1[i];
+			*(v2 - 1) = -1;
+			*v2 = -1;
+			v2[1] = -1;
+			v2[2] = v4;
+			v2 += 4;
+		}
+		v1 += DEFAULT_SIZE;
+	}
+	while ( v1 < noiseMap + sizeof(noiseMap) );
+#endif
+	image->GenerateImage((byte *)data, DEFAULT_SIZE, DEFAULT_SIZE,
+						 TF_DEFAULT, false, TR_REPEAT, TD_HIGH_QUALITY); // 16, 16, 3, 0, 0, 4
+}
+
+void R_Luminance8Image(idImage *image)
+{
+	byte data[DEFAULT_SIZE][DEFAULT_SIZE][4];
+
+	memset(data, 0, sizeof(data));
+	// idImage::FromParameters(a1, 16, 16, GL_LUMINANCE8 32832, TT_2D, TF_DEFAULT, TR_REPEAT); // GL_LUMINANCE8
+	image->GenerateImage((byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, TF_DEFAULT, false, TR_REPEAT, TD_DEFAULT);
+}
+
+static void R_ImageProgramStringToCompressedFileName_f(const idCmdArgs &args)
+{
+	if (args.Argc() < 2) {
+		common->Printf("usage: %s <image program>\n", args.Argv(0));
+		return;
+	}
+
+	idStr program;
+	for (int i = 1; i < args.Argc(); i++)
+	{
+		program.Append(args.Argv(i));
+		program.Append(" ");
+	}
+	program.StripTrailingWhiteSpace();
+
+	idImage image;
+	char	filename[MAX_IMAGE_NAME] = {0};
+	image.ImageProgramStringToCompressedFileName(program, filename);
+	common->Printf("Image program: %s\n", program.c_str());
+	common->Printf("Compressed file name: %s\n", filename);
+}
+#endif
 
 
 // the size determines how far away from the edge the blocks start fading
@@ -987,7 +1142,7 @@ static void R_CreateShadowMapImage_##name##_Res##res( idImage* image ) \
 { \
 	int size = shadowMapResolutions[res]; \
 	image->func parms;                                              \
-    printf("Create shadow map: %s(%s) -> %d x %d\n", #name, #func, size, size);  \
+    printf("Create shadow map: %s(%s) -> %dx%d\n", #name, #func, size, size);  \
 }
 
 #define CREATE_SHADOW_MAP_IMAGE_DECL(name, func, parms) \
@@ -1186,6 +1341,13 @@ void idImage::Reload(bool checkPrecompressed, bool force
 		generatorFunction(this);
 		return;
 	}
+#ifdef _SPLASHDAMAGE //karin: image generator functor
+	if (generatorFunctor) {
+		common->DPrintf("regenerating %s.\n", imgName.c_str());
+		(*generatorFunctor)(this);
+		return;
+	}
+#endif
 
 	// check file times
 	if (!force) {
@@ -2286,6 +2448,16 @@ void idImageManager::Init()
 	normalCubeMapImage = ImageFromFunction("_normalCubeMap", makeNormalizeVectorCubeMap);
 	noFalloffImage = ImageFromFunction("_noFalloff", R_CreateNoFalloffImage);
 	ImageFromFunction("_quadratic", R_QuadraticImage);
+#ifdef _SPLASHDAMAGE //karin: globals built-in images
+	grayImage = ImageFromFunction("_gray", R_GrayImage);
+	blackCubeMapImage = ImageFromFunction("_blackCubeMap", R_MakeBlackCubeMap);
+	postProcessBuffers[0] = ImageFromFunction("_postProcessBuffer_0", R_RGBA8Image);
+	postProcessBuffers[1] = ImageFromFunction("_postProcessBuffer_1", R_RGBA8Image);
+	diffusionMaskImage = ImageFromFunction("_diffusionMask", R_DefaultDitherDiffusionMask);
+	cinematicYImage = ImageFromFunction("_cinematicY", R_Luminance8Image);
+	cinematicUImage = ImageFromFunction("_cinematicU", R_Luminance8Image);
+	cinematicVImage = ImageFromFunction("_cinematicV", R_Luminance8Image);
+#endif
 
 	// cinematicImage is used for cinematic drawing
 	// scratchImage is used for screen wipes/doublevision etc..
@@ -2299,6 +2471,9 @@ void idImageManager::Init()
 	cmdSystem->AddCommand("reloadImages", R_ReloadImages_f, CMD_FL_RENDERER, "reloads images");
 	cmdSystem->AddCommand("listImages", R_ListImages_f, CMD_FL_RENDERER, "lists images");
 	cmdSystem->AddCommand("combineCubeImages", R_CombineCubeImages_f, CMD_FL_RENDERER, "combines six images for roq compression");
+#ifdef _SPLASHDAMAGE
+	cmdSystem->AddCommand("imageProgramStringToCompressedFileName", R_ImageProgramStringToCompressedFileName_f, CMD_FL_RENDERER, "print compressed image name from raw image program");
+#endif
 
 	// should forceLoadImages be here?
 #ifdef _SHADOW_MAPPING
@@ -2367,6 +2542,11 @@ void idImageManager::BeginLevelLoad()
 		if (image->generatorFunction) {
 			continue;
 		}
+#ifdef _SPLASHDAMAGE //karin: image generator functor
+		if (image->generatorFunctor) {
+			continue;
+		}
+#endif
 
 		if (com_purgeAll.GetBool()) {
 			image->PurgeImage(
@@ -2417,6 +2597,11 @@ void idImageManager::EndLevelLoad()
 		if (image->generatorFunction) {
 			continue;
 		}
+#ifdef _SPLASHDAMAGE //karin: image generator functor
+		if (image->generatorFunctor) {
+			continue;
+		}
+#endif
 
 		if (!image->levelLoadReferenced && !image->referencedOutsideLevelLoad) {
 //			common->Printf( "Purging %s\n", image->imgName.c_str() );
@@ -2439,6 +2624,11 @@ void idImageManager::EndLevelLoad()
 		if (image->generatorFunction) {
 			continue;
 		}
+#ifdef _SPLASHDAMAGE //karin: image generator functor
+		if (image->generatorFunctor) {
+			continue;
+		}
+#endif
 
 #ifdef _MULTITHREAD
 		if (image->levelLoadReferenced && (image->texnum == idImage::TEXTURE_NOT_LOADED || image->purgePending) && !image->partialImage)
@@ -2608,5 +2798,55 @@ void idImageManager::PrintMemInfo(MemInfo_t *mi)
 	fileSystem->CloseFile(f);
 }
 
+#ifdef _SPLASHDAMAGE //karin: export
+void R_GetCubeVector(int i, int cubesize, int x, int y, float *vector) {
+	getCubeVector(i, cubesize, x, y, vector);
+}
+
+idImage *idImageManager::ImageFromFunctor(const char *_name, const idImageGeneratorFunctorBase *generatorFunctor)
+{
+	idStr name;
+	idImage	*image;
+	int	hash;
+
+	if (!name) {
+		common->FatalError("idImageManager::ImageFromFunctor: NULL name");
+	}
+
+	// strip any .tga file extensions from anywhere in the _name
+	name = _name;
+	name.Replace(".tga", "");
+	name.BackSlashesToSlashes();
+
+	// see if the image already exists
+	hash = name.FileNameHash();
+
+	for (image = imageHashTable[hash] ; image; image = image->hashNext) {
+		if (name.Icmp(image->imgName) == 0) {
+			if (image->generatorFunctor != generatorFunctor) {
+				common->DPrintf("WARNING: reused image %s with mixed generators\n", name.c_str());
+			}
+
+			return image;
+		}
+	}
+
+	// create the image and issue the callback
+	image = AllocImage(name);
+
+	image->generatorFunctor = generatorFunctor;
+
+	if (image_preload.GetBool()) {
+		// check for precompressed, load is from the front end
+		image->referencedOutsideLevelLoad = true;
+		image->ActuallyLoadImage(true, false
 #ifdef _MULTITHREAD
+				, renderThread->IsActive() // If call on OpenGL thread! // !true // !AddAllocList
+#endif
+				);
+	}
+
+	return image;
+}
+
 #endif

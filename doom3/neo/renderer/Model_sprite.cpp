@@ -147,7 +147,11 @@ idRenderModel 	*idRenderModelSprite::InstantiateDynamicModel(const struct render
 
 		surf.geometry = tri;
 		surf.id = 0;
+#ifdef _SPLASHDAMAGE
+		surf.material = tr.defaultMaterial;
+#else
 		surf.shader = tr.defaultMaterial;
+#endif
 		staticModel->AddSurface(surf);
 	}
 
@@ -183,6 +187,13 @@ idRenderModel 	*idRenderModelSprite::InstantiateDynamicModel(const struct render
 	tri->verts[ 3 ].color[ 2 ] = blue;
 	tri->verts[ 3 ].color[ 3 ] = alpha;
 
+#ifdef _SPLASHDAMAGE //karin: offset parm for atmosphere, sun
+	idVec3 forward		= idVec3(renderEntity->shaderParms[ SHADERPARM_SPRITE_OFFSET ], 0.0f, 0.0f);
+	tri->verts[ 0 ].xyz += forward;
+	tri->verts[ 1 ].xyz += forward;
+	tri->verts[ 2 ].xyz += forward;
+	tri->verts[ 3 ].xyz += forward;
+#endif
 	R_BoundTriSurf(tri);
 
 	staticModel->bounds = tri->bounds;
@@ -204,7 +215,15 @@ idBounds idRenderModelSprite::Bounds(const struct renderEntity_s *renderEntity) 
 	if (renderEntity == NULL) {
 		b.ExpandSelf(8.0f);
 	} else {
+#ifdef _SPLASHDAMAGE //karin: offset parm for atmosphere, sun
+		float r = Max(renderEntity->shaderParms[ SHADERPARM_SPRITE_WIDTH ], renderEntity->shaderParms[ SHADERPARM_SPRITE_HEIGHT ]) * 0.5f;
+		float d = Max(r, renderEntity->shaderParms[ SHADERPARM_SPRITE_OFFSET ]);
+		idVec3 e(r, d, r);
+		b[0] -= e;
+		b[1] += e;
+#else
 		b.ExpandSelf(Max(renderEntity->shaderParms[ SHADERPARM_SPRITE_WIDTH ], renderEntity->shaderParms[ SHADERPARM_SPRITE_HEIGHT ]) * 0.5f);
+#endif
 	}
 
 	return b;

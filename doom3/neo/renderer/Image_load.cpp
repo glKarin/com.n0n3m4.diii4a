@@ -310,6 +310,29 @@ void idImage::SetImageFilterAndRepeat() const
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			break;
+#ifdef _SPLASHDAMAGE //karin: clamp texture single axis
+					 //karin: WARN, I think clamp_x is not clamp in S, repeat in T, it should S is repeat and T is clamp. and clamp_x, mirror_x, mirror_y are same as it. You can view in material/skybox template and skies/skybox shader
+		case TR_CLAMP_X:
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			break;
+		case TR_CLAMP_Y:
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			break;
+		case TR_MIRROR:
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			break;
+		case TR_MIRROR_X:
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			break;
+		case TR_MIRROR_Y:
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			break;
+#endif
 		default:
 			common->FatalError("R_CreateImage: bad texture repeat");
 	}
@@ -446,6 +469,10 @@ void idImage::GenerateImage(const byte *pic, int width, int height,
 	// make sure it is a power of 2
 	scaled_width = MakePowerOfTwo(width);
 	scaled_height = MakePowerOfTwo(height);
+#ifdef _SPLASHDAMAGE
+	sourceWidth = scaled_width;
+	sourceHeight = scaled_height;
+#endif
 
 	if (scaled_width != width || scaled_height != height) {
 		common->Error("R_CreateImage: not a power of 2 image");
@@ -527,7 +554,12 @@ void idImage::GenerateImage(const byte *pic, int width, int height,
 		R_SetBorderTexels((byte *)scaledBuffer, width, height, rgba);
 	}
 
-	if (generatorFunction == NULL && ( ( depth == TD_BUMP && globalImages->image_writeNormalTGA.GetBool() ) || ( depth != TD_BUMP && globalImages->image_writeTGA.GetBool() ) )) {
+#ifdef _SPLASHDAMAGE //karin: image generator functor
+	if (generatorFunction == NULL && generatorFunctor == NULL && ( ( depth == TD_BUMP && globalImages->image_writeNormalTGA.GetBool() ) || ( depth != TD_BUMP && globalImages->image_writeTGA.GetBool() ) ))
+#else
+	if (generatorFunction == NULL && ( ( depth == TD_BUMP && globalImages->image_writeNormalTGA.GetBool() ) || ( depth != TD_BUMP && globalImages->image_writeTGA.GetBool() ) ))
+#endif
+	{
 		// Optionally write out the texture to a .tga
 		char filename[MAX_IMAGE_NAME];
 		ImageProgramStringToCompressedFileName(imgName, filename);
@@ -697,6 +729,10 @@ void idImage::Generate3DImage(const byte *pic, int width, int height, int picDep
 	scaled_width = MakePowerOfTwo(width);
 	scaled_height = MakePowerOfTwo(height);
 	scaled_depth = MakePowerOfTwo(picDepth);
+#ifdef _SPLASHDAMAGE
+	sourceWidth = scaled_width;
+	sourceHeight = scaled_height;
+#endif
 
 	if (scaled_width != width || scaled_height != height || scaled_depth != picDepth) {
 		common->Error("R_Create3DImage: not a power of 2 image");
@@ -850,6 +886,10 @@ void idImage::GenerateCubeImage(const byte *pic[6], int size,
 #endif
 
 	width = height = size;
+#ifdef _SPLASHDAMAGE
+	sourceWidth = width;
+	sourceHeight = height;
+#endif
 
 	// generate the texture number
 	qglGenTextures(1, &texnum);
@@ -939,12 +979,284 @@ void idImage::GenerateCubeImage(const byte *pic[6], int size,
 ImageProgramStringToFileCompressedFileName
 ================
 */
+#ifdef _SPLASHDAMAGE //karin: generated compressed image file name
+void iImageProgramStringToCompressedFileName(const char *imageProg, char *fileName)
+{
+  int length_v4;
+  char *v5;
+  const char *v6;
+  const char *v7;
+  intptr_t v8;
+  const char *v9;
+  char v10;
+  char v11;
+  int v12;
+  char v13;
+  size_t v14;
+  int v15;
+  char *v16;
+  int v17;
+  char *Sourcea;
+
+  if ( idStr::CheckExtension(imageProg, "dds") )
+  {
+    idStr::Copynz(fileName, imageProg, 256);
+    return;
+  }
+  idStr::Copynz(fileName, "generated/dds/", 256);
+  length_v4 = 0;
+  if ( *fileName )
+  {
+    do
+      ++length_v4;
+    while ( fileName[length_v4] );
+  }
+  v5 = &fileName[length_v4];
+  Sourcea = 0;
+  v6 = imageProg;
+  v7 = imageProg;
+  if ( *imageProg )
+  {
+    v8 = -1 - (intptr_t)imageProg;
+    while ( 1 )
+    {
+      v9 = v7 + 1;
+      if ( &v7[v8 + 1] == (char *)128 )
+        goto LABEL_27;
+      v10 = *v7;
+      if ( *v7 == 47 || v10 == 92 || v10 == 40 )
+        break;
+LABEL_26:
+      v7 = v9;
+      if ( !*v9 )
+        goto LABEL_27;
+    }
+    if ( (intptr_t)Sourcea < 4 )
+    {
+      if ( v6 >= v7 )
+        goto LABEL_25;
+      while ( *v6 == 32 )
+      {
+        if ( ++v6 >= v7 )
+        {
+LABEL_25:
+          *v5++ = 47;
+          ++Sourcea;
+          v6 = v9;
+          goto LABEL_26;
+        }
+      }
+      if ( v6 >= v7 )
+        goto LABEL_25;
+      while ( 1 )
+      {
+        if ( idStr::IsBadFilenameChar(*v6) )
+        {
+          *v5 = 95;
+        }
+        else
+        {
+          v11 = *v6;
+          if ( *v6 == 41 || v11 == 44 )
+            goto LABEL_23;
+          *v5 = v11;
+        }
+        ++v5;
+LABEL_23:
+        if ( ++v6 >= v7 )
+        {
+          v8 = -1 - (intptr_t)imageProg;
+          v9 = v7 + 1;
+          goto LABEL_25;
+        }
+      }
+    }
+  }
+LABEL_27:
+  *v5 = 0;
+  v12 = 0;
+  v13 = *imageProg;
+  if ( 3 == 3 )
+  {
+    if ( v13 )
+    {
+      do
+        ++v12;
+      while ( imageProg[v12] );
+    }
+    v14 = 0;
+    if ( v13 )
+    {
+      do
+        ++v14;
+      while ( imageProg[v14] );
+    }
+  }
+  else
+  {
+    if ( v13 )
+    {
+      do
+        ++v12;
+      while ( imageProg[v12] );
+    }
+    v14 = 0;
+    if ( v13 )
+    {
+      do
+        ++v14;
+      while ( imageProg[v14] );
+    }
+  }
+  v17 = v12;
+  v15 = MD5_BlockChecksum((byte *)imageProg, v14);
+  v16 = va("%ub%d.dds", v15, v17);
+  idStr::Append(fileName, 256, v16);
+}
+#endif
+
 void idImage::ImageProgramStringToCompressedFileName(const char *imageProg, char *fileName) const
 {
+#ifdef _SPLASHDAMAGExxx
+  int length_v4; // eax
+  char *v5; // edi
+  const char *v6; // esi
+  char *v7; // ebx
+  intptr_t v8; // edx
+  char *v9; // ecx
+  char v10; // al
+  char v11; // al
+  int v12; // ecx
+  char v13; // dl
+  size_t v14; // eax
+  int v15; // eax
+  char *v16; // eax
+  int v17; // [esp-4h] [ebp-14h]
+  char *Sourcea; // [esp+14h] [ebp+4h]
+
+  if ( idStr::CheckExtension(imageProg, "dds") )
+  {
+    idStr::Copynz(fileName, imageProg, 256);
+    return;
+  }
+  idStr::Copynz(fileName, "generated/dds/", 256);
+  length_v4 = 0;
+  if ( *fileName )
+  {
+    do
+      ++length_v4;
+    while ( fileName[length_v4] );
+  }
+  v5 = &fileName[length_v4];
+  Sourcea = 0;
+  v6 = imageProg;
+  v7 = imageProg;
+  if ( *imageProg )
+  {
+    v8 = -1 - (intptr_t)imageProg;
+    while ( 1 )
+    {
+      v9 = v7 + 1;
+      if ( &v7[v8 + 1] == (char *)128 )
+        goto LABEL_27;
+      v10 = *v7;
+      if ( *v7 == 47 || v10 == 92 || v10 == 40 )
+        break;
+LABEL_26:
+      v7 = v9;
+      if ( !*v9 )
+        goto LABEL_27;
+    }
+    if ( (intptr_t)Sourcea < 4 )
+    {
+      if ( v6 >= v7 )
+        goto LABEL_25;
+      while ( *v6 == 32 )
+      {
+        if ( ++v6 >= v7 )
+        {
+LABEL_25:
+          *v5++ = 47;
+          ++Sourcea;
+          v6 = v9;
+          goto LABEL_26;
+        }
+      }
+      if ( v6 >= v7 )
+        goto LABEL_25;
+      while ( 1 )
+      {
+        if ( idStr::IsBadFilenameChar(*v6) )
+        {
+          *v5 = 95;
+        }
+        else
+        {
+          v11 = *v6;
+          if ( *v6 == 41 || v11 == 44 )
+            goto LABEL_23;
+          *v5 = v11;
+        }
+        ++v5;
+LABEL_23:
+        if ( ++v6 >= v7 )
+        {
+          v8 = -1 - (intptr_t)imageProg;
+          v9 = v7 + 1;
+          goto LABEL_25;
+        }
+      }
+    }
+  }
+LABEL_27:
+  *v5 = 0;
+  v12 = 0;
+  v13 = *imageProg;
+  if ( 3 == 3 )
+  {
+    if ( v13 )
+    {
+      do
+        ++v12;
+      while ( imageProg[v12] );
+    }
+    v14 = 0;
+    if ( v13 )
+    {
+      do
+        ++v14;
+      while ( imageProg[v14] );
+    }
+  }
+  else
+  {
+    if ( v13 )
+    {
+      do
+        ++v12;
+      while ( imageProg[v12] );
+    }
+    v14 = 0;
+    if ( v13 )
+    {
+      do
+        ++v14;
+      while ( imageProg[v14] );
+    }
+  }
+  v17 = v12;
+  v15 = MD5_BlockChecksum((byte *)imageProg, v14);
+  v16 = va("%ub%d.dds", v15, v17);
+  idStr::Append(fileName, 256, v16);
+#else
 	const char	*s;
 	char	*f;
 
+#ifdef _SPLASHDAMAGE
+	strcpy(fileName, "generated/dds/");
+#else
 	strcpy(fileName, "dds/");
+#endif
 	f = fileName + strlen(fileName);
 
 	int depth = 0;
@@ -961,10 +1273,17 @@ void idImage::ImageProgramStringToCompressedFileName(const char *imageProg, char
 			}
 
 			f++;
+#ifdef _SPLASHDAMAGE
+		} else if (*s == ' ' && *(f-1) == '/') {	// ignore a space right after a slash
+		} else if ( idStr::IsBadFilenameChar(*s) ) {
+			*f = '_';
+			f++;
+#else
 		} else if (*s == '<' || *s == '>' || *s == ':' || *s == '|' || *s == '"' || *s == '.') {
 			*f = '_';
 			f++;
 		} else if (*s == ' ' && *(f-1) == '/') {	// ignore a space right after a slash
+#endif
 		} else if (*s == ')' || *s == ',') {		// always ignore these
 		} else {
 			*f = *s;
@@ -973,7 +1292,17 @@ void idImage::ImageProgramStringToCompressedFileName(const char *imageProg, char
 	}
 
 	*f++ = 0;
+#ifdef _SPLASHDAMAGE
+	int length_v14 = idStr::Length(imageProg);
+	int md5_v15 = MD5_BlockChecksum((byte *)imageProg, length_v14);
+	const char *filename_v16 = va("%ub%d", md5_v15, length_v14);
+	idStr str = fileName;
+	str.StripFilename();
+	str.AppendPath(filename_v16);
+	idStr::Copynz(fileName, str.c_str(), MAX_IMAGE_NAME);
+#endif
 	strcat(fileName, ".dds");
+#endif
 }
 
 /*
@@ -1344,7 +1673,12 @@ bool idImage::CheckPrecompressedImage(bool fullLoad)
 		return false;
 	}
 
-	if (!generatorFunction && timestamp != FILE_NOT_FOUND_TIMESTAMP) {
+#ifdef _SPLASHDAMAGE //karin: image generator functor
+	if (!generatorFunction && !generatorFunctor && timestamp != FILE_NOT_FOUND_TIMESTAMP)
+#else
+	if (!generatorFunction && timestamp != FILE_NOT_FOUND_TIMESTAMP)
+#endif
+	{
 		if (precompTimestamp < timestamp) {
 			// The image has changed after being precompressed
 			return false;
@@ -1450,6 +1784,10 @@ void idImage::UploadPrecompressedImage(byte *data, int len)
 
 	precompressedFile = true;
 
+#ifdef _SPLASHDAMAGE
+	sourceWidth = header->dwWidth;
+	sourceHeight = header->dwHeight;
+#endif
 	uploadWidth = header->dwWidth;
 	uploadHeight = header->dwHeight;
 	if (header->ddspf.dwFlags & DDSF_FOURCC) {
@@ -1622,6 +1960,10 @@ int idImage::GenerateImageETC(int width, int height,
 		common->Error("R_CreateImage: not a power of 2 image");
 	}
 
+#ifdef _SPLASHDAMAGE
+	sourceWidth = scaled_width;
+	sourceHeight = scaled_height;
+#endif
 	// Optionally modify our width/height based on options/hardware
 	GetDownsize(scaled_width, scaled_height);
 
@@ -1766,6 +2108,12 @@ void	idImage::ActuallyLoadImage(bool checkForPrecompressed, bool fromBackEnd)
 		generatorFunction(this);
 		return;
 	}
+#ifdef _SPLASHDAMAGE //karin: image generator functor
+	if (generatorFunctor) {
+		(*generatorFunctor)(this);
+		return;
+	}
+#endif
 
 	// if we are a partial image, we are only going to load from a compressed file
 	if (isPartialImage) {
@@ -1819,6 +2167,29 @@ void	idImage::ActuallyLoadImage(bool checkForPrecompressed, bool fromBackEnd)
 		}
 
 		R_LoadImageProgram(imgName, &pic, &width, &height, &timestamp, &depth);
+#ifdef _SPLASHDAMAGE //karin: load DXT to raw RGBA 
+		if (pic == NULL) {
+			char filename[MAX_IMAGE_NAME];
+			ImageProgramStringToCompressedFileName(imgName, filename);
+			LoadDXT(filename, &pic, &width, &height, &timestamp);
+			/*
+			Sys_Printf("CDDS:%s|%s|%p\n", imgName.c_str(), filename, pic);
+			R_StaticFree(pic);
+			pic = NULL;
+
+			iImageProgramStringToCompressedFileName((char *)imgName.c_str(), filename);
+			LoadDDS(filename, &pic, &width, &height, &timestamp);
+			Sys_Printf("CDD3:%s|%s|%p\n", imgName.c_str(), filename, pic);
+			R_StaticFree(pic);
+			pic = NULL;
+			iImageProgramStringToCompressedFileName((char *)imgName.c_str(), filename);
+			LoadDDS(filename, &pic, &width, &height, &timestamp);
+			Sys_Printf("CDD5:%s|%s|%p\n", imgName.c_str(), filename, pic);
+			R_StaticFree(pic);
+			pic = NULL;
+			*/
+		}
+#endif
 
 		if (pic == NULL) {
 #ifdef _MULTITHREADxxx
@@ -2120,6 +2491,10 @@ void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight, boo
 	potWidth = MakePowerOfTwo(imageWidth);
 	potHeight = MakePowerOfTwo(imageHeight);
 
+#ifdef _SPLASHDAMAGE
+	int scaled_width = potWidth;
+	int scaled_height = potHeight;
+#endif
 	//k: fix berserk/double/grabber/helltime vision
 #if !defined(GL_ES_VERSION_2_0)
 	GetDownsize(imageWidth, imageHeight);
@@ -2135,6 +2510,10 @@ void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight, boo
 	// otherwise subview renderings could thrash this
 	if ((useOversizedBuffer && (uploadWidth < potWidth || uploadHeight < potHeight))
 	    || (!useOversizedBuffer && (uploadWidth != potWidth || uploadHeight != potHeight))) {
+#ifdef _SPLASHDAMAGE
+		sourceWidth = scaled_width;
+		sourceHeight = scaled_height;
+#endif
 		uploadWidth = potWidth;
 		uploadHeight = potHeight;
 
@@ -2198,6 +2577,10 @@ void idImage::CopyDepthbuffer(int x, int y, int imageWidth, int imageHeight)
 	potHeight = MakePowerOfTwo(imageHeight);
 
 	if (uploadWidth != potWidth || uploadHeight != potHeight) {
+#ifdef _SPLASHDAMAGE
+		sourceWidth = potWidth;
+		sourceHeight = potHeight;
+#endif
 		uploadWidth = potWidth;
 		uploadHeight = potHeight;
 
@@ -2246,6 +2629,10 @@ void idImage::UploadScratch(const byte *data, int cols, int rows)
 
 		// if the scratchImage isn't in the format we want, specify it as a new texture
 		if (cols != uploadWidth || rows != uploadHeight) {
+#ifdef _SPLASHDAMAGExxx
+			sourceWidth = cols;
+			sourceHeight = rows;
+#endif
 			uploadWidth = cols;
 			uploadHeight = rows;
 
@@ -2279,6 +2666,10 @@ void idImage::UploadScratch(const byte *data, int cols, int rows)
 
 		// if the scratchImage isn't in the format we want, specify it as a new texture
 		if (cols != uploadWidth || rows != uploadHeight) {
+#ifdef _SPLASHDAMAGExxx
+			sourceWidth = cols;
+			sourceHeight = rows;
+#endif
 			uploadWidth = cols;
 			uploadHeight = rows;
 			qglTexImage2D(GL_TEXTURE_2D, 0, IF_GL_RGBA, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -2359,7 +2750,11 @@ void idImage::Print() const
 {
 	if (precompressedFile) {
 		common->Printf("P");
+#ifdef _SPLASHDAMAGE //karin: image generator functor
+	} else if (generatorFunction || generatorFunctor) {
+#else
 	} else if (generatorFunction) {
+#endif
 		common->Printf("F");
 	} else {
 		common->Printf(" ");
@@ -2496,6 +2891,23 @@ void idImage::Print() const
 		case TR_CLAMP:
 			common->Printf("clmp ");
 			break;
+#ifdef _SPLASHDAMAGE
+		case TR_CLAMP_X:
+			common->Printf("clpx ");
+			break;
+		case TR_CLAMP_Y:
+			common->Printf("clpy ");
+			break;
+		case TR_MIRROR:
+			common->Printf("mir ");
+			break;
+		case TR_MIRROR_X:
+			common->Printf("mirx ");
+			break;
+		case TR_MIRROR_Y:
+			common->Printf("miry ");
+			break;
+#endif
 		default:
 			common->Printf("<BAD REPEAT:%i>", repeat);
 			break;
@@ -2536,6 +2948,10 @@ void		idImage::GenerateShadow2DDepthImage(int width, int height, textureFilter_t
         common->Error("GenerateShadow2DDepthImage: not a power of 2 image");
     }
 
+#ifdef _SPLASHDAMAGE
+	sourceWidth = scaled_width;
+	sourceHeight = scaled_height;
+#endif
     // Optionally modify our width/height based on options/hardware
     //GetDownsize(scaled_width, scaled_height);
 
@@ -2617,6 +3033,10 @@ void		idImage::GenerateShadow2DRGBAImage(int width, int height, textureFilter_t 
 		common->Error("GenerateShadow2DRGBAImage: not a power of 2 image");
 	}
 
+#ifdef _SPLASHDAMAGE
+	sourceWidth = scaled_width;
+	sourceHeight = scaled_height;
+#endif
 	// Optionally modify our width/height based on options/hardware
 	//GetDownsize(scaled_width, scaled_height);
 
@@ -2678,6 +3098,10 @@ void idImage::GenerateShadowCubeRGBAImage(int size, textureFilter_t filterParm, 
 		common->Error("GenerateShadowCubeRGBAImage: not a power of 2 image");
 	}
 
+#ifdef _SPLASHDAMAGE
+	sourceWidth = scaled_width;
+	sourceHeight = scaled_height;
+#endif
 	// Optionally modify our width/height based on options/hardware
 	//GetDownsize(scaled_width, scaled_height);
 
@@ -2765,6 +3189,10 @@ void idImage::GenerateShadowCubeDepthImage(int size, textureFilter_t filterParm,
 		common->Error("GenerateShadowCubeDepthImage: not a power of 2 image");
 	}
 
+#ifdef _SPLASHDAMAGE
+	sourceWidth = scaled_width;
+	sourceHeight = scaled_height;
+#endif
 	// Optionally modify our width/height based on options/hardware
 	//GetDownsize(scaled_width, scaled_height);
 
@@ -2871,6 +3299,10 @@ void idImage::GenerateShadowArray( int width, int height, int numSides, textureF
 		common->Error("GenerateShadowArray: not a power of 2 image");
 	}
 
+#ifdef _SPLASHDAMAGE
+	sourceWidth = scaled_width;
+	sourceHeight = scaled_height;
+#endif
 	// Optionally modify our width/height based on options/hardware
 	//GetDownsize(scaled_width, scaled_height);
 
@@ -2969,6 +3401,10 @@ void idImage::GenerateDepthStencilImage( int width, int height, bool allowDownSi
 		common->Error("GenerateDepthStencilImage: not a power of 2 image");
 	}
 
+#ifdef _SPLASHDAMAGE
+	sourceWidth = scaled_width;
+	sourceHeight = scaled_height;
+#endif
 	// Optionally modify our width/height based on options/hardware
 	//GetDownsize(scaled_width, scaled_height);
 
@@ -3028,3 +3464,9 @@ void idImage::GenerateDepthStencilImage( int width, int height, bool allowDownSi
 
 	GL_CheckErrors();
 }
+
+#ifdef _SPLASHDAMAGE //karin: image loaded
+bool idImage::IsLoaded() const {
+	return texnum == TEXTURE_NOT_LOADED;
+}
+#endif

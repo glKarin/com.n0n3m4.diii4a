@@ -2644,6 +2644,7 @@ public class GameLauncher extends Activity
 		menuGames.put(R.id.main_menu_game_skindeep, Q3EGameConstants.GAME_SKINDEEP);
 		menuGames.put(R.id.main_menu_game_qc, Q3EGameConstants.GAME_QC);
 		menuGames.put(R.id.main_menu_game_icarus, Q3EGameConstants.GAME_ICARUS);
+		menuGames.put(R.id.main_menu_game_etqw, Q3EGameConstants.GAME_ETQW);
 
 		for(Map.Entry<Integer, String> entry : menuGames.entrySet())
 		{
@@ -4972,6 +4973,7 @@ public class GameLauncher extends Activity
 		public RadioGroup rg_fs_skindeepgame;
 		public RadioGroup rg_fs_qcgame;
 		public RadioGroup rg_fs_icarusgame;
+		public RadioGroup rg_fs_etqwgame;
 		public Spinner launcher_tab2_joystick_visible;
 		public TextView launcher_fs_game_subdir;
 		public CheckBox cb_stencilShadowSoft;
@@ -5115,6 +5117,7 @@ public class GameLauncher extends Activity
 			rg_fs_skindeepgame = CreateGameRadioGroup(gameId);
 			rg_fs_qcgame = CreateGameRadioGroup(gameId);
 			rg_fs_icarusgame = CreateGameRadioGroup(gameId);
+			rg_fs_etqwgame = CreateGameRadioGroup(gameId);
 
             edt_cmdline = findViewById(R.id.edt_cmdline);
             res_customlayout = findViewById(R.id.res_customlayout);

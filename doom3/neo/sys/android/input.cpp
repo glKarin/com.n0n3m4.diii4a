@@ -94,6 +94,11 @@ void Sys_ForceResolution(void)
 			} else if (r > 1.55f) {
 				cvarSystem->SetCVarInteger("r_aspectRatio", 2);    // 16:10
 				aspectRatio = "16:10";
+#ifdef _SPLASHDAMAGE //karin: r_aspectRatio == 3: 5:4
+			} else if (r > 1.25f) {
+				cvarSystem->SetCVarInteger("r_aspectRatio", 3);    // 5:4
+				aspectRatio = "5:4";
+#endif
 			} else {
 				cvarSystem->SetCVarInteger("r_aspectRatio", 0);    // 4:3
 				aspectRatio = "4:3";
@@ -104,7 +109,11 @@ void Sys_ForceResolution(void)
 		}
 		else
 		{
+#ifdef _SPLASHDAMAGE //karin: r_aspectRatio == -2: automatic
+			cvarSystem->SetCVarInteger("r_aspectRatio", -2);
+#else
 			cvarSystem->SetCVarInteger("r_aspectRatio", -1);
+#endif
 			Sys_Printf("r_mode(%i), r_customWidth(%i), r_customHeight(%i), r_aspectRatio(%i) = %f\n",
 					   -1, screen_width, screen_height, cvarSystem->GetCVarInteger("r_aspectRatio"), r);
 		}

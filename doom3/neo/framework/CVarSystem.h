@@ -99,7 +99,18 @@ typedef enum {
 	CVAR_INIT				= BIT(15),	// can only be set from the command-line
 	CVAR_ROM				= BIT(16),	// display only, cannot be set by user at all
 	CVAR_ARCHIVE			= BIT(17),	// set to cause it to be saved to a config file
+#ifdef _SPLASHDAMAGE
+    CVAR_LATCH				= BIT(18),	// will only change to the new value when UpdateLatched is called
+    // the modified flag is still set when the latched string changes
+    CVAR_MODIFIED			= BIT(19),	// set when the variable is modified
+    CVAR_PROFILE			= BIT(20),	// stored in each user's profile folder; reset when switching between  users
+    CVAR_GUILOCKED			= BIT(21),	// a flag to the UI that the cvar shouldn't be changed
+    // the value can still be changed via the console
+    CVAR_RANKLOCKED			= BIT(22),	// locked on ranked servers
+    CVAR_REPEATERINFO		= BIT(23),	// repeater info, similar to server info
+#else
 	CVAR_MODIFIED			= BIT(18)	// set when the variable is modified
+#endif
 #ifdef _RAVEN
 #define PC_CVAR_ARCHIVE CVAR_ARCHIVE
 	, CVAR_INFO				= BIT(19),	// sent as part of the MOTD packet
@@ -117,6 +128,14 @@ typedef enum {
 
 ===============================================================================
 */
+
+#ifdef _SPLASHDAMAGE
+class idCVarCallback
+{
+public:
+    virtual void			OnChanged( void ) = 0;
+};
+#endif
 
 class idCVar
 {
@@ -169,6 +188,16 @@ class idCVar
 		void					ClearModified(void) {
 			internalVar->flags &= ~CVAR_MODIFIED;
 		}
+		
+#ifdef _SPLASHDAMAGE
+	    bool					IsDefaultValue( void ) {
+	        return internalVar->InternalIsDefaultValue();
+	    }
+    
+	    bool					IsGuiLocked( void ) const {
+	        return ( internalVar->flags & CVAR_GUILOCKED ) != 0;
+	    }
+#endif
 
 		const char 			*GetString(void) const {
 			return internalVar->value;
@@ -195,6 +224,17 @@ class idCVar
 		void					SetFloat(const float value) {
 			internalVar->InternalSetFloat(value);
 		}
+		
+#ifdef _SPLASHDAMAGE
+	    void					RegisterCallback( idCVarCallback* callback )
+	    {
+	        internalVar->InternalRegisterCallback( callback );
+	    }
+	    void					UnRegisterCallback( idCVarCallback* callback )
+	    {
+	        internalVar->InternalUnRegisterCallback( callback );
+	    }
+#endif
 
 		void					SetInternalVar(idCVar *cvar) {
 			internalVar = cvar;
@@ -222,6 +262,14 @@ class idCVar
 		void					Init(const char *name, const char *value, int flags, const char *description,
 		                float valueMin, float valueMax, const char **valueStrings, argCompletion_t valueCompletion);
 
+#ifdef _SPLASHDAMAGE
+	    virtual void			InternalRegisterCallback( idCVarCallback* callback ) {}
+	    virtual void			InternalUnRegisterCallback( idCVarCallback* callback ) {}
+	    virtual void			InternalUpdateLatched( void ) {}
+	    virtual bool			InternalIsDefaultValue() const {
+	        return false;
+	    }
+#endif
 		virtual void			InternalSetString(const char *newValue) {}
 		virtual void			InternalSetBool(const bool newValue) {}
 		virtual void			InternalSetInteger(const int newValue) {}

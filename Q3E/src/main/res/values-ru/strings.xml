@@ -73,4 +73,5 @@
     <string name="error">Ошибка</string>
     <string name="restart">Перезапустить</string>
     <string name="skin_deep_glsl_shader">Skin Deep GLSL шейдер</string>
+    <string name="etqw_glsl_shader_and_resource_patches">ETQW GLSL shader and resource patches</string>
 </resources>

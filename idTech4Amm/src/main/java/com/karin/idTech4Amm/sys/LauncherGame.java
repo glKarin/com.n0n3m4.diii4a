@@ -57,6 +57,8 @@ public enum LauncherGame
     QC(Q3EGameConstants.GAME_ID_QC, Q3EGameConstants.GAME_QC, R.drawable.empty_icon, R.string.qc_base, R.color.theme_qc_main_color, R.string.qc),
 
     ICARUS(Q3EGameConstants.GAME_ID_ICARUS, Q3EGameConstants.GAME_ICARUS, R.drawable.empty_icon, R.string.icarus_base, R.color.theme_icarus_main_color, R.string.icarus),
+
+    ETQW(Q3EGameConstants.GAME_ID_ETQW, Q3EGameConstants.GAME_ETQW, R.drawable.etqw_icon, R.string.etqw_base, R.color.theme_etqw_main_color, R.string.etqw),
     ;
 
     public final int    GAME_ID;

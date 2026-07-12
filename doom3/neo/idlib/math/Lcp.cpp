@@ -85,6 +85,13 @@ idLCP_Square::FactorClamped
 */
 bool idLCP_Square::FactorClamped(void)
 {
+#ifdef _SPLASHDAMAGE
+
+    for ( int i = 0; i < numClamped; i++ ) {
+        memcpy( clamped[i], rowPtrs[i], numClamped * sizeof( float ) );
+    }
+    return SIMDProcessor->MatX_LU_Factor( clamped, diagonal, numClamped );
+#else
 	int i, j, k;
 	float s, d;
 
@@ -116,6 +123,7 @@ bool idLCP_Square::FactorClamped(void)
 	}
 
 	return true;
+#endif
 }
 
 /*
@@ -790,18 +798,22 @@ bool idLCP_Square::Solve(const idMatX &o_m, idVecX &o_x, const idVecX &o_b, cons
 #ifdef IGNORE_UNSATISFIABLE_VARIABLES
 
 	if (numIgnored) {
+#if !defined(_SPLASHDAMAGE)
 		if (lcp_showFailures.GetBool()) {
 			idLib::common->Printf("idLCP_Symmetric::Solve: %d of %d bounded variables ignored\n", numIgnored, m.GetNumRows() - numUnbounded);
 		}
+#endif
 	}
 
 #endif
 
 	// if failed clear remaining forces
 	if (failed) {
+#if !defined(_SPLASHDAMAGE)
 		if (lcp_showFailures.GetBool()) {
 			idLib::common->Printf("idLCP_Square::Solve: %s (%d of %d bounded variables ignored)\n", failed, m.GetNumRows() - i, m.GetNumRows() - numUnbounded);
 		}
+#endif
 
 		for (j = i; j < m.GetNumRows(); j++) {
 			f[j] = 0.0f;
@@ -915,7 +927,11 @@ bool idLCP_Symmetric::FactorClamped(void)
 		memcpy(clamped[i], rowPtrs[i], numClamped * sizeof(float));
 	}
 
+#ifdef _SPLASHDAMAGE
+    return SIMDProcessor->MatX_LDLT_Factor( clamped, diagonal, numClamped );
+#else
 	return SIMDProcessor->MatX_LDLTFactor(clamped, diagonal, numClamped);
+#endif
 }
 
 /*
@@ -1643,18 +1659,22 @@ bool idLCP_Symmetric::Solve(const idMatX &o_m, idVecX &o_x, const idVecX &o_b, c
 #ifdef IGNORE_UNSATISFIABLE_VARIABLES
 
 	if (numIgnored) {
+#if !defined(_SPLASHDAMAGE)
 		if (lcp_showFailures.GetBool()) {
 			idLib::common->Printf("idLCP_Symmetric::Solve: %d of %d bounded variables ignored\n", numIgnored, m.GetNumRows() - numUnbounded);
 		}
+#endif
 	}
 
 #endif
 
 	// if failed clear remaining forces
 	if (failed) {
+#if !defined(_SPLASHDAMAGE)
 		if (lcp_showFailures.GetBool()) {
 			idLib::common->Printf("idLCP_Symmetric::Solve: %s (%d of %d bounded variables ignored)\n", failed, m.GetNumRows() - i, m.GetNumRows() - numUnbounded);
 		}
+#endif
 
 		for (j = i; j < m.GetNumRows(); j++) {
 			f[j] = 0.0f;
@@ -1707,7 +1727,11 @@ bool idLCP_Symmetric::Solve(const idMatX &o_m, idVecX &o_x, const idVecX &o_b, c
 		}
 	}
 
+#ifdef _SPLASHDAMAGE
+    return failed ? false : true;
+#else
 	return true;
+#endif
 }
 
 

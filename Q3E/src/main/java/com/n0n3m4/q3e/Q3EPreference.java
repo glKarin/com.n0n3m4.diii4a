@@ -278,6 +278,15 @@ public final class Q3EPreference
     public static final String pref_harm_icarus_command_record        = PREF_HARM_ICARUS_PREFIX + "command_record";
     public static final String pref_harm_icarus_env                   = PREF_HARM_ICARUS_PREFIX + "env";
     public static final String pref_harm_icarus_game_mod              = PREF_HARM_ICARUS_PREFIX + "game_mod"; //k
+    // Enemy Territory: QUAKE Wars
+    public static final String PREF_HARM_ETQW_PREFIX         = "q3e_harm_etqw_";
+    public static final String pref_harm_etqw_fs_game        = PREF_HARM_ETQW_PREFIX + "fs_game"; //k
+    public static final String pref_harm_etqw_game_lib       = PREF_HARM_ETQW_PREFIX + "game_lib"; //k
+    public static final String pref_harm_etqw_user_mod       = PREF_HARM_ETQW_PREFIX + "user_mod"; //k
+    public static final String pref_params_etqw              = PREF_HARM_ETQW_PREFIX + "params"; //k
+    public static final String pref_harm_etqw_command_record = PREF_HARM_ETQW_PREFIX + "command_record"; //k
+    public static final String pref_harm_etqw_env            = PREF_HARM_ETQW_PREFIX + "env"; //k
+    public static final String pref_harm_etqw_game_mod       = PREF_HARM_ETQW_PREFIX + "game_mod"; //k
 
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k

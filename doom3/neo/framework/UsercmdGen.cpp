@@ -44,6 +44,37 @@ void usercmd_t::ByteSwap(void)
 	sequence = LittleLong(sequence);
 }
 
+#ifdef _SPLASHDAMAGE //karin: compat for DOOM3 source code
+#include "framework/KeyInputManager_Local.h"
+
+bool operator==(const userButtons_t &a, const userButtons_t &b) {
+	return 
+	a.attack == b.attack
+	&& a.run == b.run
+	&& a.modeSwitch == b.modeSwitch
+	&& a.mLookOff == b.mLookOff
+	&& a.sprint == b.sprint
+	&& a.activate == b.activate
+	&& a.altAttack == b.altAttack
+	&& a.leanLeft == b.leanLeft
+	&& a.leanRight == b.leanRight
+	&& a.tophat == b.tophat
+	;
+};
+
+bool operator==(const userButtonsUnion_t &a, const userButtonsUnion_t &b) {
+	return a.btnValue == b.btnValue || a.btn == b.btn;
+}
+
+int operator&(const userButtonsUnion_t &a, int b) {
+	return a.btnValue & b;
+}
+
+int operator|=(userButtonsUnion_t &a, int b) {
+	a.btnValue |= b;
+	return a.btnValue;
+}
+#endif
 /*
 ================
 usercmd_t::operator==
@@ -67,6 +98,7 @@ bool usercmd_t::operator==(const usercmd_t &rhs) const
 
 const int KEY_MOVESPEED	= 127;
 
+#if !defined(_SPLASHDAMAGE) //karin: move to header
 typedef enum {
 	UB_NONE,
 
@@ -168,6 +200,7 @@ typedef enum {
 
 	UB_MAX_BUTTONS
 } usercmdButton_t;
+#endif
 
 typedef struct {
 	const char *string;
@@ -189,6 +222,20 @@ userCmdString_t	userCmdStrings[] = {
 
 	{ "_attack",		UB_ATTACK },
 	{ "_speed",			UB_SPEED },
+#ifdef _SPLASHDAMAGE //karin: sync with usercmdButton_t and Game_local.cpp::userCmdStrings
+	{ "_modeswitch",	UB_MODESWITCH },
+	{ "_sprint",		UB_SPRINT },
+	{ "_activate",		UB_ACTIVATE },
+	{ "_showScores",	UB_SHOWSCORES },
+	{ "_voice",			UB_VOICE },
+	{ "_teamVoice",		UB_TEAMVOICE },
+	{ "_fireteamVoice",	UB_FIRETEAMVOICE },
+	{ "_mlook",			UB_MLOOK },
+	{ "_altattack",		UB_ALTATTACK },
+	{ "_tophat",		UB_TOPHAT },
+	{ "_leanLeft",		UB_LEANLEFT },
+	{ "_leanRight",		UB_LEANRIGHT },
+#else
 	{ "_zoom",			UB_ZOOM },
 	{ "_showScores",	UB_SHOWSCORES },
 	{ "_mlook",			UB_MLOOK },
@@ -271,6 +318,7 @@ userCmdString_t	userCmdStrings[] = {
 	{ "_attackalt",		UB_ATTACK_ALT },
 #endif
 
+#endif
 	{ NULL,				UB_NONE },
 };
 
@@ -365,6 +413,9 @@ class idUsercmdGenLocal : public idUsercmdGen
 		void			JoystickMove(void);
 		void			MouseMove(void);
 		void			CmdButtons(void);
+#ifdef _SPLASHDAMAGE //karin: client cmd buttons
+		void			ClientCmdButtons(void);
+#endif
 
 		void			Mouse(void);
 		void			Keyboard(void);
@@ -419,7 +470,7 @@ idCVar idUsercmdGenLocal::in_yawSpeed("in_yawspeed", "140", CVAR_SYSTEM | CVAR_A
 idCVar idUsercmdGenLocal::in_pitchSpeed("in_pitchspeed", "140", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_FLOAT, "pitch change speed when holding down look _lookUp or _lookDown button");
 idCVar idUsercmdGenLocal::in_angleSpeedKey("in_anglespeedkey", "1.5", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_FLOAT, "angle change scale when holding down _speed button");
 idCVar idUsercmdGenLocal::in_freeLook("in_freeLook", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "look around with mouse (reverse _mlook button)");
-#ifdef _RAVEN //karin: in_alwaysRun default on, and not only in MP game.
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: in_alwaysRun default on, and not only in MP game.
 idCVar idUsercmdGenLocal::in_alwaysRun("in_alwaysRun", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "always run (reverse _speed button)");
 #else
 idCVar idUsercmdGenLocal::in_alwaysRun("in_alwaysRun", "0", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "always run (reverse _speed button) - only in MP");
@@ -558,7 +609,7 @@ void idUsercmdGenLocal::AdjustAngles(void)
 {
 	float	speed;
 
-#ifdef _RAVEN //karin: in_alwaysRun default on, and not only in MP game.
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: in_alwaysRun default on, and not only in MP game.
 	if (toggled_run.on ^(in_alwaysRun.GetBool())) 
 #else
 	if (toggled_run.on ^(in_alwaysRun.GetBool() && idAsyncNetwork::IsActive())) 
@@ -616,6 +667,10 @@ void idUsercmdGenLocal::KeyMove(void)
 	cmd.forwardmove = idMath::ClampChar(forward);
 	cmd.rightmove = idMath::ClampChar(side);
 	cmd.upmove = idMath::ClampChar(up);
+
+#ifdef _SPLASHDAMAGExxx
+	//game->KeyMove(cmd.forwardmove, cmd.rightmove, cmd.upmove, cmd);
+#endif
 }
 
 /*
@@ -698,7 +753,12 @@ void idUsercmdGenLocal::MouseMove(void)
 		return;
 	}
 
-	if (ButtonState(UB_STRAFE) || !(cmd.buttons & BUTTON_MLOOK)) {
+#ifdef _SPLASHDAMAGE //karin: mouse look vs. look off
+	if (ButtonState(UB_STRAFE) || (cmd.buttons & BUTTON_LOOKOFF) != 0) 
+#else
+	if (ButtonState(UB_STRAFE) || !(cmd.buttons & BUTTON_MLOOK)) 
+#endif
+	{
 		// add mouse X/Y movement to cmd
 		strafeMx *= m_strafeScale.GetFloat();
 		strafeMy *= m_strafeScale.GetFloat();
@@ -717,7 +777,12 @@ void idUsercmdGenLocal::MouseMove(void)
 		cmd.rightmove = idMath::ClampChar((int)(cmd.rightmove + strafeMx));
 	}
 
-	if (!ButtonState(UB_STRAFE) && (cmd.buttons & BUTTON_MLOOK)) {
+#ifdef _SPLASHDAMAGE //karin: mouse look vs. look off
+	if (!ButtonState(UB_STRAFE) && !(cmd.buttons & BUTTON_LOOKOFF)) 
+#else
+	if (!ButtonState(UB_STRAFE) && (cmd.buttons & BUTTON_MLOOK)) 
+#endif
+	{
 		viewangles[PITCH] += m_pitch.GetFloat() * my;
 	} else {
 		cmd.forwardmove = idMath::ClampChar((int)(cmd.forwardmove - strafeMy));
@@ -733,7 +798,7 @@ void idUsercmdGenLocal::JoystickMove(void)
 {
 	float	anglespeed;
 
-#ifdef _RAVEN //karin: in_alwaysRun default on, and not only in MP game.
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: in_alwaysRun default on, and not only in MP game.
 	if (toggled_run.on ^(in_alwaysRun.GetBool())) 
 #else
 	if (toggled_run.on ^(in_alwaysRun.GetBool() && idAsyncNetwork::IsActive())) 
@@ -766,12 +831,36 @@ void idUsercmdGenLocal::CmdButtons(void)
 
 	cmd.buttons = 0;
 
+#ifdef _SPLASHDAMAGE //karin: cmd buttons
+	if (ButtonState(UB_MODESWITCH)) {
+		cmd.buttons |= BUTTON_MODE_SWITCH;
+	}
+	if (ButtonState(UB_SPRINT)) {
+		cmd.buttons |= BUTTON_SPRINT;
+	}
+	if (ButtonState(UB_ACTIVATE)) {
+		cmd.buttons |= BUTTON_ACTIVATE;
+	}
+	if (ButtonState(UB_ALTATTACK)) {
+		cmd.buttons |= BUTTON_ALTATTACK;
+	}
+	if (ButtonState(UB_TOPHAT)) {
+		cmd.buttons |= BUTTON_TOP_HAT;
+	}
+	if (ButtonState(UB_LEANLEFT)) {
+		cmd.buttons |= BUTTON_LEANLEFT;
+	}
+	if (ButtonState(UB_LEANRIGHT)) {
+		cmd.buttons |= BUTTON_LEANRIGHT;
+	}
+#else //karin: no impulse buttons
 	// figure button bits
 	for (i = 0 ; i <= 7 ; i++) {
 		if (ButtonState((usercmdButton_t)(UB_BUTTON0 + i))) {
 			cmd.buttons |= 1 << i;
 		}
 	}
+#endif
 
 	// check the attack button
 	if (ButtonState(UB_ATTACK)) {
@@ -779,7 +868,7 @@ void idUsercmdGenLocal::CmdButtons(void)
 	}
 
 	// check the run button
-#ifdef _RAVEN //karin: in_alwaysRun default on, and not only in MP game.
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: in_alwaysRun default on, and not only in MP game.
 	if (toggled_run.on ^(in_alwaysRun.GetBool())) 
 #else
 	if (toggled_run.on ^(in_alwaysRun.GetBool() && idAsyncNetwork::IsActive())) 
@@ -793,16 +882,24 @@ void idUsercmdGenLocal::CmdButtons(void)
 		cmd.buttons |= BUTTON_ZOOM;
 	}
 
+#if !defined(_SPLASHDAMAGE) //karin: show scores with tab
 	// check the scoreboard button
 	if (ButtonState(UB_SHOWSCORES) || ButtonState(UB_IMPULSE19)) {
 		// the button is toggled in SP mode as well but without effect
 		cmd.buttons |= BUTTON_SCORES;
 	}
+#endif
 
 	// check the mouse look button
+#ifdef _SPLASHDAMAGE //karin: mouse look vs. look off
+	if (!(ButtonState(UB_MLOOK)) ^ in_freeLook.GetInteger()) {
+		cmd.buttons |= BUTTON_LOOKOFF;
+	}
+#else
 	if (ButtonState(UB_MLOOK) ^ in_freeLook.GetInteger()) {
 		cmd.buttons |= BUTTON_MLOOK;
 	}
+#endif
 
 #ifdef _HUMANHEAD
 	// check the alt attack button
@@ -824,12 +921,16 @@ void idUsercmdGenLocal::InitCurrent(void)
 	memset(&cmd, 0, sizeof(cmd));
 	cmd.flags = flags;
 	cmd.impulse = impulse;
-#ifdef _RAVEN //karin: in_alwaysRun default on, and not only in MP game.
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: in_alwaysRun default on, and not only in MP game.
 	cmd.buttons |= (in_alwaysRun.GetBool()) ? BUTTON_RUN : 0;
 #else
 	cmd.buttons |= (in_alwaysRun.GetBool() && idAsyncNetwork::IsActive()) ? BUTTON_RUN : 0;
 #endif
+#ifdef _SPLASHDAMAGE //karin: mouse look vs. look off
+	cmd.buttons |= in_freeLook.GetBool() ? 0 : BUTTON_LOOKOFF;
+#else
 	cmd.buttons |= in_freeLook.GetBool() ? BUTTON_MLOOK : 0;
+#endif
 }
 
 /*
@@ -850,13 +951,20 @@ void idUsercmdGenLocal::MakeCurrent(void)
 		// update toggled key states
 		toggled_crouch.SetKeyState(ButtonState(UB_DOWN), in_toggleCrouch.GetBool());
 		toggled_run.SetKeyState(ButtonState(UB_SPEED), in_toggleRun.GetBool() && idAsyncNetwork::IsActive());
+#ifdef _SPLASHDAMAGE //karin: mode switch by zoom
+		toggled_zoom.SetKeyState(ButtonState(UB_MODESWITCH), in_toggleZoom.GetBool());
+#else
 		toggled_zoom.SetKeyState(ButtonState(UB_ZOOM), in_toggleZoom.GetBool());
+#endif
 
 		// keyboard angle adjustment
 		AdjustAngles();
 
 		// set button bits
 		CmdButtons();
+#ifdef _SPLASHDAMAGE //karin: client cmd buttons
+		ClientCmdButtons();
+#endif
 
 		// get basic movement from keyboard
 		KeyMove();
@@ -1026,23 +1134,49 @@ void idUsercmdGenLocal::Key(int keyNum, bool down)
 
 	int action = idKeyInput::GetUsercmdAction(keyNum);
 
+#ifdef _SPLASHDAMAGE //karin: check button action type
+	if (action < 0)
+		return;
+	const idKey &key = keyInputManagerLocal.GetKeyByNum(keyNum);
+	if (key.type == B_LOCAL_IMPULSE)
+		return;
+#endif
 	if (down) {
 
+#ifdef _SPLASHDAMAGE //karin: only type is button can update buttonState
+		if(key.type == B_BUTTON)
+#endif
 		buttonState[ action ]++;
 
+#ifdef _SPLASHDAMAGE //karin: impulse buttons
+		if (!Inhibited()) {
+			if (key.type == B_IMPULSE) {
+				cmd.impulse = action;
+				cmd.flags ^= UCF_IMPULSE_SEQUENCE;
+			}
+		}
+#else
 		if (!Inhibited()) {
 			if (action >= UB_IMPULSE0 && action <= UB_IMPULSE61) {
 				cmd.impulse = action - UB_IMPULSE0;
 				cmd.flags ^= UCF_IMPULSE_SEQUENCE;
 			}
 		}
+#endif
 	} else {
+#ifdef _SPLASHDAMAGE //karin: only type is button can update buttonState
+		if(key.type == B_BUTTON)
+		{
+#endif
 		buttonState[ action ]--;
 
 		// we might have one held down across an app active transition
 		if (buttonState[ action ] < 0) {
 			buttonState[ action ] = 0;
 		}
+#ifdef _SPLASHDAMAGE //karin: only type is button can update buttonState
+		}
+#endif
 	}
 }
 
@@ -1212,3 +1346,13 @@ usercmd_t idUsercmdGenLocal::GetDirectUsercmd(void)
 
 	return cmd;
 }
+
+#ifdef _SPLASHDAMAGE //karin: client cmd buttons
+void idUsercmdGenLocal::ClientCmdButtons(void)
+{
+	cmd.clientButtons.showScores = ButtonState(UB_SHOWSCORES);
+	cmd.clientButtons.voice = ButtonState(UB_VOICE);
+	cmd.clientButtons.teamVoice = ButtonState(UB_TEAMVOICE);
+	cmd.clientButtons.fireteamVoice = ButtonState(UB_FIRETEAMVOICE);
+}
+#endif

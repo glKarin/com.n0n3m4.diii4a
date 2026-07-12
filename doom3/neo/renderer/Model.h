@@ -42,7 +42,12 @@ If you have questions concerning this license or the applicable additional terms
 #define MD5_MESH_EXT			"md5mesh"
 #define MD5_ANIM_EXT			"md5anim"
 #define MD5_CAMERA_EXT			"md5camera"
+#ifdef _SPLASHDAMAGE
+#define MD5B_VERSION			1
+#define MD5_VERSION				11
+#else
 #define MD5_VERSION				10
+#endif
 
 #define MD5_STATIC_MESH_EXT     "md5meshs" // mark as static model, but file content is same as md5mesh
 
@@ -91,14 +96,21 @@ typedef struct dominantTri_s {
 	float						normalizationScale[3];
 } dominantTri_t;
 
+#if !defined(_SPLASHDAMAGE) //karin: defined in idlib/geometry/DrawVert.h
 typedef struct shadowCache_s {
 	idVec4						xyz;					// we use homogenous coordinate tricks
 } shadowCache_t;
+#endif
 
 const int SHADOW_CAP_INFINITE	= 64;
 
 // our only drawing geometry type
-typedef struct srfTriangles_s {
+#ifdef _SPLASHDAMAGE
+struct srfTriangles_t
+#else
+typedef struct srfTriangles_s
+#endif
+{
 	idBounds					bounds;					// for culling
 
 	int							ambientViewCount;		// if == tr.viewCount, it is visible this view
@@ -109,6 +121,13 @@ typedef struct srfTriangles_s {
 	bool						perfectHull;			// true if there aren't any dangling edges
 	bool						deformedSurface;		// if true, indexes, silIndexes, mirrorVerts, and silEdges are
 	// pointers into the original surface, and should not be freed
+	
+#ifdef _SPLASHDAMAGE
+	//BEGIN RAVEN
+    int							numAllocedVerts;
+	int							numAllocedIndices;
+	//END RAVEN
+#endif
 
 	int							numVerts;				// number of vertices
 	idDrawVert 				*verts;					// vertices, allocated with special allocator
@@ -142,10 +161,17 @@ typedef struct srfTriangles_s {
 	shadowCache_t 				*shadowVertexes;			// these will be copied to shadowCache when it is going to be drawn.
 	// these are NULL when vertex programs are available
 
+#ifdef _SPLASHDAMAGE
+	struct srfTriangles_t 		*ambientSurface;			// for light interactions, point back at the original surface that generated
+	// the interaction, which we will get the ambientCache from
+
+	struct srfTriangles_t 		*nextDeferredFree;		// chain of tris to free next frame
+#else
 	struct srfTriangles_s 		*ambientSurface;			// for light interactions, point back at the original surface that generated
 	// the interaction, which we will get the ambientCache from
 
 	struct srfTriangles_s 		*nextDeferredFree;		// chain of tris to free next frame
+#endif
 
 	// data in vertex object space, not directly readable by the CPU
 	struct vertCache_s 		*indexCache;				// int
@@ -154,13 +180,24 @@ typedef struct srfTriangles_s {
 #ifdef _SHADOW_MAPPING
 	bool 			        shadowIsPrelight; // flag is prelight shadow from prelight shadow model
 #endif
-} srfTriangles_t;
+}
+#ifdef _SPLASHDAMAGE
+;
+typedef struct srfTriangles_t srfTriangles_s;
+#else
+srfTriangles_t
+#endif
+;
 
 typedef idList<srfTriangles_t *> idTriList;
 
 typedef struct modelSurface_s {
 	int							id;
+#ifdef _SPLASHDAMAGE
+    const idMaterial *			material;
+#else
 	const idMaterial 			*shader;
+#endif
 	srfTriangles_t 			*geometry;
 } modelSurface_t;
 
@@ -174,6 +211,10 @@ typedef enum {
 	INVALID_JOINT				= -1
 } jointHandle_t;
 
+#ifdef _SPLASHDAMAGE
+#define COLLISION_JOINT_HANDLE( id )	( ( id ) >= 0 ? INVALID_JOINT : ((jointHandle_t) ( -1 - id )) )
+#define JOINTHANDLE_FOR_TRACE( trace )	( trace ? COLLISION_JOINT_HANDLE( trace->c.id ) : INVALID_JOINT )
+#endif
 class idMD5Joint
 {
 	public:
@@ -184,6 +225,24 @@ class idMD5Joint
 		const idMD5Joint 			*parent;
 };
 
+#ifdef _SPLASHDAMAGE
+const int MAX_GUISURFACE_POINTS = 16;
+const int MAX_GUISURFACE_INDICES = ( MAX_GUISURFACE_POINTS - 2 ) * 3;
+const int MAX_GUISURFACE_TRIANGLES = MAX_GUISURFACE_INDICES / 3;
+
+struct guiSurface_t {
+    int					guiNum;
+    idBounds			bounds;
+    idVec3				origin;
+    idMat3				axis;
+    jointHandle_t		joint;
+
+    // geometry data used for tracing and culling
+    idPlane				plane;
+    idPlane				edgePlanes[ MAX_GUISURFACE_TRIANGLES ][ 2 ];
+    int					numTris;
+};
+#endif
 
 // the init methods may be called again on an already created model when
 // a reloadModels is issued
@@ -240,6 +299,9 @@ class idRenderModel
 
 		// dump any ambient caches on the model surfaces
 		virtual void				FreeVertexCache() = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual void				DirtyVertexAmbientCache() = 0;
+#endif
 
 		// returns the name of the model
 		virtual const char			*Name() const = 0;
@@ -334,6 +396,16 @@ class idRenderModel
 		// Returns number of the joint nearest to the given triangle.
 		virtual int					NearestJoint(int surfaceNum, int a, int c, int b) const = 0;
 
+#ifdef _SPLASHDAMAGE
+	    // Returns the number of GUI surfaces
+	    virtual int					NumGUISurfaces( void ) const = 0;
+	
+	    // Returns the GUI surfaces
+	    virtual const guiSurface_t*	GetGUISurface( int guiSurfaceNum ) const = 0;
+	    // Returns the id of the surface with the given name (-1 if not supported or not found)
+	    virtual int					FindSurfaceId( const char *surfaceName ) = 0;
+#endif
+
 		// Writing to and reading from a demo file.
 		virtual void				ReadFromDemoFile(class idDemoFile *f) = 0;
 		virtual void				WriteToDemoFile(class idDemoFile *f) = 0;
@@ -344,8 +416,8 @@ class idRenderModel
         virtual int					GetSurfaceMask ( const char* surface ) const = 0;
 
 		// jscott: for portal skies
-        virtual void                                SetHasSky( bool on ) = 0;
-        virtual bool                                GetHasSky( void ) const = 0;
+        virtual void                SetHasSky( bool on ) = 0;
+        virtual bool                GetHasSky( void ) const = 0;
 #endif
 #ifdef _HUMANHEAD
         // HUMANHEAD pdm: Game access to liquid models
@@ -353,9 +425,24 @@ class idRenderModel
         // HUMANHEAD END
 
 #if _HH_RENDERDEMO_HACKS //HUMANHEAD rww
-        virtual bool					IsGameUpdatedModel(void) = 0;
-        virtual void					SetGameUpdatedModel(bool gum) = 0;
+        virtual bool				IsGameUpdatedModel(void) = 0;
+        virtual void				SetGameUpdatedModel(bool gum) = 0;
 #endif //HUMANHEAD END
+#endif
+
+#ifdef _SPLASHDAMAGE
+
+    	virtual void				SetBounds( idBounds const &bb ) = 0;
+	    // Purges any partial loadable images referenced by this model
+	    virtual void				PurgePartialLoadableImages( void ) = 0;
+	    
+	    // Schedules loading of any partial loadable images referenced by this model
+	    virtual void				LoadPartialLoadableImages( bool blocking = false ) = 0;
+
+	    // All surfaces have finished any pending partial image loads
+	    virtual bool				IsFinishedPartialLoading( void ) const = 0;
+    	virtual int					NumMeshes( const int lod = 0 ) const = 0;
+    	virtual idBounds			CalcMeshBounds( int meshIndex, const idJointMat *joints, const idVec3 &offset, const idMat3 &axis, bool useDefaultAnim ) = 0;
 #endif
 };
 

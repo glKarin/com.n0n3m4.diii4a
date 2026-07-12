@@ -84,6 +84,7 @@ public class Q3EInterface
 	public boolean isSkinDeep = false;
 	public boolean isQC = false;
 	public boolean isIcarus = false;
+	public boolean isETQW = false;
 
 	public String default_path = Environment.getExternalStorageDirectory() + "/diii4a";
 
@@ -223,6 +224,8 @@ public class Q3EInterface
 			return Q3EGameConstants.GAME_ID_QC;
 		else if(isIcarus)
 			return Q3EGameConstants.GAME_ID_ICARUS;
+		else if(isETQW)
+			return Q3EGameConstants.GAME_ID_ETQW;
 		else
 			return Q3EGameConstants.GAME_ID_DOOM3;
 	}
@@ -301,6 +304,8 @@ public class Q3EInterface
 			SetupQC();
 		else if(Q3EGameConstants.GAME_ICARUS.equalsIgnoreCase(name))
 			SetupIcarus();
+		else if(Q3EGameConstants.GAME_ETQW.equalsIgnoreCase(name))
+			SetupETQW();
 		else
 			SetupDOOM3();
 	}
@@ -333,6 +338,7 @@ public class Q3EInterface
 		isSkinDeep = false;
 		isQC = false;
 		isIcarus = false;
+		isETQW = false;
 	}
 
 	public void SetupDOOM3()
@@ -512,9 +518,17 @@ public class Q3EInterface
 		SetupGameConfig();
 	}
 
+	public void SetupETQW()
+	{
+		ResetGameState();
+		isD3 = true;
+		isETQW = true;
+		SetupGameConfig();
+	}
+
 	public boolean IsInitGame()
 	{
-		return isD3 || isQ4 || isPrey
+		return isD3 || isQ4 || isPrey || isETQW
 				|| isD3BFG || isTDM || isSkinDeep || isQC || isIcarus
 				|| isRTCW || isQ3 || isETW || isRealRTCW || isFTEQW || isJA || isJO || isUrT || isMOHAA
 				|| isQ2 || isQ1
@@ -560,7 +574,7 @@ public class Q3EInterface
 
 	public boolean IsIdTech4()
 	{
-		return isD3 || isQ4 || isPrey;
+		return isD3 || isQ4 || isPrey || isETQW;
 	}
 
 	public boolean IsUsingSDL()
@@ -605,7 +619,7 @@ public class Q3EInterface
 
 	public boolean IS_D3()
 	{
-		return isD3 && (!isQ4 || !isPrey);
+		return isD3 && (!isQ4 || !isPrey && !isETQW);
 	}
 
 	public static boolean IsStandaloneGame(String game)
@@ -826,6 +840,12 @@ public class Q3EInterface
 		else if(isIcarus)
 		{
 			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_ICARUS);
+			list.add("<mod>/autoexec.cfg");
+			list.add("<base>/autoexec.cfg");
+		}
+		else if(isETQW)
+		{
+			list.add("<mod>/" + Q3EGameConstants.CONFIG_FILE_ETQW);
 			list.add("<mod>/autoexec.cfg");
 			list.add("<base>/autoexec.cfg");
 		}

@@ -37,6 +37,16 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+using namespace sdUtility;
+
+class sdDeclRenderBinding;
+class sdDeclRenderProgram;
+class sdDeclSurfaceType;
+class sdDeclSurfaceTypeMap;
+class sdRenderProgram;
+#endif
+
 class idImage;
 class idCinematic;
 class idUserInterface;
@@ -67,6 +77,14 @@ typedef enum {
 	// set AFTER image format selection
 	TR_CLAMP_TO_ZERO_ALPHA	// guarantee 0 alpha edge for projected textures,
 	// set AFTER image format selection
+#ifdef _SPLASHDAMAGE
+	,
+	TR_CLAMP_X,				// only clamp x direction
+	TR_CLAMP_Y,				// only clamp y direction
+	TR_MIRROR,
+	TR_MIRROR_X,
+	TR_MIRROR_Y,
+#endif
 } textureRepeat_t;
 
 #ifdef _RAVENxxx //karin: TODO decal in Quake4
@@ -151,6 +169,9 @@ typedef enum {
 	,
     OP_TYPE_FRAGMENTPROGRAMS // HUMANHEAD CJR:  Added so fragment programs support can be toggled
 #endif
+#ifdef _SPLASHDAMAGE
+	, OP_TYPE_LOAD
+#endif
 } expOpType_t;
 
 typedef enum {
@@ -188,6 +209,16 @@ typedef enum {
 	EXP_REG_DISTANCE, // HUMANHEAD: CJR
 #endif
 
+#ifdef _SPLASHDAMAGE
+	EXP_REG_NUMLIGHTS,
+	EXP_REG_SUN_R,
+	EXP_REG_SUN_G,
+	EXP_REG_SUN_B,
+	EXP_REG_SUN_AZIMUTH,
+	EXP_REG_WIND_X,
+	EXP_REG_WIND_Y,
+	EXP_REG_RANDF,
+#endif
 	EXP_REG_NUM_PREDEFINED
 } expRegister_t;
 
@@ -237,6 +268,9 @@ typedef enum {
 typedef enum {
 	SVC_IGNORE,
 	SVC_MODULATE,
+#ifdef _SPLASHDAMAGE
+	SVC_MODULATE_ALPHA,
+#endif
 	SVC_INVERSE_MODULATE
 } stageVertexColor_t;
 
@@ -254,16 +288,13 @@ static const int	MAX_FRAGMENT_PARMS = 8;
 static const int	MAX_VERTEX_PARMS = 4;
 static const int	MAX_FRAGMENT_PARMS = 4; // add for DOOM3
 #endif
-#ifdef _RAVEN
-class rvNewShaderStage;
-#endif
 
 typedef struct {
 	int					vertexProgram;
 	int					numVertexParms;
 	int					vertexParms[MAX_VERTEX_PARMS][4];	// evaluated register indexes
 
-#if defined(_GLSL_PROGRAM) || defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
+#if defined(_GLSL_PROGRAM) || defined(_RAVEN) || defined(_HUMANHEAD) || defined(_SPLASHDAMAGE) //karin: fragment shader parms
 // RAVEN BEGIN
 // AReis: New Fragment Parm stuff.
     int                 numFragmentParms;
@@ -288,6 +319,59 @@ typedef struct {
 //HUMANHEAD END
 #endif
 
+#ifdef _SPLASHDAMAGE
+struct stageVector_t {
+	int							registers[4];
+	const sdDeclRenderBinding*	renderBinding;
+};
+const int MAX_STAGE_VECTORS = 32;
+
+struct stageTexture_t {
+	idImage*					image;
+	const sdDeclRenderBinding*	renderBinding;
+};
+const int MAX_STAGE_TEXTURES = 16;
+
+struct stageTextureMatrix_t {
+	int							matrix[2][3];
+	const sdDeclRenderBinding*	renderBinding_s;
+	const sdDeclRenderBinding*	renderBinding_t;
+};
+const int MAX_STAGE_TEXTUREMATRICES = 3;
+
+struct stageParseData_t {
+							stageParseData_t() :
+								numVectors( 0 ),
+								numTextures( 0 ),
+								numTextureMatrices( 0 ) {
+								memset( vectors, 0, sizeof( vectors ) );
+								memset( textures, 0, sizeof( textures ) );
+								memset( textureMatrices, 0, sizeof( textureMatrices ) );
+								declRenderProgram = NULL;
+							}
+
+	int						numVectors;
+	stageVector_t			vectors[MAX_STAGE_VECTORS];
+	int						numTextures;
+	stageTexture_t			textures[MAX_STAGE_TEXTURES];
+	int						numTextureMatrices;
+	stageTextureMatrix_t	textureMatrices[MAX_STAGE_TEXTUREMATRICES];
+
+	const sdDeclRenderProgram *declRenderProgram;
+};
+
+//karin: I see them always constants, maybe not need register
+typedef struct {
+	int				tint[3];
+	int				distortion[4];
+	int				fresnel;
+	int				glare;
+	int				offset[4];
+	int				desat;
+	int				lerp; // must register
+} waterStage_t;
+#endif
+
 typedef struct {
 	int					conditionRegister;	// if registers[conditionRegister] == 0, skip stage
 	stageLighting_t		lighting;			// determines which passes interact with lights
@@ -306,7 +390,7 @@ typedef struct {
 #ifdef _RAVEN
 	// RAVEN BEGIN
 // rjohnson: new shader stage system
-	rvNewShaderStage	*newShaderStage;
+	class rvNewShaderStage	*newShaderStage;
 #endif
 
 #ifdef _HUMANHEAD
@@ -319,7 +403,24 @@ typedef struct {
 
     specData_t			specular;	//HUMANHEAD bjk: specular exponent
 #endif
+
+#ifdef _SPLASHDAMAGE
+	float				lineWidth;
+
+	const sdRenderProgram*		renderProgram;
+
+	int							numVectors;
+	stageVector_t*				vectors;
+	int							numTextures;
+	stageTexture_t*				textures;
+	int							numTextureMatrices;
+	stageTextureMatrix_t*		textureMatrices;
+	int							destinationBuffer; //-1 for normal rendering
+#endif
 } shaderStage_t;
+#ifdef _SPLASHDAMAGE
+typedef shaderStage_t materialStage_t;
+#endif
 
 typedef enum {
 	MC_BAD,
@@ -338,6 +439,30 @@ typedef enum {
 #else
 	SS_SUBVIEW = -3,	// mirrors, viewscreens, etc
 #endif
+#ifdef _SPLASHDAMAGE
+	SS_BAD = -1,
+	SS_OPAQUEFIRST,		// opaque
+	SS_OPAQUE,			// opaque
+	SS_OPAQUENEARER,	// used for materials with expensive shaders, such as the megaTexture
+	SS_OPAQUENEAREST,	// used for materials that definitely should be rendered 'last'
+	SS_DECAL,			// scorch marks, etc.
+
+	SS_GUI,		// guis
+
+	SS_REFRACTABLE,			// Translucent, but drawn before refraction surfaces
+	SS_REFRACTION,			// Stage using refraction screen copy to texture
+
+	SS_FAR_PRE_ATMOS,		// Translucent materials drawn before the atmosphere, this is usally not what we want
+	SS_MEDIUM_PRE_ATMOS,	// as translucent mats don't fill the z-buffer and thus get fogged like what's behind them
+	SS_CLOSE_PRE_ATMOS,		// instead of for their own depth.
+
+	//
+	//	Anything whith the following sort orders will need to be fogged "manually" (i.e. by setting up the shader properly)
+	//
+	SS_ATMOSPHERE,			// Not really used; just as a new phase
+
+	SS_PORTAL_SKY, // compat for DOOM3
+#else
 	SS_GUI = -2,		// guis
 	SS_BAD = -1,
 	SS_OPAQUE,			// opaque
@@ -345,6 +470,7 @@ typedef enum {
 	SS_PORTAL_SKY,
 
 	SS_DECAL,			// scorch marks, etc.
+#endif
 
 	SS_FAR,
 	SS_MEDIUM,			// normal translucent
@@ -399,11 +525,39 @@ typedef enum {
     MF_SKIPCLIP                 = BIT(9)
 		//HUMANHEAD END
 #endif
+#ifdef _SPLASHDAMAGE
+	,
+    MF_NOAMBIENT					= BIT(7),	// No cubemap ambient light on this shader
+    MF_NOATMOSPHERE					= BIT(7),	// No extinction/inscattering on this shader
+    MF_FORCETANGENTS				= BIT(8),	// Force tangents and normal calculation
+    MF_CLUSTERTRANSFORM				= BIT(9),	// the vertex shader will do the final offseting for the cluster model
+    MF_FORCEATMOSPHERE				= BIT(10),	// No extinction/inscattering on this shader
+    MF_FLIPBACKSIDENORMALS			= BIT(11),	// hack to make foliage light better, for twosided materials give one side flipped normals
+    MF_FULLSCREENPOSTPROCESS		= BIT(12),	// Don't modify depth and always pass the depth test for post processing materials (using SS_POSTPROCESS sort)
+    MF_NOHWSKINNING					= BIT(13),	// Don't use hardware skinning, use the SIMD code instead
+    MF_OCCLUSION_OCCLUDE			= BIT(14),
+    MF_OCCLUSION_QUERY				= BIT(15),
+    MF_NOSURFACEMERGE				= BIT(16),	// Don't merge MD5 mesh surface which have this set
+    MF_SHADOWMAPPED					= BIT(17),	// This light uses shadow maps
+    MF_VERTEXPOSITIONONLY			= BIT(18),	// Ignore UV, color, etc data from source models when loaded
+    MF_ONLYATMOSPHEREINTERACTION	= BIT(19),
+    MF_NOATMOSPHEREINTERACTION		= BIT(20),
+    MF_ADVERT						= BIT(21),
+    MF_FORCESOURCENORMALS			= BIT(22),
+    MF_BAKEDINATMOSLIGHTCOL			= BIT(23),
+    MF_TRANSLUCENTINTERACTION		= BIT(24),
+    MF_RECEIVESLIGHTINGONBACKSIDES	= BIT(25),
+    MF_LOWRANGEUVCOMPRESS			= BIT(26),
+    MF_UPDATECURRENTRENDER			= BIT(27),
+    MF_SHADOWSCASTONLYFROMSTATICOBJECTS = BIT(28),
+    MF_HASMEGA						= BIT(29),
+    MF_NOIMPLICITSTAGES				= BIT(30),
+#endif
 } materialFlags_t;
 
 // contents flags, NOTE: make sure to keep the defines in doom_defs.script up to date with these!
 typedef enum {
-#ifdef _RAVEN //karin: must sync script/defs.script | cm/CollisionModel_debug.cpp
+#ifdef _RAVEN //karin: must sync with script/defs.script | cm/CollisionModel_debug.cpp
 	CONTENTS_SOLID				= BIT(0),	// an eye is never valid in a solid
 	CONTENTS_OPAQUE				= BIT(1),	// blocks visibility (for ai)
 	CONTENTS_WATER				= BIT(2),	// used for water
@@ -441,7 +595,7 @@ typedef enum {
 		CONTENTS_FOG				= BIT(25),
 		CONTENTS_LAVA				= BIT(26),
 		CONTENTS_SLIME				= BIT(27),*/
-#elif defined(_HUMANHEAD)
+#elif defined(_HUMANHEAD) //karin: must sync with script/defs.script | cm/CollisionModel_debug.cpp
 	CONTENTS_SOLID				= BIT(0),	// an eye is never valid in a solid
 	CONTENTS_OPAQUE				= BIT(1),	// blocks visibility (for ai)
 	CONTENTS_WATER				= BIT(2),	// used for water
@@ -478,6 +632,40 @@ typedef enum {
 	CONTENTS_SHOOTABLEBYARROW	= BIT(26),	// pdm: solid to spirit arrows specifically as opposed to other projectiles
 	CONTENTS_HUNTERCLIP			= BIT(27),	// pdm: solid to hunters, but not hunters in vehicles
 	// HUMANHEAD END
+#elif defined(_SPLASHDAMAGE) //karin: must sync with script/defs.script | cm/CollisionModel_debug.cpp
+	CONTENTS_SOLID				= BIT(0),	// an eye is never valid in a solid
+	CONTENTS_OPAQUE				= BIT(1),	// blocks visibility (for ai)
+	CONTENTS_WATER				= BIT(2),	// used for water
+	CONTENTS_PLAYERCLIP			= BIT(3),	// solid to players
+	CONTENTS_WALKERCLIP			= BIT(4),	// solid to walkers
+	CONTENTS_MOVEABLECLIP		= BIT(5),	// solid to moveable entities
+	CONTENTS_IKCLIP				= BIT(6),	// solid to IK
+	CONTENTS_SLIDEMOVER			= BIT(7),	// contains players & vehicles that move like players (with a SlideMove)
+	CONTENTS_BODY				= BIT(8),	// used for actors
+	CONTENTS_PROJECTILE			= BIT(9),	// used for projectiles
+	CONTENTS_CORPSE				= BIT(10),	// used for dead bodies
+	CONTENTS_RENDERMODEL		= BIT(11),	// used for render models for collision detection
+	CONTENTS_TRIGGER			= BIT(12),	// used for triggers
+	CONTENTS_VEHICLECLIP		= BIT(13),	// solid to vehicles
+	CONTENTS_EXPLOSIONSOLID		= BIT(14),	// used for selection traces
+	CONTENTS_MONSTER			= BIT(15),	// monster physics
+	CONTENTS_FORCEFIELD			= BIT(16),	// these can be hit by projectiles but other things can move through them
+	CONTENTS_SHADOWCOLLISION	= BIT(17),
+	CONTENTS_CROSSHAIRSOLID		= BIT(18),
+	CONTENTS_FLYERHIVECLIP		= BIT(19),	// flyer hive only
+
+	// AAS
+	CONTENTS_AAS_SOLID_PLAYER	= BIT(24),	//
+	CONTENTS_AAS_SOLID_VEHICLE	= BIT(25),	//
+	CONTENTS_AAS_CLUSTER_PORTAL	= BIT(26),	//
+	CONTENTS_AAS_OBSTACLE		= BIT(27),	//
+
+	// contents used by utils
+	CONTENTS_AREAPORTAL			= BIT(28),	// portal separating renderer areas
+	CONTENTS_NOCSG				= BIT(29),	// don't cut this brush with CSG operations in the editor
+	CONTENTS_OCCLUDER			= BIT(30),	// occluder brushes for outdoor occlusion
+#define CONTENTS_MONSTERCLIP CONTENTS_MONSTER
+#define CONTENTS_AAS_SOLID (CONTENTS_AAS_SOLID_PLAYER|CONTENTS_AAS_SOLID_VEHICLE)
 #else
 	CONTENTS_SOLID				= BIT(0),	// an eye is never valid in a solid
 	CONTENTS_OPAQUE				= BIT(1),	// blocks visibility (for ai)
@@ -540,6 +728,23 @@ typedef enum {
 
 // surface flags
 typedef enum {
+#ifdef _SPLASHDAMAGE //karin: must sync with script/defs.script
+    SURF_NODAMAGE				= BIT(0),	// never give falling damage
+    SURF_SLICK					= BIT(1),	// affects game physics
+    SURF_COLLISION				= BIT(2),	// collision surface
+    SURF_LADDER					= BIT(3),	// player can climb up this surface
+    SURF_NOIMPACT				= BIT(4),	// don't make missile explosions
+    SURF_NOSTEPS				= BIT(5),	// no footstep sounds
+    SURF_DISCRETE				= BIT(6),	// not clipped or merged by utilities
+    SURF_NOFRAGMENT				= BIT(7),	// dmap won't cut surface at each bsp boundary
+    SURF_NULLNORMAL				= BIT(8),	// renderbump will draw this surface as 0x80 0x80 0x80, which
+    // won't collect light from any angle
+    SURF_NONSOLID				= BIT(9),
+    SURF_NOPLANT				= BIT(10),	// can't plant landmines, HE charges etc here
+    SURF_NOAREAS				= BIT(11),	// don't create AAS areas on this surface
+
+    SURF_SHADOWCOLLISION		= BIT(12),	// shadow collision surface, used only when CONTENTS_SHADOWCOLLISION is specified
+#else
 	SURF_TYPE_BIT0				= BIT(0),	// encodes the material type (metal, flesh, concrete, etc.)
 	SURF_TYPE_BIT1				= BIT(1),	// "
 	SURF_TYPE_BIT2				= BIT(2),	// "
@@ -566,7 +771,21 @@ typedef enum {
 // RAVEN END
 #endif
 	// won't collect light from any angle
+#endif
 } surfaceFlags_t;
+
+#ifdef _SPLASHDAMAGE
+// portal flags
+typedef enum {
+    PORTAL_VIS,						// block visibility, splits surfaces
+    PORTAL_OUTSIDE,					// defines a border between an outside and an inside area
+    PORTAL_BLOCKAMBIENT,			// defines ambient light sectors
+    PORTAL_AUDIO,					// defines sound sectors
+    PORTAL_PLAYZONE,				// defines playzone areas
+    PORTAL_OCCTEST,					// enables occlusion testing on portal
+    NUM_PORTAL_FLAGS
+} portalFlags_t;
+#endif
 
 class idSoundEmitter;
 
@@ -802,9 +1021,16 @@ class idMaterial : public idDecl
 		}
 
 		// gets name for surface type (stone, metal, flesh, etc.)
+#ifdef _SPLASHDAMAGE
+		const class sdDeclSurfaceType*		GetSurfaceType( void ) const { return surfaceTypeDecl; }
+		const class sdDeclSurfaceTypeMap*	GetSurfaceTypeMapDecl( void ) const { return surfaceTypeMapDecl; }
+		//const class sdSurfaceTypeMap*		GetSurfaceTypeMap( void ) const { return surfaceTypeMap; }
+		const idVec3&		GetSurfaceColor( void ) const { return surfaceColor; }
+#else
 		const surfTypes_t	GetSurfaceType(void) const {
 			return static_cast<surfTypes_t>(surfaceFlags & SURF_TYPE_MASK);
 		}
+#endif
 
 		// get material description
 		const char 		*GetDescription(void) const {
@@ -894,6 +1120,9 @@ class idMaterial : public idDecl
 		//------------------------------------------------------------------
 
 		// gets an image for the editor to use
+#ifdef _SPLASHDAMAGE //karin: called in game, make virtual
+		virtual 
+#endif
 		idImage 			*GetEditorImage(void) const;
 		int					GetImageWidth(void) const;
 		int					GetImageHeight(void) const;
@@ -948,10 +1177,24 @@ class idMaterial : public idDecl
 #ifdef _NO_LIGHT
 		bool IsNoLight(void) const { return noLight; }
 #endif
+#ifdef _SPLASHDAMAGE
+    	static void			CacheFromDict( const idDict& dict );
+#endif
 
 	private:
 		// parse the entire material
 		void				CommonInit();
+#ifdef _SPLASHDAMAGE
+		void				ParseMaterial(idParser &src);
+		bool				MatchToken(idParser &src, const char *match);
+		void				ParseSort(idParser &src);
+		void				ParseBlend(idParser &src, shaderStage_t *stage);
+		void				ParseVertexParm(idParser &src, newShaderStage_t *newStage);
+		void				ParseFragmentMap(idParser &src, newShaderStage_t *newStage);
+		void				ParseStage(idParser &src, const textureRepeat_t trpDefault = TR_REPEAT);
+		void				ParseDeform(idParser &src);
+		void				ParseDecalInfo(idParser &src);
+#else
 		void				ParseMaterial(idLexer &src);
 		bool				MatchToken(idLexer &src, const char *match);
 		void				ParseSort(idLexer &src);
@@ -961,15 +1204,23 @@ class idMaterial : public idDecl
 		void				ParseStage(idLexer &src, const textureRepeat_t trpDefault = TR_REPEAT);
 		void				ParseDeform(idLexer &src);
 		void				ParseDecalInfo(idLexer &src);
+#endif
 		bool				CheckSurfaceParm(idToken *token);
 		int					GetExpressionConstant(float f);
 		int					GetExpressionTemporary(void);
 		expOp_t				*GetExpressionOp(void);
 		int					EmitOp(int a, int b, expOpType_t opType);
+#ifdef _SPLASHDAMAGE
+		int					ParseEmitOp(idParser &src, int a, expOpType_t opType, int priority);
+		int					ParseTerm(idParser &src);
+		int					ParseExpressionPriority(idParser &src, int priority);
+		int					ParseExpression(idParser &src);
+#else
 		int					ParseEmitOp(idLexer &src, int a, expOpType_t opType, int priority);
 		int					ParseTerm(idLexer &src);
 		int					ParseExpressionPriority(idLexer &src, int priority);
 		int					ParseExpression(idLexer &src);
+#endif
 		void				ClearStage(shaderStage_t *ss);
 		int					NameToSrcBlendMode(const idStr &name);
 		int					NameToDstBlendMode(const idStr &name);
@@ -980,8 +1231,29 @@ class idMaterial : public idDecl
 #if defined(_GLSL_PROGRAM) || defined(_RAVEN) || defined(_HUMANHEAD) //karin: fragment shader parms
 		void				ParseFragmentParm(idLexer &src, newShaderStage_t *newStage);
 #endif
+#ifdef _SPLASHDAMAGE
+		void				ParseFragmentParm(idParser &src, newShaderStage_t *newStage);
+#endif
 #ifdef _GLSL_PROGRAM
+#ifdef _SPLASHDAMAGE
+		void				ParseGLSLProgram(idParser &src, newShaderStage_t *newStage);
+#else
         void                ParseGLSLProgram(idLexer &src, newShaderStage_t *newStage);
+#endif
+#endif
+
+#ifdef _SPLASHDAMAGE
+		void				ParseFillMode( idParser &src, materialStage_t *stage );
+		void				ParseCullFace( idParser &src, materialStage_t *stage );
+
+		materialStage_t *	AllocAndCopyStage(const materialStage_t *ss);
+        void				CompleteStage( materialStage_t* ms, stageParseData_t& spd, const sdDeclRenderBinding** defaults, const int numDefaults );
+        void				CompleteInterationStage( materialStage_t *ss, stageParseData_t& spd );
+        void				FinishStage( materialStage_t* ms, stageParseData_t& spd );
+        int					ParseProgramStageVector( idParser &src, stageParseData_t& spd, const sdDeclRenderBinding *binding = NULL );
+        int					ParseProgramStageTexture( idParser &src, stageParseData_t& spd, const sdDeclRenderBinding *binding = NULL );
+        int					ParseProgramStageMatrix( idParser &src, stageParseData_t& spd );
+		bool				ParseConstantCVarExpression( idParser& src, bool& result );
 #endif
 
 	private:
@@ -1075,6 +1347,13 @@ class idMaterial : public idDecl
 		bool				suppressInSubview;
 		bool				portalSky;
 		int					refCount;
+#ifdef _SPLASHDAMAGE
+		const sdDeclSurfaceType*	surfaceTypeDecl;
+		const sdDeclSurfaceTypeMap*	surfaceTypeMapDecl;
+		//const sdSurfaceTypeMap*		surfaceTypeMap;
+		idVec3				surfaceColor;
+		bool				writeDepth;
+#endif
 #ifdef _NO_LIGHT
 		bool 				noLight;
 #endif

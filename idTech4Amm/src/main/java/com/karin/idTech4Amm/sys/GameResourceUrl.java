@@ -113,6 +113,9 @@ public enum GameResourceUrl
 
     // Icarus Starship Command Simulator
     ICARUS_BASE(Q3EGameConstants.GAME_ICARUS, "base", "", "https://store.steampowered.com/app/620170/Icarus_Starship_Command_Simulator/", 2),
+
+    // Enemy Territory: QUAKE Wars
+    ETQW_BASE(Q3EGameConstants.GAME_ETQW, "etqwbase", "", "https://www.splashdamage.com/games/enemy-territory-quake-wars/", 1),
     ;
 
     public static final int SOURCE_HOMEPAGE = 1;

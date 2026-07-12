@@ -3591,3 +3591,143 @@ void VPCALL idSIMD_Generic::MixedSoundToSamples(short *samples, const float *mix
 		}
 	}
 }
+
+#ifdef _SPLASHDAMAGE
+
+/*
+============
+idSIMD_Generic::MatX_LU_Factor
+
+  in-place factorization LU of the n * n sub-matrix of mat
+  the reciprocal of the diagonal elements of U are stored in invDiag
+  no pivoting is used
+============
+*/
+bool VPCALL idSIMD_Generic::MatX_LU_Factor( idMatX &mat, idVecX &invDiag, const int n )
+{
+#if 1
+
+    int i, j, k;
+    float d1, d2, *ptr1, *ptr2;
+
+    for ( i = 0; i < n; i++ ) {
+
+        d1 = mat[i][i];
+
+        if ( d1 == 0.0f ) {
+            return false;
+        }
+
+        invDiag[i] = d1 = 1.0f / d1;
+
+        ptr1 = mat[i];
+
+        for ( j = i + 1; j < n; j++ ) {
+
+            ptr2 = mat[j];
+            ptr2[i] = d2 = ptr2[i] * d1;
+
+            for ( k = i + 1; k < n - 15; k += 16 ) {
+                ptr2[k+0] -= d2 * ptr1[k+0];
+                ptr2[k+1] -= d2 * ptr1[k+1];
+                ptr2[k+2] -= d2 * ptr1[k+2];
+                ptr2[k+3] -= d2 * ptr1[k+3];
+                ptr2[k+4] -= d2 * ptr1[k+4];
+                ptr2[k+5] -= d2 * ptr1[k+5];
+                ptr2[k+6] -= d2 * ptr1[k+6];
+                ptr2[k+7] -= d2 * ptr1[k+7];
+                ptr2[k+8] -= d2 * ptr1[k+8];
+                ptr2[k+9] -= d2 * ptr1[k+9];
+                ptr2[k+10] -= d2 * ptr1[k+10];
+                ptr2[k+11] -= d2 * ptr1[k+11];
+                ptr2[k+12] -= d2 * ptr1[k+12];
+                ptr2[k+13] -= d2 * ptr1[k+13];
+                ptr2[k+14] -= d2 * ptr1[k+14];
+                ptr2[k+15] -= d2 * ptr1[k+15];
+            }
+            switch( n - k ) {
+                NODEFAULT;
+            case 15:
+                ptr2[k+14] -= d2 * ptr1[k+14];
+            case 14:
+                ptr2[k+13] -= d2 * ptr1[k+13];
+            case 13:
+                ptr2[k+12] -= d2 * ptr1[k+12];
+            case 12:
+                ptr2[k+11] -= d2 * ptr1[k+11];
+            case 11:
+                ptr2[k+10] -= d2 * ptr1[k+10];
+            case 10:
+                ptr2[k+9] -= d2 * ptr1[k+9];
+            case 9:
+                ptr2[k+8] -= d2 * ptr1[k+8];
+            case 8:
+                ptr2[k+7] -= d2 * ptr1[k+7];
+            case 7:
+                ptr2[k+6] -= d2 * ptr1[k+6];
+            case 6:
+                ptr2[k+5] -= d2 * ptr1[k+5];
+            case 5:
+                ptr2[k+4] -= d2 * ptr1[k+4];
+            case 4:
+                ptr2[k+3] -= d2 * ptr1[k+3];
+            case 3:
+                ptr2[k+2] -= d2 * ptr1[k+2];
+            case 2:
+                ptr2[k+1] -= d2 * ptr1[k+1];
+            case 1:
+                ptr2[k+0] -= d2 * ptr1[k+0];
+            case 0:
+                break;
+            }
+        }
+    }
+
+    return true;
+
+#else
+
+    int i, j, k;
+    float d;
+
+    for ( i = 0; i < n; i++ ) {
+
+        if ( mat[i][i] == 0.0f ) {
+            return false;
+        }
+
+        invDiag[i] = d = 1.0f / mat[i][i];
+
+        for ( j = i + 1; j < n; j++ ) {
+            mat[j][i] *= d;
+        }
+
+        for ( j = i + 1; j < n; j++ ) {
+            d = mat[j][i];
+            for ( k = i + 1; k < n; k++ ) {
+                mat[j][k] -= d * mat[i][k];
+            }
+        }
+    }
+
+    return true;
+
+#endif
+}
+
+/*
+============
+idSIMD_Generic::DecompressJoints
+============
+*/
+void VPCALL idSIMD_Generic::DecompressJoints( idJointQuat *joints, const idCompressedJointQuat *compressedJoints, const int *index, const int numJoints )
+{
+	for ( int i = 0; i < numJoints; i++ ) {
+		int j = index[i];
+
+		joints[j].q = compressedJoints[j].ToQuat();
+		joints[j].t = compressedJoints[j].ToOffset();
+		joints[j].w = 0.0f;
+	}
+}
+#endif

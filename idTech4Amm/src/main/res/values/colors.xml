@@ -27,6 +27,7 @@
     <color name="theme_skindeep_main_color">#FFC700FD</color>
     <color name="theme_qc_main_color">#FFDCD7C3</color>
     <color name="theme_icarus_main_color">#FF02BDFD</color>
+    <color name="theme_etqw_main_color">#FFD8D1C7</color>
 
     <color name="launcher_divider_color">#FFCCCCCC</color>
     <color name="launcher_box_color">#FFBBBBBB</color>

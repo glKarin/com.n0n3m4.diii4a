@@ -182,6 +182,11 @@ Removes node from list
 template< class type >
 void idLinkList<type>::Remove(void)
 {
+#ifdef _SPLASHDAMAGE
+    // don't call Remove() on the head element, or head needs to be updated in all the links
+    assert( IsListEmpty() || head != this );
+#endif
+
 	prev->next = next;
 	next->prev = prev;
 
@@ -363,5 +368,22 @@ void idLinkList<type>::SetOwner(type *object)
 {
 	owner = object;
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+operator==( idLinkList< type >, idLinkList< type > )
+============
+*/
+template< class type >
+bool operator==( const idLinkList< type >& lhs, const idLinkList< type >& rhs )
+{
+    return (	lhs.Owner() == rhs.Owner() &&
+                lhs.ListHead() == rhs.ListHead() &&
+                lhs.NextNode() == rhs.NextNode() &&
+                lhs.PrevNode() == rhs.PrevNode()
+           );
+}
+#endif
 
 #endif /* !__LINKLIST_H__ */

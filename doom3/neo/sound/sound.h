@@ -131,6 +131,10 @@ typedef struct soundSubtitleList_s {
 } soundSubtitleList_t;
 //HUMANHEAD END
 #endif
+#ifdef _SPLASHDAMAGE
+static const int	SSF_RANDOMIZE =				BIT(10);	// randomly cycle the looped sample
+static const int	SSF_OCCLUDE_ONCE =			BIT(11);	// only occlude once in its lifetime
+#endif
 
 // these options can be overriden from sound shader defaults on a per-emitter and per-channel basis
 typedef struct {
@@ -155,6 +159,12 @@ typedef struct {
 	int						profanityIndex;			// HUMANHEAD pdm
 	float					profanityDelay;			// HUMANHEAD pdm
 	float					profanityDuration;		// HUMANHEAD pdm
+#endif
+
+#ifdef _SPLASHDAMAGE
+    float					pitchShift;
+    int						soundArea;
+	float					farDistance;
 #endif
 } soundShaderParms_t;
 
@@ -271,6 +281,14 @@ class idSoundShader : public idDecl
 		virtual float			GetMinDistance() const;		// FIXME: replace this with a GetSoundShaderParms()
 		virtual float			GetMaxDistance() const;
 
+#ifdef _SPLASHDAMAGE
+    	virtual int				GetTimeLength( void ) const;	// This is virtual because the effects editor needs it
+	    void					GetParms( soundShaderParms_t* out ) const {
+	        *out = parms;
+	    }
+   	    virtual bool			IsOGGCompressed( void ) const;
+    	static void				CacheFromDict( const idDict& dict );
+#endif
 		// returns NULL if an AltSound isn't defined in the shader.
 		// we use this for pairing a specific broken light sound with a normal light sound
 		virtual const idSoundShader *GetAltSound() const;
@@ -351,10 +369,17 @@ class idSoundShader : public idDecl
         int						playCount;					// For profiling
 // RAVEN END
 #endif
+#ifdef _SPLASHDAMAGE
+		bool					lowPriority;
+#endif
 
 	private:
 		void					Init(void);
+#ifdef _SPLASHDAMAGE
+		bool					ParseShader(idParser &src);
+#else
 		bool					ParseShader(idLexer &src);
+#endif
 };
 
 /*
@@ -371,6 +396,10 @@ static const int SCHANNEL_ANY = 0;	// used in queries and commands to effect eve
 static const int SCHANNEL_ONE = 1;	// any following integer can be used as a channel number
 typedef int s_channelType;	// the game uses its own series of enums, and we don't want to require casts
 
+#ifdef _SPLASHDAMAGE
+#include "../renderer/Cinematic.h"
+typedef int soundChannel_t;			// the game uses its own series of enums, and we don't want to require casts
+#endif
 
 class idSoundEmitter
 {
@@ -395,6 +424,11 @@ class idSoundEmitter
 		virtual int				StartSound(const idSoundShader *shader, const s_channelType channel, float diversity = 0, int shaderFlags = 0, bool allowSlow = true) = 0;
 
 		// pass SCHANNEL_ANY to effect all channels
+#ifdef _SPLASHDAMAGE
+    	virtual const soundShaderParms_t&	GetChannelParms( const soundChannel_t channel ) = 0;
+    	virtual void						ModifySound( const soundChannel_t channel, const soundShaderParms_t& parms ) = 0;
+    	virtual void						SetChannelOffset( const soundChannel_t channel, int ms ) = 0;
+#endif
 		virtual void			ModifySound(const s_channelType channel, const soundShaderParms_t *parms) = 0;
 		virtual void			StopSound(const s_channelType channel) = 0;
 		// to is in Db (sigh), over is in seconds
@@ -457,6 +491,9 @@ class idSoundWorld
 		// gameTime is in msec, and is used to time sound queries and removals so that they are independent
 		// of any race conditions with the async update
 		virtual	void			PlaceListener(const idVec3 &origin, const idMat3 &axis, const int listenerId, const int gameTime, const idStr &areaName) = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual	void			PlaceListener( const idVec3& origin, const idMat3& axis, const int listenerId, const int gameTime ) = 0;
+#endif
 
 		// fade all sounds in the world with a given shader soundClass
 		// to is in Db (sigh), over is in seconds
@@ -464,6 +501,9 @@ class idSoundWorld
 
 		// background music
 		virtual	void			PlayShaderDirectly(const char *name, int channel = -1) = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual	void			PlayShaderDirectly( const idSoundShader* shader, const soundChannel_t channel = SCHANNEL_ANY, int* length = NULL ) = 0;
+#endif
 
 		// dumps the current state and begins archiving commands
 		virtual void			StartWritingDemo(idDemoFile *demo) = 0;
@@ -586,6 +626,16 @@ class idSoundSystem
 		// We might want to defer the loading of new sounds to this point,
 		// as we do with images, to avoid having a union in memory at one time.
 		virtual	void			EndLevelLoad(const char *mapString) = 0;
+#ifdef _SPLASHDAMAGE
+    	virtual bool			QuerySpeakers( int numSpeakers ) const = 0;
+
+    	virtual void			RefreshSoundDevices( void ) = 0; // Updates the list of sound devices available
+
+    	virtual const idWStrList*	ListSoundPlaybackDevices() const = 0;
+    	virtual const idWStrList*	ListSoundCaptureDevices() const = 0;
+    	virtual void				FreeDeviceList( const idWStrList* list ) const = 0;
+    	virtual int					GetAudioDeviceHash( const wchar_t* name ) const = 0;
+#endif
 
 		// direct mixing for OSes that support it
 		virtual int				AsyncMix(int soundTime, float *mixBuffer) = 0;

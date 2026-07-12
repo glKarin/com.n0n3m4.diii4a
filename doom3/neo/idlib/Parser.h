@@ -68,10 +68,16 @@ typedef struct define_s {
 typedef struct indent_s {
 	int				type;						// indent type
 	int				skip;						// true if skipping current indent
+#ifdef _SPLASHDAMAGE
+    int				skipElse;					// true if any following else sections should be skipped
+#endif
 	idLexer 		*script;						// script the indent was in
 	struct indent_s	*next;						// next indent on the indent stack
 } indent_t;
 
+#ifdef _SPLASHDAMAGE
+typedef void (*pragmaFunc_t)( void *data, const char *pragma );
+#endif
 
 class idParser
 {
@@ -84,11 +90,25 @@ class idParser
 		idParser(const char *ptr, int length, const char *name, int flags = 0);
 		// destructor
 		~idParser();
+#ifdef _SPLASHDAMAGE
+	    // load a source file
+	    int				LoadFile( const char *filename, bool OSPath = false, int startLine = 1 );
+	    // load a source from the given memory with the given length
+	    // NOTE: the ptr is expected to point at a valid C string: ptr[length] == '\0'
+	    int				LoadMemory( const char *ptr, int length, const char *name, int startLine = 1 );
+    	int				LoadMemoryBinary( const byte *ptr, int length, const char *name, idTokenCache* globals );
+    	
+    void				WriteBinary( idFile* f, idTokenCache* tokenCache = NULL );
+
+    void				ResetBinaryParsing();
+    
+#else
 		// load a source file
 		int				LoadFile(const char *filename, bool OSPath = false);
 		// load a source from the given memory with the given length
 		// NOTE: the ptr is expected to point at a valid C string: ptr[length] == '\0'
 		int				LoadMemory(const char *ptr, int length, const char *name);
+#endif
 		// free the current source
 		void			FreeSource(bool keepDefines = false);
 		// returns true if a source is loaded
@@ -98,7 +118,11 @@ class idParser
 		// read a token from the source
 		int				ReadToken(idToken *token);
 		// expect a certain token, reads the token when available
+#ifdef _SPLASHDAMAGE
+    	bool			ExpectTokenString( const char *string, idToken* other = NULL );
+#else
 		int				ExpectTokenString(const char *string);
+#endif
 		// expect a certain token type
 		int				ExpectTokenType(int type, int subtype, idToken *token);
 		// expect a token
@@ -112,18 +136,27 @@ class idParser
 		// returns true if the next token equals the given type but does not remove the token from the source
 		int				PeekTokenType(int type, int subtype, idToken *token);
 		// skip tokens until the given token string is read
+#ifdef _SPLASHDAMAGE
+    	int				SkipUntilString( const char *string, idToken *token );
+#endif
 		int				SkipUntilString(const char *string);
 		// skip the rest of the current line
 		int				SkipRestOfLine(void);
 		// skip the braced section
 		int				SkipBracedSection(bool parseFirstBrace = true);
 		// parse a braced section into a string
+#ifdef _SPLASHDAMAGE
+    	const char *	ParseBracedSection( idStr &out, int tabs = -1, bool parseFirstBrace = true, char intro = '{', char outro = '}' );
+#endif
 		const char 	*ParseBracedSection(idStr &out, int tabs = -1);
 		// parse a braced section into a string, maintaining indents and newlines
 		const char 	*ParseBracedSectionExact(idStr &out, int tabs = -1);
 		// parse the rest of the line
 		const char 	*ParseRestOfLine(idStr &out);
 		// unread the given token
+#ifdef _SPLASHDAMAGE
+    	void			UnreadToken( const idToken& token );
+#endif
 		void			UnreadToken(idToken *token);
 		// read a token only if on the current line
 		int				ReadTokenOnLine(idToken *token);
@@ -132,11 +165,19 @@ class idParser
 		// read a boolean
 		bool			ParseBool(void);
 		// read a floating point number
+#ifdef _SPLASHDAMAGE
+    	float			ParseFloat( bool* hadError = NULL );
+#else
 		float			ParseFloat(void);
+#endif
 		// parse matrices with floats
 		int				Parse1DMatrix(int x, float *m);
 		int				Parse2DMatrix(int y, int x, float *m);
 		int				Parse3DMatrix(int z, int y, int x, float *m);
+#ifdef _SPLASHDAMAGE
+	    // retrieves the white space after the last read token
+	    int				GetNextWhiteSpace( idStr &whiteSpace, bool currentLine );
+#endif
 		// get the white space before the last read token
 		int				GetLastWhiteSpace(idStr &whiteSpace) const;
 		// Set a marker in the source file (there is only one marker)
@@ -145,10 +186,20 @@ class idParser
 		void			GetStringFromMarker(idStr &out, bool clean = false);
 		// add a define to the source
 		int				AddDefine(const char *string);
+#ifdef _SPLASHDAMAGE
+	    // add includes to the source
+	    int				AddIncludes( const idStrList& includes );
+	    // add an include to the source
+	    int				AddInclude( const char *string );
+#endif
 		// add builtin defines
 		void			AddBuiltinDefines(void);
 		// set the source include path
 		void			SetIncludePath(const char *path);
+#ifdef _SPLASHDAMAGE
+	    // set pragma callback
+	    void			SetPragmaCallback( void *data, pragmaFunc_t func );
+#endif
 		// set the punctuation set
 		void			SetPunctuations(const punctuation_t *p);
 		// returns a pointer to the punctuation with the given id
@@ -171,6 +222,12 @@ class idParser
 		void			Error(const char *str, ...) const id_attribute((format(printf,2,3)));
 		// print a warning message
 		void			Warning(const char *str, ...) const id_attribute((format(printf,2,3)));
+#ifdef _SPLASHDAMAGE
+	    // for enumerating only the current level
+	    int				GetCurrentDependency( void ) const;
+	    // walk all included files, start from 0 to enumerate all
+	    const char*		GetNextDependency( int &index ) const;
+#endif
 
 		// add a global define that will be added to all opened sources
 		static int		AddGlobalDefine(const char *string);
@@ -187,6 +244,11 @@ class idParser
 	    int				Parse1DMatrix( int x, float *m, bool ravenMatrix/* = false //k*/ );
 #endif
 
+#ifdef _SPLASHDAMAGE
+	    // save off the state of the dependencies list
+	    void			PushDependencies();
+	    void			PopDependencies();
+#endif
 
 	private:
 		int				loaded;						// set when a source file is loaded from file or memory
@@ -202,15 +264,34 @@ class idParser
 		indent_t 		*indentstack;				// stack with indents
 		int				skip;						// > 0 if skipping conditional code
 		const char		*marker_p;
+#ifdef _SPLASHDAMAGE
+	    pragmaFunc_t	pragmaCallback;				// called when a #pragma is parsed
+	    void *			pragmaData;
+	    int				startLine;					// line offset
+	    
+	    idStrList		dependencies;				// list of filenames that have been included
+	    sdStack< int >	dependencyStateStack;		// stack of the number of dependencies
+#endif
 
 		static define_t *globaldefines;				// list with global defines added to every source loaded
 
 	private:
+#ifdef _SPLASHDAMAGE
+	    void			PushIndent( int type, int skip, int skipElse );
+	    void			PopIndent( int &type, int &skip, int &skipElse );
+    	bool			PushScript( idLexer *script );
+#else
 		void			PushIndent(int type, int skip);
 		void			PopIndent(int *type, int *skip);
 		void			PushScript(idLexer *script);
+#endif
 		int				ReadSourceToken(idToken *token);
+#ifdef _SPLASHDAMAGE
+	    int				ReadLine( idToken *token, bool multiline = false ); //karin: add default value for compat
+	    bool			UnreadSourceToken( const idToken& token );
+#else
 		int				ReadLine(idToken *token);
+#endif
 		int				UnreadSourceToken(idToken *token);
 		int				ReadDefineParms(define_t *define, idToken **parms, int maxparms);
 		int				StringizeTokens(idToken *tokens, idToken *token);
@@ -229,6 +310,9 @@ class idParser
 		static define_t *DefineFromString(const char *string);
 		define_t 		*CopyFirstDefine(void);
 		int				Directive_include(void);
+#ifdef _SPLASHDAMAGE
+    	int				Directive_define( bool isTemplate );
+#endif
 		int				Directive_undef(void);
 		int				Directive_if_def(int type);
 		int				Directive_ifdef(void);
@@ -238,7 +322,9 @@ class idParser
 		int				EvaluateTokens(idToken *tokens, signed/*64long*/ int *intvalue, double *floatvalue, int integer);
 		int				Evaluate(signed/*64long*/ int *intvalue, double *floatvalue, int integer);
 		int				DollarEvaluate(signed/*64long*/ int *intvalue, double *floatvalue, int integer);
+#if !defined(_SPLASHDAMAGE)
 		int				Directive_define(void);
+#endif
 		int				Directive_elif(void);
 		int				Directive_if(void);
 		int				Directive_line(void);
@@ -249,6 +335,15 @@ class idParser
 		int				Directive_eval(void);
 		int				Directive_evalfloat(void);
 		int				ReadDirective(void);
+#ifdef _SPLASHDAMAGE
+	    int				DollarDirective_if_def( int type );
+	    int				DollarDirective_ifdef( void );
+	    int				DollarDirective_ifndef( void );
+	    int				DollarDirective_else( void );
+	    int				DollarDirective_endif( void );
+	    int				DollarDirective_elif( void );
+	    int				DollarDirective_if( void );
+#endif
 		int				DollarDirective_evalint(void);
 		int				DollarDirective_evalfloat(void);
 		int				ReadDollarDirective(void);

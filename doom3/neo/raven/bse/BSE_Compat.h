@@ -107,7 +107,11 @@ ID_INLINE void AddSurface(rvRenderModelBSE* model, int id, const idMaterial* mat
 {
     modelSurface_t ret;
     ret.id = id;
+#ifdef _SPLASHDAMAGE
+    ret.material = mat;
+#else
     ret.shader = mat;
+#endif
     ret.geometry = tri;
     model->AddSurface( ret );
 }

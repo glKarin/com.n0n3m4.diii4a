@@ -40,6 +40,12 @@ If you have questions concerning this license or the applicable additional terms
 //                                                        E
 //===============================================================
 
+#ifdef _SPLASHDAMAGExxx //karin: keep DOOM3 format
+#define DRAWVERT_ST_OFFSET			(56)
+#define DRAWVERT_TANGENT0_OFFSET	(32)
+#define DRAWVERT_TANGENT1_OFFSET	(44)
+#define DRAWVERT_COLOR_OFFSET		(3*4)
+#else
 #define DRAWVERT_SIZE				60
 #define DRAWVERT_XYZ_OFFSET			(0*4)
 #define DRAWVERT_ST_OFFSET			(3*4)
@@ -47,6 +53,7 @@ If you have questions concerning this license or the applicable additional terms
 #define DRAWVERT_TANGENT0_OFFSET	(8*4)
 #define DRAWVERT_TANGENT1_OFFSET	(11*4)
 #define DRAWVERT_COLOR_OFFSET		(14*4)
+#endif
 
 #if defined(__GNUC__) && defined(__SSE__) || ( ( defined(_M_X64) || defined(__x86_64__) ) && defined(_USE_SSE) ) || ( ( defined(__arm__) || defined(__aarch64__) ) && defined(_ARM_SIMD_SSE2NEON) )
 
@@ -1030,7 +1037,9 @@ void VPCALL idSIMD_SSE::Dot(float *dst, const idVec3 &constant, const idPlane *s
 #define DRAWVERT_TANGENT1_OFFSET	(11*4)
 #define DRAWVERT_COLOR_OFFSET		(14*4)
 
+#if !defined(_SPLASHDAMAGE) //karin: defined in geometry/JointTransform.h
 #define JOINTQUAT_SIZE				(7*4)
+#endif
 #define JOINTMAT_SIZE				(4*3*4)
 #define JOINTWEIGHT_SIZE			(4*4)
 

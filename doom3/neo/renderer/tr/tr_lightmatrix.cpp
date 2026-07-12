@@ -183,7 +183,11 @@ void R_SetupSplitFrustums( viewDef_t* viewDef )
 {
     idVec3			planeOrigin;
 
+#ifdef _SPLASHDAMAGE
+    const float zNearStart = ( viewDef->renderView.flags.cramZNear ) ? ( r_znear.GetFloat() * 0.25f ) : r_znear.GetFloat();
+#else
     const float zNearStart = ( viewDef->renderView.cramZNear ) ? ( r_znear.GetFloat() * 0.25f ) : r_znear.GetFloat();
+#endif
     float zFarEnd = 10000;
 
     float zNear = zNearStart;

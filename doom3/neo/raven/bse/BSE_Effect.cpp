@@ -138,7 +138,11 @@ float rvBSE::GetOriginAttenuation(const rvSegmentTemplate* st) const
   ----------------------------------------------------------------------*/
 void rvBSE::UpdateSoundEmitter(const rvSegmentTemplate* st, rvSegment* seg)
 {
+#ifdef _SPLASHDAMAGE
+    idSoundEmitter* emitter = this->mReferenceSound;
+#else
     idSoundEmitter* emitter = soundSystem->EmitterForIndex( /*channel*/SOUNDWORLD_GAME/* 1 */, mReferenceSoundHandle);
+#endif
     if (!emitter) {
         return;
     }
@@ -158,9 +162,13 @@ void rvBSE::UpdateSoundEmitter(const rvSegmentTemplate* st, rvSegment* seg)
     soundShaderParms_t parms;          // zero initialise
     memset(&parms, 0, sizeof(parms));
     parms.volume = seg->mSoundVolume;
+#ifdef _SPLASHDAMAGE
+    emitter->UpdateEmitter(mCurrentOrigin, /*listener number*/0, &parms);
+#else
     parms.frequencyShift = seg->mFreqShift;
 
-    emitter->UpdateEmitter(mCurrentOrigin,mCurrentVelocity, /*listener number*/0, &parms);
+    emitter->UpdateEmitter(mCurrentOrigin, mCurrentVelocity, /*listener number*/0, &parms);
+#endif
 }
 
 /*------------------------------------------------------------------------
@@ -357,7 +365,12 @@ void rvBSE::UpdateAttenuation()
     // ------------------------------------------------------------------
     idVec3  camOrg;
     idMat3  camAxis;                // ignored here, but retrieved for parity
+#ifdef _SPLASHDAMAGE
+	float camFov;
+    game->GetPlayerView(camOrg, camAxis, camFov);
+#else
     game->GetPlayerView(camOrg, camAxis);
+#endif
 
     mOriginDistanceToCamera =
         idMath::ClampFloat(1.0f, WORLD_SIZE/* 131072.0f */,
@@ -607,10 +620,23 @@ rvRenderModelBSE* rvBSE::Render(const renderEffect_s* owner, const viewDef_s* vi
 void rvBSE::Destroy()
 {
     // Stop & free sound emitter
+#ifdef _SPLASHDAMAGE
+    if (idSoundEmitter* emitter = this->mReferenceSound)
+#else
     if (idSoundEmitter* emitter = soundSystem->EmitterForIndex(SOUNDWORLD_GAME/* 1 */, mReferenceSoundHandle))
+#endif
     {
         emitter->StopSound(SCHANNEL_ANY/* 0 */);
+#ifdef _SPLASHDAMAGE
+		if(emitter)
+		{
+			Sys_EnterCriticalSection(); //karin: Q4D lock it
+			emitter->Free(false);
+			Sys_LeaveCriticalSection(); //karin: Q4D lock it
+		}
+#else
         soundSystem->FreeSoundEmitter(SOUNDWORLD_GAME/* 1 */, emitter->Index(), false/* true */); //karin: TODO mark removed only, sound broken sometime
+#endif
     }
 
     // Destroy all segments & particles, then free the array
@@ -718,7 +744,11 @@ void rvBSE::Init(rvDeclEffect* decl,
     UpdateFromOwner(parms, time, /*init=*/true);
 
     // Remember sound emitter handle
+#ifdef _SPLASHDAMAGE
+    mReferenceSound = parms->referenceSound;
+#else
     mReferenceSoundHandle = parms->referenceSoundHandle;
+#endif
 
     // Create segments & pre-sample
     UpdateSegments(time);
@@ -736,7 +766,11 @@ bool rvBSE::CanInterpolate() const
 
 idSoundEmitter * rvBSE::GetReferenceSound(int worldId)
 {
+#ifdef _SPLASHDAMAGE
+	return this->mReferenceSound;
+#else
     return soundSystem->EmitterForIndex(worldId, mReferenceSoundHandle);
+#endif
 }
 
 #include "BSE_Compat.cpp"

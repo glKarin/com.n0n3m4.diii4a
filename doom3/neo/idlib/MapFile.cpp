@@ -244,6 +244,41 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 		return NULL;
 	}
 
+
+#ifdef _SPLASHDAMAGE
+    //-------------------------------------------------------------------------
+    // here we may have to jump over brush epairs ( only used in editor )
+    src.ReadToken( &token );
+    do {
+        // the token should be a key string for a key/value pair
+        if ( token.type != TT_STRING ) {
+            break;
+        }
+
+        idStr key = token;
+
+        if ( !src.ReadTokenOnLine( &token ) || token.type != TT_STRING ) {
+            src.Error( "idMapPatch::Parse: expected epair value string not found" );
+            return NULL;
+        }
+
+        patch->epairs.Set( key, token );
+
+        // try to read the next key
+        if ( !src.ReadToken( &token ) ) {
+            src.Error( "idMapPatch::Parse: unexpected EOF" );
+        }
+    } while (1);
+
+    src.UnreadToken( &token );
+    //-------------------------------------------------------------------------
+
+    if ( !src.ExpectTokenString( "}" ) || !src.ExpectTokenString( "}" ) ) {
+        src.Error( "idMapPatch::Parse: unable to parse patch control points, no closure" );
+        delete patch;
+        return NULL;
+    }
+#else
 //#if !defined(_RAVEN) // quake4 map file
 #ifdef _RAVEN //karin: for compat doom3 map
     if(MAP_NOT_QUAKE4_VERSION())
@@ -262,9 +297,56 @@ idMapPatch *idMapPatch::Parse(idLexer &src, const idVec3 &origin, bool patchDef3
 		}
 	}
 //#endif
+#endif
 
 	return patch;
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idMapPatch::Write
+============
+*/
+bool idMapPatch::Write( idStr& buffer, int primitiveNum, const idVec3 &origin ) const
+{
+    int i, j;
+    const idDrawVert *v;
+    idVec2 st;
+
+    if ( GetExplicitlySubdivided() ) {
+        buffer += va( "// primitive %d\n{\n patchDef3\n {\n", primitiveNum );
+        buffer += va( "  \"%s\"\n", GetMaterial());
+        buffer += va( "  ( %d %d %d %d 0 0 0 )\n", GetWidth(), GetHeight(), GetHorzSubdivisions(), GetVertSubdivisions());
+    } else {
+        buffer += va( "// primitive %d\n{\n patchDef2\n {\n", primitiveNum );
+        buffer += va( "  \"%s\"\n", GetMaterial());
+        buffer += va( "  ( %d %d 0 0 0 )\n",  GetWidth(), GetHeight());
+    }
+
+    buffer += va( "  (\n" );
+    for ( i = 0; i < GetWidth(); i++ ) {
+        buffer += va( "   ( " );
+        for ( j = 0; j < GetHeight(); j++ ) {
+            v = &verts[ j * GetWidth() + i ];
+            st = v->GetST();
+            buffer += va( " ( %f %f %f %f %f )", v->xyz[0] + origin[0],
+                          v->xyz[1] + origin[1], v->xyz[2] + origin[2], st[0], st[1] );
+        }
+        buffer += va( " )\n" );
+    }
+    buffer += va( "  )\n" );
+
+    // write patch epairs
+    for ( i = 0; i < epairs.GetNumKeyVals(); i++) {
+        buffer += va( "  \"%s\" \"%s\"\n", epairs.GetKeyVal(i)->GetKey().c_str(), epairs.GetKeyVal(i)->GetValue().c_str());
+    }
+
+    buffer += va( " }\n}\n" );
+
+    return true;
+}
+#endif
 
 /*
 ============
@@ -278,10 +360,20 @@ bool idMapPatch::Write(idFile *fp, int primitiveNum, const idVec3 &origin) const
 
 	if (GetExplicitlySubdivided()) {
 		fp->WriteFloatString("// primitive %d\n{\n patchDef3\n {\n", primitiveNum);
+#ifdef _SPLASHDAMAGE
+        fp->WriteFloatString( "  \"%s\"\n", GetMaterial());
+        fp->WriteFloatString( "  ( %d %d %d %d 0 0 0 )\n", GetWidth(), GetHeight(), GetHorzSubdivisions(), GetVertSubdivisions());
+#else
 		fp->WriteFloatString("  \"%s\"\n  ( %d %d %d %d 0 0 0 )\n", GetMaterial(), GetWidth(), GetHeight(), GetHorzSubdivisions(), GetVertSubdivisions());
+#endif
 	} else {
 		fp->WriteFloatString("// primitive %d\n{\n patchDef2\n {\n", primitiveNum);
+#ifdef _SPLASHDAMAGE
+        fp->WriteFloatString( "  \"%s\"\n", GetMaterial());
+        fp->WriteFloatString( "  ( %d %d 0 0 0 )\n",  GetWidth(), GetHeight());
+#else
 		fp->WriteFloatString("  \"%s\"\n  ( %d %d 0 0 0 )\n", GetMaterial(), GetWidth(), GetHeight());
+#endif
 	}
 
 	fp->WriteFloatString("  (\n");
@@ -298,7 +390,18 @@ bool idMapPatch::Write(idFile *fp, int primitiveNum, const idVec3 &origin) const
 		fp->WriteFloatString(" )\n");
 	}
 
+#ifdef _SPLASHDAMAGE
+    fp->WriteFloatString( "  )\n" );
+
+    // write patch epairs
+    for ( i = 0; i < epairs.GetNumKeyVals(); i++) {
+        fp->WriteFloatString( "  \"%s\" \"%s\"\n", epairs.GetKeyVal(i)->GetKey().c_str(), epairs.GetKeyVal(i)->GetValue().c_str());
+    }
+
+    fp->WriteFloatString( " }\n}\n" );
+#else
 	fp->WriteFloatString("  )\n }\n}\n");
+#endif
 
 	return true;
 }
@@ -580,6 +683,40 @@ idMapBrush *idMapBrush::ParseQ3(idLexer &src, const idVec3 &origin)
 	return brush;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+============
+idMapBrush::Write
+============
+*/
+bool idMapBrush::Write( idStr& buffer, int primitiveNum, const idVec3 &origin ) const
+{
+    int i;
+    idMapBrushSide *side;
+
+    buffer += va( "// primitive %d\n{\n brushDef3\n {\n", primitiveNum );
+
+    // write brush epairs
+    for ( i = 0; i < epairs.GetNumKeyVals(); i++) {
+        buffer += va( "  \"%s\" \"%s\"\n", epairs.GetKeyVal(i)->GetKey().c_str(), epairs.GetKeyVal(i)->GetValue().c_str());
+    }
+
+    // write brush sides
+    for ( i = 0; i < GetNumSides(); i++ ) {
+        side = GetSide( i );
+        buffer += va( "  ( %f %f %f %f ) ", side->plane[0], side->plane[1], side->plane[2], side->plane[3] );
+        buffer += va( "( ( %f %f %f ) ( %f %f %f ) ) \"%s\" 0 0 0\n",
+                      side->texMat[0][0], side->texMat[0][1], side->texMat[0][2],
+                      side->texMat[1][0], side->texMat[1][1], side->texMat[1][2],
+                      side->material.c_str() );
+    }
+
+    buffer += va( " }\n}\n" );
+
+    return true;
+}
+#endif
+
 /*
 ============
 idMapBrush::Write
@@ -767,6 +904,99 @@ idMapEntity *idMapEntity::Parse(idLexer &src, bool worldSpawn, float version)
 	return mapEnt;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+================
+idMapEntity::ParseActions
+
+Parse and save the bot's actions
+================
+*/
+idMapEntity *idMapEntity::ParseActions( idLexer &src )
+{
+    idToken	token;
+    idMapEntity *mapEnt;
+
+    if ( !src.ReadToken( &token ) ) {
+        return NULL;
+    }
+
+    if ( token != "{" ) {
+        src.Error( "idMapEntity::ParseActions: { not found, found %s", token.c_str() );
+        return NULL;
+    }
+
+    mapEnt = new idMapEntity();
+
+    do {
+        if ( !src.ReadToken(&token) ) {
+            src.Error( "idMapEntity::ParseActions: EOF without closing brace" );
+            return NULL;
+        }
+
+        if ( token == "}" ) {
+            break;
+        }
+
+        idStr key, value;
+
+        // parse a key / value pair
+        key = token;
+        src.ReadTokenOnLine( &token );
+        value = token;
+
+        // strip trailing spaces that sometimes get accidentally
+        // added in the editor
+        value.StripTrailingWhiteSpace();
+        key.StripTrailingWhiteSpace();
+
+        mapEnt->epairs.Set( key, value );
+    } while ( 1 );
+
+    return mapEnt;
+}
+
+/*
+============
+idMapEntity::Write
+============
+*/
+bool idMapEntity::Write( idStr& buffer, int entityNum ) const
+{
+    int i;
+    idMapPrimitive *mapPrim;
+    idVec3 origin;
+
+    buffer += va( "// entity %d\n{\n", entityNum );
+
+    // write entity epairs
+    for ( i = 0; i < epairs.GetNumKeyVals(); i++) {
+        buffer += va( "\"%s\" \"%s\"\n", epairs.GetKeyVal(i)->GetKey().c_str(), epairs.GetKeyVal(i)->GetValue().c_str());
+    }
+
+    epairs.GetVector( "origin", "0 0 0", origin );
+
+    // write pritimives
+    for ( i = 0; i < GetNumPrimitives(); i++ ) {
+        mapPrim = GetPrimitive( i );
+
+        switch( mapPrim->GetType() ) {
+        case idMapPrimitive::TYPE_BRUSH:
+            static_cast<idMapBrush*>(mapPrim)->Write( buffer, i, origin );
+            break;
+        case idMapPrimitive::TYPE_PATCH:
+            static_cast<idMapPatch*>(mapPrim)->Write( buffer, i, origin );
+            break;
+        }
+    }
+
+    buffer += va( "}\n" );
+
+    return true;
+}
+
+#endif
+
 /*
 ============
 idMapEntity::Write
@@ -855,12 +1085,144 @@ unsigned int idMapEntity::GetGeometryCRC(void) const
 	return crc;
 }
 
+#ifdef _SPLASHDAMAGE
 /*
 ===============
 idMapFile::Parse
 ===============
 */
+bool idMapFile::ParseBuffer( const idStr& buffer, const idStr& name, bool moveFuncGroups )
+{
+    // no string concatenation for epairs and allow path names for materials
+    idLexer src( LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES );
+    idToken token;
+    idStr fullName;
+    idMapEntity *mapEnt;
+    int i, j, k;
+
+    hasPrimitiveData = false;
+
+    src.LoadMemory( buffer.c_str(), buffer.Length(), name.c_str() );
+
+    version = OLD_MAP_VERSION;
+    fileTime = src.GetFileTime();
+    entities.DeleteContents( true );
+
+    if ( src.CheckTokenString( "Version" ) ) {
+        src.ReadTokenOnLine( &token );
+        version = token.GetFloatValue();
+    }
+
+    while( 1 ) {
+        mapEnt = idMapEntity::Parse( src, ( entities.Num() == 0 ), version );
+        if ( !mapEnt ) {
+            break;
+        }
+        entities.Append( mapEnt );
+    }
+
+    SetGeometryCRC();
+
+    // if the map has a worldspawn
+    if ( entities.Num() ) {
+
+        // "removeEntities" "classname" can be set in the worldspawn to remove all entities with the given classname
+        const idKeyValue *removeEntities = entities[0]->epairs.MatchPrefix( "removeEntities", NULL );
+        while ( removeEntities ) {
+            RemoveEntities( removeEntities->GetValue() );
+            removeEntities = entities[0]->epairs.MatchPrefix( "removeEntities", removeEntities );
+        }
+
+        // "overrideMaterial" "material" can be set in the worldspawn to reset all materials
+        idStr material;
+        if ( entities[0]->epairs.GetString( "overrideMaterial", "", material ) ) {
+            for ( i = 0; i < entities.Num(); i++ ) {
+                mapEnt = entities[i];
+                for ( j = 0; j < mapEnt->GetNumPrimitives(); j++ ) {
+                    idMapPrimitive *mapPrimitive = mapEnt->GetPrimitive( j );
+                    switch( mapPrimitive->GetType() ) {
+                    case idMapPrimitive::TYPE_BRUSH: {
+                        idMapBrush *mapBrush = static_cast<idMapBrush *>(mapPrimitive);
+                        for ( k = 0; k < mapBrush->GetNumSides(); k++ ) {
+                            mapBrush->GetSide( k )->SetMaterial( material );
+                        }
+                        break;
+                    }
+                    case idMapPrimitive::TYPE_PATCH: {
+                        static_cast<idMapPatch *>(mapPrimitive)->SetMaterial( material );
+                        break;
+                    }
+                    }
+                }
+            }
+        }
+
+        // force all entities to have a name key/value pair
+        if ( entities[0]->epairs.GetBool( "forceEntityNames" ) ) {
+            for ( i = 1; i < entities.Num(); i++ ) {
+                mapEnt = entities[i];
+                if ( !mapEnt->epairs.FindKey( "name" ) ) {
+                    mapEnt->epairs.Set( "name", va( "%s%d", mapEnt->epairs.GetString( "classname", "forcedName" ), i ) );
+                }
+            }
+        }
+
+        // move the primitives of any func_group entities to the worldspawn
+        if ( moveFuncGroups && entities[0]->epairs.GetBool( "moveFuncGroups" ) ) {
+            for ( i = 1; i < entities.Num(); i++ ) {
+                mapEnt = entities[i];
+                if ( idStr::Icmp( mapEnt->epairs.GetString( "classname" ), "func_group" ) == 0 ) {
+                    // transform primitives into worldspawn space
+                    idMapPrimitive *mapPrim;
+                    idVec3 translationVec;
+                    mapEnt->epairs.GetVector( "origin", "", translationVec );
+                    for ( j = 0; j < mapEnt->GetNumPrimitives(); j++ ) {
+                        mapPrim = mapEnt->GetPrimitive( j );
+                        if ( mapPrim->GetType() == idMapPrimitive::TYPE_PATCH ) {
+                            static_cast<idMapPatch*>(mapPrim)->TranslateSelf( translationVec );
+                        }
+                        if ( mapPrim->GetType() == idMapPrimitive::TYPE_BRUSH ) {
+                            for ( k = 0; k < static_cast<idMapBrush*>(mapPrim)->GetNumSides(); k++ ) {
+                                idMapBrushSide *side;
+                                side = static_cast<idMapBrush*>(mapPrim)->GetSide( k );
+
+                                idPlane &plane = side->GetPlane();
+                                plane.TranslateSelf( translationVec );
+
+                                side->TranslateSelf( -translationVec );
+                            }
+                        }
+                    }
+                    entities[0]->primitives.Append( mapEnt->primitives );
+                    mapEnt->primitives.Clear();
+                }
+            }
+
+            // we have no need anymore for the func_group entities
+            for ( i = entities.Num() - 1; i > 0; i-- ) {
+                mapEnt = entities[i];
+                if ( idStr::Icmp( mapEnt->epairs.GetString( "classname" ), "func_group" ) == 0 ) {
+                    entities.RemoveIndex( i );
+                }
+            }
+        }
+    }
+
+    hasPrimitiveData = true;
+    return true;
+}
+#endif
+
+/*
+===============
+idMapFile::Parse
+===============
+*/
+#ifdef _SPLASHDAMAGE
+bool idMapFile::Parse( const char *filename, bool ignoreRegion, bool osPath, bool moveFuncGroups, bool ignoreEntities, const char* onlyEntitiesOfClass )
+#else
 bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
+#endif
 {
 	// no string concatenation for epairs and allow path names for materials
 #ifdef _RAVEN
@@ -889,6 +1251,23 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 		src.LoadFile(fullName, osPath);
 	}
 
+#ifdef _SPLASHDAMAGE
+    if ( !src.IsLoaded() && !ignoreEntities ) {
+        // now try an entity file
+        fullName.SetFileExtension( ENTITY_FILE_EXT );
+        src.LoadFile( fullName, osPath );
+    }
+
+    if ( !src.IsLoaded() ) {
+        // now try a map file
+        fullName.SetFileExtension( ".map" );
+        src.LoadFile( fullName, osPath );
+    }
+
+    if ( !src.IsLoaded() ) {
+        return false;
+    }
+#else
 	if (!src.IsLoaded()) {
 		// now try a .map file
 		fullName.SetFileExtension("map");
@@ -899,6 +1278,7 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 			return false;
 		}
 	}
+#endif
 
 	version = OLD_MAP_VERSION;
 	fileTime = src.GetFileTime();
@@ -933,6 +1313,13 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 			mHasFuncGroups = true;
 		}
 // RAVEN END
+#elif defined(_SPLASHDAMAGE)
+        if ( onlyEntitiesOfClass != NULL ) {
+            if ( idStr::Icmp( mapEnt->epairs.GetString( "classname" ), onlyEntitiesOfClass ) != 0 ) {
+                delete mapEnt;
+                continue;
+            }
+        }
 #endif
 
 		entities.Append(mapEnt);
@@ -1006,6 +1393,46 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 		}
 
 		// move the primitives of any func_group entities to the worldspawn
+#ifdef _SPLASHDAMAGE
+        if ( moveFuncGroups && entities[0]->epairs.GetBool( "moveFuncGroups" ) ) {
+            for ( i = 1; i < entities.Num(); i++ ) {
+                mapEnt = entities[i];
+                if ( idStr::Icmp( mapEnt->epairs.GetString( "classname" ), "func_group" ) == 0 ) {
+                    // transform primitives into worldspawn space
+                    idMapPrimitive *mapPrim;
+                    idVec3 translationVec;
+                    mapEnt->epairs.GetVector( "origin", "", translationVec );
+                    for ( j = 0; j < mapEnt->GetNumPrimitives(); j++ ) {
+                        mapPrim = mapEnt->GetPrimitive( j );
+                        if ( mapPrim->GetType() == idMapPrimitive::TYPE_PATCH ) {
+                            static_cast<idMapPatch*>(mapPrim)->TranslateSelf( translationVec );
+                        }
+                        if ( mapPrim->GetType() == idMapPrimitive::TYPE_BRUSH ) {
+                            for ( k = 0; k < static_cast<idMapBrush*>(mapPrim)->GetNumSides(); k++ ) {
+                                idMapBrushSide *side;
+                                side = static_cast<idMapBrush*>(mapPrim)->GetSide( k );
+
+                                idPlane &plane = side->GetPlane();
+                                plane.TranslateSelf( translationVec );
+
+                                side->TranslateSelf( -translationVec );
+                            }
+                        }
+                    }
+                    entities[0]->primitives.Append( mapEnt->primitives );
+                    mapEnt->primitives.Clear();
+                }
+            }
+
+            // we have no need anymore for the func_group entities
+            for ( i = entities.Num() - 1; i > 0; i-- ) {
+                mapEnt = entities[i];
+                if ( idStr::Icmp( mapEnt->epairs.GetString( "classname" ), "func_group" ) == 0 ) {
+                    entities.RemoveIndex( i );
+                }
+            }
+        }
+#else
 		if (entities[0]->epairs.GetBool("moveFuncGroups")) {
 			for (i = 1; i < entities.Num(); i++) {
 				mapEnt = entities[i];
@@ -1016,6 +1443,7 @@ bool idMapFile::Parse(const char *filename, bool ignoreRegion, bool osPath)
 				}
 			}
 		}
+#endif
 	}
 #endif
 
@@ -1093,7 +1521,11 @@ int idMapFile::AddEntity(idMapEntity *mapEnt)
 idMapFile::FindEntity
 ===============
 */
+#ifdef _SPLASHDAMAGE
+idMapEntity *idMapFile::FindEntity( const char *name ) const
+#else
 idMapEntity *idMapFile::FindEntity(const char *name)
+#endif
 {
 	for (int i = 0; i < entities.Num(); i++) {
 		idMapEntity *ent = entities[i];
@@ -1635,6 +2067,77 @@ void idMapBrush::AdjustOrigin( idVec3 &delta ) {
 	}
 }
 // RAVEN END
+
+#endif
+
+#ifdef _SPLASHDAMAGE
+/*
+===============
+idMapFile::ParseBotEntities
+
+Parse the bot_entities file, and setup the info for the bot thread.
+===============
+*/
+bool idMapFile::ParseBotEntities( const char *filename )
+{
+	idLexer src( LEXFL_NOSTRINGCONCAT | LEXFL_NOSTRINGESCAPECHARS | LEXFL_ALLOWPATHNAMES );
+	idToken token;
+	idMapEntity *botEnt;
+	idStr fullName;
+	name = filename;
+	name.StripFileExtension();
+	fullName = name;
+
+	version = -1.0f;
+
+	if ( !src.IsLoaded() ) {
+		// now try an entity file
+		fullName.SetFileExtension( BOT_ENTITY_FILE_EXT );
+		src.LoadFile( fullName );
+	}
+
+	if ( !src.IsLoaded() ) {
+		return false;
+	}
+
+	if ( src.CheckTokenString( "Version" ) ) {
+		src.ReadTokenOnLine( &token );
+		version = token.GetFloatValue();
+	}
+
+	if ( version != BOT_MAP_VERSION ) {
+		idLib::common->Warning( "%s is an old version, and can't be used. Recompile your map to generate a new one!", fullName.c_str() );
+		return false;
+	}
+
+	while( 1 ) {
+		botEnt = idMapEntity::ParseActions( src );
+
+		if ( !botEnt ) {
+			break;
+		}
+		entities.Append( botEnt );
+	}
+
+	return true;
+}
+
+/*
+============
+idMapFile::Write
+============
+*/
+bool idMapFile::WriteBuffer( idStr& buffer )
+{
+	buffer += va( "Version %f\n", (float) CURRENT_MAP_VERSION );
+
+	int i;
+	for ( i = 0; i < entities.Num(); i++ ) {
+		entities[i]->Write( buffer, i );
+	}
+
+	return true;
+}
 
 #endif
 

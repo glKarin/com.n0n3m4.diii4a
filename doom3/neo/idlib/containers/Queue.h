@@ -37,7 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 template< typename type >
 class idQueueNode {
 public:

@@ -120,6 +120,19 @@ class idFile
         virtual void			ReadSyncId(const char* detail = "unspecified", const char* classname = NULL) { }
         // jmarshall end
 #endif
+#ifdef _SPLASHDAMAGE
+	    virtual int				ReadCQuat( idCQuat& quat );
+	    virtual int				ReadAngles( idAngles& angles );
+	    
+	    virtual int				Read1DFloatArray( float* dst );
+	    virtual int				ReadFloatArray( float* src, const int num );
+	    
+    	virtual int				WriteDouble( const double value );
+	    virtual int				WriteCQuat( const idCQuat& quat );
+	    virtual int				WriteAngles( const idAngles& angles );
+	    virtual int				Write1DFloatArray( const int num, const float* src );
+	    virtual int				WriteFloatArray( const float* src, const int num );
+#endif
 };
 
 
@@ -154,6 +167,9 @@ class idFile_Memory : public idFile
 		// clear the file
 		virtual void			Clear(bool freeMemory = true);
 		// set data for reading
+#ifdef _SPLASHDAMAGE //karin: call in idlib, make it virtual
+		virtual 
+#endif
 		void					SetData(const char *data, int length);
 		// returns const pointer to the memory buffer
 		const char 			*GetDataPtr(void) const {
@@ -308,5 +324,42 @@ static int ReadDouble(idFile *file, double &value) {
     return result;
 }
 
+#ifdef _SPLASHDAMAGE //karin: not implement, same as idFile, only as placeholder
+class idFile_Buffered : public idFile {
+	friend class			idFileSystemLocal;
+
+public:
+	idFile_Buffered( const int granularity = 2048 * 1024 );	// file for reading
+	idFile_Buffered( idFile* source, const int granularity = 2048 * 1024 );	// file for reading
+	virtual					~idFile_Buffered( void );
+
+	virtual const char *	GetName( void ) { return source->GetName(); }
+	virtual const char *	GetFullPath( void ) { return source->GetFullPath(); }
+	virtual int				Read( void *buffer, int len );
+	virtual int				Length( void ) const { return source->Length(); }
+#ifdef _SPLASHDAMAGE
+	virtual ID_TIME_T		Timestamp( void ) { return source->Timestamp(); }
+#else
+	virtual unsigned int	Timestamp( void ) { return source->Timestamp(); }
+#endif
+	virtual int				Tell( void );
+	virtual int				Seek( long offset, fsOrigin_t origin );
+
+	void					SetSource( idFile* source );
+	void					ReleaseSource();
+
+private:
+	int						ReadInternal( void* buffer, int len );
+	void					SeekInternal( long offset );
+
+private:
+	idFile *				source;			// source file pointer
+	int						granularity;	// file granularity
+	int						available;		// current amount of data left in buffer
+	long					sourceOffset;	// offset in source file of file data
+	const byte *			filePtr;		// buffer holding the file data
+	const byte *			curPtr;			// current read pointer
+};
+#endif
 
 #endif /* !__FILE_H__ */

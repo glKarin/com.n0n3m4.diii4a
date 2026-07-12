@@ -137,6 +137,11 @@
                 android:title="@string/icarus"
                 android:icon="@drawable/empty_icon"
                 android:showAsAction="never|withText"/>
+            <item
+                android:id="@+id/main_menu_game_etqw"
+                android:title="@string/etqw"
+                android:icon="@drawable/etqw_icon"
+                android:showAsAction="never|withText"/>
         </menu>
     </item>
 

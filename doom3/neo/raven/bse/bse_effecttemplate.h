@@ -38,7 +38,11 @@ public:
     // --------------------------------------------------------------------- //
     const char* DefaultDefinition() const;    // implicit text used by the material editor
     bool            SetDefaultText();       // injects the default definition into this->base
+#ifdef _SPLASHDAMAGE
+    bool            Parse(const char* text, const int textLength);
+#else
     bool            Parse(const char* text, const int textLength, bool noCaching);
+#endif
     virtual size_t	Size(void) const;       // idDecl virtual
     void            FreeData();       // idDecl virtual
 
@@ -61,6 +65,9 @@ public:
     // duration helpers
     void            SetMinDuration(float duration);
     void            SetMaxDuration(float duration);
+#ifdef _SPLASHDAMAGE
+    static void		CacheFromDict( const idDict& dict );
+#endif
 
 public:
     // internal comparison used by the editor diff logic
@@ -79,4 +86,7 @@ public:
     float            mSize;            // editor preview bounds
     int              mPlayCount;                 // how many times we*ve played (runtime, not parsed)
     int              mLoopCount;                 // loops before auto-stop
+#ifdef _SPLASHDAMAGE
+	float			 mCutOffDistance;
+#endif
 };

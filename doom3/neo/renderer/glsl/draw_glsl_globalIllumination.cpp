@@ -49,6 +49,9 @@ static void RB_GLSL_DrawGlobalIllumination(const drawInteraction_t *din)
     din->specularImage->Bind();
 
     GL_SelectTextureNoClient(0); //k2023
+#ifdef INTERACTION_ALPHA_TEST // alpha test in interaction
+	GL_Uniform1f(offsetof(shaderProgram_t, alphaTest), din->alphaTest);
+#endif
 
     // draw it
     RB_DrawElementsWithCounters(din->surf->geo);
@@ -105,6 +108,8 @@ void RB_DrawGlobalIlluminations( drawSurf_t **drawSurfs, int numDrawSurfs )
     }
 
     RB_LogComment("---------- RB_DrawGlobalIlluminations ----------\n");
+
+	backEnd.vLight = NULL;
 
     // bind the vertex and fragment shader
     GL_UseProgram(&globalIlluminationShader);

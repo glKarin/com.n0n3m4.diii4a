@@ -204,6 +204,17 @@ public class Q3EPatchResourceManager
                 "base"
         );
         resourceList.add(rsc);
+
+        rsc = new Q3EPatchResource_zipToDir(
+                Q3EGameConstants.PatchResource.ETQW_GLSL_SHADER_EXTRAS,
+                Q3ELang.tr(context, R.string.etqw_glsl_shader_and_resource_patches),
+                Q3EGameConstants.ETQW_GLSL_SHADER_VERSION,
+                Q3EGameConstants.GAME_ETQW,
+                null,
+                "pak/etqwbase/zzz_etqwbase.pk4",
+                "etqwbase"
+        );
+        resourceList.add(rsc);
     }
 
     public String Fetch(Q3EGameConstants.PatchResource type, boolean overwrite, String...fsgame)

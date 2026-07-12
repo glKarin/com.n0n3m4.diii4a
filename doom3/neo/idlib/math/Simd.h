@@ -81,6 +81,9 @@ class idDrawVert;
 class idJointQuat;
 class idJointMat;
 struct dominantTri_s;
+#ifdef _SPLASHDAMAGE
+class idCompressedJointQuat;
+#endif
 
 const int MIXBUFFER_SAMPLES = 4096;
 
@@ -174,6 +177,11 @@ class idSIMDProcessor
 		virtual void VPCALL MatX_LowerTriangularSolve(const idMatX &L, float *x, const float *b, const int n, int skip = 0) = 0;
 		virtual void VPCALL MatX_LowerTriangularSolveTranspose(const idMatX &L, float *x, const float *b, const int n) = 0;
 		virtual bool VPCALL MatX_LDLTFactor(idMatX &mat, idVecX &invDiag, const int n) = 0;
+#ifdef _SPLASHDAMAGE
+		virtual bool VPCALL MatX_LDLT_Factor( idMatX &mat, idVecX &invDiag, const int n ) = 0;
+	    virtual bool VPCALL MatX_LU_Factor( idMatX &mat, idVecX &invDiag, const int n ) = 0;
+    	virtual void VPCALL DecompressJoints( idJointQuat *joints, const idCompressedJointQuat *compressedJoints, const int *index, const int numJoints ) = 0;
+#endif
 
 		// rendering
 		virtual void VPCALL BlendJoints(idJointQuat *joints, const idJointQuat *blendJoints, const float lerp, const int *index, const int numJoints) = 0;

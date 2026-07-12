@@ -334,6 +334,11 @@ typedef struct searchpath_s {
 #define MAX_GAME_OS	6
 #define BINARY_CONFIG "binary.conf"
 #define ADDON_CONFIG "addon.conf"
+#ifdef _SPLASHDAMAGE
+#define PAKMETA_CONFIG "pakmeta.conf"
+
+void ReplacePathSeparators(idStr &path, char sep = PATHSEPERATOR_CHAR); // idFileSystemLocal's friend function with default args
+#endif
 
 class idDEntry : public idStrList
 {
@@ -421,9 +426,29 @@ class idFileSystemLocal : public idFileSystem
 		static void				TouchFileList_f(const idCmdArgs &args);
         virtual void			RemoveDir(const char *relativePath);
         virtual void			RemoveFolder(const char *relativePath);
+        void                    RemoveDir_r(const char *OSPath, int type = 0);
 #ifdef _RAVEN
 		virtual void			SetIsFileLoadingAllowed(bool mode) { (void)mode; }
 		virtual idFile *		GetNewFileMemory( void );
+#endif
+#ifdef _SPLASHDAMAGE
+		virtual sdAddonMetaDataList* ListAddonMetaData( const char* metaDataTag );
+		virtual void			FreeAddonMetaDataList( sdAddonMetaDataList* list );
+
+		virtual const char *	GetBasePath() const;
+		virtual const char *	GetUserPath() const;
+		virtual const char *	GetGamePath() const;
+    	virtual void			FindDLL( const char *basename, char dllPath[ MAX_OSPATH ], bool updateChecksum, bool pureCheck );
+
+		virtual class idFile_Memory*	OpenMemoryFile( const char* name );
+		virtual class idFile_Buffered* OpenBufferedFile( idFile* file );
+
+		virtual bool			IsAddonPackReferenced( const char* pak );
+		virtual void			ReferenceAddonPack( const char* pak );
+
+		virtual void			ReadTGA( const char *name, byte **pic, int *width, int *height, unsigned *timestamp = 0, bool markPaksReferenced = true );
+		virtual void			WriteTGA( const char* name, const byte* pic, int width, int height );
+		virtual void			FreeTGA( byte* pic );
 #endif
 
 	private:
@@ -474,6 +499,10 @@ class idFileSystemLocal : public idFileSystem
 		int						dir_cache_count;
 
 		int						d3xp;	// 0: didn't check, -1: not installed, 1: installed
+#ifdef _SPLASHDAMAGE
+		idStrList				addonMetaDataNames;
+		idList<sdAddonMetaDataList *> addonMetaDataList; //karin: sdAddonMetaDataList has heap memory member and destructor, but no operator=, so don't copy and make list resize, so we using new pointer, and delete it on Shutdown
+#endif
 
 	private:
 		void					ReplaceSeparators(idStr &path, char sep = PATHSEPERATOR_CHAR);
@@ -522,7 +551,12 @@ class idFileSystemLocal : public idFileSystem
 		// Add game extra game base name from cfg file after add base game paths
         void                    InitExtraGame(const char *configFile);
 
-        void                    RemoveDir_r(const char *OSPath, int type = 0);
+#ifdef _SPLASHDAMAGE
+		bool					ParseMetaConfFile(const char *text, int length, bool isAddon, const char *type = NULL);
+		bool					ParseMetaConf(idLexer &src, metaDataContext_t &md);
+		void					InitMetaConf(const char *type = NULL);
+		friend void				ReplacePathSeparators(idStr &path, char sep);
+#endif
 };
 
 // Init game addon resource config file
@@ -970,11 +1004,10 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 	}
 
 #else
-#ifdef __ANDROID__ //karin: use preybase on Android
+#ifdef __ANDROID__ //karin: use <game>base on Android
 #ifdef _HUMANHEAD //k: for windows game data path, e.g. C:\PREY\base/type/file.ext
 				  // first search standard prey path, and then search diii4a prey path
-#define RAW_BASE_GAMEDIR "base"
-	base = (char *)strstr(OSPath, RAW_BASE_GAMEDIR);
+	base = (char *)strstr(OSPath, "base");
 
 	while (base) {
 		char c1 = '\0', c2;
@@ -983,13 +1016,35 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 			c1 = *(base - 1);
 		}
 
-		c2 = *(base + strlen(RAW_BASE_GAMEDIR));
+		c2 = *(base + strlen("base"));
 
 		if ((c1 == '/' || c1 == '\\') && (c2 == '/' || c2 == '\\')) {
 			break;
 		}
 
-		base = strstr(base + 1, RAW_BASE_GAMEDIR);
+		base = strstr(base + 1, "base");
+	}
+
+	if(!base || !base[0])
+	{
+#elif defined(_SPLASHDAMAGE) //k: for windows game data path, e.g. C:\PREY\base/type/file.ext
+				  // first search standard ETQW path, and then search diii4a prey path
+	base = (char *)strstr(OSPath, "base");
+
+	while (base) {
+		char c1 = '\0', c2;
+
+		if (base > OSPath) {
+			c1 = *(base - 1);
+		}
+
+		c2 = *(base + strlen("base"));
+
+		if ((c1 == '/' || c1 == '\\') && (c2 == '/' || c2 == '\\')) {
+			break;
+		}
+
+		base = strstr(base + 1, "base");
 	}
 
 	if(!base || !base[0])
@@ -1016,8 +1071,8 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 		base = strstr(base + 1, BASE_GAMEDIR);
 	}
 
-#ifdef __ANDROID__ //karin: use preybase on Android
-#ifdef _HUMANHEAD
+#ifdef __ANDROID__ //karin: use <game>base on Android
+#if defined(_HUMANHEAD) || defined(_SPLASHDAMAGE)
 	}
 #endif
 #endif
@@ -1035,9 +1090,12 @@ const char *idFileSystemLocal::OSPathToRelativePath(const char *OSPath)
 			fsgame = fs_game_base.GetString();
 		}
 
-#ifdef __ANDROID__ //karin: use preybase on Android
+#ifdef __ANDROID__ //karin: use <game>base on Android
 #ifdef _HUMANHEAD
 		if(fsgame && !idStr::Icmp(fsgame, "preybase"))
+			fsgame = "";
+#elif defined(_SPLASHDAMAGE)
+		if(fsgame && !idStr::Icmp(fsgame, "etqwbase"))
 			fsgame = "";
 #endif
 #endif
@@ -1975,9 +2033,13 @@ idModList *idFileSystemLocal::ListMods(void)
 #elif defined(_HUMANHEAD) //karin: base game in mods list
 #ifdef __ANDROID__ //karin: use preybase on Android
         dirs.Remove("preybase");
-#else
-        dirs.Remove("base");
 #endif
+        dirs.Remove("base");
+#elif defined(_SPLASHDAMAGE) //karin: base game in mods list
+#ifdef __ANDROID__ //karin: use etqwbase on Android
+        dirs.Remove("etqwbase");
+#endif
+        dirs.Remove("base");
 #else
 		dirs.Remove("base");
 #endif
@@ -3330,9 +3392,11 @@ void idFileSystemLocal::Init(void)
 	// busted and error out now, rather than getting an unreadable
 	// graphics screen when the font fails to load
 	// Dedicated servers can run with no outside files at all
+#if !defined(_SPLASHDAMAGE) //karin: multi user profile in ETQW
 	if (ReadFile("default.cfg", NULL, NULL) <= 0) {
 		common->FatalError("Couldn't load default.cfg");
 	}
+#endif
 }
 
 /*
@@ -3353,9 +3417,11 @@ void idFileSystemLocal::Restart(void)
 	// if we can't find default.cfg, assume that the paths are
 	// busted and error out now, rather than getting an unreadable
 	// graphics screen when the font fails to load
+#if !defined(_SPLASHDAMAGE) //karin: multi user profile in ETQW
 	if (ReadFile("default.cfg", NULL, NULL) <= 0) {
 		common->FatalError("Couldn't load default.cfg");
 	}
+#endif
 }
 
 /*
@@ -3419,6 +3485,10 @@ void idFileSystemLocal::Shutdown(bool reloading)
 	cmdSystem->RemoveCommand("touchFile");
 
 	mapDict.Clear();
+#ifdef _SPLASHDAMAGE //karin: free map meta data
+	addonMetaDataNames.Clear();
+	addonMetaDataList.DeleteContents(true);
+#endif
 }
 
 /*
@@ -5110,5 +5180,315 @@ idFile * idFileSystemLocal::GetNewFileMemory( void )
 	_fileMemory.Rewind();
 	_fileMemory.Clear(false);
 	return &_fileMemory;
+}
+#endif
+
+#ifdef _SPLASHDAMAGE //karin: map meta data
+void idFileSystemLocal::InitMetaConf(const char *type)
+{
+	searchpath_t 	*search;
+	idStr			netpath;
+	pack_t 		*pak;
+	fileInPack_t 	*pakFile;
+	directory_t 	*dir;
+	int				hash;
+	FILE 			*fp;
+
+	if (!searchPaths) {
+		common->FatalError("Filesystem call made without initialization\n");
+	}
+
+	//
+	// search through the path, one element at a time
+	//
+
+	const char *relativePaths[] = {
+		ADDON_CONFIG,
+		PAKMETA_CONFIG,
+		NULL
+	};
+
+	const char **p = &relativePaths[0];
+	while(*p)
+	{
+		const char *relativePath = *p;
+		p++;
+		hash = HashFileName(relativePath);
+
+		for (search = searchPaths; search; search = search->next) {
+			idFile *f = NULL;
+			bool isAddon = false;
+			if (search->dir) {
+				// check a file in the directory tree
+
+				dir = search->dir;
+
+				netpath = BuildOSPath(dir->path, dir->gamedir, relativePath);
+				fp = OpenOSFileCorrectName(netpath, "rb");
+
+				if (!fp) {
+					continue;
+				}
+
+				idFile_Permanent *file = new idFile_Permanent();
+				file->o = fp;
+				file->name = relativePath;
+				file->fullPath = netpath;
+				file->mode = (1 << FS_READ);
+				file->fileSize = DirectFileLength(file->o);
+				f = file;
+			} else if (search->pack) {
+
+				if (!search->pack->hashTable[hash]) {
+					continue;
+				}
+
+				// look through all the pak file elements
+				pak = search->pack;
+
+				for (pakFile = pak->hashTable[hash]; pakFile; pakFile = pakFile->next) {
+					// case and separator insensitive comparisons
+					if (!FilenameCompare(pakFile->name, relativePath)) {
+						idFile_InZip *file = ReadFileFromZip(pak, pakFile, relativePath);
+						isAddon = pak->addon;
+						f = file;
+						break;
+					}
+				}
+			}
+
+			if(f)
+			{
+				if (f->Length()) {
+					char *buf;
+					buf = new char[ f->Length() + 1 ];
+					f->Read((void *)buf, f->Length());
+					buf[ f->Length()] = '\0';
+					ParseMetaConfFile(buf, f->Length(), isAddon, type);
+					delete[] buf;
+				}
+
+				if (f) {
+					CloseFile(f);
+				}
+			}
+		}
+
+		for (search = addonPaks; search; search = search->next) {
+			assert(search->pack);
+			fileInPack_t	*pakFile;
+			pak = search->pack;
+
+			for (pakFile = pak->hashTable[hash]; pakFile; pakFile = pakFile->next) {
+				if (!FilenameCompare(pakFile->name, relativePath)) {
+					idFile_InZip *file = ReadFileFromZip(pak, pakFile, relativePath);
+
+					if(file)
+					{
+						if (file->Length()) {
+							char *buf;
+							buf = new char[ file->Length() + 1 ];
+							file->Read((void *)buf, file->Length());
+							buf[ file->Length()] = '\0';
+							ParseMetaConfFile(buf, file->Length(), pak->addon, type);
+							delete[] buf;
+						}
+
+						if (file) {
+							CloseFile(file);
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+bool idFileSystemLocal::ParseMetaConf(idLexer &src, metaDataContext_t &md)
+{
+	idToken token;
+
+	if(!src.ReadToken(&token))
+	{
+		return false;
+	}
+
+	idDict dict;
+	if(!dict.Parse(src))
+	{
+		src.SkipBracedSection(false);
+		return false;
+	}
+
+	//karin: must has 'maps/' prefix
+	//token.StripPath();
+	//token.StripFileExtension();
+	dict.Set("metadata_name", token.c_str());
+	md.addon = false;
+	idDict *meta = new idDict;
+	meta->Swap(dict);
+	md.meta = meta;
+
+	return true;
+}
+
+bool idFileSystemLocal::ParseMetaConfFile(const char *text, int length, bool isAddon, const char *type)
+{
+	idLexer src;
+	idToken token;
+	src.SetFlags(DECL_LEXER_FLAGS);
+
+	if(!src.LoadMemory(text, length, "<metadata.conf>"))
+	{
+		return false;
+	}
+
+	while(true)
+	{
+		if(!src.ReadToken(&token))
+		{
+			break;
+		}
+
+		metaDataContext_t md;
+		if(ParseMetaConf(src, md))
+		{
+			if (!type || !type[0] || !idStr::Icmp(token, type)) {
+				sdAddonMetaDataList *list = ListAddonMetaData(token);
+				const metaDataContext_t *exists = list->FindMetaDataContext(md.meta->GetString("metadata_name"));
+				if (!exists) {
+					md.addon = isAddon;
+					list->meta.Append(md);
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+sdAddonMetaDataList* idFileSystemLocal::ListAddonMetaData( const char* metaDataTag ) {
+	sdAddonMetaDataList *value;
+	int index;
+
+	index = addonMetaDataNames.FindIndex(metaDataTag);
+	if(index != -1)
+	{
+		return addonMetaDataList[index];
+	}
+	addonMetaDataNames.Append(metaDataTag);
+	value = new sdAddonMetaDataList;
+	addonMetaDataList.Append(value);
+	InitMetaConf(metaDataTag);
+	return value;
+}
+
+void idFileSystemLocal::FreeAddonMetaDataList( sdAddonMetaDataList* list ) {
+#if 0 //karin: TODO don't clear list, it is empty when in loading screen gui
+	int index;
+
+	index = addonMetaDataList.FindIndex(list);
+	if(index != -1)
+	{
+		//karin: only clear, don't delete it
+		list->~sdAddonMetaDataList();
+		list->meta.Clear();
+		//addonMetaDataList.RemoveIndex(index);
+		//addonMetaDataNames.RemoveIndex(index);
+		//delete list;
+	}
+#endif
+}
+
+#ifdef __ANDROID__
+extern const char *Posix_Cwd(void);
+#else
+extern bool Sys_GetPath(sysPath_t type, idStr &path);
+#endif
+const char * idFileSystemLocal::GetBasePath() const {
+	static idStr basePath;
+	if (basePath.IsEmpty())
+#ifdef __ANDROID__
+	{
+		basePath = Posix_Cwd();
+		basePath.AppendPath(BASE_GAMEDIR);
+	}
+#else
+		Sys_GetPath(PATH_BASE, basePath);
+#endif
+	return basePath.c_str();
+}
+
+const char * idFileSystemLocal::GetUserPath() const {
+	static idStr basePath;
+	if (basePath.IsEmpty())
+#ifdef __ANDROID__
+	{
+		basePath = Posix_Cwd();
+		basePath.AppendPath(BASE_GAMEDIR);
+	}
+#else
+		Sys_GetPath(PATH_CONFIG, basePath);
+#endif
+	return basePath.c_str();
+}
+
+const char * idFileSystemLocal::GetGamePath() const {
+	static idStr basePath;
+	if (basePath.IsEmpty())
+#ifdef __ANDROID__
+	{
+		basePath = Posix_Cwd();
+		basePath.AppendPath(BASE_GAMEDIR);
+	}
+#else
+		Sys_GetPath(PATH_EXE, basePath);
+#endif
+	return basePath.c_str();
+}
+
+void idFileSystemLocal::FindDLL( const char *basename, char dllPath[ MAX_OSPATH ], bool updateChecksum, bool pureCheck ) {
+}
+
+idFile_Memory* idFileSystemLocal::OpenMemoryFile( const char* name ) {
+	idFile_Memory *f = new idFile_Memory(name);
+	return f;
+}
+
+idFile_Buffered* idFileSystemLocal::OpenBufferedFile( idFile* file ) {
+	idFile_Buffered *f = new idFile_Buffered(file);
+	return f;
+}
+
+bool idFileSystemLocal::IsAddonPackReferenced( const char* pak ) {
+	return false;
+}
+
+void idFileSystemLocal::ReferenceAddonPack( const char* pak ) {
+}
+
+#include "../renderer/tr_local.h"
+extern void R_LoadTGA(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
+void idFileSystemLocal::ReadTGA( const char *name, byte **pic, int *width, int *height, unsigned *timestamp, bool markPaksReferenced ) {
+	R_LoadTGA(name, pic, width, height, (ID_TIME_T *)timestamp);
+}
+
+void idFileSystemLocal::WriteTGA( const char* name, const byte* pic, int width, int height ) {
+	R_WriteTGA(name, pic, width, height, false);
+}
+
+void idFileSystemLocal::FreeTGA( byte* pic ) {
+	Mem_Free(pic);
+}
+
+
+void ReplacePathSeparators(idStr &path, char sep) {
+	fileSystemLocal.ReplaceSeparators(path, sep);
+}
+
+void RemoveOSDir(const char *OSPath, int type = 0)
+{
+	fileSystemLocal.RemoveDir_r(OSPath, type);
 }
 #endif

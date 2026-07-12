@@ -50,6 +50,19 @@ void idSurface_Patch::SetSize(int patchWidth, int patchHeight)
 	verts.SetNum(width * height, false);
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+============
+idSurface_Patch::SetMaxSize
+============
+*/
+void idSurface_Patch::SetMaxSize( int patchWidth, int patchHeight )
+{
+    maxWidth = patchWidth;
+    maxHeight = patchHeight;
+}
+#endif
+
 /*
 =================
 idSurface_Patch::PutOnCurve
@@ -259,11 +272,31 @@ void idSurface_Patch::LerpVert(const idDrawVert &a, const idDrawVert &b, idDrawV
 	out.xyz[0] = 0.5f * (a.xyz[0] + b.xyz[0]);
 	out.xyz[1] = 0.5f * (a.xyz[1] + b.xyz[1]);
 	out.xyz[2] = 0.5f * (a.xyz[2] + b.xyz[2]);
+#ifdef _SPLASHDAMAGE
+    // FIXME: SD_USE_DRAWVERT_SIZE_32
+#if defined( SD_USE_DRAWVERT_SIZE_32 )
+    idVec3 na = a.GetNormal();
+    idVec3 nb = b.GetNormal();
+    idVec3 n;
+    n[0] = 0.5f * ( na[0] + nb[0] );
+    n[1] = 0.5f * ( na[1] + nb[1] );
+    n[2] = 0.5f * ( na[2] + nb[2] );
+    n.Normalize();
+    out.SetNormal( n );
+#else
+    out._normal[0] = 0.5f * ( a._normal[0] + b._normal[0] );
+    out._normal[1] = 0.5f * ( a._normal[1] + b._normal[1] );
+    out._normal[2] = 0.5f * ( a._normal[2] + b._normal[2] );
+#endif
+    out._st[0] = 0.5f * ( a._st[0] + b._st[0] );
+    out._st[1] = 0.5f * ( a._st[1] + b._st[1] );
+#else
 	out.normal[0] = 0.5f * (a.normal[0] + b.normal[0]);
 	out.normal[1] = 0.5f * (a.normal[1] + b.normal[1]);
 	out.normal[2] = 0.5f * (a.normal[2] + b.normal[2]);
 	out.st[0] = 0.5f * (a.st[0] + b.st[0]);
 	out.st[1] = 0.5f * (a.st[1] + b.st[1]);
+#endif
 }
 
 /*
@@ -330,7 +363,11 @@ void idSurface_Patch::GenerateNormals(void)
 		if (i == width * height) {
 			// all are coplanar
 			for (i = 0; i < width * height; i++) {
+#ifdef _SPLASHDAMAGE
+                verts[i].SetNormal( norm );
+#else
 				verts[i].normal = norm;
+#endif
 			}
 
 			return;
@@ -433,8 +470,14 @@ void idSurface_Patch::GenerateNormals(void)
 				count = 1;
 			}
 
+#ifdef _SPLASHDAMAGE
+            // FIXME: SD_USE_DRAWVERT_SIZE_32
+            sum.Normalize();
+            verts[j * width + i].SetNormal( sum );
+#else
 			verts[j *width + i].normal = sum;
 			verts[j * width + i].normal.Normalize();
+#endif
 		}
 	}
 }
@@ -491,13 +534,27 @@ void idSurface_Patch::SampleSinglePatchPoint(const idDrawVert ctrl[3][3], float 
 				b = ctrl[1][vPoint].xyz[axis];
 				c = ctrl[2][vPoint].xyz[axis];
 			} else if (axis < 6) {
+#ifdef _SPLASHDAMAGE
+                // FIXME: SD_USE_DRAWVERT_SIZE_32
+                a = ctrl[0][vPoint].GetNormalIdx( axis-3 );
+                b = ctrl[1][vPoint].GetNormalIdx( axis-3 );
+                c = ctrl[2][vPoint].GetNormalIdx( axis-3 );
+#else
 				a = ctrl[0][vPoint].normal[axis-3];
 				b = ctrl[1][vPoint].normal[axis-3];
 				c = ctrl[2][vPoint].normal[axis-3];
+#endif
 			} else {
+#ifdef _SPLASHDAMAGE
+                // FIXME: SD_USE_DRAWVERT_SIZE_32
+                a = ctrl[0][vPoint]._st[ axis-6 ];
+                b = ctrl[1][vPoint]._st[ axis-6 ];
+                c = ctrl[2][vPoint]._st[ axis-6 ];
+#else
 				a = ctrl[0][vPoint].st[axis-6];
 				b = ctrl[1][vPoint].st[axis-6];
 				c = ctrl[2][vPoint].st[axis-6];
+#endif
 			}
 
 			qA = a - 2.0f * b + c;
@@ -508,6 +565,11 @@ void idSurface_Patch::SampleSinglePatchPoint(const idDrawVert ctrl[3][3], float 
 	}
 
 	// interpolate the v value
+#ifdef _SPLASHDAMAGE
+#if defined( SD_USE_DRAWVERT_SIZE_32 )
+    idVec3 normal;
+#endif
+#endif
 	for (axis = 0; axis < 8; axis++) {
 		float a, b, c;
 		float qA, qB, qC;
@@ -522,11 +584,31 @@ void idSurface_Patch::SampleSinglePatchPoint(const idDrawVert ctrl[3][3], float 
 		if (axis < 3) {
 			out->xyz[axis] = qA * v * v + qB * v + qC;
 		} else if (axis < 6) {
+#ifdef _SPLASHDAMAGE
+            // FIXME: SD_USE_DRAWVERT_SIZE_32
+#if defined( SD_USE_DRAWVERT_SIZE_32 )
+            normal[axis-3] = qA * v * v + qB * v + qC;
+#else
+            out->_normal[axis-3] = qA * v * v + qB * v + qC;
+#endif
+#else
 			out->normal[axis-3] = qA * v * v + qB * v + qC;
+#endif
 		} else {
+#ifdef _SPLASHDAMAGE
+            // FIXME: SD_USE_DRAWVERT_SIZE_32
+            out->_st[axis-6] = qA * v * v + qB * v + qC;
+#else
 			out->st[axis-6] = qA * v * v + qB * v + qC;
+#endif
 		}
 	}
+#ifdef _SPLASHDAMAGE
+#if defined( SD_USE_DRAWVERT_SIZE_32 )
+    normal.Normalize();
+    out->SetNormal( normal );
+#endif
+#endif
 }
 
 /*
@@ -608,9 +690,20 @@ void idSurface_Patch::SubdivideExplicit(int horzSubdivisions, int vertSubdivisio
 
 	// normalize all the lerped normals
 	if (genNormals) {
+#ifdef _SPLASHDAMAGE
+#if !defined( SD_USE_DRAWVERT_SIZE_32 )
+        // pointless on 32bit format given normal is stored as 2 values, therefor when 3rd is calced
+        // it will always be normalised.  important that normalised as work is carried out.
+        for ( i = 0; i < width * height; i++ ) {
+            // FIXME: SD_USE_DRAWVERT_SIZE_32
+            verts[i]._normal.Normalize();
+        }
+#endif
+#else
 		for (i = 0; i < width * height; i++) {
 			verts[i].normal.Normalize();
 		}
+#endif
 	}
 
 	GenerateIndexes();
@@ -758,9 +851,21 @@ void idSurface_Patch::Subdivide(float maxHorizontalError, float maxVerticalError
 
 	// normalize all the lerped normals
 	if (genNormals) {
+
+#ifdef _SPLASHDAMAGE
+#if !defined( SD_USE_DRAWVERT_SIZE_32 )
+        // pointless on 32bit format given normal is stored as 2 values, therefor when 3rd is calced
+        // it will always be normalised.  important that normalised as work is carried out.
+        for ( i = 0; i < width * height; i++ ) {
+            // FIXME: SD_USE_DRAWVERT_SIZE_32
+            verts[i]._normal.Normalize();
+        }
+#endif
+#else
 		for (i = 0; i < width * height; i++) {
 			verts[i].normal.Normalize();
 		}
+#endif
 	}
 
 	GenerateIndexes();

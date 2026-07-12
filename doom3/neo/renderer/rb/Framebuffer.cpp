@@ -522,6 +522,10 @@ void Framebuffer::Init()
         printf("Depth/Stencil to color framebuffer creating: %d x %d\n", glConfig.vidWidth, glConfig.vidHeight);
         depthStencilRenderer.Init(glConfig.vidWidth, glConfig.vidHeight);
     }
+#ifdef _SPLASHDAMAGE //karin: postprocess framebuffer, postprocess buffer width and height is 1/4
+	printf("Postprocess framebuffer creating: %d x %d\n", glConfig.vidWidth, glConfig.vidHeight);
+    postprocessBuffer.Init(glConfig.vidWidth, glConfig.vidHeight, 0.25f);
+#endif
 
     BindNull();
 }
@@ -556,6 +560,10 @@ void Framebuffer::Shutdown()
         printf("Depth/Stencil to color framebuffer purged\n");
         depthStencilRenderer.Shutdown();
     }
+#ifdef _SPLASHDAMAGE //karin: postprocess framebuffer
+	printf("Postprocess framebuffer purged\n");
+    postprocessBuffer.Shutdown();
+#endif
 }
 
 void Framebuffer::BindNull()

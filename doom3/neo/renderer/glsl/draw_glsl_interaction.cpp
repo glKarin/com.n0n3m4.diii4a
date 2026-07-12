@@ -1,11 +1,3 @@
-extern const float zero[] = { 0.0f };
-extern const float one[] = { 1.0f };
-extern const float negOne[] = { -1.0f };
-#ifdef COLOR_MODULATE_IS_NORMALIZED
-extern const float oneModulate[] = { 1.0f / 255.0f };
-extern const float negOneModulate[] = { -1.0f / 255.0f };
-#endif
-
 /*
 =========================================================================================
 
@@ -151,6 +143,9 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 #endif
 
 	GL_SelectTextureNoClient(0); //k2023
+#ifdef INTERACTION_ALPHA_TEST // alpha test in interaction
+	GL_Uniform1f(offsetof(shaderProgram_t, alphaTest), din->alphaTest);
+#endif
 
 	// draw it
 	RB_DrawElementsWithCounters(din->surf->geo);

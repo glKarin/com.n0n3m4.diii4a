@@ -26,6 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#ifndef __IMAGE_H__ // add ifndef
+#define __IMAGE_H__
+
 /*
 ====================================================================
 
@@ -161,6 +164,9 @@ typedef enum {
 	CF_2D,			// not a cube map
 	CF_NATIVE,		// _px, _nx, _py, etc, directly sent to GL
 	CF_CAMERA		// _forward, _back, etc, rotated and flipped as needed before sending to GL
+#ifdef _SPLASHDAMAGE // cubemap with single image
+	, CF_HALFSPHERE	// Half-Spherical projection map resampled to cubemap at load time
+#endif
 #ifdef GL_ES_VERSION_3_0
 	, CF_2D_ARRAY		// not a cube map but not a single 2d texture either
 #endif
@@ -168,6 +174,36 @@ typedef enum {
 
 #define	MAX_IMAGE_NAME	256
 
+#ifdef _SPLASHDAMAGE
+class idImageGeneratorFunctorBase
+{
+public:
+    virtual ~idImageGeneratorFunctorBase( void ) { }
+    virtual void	operator()( class idImage *image ) const = 0;
+};
+
+template <class T> class idImageGeneratorFunctor : public idImageGeneratorFunctorBase
+{
+public:
+    typedef void( T::*func_t )( class idImage *image );
+
+    void			Init( T* generatorClass, func_t imageGenerator )
+    {
+        this->generatorClass = generatorClass;
+        this->imageGenerator = imageGenerator;
+    }
+
+    virtual void	operator()( class idImage *image ) const
+    {
+        (*generatorClass.*imageGenerator)( image );
+    }
+
+private:
+    T *				generatorClass;
+    func_t			imageGenerator;
+};
+
+#endif
 class idImage
 {
 	public:
@@ -303,6 +339,12 @@ class idImage
 
 		int					classification;			// just for resource profiling
 
+#ifdef _SPLASHDAMAGE
+    	int					sourceWidth, sourceHeight;				// after power of two, before downsample
+		const idImageGeneratorFunctorBase *	generatorFunctor;	// NULL for files
+		bool				IsLoaded() const;
+#endif
+
 		// data for listImages
 		int					uploadWidth, uploadHeight, uploadDepth;	// after power of two, downsample, and MAX_TEXTURE_SIZE
 		int					internalFormat;
@@ -358,6 +400,10 @@ ID_INLINE idImage::idImage()
 	cinmaticNextTime = 0;
 
     imageReferencePtr = NULL;
+#endif
+#ifdef _SPLASHDAMAGE
+	sourceWidth = sourceHeight = 0;
+	generatorFunctor = NULL;
 #endif
 }
 
@@ -470,6 +516,16 @@ class idImageManager
 		idImage 			*alphaRampImage;				// 0-255 in alpha, 255 in RGB
 		idImage 			*alphaNotchImage;			// 2x1 texture with just 1110 and 1111 with point sampling
 		idImage 			*whiteImage;					// full of 0xff
+#ifdef _SPLASHDAMAGE //karin: globals built-in images
+	    idImage			    *grayImage;					// full of 0x77
+		idImage 			*blackCubeMapImage;			// RGB is 0, A is 255
+		idImage				*postProcessBuffers[2];
+	    idImage			    *diffusionMaskImage;		// store in alpha bit
+	    idImage			    *cinematicYImage;			// GL_LUMINANCE8
+	    idImage			    *cinematicUImage;			// GL_LUMINANCE8
+	    idImage			    *cinematicVImage;			// GL_LUMINANCE8
+		idImage 			*ImageFromFunctor(const char *name, const idImageGeneratorFunctorBase *generatorFunctor);
+#endif
 		idImage 			*blackImage;					// full of 0x00
 		idImage 			*normalCubeMapImage;			// cube map to normalize STR into RGB
 		idImage 			*noFalloffImage;				// all 255, but zero clamped
@@ -582,5 +638,10 @@ IMAGEPROGRAM
 */
 
 void R_LoadImageProgram(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, textureDepth_t *depth = NULL);
+#ifdef _SPLASHDAMAGE
+const char *R_ParsePastImageProgram(idParser &src);
+#else
 const char *R_ParsePastImageProgram(idLexer &src);
+#endif
 
+#endif

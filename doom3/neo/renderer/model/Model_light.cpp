@@ -167,7 +167,11 @@ void idModelLight::CreateLight(const char *material, const idDict *dict)
     spawnArgs.Set("light_target", va("%f 0 0", radius[0]));
     spawnArgs.Set("_color", lightColor.c_str());
 
+#ifdef _SPLASHDAMAGE
+    gameEdit->ParseSpawnArgsToRenderLight(spawnArgs, viewLight);
+#else
     gameEdit->ParseSpawnArgsToRenderLight(&spawnArgs, &viewLight);
+#endif
 
     lightDef = world->AddLightDef(&viewLight);
 }

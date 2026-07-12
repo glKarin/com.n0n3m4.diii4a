@@ -71,6 +71,13 @@ public:
 	const char *			GetName() const {
 		return fboName.c_str();
 	}
+	// framebuffer size
+	int						Width(void) const {
+		return width;
+	}
+	int						Height(void) const {
+		return height;
+	}
 
 private:
 	void					PrintFramebuffer(void);

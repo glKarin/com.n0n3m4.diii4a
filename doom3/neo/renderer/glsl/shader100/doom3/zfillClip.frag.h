@@ -1,0 +1,25 @@
+
+// z-fill with clip plane
+GLSL_SHADER const char ZFILLCLIP_FRAG[] =
+"#version 100\n"
+"//#pragma optimize(off)\n"
+"\n"
+"precision mediump float;\n"
+"\n"
+"varying vec2 var_TexDiffuse;\n"
+"varying vec2 var_TexClip;\n"
+"\n"
+"uniform sampler2D u_fragmentMap0;\n"
+"uniform sampler2D u_fragmentMap1;\n"
+"uniform lowp float u_alphaTest;\n"
+"uniform lowp vec4 u_glColor;\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"    if (u_alphaTest > (texture2D(u_fragmentMap0, var_TexDiffuse).a * texture2D(u_fragmentMap1, var_TexClip).a) ) {\n"
+      "discard;\n"
+"    }\n"
+"\n"
+"    gl_FragColor = u_glColor;\n"
+"}\n"
+;

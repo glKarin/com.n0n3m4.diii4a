@@ -82,6 +82,55 @@ void RB_DrawElementsWithCounters(const srfTriangles_t *tri)
 	}
 }
 
+#ifdef GL_ES_VERSION_2_0
+/*
+================
+RB_DrawElementsWithCountersLines
+Only for OpenGLES without glPolygonMode
+================
+*/
+void RB_DrawElementsWithCountersLines(const srfTriangles_t *tri)
+{
+	HARM_CHECK_SHADER("RB_DrawElementsWithCountersLines");
+
+	backEnd.pc.c_drawElements++;
+	backEnd.pc.c_drawIndexes += tri->numIndexes;
+	backEnd.pc.c_drawVertexes += tri->numVerts;
+
+	if (tri->ambientSurface != NULL) {
+		if (tri->indexes == tri->ambientSurface->indexes) {
+			backEnd.pc.c_drawRefIndexes += tri->numIndexes;
+		}
+
+		if (tri->verts == tri->ambientSurface->verts) {
+			backEnd.pc.c_drawRefVertexes += tri->numVerts;
+		}
+	}
+
+	const int numIndexes = r_singleTriangle.GetBool() ? 3 : tri->numIndexes;
+	if (tri->indexCache) {
+		for(int i = 0; i < numIndexes; i += 3)
+		{
+			qglDrawElements(GL_LINE_LOOP,
+					3,
+					GL_INDEX_TYPE,
+					(glIndex_t *)vertexCache.Position(tri->indexCache) + i);
+			backEnd.pc.c_vboIndexes += 3;
+		}
+	} else {
+		vertexCache.UnbindIndex();
+
+		for(int i = 0; i < numIndexes; i += 3)
+		{
+			qglDrawElements(GL_LINE_LOOP,
+					3,
+					GL_INDEX_TYPE,
+					tri->indexes + i);
+		}
+	}
+}
+#endif
+
 /*
 ================
 RB_DrawShadowElementsWithCounters
@@ -164,7 +213,7 @@ void RB_ComputeDrawSurfMVP( const drawSurf_t * const surf )
 	myGlMultMatrix(surf->space->modelViewMatrix, rb_projectionMatrix, rb_MVP);
 }
 
-ID_INLINE void RB_SetupDrawSurfMVP( const drawSurf_t * const surf )
+void RB_SetupDrawSurfMVP( const drawSurf_t * const surf )
 {
 	RB_ComputeDrawSurfMVP(surf);
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), rb_MVP);
@@ -715,6 +764,24 @@ static void RB_SubmittInteraction(drawInteraction_t *din, void (*DrawInteraction
 			din->diffuseColor[2] *= RB_overbright;
 		}
 #endif
+#ifdef _SPLASHDAMAGE //karin: fade by distance
+		if (din->surf->space->fadeFraction > 0.0f) {
+			const float fade = 1.0f - din->surf->space->fadeFraction;
+			din->diffuseColor[0] *= fade;
+			din->diffuseColor[1] *= fade;
+			din->diffuseColor[2] *= fade;
+		}
+		if (backEnd.vLight && backEnd.vLight->fadeFraction > 0.0f)
+		{
+			const float fade = 1.0f - backEnd.vLight->fadeFraction;
+			din->diffuseColor[0] *= fade;
+			din->diffuseColor[1] *= fade;
+			din->diffuseColor[2] *= fade;
+			din->specularColor[0] *= fade;
+			din->specularColor[1] *= fade;
+			din->specularColor[2] *= fade;
+		}
+#endif
 		DrawInteraction(din);
 	}
 }
@@ -735,6 +802,9 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 	const idMaterial	*lightShader = vLight->lightShader;
 	const float			*lightRegs = vLight->shaderRegisters;
 	drawInteraction_t	inter;
+#ifdef INTERACTION_ALPHA_TEST //karin: alpha test in interaction stage
+	inter.alphaTest = 0.0f;
+#endif
 
 	if (r_skipInteractions.GetBool() || !surf->geo || !surf->geo->ambientCache) {
 		return;
@@ -882,6 +952,11 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 					inter.specularColor[2] *= lightColor[2];
 					inter.specularColor[3] *= lightColor[3];
 					inter.vertexColor = surfaceStage->vertexColor;
+#ifdef INTERACTION_ALPHA_TEST //karin: alpha test in interaction stage
+					if (surfaceStage->hasAlphaTest) {
+						inter.alphaTest = surfaceRegs[surfaceStage->alphaTestRegister];
+					}
+#endif
 					break;
 				}
 			}
@@ -1022,6 +1097,9 @@ void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*Dr
 
     drawInteraction_t inter;
     memset(&inter, 0, sizeof(inter));
+#ifdef INTERACTION_ALPHA_TEST //karin: alpha test in interaction stage
+	inter.alphaTest = 0.0f;
+#endif
     inter.surf = drawSurf;
 
     // tranform the view origin into model local space
@@ -1105,6 +1183,11 @@ void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*Dr
                 R_SetDrawInteraction(surfaceStage, surfaceRegs, &inter.diffuseImage,
                                      inter.diffuseMatrix, inter.diffuseColor.ToFloatPtr());
                 inter.vertexColor = surfaceStage->vertexColor;
+#ifdef INTERACTION_ALPHA_TEST //karin: alpha test in interaction stage
+				if (surfaceStage->hasAlphaTest) {
+					inter.alphaTest = surfaceRegs[surfaceStage->alphaTestRegister];
+				}
+#endif
                 break;
             }
 
@@ -1162,3 +1245,389 @@ void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*Dr
     backEnd.currentSpace = drawSurf->space; //k2023
 }
 #endif
+
+#ifdef _SPLASHDAMAGE //karin: area ambient
+
+#if !defined(BLEND_NORMALS)
+#define BLEND_NORMALS 1
+#endif
+
+void RB_CreateSingleDrawAreaAmbient_builtin(const drawSurf_t *drawSurf, void (*DrawInteraction)(const drawInteraction_t *))
+{
+    if(!drawSurf)
+        return;
+
+    if (!drawSurf->geo || !drawSurf->geo->ambientCache) {
+        return;
+    }
+
+    const idMaterial* surfaceMaterial = drawSurf->material;
+
+    // translucent surfaces don't put anything in the depth buffer and don't
+    // test against it, which makes them fail the mirror clip plane operation
+    if( surfaceMaterial->Coverage() == MC_TRANSLUCENT )
+    {
+        return;
+    }
+
+    // get the expressions for conditionals / color / texcoords
+    const float* surfaceRegs = drawSurf->shaderRegisters;
+
+    // if all stages of a material have been conditioned off, don't do anything
+    int stage = 0;
+    for( ; stage < surfaceMaterial->GetNumStages(); stage++ )
+    {
+        const shaderStage_t* pStage = surfaceMaterial->GetStage( stage );
+        // check the stage enable condition
+        if( surfaceRegs[ pStage->conditionRegister ] != 0 )
+        {
+            break;
+        }
+    }
+    if( stage == surfaceMaterial->GetNumStages() )
+    {
+        return;
+    }
+
+    // change the matrix if needed
+    if( drawSurf->space != backEnd.currentSpace )
+    {
+		RB_LoadProjectionMatrix();
+
+        // we need the model matrix without it being combined with the view matrix
+        // so we can transform local vectors to global coordinates
+        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), drawSurf->space->modelMatrix);
+
+        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewMatrix), drawSurf->space->modelViewMatrix);
+    }
+
+    // change the scissor if needed
+    if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(drawSurf->scissorRect)) {
+        backEnd.currentScissor = drawSurf->scissorRect;
+        qglScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+                   backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
+                   backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
+                   backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1);
+    }
+
+    // hack depth range if needed
+    if (drawSurf->space->weaponDepthHack) {
+        RB_EnterWeaponDepthHack(/*drawSurf*/);
+    }
+
+    if (drawSurf->space->modelDepthHack) {
+        RB_EnterModelDepthHack(drawSurf);
+    }
+	RB_SetupDrawSurfMVP(drawSurf);
+
+    drawInteraction_t inter;
+    memset(&inter, 0, sizeof(inter));
+	//karin: alpha test in interaction stage
+	inter.alphaTest = 0.0f;
+    inter.surf = drawSurf;
+
+    // tranform the view origin into model local space
+    R_GlobalPointToLocal( drawSurf->space->modelMatrix, backEnd.viewDef->renderView.vieworg, inter.localViewOrigin.ToVec3() );
+    inter.localViewOrigin[3] = 1.0f;
+    inter.ambientLight = true;
+
+    inter.diffuseColor[0] = inter.diffuseColor[1] = inter.diffuseColor[2] = inter.diffuseColor[3] = 1.0f;
+    inter.specularColor[0] = inter.specularColor[1] = inter.specularColor[2] = inter.specularColor[3] = 0.0f;
+
+    inter.bumpImage = NULL;
+    inter.specularImage = NULL;
+    inter.diffuseImage = NULL;
+
+    // perforated surfaces may have multiple alpha tested stages
+    for( stage = 0; stage < surfaceMaterial->GetNumStages(); stage++ )
+    {
+        const shaderStage_t* surfaceStage = surfaceMaterial->GetStage( stage );
+
+        switch( surfaceStage->lighting )
+        {
+            case SL_AMBIENT: {
+                // ignore ambient stages while drawing interactions
+                break;
+            }
+
+            case SL_BUMP: {
+                // ignore stage that fails the condition
+                if( !surfaceRegs[ surfaceStage->conditionRegister ] )
+                {
+                    break;
+                }
+                // draw any previous interaction
+                if( inter.bumpImage != NULL )
+                {
+#if BLEND_NORMALS
+                    if( inter.vertexColor == SVC_IGNORE )
+                    {
+                        GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+                    }
+                    else
+                    {
+                        // RB: this is a bit hacky: use additive blending to blend the normals
+                        GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+                    }
+#endif
+                }
+
+                // draw any previous interaction
+                RB_SubmittInteraction(&inter, DrawInteraction);
+                inter.diffuseImage = NULL;
+                inter.specularImage = NULL;
+                R_SetDrawInteraction(surfaceStage, surfaceRegs, &inter.bumpImage, inter.bumpMatrix, NULL);
+                break;
+            }
+
+            case SL_DIFFUSE: {
+                // ignore stage that fails the condition
+                if( !surfaceRegs[ surfaceStage->conditionRegister ] )
+                {
+                    break;
+                }
+
+                // draw any previous interaction
+                if( inter.diffuseImage != NULL )
+                {
+#if BLEND_NORMALS
+                    if( inter.vertexColor == SVC_IGNORE )
+                    {
+                        GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+                    }
+                    else
+                    {
+                        // RB: this is a bit hacky: use additive blending to blend the normals
+                        GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+                    }
+#endif
+
+                    RB_SubmittInteraction(&inter, DrawInteraction);
+                }
+                R_SetDrawInteraction(surfaceStage, surfaceRegs, &inter.diffuseImage,
+                                     inter.diffuseMatrix, inter.diffuseColor.ToFloatPtr());
+                inter.vertexColor = surfaceStage->vertexColor;
+				if (surfaceStage->hasAlphaTest) {
+					inter.alphaTest = surfaceRegs[surfaceStage->alphaTestRegister];
+				}
+                break;
+            }
+
+            case SL_SPECULAR: {
+                // ignore stage that fails the condition
+                if( !surfaceRegs[ surfaceStage->conditionRegister ] )
+                {
+                    break;
+                }
+                // draw any previous interaction
+                if( inter.specularImage != NULL )
+                {
+#if BLEND_NORMALS
+                    if( inter.vertexColor == SVC_IGNORE )
+                    {
+                        GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+                    }
+                    else
+                    {
+                        // RB: this is a bit hacky: use additive blending to blend the normals
+                        GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+                    }
+#endif
+
+                    RB_SubmittInteraction(&inter, DrawInteraction);
+                }
+                R_SetDrawInteraction(surfaceStage, surfaceRegs, &inter.specularImage, inter.specularMatrix, inter.specularColor.ToFloatPtr());
+                inter.vertexColor = surfaceStage->vertexColor;
+                break;
+            }
+        }
+    }
+
+    // draw the final interaction
+    RB_SubmittInteraction(&inter, DrawInteraction);
+
+    // draw the final interaction
+#if BLEND_NORMALS
+    if( inter.vertexColor == SVC_IGNORE )
+    {
+        GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+    }
+    else
+    {
+        // RB: this is a bit hacky: use additive blending to blend the normals
+        GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+    }
+#endif
+
+    // unhack depth range if needed
+    if (drawSurf->space->weaponDepthHack || drawSurf->space->modelDepthHack != 0.0f) {
+        RB_LeaveDepthHack(/*drawSurf*/);
+    }
+
+    backEnd.currentSpace = drawSurf->space; //k2023
+}
+
+void RB_CreateSingleDrawAreaAmbient_external(const drawSurf_t *drawSurf, void (*DrawInteraction)(const drawInteraction_t *))
+{
+    if(!drawSurf)
+        return;
+
+    if (!drawSurf->geo || !drawSurf->geo->ambientCache) {
+        return;
+    }
+
+    const idMaterial* surfaceMaterial = drawSurf->material;
+
+    // translucent surfaces don't put anything in the depth buffer and don't
+    // test against it, which makes them fail the mirror clip plane operation
+    if( surfaceMaterial->Coverage() == MC_TRANSLUCENT )
+    {
+        return;
+    }
+
+    // get the expressions for conditionals / color / texcoords
+    const float* surfaceRegs = drawSurf->shaderRegisters;
+
+    // if all stages of a material have been conditioned off, don't do anything
+    int stage = 0;
+    for( ; stage < surfaceMaterial->GetNumStages(); stage++ )
+    {
+        const shaderStage_t* pStage = surfaceMaterial->GetStage( stage );
+        // check the stage enable condition
+        if( surfaceRegs[ pStage->conditionRegister ] != 0 )
+        {
+            break;
+        }
+    }
+    if( stage == surfaceMaterial->GetNumStages() )
+    {
+        return;
+    }
+
+    // change the matrix if needed
+    if( drawSurf->space != backEnd.currentSpace )
+    {
+		RB_LoadProjectionMatrix();
+
+        // we need the model matrix without it being combined with the view matrix
+        // so we can transform local vectors to global coordinates
+        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), drawSurf->space->modelMatrix);
+
+        GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewMatrix), drawSurf->space->modelViewMatrix);
+    }
+
+    // change the scissor if needed
+    if (r_useScissor.GetBool() && !backEnd.currentScissor.Equals(drawSurf->scissorRect)) {
+        backEnd.currentScissor = drawSurf->scissorRect;
+        qglScissor(backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+                   backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
+                   backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
+                   backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1);
+    }
+
+    // hack depth range if needed
+    if (drawSurf->space->weaponDepthHack) {
+        RB_EnterWeaponDepthHack(/*drawSurf*/);
+    }
+
+    if (drawSurf->space->modelDepthHack) {
+        RB_EnterModelDepthHack(drawSurf);
+    }
+	RB_SetupDrawSurfMVP(drawSurf);
+
+    drawInteraction_t inter;
+    memset(&inter, 0, sizeof(inter));
+	//karin: alpha test in interaction stage
+	inter.alphaTest = 0.0f;
+    inter.surf = drawSurf;
+
+    // tranform the view origin into model local space
+    R_GlobalPointToLocal( drawSurf->space->modelMatrix, backEnd.viewDef->renderView.vieworg, inter.localViewOrigin.ToVec3() );
+    inter.localViewOrigin[3] = 1.0f;
+    inter.ambientLight = true;
+
+    inter.diffuseColor[0] = inter.diffuseColor[1] = inter.diffuseColor[2] = inter.diffuseColor[3] = 1.0f;
+    inter.specularColor[0] = inter.specularColor[1] = inter.specularColor[2] = inter.specularColor[3] = 0.0f;
+
+    inter.bumpImage = NULL;
+    inter.specularImage = NULL;
+    inter.diffuseImage = NULL;
+
+    // perforated surfaces may have multiple alpha tested stages
+    for( stage = 0; stage < surfaceMaterial->GetNumStages(); stage++ )
+    {
+        const shaderStage_t* surfaceStage = surfaceMaterial->GetStage( stage );
+
+        switch( surfaceStage->lighting )
+        {
+            case SL_AMBIENT: {
+                // ignore ambient stages while drawing interactions
+                break;
+            }
+
+            case SL_BUMP: {
+                // ignore stage that fails the condition
+                if( !surfaceRegs[ surfaceStage->conditionRegister ] )
+                {
+                    break;
+                }
+
+                // draw any previous interaction
+                RB_SubmittInteraction(&inter, DrawInteraction);
+                inter.diffuseImage = NULL;
+                inter.specularImage = NULL;
+                R_SetDrawInteraction(surfaceStage, surfaceRegs, &inter.bumpImage, inter.bumpMatrix, NULL);
+                break;
+            }
+
+            case SL_DIFFUSE: {
+                // ignore stage that fails the condition
+                if( !surfaceRegs[ surfaceStage->conditionRegister ] )
+                {
+                    break;
+                }
+
+                // draw any previous interaction
+                if( inter.diffuseImage != NULL )
+                {
+                    RB_SubmittInteraction(&inter, DrawInteraction);
+                }
+                R_SetDrawInteraction(surfaceStage, surfaceRegs, &inter.diffuseImage,
+                                     inter.diffuseMatrix, inter.diffuseColor.ToFloatPtr());
+                inter.vertexColor = surfaceStage->vertexColor;
+				if (surfaceStage->hasAlphaTest) {
+					inter.alphaTest = surfaceRegs[surfaceStage->alphaTestRegister];
+				}
+                break;
+            }
+
+            case SL_SPECULAR: {
+                // ignore stage that fails the condition
+                if( !surfaceRegs[ surfaceStage->conditionRegister ] )
+                {
+                    break;
+                }
+                // draw any previous interaction
+                if( inter.specularImage != NULL )
+                {
+                    RB_SubmittInteraction(&inter, DrawInteraction);
+                }
+                R_SetDrawInteraction(surfaceStage, surfaceRegs, &inter.specularImage, inter.specularMatrix, inter.specularColor.ToFloatPtr());
+                inter.vertexColor = surfaceStage->vertexColor;
+                break;
+            }
+        }
+    }
+
+    // draw the final interaction
+    RB_SubmittInteraction(&inter, DrawInteraction);
+
+    // unhack depth range if needed
+    if (drawSurf->space->weaponDepthHack || drawSurf->space->modelDepthHack != 0.0f) {
+        RB_LeaveDepthHack(/*drawSurf*/);
+    }
+
+    backEnd.currentSpace = drawSurf->space; //k2023
+}
+#endif
+

@@ -249,7 +249,11 @@ public:
     //──────────────────────────────
     bool DebugHudActive() const { return com_debugHudActive; }
 
-    idBlockAlloc<rvBSE, 256, 26>          effects_;             // effect pool
+#ifdef _SPLASHDAMAGE
+    idBlockAlloc<rvBSE, 256, false>          effects_;
+#else
+    idBlockAlloc<rvBSE, 256, 26>          effects_;
+#endif            // effect pool
     static idMat3                          mModelToBSE;
     idList<idTraceModel*>          traceModels;         // loose heap-allocated models
     static		const char* mSegmentNames[SEG_COUNT];

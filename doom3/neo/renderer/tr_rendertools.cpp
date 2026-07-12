@@ -226,7 +226,7 @@ int &rb_debugPolygonTime = rb_debugPolygonTimes[_frameIndex];
 
 idCVar harm_r_renderToolsMultithread("harm_r_renderToolsMultithread", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Enable render tools debug with GLES in multi-threading.");
 
-#include "rb/QueueList.h"
+#include "containers/QueueList.h"
 typedef struct showViewEntityBounds_s {
 	float modelViewMatrix[16];
 	idBounds referenceBounds;
@@ -1388,7 +1388,7 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	// start far enough away that we don't hit the player model
 	start = tr.primaryView->renderView.vieworg + tr.primaryView->renderView.viewaxis[0] * 16;
-	end = start + tr.primaryView->renderView.viewaxis[0] * 1000.0f;
+	end = start + tr.primaryView->renderView.viewaxis[0] * harm_r_debugDistance.GetFloat()/*1000.0f*/;
 
 	if (!tr.primaryWorld->Trace(mt, start, end, 0.0f, false)) {
 		return;
@@ -1411,19 +1411,22 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	idVec3	trans[3];
 	float	matrix[16];
+	float textScale = 0.35f;
+	if (harm_r_debugDistance.GetFloat() > 1000.0f)
+		textScale *= (harm_r_debugDistance.GetFloat() / 1000.f);
 
 	// transform the object verts into global space
 	R_AxisToModelMatrix(mt.entity->axis, mt.entity->origin, matrix);
 
 	tr.primaryWorld->DrawText(mt.entity->hModel->Name(), mt.point + tr.primaryView->renderView.viewaxis[2] * 12,
-	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
+	                          textScale, colorRed, tr.primaryView->renderView.viewaxis);
 	tr.primaryWorld->DrawText(mt.material->GetName(), mt.point,
-	                          0.35f, colorBlue, tr.primaryView->renderView.viewaxis);
+	                          textScale, colorBlue, tr.primaryView->renderView.viewaxis);
 #ifdef _RAVEN //karin: show materialType
 	if(mt.materialType)
 	{
 		tr.primaryWorld->DrawText(mt.materialType->GetName(), mt.point - tr.primaryView->renderView.viewaxis[2] * 12,
-				0.35f, colorGreen, tr.primaryView->renderView.viewaxis);
+				textScale, colorGreen, tr.primaryView->renderView.viewaxis);
 	}
 #endif
 #ifdef _K_DEV //karin: show stage texgen
@@ -1441,7 +1444,7 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 	for(int i = 0; i < mt.material->GetNumStages(); i++)
 		str += va("%d. %s\n", i, TG_NAMES[mt.material->GetStage(i)->texture.texgen]);
 	tr.primaryWorld->DrawText(str.c_str(), mt.point - tr.primaryView->renderView.viewaxis[2] * 24,
-	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
+	                          textScale, colorRed, tr.primaryView->renderView.viewaxis);
 #endif
 
 	qglEnable(GL_DEPTH_TEST);
@@ -3356,7 +3359,7 @@ void R_ShowSurfaceInfo(void)
 
 	// start far enough away that we don't hit the player model
 	start = tr.primaryView->renderView.vieworg + tr.primaryView->renderView.viewaxis[0] * 16;
-	end = start + tr.primaryView->renderView.viewaxis[0] * 1000.0f;
+	end = start + tr.primaryView->renderView.viewaxis[0] * harm_r_debugDistance.GetFloat()/*1000.0f*/;
 
 	if (!tr.primaryWorld->Trace(mt, start, end, 0.0f, false)) {
 		return;
@@ -3364,19 +3367,22 @@ void R_ShowSurfaceInfo(void)
 
 	idVec3	trans[3];
 	float	matrix[16];
+	float textScale = 0.35f;
+	if (harm_r_debugDistance.GetFloat() > 1000.0f)
+		textScale *= (harm_r_debugDistance.GetFloat() / 1000.f);
 
 	// transform the object verts into global space
 	R_AxisToModelMatrix(mt.entity->axis, mt.entity->origin, matrix);
 
 	tr.primaryWorld->DrawText(mt.entity->hModel->Name(), mt.point + tr.primaryView->renderView.viewaxis[2] * 12,
-	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
+	                          textScale, colorRed, tr.primaryView->renderView.viewaxis);
 	tr.primaryWorld->DrawText(mt.material->GetName(), mt.point,
-	                          0.35f, colorBlue, tr.primaryView->renderView.viewaxis);
+	                          textScale, colorBlue, tr.primaryView->renderView.viewaxis);
 #ifdef _RAVEN //karin: show materialType
 	if(mt.materialType)
 	{
 		tr.primaryWorld->DrawText(mt.materialType->GetName(), mt.point - tr.primaryView->renderView.viewaxis[2] * 12,
-				0.35f, colorGreen, tr.primaryView->renderView.viewaxis);
+				textScale, colorGreen, tr.primaryView->renderView.viewaxis);
 	}
 #endif
 #ifdef _K_DEV //karin: show stage texgen
@@ -3394,7 +3400,7 @@ void R_ShowSurfaceInfo(void)
 	for(int i = 0; i < mt.material->GetNumStages(); i++)
 		str += va("%d. %s\n", i, TG_NAMES[mt.material->GetStage(i)->texture.texgen]);
 	tr.primaryWorld->DrawText(str.c_str(), mt.point - tr.primaryView->renderView.viewaxis[2] * 24,
-	                          0.35f, colorRed, tr.primaryView->renderView.viewaxis);
+	                          textScale, colorRed, tr.primaryView->renderView.viewaxis);
 #endif
 }
 

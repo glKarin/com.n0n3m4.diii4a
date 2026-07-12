@@ -32,6 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "AsyncNetwork.h"
 
 #include "../Session_local.h"
+#ifdef _SPLASHDAMAGE
+#include "sdnet/SDNet.h"
+#endif
 
 const int MIN_RECONNECT_TIME			= 2000;
 const int EMPTY_RESEND_TIME				= 500;
@@ -309,6 +312,7 @@ void idAsyncServer::ExecuteMapChange(void)
 	fileSystem->ClearPureChecksums();
 
 	// make sure the map/gametype combo is good
+#if !defined(_SPLASHDAMAGE)
 #ifdef _RAVEN
 	GetBestGameType(cvarSystem->GetCVarString("si_map"), cvarSystem->GetCVarString("si_gametype"), bestGameType);
 #elif defined(_HUMANHEAD)
@@ -317,12 +321,39 @@ void idAsyncServer::ExecuteMapChange(void)
 	game->GetBestGameType(cvarSystem->GetCVarString("si_map"), cvarSystem->GetCVarString("si_gametype"), bestGameType);
 #endif
 	cvarSystem->SetCVarString("si_gametype", bestGameType);
+#endif
 
 	// initialize map settings
 	cmdSystem->BufferCommandText(CMD_EXEC_NOW, "rescanSI");
 
+#ifdef _SPLASHDAMAGE //karin: call OnUserStartMap before spawn server map, must on after rescanSI, because must sync cvars to serverInfo
+	const char *map = sessLocal.mapSpawnData.serverInfo.GetString("si_map");
+	idStr gameMapName;
+	idStr reason;
+	common->Printf("idAsyncServer::OnUserStartMap '%s': isServer=%d, isClient=%d......\n", map, idAsyncNetwork::server.IsActive(), idAsyncNetwork::client.IsActive());
+	userMapChangeResult_e changeResult = game->OnUserStartMap(map, reason, gameMapName);
+	common->Printf("idAsyncServer::OnUserStartMap '%s': %d\n", map, changeResult);
+	if (changeResult == UMCR_ERROR) {
+		common->Warning("Can not start server map %s: %s", map, reason.c_str());
+		sessLocal.MessageBox(MSG_ABORT, reason.c_str(), "Start server map error");
+		cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "disconnect\n");
+		return;
+	}
+	common->Printf("Start server map '%s': %d\n", gameMapName.c_str(), changeResult);
+	mapName = gameMapName.c_str(); // return map name if campaign mode, else is normalized map file path
+
+	// OnUserStartMap return normalized map file path with extension
+	idStr cleanName = gameMapName;
+	cleanName.StripFileExtension();
+	if(cleanName.Cmp(map))
+	{
+		cvarSystem->SetCVarString("si_map", cleanName.c_str());
+		sessLocal.mapSpawnData.serverInfo.Set("si_map", cleanName.c_str());
+	}
+#else
 	sprintf(mapName, "maps/%s", sessLocal.mapSpawnData.serverInfo.GetString("si_map"));
 	mapName.SetFileExtension(".map");
+#endif
 	ff = fileSystem->FindFile(mapName, !serverReloadingEngine);
 
 	switch (ff) {
@@ -392,6 +423,12 @@ void idAsyncServer::ExecuteMapChange(void)
 	// re-initialize all connected clients for the new map
 	for (i = 0; i < MAX_ASYNC_CLIENTS; i++) {
 		if (clients[i].clientState >= SCS_PUREWAIT && i != localClientNum) {
+#ifdef _SPLASHDAMAGE //karin: bot fake client
+			if (ClientIsBot(i))
+				InitBotClient(i);
+			else
+			{
+#endif
 			InitClient(i, clients[i].clientId, clients[i].clientRate);
 
 			SendGameInitToClient(i);
@@ -399,6 +436,9 @@ void idAsyncServer::ExecuteMapChange(void)
 			if (sessLocal.mapSpawnData.serverInfo.GetBool("si_pure")) {
 				clients[ i ].clientState = SCS_PUREWAIT;
 			}
+#ifdef _SPLASHDAMAGE //karin: bot fake client
+			}
+#endif
 		}
 	}
 
@@ -418,7 +458,11 @@ void idAsyncServer::ExecuteMapChange(void)
 	if (localClientNum >= 0) {
 		BeginLocalClient();
 	} else {
+#ifdef _SPLASHDAMAGE
+		game->SetClientNum(-1, idAsyncNetwork::server.IsActive());
+#else
 		game->SetLocalClient(-1);
+#endif
 	}
 
 	if (sessLocal.mapSpawnData.serverInfo.GetInt("si_pure")) {
@@ -788,7 +832,7 @@ void idAsyncServer::InitClient(int clientNum, int clientId, int clientRate)
 	}
 
 	// let the game know a player connected
-#ifdef _HUMANHEAD
+#if defined(_HUMANHEAD) || defined(_SPLASHDAMAGE)
 	game->ServerClientConnect(clientNum);
 #else
 	game->ServerClientConnect(clientNum, client.guid);
@@ -820,13 +864,24 @@ idAsyncServer::BeginLocalClient
 */
 void idAsyncServer::BeginLocalClient(void)
 {
+#ifdef _SPLASHDAMAGE
+	game->SetClientNum(localClientNum, idAsyncNetwork::server.IsActive());
+#else
 	game->SetLocalClient(localClientNum);
+#endif
 #ifdef _RAVEN
 	game->SetUserInfo(localClientNum, sessLocal.mapSpawnData.userInfo[localClientNum], false);
+#elif defined(_SPLASHDAMAGE)
+	game->ValidateUserInfo(localClientNum, sessLocal.mapSpawnData.userInfo[localClientNum]);
+	game->UserInfoChanged(localClientNum);
 #else
 	game->SetUserInfo(localClientNum, sessLocal.mapSpawnData.userInfo[localClientNum], false, false);
 #endif
+#ifdef _SPLASHDAMAGE
+	game->ServerClientBegin(localClientNum, false);
+#else
 	game->ServerClientBegin(localClientNum);
+#endif
 }
 
 /*
@@ -887,7 +942,13 @@ void idAsyncServer::DropClient(int clientNum, const char *reason)
 		}
 	}
 
+#ifdef _SPLASHDAMAGE //karin: wchar
+	idWStr tmp = common->GetLanguageDict()->GetString(reason);
+	idStr reasonStr = WStrToStr(tmp);
+	reason = reasonStr.c_str();
+#else
 	reason = common->GetLanguageDict()->GetString(reason);
+#endif
 	common->Printf("client %d %s\n", clientNum, reason);
 	cmdSystem->BufferCommandText(CMD_EXEC_NOW, va("addChatLine \"%s^0 %s\"", sessLocal.mapSpawnData.userInfo[ clientNum ].GetString("ui_name"), reason));
 
@@ -907,6 +968,10 @@ void idAsyncServer::SendReliableMessage(int clientNum, const idBitMsg &msg)
 	if (clientNum == localClientNum) {
 		return;
 	}
+#ifdef _SPLASHDAMAGE //karin: bot fake client
+	if (ClientIsBot(clientNum))
+		return;
+#endif
 
 	if (!clients[ clientNum ].channel.SendReliableMessage(msg)) {
 		clients[ clientNum ].channel.ClearReliableMessages();
@@ -932,6 +997,10 @@ void idAsyncServer::CheckClientTimeouts(void)
 		if (i == localClientNum) {
 			continue;
 		}
+#ifdef _SPLASHDAMAGE //karin: bot fake client
+		if (ClientIsBot(client))
+			return;
+#endif
 
 		if (client.lastPacketTime > serverTime) {
 			client.lastPacketTime = serverTime;
@@ -1010,6 +1079,10 @@ void idAsyncServer::SendUserInfoBroadcast(int userInfoNum, const idDict &info, b
 
 #ifdef _RAVEN
 	gameInfo = game->SetUserInfo(userInfoNum, info, false);
+#elif defined(_SPLASHDAMAGE)
+	idDict tempInfo = info;
+	game->ValidateUserInfo(userInfoNum, tempInfo);
+	gameInfo = &tempInfo;
 #else
 	gameInfo = game->SetUserInfo(userInfoNum, info, false, true);
 #endif
@@ -1056,6 +1129,9 @@ void idAsyncServer::SendUserInfoBroadcast(int userInfoNum, const idDict &info, b
 	}
 
 	sessLocal.mapSpawnData.userInfo[userInfoNum] = *gameInfo;
+#ifdef _SPLASHDAMAGE //karin: update game player user info here
+	game->UserInfoChanged(userInfoNum);
+#endif
 }
 
 /*
@@ -1068,7 +1144,11 @@ we then need to get the info from the game, and broadcast to clients
 */
 void idAsyncServer::UpdateUI(int clientNum)
 {
+#ifdef _SPLASHDAMAGE //karin: TODO no GetUserInfo in SDK
+	const idDict	*info = &networkSystem->GetUserInfo(clientNum);
+#else
 	const idDict	*info = game->GetUserInfo(clientNum);
+#endif
 
 	if (!info) {
 		common->Warning("idAsyncServer::UpdateUI: no info from game\n");
@@ -1313,6 +1393,8 @@ bool idAsyncServer::SendSnapshotToClient(int clientNum)
 	// write the game snapshot
 #ifdef _RAVEN
 	game->ServerWriteSnapshot(clientNum, client.snapshotSequence, msg, clientInPVS, MAX_ASYNC_CLIENTS, 0);
+#elif defined(_SPLASHDAMAGE)
+	game->ServerWriteSnapshot(clientNum, client.snapshotSequence, msg, msg);
 #else
 	game->ServerWriteSnapshot(clientNum, client.snapshotSequence, msg, clientInPVS, MAX_ASYNC_CLIENTS);
 #endif
@@ -1426,7 +1508,11 @@ void idAsyncServer::ProcessUnreliableClientMessage(int clientNum, const idBitMsg
 		SendEnterGameToClient(clientNum);
 
 		// get the client running in the game
+#ifdef _SPLASHDAMAGE
+		game->ServerClientBegin(clientNum, ClientIsBot(clientNum));
+#else
 		game->ServerClientBegin(clientNum);
+#endif
 
 		// write any reliable messages to initialize the client game state
 		game->ServerWriteInitialReliableMessages(clientNum);
@@ -1632,7 +1718,12 @@ void idAsyncServer::ProcessAuthMessage(const idBitMsg &msg)
 		}
 
 		// maybe localize it
+#ifdef _SPLASHDAMAGE //karin: wchar
+		idStr tmp = WStrToStr(common->GetLanguageDict()->GetString(msg));
+		const char *l_msg = tmp.c_str();
+#else
 		const char *l_msg = common->GetLanguageDict()->GetString(msg);
+#endif
 		common->DPrintf("auth: client %s %s - %s %s\n", Sys_NetAdrToString(client_from), client_guid, authReplyStr[ reply ], l_msg);
 		challenges[ i ].authReply = reply;
 		challenges[ i ].authReplyMsg = replyMsg;
@@ -1913,9 +2004,17 @@ void idAsyncServer::ProcessConnectMessage(const netadr_t from, const idBitMsg &m
 				msg = challenges[ ichallenge ].authReplyPrint.c_str();
 			}
 
+#ifdef _SPLASHDAMAGE //karin: wchar
+		{
+			idWStr tmp = common->GetLanguageDict()->GetString(msg);
+
+			common->DPrintf("%s: %ls\n", Sys_NetAdrToString(from), tmp.c_str());
+		}
+#else
 			l_msg = common->GetLanguageDict()->GetString(msg);
 
 			common->DPrintf("%s: %s\n", Sys_NetAdrToString(from), l_msg);
+#endif
 
 			if (challenges[ ichallenge ].authReplyMsg == AUTH_REPLY_UNKNOWN || challenges[ ichallenge ].authReplyMsg == AUTH_REPLY_WAITING) {
 				// the client may be trying to connect to us in LAN mode, and the server disagrees
@@ -1970,6 +2069,11 @@ void idAsyncServer::ProcessConnectMessage(const netadr_t from, const idBitMsg &m
 	char reason[MAX_STRING_CHARS];
 #ifdef _RAVEN
 	allowReply_t reply = game->ServerAllowClient(clientId, numClients, Sys_NetAdrToString(from), guid, password, password, reason);
+#elif defined(_SPLASHDAMAGE) //karin: TODO numBots
+	clientNetworkAddress_t address;
+	sdNetClientId netClientId;
+	allowFailureReason_t reasonValue;
+	allowReply_t reply = game->ServerAllowClient(numClients, NumBotClients(), address, netClientId, guid, password, reasonValue);
 #else
 	allowReply_t reply = game->ServerAllowClient(numClients, Sys_NetAdrToString(from), guid, password, reason);
 #endif
@@ -2681,7 +2785,9 @@ void idAsyncServer::RunFrame(void)
 	if (cvarSystem->GetModifiedFlags() & CVAR_USERINFO) {
 		if (localClientNum >= 0) {
 			idDict newInfo;
+#if !defined(_SPLASHDAMAGE)
 			game->ThrottleUserInfo();
+#endif
 			newInfo = *cvarSystem->MoveCVarsToDict(CVAR_USERINFO);
 			SendUserInfoBroadcast(localClientNum, newInfo);
 		}
@@ -2702,11 +2808,17 @@ void idAsyncServer::RunFrame(void)
 #ifdef _RAVEN
 		// session->rw->DebugClear(0); // clear debug draw(version 1)
 		gameReturn_t ret = game->RunFrame(userCmds[gameFrame & (MAX_USERCMD_BACKUP - 1)], 0, true, gameFrame);
+#elif defined(_SPLASHDAMAGE) //karin: elapsed time on gmae->RunFrame
+		int elapsedTime = USERCMD_MSEC;
+		sessLocal.gameTime += elapsedTime;
+		game->RunFrame(userCmds[gameFrame & (MAX_USERCMD_BACKUP - 1)], elapsedTime);
 #else
 		gameReturn_t ret = game->RunFrame(userCmds[gameFrame & (MAX_USERCMD_BACKUP - 1)]);
 #endif
 
+#if !defined(_SPLASHDAMAGE)
 		idAsyncNetwork::ExecuteSessionCommand(ret.sessionCommand);
+#endif
 
 		// update time
 		gameFrame++;
@@ -2724,6 +2836,10 @@ void idAsyncServer::RunFrame(void)
 		if (client.clientState == SCS_FREE || i == localClientNum) {
 			continue;
 		}
+#ifdef _SPLASHDAMAGE //karin: jmarshall's Quake4 bot - Don't send update packets to bots.
+		if (ClientIsBot(client))
+			continue;
+#endif
 
 		// modify maximum rate if necesary
 		if (idAsyncNetwork::serverMaxClientRate.IsModified()) {
@@ -3094,3 +3210,135 @@ void idAsyncServer::ProcessDownloadRequestMessage(const netadr_t from, const idB
 	}
 }
 
+#ifdef _SPLASHDAMAGE //karin: jmarshall's Quake4 bot
+/*
+===============
+idAsyncServer::ServerSetBotUserCommand
+===============
+*/
+int idAsyncServer::ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd) {
+	usercmd_t realcmd;
+
+	// Ensure this client is a bot.
+	if (!ClientIsBot(clientNum))
+		return -1;
+
+	realcmd = cmd;
+	realcmd.gameTime = gameFrame;
+	realcmd.duplicateCount = gameTime;
+
+	int index = gameFrame & (MAX_USERCMD_BACKUP - 1);
+	userCmds[index][clientNum] = realcmd;
+
+	return 1;
+}
+
+/*
+===============
+idAsyncServer::AllocOpenClientSlotForAI
+===============
+*/
+int idAsyncServer::AllocOpenClientSlotForAI(int maxPlayersOnServer) {
+	int numActivePlayers = 0;
+	int botClientId = -1;
+	idDict spawnArgs;
+
+	// Check to see how many active players we have.
+	for (int i = 0; i < MAX_ASYNC_CLIENTS; i++)
+	{
+		if (clients[i].clientState >= SCS_PUREWAIT)
+		{
+			numActivePlayers++;
+		}
+	}
+
+	if (numActivePlayers >= maxPlayersOnServer) {
+		common->Warning("idAsyncServer::AllocateClientSlotForBot: No open slots for bot\n");
+		return -1;
+	}
+
+	// Find a free slot for the bot.
+	for (int i = 0; i < MAX_ASYNC_CLIENTS; i++)
+	{
+		if (clients[i].clientState == SCS_FREE)
+		{
+			botClientId = i;
+			break;
+		}
+	}
+
+	if (botClientId == -1)
+	{
+		common->Warning("idAsyncServer::AllocateClientSlotForBot: Invalid client number\n");
+		return -1;
+	}
+
+	idStr botName;
+	game->GetRandomBotName(botClientId, botName);
+
+	{
+		netadr_t badAddress;
+		InitClient( botClientId, 0, 0 );
+		memset( &badAddress, 0, sizeof( badAddress ) );
+		//badAddress.type = NA_BOT;
+		clients[botClientId].channel.Init( badAddress, serverId );
+		ClientSetBot(botClientId);
+		clients[botClientId].clientState = SCS_INGAME;
+		sessLocal.mapSpawnData.userInfo[botClientId] = *cvarSystem->MoveCVarsToDict( CVAR_USERINFO );
+	}
+
+	// Set all the spawn args for the new bot.
+	spawnArgs.Set("ui_name", botName);
+	spawnArgs.SetBool("ui_bot", true); //karin: mark is bot
+
+	// Init the new client, and broadcast it to the rest of the players.
+	game->ServerClientBegin(botClientId, true);
+	idAsyncServer::SendUserInfoBroadcast(botClientId, spawnArgs, true);
+
+	return botClientId;
+}
+
+void idAsyncServer::InitBotClient(int clientNum) {
+	assert(ClientIsBot(clientNum))
+
+	// clear the user info
+	sessLocal.mapSpawnData.userInfo[ clientNum ].Clear();	// always start with a clean base
+
+	// clear the server client
+	serverClient_t &client = clients[clientNum];
+	client.clientState = SCS_FREE;
+	client.clientPrediction = 0;
+	client.clientAheadTime = 0;
+	client.gameInitSequence = -1;
+	client.gameFrame = 0;
+	client.gameTime = 0;
+	client.channel.ResetRate();
+	int clientRate = client.clientRate;
+	client.clientRate = clientRate ? clientRate : idAsyncNetwork::serverMaxClientRate.GetInteger();
+	client.channel.SetMaxOutgoingRate(Min(idAsyncNetwork::serverMaxClientRate.GetInteger(), client.clientRate));
+	client.clientPing = 0;
+	client.lastConnectTime = serverTime;
+	client.lastEmptyTime = serverTime;
+	client.lastPingTime = serverTime;
+	client.lastSnapshotTime = serverTime;
+	client.lastPacketTime = serverTime;
+	client.lastInputTime = serverTime;
+	client.acknowledgeSnapshotSequence = 0;
+	client.numDuplicatedUsercmds = 0;
+
+	// clear the user commands
+	for (int m = 0; m < MAX_USERCMD_BACKUP; m++) {
+		memset(&userCmds[m][clientNum], 0, sizeof(userCmds[m][clientNum]));
+	}
+}
+
+int idAsyncServer::NumBotClients(void) const {
+	int num = 0;
+	for (int i = 0; i < MAX_ASYNC_CLIENTS; i++) {
+		if (clients[i].clientState != SCS_FREE && ClientIsBot(i)) {
+			num++;
+		}
+	}
+	return num;
+}
+#endif

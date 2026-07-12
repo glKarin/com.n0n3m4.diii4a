@@ -165,6 +165,74 @@ class idModList
 		idStrList				descriptions;
 };
 
+#ifdef _SPLASHDAMAGE
+struct metaDataContext_t {
+    const idDict*	meta;
+    bool			addon;
+    idStr			pak;
+};
+
+class sdAddonMetaDataList
+{
+    friend class idFileSystemLocal;
+public:
+
+    ~sdAddonMetaDataList( void )
+    {
+        for( int i = 0; i < meta.Num(); i++ ) {
+            delete meta[ i ].meta;
+        }
+    }
+
+    int						GetNumMetaData() const
+    {
+        return meta.Num();
+    }
+    const idDict&			GetMetaData( int index ) const
+    {
+        return *meta[ index ].meta;
+    }
+    const metaDataContext_t&GetMetaDataContext( int index ) const
+    {
+        return meta[ index ];
+    }
+    const idDict*			FindMetaData( const char* name, const idDict* defaultDict = NULL )
+    {
+        for( int i = 0; i < meta.Num(); i++ ) {
+            const char* value = meta[ i ].meta->GetString( "metadata_name" );
+            if( !idStr::Icmp( name, value ) ) {
+                return meta[ i ].meta;
+            }
+        }
+        return defaultDict;
+    }
+    int						FindMetaDataIndex( const char* name )
+    {
+        for( int i = 0; i < meta.Num(); i++ ) {
+            const char* value = meta[ i ].meta->GetString( "metadata_name" );
+            if( !idStr::Icmp( name, value ) ) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    const metaDataContext_t*	FindMetaDataContext( const char* name ) const
+    {
+        for( int i = 0; i < meta.Num(); i++ ) {
+            const char* value = meta[ i ].meta->GetString( "metadata_name" );
+            if( !idStr::Icmp( name, value ) ) {
+                return &meta[ i ];
+            }
+        }
+        return NULL;
+    }
+
+private:
+    idList<metaDataContext_t>	meta;
+};
+
+#endif
 class idFileSystem
 {
 	public:
@@ -311,14 +379,67 @@ class idFileSystem
         // Removes the given directory and children files.
         virtual void			RemoveFolder(const char *relativePath) = 0;
 #ifdef _RAVEN
-	// mekberg: is file loading allowed?
-	virtual void			SetIsFileLoadingAllowed(bool mode) = 0;
+        // mekberg: is file loading allowed?
+        virtual void			SetIsFileLoadingAllowed(bool mode) = 0;
 
-	// jscott: new functions for tools
-	virtual idFile *		GetNewFileMemory( void ) = 0;
+        // jscott: new functions for tools
+        virtual idFile *		GetNewFileMemory( void ) = 0;
+#endif
+
+#ifdef _SPLASHDAMAGE
+	    // Returns a list of metadata specified in addon.conf (and pakmeta.conf)
+	    virtual sdAddonMetaDataList* ListAddonMetaData( const char* metaDataTag ) = 0;
+	    // Frees the given metadata list
+	    virtual void			FreeAddonMetaDataList( sdAddonMetaDataList* list ) = 0;
+	    // Returns a full OS path where the initial base of the file system exists
+	    virtual const char *	GetBasePath() const = 0;
+	    // Returns a full OS path where user visible files can be written to
+	    virtual const char *	GetUserPath() const = 0;
+	    // Returns the current game path
+	    virtual const char *	GetGamePath() const = 0;
+	    
+    	virtual void			FindDLL( const char *basename, char dllPath[ MAX_OSPATH ], bool updateChecksum, bool pureCheck ) = 0;
+    	
+    	virtual class idFile_Memory*	OpenMemoryFile( const char* name ) = 0;
+
+    	virtual class idFile_Buffered* OpenBufferedFile( idFile* file ) = 0;
+    	
+	    // is the pack currently referenced?
+	    virtual bool			IsAddonPackReferenced( const char* pak ) = 0;
+	    // ensure that the pack is loaded after the next pure restart
+	    virtual void			ReferenceAddonPack( const char* pak ) = 0;
+    
+	    // textures
+	    virtual void			ReadTGA( const char *name, byte **pic, int *width, int *height, unsigned *timestamp = 0, bool markPaksReferenced = true ) = 0;
+    	virtual void			WriteTGA( const char* name, const byte* pic, int width, int height ) = 0;
+    	virtual void			FreeTGA( byte* pic ) = 0;
 #endif
 };
 
 extern idFileSystem 		*fileSystem;
+
+#ifdef _SPLASHDAMAGE
+// Auto-close files on destruction
+// Prefer this to using idFile* in most cases, since this is exception-safe
+struct sdCleanupPolicy_CloseFile {
+    static void Free( idFile* fp )
+    {
+        fileSystem->CloseFile( fp );
+    }
+};
+typedef sdAutoPtr< idFile, sdCleanupPolicy_CloseFile > sdFilePtr;
+typedef sdAutoPtr< idFile_Memory, sdCleanupPolicy_CloseFile > sdFileMemoryPtr;
+
+
+// idLib versions
+struct sdCleanupPolicy_idLibCloseFile {
+	static void Free( idFile* fp )
+	{
+		idLib::fileSystem->CloseFile( fp );
+	}
+};
+typedef sdAutoPtr< idFile, sdCleanupPolicy_idLibCloseFile > sdLibFilePtr;
+typedef sdAutoPtr< idFile_Memory, sdCleanupPolicy_idLibCloseFile > sdLibFileMemoryPtr;
+#endif
 
 #endif /* !__FILESYSTEM_H__ */

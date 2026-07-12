@@ -31,6 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "TraceModel.h"
 
+#ifdef _SPLASHDAMAGE
+#include "../../renderer/Material.h"
+#endif
 
 /*
 ============
@@ -111,6 +114,9 @@ void idTraceModel::InitBox(void)
 	numVerts = 8;
 	numEdges = 12;
 	numPolys = 6;
+#ifdef _SPLASHDAMAGE
+    SetNullPolygonMaterials();
+#endif
 
 	// set box edges
 	for (i = 0; i < 4; i++) {
@@ -253,6 +259,9 @@ void idTraceModel::InitOctahedron(void)
 	numVerts = 6;
 	numEdges = 12;
 	numPolys = 8;
+#ifdef _SPLASHDAMAGE
+    SetNullPolygonMaterials();
+#endif
 
 	// set edges
 	edges[ 1].v[0] =  4;
@@ -442,6 +451,9 @@ void idTraceModel::InitDodecahedron(void)
 	numVerts = 20;
 	numEdges = 30;
 	numPolys = 12;
+#ifdef _SPLASHDAMAGE
+    SetNullPolygonMaterials();
+#endif
 
 	// set edges
 	edges[ 1].v[0] =  0;
@@ -599,7 +611,11 @@ void idTraceModel::InitDodecahedron(void)
 idTraceModel::SetupCylinder
 ============
 */
+#ifdef _SPLASHDAMAGE
+void idTraceModel::SetupCylinder( const idBounds &cylBounds, const int numSides, float angleOffset, int axis )
+#else
 void idTraceModel::SetupCylinder(const idBounds &cylBounds, const int numSides)
+#endif
 {
 	int i, n, ii, n2;
 	float angle;
@@ -626,15 +642,50 @@ void idTraceModel::SetupCylinder(const idBounds &cylBounds, const int numSides)
 		n = MAX_TRACEMODEL_POLYS - 2;
 	}
 
+#ifdef _SPLASHDAMAGE
+    int a1, a2, a3;
+
+    switch( axis ) {
+    default:
+    case 0:
+        a1 = 0;
+        a2 = 1;
+        a3 = 2;
+        break;
+    case 1:
+        a1 = 2;
+        a2 = 0;
+        a3 = 1;
+        break;
+    case 2:
+        a1 = 1;
+        a2 = 2;
+        a3 = 0;
+        break;
+    }
+
+#endif
 	type = TRM_CYLINDER;
 	numVerts = n * 2;
 	numEdges = n * 3;
 	numPolys = n + 2;
+#ifdef _SPLASHDAMAGE
+    SetNullPolygonMaterials();
+#endif
 	offset = (cylBounds[0] + cylBounds[1]) * 0.5f;
 	halfSize = cylBounds[1] - offset;
 
 	for (i = 0; i < n; i++) {
 		// verts
+#ifdef _SPLASHDAMAGE
+        angle = ( idMath::TWO_PI * i / n ) + DEG2RAD( angleOffset );
+        verts[i][a1] = cos( angle ) * halfSize[a1] + offset[a1];
+        verts[i][a2] = sin( angle ) * halfSize[a2] + offset[a2];
+        verts[i][a3] = -halfSize[a3] + offset[a3];
+        verts[n+i][a1] = verts[i][a1];
+        verts[n+i][a2] = verts[i][a2];
+        verts[n+i][a3] = halfSize[a3] + offset[a3];
+#else
 		angle = idMath::TWO_PI * i / n;
 		verts[i].x = cos(angle) * halfSize.x + offset.x;
 		verts[i].y = sin(angle) * halfSize.y + offset.y;
@@ -642,6 +693,7 @@ void idTraceModel::SetupCylinder(const idBounds &cylBounds, const int numSides)
 		verts[n+i].x = verts[i].x;
 		verts[n+i].y = verts[i].y;
 		verts[n+i].z = halfSize.z + offset.z;
+#endif
 		// edges
 		ii = i + 1;
 		n2 = n << 1;
@@ -753,6 +805,9 @@ void idTraceModel::SetupCone(const idBounds &coneBounds, const int numSides)
 	numVerts = n + 1;
 	numEdges = n * 2;
 	numPolys = n + 1;
+#ifdef _SPLASHDAMAGE
+    SetNullPolygonMaterials();
+#endif
 	offset = (coneBounds[0] + coneBounds[1]) * 0.5f;
 	halfSize = coneBounds[1] - offset;
 	verts[n].Set(0.0f, 0.0f, halfSize.z + offset.z);
@@ -892,6 +947,9 @@ void idTraceModel::InitBone(void)
 	numVerts = 5;
 	numEdges = 9;
 	numPolys = 6;
+#ifdef _SPLASHDAMAGE
+    SetNullPolygonMaterials();
+#endif
 
 	// set bone edges
 	for (i = 0; i < 3; i++) {
@@ -959,6 +1017,9 @@ void idTraceModel::SetupPolygon(const idVec3 *v, const int count)
 
 	numEdges = numVerts;
 	numPolys = 2;
+#ifdef _SPLASHDAMAGE
+    SetNullPolygonMaterials();
+#endif
 	// set polygon planes
 	polys[0].numEdges = numEdges;
 	polys[0].normal = (v[1] - v[0]).Cross(v[2] - v[0]);
@@ -1029,6 +1090,9 @@ void idTraceModel::VolumeFromPolygon(idTraceModel &trm, float thickness) const
 	trm.numVerts = numVerts * 2;
 	trm.numEdges = numEdges * 3;
 	trm.numPolys = numEdges + 2;
+#ifdef _SPLASHDAMAGE
+    trm.SetNullPolygonMaterials();
+#endif
 
 	for (i = 0; i < numEdges; i++) {
 		trm.verts[ numVerts + i ] = verts[i] - thickness * polys[0].normal;
@@ -1050,6 +1114,11 @@ void idTraceModel::VolumeFromPolygon(idTraceModel &trm, float thickness) const
 	trm.polys[1].dist = trm.polys[1].normal * trm.verts[ numEdges ];
 
 	trm.GenerateEdgeNormals();
+#ifdef _SPLASHDAMAGE
+
+    trm.TestConvexity();
+    assert( trm.isConvex );
+#endif
 }
 
 /*
@@ -1090,10 +1159,18 @@ int idTraceModel::GenerateEdgeNormals(void)
 					// max length normal pointing outside both polygons
 					dir = verts[ edge->v[edgeNum > 0]] - verts[ edge->v[edgeNum < 0]];
 					edge->normal = edge->normal.Cross(dir) + poly->normal.Cross(-dir);
+#ifdef _SPLASHDAMAGE
+                    edge->normal *= ( 1.0f / ( 1.0f + SHARP_EDGE_DOT ) ) / edge->normal.Length();
+#else
 					edge->normal *= (0.5f / (0.5f + 0.5f * SHARP_EDGE_DOT)) / edge->normal.Length();
+#endif
 					numSharpEdges++;
 				} else {
+#ifdef _SPLASHDAMAGE
+                    edge->normal = ( 1.0f / ( 1.0f + dot ) ) * ( edge->normal + poly->normal );
+#else
 					edge->normal = (0.5f / (0.5f + 0.5f * dot)) * (edge->normal + poly->normal);
+#endif
 				}
 			}
 		}
@@ -1163,6 +1240,100 @@ void idTraceModel::Rotate(const idMat3 &rotation)
 idTraceModel::Shrink
 ============
 */
+#ifdef _SPLASHDAMAGE
+void idTraceModel::Shrink( const float m )
+{
+    int i, j, edgeNum, vertexNum;
+    float d, bestd, n, invDet, f0, f1;
+    traceModelPoly_t *poly, *poly1, *poly2;
+    traceModelEdge_t *edge;
+    idVec3 start, dir;
+    int vertexPolys[MAX_TRACEMODEL_VERTS][MAX_TRACEMODEL_POLYS];
+    int vertexNumPolys[MAX_TRACEMODEL_VERTS];
+
+    // special case for single polygon
+    if ( type == TRM_POLYGON ) {
+        for ( i = 0; i < numEdges; i++ ) {
+            edgeNum = polys[0].edges[i];
+            edge = &edges[abs(edgeNum)];
+            dir = verts[ edge->v[ INTSIGNBITSET(edgeNum) ] ] - verts[ edge->v[ INTSIGNBITNOTSET(edgeNum) ] ];
+            if ( dir.Normalize() < 2.0f * m ) {
+                continue;
+            }
+            dir *= m;
+            verts[ edge->v[ 0 ] ] -= dir;
+            verts[ edge->v[ 1 ] ] += dir;
+        }
+        return;
+    }
+
+    // the trace model should be a closed surface
+    assert( IsClosedSurface() );
+
+    memset( vertexPolys, 0, sizeof( vertexPolys ) );
+    memset( vertexNumPolys, 0, sizeof( vertexNumPolys ) );
+
+    // move polygon planes and find the vertex polygons
+    for ( i = 0; i < numPolys; i++ ) {
+        poly = &polys[i];
+
+        poly->dist -= m;
+
+        for ( j = 0; j < poly->numEdges; j++ ) {
+            edgeNum = poly->edges[j];
+            edge = &edges[abs(edgeNum)];
+            vertexNum = edge->v[ INTSIGNBITSET( edgeNum ) ];
+
+            vertexPolys[vertexNum][vertexNumPolys[vertexNum]] = i;
+            vertexNumPolys[vertexNum]++;
+        }
+    }
+
+    // move vertices
+    for ( i = 0; i < numVerts; i++ ) {
+
+        assert( vertexNumPolys[i] >= 3 );
+
+        poly1 = &polys[vertexPolys[i][0]];
+        poly2 = NULL;
+
+        // find the polygon that is most orthogonal to the first polygon
+        bestd = 1.0f;
+        for ( j = 1; j < vertexNumPolys[i]; j++ ) {
+            d = fabs( poly1->normal * polys[vertexPolys[i][j]].normal );
+            if ( d < bestd ) {
+                bestd = d;
+                poly2 = &polys[vertexPolys[i][j]];
+            }
+        }
+
+        // calculate intersection line between planes
+        n = poly1->normal * poly2->normal;
+        invDet = 1.0f / ( 1.0f - n * n );
+        f0 = ( poly1->dist - n * poly2->dist ) * invDet;
+        f1 = ( poly2->dist - n * poly1->dist ) * invDet;
+        start = f0 * poly1->normal + f1 * poly2->normal;
+        dir = poly1->normal.Cross( poly2->normal );
+
+        // find the polygon that is most orthogonal to the plane intersection ray
+        bestd = 0.0f;
+        for ( j = 1; j < vertexNumPolys[i]; j++ ) {
+            d = fabs( dir * polys[vertexPolys[i][j]].normal );
+            if ( d > bestd ) {
+                bestd = d;
+                poly2 = &polys[vertexPolys[i][j]];
+            }
+        }
+
+        // calculate intersection with plane intersection ray
+        f0 = poly2->normal * start - poly2->dist;
+        f1 = poly2->normal * dir;
+        verts[i] = start - dir * ( f0 / f1 );
+    }
+
+    Verify();
+}
+#else
 void idTraceModel::Shrink(const float m)
 {
 	int i, j, edgeNum;
@@ -1197,6 +1368,7 @@ void idTraceModel::Shrink(const float m)
 		}
 	}
 }
+#endif
 
 /*
 ============
@@ -1279,10 +1451,16 @@ idTraceModel::GetOrderedSilhouetteEdges
 int idTraceModel::GetOrderedSilhouetteEdges(const int edgeIsSilEdge[MAX_TRACEMODEL_EDGES+1], int silEdges[MAX_TRACEMODEL_EDGES]) const
 {
 	int i, j, edgeNum, numSilEdges, nextSilVert;
+#ifdef _SPLASHDAMAGE
+    int unsortedSilEdges[MAX_TRACEMODEL_EDGES+1];
+#else
 	int unsortedSilEdges[MAX_TRACEMODEL_EDGES];
+#endif
 
 	numSilEdges = 0;
+#if !defined(_SPLASHDAMAGE)
     unsortedSilEdges[0] = 0;
+#endif
 
 	for (i = 1; i <= numEdges; i++) {
 		if (edgeIsSilEdge[i]) {
@@ -1627,3 +1805,360 @@ void idTraceModel::GetMassProperties(const float density, float &mass, idVec3 &c
 	inertiaTensor[1][2] = inertiaTensor[2][1] += mass * centerOfMass[1] * centerOfMass[2];
 	inertiaTensor[2][0] = inertiaTensor[0][2] += mass * centerOfMass[2] * centerOfMass[0];
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idTraceModel::ClearUnused
+============
+*/
+void idTraceModel::ClearUnused( void )
+{
+    int i, j;
+
+    for ( i = numVerts; i < MAX_TRACEMODEL_VERTS; i++ ) {
+        verts[i].Zero();
+    }
+    memset( &edges[0], 0, sizeof( edges[0] ) );
+    for ( i = numEdges+1; i < MAX_TRACEMODEL_EDGES+1; i++ ) {
+        memset( &edges[i], 0, sizeof( edges[i] ) );
+    }
+    for ( i = 0; i < numPolys; i++ ) {
+        for ( j = polys[i].numEdges; j < MAX_TRACEMODEL_POLYEDGES; j++ ) {
+            polys[i].edges[j] = 0;
+        }
+    }
+    for ( i = numPolys; i < MAX_TRACEMODEL_POLYS; i++ ) {
+        memset( &polys[i], 0, sizeof( polys[i] ) );
+    }
+}
+
+/*
+============
+idTraceModel::Verify
+============
+*/
+bool idTraceModel::Verify( void )
+{
+    int i, j, edgeNum, vertexNum;
+    traceModelPoly_t *poly;
+    traceModelEdge_t *edge;
+
+    // test whether or not the vertices are on the polygon planes
+    for ( i = 0; i < numPolys; i++ ) {
+        poly = &polys[i];
+
+        for ( j = 0; j < polys[i].numEdges; j++ ) {
+            edgeNum = poly->edges[j];
+            edge = &edges[abs(edgeNum)];
+            vertexNum = edge->v[ INTSIGNBITSET( edgeNum ) ];
+            float d = poly->normal * verts[vertexNum] - poly->dist;
+            if ( fabs( d ) > 1e-4f ) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+/*
+============
+idTraceModel::TestConvexity
+============
+*/
+void idTraceModel::TestConvexity( void )
+{
+    int i, j;
+
+    // assume convex
+    isConvex = true;
+    // check if really convex
+    for ( i = 0; i < numPolys; i++ ) {
+        // to be convex no vertices should be in front of any polygon plane
+        for ( j = 0; j < numVerts; j++ ) {
+            if ( polys[ i ].normal * verts[ j ] - polys[ i ].dist > 0.01f ) {
+                isConvex = false;
+                break;
+            }
+        }
+        if ( j < numVerts ) {
+            break;
+        }
+    }
+}
+
+/*
+============
+idTraceModel::SetupPolygonPrism
+============
+*/
+void idTraceModel::SetupPolygonPrism( const idWinding &w, float thickness )
+{
+    idTraceModel trm;
+    trm.SetupPolygon( w );
+    trm.Translate( w.GetNormal() * -thickness );
+    trm.VolumeFromPolygon( *this, thickness );
+}
+
+/*
+============
+idTraceModel::SetupFrustum
+============
+*/
+void idTraceModel::SetupFrustum( const idBounds &boxBounds, float topOffset )
+{
+    int i;
+
+    //
+    // Basically a box, but with the top square shrunk by topOffse
+    //
+    type = TRM_CUSTOM;
+    numVerts = 8;
+    numEdges = 12;
+    numPolys = 6;
+    SetNullPolygonMaterials();
+
+    // set box edges
+    for ( i = 0; i < 4; i++ ) {
+        edges[ i + 1 ].v[0] = i;
+        edges[ i + 1 ].v[1] = (i + 1) & 3;
+        edges[ i + 5 ].v[0] = 4 + i;
+        edges[ i + 5 ].v[1] = 4 + ((i + 1) & 3);
+        edges[ i + 9 ].v[0] = i;
+        edges[ i + 9 ].v[1] = 4 + i;
+    }
+
+    // all edges of a polygon go counter clockwise
+    polys[0].numEdges = 4;
+    polys[0].edges[0] = -4;
+    polys[0].edges[1] = -3;
+    polys[0].edges[2] = -2;
+    polys[0].edges[3] = -1;
+
+    polys[1].numEdges = 4;
+    polys[1].edges[0] = 5;
+    polys[1].edges[1] = 6;
+    polys[1].edges[2] = 7;
+    polys[1].edges[3] = 8;
+
+    polys[2].numEdges = 4;
+    polys[2].edges[0] = 1;
+    polys[2].edges[1] = 10;
+    polys[2].edges[2] = -5;
+    polys[2].edges[3] = -9;
+
+    polys[3].numEdges = 4;
+    polys[3].edges[0] = 2;
+    polys[3].edges[1] = 11;
+    polys[3].edges[2] = -6;
+    polys[3].edges[3] = -10;
+
+    polys[4].numEdges = 4;
+    polys[4].edges[0] = 3;
+    polys[4].edges[1] = 12;
+    polys[4].edges[2] = -7;
+    polys[4].edges[3] = -11;
+
+    polys[5].numEdges = 4;
+    polys[5].edges[0] = 4;
+    polys[5].edges[1] = 9;
+    polys[5].edges[2] = -8;
+    polys[5].edges[3] = -12;
+
+    // convex model
+    isConvex = true;
+
+
+    // offset to center
+    offset = ( boxBounds[0] + boxBounds[1] ) * 0.5f;
+    // set box vertices
+    for ( i = 0; i < 8; i++ ) {
+        verts[i][0] = boxBounds[(i^(i>>1))&1][0];
+        verts[i][1] = boxBounds[(i>>1)&1][1];
+        verts[i][2] = boxBounds[(i>>2)&1][2];
+    }
+
+    // offset the upper verts by the top offset to turn it into a frustum
+    verts[ 4 ][ 0 ] -= topOffset;
+    verts[ 4 ][ 1 ] -= topOffset;
+
+    verts[ 5 ][ 0 ] += topOffset;
+    verts[ 5 ][ 1 ] -= topOffset;
+
+    verts[ 6 ][ 0 ] += topOffset;
+    verts[ 6 ][ 1 ] += topOffset;
+
+    verts[ 7 ][ 0 ] -= topOffset;
+    verts[ 7 ][ 1 ] += topOffset;
+
+
+    // setup polygons
+    int e0, e1, e2, e3;
+    int v0, v1, v2, v3;
+    for ( i = 0; i < numPolys; i++ ) {
+        e0 = polys[i].edges[0];
+        e1 = polys[i].edges[1];
+        e2 = polys[i].edges[2];
+        e3 = polys[i].edges[3];
+        v0 = edges[abs(e0)].v[INTSIGNBITSET(e0)];
+        v1 = edges[abs(e0)].v[INTSIGNBITNOTSET(e0)];
+        v2 = edges[abs(e1)].v[INTSIGNBITNOTSET(e1)];
+        v3 = edges[abs(e2)].v[INTSIGNBITNOTSET(e2)];
+        // polygon plane
+        polys[i].normal = ( verts[v1] - verts[v0] ).Cross( verts[v2] - verts[v1] );
+        polys[i].normal.Normalize();
+        polys[i].dist = polys[i].normal * verts[v0];
+        // polygon bounds
+        polys[i].bounds[0] = polys[i].bounds[1] = verts[v0];
+        polys[i].bounds.AddPoint( verts[v0] );
+        polys[i].bounds.AddPoint( verts[v1] );
+        polys[i].bounds.AddPoint( verts[v2] );
+        polys[i].bounds.AddPoint( verts[v3] );
+    }
+
+    bounds = boxBounds;
+    for ( i = 0; i < numVerts; i++ ) {
+        bounds.AddPoint( verts[i] );
+    }
+
+    GenerateEdgeNormals();
+}
+
+/*
+============
+idTraceModel::IsClosedSurface
+============
+*/
+bool idTraceModel::IsClosedSurface( void ) const
+{
+    int i, j, numEdgeUsers[MAX_TRACEMODEL_EDGES+1];
+
+    // each edge should be used exactly twice
+    memset( numEdgeUsers, 0, sizeof(numEdgeUsers) );
+    for ( i = 0; i < numPolys; i++ ) {
+        for ( j = 0; j < polys[i].numEdges; j++ ) {
+            numEdgeUsers[ abs( polys[i].edges[j] ) ]++;
+        }
+    }
+    for ( i = 1; i <= numEdges; i++ ) {
+        if ( numEdgeUsers[i] != 2 ) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/*
+============
+idTraceModel::ContainsPoint
+============
+*/
+bool idTraceModel::ContainsPoint( const idVec3& point ) const
+{
+    for ( int i = 0; i < numPolys; i++ ) {
+        if ( ( polys[ i ].normal * point ) > polys[ i ].dist ) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/*
+============
+idTraceModel::Write
+============
+*/
+void idTraceModel::Write( idFile* fp, trmNameForMaterial_t lookup ) const
+{
+    fp->WriteInt( type );
+
+    fp->WriteInt( numVerts );
+    for ( int i = 0; i < numVerts; i++ ) {
+        fp->WriteVec3( verts[ i ] );
+    }
+
+    fp->WriteInt( numEdges );
+    for ( int i = 1; i <= numEdges; i++ ) {
+        fp->WriteInt( edges[ i ].v[ 0 ] );
+        fp->WriteInt( edges[ i ].v[ 1 ] );
+        fp->WriteVec3( edges[ i ].normal );
+    }
+
+    fp->WriteInt( numPolys );
+    for ( int i = 0; i < numPolys; i++ ) {
+        fp->WriteVec3( polys[ i ].normal );
+        fp->WriteFloat( polys[ i ].dist );
+        fp->WriteVec3( polys[ i ].bounds[ 0 ] );
+        fp->WriteVec3( polys[ i ].bounds[ 1 ] );
+        fp->WriteInt( polys[ i ].numEdges );
+        for ( int j = 0; j < polys[ i ].numEdges; j++ ) {
+            fp->WriteInt( polys[ i ].edges[ j ] );
+        }
+        fp->WriteString( lookup( polyMaterials[ i ] ) );
+    }
+
+    fp->WriteVec3( offset );
+    fp->WriteVec3( bounds[ 0 ] );
+    fp->WriteVec3( bounds[ 1 ] );
+    fp->WriteBool( isConvex );
+}
+
+/*
+============
+idTraceModel::Read
+============
+*/
+void idTraceModel::Read( idFile* fp, trmMaterialForName_t lookup )
+{
+    int dummy;
+    fp->ReadInt( dummy );
+    type = ( traceModel_t )dummy;
+
+    fp->ReadInt( numVerts );
+    for ( int i = 0; i < numVerts; i++ ) {
+        fp->ReadVec3( verts[ i ] );
+    }
+
+    fp->ReadInt( numEdges );
+    for ( int i = 1; i <= numEdges; i++ ) {
+        fp->ReadInt( edges[ i ].v[ 0 ] );
+        fp->ReadInt( edges[ i ].v[ 1 ] );
+        fp->ReadVec3( edges[ i ].normal );
+    }
+
+    fp->ReadInt( numPolys );
+    for ( int i = 0; i < numPolys; i++ ) {
+        fp->ReadVec3( polys[ i ].normal );
+        fp->ReadFloat( polys[ i ].dist );
+        fp->ReadVec3( polys[ i ].bounds[ 0 ] );
+        fp->ReadVec3( polys[ i ].bounds[ 1 ] );
+        fp->ReadInt( polys[ i ].numEdges );
+        for ( int j = 0; j < polys[ i ].numEdges; j++ ) {
+            fp->ReadInt( polys[ i ].edges[ j ] );
+        }
+
+        idStr materialName;
+        fp->ReadString( materialName );
+        polyMaterials[ i ] = lookup( materialName.c_str() );
+    }
+
+    fp->ReadVec3( offset );
+    fp->ReadVec3( bounds[ 0 ] );
+    fp->ReadVec3( bounds[ 1 ] );
+    fp->ReadBool( isConvex );
+}
+
+/*
+============
+idTraceModel::SetNullPolygonMaterials
+============
+*/
+void idTraceModel::SetNullPolygonMaterials( void )
+{
+    for ( int i = 0; i < numPolys; i++ ) {
+        polyMaterials[ i ] = NULL;
+    }
+}
+#endif

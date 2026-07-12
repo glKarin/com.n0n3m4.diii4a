@@ -1007,7 +1007,7 @@ enum LOGICAL_PROCESSOR_RELATIONSHIP_LOCAL {
     localRelationProcessorPackage
 };
 
-struct cpuInfo_t {
+struct cpuInfoWin_t {
     int processorPackageCount;
     int processorCoreCount;
     int logicalProcessorCount;
@@ -1025,7 +1025,7 @@ struct cpuInfo_t {
 GetCPUInfo
 ========================
 */
-bool GetCPUInfo( cpuInfo_t & cpuInfo ) {
+bool GetCPUInfo( cpuInfoWin_t & cpuInfo ) {
     PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer = NULL;
     PSYSTEM_LOGICAL_PROCESSOR_INFORMATION ptr = NULL;
     PCACHE_DESCRIPTOR Cache;
@@ -1121,7 +1121,7 @@ numCPUPackages		- the total number of packages (physical processors)
 */
 void Sys_Win_CPUCount( int& numLogicalCPUCores, int& numPhysicalCPUCores, int& numCPUPackages )
 {
-    cpuInfo_t cpuInfo;
+    cpuInfoWin_t cpuInfo;
     GetCPUInfo( cpuInfo );
 
     numPhysicalCPUCores = cpuInfo.processorCoreCount;

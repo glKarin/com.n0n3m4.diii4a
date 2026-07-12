@@ -84,7 +84,7 @@
     <string name="quake_2">雷神之锤2</string>
     <string name="quake_3">雷神之锤3</string>
     <string name="rtcw">重返德军总部</string>
-    <string name="etw">德军总部: 深入敌后</string>
+    <string name="etw">深入敌后: 德军总部</string>
     <string name="realrtcw">真·重返德军总部</string>
     <string name="fteqw">FTEQW</string>
     <string name="samtfe">英雄萨姆TFE</string>
@@ -376,7 +376,7 @@
     <string name="ambient_lighting_brightness_harm_r_ambientlightingbrightness">环境光照亮度(harm_r_ambientLightingBrightness):</string>
     <string name="ambient_lighting_brightness">环境光照亮度</string>
     <string name="hardqore">Hardqore</string>
-    <string name="etw_base">德军总部: 深入敌后</string>
+    <string name="etw_base">深入敌后: 德军总部</string>
     <string name="launcher">启动器</string>
     <string name="auto_save_buttons_settings_immediately_if_changed">如果按键设置被修改立即保存</string>
     <string name="auto_save_button_settings">自动保存按键设置</string>
@@ -591,4 +591,6 @@
     <string name="idtech_3_engine">idTech3引擎</string>
     <string name="idtech_4_engine">idTech4引擎</string>
     <string name="other_engine">其他引擎</string>
+    <string name="etqw">深入敌后: 雷神战争</string>
+    <string name="etqw_base">深入敌后: 雷神战争</string>
 </resources>

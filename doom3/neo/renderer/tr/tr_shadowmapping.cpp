@@ -51,7 +51,12 @@ void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLigh
             vLight->scissorRect.zmax = projected[1][2];*/
 
             const bool lightCastsShadows = /*light->parms.forceShadows || */(
-                    !light->parms.noShadows && light->lightShader->LightCastsShadows());
+#ifdef _SPLASHDAMAGE
+                    !light->parms.flags.noShadows
+#else
+                    !light->parms.noShadows
+#endif
+                    && light->lightShader->LightCastsShadows());
             // RB: calculate shadow LOD similar to Q3A .md3 LOD code
 
             if (/*r_useShadowMapping.GetBool() && */lightCastsShadows) {
@@ -108,7 +113,12 @@ void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLigh
                     }
 
                     // 2048^2 ultra quality is only for cascaded shadow mapping with sun lights
-                    if (lod == 0 && !light->parms.parallel) {
+#ifdef _SPLASHDAMAGE
+                    if (lod == 0 && !light->parms.flags.parallel)
+#else
+                    if (lod == 0 && !light->parms.parallel)
+#endif
+                    {
                         if(!harm_r_shadowMapNonParallelLightUltra.GetBool()) //k non parallel light allow using ultra quality shadow map texture
                         lod = 1;
                     }
@@ -137,11 +147,19 @@ void R_SetupShadowMappingProjectionMatrix(idRenderLightLocal *light)
     {
         idRenderMatrix localProject;
         float zScale = 1.0f;
+#ifdef _SPLASHDAMAGE
+        if( light->parms.flags.parallel )
+#else
         if( light->parms.parallel )
+#endif
         {
             zScale = R_ComputeParallelLightProjectionMatrix( light, localProject );
         }
+#ifdef _SPLASHDAMAGE
+        else if( light->parms.flags.pointLight )
+#else
         else if( light->parms.pointLight )
+#endif
         {
             zScale = R_ComputePointLightProjectionMatrix( light, localProject );
         }

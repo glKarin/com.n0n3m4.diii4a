@@ -269,8 +269,14 @@ const char *idListWindow::HandleEvent(const sysEvent_t *event, bool *updateVisua
 
 	if (key != K_MOUSE1) {
 		// Send a fake mouse click event so onAction gets run in our parents
+#ifdef _SPLASHDAMAGE //karin: unuse id's GUI in ETQW
+		const sysEvent_t *ev = sys->GenerateMouseButtonEvent(1, true);
+		idWindow::HandleEvent(ev, updateVisuals);
+		sys->FreeEvent(ev);
+#else
 		const sysEvent_t ev = sys->GenerateMouseButtonEvent(1, true);
 		idWindow::HandleEvent(&ev, updateVisuals);
+#endif
 	}
 
 	if (currentSel.Num() > 0) {

@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __MATH_MATH_H__
 #define __MATH_MATH_H__
 
+#ifdef _SPLASHDAMAGE
+#include <math.h>
+#endif
+
 #ifdef MACOS_X
 // for square root estimate instruction
 #include <ppc_intrinsics.h>
@@ -64,8 +68,61 @@ If you have questions concerning this license or the applicable additional terms
 #define DEG2RAD(a)				( (a) * idMath::M_DEG2RAD )
 #define RAD2DEG(a)				( (a) * idMath::M_RAD2DEG )
 
+#if !defined(_SPLASHDAMAGE) //karin: make static const var
 #define SEC2MS(t)				( idMath::FtoiFast( (t) * idMath::M_SEC2MS ) )
 #define MS2SEC(t)				( (t) * idMath::M_MS2SEC )
+#endif
+
+#ifdef _SPLASHDAMAGE
+template< typename T > ID_INLINE T Lerp( const T from, const T to, float f )
+{
+    return from + ( ( to - from ) * f );
+}
+
+template< typename T > ID_INLINE T InchesToMetres( const T value )
+{
+    return static_cast< T >( value * 0.0254f );
+}
+template< typename T > ID_INLINE T MetresToInches( const T value )
+{
+    return static_cast< T >( value * 39.37f );
+}
+template< typename T > ID_INLINE T InchesToFeet( const T value )
+{
+    return static_cast< T >( value / 12.f );
+}
+template< typename T > ID_INLINE T FeetToMiles( const T value )
+{
+    return static_cast< T >( value / 5280.f );
+}
+template< typename T > ID_INLINE T FeetToInches( const T value )
+{
+    return static_cast< T >( value * 12.f );
+}
+template< typename T > ID_INLINE T MetresToFeet( const T value )
+{
+    return InchesToFeet( MetresToInches( value ) );
+}
+template< typename T > ID_INLINE T FeetToMetres( const T value )
+{
+    return FeetToInches( InchesToMetres( value ) );
+}
+
+template< typename T > ID_INLINE float UPSToKPH( const T value )
+{
+    return InchesToMetres( value ) * 0.001f * 60.f * 60.f;
+}
+template< typename T > ID_INLINE float KPHToUPS( const T value )
+{
+    return MetresToInches( value ) / ( 0.001f * 60.f * 60.f );
+}
+
+template< typename T > ID_INLINE float UPSToMPH( const T value )
+{
+    return FeetToMiles( InchesToFeet( value ) ) * 60.f * 60.f;
+}
+
+#endif
 
 #define	ANGLE2SHORT(x)			( idMath::FtoiFast( (x) * 65536.0f / 360.0f ) & 65535 )
 #define	SHORT2ANGLE(x)			( (x) * ( 360.0f / 65536.0f ) )
@@ -78,6 +135,84 @@ If you have questions concerning this license or the applicable additional terms
 #define FLOATNOTZERO(f)			((*(const unsigned int *)&(f)) & ~(1<<31) )
 #define INTSIGNBITSET(i)		(((const unsigned int)(i)) >> 31)
 #define INTSIGNBITNOTSET(i)		((~((const unsigned int)(i))) >> 31)
+
+#ifdef _SPLASHDAMAGE
+#define SHORTSIGNBITSET(i)		(((const unsigned int)(i)) >> 15)
+#define SHORTSIGNBITNOTSET(i)	((~((const unsigned int)(i))) >> 15)
+
+// floating point special value tests
+#define	FLOAT_IS_NAN(x)			(((*(const unsigned int *)&(x)) & 0x7f800000) == 0x7f800000)
+#define FLOAT_IS_INF(x)			(((*(const unsigned int *)&(x)) & 0x7fffffff) == 0x7f800000)
+#define FLOAT_IS_IND(x)			((*(const unsigned int *)&(x)) == 0xffc00000)
+#define	FLOAT_IS_DENORMAL(x)	(((*(const unsigned int *)&(x)) & 0x7f800000) == 0x00000000 && \
+								 ((*(const unsigned int *)&(x)) & 0x007fffff) != 0x00000000 )
+
+// FeaRog:
+//  Macros to cause a user breakpoint if any bad values occur
+//  Alternatively you can enable floating point exceptions, but these are handy
+//  if you want to check on a smaller scale.
+//
+// Uncomment the next line to enable the checks
+
+#if defined( _DEBUG )
+//#define ENABLE_FLOAT_CHECKS
+#endif
+
+#ifdef ENABLE_FLOAT_CHECKS
+
+#ifdef MACOS_X
+#define FLOAT_CHECK_BAD( x ) { \
+	if ( FLOAT_IS_NAN( x ) || FLOAT_IS_INF( x ) || FLOAT_IS_IND( x ) || FLOAT_IS_DENORMAL( x ) ) { \
+		assert(0); \
+	} \
+}
+#else
+#define FLOAT_CHECK_BAD( x ) { \
+	if ( FLOAT_IS_NAN( x ) || FLOAT_IS_INF( x ) || FLOAT_IS_IND( x ) || FLOAT_IS_DENORMAL( x ) ) { \
+		__debugbreak(); \
+	} \
+}
+#endif
+
+#define VEC_CHECK_BAD( vec ) { \
+	FLOAT_CHECK_BAD( ( vec ).x ) \
+	FLOAT_CHECK_BAD( ( vec ).y ) \
+	FLOAT_CHECK_BAD( ( vec ).z ) \
+}
+
+#else
+
+#define FLOAT_CHECK_BAD( x )  ;
+#define VEC_CHECK_BAD( vec )   ;
+
+#endif
+
+
+
+// floating point bit layouts according to the IEEE standard
+const int IEEE_FLT_MANTISSA_BITS	= 23;
+const int IEEE_FLT_EXPONENT_BITS	= 8;
+const int IEEE_FLT_EXPONENT_BIAS	= 127;
+const int IEEE_FLT_SIGN_BIT			= 31;
+
+const int IEEE_DBL_MANTISSA_BITS	= 52;
+const int IEEE_DBL_EXPONENT_BITS	= 11;
+const int IEEE_DBL_EXPONENT_BIAS	= 1023;
+const int IEEE_DBL_SIGN_BIT			= 63;
+
+const int IEEE_DBLE_MANTISSA_BITS	= 63;
+const int IEEE_DBLE_EXPONENT_BITS	= 15;
+const int IEEE_DBLE_EXPONENT_BIAS	= 0;
+const int IEEE_DBLE_SIGN_BIT		= 79;
+
+#define INT32_SIGN_BIT					31
+#define IEEE_FLT_SIGNBITSET(f)			FLOATSIGNBITSET(f)
+#define IEEE_FLT_SIGNBITNOTSET(f)		FLOATSIGNBITNOTSET(f)
+#define INT32_SIGNBITSET(i)				INTSIGNBITSET(i)
+#define INT32_SIGNBITNOTSET(i)			INTSIGNBITNOTSET(i)
+#define IEEE_FLT_ISNOTZERO(f)			(reinterpret_cast<const unsigned int &>(f) & ~(1<<IEEE_FLT_SIGN_BIT))
+
+#else
 
 #define	FLOAT_IS_NAN(x)			(((*(const unsigned int *)&x) & 0x7f800000) == 0x7f800000)
 #define FLOAT_IS_INF(x)			(((*(const unsigned int *)&x) & 0x7fffffff) == 0x7f800000)
@@ -99,6 +234,7 @@ If you have questions concerning this license or the applicable additional terms
 #define IEEE_DBLE_EXPONENT_BITS	15
 #define IEEE_DBLE_EXPONENT_BIAS	0
 #define IEEE_DBLE_SIGN_BIT		79
+#endif
 
 template<class T> ID_INLINE int	MaxIndex(T x, T y)
 {
@@ -226,8 +362,8 @@ class idMath
 
 		static signed char			ClampChar(int i);
 		static signed short			ClampShort(int i);
-		static int					ClampInt(int min, int max, int value);
-		static float				ClampFloat(float min, float max, float value);
+		static int					ClampInt(int minValue, int maxValue, int value);
+		static float				ClampFloat(float minValue, float maxValue, float value);
 
 		static float				AngleNormalize360(float angle);
 		static float				AngleNormalize180(float angle);
@@ -253,9 +389,7 @@ class idMath
         {
             return min + (max - min) * FRand();
         }
-#endif
 
-#ifdef _RAVEN
     // abahr
         static float				Lerp( const idVec2& range, float frac );
         static float				Lerp( float start, float end, float frac );
@@ -271,11 +405,33 @@ class idMath
         static const float			THREEFOURTHS_PI;			// 3 * pi / 4
     // RAVEN END
 #endif
+#ifdef _SPLASHDAMAGE
+        static int					BitsForFloat( float maxValue, float minValue );	// minimum number of bits required to represent everything between min & max (min being the minimum relevant precision)
+        static int					LowerPowerOfTwo( int x );	// round x down to the first power of 2
+        static int					HigherPowerOfTwo( int x );	// round x up to the first power of 2
+        static byte					Ftob( float f );			// float to byte conversion, the result is clamped to the range [0-255]
+        static void					TestFloatBitConversions();	// unit test for FloatToBits & BitsToFloat
+        static float				Sign( float f );
+        static float				Fmod( float x, float y );
+        static float				Modf( float f, float& i );
+        static float				Modf( float f );
+
+        static bool					FloatIsZero( const float f );
+
+        static float				BarycentricTriangleArea( const idVec3 &normal, const idVec3 &a, const idVec3 &b, const idVec3 &c );
+        static void					BarycentricEvaluate( idVec2 &result, const idVec3 &point, const idVec3 &normal, const float area, const idVec3 t[3], const idVec2 tc[3] );
+        static void					BarycentricEvaluate( idVec2 &result, const idVec3 &point, const idVec3 &normal, const float area, const idVec3 t[3], const short tc[ 3 ][ 2 ], float scale );
+
+        static float				BiTangentSign( const idVec3& n, const idVec3& t0, const idVec3& t1 );
+#endif
 
 		static const float			PI;							// pi
 		static const float			TWO_PI;						// pi * 2
 		static const float			HALF_PI;					// pi / 2
 		static const float			ONEFOURTH_PI;				// pi / 4
+#ifdef _SPLASHDAMAGE
+    	static const float			THREEFOURTHS_PI;			// 3 * pi / 4
+#endif
 		static const float			E;							// e
 		static const float			SQRT_TWO;					// sqrt( 2 )
 		static const float			SQRT_THREE;					// sqrt( 3 )
@@ -306,6 +462,13 @@ class idMath
 
 		static dword				iSqrt[SQRT_TABLE_SIZE];
 		static bool					initialized;
+
+#ifdef _SPLASHDAMAGE
+#ifdef ID_WIN_X86_SSE
+	    static const float			SSE_FLOAT_ZERO;
+	    static const float			SSE_FLOAT_255;
+#endif
+#endif
 };
 
 ID_INLINE float idMath::RSqrt(float x)
@@ -324,7 +487,24 @@ ID_INLINE float idMath::RSqrt(float x)
 
 ID_INLINE float idMath::InvSqrt16(float x)
 {
+#ifdef _SPLASHDAMAGE
+    assert( x != 0.f );
+#ifdef _XENON
+    float r = __frsqrte( x );
+    return ( x * r * r + -3.0f ) * ( r * -0.5f );
+#else
+    dword a = ((union _flint*)(&x))->i;
+    union _flint seed;
 
+    assert( initialized );
+
+    double y = x * 0.5f;
+    seed.i = (( ( (3*EXP_BIAS-1) - ( (a >> EXP_POS) & 0xFF) ) >> 1)<<EXP_POS) | iSqrt[(a >> (EXP_POS-LOOKUP_BITS)) & LOOKUP_MASK];
+    double r = seed.f;
+    r = r * ( 1.5f - r * r * y );
+    return (float) r;
+#endif
+#else
 	dword a = ((union _flint *)(&x))->i;
 	union _flint seed;
 
@@ -335,11 +515,32 @@ ID_INLINE float idMath::InvSqrt16(float x)
 	double r = seed.f;
 	r = r * (1.5f - r * r * y);
 	return (float) r;
+#endif
 }
 
 ID_INLINE float idMath::InvSqrt(float x)
 {
+#ifdef _SPLASHDAMAGE
+    assert( x != 0.f );
+#ifdef _XENON
+    float r = __frsqrte( x );
+    return ( x * r * r + -3.0f ) * ( r * -0.5f );
+#elif 1
+    return 1 / sqrtf( x );
+#else
+    dword a = ((union _flint*)(&x))->i;
+    union _flint seed;
 
+    assert( initialized );
+
+    double y = x * 0.5f;
+    seed.i = (( ( (3*EXP_BIAS-1) - ( (a >> EXP_POS) & 0xFF) ) >> 1)<<EXP_POS) | iSqrt[(a >> (EXP_POS-LOOKUP_BITS)) & LOOKUP_MASK];
+    double r = seed.f;
+    r = r * ( 1.5f - r * r * y );
+    r = r * ( 1.5f - r * r * y );
+    return (float) r;
+#endif
+#else
 	dword a = ((union _flint *)(&x))->i;
 	union _flint seed;
 
@@ -351,10 +552,33 @@ ID_INLINE float idMath::InvSqrt(float x)
 	r = r * (1.5f - r * r * y);
 	r = r * (1.5f - r * r * y);
 	return (float) r;
+#endif
 }
 
 ID_INLINE double idMath::InvSqrt64(float x)
 {
+#ifdef _SPLASHDAMAGE
+    assert( x != 0.f );
+#ifdef _XENON
+    float r = __frsqrte( x );
+    return ( x * r * r + -3.0f ) * ( r * -0.5f );
+#elif 1
+    return 1 / sqrtf( x );
+#else
+    dword a = ((union _flint*)(&x))->i;
+    union _flint seed;
+
+    assert( initialized );
+
+    double y = x * 0.5f;
+    seed.i = (( ( (3*EXP_BIAS-1) - ( (a >> EXP_POS) & 0xFF) ) >> 1)<<EXP_POS) | iSqrt[(a >> (EXP_POS-LOOKUP_BITS)) & LOOKUP_MASK];
+    double r = seed.f;
+    r = r * ( 1.5f - r * r * y );
+    r = r * ( 1.5f - r * r * y );
+    r = r * ( 1.5f - r * r * y );
+    return r;
+#endif
+#else
 	dword a = ((union _flint *)(&x))->i;
 	union _flint seed;
 
@@ -367,6 +591,7 @@ ID_INLINE double idMath::InvSqrt64(float x)
 	r = r * (1.5f - r * r * y);
 	r = r * (1.5f - r * r * y);
 	return r;
+#endif
 }
 
 ID_INLINE float idMath::Sqrt16(float x)
@@ -376,12 +601,28 @@ ID_INLINE float idMath::Sqrt16(float x)
 
 ID_INLINE float idMath::Sqrt(float x)
 {
+#ifdef _SPLASHDAMAGE
+#ifdef _XENON
+    return __fsqrts( x );
+#else
+    return sqrtf( x );
+#endif
+#else
 	return x * InvSqrt(x);
+#endif
 }
 
 ID_INLINE double idMath::Sqrt64(float x)
 {
+#ifdef _SPLASHDAMAGE
+#ifdef _XENON
+    return __fsqrt( x );
+#else
+    return sqrt( x );
+#endif
+#else
 	return x * InvSqrt64(x);
+#endif
 }
 
 ID_INLINE float idMath::Sin(float a)
@@ -482,8 +723,7 @@ ID_INLINE double idMath::Cos64(float a)
 
 ID_INLINE void idMath::SinCos(float a, float &s, float &c)
 {
-//#ifdef _WIN32 //k win32
-#if defined(_MSC_VER) && defined(_M_IX86)
+#if (defined(_MSC_VER) && defined(_M_IX86)) || defined(ID_WIN_X86_ASM)
 	_asm {
 		fld		a
 		fsincos
@@ -543,8 +783,7 @@ ID_INLINE void idMath::SinCos16(float a, float &s, float &c)
 
 ID_INLINE void idMath::SinCos64(float a, double &s, double &c)
 {
-//#ifdef _WIN32 //k win32
-#if defined(_MSC_VER) && defined(_M_IX86)
+#if (defined(_MSC_VER) && defined(_M_IX86)) || defined(ID_WIN_X86_ASM)
 	_asm {
 		fld		a
 		fsincos
@@ -783,7 +1022,11 @@ ID_INLINE float idMath::Pow16(float x, float y)
 
 ID_INLINE double idMath::Pow64(float x, float y)
 {
+#ifdef _SPLASHDAMAGE
+    return powf( x, y );
+#else
 	return pow(x, y);
+#endif
 }
 
 ID_INLINE float idMath::Exp(float f)
@@ -882,7 +1125,11 @@ ID_INLINE int idMath::ILog2(int i)
 
 ID_INLINE int idMath::BitsForFloat(float f)
 {
+#ifdef _SPLASHDAMAGE
+    return static_cast< int >( fabs( static_cast< float >( ILog2( f ) ) ) ) + 1;
+#else
 	return ILog2(f) + 1;
+#endif
 }
 
 ID_INLINE int idMath::BitsForInteger(int i)
@@ -902,9 +1149,47 @@ ID_INLINE int idMath::MaskForIntegerSign(int i)
 
 ID_INLINE int idMath::FloorPowerOfTwo(int x)
 {
+#ifdef _SPLASHDAMAGE
+    return idMath::IsPowerOfTwo( x ) ? x : HigherPowerOfTwo( x ) >> 1;
+#else
 	return CeilPowerOfTwo(x) >> 1;
+#endif
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE int idMath::CeilPowerOfTwo( int x )
+{
+    if ( idMath::IsPowerOfTwo( x ) ) {
+        return x;
+    }
+
+    x--;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    x++;
+    return x;
+}
+
+ID_INLINE int idMath::LowerPowerOfTwo( int x )
+{
+    return HigherPowerOfTwo( x ) >> 1;
+}
+
+ID_INLINE int idMath::HigherPowerOfTwo( int x )
+{
+    x--;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    x++;
+    return x;
+}
+#else
 ID_INLINE int idMath::CeilPowerOfTwo(int x)
 {
 	x--;
@@ -916,6 +1201,7 @@ ID_INLINE int idMath::CeilPowerOfTwo(int x)
 	x++;
 	return x;
 }
+#endif
 
 ID_INLINE bool idMath::IsPowerOfTwo(int x)
 {
@@ -948,9 +1234,21 @@ ID_INLINE int idMath::Abs(int x)
 
 ID_INLINE float idMath::Fabs(float f)
 {
+#ifdef _SPLASHDAMAGE
+#ifdef _XENON
+    return __fabs( f );
+#elif 1
+    return fabsf( f );
+#else
+    int tmp = *reinterpret_cast<int *>( &f );
+    tmp &= 0x7FFFFFFF;
+    return *reinterpret_cast<float *>( &tmp );
+#endif
+#else
 	int tmp = *reinterpret_cast<int *>(&f);
 	tmp &= 0x7FFFFFFF;
 	return *reinterpret_cast<float *>(&tmp);
+#endif
 }
 
 ID_INLINE float idMath::Floor(float f)
@@ -970,13 +1268,27 @@ ID_INLINE float idMath::Rint(float f)
 
 ID_INLINE int idMath::Ftoi(float f)
 {
+#ifdef _SPLASHDAMAGE
+#ifdef ID_WIN_X86_SSE
+    // If a converted result is larger than the maximum signed doubleword integer,
+    // the floating-point invalid exception is raised, and if this exception is masked,
+    // the indefinite integer value (80000000H) is returned.
+    int i;
+    __asm cvttss2si	eax, f
+    __asm mov		i, eax
+    return i;
+#else
+    // If a converted result is larger than the maximum signed doubleword integer the result is undefined.
+    return C_FLOAT_TO_INT( f );
+#endif
+#else
 	return (int) f;
+#endif
 }
 
 ID_INLINE int idMath::FtoiFast(float f)
 {
-//#ifdef _WIN32 //k win32
-#if defined(_MSC_VER) && defined(_M_IX86)
+#if (defined(_MSC_VER) && defined(_M_IX86)) || defined(ID_WIN_X86_ASM)
 	int i;
 	__asm fld		f
 	__asm fistp		i		// use default rouding mode (round nearest)
@@ -999,7 +1311,11 @@ ID_INLINE int idMath::FtoiFast(float f)
 	        : "m"(f));
 	return i;
 #else
+#ifdef _SPLASHDAMAGE
+    return C_FLOAT_TO_INT( f );
+#else
 	return (int) f;
+#endif
 #endif
 }
 
@@ -1010,8 +1326,7 @@ ID_INLINE unsigned int idMath::Ftol(float f)
 
 ID_INLINE unsigned int idMath::FtolFast(float f)
 {
-//#ifdef _WIN32 //k win32
-#if defined(_MSC_VER) && defined(_M_IX86)
+#if (defined(_MSC_VER) && defined(_M_IX86)) || defined(ID_WIN_X86_ASM)
 	// FIXME: this overflows on 31bits still .. same as FtoiFast
 	unsigned int i;
 	__asm fld		f
@@ -1066,27 +1381,25 @@ ID_INLINE signed short idMath::ClampShort(int i)
 	return i;
 }
 
-ID_INLINE int idMath::ClampInt(int min, int max, int value)
+ID_INLINE int idMath::ClampInt(int minValue, int maxValue, int value)
 {
-	if (value < min) {
-		return min;
+	if (value < minValue) {
+		return minValue;
 	}
-
-	if (value > max) {
-		return max;
+	if (value > maxValue) {
+		return maxValue;
 	}
 
 	return value;
 }
 
-ID_INLINE float idMath::ClampFloat(float min, float max, float value)
+ID_INLINE float idMath::ClampFloat(float minValue, float maxValue, float value)
 {
-	if (value < min) {
-		return min;
+    if (value < minValue) {
+        return minValue;
 	}
-
-	if (value > max) {
-		return max;
+    if (value > maxValue) {
+        return maxValue;
 	}
 
 	return value;
@@ -1132,6 +1445,107 @@ ID_INLINE int idMath::FloatHash(const float *array, const int numFloats)
 }
 
 #ifdef _RAVEN
+
+// RAVEN BEGIN
+// abahr: I know its not correct but return 1 if zero
+template<class T> ID_INLINE T	SignZero( T f ) { return ( f > 0 ) ? 1 : ( ( f < 0 ) ? -1 : 1 ); }
+// RAVEN END
+
+/*
+========================
+idMath::Ftob
+========================
+*/
+ID_INLINE float idMath::AngleMod(float a)
+{
+	a = (360.0 / 65536) * ((int)(a * (65536 / 360.0)) & 65535);
+	return a;
+}
+#endif
+
+#ifdef _SPLASHDAMAGE
+
+ID_INLINE int idMath::BitsForFloat( float max, float min )
+{
+    int bitsForMax = static_cast< int >( fabs( static_cast< float >( ILog2( max ) ) ) ) + 1;
+    int bitsForMin = static_cast< int >( fabs( static_cast< float >( ILog2( min ) ) ) ) + 1;
+
+    return bitsForMax > bitsForMin ? bitsForMax : bitsForMin;
+}
+
+ID_INLINE byte idMath::Ftob( float f )
+{
+#ifdef ID_WIN_X86_SSE
+    // If a converted result is negative the value (0) is returned and if the
+    // converted result is larger than the maximum byte the value (255) is returned.
+    byte b;
+    __asm movss		xmm0, f
+    __asm maxss		xmm0, SSE_FLOAT_ZERO
+    __asm minss		xmm0, SSE_FLOAT_255
+    __asm cvttss2si	eax, xmm0
+    __asm mov		b, al
+    return b;
+#else
+    // If a converted result is clamped to the range [0-255].
+    int i;
+    i = C_FLOAT_TO_INT( f );
+    if ( i < 0 ) {
+        return 0;
+    } else if ( i > 255 ) {
+        return 255;
+    }
+    return i;
+#endif
+}
+
+ID_INLINE float idMath::Sign( float f )
+{
+    if ( f > 0.0f ) {
+        return 1.0f;
+    }
+    if ( f < 0.0f ) {
+        return -1.0f;
+    }
+    return 0.0f;
+}
+
+ID_INLINE float idMath::Fmod( float x, float y )
+{
+    return fmodf( x, y );
+}
+
+ID_INLINE float idMath::Modf( float f, float& i )
+{
+    return modff( f, &i );
+}
+
+ID_INLINE float idMath::Modf( float f )
+{
+    float i;
+    return modff( f, &i );
+}
+
+ID_INLINE bool idMath::FloatIsZero( const float f )
+{
+    return ( idMath::Fabs( f ) < idMath::FLT_EPSILON );
+}
+
+// run-time conversion from seconds to milliseconds and vice versa
+template< typename T > ID_INLINE int MINS2MS( const T value )
+{
+    return idMath::FtoiFast( value * idMath::M_SEC2MS * 60.f );
+}
+template< typename T > ID_INLINE int SEC2MS( const T value )
+{
+    return idMath::FtoiFast( value * idMath::M_SEC2MS );
+}
+template< typename T > ID_INLINE float MS2SEC( const T value )
+{
+    return static_cast< float >( value * idMath::M_MS2SEC );
+}
+#endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 // RAVEN BEGIN
 // jscott: fast and reliable random routines
 
@@ -1171,24 +1585,6 @@ public:
 };
 
 // RAVEN END
-
-// RAVEN BEGIN
-// abahr: I know its not correct but return 1 if zero
-template<class T> ID_INLINE T	SignZero( T f ) { return ( f > 0 ) ? 1 : ( ( f < 0 ) ? -1 : 1 ); }
-// RAVEN END
-#endif
-
-#ifdef _RAVEN
-/*
-========================
-idMath::Ftob
-========================
-*/
-ID_INLINE float idMath::AngleMod(float a)
-{
-	a = (360.0 / 65536) * ((int)(a * (65536 / 360.0)) & 65535);
-	return a;
-}
 #endif
 
 #endif /* !__MATH_MATH_H__ */

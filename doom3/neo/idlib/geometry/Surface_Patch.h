@@ -47,6 +47,9 @@ class idSurface_Patch : public idSurface
 		~idSurface_Patch(void);
 
 		void				SetSize(int patchWidth, int patchHeight);
+#ifdef _SPLASHDAMAGE
+    	void				SetMaxSize( int patchWidth, int patchHeight );
+#endif
 		int					GetWidth(void) const;
 		int					GetHeight(void) const;
 

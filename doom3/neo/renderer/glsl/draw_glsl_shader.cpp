@@ -62,8 +62,18 @@ static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", _GL3PROGS
 static bool glslInitialized = false;
 static bool reloadGLSLShaders = false;
 static bool shaderRequired = true;
-#define REQUIRE_SHADER() shaderRequired = true;
-#define UNNECESSARY_SHADER() shaderRequired = false;
+static bool RB_GLSL_SetupLoadError(bool b) {
+	bool last = shaderRequired;
+	shaderRequired = b;
+	return last;
+}
+static bool RB_GLSL_LoadNotAllowError(void) {
+	return RB_GLSL_SetupLoadError(true);
+}
+static bool RB_GLSL_IgnoreLoadError(void) {
+	return RB_GLSL_SetupLoadError(false);
+}
+static idStrList reloadShaderNames;
 
 static idStr RB_GLSL_GetExternalShaderSourcePath(void);
 
@@ -120,7 +130,13 @@ void RB_GLSL_HandleShaders(void)
     {
         shaderManager->ReloadShaders();
         reloadGLSLShaders = false;
+    	reloadShaderNames.Clear();
     }
+	else if (reloadShaderNames.Num() > 0)
+	{
+        shaderManager->ReloadShaders(reloadShaderNames);
+    	reloadShaderNames.Clear();
+	}
 }
 #endif
 
@@ -169,313 +185,6 @@ static bool RB_GLSL_LoadShaderProgramFromProp(const GLSLShaderProp *prop)
 #include "glsl_program.h"
 #undef GLSL_PROGRAM_PROC
 
-#define GLSL_BUILTIN_SHADER_INDEX_TO_HANDLE(x) ( (x) + 1 )
-#define GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(x) ( -( (x) + 1) )
-#define GLSL_BUILTIN_SHADER_HANDLE_TO_INDEX(x) ( (x) - 1 )
-#define GLSL_CUSTOM_SHADER_HANDLE_TO_INDEX(x) ( -(x) - 1 )
-
-const shaderHandle_t idGLSLShaderManager::INVALID_SHADER_HANDLE = 0;
-
-int idGLSLShaderManager::Add(shaderProgram_t *shader)
-{
-	if(!shader)
-		return -1;
-	if(!shader->program)
-	{
-		common->Warning("idGLSLShaderManager::Add shader's program handle is 0!");
-		return -1;
-	}
-	int index = FindIndex(shader->name);
-	if(index >= 0)
-	{
-		common->Warning("idGLSLShaderManager::Add shader's name is dup '%s'!", shader->name);
-		return index; // -1
-	}
-	common->Printf("idGLSLShaderManager::Add shader program '%s' -> %d.\n", shader->name, shader->program);
-	return shaders.Append(shader);
-}
-
-const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
-{
-	for (int i = 0; i < shaders.Num(); i++)
-	{
-		const shaderProgram_t *shader = shaders[i];
-		if(!idStr::Icmp(name, shader->name))
-        {
-            common->Printf("GLSL shader manager::Find '%s' -> %d, type=%d %s.\n", shader->name, shader->program, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "built-in");
-            return shader;
-        }
-	}
-	common->Printf("GLSL shader manager::Find '%s' -> NOT FOUND.\n", name);
-	return NULL;
-}
-
-const shaderProgram_t * idGLSLShaderManager::Find(GLuint handle) const
-{
-	if(handle == 0)
-		return NULL;
-	for (int i = 0; i < shaders.Num(); i++)
-	{
-		const shaderProgram_t *shader = shaders[i];
-		if(handle == shader->program)
-			return shader;
-	}
-	return NULL;
-}
-
-int idGLSLShaderManager::FindIndex(const char *name) const
-{
-	for (int i = 0; i < shaders.Num(); i++)
-	{
-		const shaderProgram_t *shader = shaders[i];
-		if(!idStr::Icmp(name, shader->name))
-		{
-			common->Printf("GLSL shader manager::FindIndex '%s' -> %d %s.\n", shader->name, shader->type, shader->type == SHADER_CUSTOM ? "custom" : "built-in");
-			return i;
-		}
-	}
-	return -1;
-}
-
-int idGLSLShaderManager::FindIndex(GLuint handle) const
-{
-	if(handle == 0)
-		return NULL;
-	for (int i = 0; i < shaders.Num(); i++)
-	{
-		const shaderProgram_t *shader = shaders[i];
-		if(handle == shader->program)
-			return i;
-	}
-	return -1;
-}
-
-const shaderProgram_t * idGLSLShaderManager::Get(shaderHandle_t handle) const
-{
-	int index;
-
-	if(handle > 0)
-	{
-		index = GLSL_BUILTIN_SHADER_HANDLE_TO_INDEX(handle);
-		if(index < shaders.Num())
-			return shaders[index];
-	}
-	else if(handle < 0)
-	{
-		index = GLSL_CUSTOM_SHADER_HANDLE_TO_INDEX(handle);
-		if(index < customShaders.Num())
-		{
-			const shaderProgram_t *program = customShaders[index].program;
-			if(program && program->program > 0)
-				return program;
-		}
-	}
-	return NULL;
-}
-
-shaderHandle_t idGLSLShaderManager::GetHandle(const char *name) const
-{
-    int index;
-
-    index = FindCustomIndex(name);
-    if(index >= 0)
-        return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
-
-    index = FindIndex(name);
-    if(index >= 0)
-        return GLSL_BUILTIN_SHADER_INDEX_TO_HANDLE(index);
-
-    return INVALID_SHADER_HANDLE;
-}
-
-int idGLSLShaderManager::FindCustomIndex(const char *name) const
-{
-	for(int i = 0; i < customShaders.Num(); i++)
-	{
-		const GLSLShaderProp &p = customShaders[i];
-		if(!idStr::Icmp(name, p.name.c_str()))
-			return i;
-	}
-	return -1;
-}
-
-GLSLShaderProp * idGLSLShaderManager::FindCustom(const char *name, int *index)
-{
-	for(int i = 0; i < customShaders.Num(); i++)
-	{
-		GLSLShaderProp &p = customShaders[i];
-		if(!idStr::Icmp(name, p.name.c_str()))
-        {
-            if(index)
-                *index = i;
-            return &p;
-        }
-	}
-    if(index)
-        *index = -1;
-	return NULL;
-}
-
-shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
-{
-	int index;
-	GLSLShaderProp *prop;
-
-	// check has loaded
-	index = FindIndex(inProp.name.c_str());
-	if(index >= 0)
-	{
-		common->Printf("GLSL shader manager::Load shader '%s' has loaded.\n", inProp.name.c_str());
-		return GLSL_BUILTIN_SHADER_INDEX_TO_HANDLE(index);
-	}
-
-	// check has custom loaded
-	prop = FindCustom(inProp.name.c_str(), &index);
-	if(prop)
-	{
-		if(prop->program)
-		{
-            if(prop->program->program > 0)
-            {
-                common->Printf("GLSL shader manager::Load custom shader '%s' has already loaded.\n", inProp.name.c_str());
-                return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
-            }
-            else
-            {
-                common->Printf("GLSL shader manager::Load custom shader '%s' has already load failed.\n", inProp.name.c_str());
-                return INVALID_SHADER_HANDLE;
-            }
-		}
-		else
-		{
-			common->Printf("GLSL shader manager::Load custom shader '%s' wait loading.\n", inProp.name.c_str());
-            return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
-		}
-	}
-
-	// add to queue
-	GLSLShaderProp p = inProp;
-	p.type = SHADER_CUSTOM;
-	p.program = NULL;
-	index = customShaders.Append(p);
-	// queue.Append(index);
-	common->Printf("GLSL shader manager::Load shader push '%s' into queue.\n", p.name.c_str());
-
-#ifdef _MULTITHREAD // in multi-threading, push on queue and load on backend
-	if(!multithreadActive) {
-#endif
-		ActuallyLoad();
-#ifdef _MULTITHREAD
-	}
-#endif
-
-	return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
-}
-
-void idGLSLShaderManager::ActuallyLoad(void)
-{
-	unsigned int index = queueCurrentIndex;
-	const unsigned int num = customShaders.Num();
-
-	if(
-			// !queue.Num()
-			index >= num
-			)
-		return;
-
-	const bool B = shaderRequired;
-	UNNECESSARY_SHADER();
-
-	while(
-			index < num
-			// queue.Num()
-			)
-	{
-		/*
-		index = queue[0];
-		queue.RemoveIndex(0); // always remove it
-
-		// it's not happened, using assert
-		if(index >= customShaders.Num())
-		{
-			common->Warning("GLSL shader manager::ActuallyLoad custom shader index '%d' over( >= %d ).", index, customShaders.Num());
-			continue;
-		}*/
-
-		GLSLShaderProp &prop = customShaders[index];
-		index++;
-
-		if(FindIndex(prop.name.c_str()) >= 0)
-		{
-			common->Warning("GLSL shader manager::ActuallyLoad custom shader '%s' has loaded.", prop.name.c_str());
-			continue;
-		}
-		if(prop.program)
-		{
-			common->Warning("GLSL shader manager::ActuallyLoad custom shader '%s' has handle.", prop.name.c_str());
-			continue;
-		}
-
-		// create shader on heap
-		shaderProgram_t *shader = (shaderProgram_t *)malloc(sizeof(*shader));
-        R_InitShaderProgram(shader);
-        idStr::Copynz(shader->name, prop.name.c_str(), sizeof(shader->name));
-		shader->type = SHADER_CUSTOM;
-		prop.program = shader;
-
-		common->Printf("GLSL shader manager::ActuallyLoad shader '%s'.\n", prop.name.c_str());
-		if(RB_GLSL_LoadShaderProgramFromProp(&prop))
-		{
-			Add(shader);
-		}
-		else
-		{
-            R_InitShaderProgram(prop.program);
-			common->Warning("GLSL shader manager::ActuallyLoad shader '%s' error!", prop.name.c_str());
-		}
-	}
-	shaderRequired = B;
-	queueCurrentIndex = index;
-}
-
-idGLSLShaderManager::~idGLSLShaderManager()
-{
-}
-
-void idGLSLShaderManager::Shutdown(void)
-{
-    printf("GLSL shader manager destroying: %d shaders, %d customer shaders\n", shaders.Num(), customShaders.Num());
-    // stop load queue;
-    queueCurrentIndex = customShaders.Num();
-    // delete shader programs
-    for(int i = 0; i < shaders.Num(); i++)
-    {
-        shaderProgram_t *shader = shaders[i];
-        if(shader)
-        {
-            RB_GLSL_DeleteShaderProgram(shader, true);
-        }
-    }
-    shaders.Clear();
-    // clear load queue
-    for(int i = 0; i < customShaders.Num(); i++)
-    {
-        GLSLShaderProp &prop = customShaders[i];
-        if(prop.program)
-        {
-            free(prop.program);
-            prop.program = NULL;
-        }
-    }
-    queueCurrentIndex = 0;
-    customShaders.Clear();
-    printf("GLSL shader manager shutdown\n");
-}
-
-idGLSLShaderManager idGLSLShaderManager::_shaderManager;
-
-idGLSLShaderManager *shaderManager = &idGLSLShaderManager::_shaderManager;
-
 static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 {
 #include "glsl_shader.h"
@@ -493,6 +202,7 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
 	ret.Append(GLSL_SHADER_SOURCE("default", SHADER_DEFAULT, &defaultShader, DEFAULT_VERT, DEFAULT_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("zfill", SHADER_ZFILL, &depthFillShader, ZFILL_VERT, ZFILL_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("zfillClip", SHADER_ZFILLCLIP, &depthFillClipShader, ZFILLCLIP_VERT, ZFILLCLIP_FRAG, "", ""));
+	ret.Append(GLSL_SHADER_SOURCE("zfillNoAlphaTest", SHADER_ZFILLNOALPHATEST, &depthFillNoAlphaTestShader, ZFILL_VERT, ZFILL_FRAG, "NO_ALPHA_TEST", "NO_ALPHA_TEST"));
 	ret.Append(GLSL_SHADER_SOURCE("cubemap", SHADER_CUBEMAP, &cubemapShader, CUBEMAP_VERT, CUBEMAP_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("environment", SHADER_ENVIRONMENT, &environmentShader, ENVIRONMENT_VERT, ENVIRONMENT_FRAG, "", ""));
     ret.Append(GLSL_SHADER_SOURCE("bumpyEnvironment", SHADER_BUMPY_ENVIRONMENT, &bumpyEnvironmentShader, BUMPY_ENVIRONMENT_VERT, BUMPY_ENVIRONMENT_FRAG, "", ""));
@@ -517,14 +227,19 @@ static void RB_GLSL_GetShaderSources(idList<GLSLShaderProp> &ret)
     ret.Append(GLSL_SHADER_SOURCE("stencilToColor", SHADER_STENCIL_TO_COLOR, &stencilToColorShader, SIMPLE_VERTEX_TEXCOORD_VERT, STENCIL_TO_COLOR_FRAG, "", ""));
 #endif
 	ret.Append(GLSL_SHADER_SOURCE("texgen", SHADER_TEXGEN, &texgenShader, TEXGEN_VERT, TEXGEN_FRAG, "", ""));
+#ifdef _SPLASHDAMAGE //karin: Occlusion testing
+	ret.Append(GLSL_SHADER_SOURCE("occlusionTest", SHADER_OCCLUSIONTEST, &occlusionTestShader, OCCLUSIONTEST_VERT, OCCLUSIONTEST_FRAG, "", ""));
+#endif
 
     // newStage
+#if !defined(_SPLASHDAMAGE)
+	ret.Append(GLSL_SHADER_SOURCE("colorProcess", SHADER_COLORPROCESS, &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHaze", SHADER_HEATHAZE, &heatHazeShader, HEATHAZE_VERT, HEATHAZE_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMask", SHADER_HEATHAZE_WITH_MASK, &heatHazeWithMaskShader, HEATHAZEWITHMASK_VERT, HEATHAZEWITHMASK_FRAG, "", ""));
 	ret.Append(GLSL_SHADER_SOURCE("heatHazeWithMaskAndVertex", SHADER_HEATHAZE_WITH_MASK_AND_VERTEX, &heatHazeWithMaskAndVertexShader, HEATHAZEWITHMASKANDVERTEX_VERT, HEATHAZEWITHMASKANDVERTEX_FRAG, "", ""));
-	ret.Append(GLSL_SHADER_SOURCE("colorProcess", SHADER_COLORPROCESS, &colorProcessShader, COLORPROCESS_VERT, COLORPROCESS_FRAG, "", ""));
 	// D3XP
 	ret.Append(GLSL_SHADER_SOURCE("enviroSuit", SHADER_ENVIROSUIT, &enviroSuitShader, ENVIROSUIT_VERT, ENVIROSUIT_FRAG, "", ""));
+#endif
 #ifdef _HUMANHEAD
     ret.Append(GLSL_SHADER_SOURCE("screeneffect", SHADER_SCREENEFFECT, &screeneffectShader, SCREENEFFECT_VERT, SCREENEFFECT_FRAG, "", ""));
     ret.Append(GLSL_SHADER_SOURCE("radialblur", SHADER_RADIALBLUR, &radialblurShader, RADIALBLUR_VERT, RADIALBLUR_FRAG, "", ""));
@@ -879,7 +594,7 @@ static bool RB_GLSL_InitShaders(void)
 	RB_GLSL_GetShaderSources(Props);
 
 	// base shader
-	REQUIRE_SHADER();
+	RB_GLSL_LoadNotAllowError();
 	for(int i = SHADER_BASE_BEGIN; i <= SHADER_BASE_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -887,11 +602,11 @@ static bool RB_GLSL_InitShaders(void)
             continue;
 		if(!RB_GLSL_LoadShaderProgramFromProp(prop))
 			return false;
-		shaderManager->Add(prop->program);
+		shaderManager->AddBuiltin(*prop);
 	}
 
 	// newStage shader
-	UNNECESSARY_SHADER();
+	RB_GLSL_IgnoreLoadError();
 	for(int i = SHADER_NEW_STAGE_BEGIN; i <= SHADER_NEW_STAGE_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -902,12 +617,12 @@ static bool RB_GLSL_InitShaders(void)
 			common->Printf("newStage %d not support!\n", i);
             continue;
 		}
-		shaderManager->Add(prop->program);
+		shaderManager->AddBuiltin(*prop);
 	}
-	REQUIRE_SHADER();
+	RB_GLSL_LoadNotAllowError();
 
 #ifdef _SHADOW_MAPPING
-	UNNECESSARY_SHADER();
+	RB_GLSL_IgnoreLoadError();
 	for(int i = SHADER_SHADOW_MAPPING_BEGIN; i <= SHADER_SHADOW_MAPPING_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -925,13 +640,13 @@ static bool RB_GLSL_InitShaders(void)
 #endif
 			break;
 		}
-		shaderManager->Add(prop->program);
+		shaderManager->AddBuiltin(*prop);
 	}
-	REQUIRE_SHADER();
+	RB_GLSL_LoadNotAllowError();
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE
-	UNNECESSARY_SHADER();
+	RB_GLSL_IgnoreLoadError();
 	for(int i = SHADER_STENCIL_SHADOW_BEGIN; i <= SHADER_STENCIL_SHADOW_END; i++)
 	{
 		const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -958,13 +673,13 @@ static bool RB_GLSL_InitShaders(void)
 #endif
 			break;
 		}
-		shaderManager->Add(prop->program);
+		shaderManager->AddBuiltin(*prop);
 	}
-	REQUIRE_SHADER();
+	RB_GLSL_LoadNotAllowError();
 #endif
 
 #ifdef _POSTPROCESS
-    UNNECESSARY_SHADER();
+    RB_GLSL_IgnoreLoadError();
     for(int i = SHADER_POSTPROCESS_BEGIN; i <= SHADER_POSTPROCESS_END; i++)
     {
         const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -982,12 +697,12 @@ static bool RB_GLSL_InitShaders(void)
 #endif
             break;
         }
-        shaderManager->Add(prop->program);
+        shaderManager->AddBuiltin(*prop);
     }
-    REQUIRE_SHADER();
+    RB_GLSL_LoadNotAllowError();
 #endif
 
-    UNNECESSARY_SHADER();
+    RB_GLSL_IgnoreLoadError();
     for(int i = SHADER_DEBUG_BEGIN; i <= SHADER_DEBUG_END; i++)
     {
         const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, i);
@@ -998,9 +713,9 @@ static bool RB_GLSL_InitShaders(void)
             common->Printf("Not support debug in GLSL shader!\n");
             break;
         }
-        shaderManager->Add(prop->program);
+        shaderManager->AddBuiltin(*prop);
     }
-    REQUIRE_SHADER();
+    RB_GLSL_LoadNotAllowError();
 
     int endMs = Sys_Milliseconds();
     common->Printf("----- Compile GLSL shaders finish(%d ms) -----\n", endMs - startMs);
@@ -1349,75 +1064,18 @@ int RB_GLSL_LoadShaderProgram(
     }
 }
 
-void idGLSLShaderManager::ReloadShaders(void)
-{
-	idList<GLSLShaderProp> Props;
-	RB_GLSL_GetShaderSources(Props);
-	shaderProgram_t *originShader = backEnd.glState.currentProgram;
-	GL_UseProgram(NULL);
-
-    int startMs = Sys_Milliseconds();
-    common->Printf("----- Compiling GLSL shaders -----\n");
-
-    for(int i = 0; i < shaders.Num(); i++)
-    {
-        shaderProgram_t *shader = shaders[i];
-        common->Printf("Reload GLSL shader %d -> %s......\n", i, shader->name);
-
-        int type = shader->type;
-        if(type >= SHADER_BASE_BEGIN && type <= SHADER_BASE_END)
-        {
-            REQUIRE_SHADER();
-        }
-        else
-        {
-	        UNNECESSARY_SHADER();
-        }
-        RB_GLSL_DeleteShaderProgram(shader, false);
-	    if(type < SHADER_CUSTOM)
-	    {
-            const GLSLShaderProp *prop = RB_GLSL_FindShaderProp(Props, type);
-            if(prop)
-            {
-                if(!RB_GLSL_LoadShaderProgramFromProp(prop))
-                {
-                    common->Printf("Reload GLSL shader error %d -> %s!\n", i, prop->name.c_str());
-                    continue;
-                }
-            }
-	    }
-        else
-        {
-            for(int m = 0; m < customShaders.Num(); m++)
-            {
-		        GLSLShaderProp &prop = customShaders[m];
-                if(shader == prop.program)
-                {
-                    if(!RB_GLSL_LoadShaderProgramFromProp(&prop))
-                    {
-                        common->Printf("Reload custom GLSL shader error %d(%d) -> %s!\n", i, m, prop.name.c_str());
-                        continue;
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    int endMs = Sys_Milliseconds();
-    common->Printf("----- Compile GLSL shaders finish(%d ms) -----\n", endMs - startMs);
-
-	GL_UseProgram(originShader);
-}
+#include "ShaderManager.cpp"
 
 void GLSL_AddCommand(void)
 {
-	cmdSystem->AddCommand("exportGLSLShaderSource", R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export built-in GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]");
+	cmdSystem->AddCommand("listShaders", GLSL_ListShaders_f, CMD_FL_RENDERER, "list shader manager shaders");
+	cmdSystem->AddCommand("exportGLSLShaderSource", idGLSLShaderManager::R_ExportGLSLShaderSource_f, CMD_FL_RENDERER, "export built-in GLSL shader source to game data directory\nUsage: COMMAND [name1 name2 ...] [save_path]", idGLSLShaderManager::ArgCompletion_Shaders);
     cmdSystem->AddCommand("cleanExternalGLSLShaderSource", R_CleanGLSLShaderSource_f, CMD_FL_RENDERER, "remove external GLSL shader source directory");
-	cmdSystem->AddCommand("printGLSLShaderSource", R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print built-in GLSL shader source\nUsage: COMMAND [name1 name2 ...]");
+	cmdSystem->AddCommand("printGLSLShaderSource", idGLSLShaderManager::R_PrintGLSLShaderSource_f, CMD_FL_RENDERER, "print built-in GLSL shader source\nUsage: COMMAND [name1 name2 ...]", idGLSLShaderManager::ArgCompletion_Shaders);
 	cmdSystem->AddCommand("exportDevShaderSource", R_ExportDevShaderSource_f, CMD_FL_RENDERER, "export built-in original C-String GLSL shader source for developer");
 #ifdef GL_ES_VERSION_3_0
     cmdSystem->AddCommand("cleanGLSLShaderBinary", R_CleanGLSLShaderBinary_f, CMD_FL_RENDERER, "remove GLSL shader binary directory");
 #endif
     cmdSystem->AddCommand("convertARB", GLSL_ConvertARBShader_f, CMD_FL_RENDERER, "convert ARB shader to GLSL shader", GLSL_ArgCompletion_glprogs);
+	cmdSystem->AddCommand("reloadShader", R_ReloadShader_f, CMD_FL_RENDERER, "reload shader", idGLSLShaderManager::ArgCompletion_Shaders);
 }

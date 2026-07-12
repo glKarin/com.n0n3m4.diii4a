@@ -393,6 +393,9 @@ void R_ReallyFreeStaticTriSurf(srfTriangles_t *tri)
 		// R_CreateLightTris points tri->verts at the verts of the ambient surface
 		if (tri->ambientSurface == NULL || tri->verts != tri->ambientSurface->verts) {
 			triVertexAllocator.Free(tri->verts);
+#ifdef _SPLASHDAMAGE //karin: save allocated verts num for ETQW sdWake, else it causes idVertexCache::Alloc with size = 0
+			tri->numAllocedVerts = 0;
+#endif
 		}
 	}
 
@@ -401,6 +404,9 @@ void R_ReallyFreeStaticTriSurf(srfTriangles_t *tri)
 			// if a surface is completely inside a light volume R_CreateLightTris points tri->indexes at the indexes of the ambient surface
 			if (tri->ambientSurface == NULL || tri->indexes != tri->ambientSurface->indexes) {
 				triIndexAllocator.Free(tri->indexes);
+#ifdef _SPLASHDAMAGE //karin: save allocated indexes
+				tri->numAllocedIndices = 0;
+#endif
 			}
 		}
 
@@ -580,6 +586,9 @@ void R_AllocStaticTriSurfVerts(srfTriangles_t *tri, int numVerts)
 {
 	assert(tri->verts == NULL);
 	tri->verts = triVertexAllocator.Alloc(numVerts);
+#ifdef _SPLASHDAMAGE //karin: save allocated verts num for ETQW sdWake, else it causes idVertexCache::Alloc with size = 0
+	tri->numAllocedVerts = numVerts;
+#endif
 }
 
 /*
@@ -591,6 +600,9 @@ void R_AllocStaticTriSurfIndexes(srfTriangles_t *tri, int numIndexes)
 {
 	assert(tri->indexes == NULL);
 	tri->indexes = triIndexAllocator.Alloc(numIndexes);
+#ifdef _SPLASHDAMAGE //karin: save allocated indexes
+	tri->numAllocedIndices = numIndexes;
+#endif
 }
 
 /*
@@ -627,6 +639,9 @@ void R_ResizeStaticTriSurfVerts(srfTriangles_t *tri, int numVerts)
 {
 #ifdef USE_TRI_DATA_ALLOCATOR
 	tri->verts = triVertexAllocator.Resize(tri->verts, numVerts);
+#ifdef _SPLASHDAMAGE //karin: save allocated verts num for ETQW sdWake, else it causes idVertexCache::Alloc with size = 0
+	tri->numAllocedVerts = numVerts;
+#endif
 #else
 	assert(false);
 #endif
@@ -641,6 +656,9 @@ void R_ResizeStaticTriSurfIndexes(srfTriangles_t *tri, int numIndexes)
 {
 #ifdef USE_TRI_DATA_ALLOCATOR
 	tri->indexes = triIndexAllocator.Resize(tri->indexes, numIndexes);
+#ifdef _SPLASHDAMAGE //karin: save allocated indexes
+	tri->numAllocedIndices = numIndexes;
+#endif
 #else
 	assert(false);
 #endif
@@ -1418,11 +1436,17 @@ static void	R_DuplicateMirroredVertexes(srfTriangles_t *tri)
 
 #ifdef USE_TRI_DATA_ALLOCATOR
 	tri->verts = triVertexAllocator.Resize(tri->verts, totalVerts);
+#ifdef _SPLASHDAMAGE //karin: save allocated verts num for ETQW sdWake, else it causes idVertexCache::Alloc with size = 0
+	tri->numAllocedVerts = totalVerts;
+#endif
 #else
 	idDrawVert *oldVerts = tri->verts;
 	R_AllocStaticTriSurfVerts(tri, totalVerts);
 	memcpy(tri->verts, oldVerts, tri->numVerts * sizeof(tri->verts[0]));
 	triVertexAllocator.Free(oldVerts);
+#ifdef _SPLASHDAMAGE //karin: save allocated verts num for ETQW sdWake, else it causes idVertexCache::Alloc with size = 0
+	tri->numAllocedVerts = totalVerts;
+#endif
 #endif
 
 	// create the duplicates
@@ -2390,6 +2414,9 @@ deformInfo_t *R_BuildDeformInfo(int numVerts, const idDrawVert *verts, int numIn
 
 	if (tri.verts) {
 		triVertexAllocator.Free(tri.verts);
+#ifdef _SPLASHDAMAGE //karin: save allocated verts num for ETQW sdWake, else it causes idVertexCache::Alloc with size = 0
+		tri.numAllocedVerts = 0;
+#endif
 	}
 
 	if (tri.facePlanes) {

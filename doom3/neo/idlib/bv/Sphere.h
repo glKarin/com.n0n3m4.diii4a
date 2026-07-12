@@ -37,6 +37,10 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+class idBounds;
+#endif
+
 class idSphere
 {
 	public:
@@ -77,6 +81,9 @@ class idSphere
 
 		bool			ContainsPoint(const idVec3 &p) const;			// includes touching
 		bool			IntersectsSphere(const idSphere &s) const;	// includes touching
+#ifdef _SPLASHDAMAGE
+    	bool			IntersectsBounds( const idBounds& bounds ) const;
+#endif
 		bool			LineIntersection(const idVec3 &start, const idVec3 &end) const;
 		// intersection points are (start + dir * scale1) and (start + dir * scale2)
 		bool			RayIntersection(const idVec3 &start, const idVec3 &dir, float &scale1, float &scale2) const;

@@ -179,6 +179,11 @@ class idSessionLocal : public idSession
 #ifdef _MULTITHREAD
 		virtual void        UpdateScreen(byte *data, bool outOfSequence);
 #endif
+#ifdef _SPLASHDAMAGE //karin: for wchar dialog
+		virtual const char *MessageBox(msgBoxType_t type, const wchar_t *message, const wchar_t *title = NULL, bool wait = false, const char *fire_yes = NULL, const char *fire_no = NULL, bool network = false);
+		virtual const char *MessageBox(msgBoxType_t type, const char *message, const wchar_t *title = NULL, bool wait = false, const char *fire_yes = NULL, const char *fire_no = NULL, bool network = false);
+		virtual const char *MessageBox(msgBoxType_t type, const wchar_t *message, const char *title = NULL, bool wait = false, const char *fire_yes = NULL, const char *fire_no = NULL, bool network = false);
+#endif
 
 		//=====================================
 
@@ -201,7 +206,7 @@ class idSessionLocal : public idSession
 		int					timeHitch;
 
 		bool				menuActive;
-#if !defined(_RAVEN) //karin: move to idSession
+#if !defined(_RAVEN) && !defined(_SPLASHDAMAGE) //karin: move to idSession
 		idSoundWorld 		*menuSoundWorld;			// so the game soundWorld can be muted
 #endif
 
@@ -292,6 +297,9 @@ class idSessionLocal : public idSession
 		bool 				GetLoadingSaveGame(void) const {
 			return loadingSaveGame;
 		}
+#endif
+#ifdef _SPLASHDAMAGE //karin: for calc elapsed time
+		int					gameTime;
 #endif
 
 #if ID_CONSOLE_LOCK

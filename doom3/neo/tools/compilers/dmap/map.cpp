@@ -483,7 +483,11 @@ static void CreateMapLight(const idMapEntity *mapEnt)
 	// parse parms exactly as the game do
 	// use the game's epair parsing code so
 	// we can use the same renderLight generation
+#ifdef _SPLASHDAMAGE
+	gameEdit->ParseSpawnArgsToRenderLight(mapEnt->epairs, light->def.parms);
+#else
 	gameEdit->ParseSpawnArgsToRenderLight(&mapEnt->epairs, &light->def.parms);
+#endif
 
 	R_DeriveLightData(&light->def);
 

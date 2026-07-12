@@ -475,6 +475,8 @@ public final class KCVarSystem
                 .AddCVar(rendereres);
         KCVar.Group ICARUS_CVARS = new KCVar.Group("Icarus", true)
                 .AddCVar(rendereres);
+        KCVar.Group ETQW_CVARS = new KCVar.Group("ETQW", true)
+                .AddCVar(rendereres);
 
         _cvars.put("RENDERER", RENDERER_CVARS);
         _cvars.put("FRAMEWORK", FRAMEWORK_CVARS);
@@ -493,6 +495,7 @@ public final class KCVarSystem
         _cvars.put("SkinDeep", SKINDEEP_CVARS);
         _cvars.put("QC", QC_CVARS);
         _cvars.put("Icarus", ICARUS_CVARS);
+        _cvars.put("ETQW", ETQW_CVARS);
 
         return _cvars;
     }

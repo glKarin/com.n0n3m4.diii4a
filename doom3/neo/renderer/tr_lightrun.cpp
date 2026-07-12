@@ -188,7 +188,12 @@ void R_CreateEntityRefs(idRenderEntityLocal *def)
 
 	// if the entity hasn't been fully specified due to expensive animation calcs
 	// for md5 and particles, use the provided conservative bounds.
-	if (def->parms.callback) {
+#ifdef _SPLASHDAMAGE //karin: entity overridenBounds parm
+	if (def->parms.callback || def->parms.flags.overridenBounds)
+#else
+	if (def->parms.callback) 
+#endif
+	{
 		def->referenceBounds = def->parms.bounds;
 	} else {
 		def->referenceBounds = def->parms.hModel->Bounds(&def->parms);
@@ -206,6 +211,21 @@ void R_CreateEntityRefs(idRenderEntityLocal *def)
 		               def->referenceBounds[1][1] - def->referenceBounds[0][1]);
 	}
 
+#ifdef _SPLASHDAMAGE //karin: entity push into connected/outside areas
+	if(def->parms.flags.pushIntoConnectedOutsideAreas)
+	{
+        tr.viewCount++;
+		def->world->PushIntoConnectedOutsideAreas(def->parms.origin, def, NULL);
+		return;
+	}
+	else if(def->parms.flags.pushIntoOutsideAreas)
+	{
+        tr.viewCount++;
+		def->world->PushIntoOutsideAreas(def, NULL);
+		return;
+	}
+#endif
+
 #ifdef _D3BFG_CULLING
     if(harm_r_occlusionCulling.GetBool())
     {
@@ -217,12 +237,21 @@ void R_CreateEntityRefs(idRenderEntityLocal *def)
 
         // push these points down the BSP tree into areas
         def->world->PushFrustumIntoTree(def, NULL, ID_RENDER_MATRIX def->inverseBaseModelProject, bounds_unitCube);
-        
+
         // return;
     }
     else
     {
 #endif
+#if 0 // defined(_RAVEN) || defined(_SPLASHDAMAGE)
+    // bump the view count so we can tell if an
+    // area already has a reference
+    tr.viewCount++;
+
+    // push these points down the BSP tree into areas
+    const idBox box( def->referenceBounds, def->parms.origin, def->parms.axis );
+    def->world->PushPolytopeIntoTree(def, NULL, NULL, &box, NULL, 0);
+#else
 	for (i = 0 ; i < 8 ; i++) {
 		v[0] = def->referenceBounds[i&1][0];
 		v[1] = def->referenceBounds[(i>>1)&1][1];
@@ -237,6 +266,7 @@ void R_CreateEntityRefs(idRenderEntityLocal *def)
 
 	// push these points down the BSP tree into areas
     def->world->PushVolumeIntoTree(def, NULL, 8, transformed);
+#endif
 #ifdef _D3BFG_CULLING
     }
 #endif
@@ -395,13 +425,24 @@ void R_DeriveLightData(idRenderLightLocal *light)
     if(harm_r_occlusionCulling.GetBool())
     {
         // decide which light shader we are going to use
+#ifdef _SPLASHDAMAGE
+    	if( light->parms.material )
+    	{
+    		light->lightShader = light->parms.material;
+    	}
+#else
         if( light->parms.shader )
         {
             light->lightShader = light->parms.shader;
         }
+#endif
         else if( !light->lightShader )
         {
+#ifdef _SPLASHDAMAGE
+            if( light->parms.flags.pointLight )
+#else
             if( light->parms.pointLight )
+#endif
             {
                 light->lightShader = declManager->FindMaterial( "lights/defaultPointLight" );
             }
@@ -419,7 +460,11 @@ void R_DeriveLightData(idRenderLightLocal *light)
             // use the falloff from the default shader of the correct type
             const idMaterial* defaultShader;
 
+#ifdef _SPLASHDAMAGE
+            if( light->parms.flags.pointLight )
+#else
             if( light->parms.pointLight )
+#endif
             {
                 defaultShader = declManager->FindMaterial( "lights/defaultPointLight" );
                 light->falloffImage = defaultShader->LightFalloffImage();
@@ -438,11 +483,19 @@ void R_DeriveLightData(idRenderLightLocal *light)
 
         idRenderMatrix localProject;
         float zScale = 1.0f;
+#ifdef _SPLASHDAMAGE
+        if( light->parms.flags.parallel )
+#else
         if( light->parms.parallel )
+#endif
         {
             zScale = R_ComputeParallelLightProjectionMatrix( light, localProject );
         }
+#ifdef _SPLASHDAMAGE
+        else if( light->parms.flags.pointLight )
+#else
         else if( light->parms.pointLight )
+#endif
         {
             zScale = R_ComputePointLightProjectionMatrix( light, localProject );
         }
@@ -492,7 +545,11 @@ void R_DeriveLightData(idRenderLightLocal *light)
 
         // adjust global light origin for off center projections and parallel projections
         // we are just faking parallel by making it a very far off center for now
+#ifdef _SPLASHDAMAGE
+        if( light->parms.flags.parallel )
+#else
         if( light->parms.parallel )
+#endif
         {
             idVec3 dir = light->parms.lightCenter;
             if( dir.Normalize() == 0.0f )
@@ -551,12 +608,23 @@ void R_DeriveLightData(idRenderLightLocal *light)
     {
 #endif
 	// decide which light shader we are going to use
+#ifdef _SPLASHDAMAGE
+    	if (light->parms.material) {
+    		light->lightShader = light->parms.material;
+    	}
+#else
 	if (light->parms.shader) {
 		light->lightShader = light->parms.shader;
 	}
+#endif
 
 	if (!light->lightShader) {
-		if (light->parms.pointLight) {
+#ifdef _SPLASHDAMAGE
+		if (light->parms.flags.pointLight)
+#else
+		if (light->parms.pointLight)
+#endif
+		{
 			light->lightShader = declManager->FindMaterial("lights/defaultPointLight");
 		} else {
 			light->lightShader = declManager->FindMaterial("lights/defaultProjectedLight");
@@ -570,7 +638,12 @@ void R_DeriveLightData(idRenderLightLocal *light)
 		// use the falloff from the default shader of the correct type
 		const idMaterial	*defaultShader;
 
-		if (light->parms.pointLight) {
+#ifdef _SPLASHDAMAGE
+		if (light->parms.flags.pointLight)
+#else
+		if (light->parms.pointLight)
+#endif
+		{
 			defaultShader = declManager->FindMaterial("lights/defaultPointLight");
 			light->falloffImage = defaultShader->LightFalloffImage();
 		} else {
@@ -581,7 +654,12 @@ void R_DeriveLightData(idRenderLightLocal *light)
 	}
 
 	// set the projection
-	if (!light->parms.pointLight) {
+#ifdef _SPLASHDAMAGE
+	if (!light->parms.flags.pointLight)
+#else
+	if (!light->parms.pointLight)
+#endif
+	{
 		// projected light
 
 		R_SetLightProject(light->lightProject, vec3_origin /* light->parms.origin */, light->parms.target,
@@ -618,7 +696,12 @@ void R_DeriveLightData(idRenderLightLocal *light)
 
 	// adjust global light origin for off center projections and parallel projections
 	// we are just faking parallel by making it a very far off center for now
-	if (light->parms.parallel) {
+#ifdef _SPLASHDAMAGE
+	if (light->parms.flags.parallel)
+#else
+	if (light->parms.parallel)
+#endif
+	{
 		idVec3	dir;
 
 		dir = light->parms.lightCenter;
@@ -677,19 +760,32 @@ void R_CreateLightRefs(idRenderLightLocal *light)
         // we can limit the area references to those visible through the portals from the light center.
         // We can't do this in the normal case, because shadows are cast from back facing triangles, which
         // may be in areas not directly visible to the light projection center.
+#ifdef _SPLASHDAMAGE //karin: multi prelights in light
+        if( (light->parms.prelightModel || light->parms.numPrelightModels > 0) && !light->parms.flags.atmosphereLight && r_useLightPortalFlow.GetBool() && light->lightShader->LightCastsShadows() )
+#else
         if( light->parms.prelightModel && r_useLightPortalFlow.GetBool() && light->lightShader->LightCastsShadows() )
+#endif
         {
             light->world->FlowLightThroughPortals( light );
         }
         else
         {
+#ifdef _SPLASHDAMAGE //karin: using computed light areaNum / light push into areas
+			if(light->parms.numAreas > 0)
+			{
+				light->areaNum = light->parms.areas[0];
+				for(int m = 0; m < light->parms.numAreas; m++)
+				{
+					light->world->AddLightRefToArea(light, &light->world->portalAreas[light->parms.areas[m]]);
+				}
+			}
+			else if(light->parms.flags.atmosphereLight)
+				light->world->PushIntoConnectedOutsideAreas(light->parms.origin, NULL, light);
+			else
+#endif
             // push the light frustum down the BSP tree into areas
             light->world->PushFrustumIntoTree( NULL, light, ID_RENDER_MATRIX light->inverseBaseLightProject, bounds_zeroOneCube );
         }
-
-        // R_CreateLightDefFogPortals( light );
-        
-        // return;
     }
     else
     {
@@ -734,11 +830,57 @@ void R_CreateLightRefs(idRenderLightLocal *light)
 	// we can limit the area references to those visible through the portals from the light center.
 	// We can't do this in the normal case, because shadows are cast from back facing triangles, which
 	// may be in areas not directly visible to the light projection center.
-	if (light->parms.prelightModel && r_useLightPortalFlow.GetBool() && light->lightShader->LightCastsShadows()) {
+#ifdef _SPLASHDAMAGE //karin: multi prelights in light
+	if ((light->parms.prelightModel || light->parms.numPrelightModels > 0) && !light->parms.flags.atmosphereLight && r_useLightPortalFlow.GetBool() && light->lightShader->LightCastsShadows())
+#else
+	if (light->parms.prelightModel && r_useLightPortalFlow.GetBool() && light->lightShader->LightCastsShadows())
+#endif
+	{
 		light->world->FlowLightThroughPortals(light);
 	} else {
+#ifdef _SPLASHDAMAGE //karin: using computed light areaNum / light push into areas
+		if(light->parms.numAreas > 0)
+		{
+			light->areaNum = light->parms.areas[0];
+			for(int m = 0; m < light->parms.numAreas; m++)
+			{
+				light->world->AddLightRefToArea(light, &light->world->portalAreas[light->parms.areas[m]]);
+			}
+		}
+		else if(light->parms.flags.atmosphereLight)
+			light->world->PushIntoConnectedOutsideAreas(light->parms.origin, NULL, light);
+		else
+#endif
 		// push these points down the BSP tree into areas
+#if 0 // def _RAVEN
+		{
+			if (light->parms.pointLight)
+			{
+				const idBox box( light->parms.origin, light->parms.lightRadius, light->parms.axis );
+				light->world->PushPolytopeIntoTree(NULL, light, NULL, &box, NULL, 0);
+			}
+			else
+			{
+				const idBox box( light->frustumTris->bounds );
+				light->world->PushPolytopeIntoTree(NULL, light, NULL, &box, points, tri->numVerts);
+			}
+		}
+#elif 0 // defined(_SPLASHDAMAGE)
+		{
+			if (light->parms.flags.pointLight)
+			{
+				const idBox box( light->parms.origin, light->parms.lightRadius, light->parms.axis );
+				light->world->PushPolytopeIntoTree(NULL, light, NULL, &box, NULL, 0);
+			}
+			else
+			{
+				const idBox box( light->frustumTris->bounds );
+				light->world->PushPolytopeIntoTree(NULL, light, NULL, &box, points, tri->numVerts);
+			}
+		}
+#else
         light->world->PushVolumeIntoTree(NULL, light, tri->numVerts, points);
+#endif
 	}
 #ifdef _D3BFG_CULLING
     }
@@ -975,6 +1117,11 @@ void R_FreeEntityDefDerivedData(idRenderEntityLocal *def, bool keepDecals, bool 
 			md5_model->ClearDynamicModelSnapshot();
 	}
 #endif
+#ifdef _SPLASHDAMAGE //karin: imposter model
+	if (def->imposterModel) {
+		def->imposterModel = NULL;
+	}
+#endif
 
 	def->entityRefs = NULL;
 }
@@ -1203,7 +1350,7 @@ void R_DeriveEntityData(idRenderEntityLocal* entity)
 }
 #endif
 
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 #ifdef _RAVEN_BSE
 void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def)
 {
