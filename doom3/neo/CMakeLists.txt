@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR) # 2.6
+cmake_minimum_required(VERSION 2.8.12...3.5 FATAL_ERROR) # 2.6
 
 project(doom3)
 
@@ -1572,7 +1572,7 @@ endif() # ogg
 
 if(REQUIRE_FREETYPE)
 	if(USE_SYSTEM_FREETYPE)
-		find_package(Freetype)
+		find_package(Freetype QUIET)
 		if(FREETYPE_FOUND)
 			set(freetype_inc ${FREETYPE_INCLUDE_DIRS})
 			set(freetype_lib ${FREETYPE_LIBRARIES})
@@ -1593,7 +1593,7 @@ if(REQUIRE_FREETYPE)
 	endif()
 
 	include_directories(${freetype_inc})
-	message(STATUS "freetype include dir: ${freetype_inc}")
+
 	if(COMPILE_FREETYPE #[[STREQUAL "1"]])
 		set(local_libs ${local_libs} ${freetype_lib})
 	else()
