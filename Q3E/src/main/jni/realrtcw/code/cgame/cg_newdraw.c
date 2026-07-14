@@ -172,6 +172,7 @@ static int weapIconDrawSize( int weap ) {
 	case WP_G43:
 	case WP_M1GARAND:
 	case WP_BAR:
+	case WP_M30:
     case WP_MP44:
 	case WP_MG42M:
 	case WP_M97:
@@ -528,16 +529,10 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 
 	switch ( weap ) {      // some weapons don't draw ammo count text
 	case WP_AIRSTRIKE:
-	case WP_POISONGAS_MEDIC:
+	case WP_POISONGAS:
 	case WP_DYNAMITE_ENG:
+	case WP_SMOKE_BOMB:
 		return;
-
-	case WP_AKIMBO:
-		specialWeap = WP_COLT;
-		break;
-	case WP_DUAL_TT33:
-		specialWeap = WP_TT33;
-		break;
 
 	case WP_GRENADE_LAUNCHER:
 	case WP_KNIFE:
@@ -545,7 +540,6 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 	case WP_DYNAMITE:
 	case WP_TESLA:
 	case WP_FLAMETHROWER:
-	case WP_POISONGAS:
 	case WP_HOLYCROSS:
 		if ( type == 0 ) {  // don't draw reserve value, just clip (since these weapons have all their ammo in the clip)
 			return;
@@ -891,7 +885,12 @@ static void CG_DrawPerks( rectDef_t *rect, int font, float scale, qboolean draw2
     gitem_t *item;
     float x, y = 20; // Top part of the screen
 
-    // Count the number of active perks
+	if (cg_gameType.integer != GT_SURVIVAL)
+	{
+		return;
+	}
+
+	// Count the number of active perks
     for ( i = 0; i < MAX_PERKS; i++ ) {
         if ( cg.snap->ps.perks[i] > 0 || (cg.snap->ps.stats[STAT_PERK] & (1 << i)) ) {
             numPerks++;
@@ -912,7 +911,18 @@ static void CG_DrawPerks( rectDef_t *rect, int font, float scale, qboolean draw2
             if ( item ) {
                 CG_RegisterItemVisuals( item - bg_itemlist );
                 CG_DrawPic( x, y, rect->w, rect->h, cg_items[item - bg_itemlist].icons[0] );
-                x += rect->w + 5; // 5 is the space between icons
+
+				// PRO overlay (no new assets)
+				if (cg.snap->ps.perks[i] >= 2)
+				{
+					float ts = rect->w * 0.25f;		// compact size
+					float tx = x + rect->w * 0.12f; // move left from right edge
+					float ty = y - 10;				// small top padding
+
+					CG_DrawStringExt(tx, ty, "^3PRO", colorWhite, qfalse, qtrue, ts, ts, 0);
+				}
+
+				x += rect->w + 5; // 5 is the space between icons
             }
         }
     }
@@ -2109,6 +2119,8 @@ static void CG_DrawWeapRecharge( rectDef_t *rect, vec4_t color, int align ) {
 		case PC_LT:
 			chargeTime = cg_LTChargeTime.value;
 			break;
+	    case PC_CVOPS:
+		    chargeTime = cg_cvopsChargeTime.value;
 		default:
 		    chargeTime = 30000;
 			break;

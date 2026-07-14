@@ -318,6 +318,7 @@ typedef struct {
 	int soldierChargeTime;
 	int engineerChargeTime;
 	int medicChargeTime;
+	int cvopsChargeTime;
 
 	int gametype;
 
@@ -336,7 +337,8 @@ int Pmove( pmove_t *pmove );
 #define PC_SOLDIER              1   
 #define PC_MEDIC                2   
 #define PC_ENGINEER             3   
-#define PC_LT                   4   
+#define PC_LT                   4
+#define PC_CVOPS                5   
 #define PC_MEDIC_CHARGETIME     30000 
 
 
@@ -437,9 +439,9 @@ typedef enum {
 	PW_NOFATIGUE,
 	PW_REDFLAG,
 	PW_BLUEFLAG,
-	PW_BALL,
 	PW_VAMPIRE,
 	PW_AMMO,
+	PW_XSHIELD,
 	PW_NUM_POWERUPS
 } powerup_t;
 
@@ -455,15 +457,23 @@ typedef enum {
 
 typedef enum {
 	HI_NONE,
+	// draw in HUD
 	HI_WINE,
 	HI_ADRENALINE,
 	HI_BANDAGES,
 	HI_BOOK1,   
 	HI_BOOK2,   
-	HI_BOOK3,   
+	HI_BOOK3,
+	HI_BOOK4,   
 	HI_EG_SYRINGE,
 	HI_BG_SYRINGE,
 	HI_LP_SYRINGE,
+	HI_CROSS,
+	HI_EMP,
+	HI_XSHIELD,
+	// boundary marker
+	HI_HUD_VISIBLE_END,
+	// for special logic
 	HI_KNIVES,
 	HI_M97,
 	HI_AUTO5,
@@ -507,6 +517,9 @@ typedef enum
 	AICHAR_ZOMBIE_GHOST,
 	AICHAR_ZOMBIE_FLAME,
 	AICHAR_LOPER_SPECIAL,
+	AICHAR_MERCENARY,
+	AICHAR_TRENCH,
+	AICHAR_FLESH,
 	NUM_CHARACTERS
 } AICharacters_t;
 
@@ -546,7 +559,8 @@ typedef enum {
 	WP_BAR,
 	// Shotguns
 	WP_M97,
-	WP_AUTO5, 
+	WP_AUTO5,
+	WP_M30, 
 	// Heavy Weapons
 	WP_BROWNING,
 	WP_MG42M,
@@ -563,9 +577,9 @@ typedef enum {
 	WP_AIRSTRIKE,
 	WP_ARTY,
 	WP_POISONGAS,
-	WP_POISONGAS_MEDIC,
 	WP_SMOKETRAIL,          
 	WP_HOLYCROSS,
+	WP_SMOKE_BOMB,
 	// Alt Modes
 	WP_SNIPERRIFLE, 
     WP_SNOOPERSCOPE,
@@ -659,7 +673,6 @@ static const int autoReloadWeapons[] = {
 	WP_FLAMETHROWER,
 	WP_POISONGAS,
 	WP_AIRSTRIKE,
-	WP_POISONGAS_MEDIC,
 	WP_DYNAMITE_ENG,
 	WP_KNIFE,
 	WP_M7,
@@ -751,6 +764,7 @@ typedef enum {
 	EV_FILL_CLIP,
 	EV_FILL_CLIP_FULL,
 	EV_FILL_CLIP_AI,
+	EV_RESET_ZOOM,
 	EV_WEAP_OVERHEAT,
 	EV_CHANGE_WEAPON,
 	EV_FIRE_WEAPON,
@@ -778,6 +792,8 @@ typedef enum {
 	EV_USE_ITEM13,
 	EV_USE_ITEM14,
 	EV_USE_ITEM15,
+	EV_USE_ITEM16,
+	EV_USE_ITEM17,
 	EV_ITEM_RESPAWN,
 	EV_ITEM_POP,
 	EV_PLAYER_TELEPORT_IN,
@@ -806,6 +822,7 @@ typedef enum {
 	EV_POWERUP_QUAD,
 	EV_POWERUP_BATTLESUIT,
 	EV_POWERUP_BATTLESUIT_SURV,
+	EV_POWERUP_XSHIELD,
 	EV_POWERUP_REGEN,
 	EV_GIB_PLAYER,          // gib a previously living player
 	EV_GIB_VAMPIRISM,
@@ -869,6 +886,7 @@ typedef enum {
 	EV_QUICKGRENS,
 	EV_PLAYER_HIT,  // hitsound event
 	EV_STOP_RELOADING_SOUND,
+    EV_EMP_WAVE,
 	EV_MAX_EVENTS   // just added as an 'endcap'
 } entity_event_t;
 
@@ -1039,9 +1057,11 @@ extern char *animStringsOld[];      // defined in bg_misc.c
 typedef enum
 {
 	HIT_NONE = 0,
-	HIT_TEAMSHOT,
+	HIT_BODYSHOT,
 	HIT_HEADSHOT,
-	HIT_BODYSHOT
+	HIT_TEAMSHOT,
+	HIT_DEATHSHOT,		// this shot killed the enemy
+	HIT_MAX_NUM
 } hitEvent_t;
 
 typedef enum {
@@ -1197,6 +1217,7 @@ typedef enum {
 	MOD_BROWNING,
 	MOD_M97,
 	MOD_AUTO5,
+	MOD_M30,
 	MOD_HDM,
 	MOD_REVOLVER,
 	MOD_GRENADE_PINEAPPLE,
@@ -1221,6 +1242,7 @@ typedef enum {
 	MOD_GRAPPLE,
 	MOD_EXPLOSIVE,
 	MOD_POISONGAS,
+	MOD_SMOKEBOMB,
 	MOD_ZOMBIESPIT,
 	MOD_ZOMBIESPIT_SPLASH,
 	MOD_ZOMBIESPIRIT,
@@ -1289,7 +1311,7 @@ typedef enum {
 } itemType_t;
 
 #define MAX_ITEM_MODELS 3
-#define MAX_ITEM_ICONS 16
+#define MAX_ITEM_ICONS 32
 
 typedef struct gitem_s {
 	char        *classname; // spawning name
@@ -1332,7 +1354,7 @@ weapon_t BG_FindAmmoForWeapon( weapon_t weapon );
 weapon_t BG_FindClipForWeapon( weapon_t weapon );
 gitem_t *BG_FindItemForPerk( perk_t perk );
 
-qboolean BG_AkimboFireSequence( int weapon, int akimboClip, int coltClip );
+qboolean BG_AkimboFireSequence( int weapon, int akimboClip );
 
 #define IS_VALID_WEAPON(w) ((w) > WP_NONE && (w) < WP_NUM_WEAPONS)
 #define ITEM_INDEX( x ) ( ( x ) - bg_itemlist )

@@ -176,6 +176,7 @@ typedef enum {
 	UIMENU_BOOK1,           //----(SA)	added
 	UIMENU_BOOK2,           //----(SA)	added
 	UIMENU_BOOK3,           //----(SA)	added
+	UIMENU_BOOK4,
 	UIMENU_WM_PICKTEAM,     // NERVE - SMF - for multiplayer only
 	UIMENU_WM_PICKPLAYER,   // NERVE - SMF - for multiplayer only
 	UIMENU_WM_QUICKMESSAGE, // NERVE - SMF

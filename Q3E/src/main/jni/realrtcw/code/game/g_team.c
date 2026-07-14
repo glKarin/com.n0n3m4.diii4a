@@ -107,6 +107,24 @@ qboolean OnSameTeam( gentity_t *ent1, gentity_t *ent2 ) {
 	return qfalse;
 }
 
+void G_FixupEntityTeamNum( gentity_t *ent ) {
+    if ( !ent ) return;
+
+    // Only for characters (players + AI that are sent as ET_PLAYER)
+    if ( ent->s.eType != ET_PLAYER ) {
+        return;
+    }
+
+    // Players already have real team in persistant/session.
+    if ( ent->client ) {
+        ent->s.teamNum = ent->client->sess.sessionTeam;  // TEAM_AXIS/TEAM_ALLIES/TEAM_SPECTATOR
+        return;
+    }
+
+    // AI: use aiTeam. This matches your OnSameTeam() logic.
+    // Make sure your aiTeam values match TEAM_AXIS / TEAM_ALLIES.
+    ent->s.teamNum = ent->aiTeam;
+}
 
 /*
 ================

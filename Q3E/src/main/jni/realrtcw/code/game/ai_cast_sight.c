@@ -244,6 +244,12 @@ qboolean AICast_CheckVisibility( gentity_t *srcent, gentity_t *destent ) {
     if (destent->flags & FL_NOTARGET) {
         return qfalse;
     }
+
+	// for smoke bomb
+	if ( srcent && destent && srcent->client && destent->client && srcent->health > 0 && AICast_BotEntInvisibleBySmokeBomb( srcent->client->ps.origin, destent->client->ps.origin ) ) {
+		return qfalse;
+	}
+
 	//
 	viewer = srcent->s.number;
 	ent = destent->s.number;
@@ -343,6 +349,11 @@ void AICast_UpdateVisibility( gentity_t *srcent, gentity_t *destent, qboolean sh
 	int cnt, i;
 
 	if ( destent->flags & FL_NOTARGET ) {
+		return;
+	}
+
+	// for smoke bomb
+	if ( srcent && destent && srcent->client && destent->client && srcent->health > 0 && AICast_BotEntInvisibleBySmokeBomb( srcent->client->ps.origin, destent->client->ps.origin ) ) {
 		return;
 	}
 
@@ -786,4 +797,56 @@ escape:
 		dest = 0;
 	}
 	lastdest = dest;
+}
+
+/*
+==================
+AICast_BotEntInvisibleBySmokeBomb
+
+returns whether smoke from smoke bombs blocks vision from start to end
+==================
+
+  Mad Doc xkan, 11/25/2002
+*/
+#define MAX_SMOKE_RADIUS 320.0
+#define MAX_SMOKE_RADIUS_TIME 10000.0
+#define UNAFFECTED_BY_SMOKE_DIST SQR( 100 )
+
+qboolean AICast_BotEntInvisibleBySmokeBomb( vec3_t start, vec3_t end ) {
+	gentity_t *ent = NULL;
+	vec3_t smokeCenter;
+	float smokeRadius;
+
+	// if the target is close enough, vision is not affected by smoke bomb
+	if (g_gametype.integer != GT_SURVIVAL ) {
+	if ( DistanceSquared( start,end ) < UNAFFECTED_BY_SMOKE_DIST ) {
+		return qfalse;
+	}
+    }
+
+	while ( ( ent = G_FindSmokeBomb( ent ) ) ) {
+		if ( ent->s.effect1Time == 16 ) {
+			// xkan, the smoke has not really started yet, see weapon_smokeBombExplode
+			// and CG_RenderSmokeGrenadeSmoke
+			continue;
+		}
+		// check the distance
+		VectorCopy( ent->s.pos.trBase, smokeCenter );
+		// raise the center to better match the position of the smoke, see
+		// CG_SpawnSmokeSprite().
+		smokeCenter[2] += 32;
+		// smoke sprite has a maximum radius of 640/2. and it takes a while for it to
+		// reach that size, so adjust the radius accordingly.
+		smokeRadius = MAX_SMOKE_RADIUS *
+					  ( ( level.time - ent->grenadeExplodeTime ) / MAX_SMOKE_RADIUS_TIME );
+		if ( smokeRadius > MAX_SMOKE_RADIUS ) {
+			smokeRadius = MAX_SMOKE_RADIUS;
+		}
+		// if distance from line is short enough, vision is blocked by smoke
+		if ( DistanceFromLineSquared( smokeCenter, start, end ) < smokeRadius * smokeRadius ) {
+			return qtrue;
+		}
+	}
+
+	return qfalse;
 }

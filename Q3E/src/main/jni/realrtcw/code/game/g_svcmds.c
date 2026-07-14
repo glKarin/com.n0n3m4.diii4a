@@ -516,7 +516,7 @@ qboolean    ConsoleCommand( void ) {
 			if ( strrchr( cmd, '.' ) ) {
 				cmd[strrchr( cmd,'.' ) - cmd] = '\0';
 			}
-			if ( !Q_stricmp( cmd, "current" ) ) {     // beginning of map
+			if ( !Q_stricmp( cmd, "current_realrtcw" ) ) {     // beginning of map
 				Com_Printf( "sorry, '%s' is a reserved savegame name.  please use another name.\n", cmd );
 				return qtrue;
 			}

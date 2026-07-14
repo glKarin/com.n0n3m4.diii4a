@@ -646,7 +646,8 @@ issues.
 #ifdef DEDICATED
 #	define Q3CONFIG_CFG "wolfconfig_server.cfg"
 #else
-#	define Q3CONFIG_CFG "realrtcwconfig.cfg"
+#   define RRTCW_VARIABLES "realrtcw_cvars.cfg"
+#   define RRTCW_BINDINGS  "realrtcw_binds.cfg"
 #endif
 
 qboolean FS_Initialized( void );
@@ -731,6 +732,10 @@ void    FS_WriteFile( const char *qpath, const void *buffer, int size );
 
 long FS_filelength(fileHandle_t f);
 // doesn't work for files that are opened from a pack file
+
+long FS_filelengthInPak(fileHandle_t f);
+qboolean FS_isFileHandleInPak(fileHandle_t f);
+// added, for files that are from a pack file
 
 int     FS_FTell( fileHandle_t f );
 // where are we?

@@ -294,7 +294,8 @@ void G_Script_ScriptLoad( void ) {
 		return;
 	}
 
-	level.scriptEntity = G_Alloc( len );
+	level.scriptEntity = G_Alloc( len + 1 );
+	memset( level.scriptEntity, 0 , len + 1 );
 	trap_FS_Read( level.scriptEntity, len, f );
 
 	trap_FS_FCloseFile( f );

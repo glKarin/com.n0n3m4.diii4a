@@ -10,7 +10,7 @@ import com.karin.idTech4Amm.misc.TextHelper;
 public final class Constants
 {
     public static final int    CONST_UPDATE_RELEASE = 72;
-    public static final String CONST_RELEASE = "2026-03-08"; // 02-12; 05-08
+    public static final String CONST_RELEASE = "2026-07-08"; // 02-12; 05-08
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -30,9 +30,8 @@ public final class Constants
 	public static String[] CONST_CHANGES()
     {
         return new String[] {
-            "Add `Quadrilateral Cowboy`(ver 1.0.2602252) support, game standalone directory named `qc`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://blendogames.com/qc/", "Quadrilateral Cowboy") + "`.",
-            "Add `Icarus Starship Command Simulator`(ver 1.0.9) support, game standalone directory named `icarus`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/620170/Icarus_Starship_Command_Simulator/", "Icarus Starship Command Simulator") + "`.",
-            "Add new game chooser on launcher.",
+            "Add `Enemy Territory: QUAKE Wars`(ver 1.5) support, game standalone directory named `etqw`, game data directory named `etqwbase`. More view in `" + TextHelper.GenLinkText("https://www.splashdamage.com/games/enemy-territory-quake-wars/", "Enemy Territory: QUAKE Wars") + "`.",
+            "Update RealRTCW version to 5.4.",
         };
 	};
 

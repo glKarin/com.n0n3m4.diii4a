@@ -367,11 +367,17 @@ static void CG_SoundParseSounds( char *filename, char *buffer ) {
 CG_SoundLoadSoundFiles
 ===============
 */
-#define MAX_SOUND_FILES 256
-#define MAX_BUFFER 32768
+/*
+===============
+CG_SoundLoadSoundFiles
+===============
+*/
+#define MAX_SOUND_FILES 512
+#define MAX_BUFFER 65536
+
 static void CG_SoundLoadSoundFiles( void ) {
-	char soundFiles[MAX_SOUND_FILES][MAX_QPATH];
-	char buffer[MAX_BUFFER];
+	static char soundFiles[MAX_SOUND_FILES][MAX_QPATH];
+	static char buffer[MAX_BUFFER + 1];
 	char *text;
 	char filename[MAX_QPATH];
 	fileHandle_t f;
@@ -393,6 +399,7 @@ static void CG_SoundLoadSoundFiles( void ) {
 	trap_FS_Read( buffer, len, f );
 	buffer[len] = 0;
 	trap_FS_FCloseFile( f );
+
 	// parse the list
 	text = buffer;
 	numSounds = 0;
@@ -400,6 +407,9 @@ static void CG_SoundLoadSoundFiles( void ) {
 		token = COM_ParseExt( &text, qtrue );
 		if ( !token[0] ) {
 			break;
+		}
+		if ( numSounds >= MAX_SOUND_FILES ) {
+			CG_Error( "Too many sound files listed in %s (max = %i)\n", filename, MAX_SOUND_FILES );
 		}
 		Com_sprintf( soundFiles[numSounds++], MAX_QPATH, "%s", token );
 	}
@@ -423,11 +433,11 @@ static void CG_SoundLoadSoundFiles( void ) {
 		}
 		memset( buffer, 0, sizeof( buffer ) );
 		trap_FS_Read( buffer, len, f );
+		buffer[len] = 0;
 		trap_FS_FCloseFile( f );
 		CG_SoundParseSounds( filename, buffer );
 	}
 }
-
 /*
 ==============
 CG_SoundInit

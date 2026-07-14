@@ -1037,13 +1037,13 @@ removed	: used to be clipped flag
 #define FOG_BITS               5
 
 #define QSORT_DLIGHTMAP_SHIFT      0
-#define	QSORT_FOGNUM_SHIFT	2
+#define QSORT_FOGNUM_SHIFT         2
 #define QSORT_ATI_TESS_SHIFT       8
-#define	QSORT_REFENTITYNUM_SHIFT	11
-#define	QSORT_SHADERNUM_SHIFT	(QSORT_REFENTITYNUM_SHIFT+REFENTITYNUM_BITS)
+#define QSORT_REFENTITYNUM_SHIFT   11
+#define QSORT_SHADERNUM_SHIFT      (QSORT_REFENTITYNUM_SHIFT + REFENTITYNUM_BITS)
 
 // Compile-time guard: total bits must fit in 64
-#if (QSORT_SHADERNUM_SHIFT+SHADERNUM_BITS) > 64
+#if (QSORT_SHADERNUM_SHIFT + SHADERNUM_BITS) > 64
 #  error "Need to update sorting, too many bits for 64-bit key."
 #endif
 
@@ -1269,6 +1269,8 @@ typedef struct {
 
 	// RF, temp var used while parsing shader only
 	int allowCompress;
+
+	qboolean supportsNPOT;
 
 } trGlobals_t;
 

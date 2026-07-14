@@ -510,6 +510,7 @@ static float PM_CmdScale( usercmd_t *cmd ) {
 		     scale *= 1.3;
 			 break;
 		case AICHAR_ZOMBIE_SURV:
+		case AICHAR_FLESH:
 		case AICHAR_ZOMBIE_FLAME:
 		     scale *= 1.1;
 			 break;
@@ -2375,8 +2376,7 @@ void PM_BeginWeaponChange( int oldweapon, int newweapon, qboolean reload ) { //-
 	if ( oldweapon == WP_GRENADE_LAUNCHER ||
 		 oldweapon == WP_GRENADE_PINEAPPLE ||
 		 oldweapon == WP_DYNAMITE ||
-		 oldweapon == WP_PANZERFAUST ||
-		 oldweapon == WP_POISONGAS ) {
+		 oldweapon == WP_PANZERFAUST ) {
 		if ( !pm->ps->ammoclip[oldweapon] ) {  // you're empty, don't show grenade '0'
 			showdrop = qfalse;
 		}
@@ -2394,7 +2394,6 @@ void PM_BeginWeaponChange( int oldweapon, int newweapon, qboolean reload ) { //-
 	case WP_DYNAMITE_ENG:
 	case WP_GRENADE_LAUNCHER:
 	case WP_GRENADE_PINEAPPLE:
-	case WP_POISONGAS:
 	case WP_KNIFE:
 		pm->ps->grenadeTimeLeft = 0;        // initialize the timer on the potato you're switching to
 
@@ -2429,6 +2428,12 @@ void PM_BeginWeaponChange( int oldweapon, int newweapon, qboolean reload ) { //-
 	}
 
 	switchtime = 250;   // dropping/raising usually takes 1/4 sec.
+
+	// Fast Hands PRO: faster weapon switch
+	if ( pm->ps->perks[PERK_WEAPONHANDLING] >= 2 ) {
+		switchtime = 100;
+	}
+
 	// sometimes different switch times for alt weapons
 	switch ( oldweapon ) {
 	case WP_M1GARAND:
@@ -2518,6 +2523,11 @@ static void PM_FinishWeaponChange( void ) {
 	// dropping/raising usually takes 1/4 sec.
 	switchtime = 250;
 
+	// Fast Hands PRO: faster weapon switch
+	if ( pm->ps->perks[PERK_WEAPONHANDLING] >= 2 ) {
+		switchtime = 100;
+	}
+
 	// sometimes different switch times for alt weapons
 	switch ( newweapon ) {
 	case WP_FG42:
@@ -2588,6 +2598,12 @@ static void PM_ReloadClip(int weapon) {
 	if (!pm->ps->aiChar) {
 		if (weapon == WP_M97 || weapon == WP_AUTO5) {
 			ammomove = 1;
+
+			if (pm->ps->perks[PERK_WEAPONHANDLING]) {
+				if (maxclip - ammoclip >= 2) {
+					ammomove = 2;
+				}
+			}
 		}
 
 		if (weapon == WP_M1941 && ammoclip > 0) {
@@ -2602,14 +2618,6 @@ static void PM_ReloadClip(int weapon) {
 	if (ammomove > 0) {
 		pm->ps->ammo[ammoIndex]     -= ammomove;
 		pm->ps->ammoclip[clipIndex] += ammomove;
-	}
-
-	// Reload secondary weapon if akimbo
-	if (weapon == WP_AKIMBO) {
-		PM_ReloadClip(WP_COLT);
-	}
-	if (weapon == WP_DUAL_TT33) {
-		PM_ReloadClip(WP_TT33);
 	}
 }
 
@@ -2734,45 +2742,10 @@ void PM_CheckForReload(int weapon) {
 			if (pm->ps->ammoclip[clipWeap] < BG_GetMaxClip(pm->ps, weapon)) {
 				doReload = qtrue;
 			}
-
-			// Dual weapon check (Colt or TT33)
-			if (weapon == WP_AKIMBO) {
-				int coltClip = BG_FindClipForWeapon(WP_COLT);
-				if (pm->ps->ammoclip[coltClip] < BG_GetMaxClip(pm->ps, WP_COLT)) {
-					doReload = qtrue;
-				}
-			} else if (weapon == WP_DUAL_TT33) {
-				int tt33Clip = BG_FindClipForWeapon(WP_TT33);
-				if (pm->ps->ammoclip[tt33Clip] < BG_GetMaxClip(pm->ps, WP_TT33)) {
-					doReload = qtrue;
-				}
-			}
 		}
 	} else if (autoreload) {
 		if (pm->ps->ammoclip[clipWeap] == 0 && pm->ps->ammo[ammoWeap]) {
-			switch (weapon) {
-				case WP_AKIMBO:
-					if (pm->ps->ammoclip[WP_COLT] == 0) doReload = qtrue;
-					break;
-				case WP_DUAL_TT33:
-					if (pm->ps->ammoclip[WP_TT33] == 0) doReload = qtrue;
-					break;
-				case WP_COLT:
-					if (pm->ps->weapon == WP_AKIMBO && pm->ps->ammoclip[WP_AKIMBO] == 0)
-						doReload = qtrue;
-					else
-						doReload = qtrue;
-					break;
-				case WP_TT33:
-					if (pm->ps->weapon == WP_DUAL_TT33 && pm->ps->ammoclip[WP_DUAL_TT33] == 0)
-						doReload = qtrue;
-					else
-						doReload = qtrue;
-					break;
-				default:
-					doReload = qtrue;
-					break;
-			}
+			doReload = qtrue;
 		}
 	}
 
@@ -2797,7 +2770,6 @@ static void PM_SwitchIfEmpty( void ) {
 	case WP_GRENADE_PINEAPPLE:
 	case WP_DYNAMITE:
 	case WP_PANZERFAUST:
-	case WP_POISONGAS:
 	case WP_KNIFE:
 		break;
 	default:
@@ -2820,7 +2792,6 @@ static void PM_SwitchIfEmpty( void ) {
 	case WP_GRENADE_LAUNCHER:
 	case WP_GRENADE_PINEAPPLE:
 	case WP_DYNAMITE:
-	case WP_POISONGAS:
 	case WP_KNIFE:
 		// take the 'weapon' away from the player
 		COM_BitClear( pm->ps->weapons, pm->ps->weapon );
@@ -2846,16 +2817,6 @@ void PM_WeaponUseAmmo( int wp, int amount ) {
 		pm->ps->ammo[ BG_FindAmmoForWeapon( wp )] -= amount;
 	} else {
 		takeweapon = BG_FindClipForWeapon( wp );
-		if ( wp == WP_AKIMBO ) {
-			if ( !BG_AkimboFireSequence( wp, pm->ps->ammoclip[WP_AKIMBO], pm->ps->ammoclip[WP_COLT] ) ) {
-				takeweapon = WP_COLT;
-			}
-		} else if ( wp == WP_DUAL_TT33 ) {
-			if ( !BG_AkimboFireSequence( wp, pm->ps->ammoclip[WP_DUAL_TT33], pm->ps->ammoclip[WP_TT33] ) ) {
-				takeweapon = WP_TT33;
-			}
-		}
-
 		pm->ps->ammoclip[takeweapon] -= amount;
 	}
 }
@@ -2873,16 +2834,6 @@ int PM_WeaponAmmoAvailable( int wp ) {
 		return pm->ps->ammo[ BG_FindAmmoForWeapon( wp )];
 	} else {
 		takeweapon = BG_FindClipForWeapon( wp );
-		if ( wp == WP_AKIMBO ) {
-			if ( !BG_AkimboFireSequence( pm->ps->weapon, pm->ps->ammoclip[WP_AKIMBO], pm->ps->ammoclip[WP_COLT] ) ) {
-				takeweapon = WP_COLT;
-			}
-		} else if ( wp == WP_DUAL_TT33 ) {
-			if ( !BG_AkimboFireSequence( pm->ps->weapon, pm->ps->ammoclip[WP_DUAL_TT33], pm->ps->ammoclip[WP_TT33] ) ) {
-				takeweapon = WP_TT33;
-			}
-		}
-
 		return pm->ps->ammoclip[takeweapon];
 	}
 }
@@ -3117,11 +3068,11 @@ static qboolean PM_CheckGrenade() {
 
 		if (pm->ps->weapon != WP_GRENADE_LAUNCHER &&
 		pm->ps->weapon != WP_GRENADE_PINEAPPLE &&
+		pm->ps->weapon != WP_SMOKE_BOMB &&
 		pm->ps->weapon != WP_DYNAMITE &&
 		pm->ps->weapon != WP_POISONGAS &&
 		pm->ps->weapon != WP_AIRSTRIKE &&
 		pm->ps->weapon != WP_KNIFE &&
-		pm->ps->weapon != WP_POISONGAS_MEDIC &&
 	    pm->ps->weapon != WP_DYNAMITE_ENG ) {
 			return qfalse;
 		}
@@ -3155,7 +3106,7 @@ static qboolean PM_CheckGrenade() {
 
 				if ( pm->ps->grenadeTimeLeft <= 0 ) {   // give two frames advance notice so there's time to launch and detonate
 					PM_WeaponUseAmmo( pm->ps->weapon, 1 ); 
-                    if (!( pm->ps->weapon == WP_POISONGAS))
+                    if (!( pm->ps->weapon == WP_POISONGAS) && !( pm->ps->weapon == WP_SMOKE_BOMB))
 					{
 					PM_AddEvent( EV_GRENADE_SUICIDE );      //----(SA)	die, dumbass
 					}
@@ -3282,8 +3233,8 @@ static void PM_Weapon( void ) {
 		return;
 	}
 
-	akimboFire_colt = BG_AkimboFireSequence( pm->ps->weapon, pm->ps->ammoclip[WP_AKIMBO], pm->ps->ammoclip[WP_COLT] );
-	akimboFire_tt33 = BG_AkimboFireSequence( pm->ps->weapon, pm->ps->ammoclip[WP_DUAL_TT33], pm->ps->ammoclip[WP_TT33] );
+	akimboFire_colt = BG_AkimboFireSequence( pm->ps->weapon, pm->ps->ammoclip[WP_AKIMBO] );
+	akimboFire_tt33 = BG_AkimboFireSequence( pm->ps->weapon, pm->ps->ammoclip[WP_DUAL_TT33] );
 
 	if ( 0 ) {
 		switch ( pm->ps->weaponstate ) {
@@ -3347,7 +3298,7 @@ static void PM_Weapon( void ) {
 				if ( item && ( pm->ps->holdable[pm->cmd.holdable] >= item->quantity ) ) { // ->quantity being how much 'ammo' is taken per use
 					PM_AddEvent( EV_USE_ITEM0 + pm->cmd.holdable );
 					// don't take books away when used
-					if ( pm->cmd.holdable < HI_BOOK1 || pm->cmd.holdable > HI_BOOK3 ) {
+					if ( pm->cmd.holdable < HI_BOOK1 || pm->cmd.holdable > HI_BOOK4 ) {
 						pm->ps->holdable[ pm->cmd.holdable ] -= item->quantity;
 					}
 
@@ -3534,6 +3485,7 @@ static void PM_Weapon( void ) {
 		if ( ( pm->ps->pm_flags & PMF_SPRINTING ) && ( pm->ps->sprintTime > 0 ) ){
 			if ( pm->ps->weaponstate != WEAPON_SPRINT_IN ) {
 				pm->ps->weaponstate = WEAPON_SPRINT_IN;
+				PM_AddEvent( EV_RESET_ZOOM );
 				PM_StartWeaponAnim(PM_SprintInAnimForWeapon(pm->ps->weapon));
 				pm->ps->weaponTime += 300;
 			}
@@ -3566,7 +3518,7 @@ static void PM_Weapon( void ) {
 			}
 		}
 
-	if ( pm->ps->weapon == WP_POISONGAS_MEDIC ) {
+	if ( pm->ps->weapon == WP_POISONGAS ) {
 			if ( pm->cmd.serverTime - pm->ps->classWeaponTime < ( pm->medicChargeTime ) ) {
 				return;
 			}
@@ -3577,9 +3529,15 @@ static void PM_Weapon( void ) {
 				return;
 			}
 		}
+
+	if ( pm->ps->weapon == WP_SMOKE_BOMB ) {
+			if ( pm->cmd.serverTime - pm->ps->classWeaponTime < ( pm->cvopsChargeTime ) ) {
+				return;
+			}
+		}
 	// check for fire
 	if ( (!(pm->cmd.buttons & BUTTON_ATTACK) && !PM_AltFire() && !delayedFire) 
-	    || (pm->ps->leanf != 0 && !PM_AltFiring(delayedFire) && pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_POISONGAS) )
+	    || (pm->ps->leanf != 0 && !PM_AltFiring(delayedFire) && pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE ) )
 	{
 		pm->ps->weaponTime  = 0;
 		pm->ps->weaponDelay = 0;
@@ -3623,8 +3581,8 @@ static void PM_Weapon( void ) {
 		if ( pm->ps->weapon != WP_KNIFE &&
 			 pm->ps->weapon != WP_GRENADE_LAUNCHER &&
 			 pm->ps->weapon != WP_GRENADE_PINEAPPLE &&
-			 pm->ps->weapon != WP_POISONGAS &&
-			 pm->ps->weapon != WP_POISONGAS_MEDIC ) {
+			 pm->ps->weapon != WP_SMOKE_BOMB &&
+			 pm->ps->weapon != WP_POISONGAS ) {
 			PM_AddEvent( EV_NOFIRE_UNDERWATER );        // event for underwater 'click' for nofire
 			pm->ps->weaponTime  = 500;
 			return;
@@ -3657,8 +3615,10 @@ static void PM_Weapon( void ) {
 	case WP_FG42SCOPE:
 	case WP_M97:
 	case WP_AUTO5:
+	case WP_M30:
 	case WP_AIRSTRIKE:
-	case WP_POISONGAS_MEDIC:
+	case WP_POISONGAS:
+	case WP_SMOKE_BOMB:
 		if ( !weaponstateFiring ) {
 			if ( pm->ps->aiChar && pm->ps->weapon == WP_VENOM ) {
 				// AI get fast spin-up
@@ -3721,7 +3681,6 @@ static void PM_Weapon( void ) {
 	case WP_DYNAMITE_ENG:
 	case WP_GRENADE_LAUNCHER:
 	case WP_GRENADE_PINEAPPLE:
-case WP_POISONGAS:
 	if ( !delayedFire ) {
 		if ( pm->ps->aiChar ) {
 			// ai characters go into their regular animation setup
@@ -3799,6 +3758,7 @@ case WP_POISONGAS:
 			case WP_GRENADE_LAUNCHER:
 			case WP_GRENADE_PINEAPPLE:
 			case WP_POISONGAS:
+			case WP_SMOKE_BOMB:
 				playswitchsound = qfalse;
 				break;
 			// some weapons not allowed to reload.  must switch back to primary first
@@ -3894,10 +3854,12 @@ case WP_POISONGAS:
 	case WP_M1GARAND:
 	case WP_GRENADE_LAUNCHER:
 	case WP_GRENADE_PINEAPPLE:
+	case WP_SMOKE_BOMB:
 	case WP_DYNAMITE:
 	case WP_DYNAMITE_ENG:
 	case WP_M97:
 	case WP_AUTO5:
+	case WP_M30:
     case WP_M7:
 		PM_StartWeaponAnim( weapattackanim );
 		break;
@@ -3913,7 +3875,7 @@ case WP_POISONGAS:
 	case WP_THOMPSON:
 	case WP_STEN:
 	case WP_AIRSTRIKE:
-	case WP_POISONGAS_MEDIC:
+	case WP_POISONGAS:
 		PM_ContinueWeaponAnim( weapattackanim );
 		break;
 
@@ -3931,7 +3893,7 @@ case WP_POISONGAS:
 		break;
 	}
 
-		if ( pm->ps->weapon == WP_AIRSTRIKE || pm->ps->weapon == WP_POISONGAS_MEDIC || pm->ps->weapon == WP_DYNAMITE_ENG ) { 
+		if ( pm->ps->weapon == WP_AIRSTRIKE || pm->ps->weapon == WP_POISONGAS || pm->ps->weapon == WP_DYNAMITE_ENG ) { 
 			PM_AddEvent( EV_NOAMMO );
 		}
 
@@ -3997,20 +3959,8 @@ case WP_POISONGAS:
 	        }
 	    break;
 	    case WP_AKIMBO:
+		case WP_DUAL_TT33:
 		    addTime = BG_GetNextShotTime(pm->ps, pm->ps->weapon, qfalse);
-		       if ( !pm->ps->ammoclip[WP_AKIMBO] || !pm->ps->ammoclip[WP_COLT] ) {
-			       if ( ( !pm->ps->ammoclip[WP_AKIMBO] && !akimboFire_colt ) || ( !pm->ps->ammoclip[WP_COLT] && akimboFire_colt ) ) {
-				        addTime = 2 * BG_GetNextShotTime(pm->ps, pm->ps->weapon, qfalse);
-			       }
-		       }
-		break;
-	    case WP_DUAL_TT33:
-		    addTime = BG_GetNextShotTime(pm->ps, pm->ps->weapon, qfalse);
-		       if ( !pm->ps->ammoclip[WP_DUAL_TT33] || !pm->ps->ammoclip[WP_TT33] ) {
-			       if ( ( !pm->ps->ammoclip[WP_DUAL_TT33] && !akimboFire_tt33 ) || ( !pm->ps->ammoclip[WP_TT33] && akimboFire_tt33 ) ) {
-				        addTime = 2 * BG_GetNextShotTime(pm->ps, pm->ps->weapon, qfalse);
-			       }
-		       }
 		break;
 	}
 
@@ -4067,8 +4017,12 @@ case WP_POISONGAS:
 	}
 
 
-	if ( pm->ps->perks[PERK_RIFLING] ) {
+	if ( pm->ps->perks[PERK_RIFLING] && pm->ps->weapon != WP_KNIFE ) {
 		addTime /= 1.25;
+	}
+
+	if ( pm->ps->perks[PERK_WEAPONHANDLING] >= 2 && pm->ps->weapon == WP_KNIFE ) {
+		addTime /= 1.5;
 	}
 
 	// add the recoil amount to the aimSpreadScale
@@ -4087,9 +4041,9 @@ case WP_POISONGAS:
 	switch(pm->ps->weapon) {
 		case WP_GRENADE_LAUNCHER:
 		case WP_GRENADE_PINEAPPLE:
+		case WP_SMOKE_BOMB:
 		case WP_POISONGAS:
 		case WP_AIRSTRIKE:
-		case WP_POISONGAS_MEDIC:
 			pm->ps->weaponstate = WEAPON_DROPPING;
 			pm->ps->holdable[HI_KNIVES] = 0;
 			break;
@@ -4788,7 +4742,7 @@ void PmoveSingle( pmove_t *pmove ) {
 			}
 
 			// don't allow binocs if in the middle of throwing grenade
-			if ( ( pm->ps->weapon == WP_GRENADE_LAUNCHER || pm->ps->weapon == WP_GRENADE_PINEAPPLE || pm->ps->weapon == WP_DYNAMITE || pm->ps->weapon == WP_DYNAMITE_ENG || pm->ps->weapon == WP_POISONGAS ) && pm->ps->grenadeTimeLeft > 0 ) {
+			if ( ( pm->ps->weapon == WP_GRENADE_LAUNCHER || pm->ps->weapon == WP_GRENADE_PINEAPPLE || pm->ps->weapon == WP_SMOKE_BOMB || pm->ps->weapon == WP_DYNAMITE || pm->ps->weapon == WP_DYNAMITE_ENG || pm->ps->weapon == WP_POISONGAS ) && pm->ps->grenadeTimeLeft > 0 ) {
 				pm->ps->eFlags &= ~EF_ZOOMING;
 			}
 		}

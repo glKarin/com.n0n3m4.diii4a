@@ -273,6 +273,15 @@ MAX_PN_TRIANGLES_TESSELATION_LEVEL_ATI	GetIntegerv Z+		1											-
 */
 //----(SA)	end
 
+static qboolean R_SupportsNPOT( void ) {
+    const char *ext = (const char *)qglGetString( GL_EXTENSIONS );
+
+    if ( !ext ) {
+		return qfalse;
+	}
+
+    return strstr( ext, "GL_ARB_texture_non_power_of_two" ) || strstr( ext, "GL_OES_texture_npot" );
+}
 
 /*
 ** InitOpenGL
@@ -308,6 +317,8 @@ static void InitOpenGL( void ) {
 			glConfig.maxTextureSize = 0;
 		}
 	}
+
+	tr.supportsNPOT = R_SupportsNPOT();
 
 	// set default state
 	GL_SetDefaultState();
@@ -1255,7 +1266,7 @@ void R_Register( void ) {
 	r_mode = ri.Cvar_Get( "r_mode", "-2", CVAR_ARCHIVE | CVAR_LATCH );
 	r_fullscreen = ri.Cvar_Get( "r_fullscreen", "1", CVAR_ARCHIVE | CVAR_LATCH );
 #else
-	r_mode = ri.Cvar_Get( "r_mode", "3", CVAR_ARCHIVE | CVAR_LATCH );
+	r_mode = ri.Cvar_Get( "r_mode", "-2", CVAR_ARCHIVE | CVAR_LATCH );
 	r_fullscreen = ri.Cvar_Get( "r_fullscreen", "1", CVAR_ARCHIVE | CVAR_LATCH );
 #endif
 	r_noborder = ri.Cvar_Get("r_noborder", "0", CVAR_ARCHIVE | CVAR_LATCH );

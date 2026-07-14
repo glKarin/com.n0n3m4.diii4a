@@ -447,6 +447,12 @@ struct gentity_s {
 	int isWeapon;    
 	int wave;				   // wave number, survival mode   
 	int lastPainMOD; // last meansOfDeath used in pain function        
+	int oneshot;
+
+	int empDisabledUntil;
+	int empFxUntil;
+	int empAnimState;
+	int empAnimToken; 
 };
 
 // Ridah
@@ -540,6 +546,8 @@ typedef struct {
 	int voteCount;                  // to prevent people from constantly calling votes
 	int teamVoteCount;              // to prevent people from constantly calling votes
 	qboolean teamInfo;              // send team overlay updates?
+
+	int resetStatsConfirmTime;
 } clientPersistant_t;
 
 
@@ -808,6 +816,13 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir );
 //
 void G_RunItem( gentity_t *ent );
 void RespawnItem( gentity_t *ent );
+gentity_t *G_DropSpecifiedItem( gentity_t *ent, gitem_t *item, int lifetimeMs, int dropChance );
+
+void CrossThink( gentity_t *timer );
+void CrossBurn( gentity_t *owner, gentity_t *targ );
+
+void EMP_Apply(gentity_t *owner, gentity_t *targ, int durationMs);
+void EMP_ClearFxThink(gentity_t *timer) ;
 
 void UseHoldableItem( gentity_t *ent, int item );
 void PrecacheItem( gitem_t *it );
@@ -1045,6 +1060,7 @@ void G_RunClient( gentity_t *ent );
 // g_team.c
 //
 qboolean OnSameTeam( gentity_t *ent1, gentity_t *ent2 );
+void G_FixupEntityTeamNum( gentity_t *ent );
 
 
 //
@@ -1234,6 +1250,7 @@ extern vmCvar_t g_medicChargeTime;
 extern vmCvar_t g_engineerChargeTime;
 extern vmCvar_t g_LTChargeTime;
 extern vmCvar_t g_soldierChargeTime;
+extern vmCvar_t g_cvopsChargeTime;
 // jpw
 
 extern vmCvar_t g_playerStart;      //----(SA)	added
@@ -1254,6 +1271,7 @@ extern vmCvar_t g_regen;
 extern vmCvar_t	g_flushItems;
 extern vmCvar_t g_vanilla_guns;
 extern vmCvar_t g_specialWaves;
+extern vmCvar_t g_survivalAiHealthCap;
 
 // Safe endgame fix
 extern qboolean g_endgameTriggered;

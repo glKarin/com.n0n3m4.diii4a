@@ -2745,25 +2745,9 @@ static void CG_PlayerPowerups( centity_t *cent ) {
 	}
 
 	// RF, AI don't use these effects, they are generally added manually by the game
-	if ( cent->currentState.aiChar ) {
-		return;
-	}
-
-//----(SA)	test stuff leave in, but comment out
-//	if(cg_forceModel.integer) {
-//		vec3_t orig, forward, li;
-//		trace_t		trace;
-//
-//		AngleVectors(cg.refdefViewAngles, forward, NULL, NULL);
-//		VectorNormalize(forward); // just in case
-//		VectorCopy(cent->lerpOrigin, orig);
-//		orig[2]+=cg.predictedPlayerState.viewheight;
-//		VectorMA(orig, 1000, forward, li);
-//		CG_Trace(&trace, orig, NULL, NULL, li, -1, MASK_SHOT);
-//		VectorMA(trace.endpos, -5, forward, li);
-//		trap_R_AddLightToScene( li, 100 + 100*trace.fraction, 1, 1, 1, 1 );
-//	}
-//----(SA)	end
+	//if ( cent->currentState.aiChar ) {
+		//return;
+	//}
 
 	powerups = cent->currentState.powerups;
 	if ( !powerups ) {
@@ -2781,11 +2765,6 @@ static void CG_PlayerPowerups( centity_t *cent ) {
 	}
 
 
-	// flight plays a looped sound
-//	if ( powerups & ( 1 << PW_FLIGHT ) ) {
-//		CG_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.flightSound, 255 );
-//	}
-
 	// redflag
 	if ( powerups & ( 1 << PW_REDFLAG ) ) {
 		CG_TrailItem( cent, cgs.media.redFlagModel );
@@ -2797,8 +2776,6 @@ static void CG_PlayerPowerups( centity_t *cent ) {
 		CG_TrailItem( cent, cgs.media.blueFlagModel );
 		trap_R_AddLightToScene( cent->lerpOrigin, 200 + ( rand() & 31 ), 0.2, 0.2, 1, 0 );
 	}
-
-	// haste leaves smoke trails
 	
 	if ( powerups & ( 1 << PW_HASTE_SURV ) ) {
 		CG_HasteTrail( cent );
@@ -3103,6 +3080,27 @@ static void CG_PlayerSplash( centity_t *cent ) {
 	verts[3].modulate[3] = 255;
 
 	trap_R_AddPolyToScene( cgs.media.wakeMarkShader, 4, verts );
+}
+
+
+static void CG_AddXShieldLoopSound( centity_t *cent ) {
+	const playerState_t *ps;
+
+	if ( cent->currentState.clientNum == cg.snap->ps.clientNum ) {
+		ps = &cg.predictedPlayerState;
+	} else {
+		ps = NULL;
+	}
+
+	if ( ps && ps->powerups[PW_XSHIELD] > cg.time ) {
+		CG_S_AddLoopingSound(
+			cent->currentState.number,
+			cent->lerpOrigin,	
+			vec3_origin,
+			cgs.media.xshieldLoopSound,
+			255
+		);
+	}
 }
 
 //==========================================================================
@@ -4203,173 +4201,11 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int team, enti
 		ent->reFlags |= REFLAG_FULL_LOD;
 	}
 
-//----(SA)	testing
-//----(SA)	disabling
-//	if( cent->currentState.eFlags & EF_DEAD ) {
-//		ent->reFlags |= REFLAG_DEAD_LOD;
-//	}
-//----(SA)	end
-
 	backupRefEnt = *ent;
 
 	if ( powerups & ( 1 << PW_INVIS ) ) {
 		ent->customShader = cgs.media.invisShader;
 		trap_R_AddRefEntityToScene( ent );
-#if 0
-		// -------------------------------
-		// Zombie effects
-		//
-	} else if ( es->aiChar == AICHAR_ZOMBIE ) {
-
-		// Zombie needs special processing, to remove the bits of flesh that have been torn away
-
-		if ( ent->hModel == cent->pe.torsoRefEnt.hModel ) {
-			//ent->reFlags = REFLAG_ZOMBIEFX;
-			ent->shaderTime = 0;
-		} else if ( ent->hModel == cent->pe.legsRefEnt.hModel )     {
-			//ent->reFlags = REFLAG_ZOMBIEFX2;	// ref needs to know this is the legs
-			ent->shaderTime = 0;
-		}
-
-		// first, check for portal spawning
-		if ( es->time2 ) {
-			if ( es->time2 < cg.time ) {
-				return; // not ready yet
-			}
-			// fade in the skeleton, skin should "compose" (reverse decomposition)
-			alpha = (float)( cg.time - es->time2 ) / PORTAL_ZOMBIE_SPAWNTIME;
-			if ( alpha > 1 ) {
-				alpha = 1;
-			}
-			// skeleton fades in towards end of effect
-			if ( alpha < 0.5 ) {
-				ent->shaderRGBA[3] = 0;
-			} else { ent->shaderRGBA[3] = ( unsigned char )( ( alpha - 0.5 ) * 2.0 * 255 );}
-			//
-			ent->shaderTime = 0.001 * ( 1.0 - alpha ) * ZOMBIEFX_FADEOUT_TIME;
-
-			if ( ent->hModel == cent->pe.headRefEnt.hModel ) {
-				//ent->reFlags = REFLAG_ZOMBIEFX;
-				ent->customShader = cgs.media.zombieHeadFadeShader;
-			}
-
-			trap_R_AddRefEntityToScene( ent );
-
-			// add flaming effect
-			onFire = qtrue;
-			alpha *= 0.5;
-
-		} else {
-
-			// if the Zombie is dead, the skin should decompose
-
-			ent->shaderRGBA[3] = 255;
-
-			if ( es->eFlags & EF_MONSTER_EFFECT2 &&
-				 cent->currentState.effect2Time < cg.time ) { // Ridah, Zombie death effect
-
-				if ( ent->hModel == cent->pe.headRefEnt.hModel ) {
-					//ent->reFlags = REFLAG_ZOMBIEFX;
-					ent->customShader = cgs.media.zombieHeadFadeShader;
-				}
-
-				ent->shaderTime = 0.001 * ( cg.time - cent->currentState.effect2Time );
-				trap_R_AddRefEntityToScene( ent );
-/*
-				// skeleton: add legs and head parts
-				if (ent->hModel == cent->pe.legsRefEnt.hModel) {
-					ent->skinNum = 0;
-					ent->reFlags = 0;
-					ent->customShader = cgs.media.skeletonSkinShader;
-
-					// legs
-					ent->hModel = cgs.media.skeletonLegsModel;
-					trap_R_AddRefEntityToScene( ent );
-
-					// torso (just get this so we can place the head correctly)
-					parentEnt = *ent;
-					CG_PositionEntityOnTag( ent, &parentEnt, parentEnt.hModel, "tag_torso", NULL );
-					ent->hModel = cgs.media.skeletonTorsoModel;
-
-					// head
-					parentEnt = *ent;
-					CG_PositionEntityOnTag( ent, &parentEnt, parentEnt.hModel, "tag_head", NULL );
-					ent->hModel = cgs.media.skeletonHeadModel;
-					trap_R_AddRefEntityToScene( ent );
-				}
-*/
-			} else {    // show it normally
-				trap_R_AddRefEntityToScene( ent );
-			}
-		}
-
-		// restore previous state
-		*ent = backupRefEnt;
-#endif
-/*
-	} else if (es->eFlags & EF_MONSTER_EFFECT2 && es->aiChar == AICHAR_ZOMBIE &&
-				cent->currentState.effect2Time < cg.time) {	// Ridah, Zombie death effect
-		const int fadeRiseTime = 4000;
-
-		if (cent->pe.zombieDeathFadeStart < cg.time && ent->hModel == cent->pe.legsRefEnt.hModel) {
-			// add the skeleton models starting with the legs
-			ent->fadeEndTime = 0;
-			ent->fadeStartTime = 0;
-			ent->skinNum = 0;
-
-			// legs
-			ent->hModel = cgs.media.skeletonLegsModel;
-			ent->customSkin = cgs.media.skeletonLegsSkin;
-			trap_R_AddRefEntityToScene( ent );
-
-			// torso
-			parentEnt = *ent;
-			CG_PositionEntityOnTag( ent, &parentEnt, parentEnt.hModel, "tag_torso", NULL );
-			ent->hModel = cgs.media.skeletonTorsoModel;
-			ent->customSkin = cgs.media.skeletonTorsoSkin;
-			trap_R_AddRefEntityToScene( ent );
-
-			// head
-			parentEnt = *ent;
-			CG_PositionEntityOnTag( ent, &parentEnt, parentEnt.hModel, "tag_head", NULL );
-			ent->hModel = cgs.media.skeletonHeadModel;
-			ent->customSkin = cgs.media.skeletonHeadSkin;
-			trap_R_AddRefEntityToScene( ent );
-
-			// restore previous state
-			*ent = backupRefEnt;
-		}
-
-		if (cent->pe.zombieDeathFadeEnd + fadeRiseTime > cg.time) {
-			// slowly fade the zombie "skin" out, revealing the skeleton underneath
-
-			//VectorSubtract( ent->origin, cg.snap->ps.origin, ent->fireRiseDir );
-			//VectorNegate( ent->axis[0], ent->fireRiseDir );
-			VectorNormalize2( ent->axis[0], ent->fireRiseDir );
-
-			if (cent->pe.zombieDeathFadeEnd > cg.time) {
-
-				// the zombie has hard-edged alpha blending on it's body texture by default
-				// so we need to override that for smooth fading
-				if (ent->hModel == cent->pe.legsRefEnt.hModel ||
-					ent->hModel == cent->pe.torsoRefEnt.hModel) {
-					ent->customShader = cgs.media.zombieBodyFadeShader;
-				} else if (ent->hModel == cent->pe.headRefEnt.hModel) {
-					ent->customShader = cgs.media.zombieHeadFadeShader;
-				}
-				// fade the alpha from 0 -> 255 as the time goes, which will fade from front to back
-				if (cent->pe.zombieDeathFadeStart > cg.time) {
-					ent->shaderRGBA[3] = 128;
-				} else {
-					ent->shaderRGBA[3] = 128 - (unsigned char)(128.0*pow(((float)(cg.time - cent->pe.zombieDeathFadeStart) / (float)(cent->pe.zombieDeathFadeEnd - cent->pe.zombieDeathFadeStart)), 2));
-				}
-				ent->shaderTime = 1.0;
-
-				trap_R_AddRefEntityToScene( ent );
-			}
-		}
-*/
-		// -------------------------------
 	} else {
 
 		if ( CG_EntOnFire( &cg_entities[es->number] ) ) {
@@ -4433,18 +4269,7 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int team, enti
 		if ( VectorCompare( ent->fireRiseDir, vec3_origin ) ) {
 			VectorSet( ent->fireRiseDir, 0, 0, 1 );
 		}
-/*
-		if (ent->fireRiseDir[2] > 0)
-			ent->fireRiseDir[2] *= -1;
 
-		ent->customShader = cgs.media.dripWetShader2;
-		trap_R_AddRefEntityToScene( ent );
-
-		ent->customShader = cgs.media.dripWetShader;
-		trap_R_AddRefEntityToScene( ent );
-
-		VectorCopy( fireRiseDir, ent->fireRiseDir );
-*/
 		ent->customShader = cgs.media.onFireShader;
 		trap_R_AddRefEntityToScene( ent );
 
@@ -4757,6 +4582,9 @@ void CG_Player( centity_t *cent ) {
 	// add dynamic lights, and other misc effects
 	//
 	CG_AddFireLight( cent );
+
+	// XShield loop (per-frame)
+	CG_AddXShieldLoopSound(cent);
 
 	//
 	// add the legs

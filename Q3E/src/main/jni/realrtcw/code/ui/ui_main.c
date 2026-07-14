@@ -3780,74 +3780,111 @@ void UI_ParseSavegame( int index ) {
 	trap_FS_FCloseFile( f );
 }
 
+
+static qboolean UI_IsSaveCompatible( const char *path )
+{
+	fileHandle_t f;
+	int ver;
+
+	if ( trap_FS_FOpenFile( path, &f, FS_READ ) < 0 ) {
+		return qfalse;
+	}
+
+	// read version (first 4 bytes in your format)
+	trap_FS_Read( &ver, sizeof(ver), f );
+	trap_FS_FCloseFile( f );
+
+	return ( ver == SAVE_VERSION );
+}
+
 /*
 ==============
 UI_LoadSavegames
 ==============
 */
-static void UI_LoadSavegames( char *dir ) {
+static void UI_LoadSavegames( char *dir )
+{
 	char sglist[4096];
-	char    *sgname;
-	int i, len;
+	char *sgname;
+	int fileCount, outCount = 0;
+	int len;
 
 	if ( dir ) {
-		uiInfo.savegameCount = trap_FS_GetFileList( va( "save/%s", dir ), "svg", sglist, 4096 );
+		fileCount = trap_FS_GetFileList( va( "save/%s", dir ), "svg", sglist, sizeof(sglist) );
 	} else {
-		uiInfo.savegameCount = trap_FS_GetFileList( "save", "svg", sglist, 4096 );
+		fileCount = trap_FS_GetFileList( "save", "svg", sglist, sizeof(sglist) );
 	}
 
-	if ( uiInfo.savegameCount ) {
-		if ( uiInfo.savegameCount > MAX_SAVEGAMES ) {
-			uiInfo.savegameCount = MAX_SAVEGAMES;
-		}
-		sgname = sglist;
-		for ( i = 0; i < uiInfo.savegameCount; i++ ) {
+	uiInfo.savegameCount = 0;
+	if ( !fileCount ) {
+		return;
+	}
 
-			len = strlen( sgname );
+	sgname = sglist;
+	for ( int n = 0; n < fileCount; n++ )
+	{
+		char path[MAX_QPATH];
+		char nameNoExt[MAX_QPATH];
 
-			if ( !Q_stricmp( sgname, "current.svg" ) ) {    // ignore some savegames that have special uses and shouldn't be loaded by the user directly
-				i--;
-				uiInfo.savegameCount -= 1;
-				sgname += len + 1;
-				continue;
-			}
+		len = strlen( sgname );
 
-			if ( !Q_stricmp( sgname +  len - 4,".svg" ) ) {
-				sgname[len - 4] = '\0';
-			}
-//			Q_strupr(sgname);
-			if ( dir ) {
-				uiInfo.savegameList[i].savegameFile = String_Alloc( va( "%s/%s", dir, sgname ) );
-			} else {
-				uiInfo.savegameList[i].savegameFile = String_Alloc( sgname );
-			}
-
-			uiInfo.savegameList[i].savegameName = String_Alloc( sgname );
-
-			// get string into list for sorting too
-			uiInfo.savegameStatus.displaySavegames[i] = i;
-//			qsort( &uiInfo.savegameStatus.displaySavegames[0], uiInfo.savegameCount, sizeof(int), UI_SavegamesQsortCompare);
-
-			// read savegame and get needed info
-			UI_ParseSavegame( i );
-
-			if ( uiInfo.savegameList[i].episode != -1 ) {
-				uiInfo.savegameList[i].sshotImage = trap_R_RegisterShaderNoMip( va( "levelshots/episodeshots/e%d.tga", uiInfo.savegameList[i].episode + 1 ) );
-			} else {
-				uiInfo.savegameList[i].sshotImage = trap_R_RegisterShaderNoMip( "levelshots/episodeshots/e_unknown.tga" );
-			}
-
-
-
+		// skip special/internal files
+		if ( !Q_stricmp( sgname, "current_realrtcw.svg" ) ) {
 			sgname += len + 1;
+			continue;
 		}
 
-		// sort it
-		UI_SavegameSort( 0, qtrue );
+		// build full path for open
+		if ( dir ) {
+			Com_sprintf( path, sizeof(path), "save/%s/%s", dir, sgname );
+		} else {
+			Com_sprintf( path, sizeof(path), "save/%s", sgname );
+		}
 
-		// set current selection
-//		i = UI_SavegameIndexFromName(ui_savegameName.string);
-//		Menu_SetFeederSelection(NULL, FEEDER_SAVEGAMES, i, NULL);
+		// HIDE incompatible saves
+		if ( !UI_IsSaveCompatible( path ) ) {
+			sgname += len + 1;
+			continue;
+		}
+
+		// stop if we filled the UI list
+		if ( outCount >= MAX_SAVEGAMES ) {
+			break;
+		}
+
+		// strip extension for display + internal name
+		Q_strncpyz( nameNoExt, sgname, sizeof(nameNoExt) );
+		if ( len > 4 && !Q_stricmp( nameNoExt + len - 4, ".svg" ) ) {
+			nameNoExt[len - 4] = '\0';
+		}
+
+		uiInfo.savegameList[outCount].savegameFile =
+			String_Alloc( dir ? va("%s/%s", dir, nameNoExt) : nameNoExt );
+
+		uiInfo.savegameList[outCount].savegameName = String_Alloc( nameNoExt );
+
+		uiInfo.savegameStatus.displaySavegames[outCount] = outCount;
+
+		// now do the full parse only for compatible ones
+		UI_ParseSavegame( outCount );
+
+		if ( uiInfo.savegameList[outCount].episode != -1 ) {
+			uiInfo.savegameList[outCount].sshotImage =
+				trap_R_RegisterShaderNoMip( va( "levelshots/episodeshots/e%d.tga",
+					uiInfo.savegameList[outCount].episode + 1 ) );
+		} else {
+			uiInfo.savegameList[outCount].sshotImage =
+				trap_R_RegisterShaderNoMip( "levelshots/episodeshots/e_unknown.tga" );
+		}
+
+		outCount++;
+		sgname += len + 1;
+	}
+
+	uiInfo.savegameCount = outCount;
+
+	if ( uiInfo.savegameCount > 0 ) {
+		UI_SavegameSort( 0, qtrue );
 	}
 }
 
@@ -6917,6 +6954,28 @@ UI_KeyEvent
 */
 void _UI_KeyEvent( int key, qboolean down ) {
 
+    if ( down && Menu_Count() > 0 ) {
+        menuDef_t *menu = Menu_GetFocused();
+        if ( menu && menu->window.name[0] ) {
+
+            if ( !Q_stricmp( menu->window.name, "pregame" ) ) {
+
+                // Don’t re-trigger if already started
+                if ( trap_Cvar_VariableValue( "g_playerstart" ) == 0 ) {
+
+                    if ( key != K_ESCAPE ) {
+                        trap_Cmd_ExecuteText( EXEC_APPEND, "fade 0 0 0 0 3\n" );
+                        trap_Cvar_Set( "g_playerstart", "1" );
+                        Menus_CloseAll();
+                        return; // eat the key
+                    }
+                } else {
+                    return; // already started; eat keys
+                }
+            }
+        }
+    }
+
 	if ( Menu_Count() > 0 ) {
 		menuDef_t *menu = Menu_GetFocused();
 		if ( menu ) {
@@ -7112,6 +7171,7 @@ void _UI_SetActiveMenu( uiMenuCommand_t menu ) {
 		case UIMENU_BOOK1:
 		case UIMENU_BOOK2:
 		case UIMENU_BOOK3:
+		case UIMENU_BOOK4:
 			trap_Cvar_Set( "cl_paused", "1" );
 			trap_Key_SetCatcher( KEYCATCH_UI );
 			Menus_CloseAll();

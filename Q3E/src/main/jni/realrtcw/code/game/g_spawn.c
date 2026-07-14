@@ -190,6 +190,7 @@ field_t fields[] = {
 	{"buy_item",         FOFS( buy_item ),           F_STRING},
 	{"isWeapon",         FOFS( isWeapon ),             F_INT},
 	{"wave",             FOFS( wave ),                F_INT},
+	{"oneshot",          FOFS( oneshot ),                F_INT},
 	{NULL}
 };
 
@@ -337,6 +338,9 @@ void SP_ai_partisan( gentity_t *ent );
 void SP_ai_russian( gentity_t *ent );
 void SP_ai_civilian( gentity_t *ent );
 void SP_ai_loper_special( gentity_t *ent );
+void SP_ai_mercenary( gentity_t *ent );
+void SP_ai_trench( gentity_t *ent );
+void SP_ai_flesh( gentity_t *ent );
 // done.
 
 // Rafael particles
@@ -616,6 +620,9 @@ spawn_t spawns[] = {
 	{"ai_russian", SP_ai_russian},
 	{"ai_civilian", SP_ai_civilian},
 	{"ai_loper_special", SP_ai_loper_special},
+	{"ai_mercenary", SP_ai_mercenary},
+	{"ai_trench", SP_ai_trench},
+	{"ai_flesh", SP_ai_flesh},
 
 
 	{"ai_marker", SP_ai_marker},
@@ -1024,7 +1031,8 @@ qboolean G_LoadEntsFile( void ) {
 		}
 	}
 
-	level.extraEntsScript = G_Alloc( len );
+	level.extraEntsScript = G_Alloc( len + 1 );
+	memset( level.extraEntsScript, 0 , len + 1 );
 	trap_FS_Read( level.extraEntsScript, len, f );
 
 	trap_FS_FCloseFile( f );

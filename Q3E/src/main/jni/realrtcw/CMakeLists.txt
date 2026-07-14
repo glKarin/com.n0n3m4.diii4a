@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(realrtcw)
-set(REALRTCW_VERSION "5.3")
+set(REALRTCW_VERSION "5.4")
 set(REALRTCW_SUFFIX "")
 set(REALRTCW_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -17,6 +17,7 @@ option(USE_INTERNAL_ZLIB "" OFF)
 option(USE_BLOOM "" ON)
 option(USE_VOIP "" OFF)
 option(USE_MUMBLE "" OFF)
+option(REALRTCW_STEAM "" OFF)
 
 add_definitions(-DPRODUCT_VERSION=\"${REALRTCW_VERSION}\")
 add_definitions(-D_DIII4A) # android
@@ -34,6 +35,11 @@ endif()
 if(USE_BLOOM)
 add_definitions(-DUSE_BLOOM)
 endif()
+
+if(REALRTCW_STEAM)
+    add_definitions(-DSTEAM)
+endif()
+add_definitions(-DNO_FFMPEG)
 
 set(realrtcwclient_libs android log GLESv1_CM EGL)
 set(realrtcwclient_libs ${realrtcwclient_libs} oboeaudio)
@@ -154,6 +160,7 @@ set(realrtcwgame_src
         code/game/ai_cast_func_boss1.c
         code/game/ai_cast_func_hein.c
         code/game/ai_cast_funcs.c
+        code/game/ai_cast_loadouts.c
         code/game/ai_cast_script_actions.c
         code/game/ai_cast_script.c
         code/game/ai_cast_script_ents.c

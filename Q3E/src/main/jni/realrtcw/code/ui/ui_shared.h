@@ -439,7 +439,7 @@ typedef struct {
 	char *localname;
 } translateString_t;
 
-#define MAX_TRANSLATESTRINGS 64
+#define MAX_TRANSLATESTRINGS 128
 extern translateString_t translateStrings[MAX_TRANSLATESTRINGS];
 
 //----(SA)	end

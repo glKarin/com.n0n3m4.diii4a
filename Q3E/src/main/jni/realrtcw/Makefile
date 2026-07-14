@@ -132,7 +132,7 @@ endif
 export CROSS_COMPILING
 
 ifndef VERSION
-VERSION=5.3
+VERSION=5.4
 endif
 
 ifndef CLIENTBIN
@@ -291,11 +291,18 @@ ifndef USE_AUTHORIZE_SERVER
 USE_AUTHORIZE_SERVER=0
 endif
 
+# Build flavor (steam / nosteam) affects output folder
+ifeq ($(STEAM),1)
+  BUILD_FLAVOR=steam
+else
+  BUILD_FLAVOR=nosteam
+endif
+
 
 #############################################################################
 
-BD=$(BUILD_DIR)/debug-$(PLATFORM)-$(ARCH)
-BR=$(BUILD_DIR)/release-$(PLATFORM)-$(ARCH)
+BD=$(BUILD_DIR)/debug-$(PLATFORM)-$(ARCH)-$(BUILD_FLAVOR)
+BR=$(BUILD_DIR)/release-$(PLATFORM)-$(ARCH)-$(BUILD_FLAVOR)
 STEAMDIR=$(MOUNT_DIR)/steam
 STEAMSHIMDIR=$(MOUNT_DIR)/steamshim
 CDIR=$(MOUNT_DIR)/client
@@ -398,6 +405,12 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu" "gnu")
   BASE_CFLAGS = -Wall -fno-strict-aliasing \
     -pipe -DUSE_ICON -DARCH_STRING=\\\"$(FILE_ARCH)\\\"
   CLIENT_CFLAGS += $(SDL_CFLAGS)
+
+  FFMPEG_CFLAGS := $(shell pkg-config --cflags libavcodec libavformat libavutil libswscale libswresample)
+  FFMPEG_LIBS   := $(shell pkg-config --libs   libavcodec libavformat libavutil libswscale libswresample)
+
+  CFLAGS  += $(FFMPEG_CFLAGS)
+  LDFLAGS += $(FFMPEG_LIBS)
 
   ifeq ($(ARCH),x86_64)
     OPTIMIZEVM = -O3
@@ -768,6 +781,20 @@ ifdef MINGW
   LIBS= -lws2_32 -lwinmm -lpsapi
   CLIENT_LIBS = -lgdi32 -lole32
   RENDERER_LIBS = -lgdi32 -lole32
+
+  ifeq ($(ARCH),x86_64)
+    CLIENT_LIBS += -lavformat.dll
+    CLIENT_LIBS += -lavcodec.dll
+    CLIENT_LIBS += -lavutil.dll
+    CLIENT_LIBS += -lswscale.dll
+    CLIENT_LIBS += -lswresample.dll
+  else
+    CLIENT_LIBS += -lavformat.dll
+    CLIENT_LIBS += -lavcodec.dll
+    CLIENT_LIBS += -lavutil.dll
+    CLIENT_LIBS += -lswscale.dll
+    CLIENT_LIBS += -lswresample.dll
+  endif
 
   ifeq ($(USE_FREETYPE),1)
     ifneq ($(USE_INTERNAL_FREETYPE),1)
@@ -1257,7 +1284,7 @@ ifeq ($(USE_MUMBLE),1)
   CLIENT_CFLAGS += -DUSE_MUMBLE
 endif
 
-ifdef STEAM
+ifeq ($(STEAM),1)
   CFLAGS += -DSTEAM
   CLIENT_CFLAGS += -DSTEAM
 endif
@@ -2662,6 +2689,7 @@ Q3GOBJ_ = \
   $(B)/$(BASEGAME)/game/ai_cast_func_boss1.o \
   $(B)/$(BASEGAME)/game/ai_cast_func_hein.o \
   $(B)/$(BASEGAME)/game/ai_cast_funcs.o \
+  $(B)/$(BASEGAME)/game/ai_cast_loadouts.o \
   $(B)/$(BASEGAME)/game/ai_cast_script_actions.o \
   $(B)/$(BASEGAME)/game/ai_cast_script.o \
   $(B)/$(BASEGAME)/game/ai_cast_script_ents.o \

@@ -2674,6 +2674,7 @@ static void CG_DrawCrosshair( void ) {
 	int weapnum;                // DHM - Nerve
 	vec4_t hcolor = {1, 1, 1, 1};
 	qboolean friendInSights = qfalse;
+	qboolean enemyInSights = qfalse;
 
 	/*if ( cg.renderingThirdPerson ) {
 		return;
@@ -2702,6 +2703,7 @@ static void CG_DrawCrosshair( void ) {
 	}
 
 	friendInSights = (qboolean)( cg.snap->ps.serverCursorHint == HINT_PLYR_FRIEND );  //----(SA)	added
+	enemyInSights  = (qboolean)( cg.snap->ps.serverCursorHint == HINT_PLYR_ENEMY );
 
 	weapnum = cg.weaponSelect;
 
@@ -2812,12 +2814,36 @@ static void CG_DrawCrosshair( void ) {
 		return;
 	}
 
-	// set color based on health
-	if ( cg_crosshairHealth.integer ) {
-		CG_ColorForHealth( hcolor );
-		trap_R_SetColor( hcolor );
-	} else {
-		trap_R_SetColor( NULL );
+	// crosshair coloring mode:
+	// 0 = off (untinted)
+	// 1 = health color
+	// 2 = untinted, but turns red when enemy is in sights
+	switch (cg_crosshairColoring.integer)
+	{
+	default:
+	case 0:
+		trap_R_SetColor(NULL);
+		break;
+
+	case 1:
+		CG_ColorForHealth(hcolor);
+		trap_R_SetColor(hcolor);
+		break;
+
+	case 2:
+		if (enemyInSights)
+		{
+			hcolor[0] = 1.0f;
+			hcolor[1] = 0.0f;
+			hcolor[2] = 0.0f;
+			// alpha already set earlier: hcolor[3] = cg_crosshairAlpha.value;
+			trap_R_SetColor(hcolor);
+		}
+		else
+		{
+			trap_R_SetColor(NULL); // "colorless"
+		}
+		break;
 	}
 
 	w = h = cg_crosshairSize.value;
@@ -3053,6 +3079,182 @@ static void CG_DrawCrosshair3D( void ) {
 	ent.shaderRGBA[3]=(byte)(hcolor[3]*255.f);
 
 	trap_R_AddRefEntityToScene(&ent);
+}
+
+// hit marker
+#define HITMARKER_DURATION				300	// msec
+#define HITMARKER_HIGHPRI_MIN_DURATION	90
+static qboolean canDrawNextHitMarker( hitEvent_t old, hitEvent_t new ) {
+	// different hit event types have different priorities
+	if ( new >= old ) {
+		return qtrue;
+	}
+
+	// ensure high priority hit events are drawn for at least a short period
+	if ( new < old && trap_Milliseconds() - cg.hitMarker.startTime > HITMARKER_HIGHPRI_MIN_DURATION ) {
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+/*
+==============
+CG_HitMarker
+==============
+*/
+void CG_HitMarker( hitEvent_t hitType ) {
+	if ( hitType < HIT_NONE || hitType >= HIT_MAX_NUM ) {
+		return;
+	}
+
+	if ( canDrawNextHitMarker( cg.hitMarker.hitType, hitType ) ) {
+		cg.hitMarker.active = qtrue;
+		cg.hitMarker.startTime = trap_Milliseconds();
+		cg.hitMarker.hitType = hitType;
+	}
+}
+
+/*
+==============
+CG_DrawHitMarker
+==============
+*/
+static void CG_DrawHitMarker( void ) {
+	float color[4];
+	float alpha, scale, progress;
+	int currentTime = trap_Milliseconds();
+	float x, y, w, h;
+	float baseSize, size;
+	qhandle_t drawShader;
+
+	if ( cg_hitMarker.integer <= 0 || cg_hitMarker.integer > NUM_HITMARKERS ) {
+		return;
+	}
+
+	if ( !cg.hitMarker.active ) {
+		return;
+	}
+
+	drawShader = cgs.media.hitMarkerShader[cg_hitMarker.integer - 1];
+	if ( !drawShader ) {
+		return;
+	}
+
+	progress = (float)(currentTime - cg.hitMarker.startTime) / (float)HITMARKER_DURATION;
+	if ( progress >= 1.0f ) {
+		cg.hitMarker.active = qfalse;
+		return;
+	}
+
+	// base size
+	if ( cg.snap->ps.eFlags & EF_MG42_ACTIVE ) {
+		// on mg42
+		baseSize = 48.0f;
+	} else if ( cg_hitMarkerSize.integer > 0 ) {
+		baseSize = (float)cg_hitMarkerSize.integer;
+	} else {
+		// auto baseSize
+		if ( cg_crosshairSize.value ) {
+			baseSize = 0.9f * cg_crosshairSize.value;
+		} else {
+			baseSize = 32.0f;
+		}
+	}
+
+	x = SCREEN_WIDTH * 0.5f;
+	y = SCREEN_HEIGHT * 0.5f;
+	CG_AdjustFrom640( &x, &y, &w, &h );
+
+	// fade-out (30%)
+	if ( progress < 0.7f ) {
+		alpha = 1.0f;
+	} else {
+		alpha = 1.0f - (progress - 0.7f) / 0.3f;
+	}
+	alpha *= cg_hitMarkerAlpha.value;
+
+	// default color, white
+	color[0] = 1.0f;  // R
+	color[1] = 1.0f;  // G
+	color[2] = 1.0f;  // B
+	color[3] = alpha; // A
+
+	if ( progress < 0.2f ) {
+		// blowing up stage (0-20%)
+		scale = 1.0f + (progress * 2.0f);			// 1.0 -> 1.4
+	} else if ( progress < 0.4f ) {
+		// shrinking stage (20-40%)
+		scale = 1.4f - (progress - 0.2f) * 2.0f;	// 1.4 -> 1.0
+	} else {
+		// slowly shrinking stage (40-100%)
+		scale = 1.0f - (progress - 0.4f) * 1.0f;	// 1.0 -> 0.6
+	}
+
+	// adapt the size change of the crosshair during uninterrupted shooting, see CG_DrawCursorhint
+	if ( !cg_solidHitMarker.integer ) {
+		float f = (float)cg.snap->ps.aimSpreadScale / 255.0f;
+		scale *= 1.0f + f * 0.75f;
+	}
+
+	// set visual effect for specific hit type
+	if ( cg.hitMarker.hitType == HIT_TEAMSHOT ) {
+		size = baseSize * scale;
+
+		// yellow
+		color[0] = 1.0f;  // R
+		color[1] = 1.0f;  // G
+		color[2] = 0.0f;  // B
+	} else if ( cg.hitMarker.hitType == HIT_BODYSHOT ) {
+		size = baseSize * scale;
+	} else if ( cg.hitMarker.hitType == HIT_HEADSHOT ) {
+		size = baseSize * scale * 1.15f;  // larger
+
+		// shake effect
+		if ( progress < 0.3f ) {
+			float shake = sinf( progress * 20.0f ) * 3.0f;
+			x += shake;
+			y += shake;
+		}
+	} else if ( cg.hitMarker.hitType == HIT_DEATHSHOT ) {
+		size = baseSize * scale * 1.25f;  // larger
+
+		// red
+		color[0] = 1.0f;  // R
+		color[1] = 0.1f;  // G
+		color[2] = 0.1f;  // B
+
+		// golden
+		// color[0] = 1.0f;  // R
+		// color[1] = 0.8f;  // G
+		// color[2] = 0.1f;  // B
+
+		// flash effect
+		if ( (int)(progress * 20.0f) % 2 == 0 ) {
+			color[3] = alpha * 0.75f;
+		}
+	} else {
+		return;
+	}
+
+	// start drawing
+	trap_R_SetColor( color );
+	trap_R_DrawStretchPic( x - size * 0.5f, y - size * 0.5f, size, size, 0, 0, 1, 1, drawShader );
+	
+	// for special hit, add additional halo effects
+	if ( ( cg.hitMarker.hitType == HIT_HEADSHOT || cg.hitMarker.hitType == HIT_DEATHSHOT ) && progress < 0.6f ) {
+		float haloAlpha = alpha * 0.3f;
+		float haloSize = size * 1.55f;
+		float haloProgress = progress * 1.5f;
+		
+		if ( haloProgress < 1.0f ) {
+			color[3] = haloAlpha * (1.0f - haloProgress);
+			trap_R_SetColor( color );
+			trap_R_DrawStretchPic( x - haloSize * 0.5f, y - haloSize * 0.5f, haloSize, haloSize, 0, 0, 1, 1, drawShader );
+		}
+	}
+	
+	trap_R_SetColor( NULL );
 }
 
 /*
@@ -3936,15 +4138,16 @@ static void CG_Draw2D(stereoFrame_t stereoFrame) {
 		CG_DrawWeapReticle();   // (for scopes)
 		CG_DrawCrosshair();
 		CG_DrawHoldableSelect();
-	if ( cg.zoomedBinoc ) {
-		CG_DrawBinocReticle();  // (for binocs)
-		return;
-	}
+		if ( cg.zoomedBinoc ) {
+			CG_DrawBinocReticle();  // (for binocs)
+			return;
+		}
 		return;
 	}
 
 	if ( cg.zoomedBinoc ) {
 		CG_DrawBinocReticle();
+		CG_DrawSubtitleString();
 		return;
 	}
 
@@ -3971,6 +4174,7 @@ static void CG_Draw2D(stereoFrame_t stereoFrame) {
 			CG_DrawCrosshair();
 
 		CG_DrawCrosshairNames();
+		CG_DrawHitMarker();
 	} else {
 		// don't draw any status if dead
 		if ( cg.snap->ps.stats[STAT_HEALTH] > 0 && !cg.cameraMode) {
@@ -3983,7 +4187,7 @@ static void CG_Draw2D(stereoFrame_t stereoFrame) {
 					CG_SetScreenPlacement(PLACE_LEFT, PLACE_BOTTOM);
 				}
 
-if ( !cg_oldWolfUI.integer ) {
+				if ( !cg_oldWolfUI.integer ) {
 					Menu_PaintAll();
 					CG_DrawTimedMenus();
 				}
@@ -4002,6 +4206,7 @@ if ( !cg_oldWolfUI.integer ) {
 			CG_DrawCheckpointString();
 			CG_DrawGameSavedString();
 			CG_DrawReward();
+			CG_DrawHitMarker();
 		}
 	}
 

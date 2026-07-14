@@ -91,6 +91,7 @@ If you have questions concerning this license or the applicable additional terms
 #define GIANT_HEIGHT        48
 
 #define NUM_CROSSHAIRS      11
+#define NUM_HITMARKERS    5
 
 // Ridah, trails
 #define STYPE_STRETCH   0
@@ -291,6 +292,13 @@ typedef enum
 	HITSOUNDS_NOTEAMSHOT = 8,
 } hitsooundFlags;
 
+// hitMarker
+typedef struct {
+    qboolean	active;		// is drawing?
+    int			startTime;
+    hitEvent_t	hitType;
+} cg_hitMarker_t;
+
 // centity_t have a direct corespondence with gentity_t in the game, but
 // only the entityState_t is directly communicated to the cgame
 typedef struct centity_s {
@@ -429,7 +437,8 @@ typedef enum {
 	LE_ZOMBIE_BAT,
 	LE_MOVING_TRACER,
 	LE_EMITTER,
-	LE_SPIRIT_VIEWFLASH
+	LE_SPIRIT_VIEWFLASH,
+	LE_EMP_WAVE
 } leType_t;
 
 typedef enum {
@@ -872,6 +881,7 @@ typedef struct {
 	int zoomTime;
 	float zoomSensitivity;
 	float zoomval;
+	qboolean isZoomed;
 
 
 	// information screen text during loading
@@ -925,6 +935,9 @@ typedef struct {
 	int subtitlePrintY;
 	char subtitlePrint[1024];
 	int subtitlePrintLines;
+
+	// hitMarker
+	cg_hitMarker_t hitMarker;
 
 	// fade in/out
 	int fadeTime;
@@ -1086,6 +1099,16 @@ typedef struct {
 	float rumbleScale;          //RUMBLE FX using new shakeCamera code
 	pmoveExt_t pmext;
 
+	qboolean simpleZoomed;
+	int simpleZoomTime;
+
+	float aaStrength;
+    float aaDYaw;
+    float aaDPitch;
+    int   aaEntNum;
+
+	float aaStrengthSmoothed;
+
 } cg_t;
 
 #define NUM_FUNNEL_SPRITES  21
@@ -1163,6 +1186,8 @@ typedef struct {
 	qhandle_t lagometerShader;
 	qhandle_t backTileShader;
 	qhandle_t noammoShader;
+
+	qhandle_t hitMarkerShader[NUM_HITMARKERS];
 
 	qhandle_t reticleShader;
 //	qhandle_t reticleShaderSimple;
@@ -1265,6 +1290,9 @@ typedef struct {
 	qhandle_t battleSuitShader;
 	qhandle_t battleWeaponShader;
 	qhandle_t hastePuffShader;
+
+	qhandle_t empRingShader;
+    qhandle_t empSparkShader;
 
 	// weapon effect models
 	qhandle_t spearModel;   //----(SA)
@@ -1459,6 +1487,9 @@ typedef struct {
 	sfxHandle_t bookSound;      //----(SA)	added
 	sfxHandle_t adrenalineSound;   //----(SA)	added
 	sfxHandle_t bandagesSound;
+	sfxHandle_t crossSound;
+	sfxHandle_t empSound;
+	sfxHandle_t shieldSound;
 	sfxHandle_t elecSound;
 	sfxHandle_t fireSound;
 	sfxHandle_t waterSound;
@@ -1558,6 +1589,8 @@ typedef struct {
 	sfxHandle_t poisonGasCough;
 	sfxHandle_t knifeThrow;
 	sfxHandle_t nullSound;
+	
+	sfxHandle_t xshieldLoopSound;
 
 } cgMedia_t;
 
@@ -1758,7 +1791,7 @@ extern vmCvar_t cg_crosshairX;
 extern vmCvar_t cg_crosshairY;
 extern vmCvar_t cg_crosshairSize;
 extern vmCvar_t cg_crosshairAlpha;          //----(SA)	added
-extern vmCvar_t cg_crosshairHealth;
+extern vmCvar_t cg_crosshairColoring;
 extern vmCvar_t cg_drawStatus;
 extern vmCvar_t cg_draw2D;
 extern vmCvar_t cg_drawSubtitles;
@@ -1812,8 +1845,6 @@ extern vmCvar_t cg_zoomDefaultBinoc;
 extern vmCvar_t cg_zoomDefaultSniper;
 extern vmCvar_t cg_zoomDefaultFG;
 extern vmCvar_t cg_zoomDefaultSnooper;
-extern vmCvar_t cg_zoomSensitivity;
-extern vmCvar_t cg_zoomSensitivityFovScaled;
 extern vmCvar_t cg_zoomStepBinoc;
 extern vmCvar_t cg_zoomStepSniper;
 extern vmCvar_t cg_zoomStepSnooper;
@@ -1879,12 +1910,19 @@ extern vmCvar_t cg_gameSkill;
 
 extern vmCvar_t cg_hitSounds;
 
+// hit marker
+extern vmCvar_t cg_hitMarker;
+extern vmCvar_t cg_hitMarkerSize;
+extern vmCvar_t cg_hitMarkerAlpha;
+extern vmCvar_t cg_solidHitMarker;
+
 extern vmCvar_t cg_reloading;           //----(SA)	added
 
 // JPW NERVE
 extern vmCvar_t cg_medicChargeTime;
 extern vmCvar_t cg_engineerChargeTime;
 extern vmCvar_t cg_LTChargeTime;
+extern vmCvar_t cg_cvopsChargeTime;
 extern vmCvar_t cg_soldierChargeTime;
 extern vmCvar_t cg_redlimbotime;
 extern vmCvar_t cg_bluelimbotime;
@@ -1943,6 +1981,9 @@ extern vmCvar_t	cg_weaponBounceSound;
 
 extern vmCvar_t cg_showSocials;
 extern vmCvar_t cg_gothic;
+
+extern vmCvar_t cg_simpleZoomFov;
+extern vmCvar_t cg_simpleZoomTimeMs;
 
 //
 // cg_main.c
@@ -2056,6 +2097,7 @@ void CG_BonusCenterPrint( const char *str, int y, int charWidth );
 void CG_SubtitlePrint( const char *str, int y, int charWidth );
 void CG_BuyPrint( const char *str, int y, int charWidth );
 void CG_EndGamePrint( const char *str, int y, int charWidth );
+void CG_HitMarker( hitEvent_t hitType );
 
 void CG_ObjectivePrint( const char *str, int charWidth, int team );     // NERVE - SMF
 void CG_DrawHead( float x, float y, float w, float h, int clientNum, vec3_t headAngles );
@@ -2160,6 +2202,7 @@ void CG_PrevWeapon_f( void );
 void CG_Weapon_f( void );
 void CG_WeaponBank_f( void );
 void CG_WeaponSuggest( int weap );
+void CG_ResetSimpleZoom(void);
 
 void CG_FinishWeaponChange( int lastweap, int newweap );
 
@@ -2209,6 +2252,8 @@ void CG_AddDebris( vec3_t origin, vec3_t dir, int speed, int duration, int count
 
 void CG_ClientDamage( int entnum, int enemynum, int id );
 
+void CG_UpdateAimAssist( void );
+
 void CG_AddBulletParticles( vec3_t origin, vec3_t dir, int speed, int duration, int count, float randScale );
 
 //
@@ -2246,6 +2291,9 @@ void CG_ParticleExplosion( char *animStr, vec3_t origin, vec3_t vel, int duratio
 // Rafael snow pvs check
 void    CG_SnowLink( centity_t *cent, qboolean particleOn );
 // done.
+
+
+void CG_SpawnEMPWave( centity_t *cent ) ;
 
 // Rafael bats
 void CG_ParticleBat( centity_t *cent );
@@ -2589,7 +2637,7 @@ int         trap_GetCurrentCmdNumber( void );
 qboolean    trap_GetUserCmd( int cmdNumber, usercmd_t *ucmd );
 
 // used for the weapon/holdable select and zoom
-void        trap_SetUserCmdValue( int stateValue, int holdValue, float sensitivityScale, int cld );     // NERVE - SMF - added cld
+void trap_SetUserCmdValue( int weapon, int holdable, float sensitivityScale, int cld, qboolean isZoomed, float aaStrength, float aaDYaw, float aaDPitch );
 
 // aids for VM testing
 void        testPrintInt( char *string, int i );

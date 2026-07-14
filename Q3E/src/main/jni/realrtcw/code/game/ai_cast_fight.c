@@ -345,6 +345,7 @@ qboolean AICast_EntityVisible( cast_state_t *cs, int enemynum, qboolean directvi
 	}
 	vis = &cs->vislist[enemynum];
 
+
 	if ( !vis->visible_timestamp && !vis->real_visible_timestamp ) {
 		return qfalse;  // they are not visible at all
 
@@ -465,7 +466,7 @@ qboolean AICast_SameTeam( cast_state_t *cs, int enemynum ) {
 }
 
 static inline qboolean AI_IsZombie(int c) {
-    return (c == AICHAR_ZOMBIE || c == AICHAR_ZOMBIE_SURV || c == AICHAR_ZOMBIE_FLAME || c == AICHAR_ZOMBIE_GHOST);
+    return (c == AICHAR_ZOMBIE || c == AICHAR_ZOMBIE_SURV || c == AICHAR_ZOMBIE_FLAME || c == AICHAR_ZOMBIE_GHOST || c == AICHAR_FLESH);
 }
 
 #define BBOX_ALLOWANCE 50.0f
@@ -505,8 +506,13 @@ float AICast_WeaponRange(cast_state_t *cs, int weaponnum) {
     case WP_PANZERFAUST:
         return 8000.0f;
 
+	case WP_M97:
+	case WP_AUTO5:
+	case WP_M30:
+	    return 475.0f;
     case WP_GRENADE_LAUNCHER:
     case WP_GRENADE_PINEAPPLE:
+	case WP_SMOKE_BOMB:
         return 800.0f;
 
     case WP_MONSTER_ATTACK1:
@@ -577,6 +583,8 @@ float AICast_WeaponRange(cast_state_t *cs, int weaponnum) {
         // Provide explicit fallback for unknown characters when using Venom
         switch (cs->aiCharacter) {
             case AICHAR_SOLDIER:
+			case AICHAR_MERCENARY:
+			case AICHAR_TRENCH:
             case AICHAR_VENOM:
             case AICHAR_SUPERSOLDIER_LAB:
                 return 1000.0f;
@@ -1137,6 +1145,7 @@ qboolean AICast_WeaponUsable( cast_state_t *cs, int weaponNum ) {
 		case AICHAR_ZOMBIE_SURV:
 		case AICHAR_ZOMBIE_GHOST:
 		case AICHAR_ZOMBIE_FLAME:
+		case AICHAR_FLESH:
 			return qtrue;   // always usable
 		default:
 			delay = -1;

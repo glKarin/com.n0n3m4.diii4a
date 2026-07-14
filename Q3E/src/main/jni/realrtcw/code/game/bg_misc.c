@@ -1355,6 +1355,54 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,
 		0,                                       
 	},
+
+	{   
+		WP_M30,
+		WEAPON_CLASS_SHOTGUN,
+		WP_NONE,
+		WEAPON_TEAM_AXIS,              
+		0,        
+		0,       
+		0,        
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,        
+		0,       
+		0,      
+		0,      
+		0,      
+		0,      
+		0,       
+		0,
+		0,          
+		0,          
+		0,          
+		0,       
+		0,                 
+		0.0f,            
+		0,             
+		{.0f, .0f},     
+		{.0f, .0f},         
+		0,               
+		0.0,               
+		0,               
+		0,
+		{0.0, 0.0},              
+		MOD_M30,   
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,                                     
+	},
    // Heavy Weapons
 	{   
 		WP_BROWNING,
@@ -1930,55 +1978,7 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,
 		0,
 		0,                                 
-	}, 
-
-		{   
-		WP_POISONGAS_MEDIC,
-		WEAPON_CLASS_GRENADE,
-		WP_NONE, 
-		WEAPON_TEAM_COMMON,       
-		0,                   
-		0,       
-		0,  
-		0,      
-		0,           
-		0,        
-		0,         
-		0,
-		0,         
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,      
-		0, 
-		0,     
-		0,      
-		0,        
-		0,        
-		0,        
-		0,          
-		0,                  
-		0.0f,            
-		0,               
-		{0, 0},         
-		{0,0},              
-		0,               
-		0.0,               
-		0,               
-		0,
-		{0.0, 0.0},             
-		MOD_POISONGAS, 
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,                                 
-	}, 
+	},  
 
 		{   
 		WP_DYNAMITE_ENG,
@@ -2123,6 +2123,55 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,
 		0,                            
 	}, 
+
+	{  
+		WP_SMOKE_BOMB,
+		WEAPON_CLASS_GRENADE,
+		WP_NONE,
+		WEAPON_TEAM_COMMON,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0.0f,
+		0,
+		{0, 0},
+		{0,0},
+		0,
+		0.0,
+		0,
+		0,
+		{0.0, 0.0},
+		MOD_SMOKEBOMB,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+	},
+
 
 	// Misc alt modes
 	{   
@@ -2616,7 +2665,7 @@ int reloadableWeapons[] = {
 	WP_SILENCER, WP_TT33, WP_FG42, WP_REVOLVER, WP_MG42M, WP_COLT,
 	WP_LUGER, WP_MORTAR, WP_AKIMBO, WP_PPSH, WP_M7, WP_MP34,
 	WP_MAUSER, WP_SNIPERRIFLE, WP_SNOOPERSCOPE, WP_MOSIN, WP_M1GARAND, WP_G43,
-	WP_MP44, WP_BAR, WP_M97, WP_FG42SCOPE, WP_BROWNING, WP_VENOM,
+	WP_MP44, WP_BAR, WP_M97, WP_FG42SCOPE, WP_BROWNING, WP_VENOM, WP_M30,
 	WP_DELISLE, WP_DELISLESCOPE, WP_TESLA, WP_M1941, WP_AUTO5,
 	WP_M1941SCOPE, WP_DUAL_TT33, WP_HDM, -1};
 
@@ -3876,6 +3925,7 @@ weapon_grenadePineapple
 		{0,0,0,0,0,0}
 	},
 
+
 //weapon_dynamite
 
 	{
@@ -4582,6 +4632,34 @@ model="models/weapons2/m97/m97_3rd.md3"
 	},
 
 
+	/*QUAKED weapon_auto5 (.3 .3 1) (-16 -16 -16) (16 16 16) SUSPENDED SPIN - RESPAWN
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons2/m97/m97_3rd.md3"
+*/
+	{
+		"weapon_m30",
+		"sound/misc/w_pkup.wav",
+		{ 
+		"",
+		"",
+		""
+		},
+
+			"icons/iconw_m30",  
+			"m30",            
+			700,
+			IT_WEAPON,
+			WP_M30,
+			WP_M30,
+			WP_M97,
+			WP_M30,
+			WP_M30,
+			"",                      
+			"",                     
+			{ 0,0,0,0,0,0 }
+	},
+
+
 /*QUAKED weapon_hdm (.3 .3 1) (-16 -16 -16) (16 16 16) SUSPENDED SPIN - RESPAWN
 "stand" values:
 	no value:	laying in a default position on it's side (default)
@@ -4691,9 +4769,8 @@ model="models/weapons2/p38/luger.md3"
 		{0,0,0,0,0,0}
 	},
 
-
 	{
-		"weapon_poison_med",
+		"weapon_smokebomb",
 		"sound/misc/w_pkup.wav",
 		{  
 		"",
@@ -4701,20 +4778,19 @@ model="models/weapons2/p38/luger.md3"
 		""
 		},
 
-		"icons/iconw_smokegrenade_1",    
-		"poison_med",              
+		"icons/iconw_smokebomb_1",    
+		"smokebomb",              
 		50,
 		IT_WEAPON,
-		WP_POISONGAS_MEDIC,
-		WP_POISONGAS_MEDIC,
-		WP_POISONGAS_MEDIC,
-		WP_POISONGAS_MEDIC,
-		WP_POISONGAS_MEDIC,
+		WP_SMOKE_BOMB,
+		WP_SMOKE_BOMB,
+		WP_SMOKE_BOMB,
+		WP_SMOKE_BOMB,
+		WP_SMOKE_BOMB,
 		"",                      
 		"sound/weapons/grenade/hgrenb1a.wav sound/weapons/grenade/hgrenb2a.wav",            
 		{0,0,0,0,0,0}
 	},
-
 
 	//weapon_dynamite
 
@@ -4802,7 +4878,7 @@ weapon_smoketrail -- only used as a special effects emitter for smoke trails (ar
 		""
 		},
 		"icons/iconw_poisongrenade_1",    
-		"Poison Gas",
+		"poison gas",
 		0,
 		IT_WEAPON,
 		WP_POISONGAS,		
@@ -4821,29 +4897,6 @@ weapon_smoketrail -- only used as a special effects emitter for smoke trails (ar
 	//
 
 // RealRTCW ammo
-
-	{
-		"ammo_poison_gas",
-		"sound/misc/am_pkup.wav",
-		{ 
-		"models/powerups/ammo/amgren_bag.md3",
-		0, 
-		0 
-		},
-		"",
-		"Poison Gas",
-		1,
-		IT_AMMO,
-		WP_NONE,
-		WP_POISONGAS,
-		WP_POISONGAS,
-		WP_POISONGAS,
-		WP_POISONGAS,
-		"",                  
-		"", 
-		{5,4,3,2,2,3}                
-	},
-
 
 /*QUAKED ammo_m7 (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -6267,6 +6320,23 @@ used by: Monster Attack 1 (specific to each monster)
 	{50,50,50,50,50,50}
 },
 {
+	"m30_ammo",
+	"sound/misc/am_pkup.wav",
+	{ "models/powerups/ammo/default.md3", 0, 0 },
+	"icons/iconw_default",
+	"m30_ammo",
+	60,
+	IT_AMMO,
+	WP_NONE,
+	WP_M30,
+	WP_M30,
+	WP_M30,
+	WP_M30,
+	"",
+	"",
+	{50,50,50,50,50,50}
+},
+{
 	"browning_ammo",
 	"sound/misc/am_pkup.wav",
 	{ "models/powerups/ammo/default.md3", 0, 0 },
@@ -6555,6 +6625,105 @@ model="models/powerups/holdable/bandages.md3"
 	},
 
 
+/*QUAKED holdable_cross(.3 .3 1) (-8 -8 -8) (8 8 8) SUSPENDED SPIN - RESPAWN
+Protection from fatigue
+Using the "sprint" key will not fatigue the character
+
+pickup sound : "sound/pickup/holdable/get_cross.wav"
+use sound : "sound/pickup/holdable/use_cross.wav"
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/powerups/holdable/cross.md3"
+*/
+	{
+		"holdable_cross",
+		"sound/pickup/holdable/get_stamina.wav",
+		{
+		"models/powerups/holdable/cross.md3",
+		0, 
+		0
+		},
+
+		"icons/holycross",             
+		"Cross used",             
+		1,
+		IT_HOLDABLE,
+		WP_NONE,
+		HI_CROSS,
+		0,
+		0,
+		0,
+		"",                             
+		"sound/pickup/holdable/use_cross.wav",
+		{1,1,1,1,1,1}
+	},
+
+
+/*QUAKED holdable_emp(.3 .3 1) (-8 -8 -8) (8 8 8) SUSPENDED SPIN - RESPAWN
+Protection from fatigue
+Using the "sprint" key will not fatigue the character
+
+pickup sound : "sound/pickup/holdable/get_cross.wav"
+use sound : "sound/pickup/holdable/use_cross.wav"
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/powerups/holdable/emp.md3"
+*/
+	{
+		"holdable_emp",
+		"sound/pickup/holdable/get_adrenaline.wav",
+		{
+		"models/powerups/holdable/emp.md3",
+		0, 
+		0
+		},
+
+		"icons/emp",             
+		"EMP activated",             
+		1,
+		IT_HOLDABLE,
+		WP_NONE,
+		HI_EMP,
+		0,
+		0,
+		0,
+		"",                             
+		"sound/pickup/holdable/use_emp.wav",
+		{1,1,1,1,1,1}
+	},
+
+
+/*QUAKED holdable_xshield(.3 .3 1) (-8 -8 -8) (8 8 8) SUSPENDED SPIN - RESPAWN
+Protection from fatigue
+Using the "sprint" key will not fatigue the character
+
+pickup sound : "sound/pickup/holdable/get_cross.wav"
+use sound : "sound/pickup/holdable/use_cross.wav"
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/powerups/holdable/emp.md3"
+*/
+	{
+		"holdable_xshield",
+		"sound/pickup/holdable/get_adrenaline.wav",
+		{
+		"models/powerups/holdable/shieldgen.md3",
+		0, 
+		0
+		},
+
+		"icons/xshield",             
+		"X Shield activated",             
+		1,
+		IT_HOLDABLE,
+		WP_NONE,
+		HI_XSHIELD,
+		0,
+		0,
+		0,
+		"",                             
+		"sound/pickup/holdable/use_shield.wav",
+		{1,1,1,1,1,1}
+	},
+
+
 
 /*QUAKED holdable_book1(.3 .3 1) (-8 -8 -8) (8 8 8) SUSPENDED SPIN - RESPAWN
 -------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
@@ -6631,6 +6800,33 @@ model="models/powerups/holdable/zemphr_book.md3"
 		IT_HOLDABLE,
 		WP_NONE,
 		HI_BOOK3,
+		0,
+		0,
+		0,
+		"",                            
+		"sound/pickup/holdable/use_book.wav",    
+		{0,0,0,0,0,0}
+	},
+
+/*QUAKED holdable_book4(.3 .3 1) (-8 -8 -8) (8 8 8) SUSPENDED SPIN - RESPAWN
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/powerups/holdable/zemphr_book.md3"
+*/
+	{
+		"holdable_book4",
+		"sound/pickup/holdable/get_book4.wav",
+		{
+		"models/powerups/holdable/book4.md3",
+		0, 
+		0
+		},
+
+		"icons/icon_book4",              
+		"Book4",      
+		1,
+		IT_HOLDABLE,
+		WP_NONE,
+		HI_BOOK4,
 		0,
 		0,
 		0,
@@ -6788,7 +6984,6 @@ model="models/powerups/holdable/zemphr_book.md3"
 		{0,0,0,0,0,0}
 	},
 
-
 		/*QUAKED item_enviro (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 		{
@@ -6813,7 +7008,29 @@ model="models/powerups/holdable/zemphr_book.md3"
 		{0,0,0,0,0,0}
 	},
 
-
+		/*QUAKED item_enviro (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
+*/
+		{
+		"item_xshield_dummy",
+		"sound/misc/powerup_shield.wav",
+		{
+		"models/powerups/survival/thule_g.md3",
+		0, 
+		0
+		},
+		"",                             
+		"Veil Shield",     
+		10,
+		IT_POWERUP,
+		WP_NONE,
+		PW_XSHIELD,
+		0,
+		0,
+		0,
+		"",                          
+		"sound/items/airout.wav sound/items/protect3.wav",   
+		{0,0,0,0,0,0}
+	},
 
 /*QUAKED item_invis (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
@@ -7300,30 +7517,14 @@ BG_AkimboFireSequence
 ==============
 */
 //qboolean BG_AkimboFireSequence( playerState_t *ps ) {
-qboolean BG_AkimboFireSequence( int weapon, int akimboClip, int coltClip ) {
+qboolean BG_AkimboFireSequence( int weapon, int akimboClip ) {
 	// NOTE: this doesn't work when clips are turned off (dmflags 64)
 
 	if ( weapon != WP_AKIMBO && weapon != WP_DUAL_TT33 ) {
 		return qfalse;
 	}
 
-	if ( !akimboClip ) {
-		return qfalse;
-	}
-
-	// no ammo in colt, must be akimbo turn
-	if ( !coltClip ) {
-		return qtrue;
-	}
-
-	// at this point, both have ammo
-
-	// now check 'cycle'   // (removed old method 11/5/2001)
-	if ( ( akimboClip + coltClip ) & 1 ) {
-		return qfalse;
-	}
-
-	return qtrue;
+	return akimboClip & 1;
 }
 
 //----(SA) end
@@ -7566,11 +7767,7 @@ qboolean BG_AddMagicAmmo(playerState_t *ps, int numOfClips) {
 				if (!numOfClips)
 					return qtrue;
 
-				int clipsToAdd = (weapon == WP_AKIMBO || weapon == WP_DUAL_TT33)
-					? numOfClips * 2
-					: numOfClips;
-
-				ps->ammo[ammoIndex] += clipsToAdd * maxclip;
+				ps->ammo[ammoIndex] += numOfClips * maxclip;
 
 				if (ps->ammo[ammoIndex] > maxammo) {
 					ps->ammo[ammoIndex] = maxammo;
@@ -8520,6 +8717,7 @@ char *eventnames[] = {
 	"EV_FILL_CLIP",
 	"EV_FILL_CLIP_FULL",
 	"EV_FILL_CLIP_AI",
+	"EV_RESET_ZOOM",
 	"EV_WEAP_OVERHEAT",
 	"EV_CHANGE_WEAPON",
 	"EV_FIRE_WEAPON",
@@ -8547,6 +8745,8 @@ char *eventnames[] = {
 	"EV_USE_ITEM13",
 	"EV_USE_ITEM14",
 	"EV_USE_ITEM15",
+	"EV_USE_ITEM16",
+	"EV_USE_ITEM17",
 	"EV_ITEM_RESPAWN",
 	"EV_ITEM_POP",
 	"EV_PLAYER_TELEPORT_IN",
@@ -8575,6 +8775,7 @@ char *eventnames[] = {
 	"EV_POWERUP_QUAD",
 	"EV_POWERUP_BATTLESUIT",
 	"EV_POWERUP_BATTLESUIT_SURV",
+	"EV_POWERUP_XSHIELD",
 	"EV_POWERUP_REGEN",
 	"EV_GIB_PLAYER",         // gib a previously living player
 	"EV_GIB_VAMPIRISM",
@@ -8636,6 +8837,7 @@ char *eventnames[] = {
 	"EV_QUICKGRENS",
 	"EV_PLAYER_HIT",
 	"EV_STOP_RELOADING_SOUND",
+	"EV_EMP_WAVE",
 
 	"EV_MAX_EVENTS"
 };
@@ -9377,6 +9579,7 @@ char *BG_GetWeaponFilename( weapon_t weaponNum )
 		case WP_BAR:               return "bar.weap";
 		case WP_M97:               return "ithaca.weap";
 		case WP_AUTO5:             return "auto5.weap";
+		case WP_M30:               return "m30.weap";
 		case WP_FLAMETHROWER:      return "flamethrower.weap";
 		case WP_PANZERFAUST:       return "panzerfaust.weap";
 		case WP_MG42M:             return "mg42m.weap";
@@ -9387,11 +9590,11 @@ char *BG_GetWeaponFilename( weapon_t weaponNum )
 		case WP_DYNAMITE:          return "dynamite.weap";
 		case WP_BROWNING:          return "browning.weap";
 		case WP_AIRSTRIKE:         return "airstrike.weap";
-		case WP_POISONGAS_MEDIC:   return "poisongas_medic.weap";
 		case WP_DYNAMITE_ENG:      return "dynamite_eng.weap";
 		case WP_ARTY:              return "arty.weap";
 		case WP_SMOKETRAIL:        return "smoketrail.weap";
 		case WP_POISONGAS:         return "poisongas.weap";
+		case WP_SMOKE_BOMB:        return "smokebomb.weap";
 		case WP_HDM:               return "hdm.weap";
 		case WP_HOLYCROSS:         return "cross.weap";
 		case WP_DELISLE:           return "delisle.weap";

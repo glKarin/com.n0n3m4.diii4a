@@ -539,6 +539,12 @@ char *AIFunc_Idle( cast_state_t *cs ) {
 	if ( cs->doorMarkerTime > level.time - 100 ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
 	}
+
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
+	}
 	//
 	// do we need to go to our leader?
 	if ( cs->leaderNum >= 0 && Distance( cs->bs->origin, g_entities[cs->leaderNum].r.currentOrigin ) > MAX_LEADER_DIST ) {
@@ -762,6 +768,12 @@ char *AIFunc_InspectFriendly( cast_state_t *cs ) {
 	// are we waiting for a door?
 	if ( cs->doorMarkerTime > level.time - 100 ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
+	}
+
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
 	}
 
 	followent = &g_entities[cs->followEntity];
@@ -1223,6 +1235,12 @@ char *AIFunc_InspectAudibleEvent( cast_state_t *cs ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
 	}
 
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
+	}
+
 	// are we just looking for now?
 	if ( cs->aiFlags & AIFL_MISCFLAG2 ) {
 		if ( cs->scriptPauseTime <= level.time ) {
@@ -1517,6 +1535,11 @@ char *AIFunc_ChaseGoalIdle( cast_state_t *cs ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
 	}
 	//
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
+	}
 	// if the player is not ready yet, wait
 	if ( !followent->inuse ) {
 		return NULL;
@@ -1659,6 +1682,12 @@ char *AIFunc_ChaseGoal( cast_state_t *cs ) {
 	// are we waiting for a door?
 	if ( cs->doorMarkerTime > level.time - 100 ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
+	}
+
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
 	}
 
 	followent = &g_entities[cs->followEntity];
@@ -2180,6 +2209,13 @@ char *AIFunc_BattleHunt( cast_state_t *cs ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
 	}
 	//
+
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
+	}
+
 	if ( cs->enemyNum < 0 ) {
 		return AIFunc_IdleStart( cs );
 	}
@@ -2380,6 +2416,12 @@ char *AIFunc_BattleAmbush( cast_state_t *cs ) {
 	// are we waiting for a door?
 	if ( cs->doorMarkerTime > level.time - 100 ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
+	}
+
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
 	}
 
 	// we need to move towards it
@@ -2691,6 +2733,12 @@ char *AIFunc_BattleChase( cast_state_t *cs ) {
 	// are we waiting for a door?
 	if ( cs->doorMarkerTime > level.time - 100 ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
+	}
+
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
 	}
 
 	bs = cs->bs;
@@ -3367,6 +3415,12 @@ char *AIFunc_BattleTakeCover( cast_state_t *cs ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
 	}
 
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
+	}
+
 	// we need to move towards it
 	bs = cs->bs;
 	//
@@ -3796,6 +3850,11 @@ char *AIFunc_GrenadeFlush( cast_state_t *cs ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
 	}
 	//
+// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
+	}
 	if ( cs->weaponNum && ( cs->castScriptStatus.scriptFlags & SFL_NOCHANGEWEAPON ) ) {
 		return AIFunc_IdleStart( cs );
 	}
@@ -4209,6 +4268,11 @@ char *AIFunc_InspectBody( cast_state_t *cs ) {
 	// are we waiting for a door?
 	if ( cs->doorMarkerTime > level.time - 100 ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
+	}
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
 	}
 	//
 	// if running a script
@@ -4682,6 +4746,12 @@ char *AIFunc_Battle( cast_state_t *cs ) {
 	// are we waiting for a door?
 	if ( cs->doorMarkerTime > level.time - 100 ) {
 		return AIFunc_DoorMarkerStart( cs, cs->doorMarkerDoor, cs->doorMarkerNum );
+	}
+
+	// defend override
+	if (AICast_Defend_Update(cs))
+	{
+		return NULL;
 	}
 	//
 	// do we need to go to our leader?

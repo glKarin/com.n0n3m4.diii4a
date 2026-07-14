@@ -182,7 +182,7 @@ if(GAME_ETW) # v2.83.1 | e8d0ec06800630fd458791ccd29ed488e04648d9 | Nov 12, 2024
     add_subdirectory ( etw ) # ETW
 endif()
 
-if(GAME_REALRTCW) # 5.3 | Jul 26, 2025 | 32e574d19bc3d5fa92c3c67cfe168154a26ed217 | Never do special wave if chance is 0
+if(GAME_REALRTCW) # 5.4 | Jul 26, 2025 | 32e574d19bc3d5fa92c3c67cfe168154a26ed217 | Never do special wave if chance is 0
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
 #[[    if(BUILD_BACKPORT)

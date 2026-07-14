@@ -149,6 +149,7 @@ void CG_ParseServerinfo( void ) {
 	trap_Cvar_Set( "g_engineerChargeTime",Info_ValueForKey( info,"g_engineerChargeTime" ) );
 	trap_Cvar_Set( "g_soldierChargeTime",Info_ValueForKey( info,"g_soldierChargeTime" ) );
 	trap_Cvar_Set( "g_LTChargeTime",Info_ValueForKey( info,"g_LTChargeTime" ) );
+	trap_Cvar_Set( "g_cvopsChargeTime",Info_ValueForKey( info,"g_cvopsChargeTime" ) );
 	trap_Cvar_Set( "g_redlimbotime",Info_ValueForKey( info,"g_redlimbotime" ) );
 	trap_Cvar_Set( "g_bluelimbotime",Info_ValueForKey( info,"g_bluelimbotime" ) );
 // jpw
@@ -882,6 +883,14 @@ static void CG_ServerCommand( void ) {
 			trap_S_StartLocalSound( cgs.media.votePassed, CHAN_ANNOUNCER );
 		}
 #endif
+		return;
+	}
+
+	if ( !strcmp( cmd, "hitMarker" ) ) {
+		const char *key = CG_Argv( 1 );
+		int num = atoi(key);
+		hitEvent_t hitType = ( num >= HIT_NONE && num < HIT_MAX_NUM ) ? (hitEvent_t)num : HIT_NONE;
+		CG_HitMarker( hitType );
 		return;
 	}
 

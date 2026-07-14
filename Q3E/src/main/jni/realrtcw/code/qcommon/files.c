@@ -453,7 +453,7 @@ static void FS_PrimeGateCvarsFromConfig(const char *dir)
     if (!fs_homepath || !fs_homepath->string[0]) return;
 
     const char *cfgNames[] = {
-        "realrtcwconfig.cfg",
+        RRTCW_VARIABLES,
         "wolfconfig_mp.cfg",
         "wolfconfig.cfg",
         "q3config.cfg",
@@ -991,6 +991,54 @@ long FS_filelength(fileHandle_t f)
 	else
 		return FS_fplength(h);
 }
+
+/*
+================
+FS_filelengthInPak
+
+Return the length of a file from a pak file (zip/pk3 commonly).
+================
+*/
+long FS_filelengthInPak(fileHandle_t f) {
+	unzFile	uz;
+	unz_file_info info;
+	
+	if (f <= 0 || f >= MAX_FILE_HANDLES) {
+		return -1;
+	}
+	
+	// Handle files in zip pack archives
+	if (fsh[f].zipFile == qtrue) {
+		uz = fsh[f].handleFiles.file.z;
+		if (!uz) {
+			return -1;
+		}
+		
+		if (unzGetCurrentFileInfo(uz, &info, NULL, 0, NULL, 0, NULL, 0) != UNZ_OK) {
+			return -1;
+		}
+		
+		return info.uncompressed_size;
+	}
+
+	return -1;
+}
+
+/*
+================
+FS_isFileHandleInPak
+
+Return qtrue if a file handle is from a pak file (zip/pk3 commonly).
+================
+*/
+qboolean FS_isFileHandleInPak(fileHandle_t f) {
+	if (f <= 0 || f >= MAX_FILE_HANDLES) {
+		return qfalse;
+	}
+
+	return fsh[f].zipFile;
+}
+
 
 /*
 ====================
@@ -1829,6 +1877,26 @@ qboolean FS_IsDemoExt(const char *filename, int namelen)
 	return qfalse;
 }
 
+
+static qboolean FS_IsSaveGameSvg( const char *filename ) {
+	int len;
+	if ( !filename ) return qfalse;
+
+	// qpaths are not supposed to have a leading slash
+	if ( filename[0] == '/' || filename[0] == '\\' ) {
+		filename++;
+	}
+
+	len = (int)strlen( filename );
+	return FS_IsExt( filename, ".svg", len );
+}
+
+// extension passed to FS_ListFilteredFiles is usually "svg" (no dot) in RTCW code paths
+static qboolean FS_IsSvgExtensionToken( const char *ext ) {
+	if ( !ext || !ext[0] ) return qfalse;
+	return ( !Q_stricmp( ext, "svg" ) || !Q_stricmp( ext, ".svg" ) ) ? qtrue : qfalse;
+}
+
 /*
 ===========
 FS_FOpenFileReadDir
@@ -2101,16 +2169,31 @@ long FS_FOpenFileRead(const char *filename, fileHandle_t *file, qboolean uniqueF
 	searchpath_t *search;
 	long len;
 	qboolean isLocalConfig;
+	qboolean isSaveSvg;
 
 	if(!fs_searchpaths)
 		Com_Error(ERR_FATAL, "Filesystem call made without initialization");
 
-	isLocalConfig = !strcmp(filename, "autoexec.cfg") || !strcmp(filename, Q3CONFIG_CFG);
+	isLocalConfig = !strcmp(filename, "autoexec.cfg") || !strcmp(filename, RRTCW_BINDINGS) || !strcmp(filename, RRTCW_VARIABLES);
+
+	// NEW: savegames must be read only from the current fs_gamedir folder
+	isSaveSvg = FS_IsSaveGameSvg( filename );
+
 	for(search = fs_searchpaths; search; search = search->next)
 	{
 		// autoexec.cfg and wolfconfig.cfg can only be loaded outside of pk3 files.
 		if (isLocalConfig && search->pack)
 			continue;
+
+		// NEW: .svg saves are directory-only AND current-gamedir-only
+		if (isSaveSvg) {
+			if (search->pack)
+				continue;
+			if (!search->dir)
+				continue;
+			if (Q_stricmp(search->dir->gamedir, fs_gamedir))
+				continue;
+		}
 
 		len = FS_FOpenFileReadDir(filename, search, file, uniqueFILE, qfalse);
 
@@ -2124,9 +2207,8 @@ long FS_FOpenFileRead(const char *filename, fileHandle_t *file, qboolean uniqueF
 			if(len >= 0 && *file)
 				return len;
 		}
-
 	}
-	
+
 #ifdef FS_MISSING
 	if(missingFiles)
 		fprintf(missingFiles, "%s\n", filename);
@@ -2139,8 +2221,6 @@ long FS_FOpenFileRead(const char *filename, fileHandle_t *file, qboolean uniqueF
 	}
 	else
 	{
-		// When file is NULL, we're querying the existance of the file
-		// If we've got here, it doesn't exist
 		return 0;
 	}
 }
@@ -3024,6 +3104,8 @@ char **FS_ListFilteredFiles( const char *path, const char *extension, char *filt
 		extension = "";
 	}
 
+	qboolean wantSvg = FS_IsSvgExtensionToken(extension);
+
 	pathLength = strlen( path );
 	if ( path[pathLength - 1] == '\\' || path[pathLength - 1] == '/' ) {
 		pathLength--;
@@ -3093,6 +3175,12 @@ char **FS_ListFilteredFiles( const char *path, const char *extension, char *filt
 			int numSysFiles;
 			char    **sysFiles;
 			char    *name;
+
+
+			// NEW: only list .svg saves from the current gamedir
+			if (wantSvg && Q_stricmp(search->dir->gamedir, fs_gamedir)) {
+				continue;
+			}
 
 			// don't scan directories for files if we are pure or restricted
 			// allow listing of savegames for the demo menus
@@ -3833,9 +3921,9 @@ void FS_AddGameDirectory( const char *path, const char *dir ) {
 
 	qsort( sorted, numfiles, sizeof(char *), paksort );
 
-	for ( i = 0 ; i < numfiles ; i++ ) {
+for ( i = 0 ; i < numfiles ; i++ ) {
     if ( Q_strncmp( sorted[i],"mp_",3 ) ) {
-			if ( !Q_strncmp( sorted[i],"zz_",3 ) ) {
+        if ( !Q_strncmp( sorted[i],"zz_",3 ) ) {
             memcpy( sorted[i],"sp",2 ); // restore "sp_" name
         }
 
@@ -3848,20 +3936,20 @@ void FS_AddGameDirectory( const char *path, const char *dir ) {
 		if (FS_ShouldSkipPakByRules(baseNoExt, sorted[i]))
 		{
 			continue;
-			}
+		}
 		// --- DLC gating end ---
 
-			pakfile = FS_BuildOSPath( path, dir, sorted[i] );
-			if ( ( pak = FS_LoadZipFile( pakfile, sorted[i] ) ) == 0 ) {
-				continue;
-			}
-			strcpy( pak->pakGamename, dir );
-			search = Z_Malloc( sizeof( searchpath_t ) );
-			search->pack = pak;
-			search->next = fs_searchpaths;
-			fs_searchpaths = search;
-		}
-	}
+		pakfile = FS_BuildOSPath( path, dir, sorted[i] );
+        if ( ( pak = FS_LoadZipFile( pakfile, sorted[i] ) ) == 0 ) {
+            continue;
+        }
+        strcpy( pak->pakGamename, dir );
+        search = Z_Malloc( sizeof( searchpath_t ) );
+        search->pack = pak;
+        search->next = fs_searchpaths;
+        fs_searchpaths = search;
+    }
+}
 
 	// done
 	Sys_FreeFileList( pakfiles );
@@ -4979,7 +5067,8 @@ void FS_Restart( int checksumFeed ) {
 
 		// skip the wolfconfig.cfg if "safe" is on the command line
 		if ( !Com_SafeMode() ) {
-			Cbuf_AddText ("exec " Q3CONFIG_CFG "\n");
+			Cbuf_AddText ("exec " RRTCW_VARIABLES "\n");
+			Cbuf_AddText ("exec " RRTCW_BINDINGS "\n");
 		}
 	}
 

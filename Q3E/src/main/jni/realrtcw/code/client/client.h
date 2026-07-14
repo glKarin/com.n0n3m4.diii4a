@@ -128,13 +128,14 @@ typedef struct {
 
 	int mouseDx[2], mouseDy[2];         // added to by mouse events
 	int mouseIndex;
-	int joystickAxis[MAX_JOYSTICK_AXIS];            // set by joystick events
+	float joystickAxis[MAX_JOYSTICK_AXIS];            // set by joystick events
 
 	// cgame communicates a few values to the client system
 	int cgameUserCmdValue;              // current weapon to add to usercmd_t
 	int cgameUserHoldableValue;         // current holdable item to add to usercmd_t	//----(SA)	added
 	float cgameSensitivity;
 	int cgameCld;                       // NERVE - SMF
+	qboolean cgameIsZoomed;
 
 	// cmds[cmdNumber] is the predicted command, [cmdNumber-1] is the last
 	// properly generated command
@@ -166,6 +167,10 @@ typedef struct {
 	// -NERVE - SMF
 
 	qboolean cameraMode;    //----(SA)	added for control of input while watching cinematics
+
+	float cgameAA_Strength;
+	float cgameAA_DYaw;
+	float cgameAA_DPitch;
 
 } clientActive_t;
 
@@ -417,6 +422,9 @@ extern cvar_t  *cl_recoilPitch;     // RF
 extern cvar_t  *cl_sensitivity;
 extern cvar_t  *cl_freelook;
 
+extern cvar_t  *cl_zoomSensitivity;
+extern cvar_t  *cl_zoomSensitivityFovScaled;
+
 extern cvar_t  *cl_mouseAccel;
 extern	cvar_t	*cl_mouseAccelOffset;
 extern	cvar_t	*cl_mouseAccelStyle;
@@ -438,6 +446,30 @@ extern	cvar_t	*j_yaw_axis;
 extern	cvar_t	*j_forward_axis;
 extern	cvar_t	*j_side_axis;
 extern	cvar_t	*j_up_axis;
+
+extern cvar_t   *j_moveSens;
+extern cvar_t   *j_lookSens;
+
+extern cvar_t  *j_walk_threshold;
+extern cvar_t  *j_walk_hysteresis;
+
+extern cvar_t  *j_aimassist;            
+extern cvar_t  *j_aimassist_slowdown;   
+extern cvar_t  *j_aimassist_magnet;    
+extern cvar_t  *j_aimassist_minstick;   
+extern cvar_t  *j_aimassist_maxangle;
+
+extern cvar_t *j_aimassist_strafemagnet;   
+extern cvar_t *j_aimassist_minstrength;   
+
+extern cvar_t *j_aimassist_turnrate;        
+extern cvar_t *j_aimassist_turnrate_ads;
+
+extern cvar_t *j_aimassist_recoil;   
+
+extern cvar_t   *j_uiSpeed;
+extern cvar_t   *j_uiExpo;
+extern cvar_t   *j_uiDeadzone;
 
 extern cvar_t  *cl_timedemo;
 extern	cvar_t	*cl_aviFrameRate;
@@ -528,6 +560,7 @@ qboolean CL_GetLimboString( int index, char *buf );         // NERVE - SMF
 
 void CL_OpenURL(const char *url);
 
+
 //
 // cl_input
 //
@@ -581,6 +614,7 @@ void CL_ShutdownInput( void );
 void CL_SendCmd( void );
 void CL_ClearState( void );
 void CL_ReadPackets( void );
+void CL_GamepadUIMouseMove(void);
 
 void CL_WritePacket( void );
 void IN_CenterView( void );
@@ -681,6 +715,11 @@ void CIN_SetExtents( int handle, int x, int y, int w, int h );
 void CIN_SetLooping( int handle, qboolean loop );
 void CIN_UploadCinematic( int handle );
 void CIN_CloseAllVideos( void );
+void CL_LevelCin_Play( const char *name, int mode );
+void CL_LevelCin_Stop( void );
+qboolean SCR_LevelCinematicActive( void );
+void SCR_RunLevelCinematic( void );
+void SCR_DrawLevelCinematic( void );
 
 //
 // cl_cgame.c

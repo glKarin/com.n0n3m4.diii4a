@@ -81,6 +81,7 @@ qboolean AICast_ScriptAction_IncreaseRespawns( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_SuggestWeapon( cast_state_t *cs, char *params );	//----(SA)	added
 qboolean AICast_ScriptAction_GiveWeapon( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params );
+qboolean AICast_ScriptAction_DropItem( cast_state_t *cs, char *params ) ;
 qboolean AICast_ScriptAction_GiveInventory( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_GivePerk( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_TakeWeapon( cast_state_t *cs, char *params );
@@ -109,156 +110,7 @@ qboolean AICast_ScriptAction_Mount( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_Unmount( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_SavePersistant( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_ChangeLevel( cast_state_t *cs, char *params );
-
-// Achievements
-qboolean AICast_ScriptAction_AchievementMap_W3D( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_AchievementMap_W3DSEC( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_goldchest( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_warcrime( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_speedrun( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_training( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_strangelove( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_rocketstealth( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_crystal( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_stealth1( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_stealth2( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter1( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter2( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter3( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter4( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter5( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter6( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter7( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter1_hard( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter2_hard( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter3_hard( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter4_hard( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter5_hard( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter6_hard( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_chapter7_hard( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_boss1( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_boss2( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_boss3( cast_state_t *cs, char *params );
-
-// Addons achievements
-qboolean AICast_ScriptAction_Achievement_curse( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_stalingrad( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_timegate( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_pro51( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_sf( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_ra( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_ic( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_capuzzo( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_saucers( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_arkot( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_darkm( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_darkm_2( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_dm2( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_dm2_2( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_dm2_3( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_dm2_4( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_tda_day( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_tda_night( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_tda_dark( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_tda_plus( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_tda_arena( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_lion( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_parkour( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_manor1( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_manor1_2( cast_state_t *cs, char *params );
-
-// Bonus modes achievements
-qboolean AICast_ScriptAction_Achievement_walkinthepark( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_ironman( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_hardcore( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_999( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_nightmare( cast_state_t *cs, char *params );
-
-// Winterstein achievements
-qboolean AICast_ScriptAction_Achievement_booze( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_party( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_winterstein( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_speedrun_norway( cast_state_t *cs, char *params );
-
-//ETSP achievements
-qboolean AICast_ScriptAction_AchievementMap_SIWA( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_AchievementMap_SEAWALL( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_GOLDRUSH( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_RADAR( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_RAILGUN( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_FUEL( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_ALLGOLDSIWA( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_CHESTSIWA( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_FUEL1( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_SPEEDBATTERY( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_ROOMBATTERY( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_SAFE( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_HEIST( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_KELLYS( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MANSIONGOLD( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_PANTHER( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_DEPOT( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_DORA( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_ALLGOLDFUEL( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_ETBONUS( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_BINOCS( cast_state_t *cs, char *params );
-
-// Vendetta Dilogy achievements
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_1( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_2( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_3( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_4( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_5( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_6( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_7( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_8( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_9( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_10( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_11( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_1( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_2( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_3( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_4( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_5( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_6( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_7( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_8( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_9( cast_state_t *cs, char *params );
-
-// Warbell achievements
-qboolean AICast_ScriptAction_Achievement_WARBELL1( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_WARBELL2( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_WARBELL3( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_WARBELL4( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_WARBELL5( cast_state_t *cs, char *params );
-
-// Malta Update Achievements
-qboolean AICast_ScriptAction_Achievement_MALTA_NIGHTMARE( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_LEAP( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_OSA( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_GOAT( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_COURSE( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_RADIO( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_EGYPT( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_WIDE( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_FIREFLY( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_LAIR( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_HIDEOUT( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_BARTENDER( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_BETRAYER( cast_state_t *cs, char *params );
-qboolean AICast_ScriptAction_Achievement_MALTA_AGENT2( cast_state_t *cs, char *params );
-
-//Ice
-qboolean AICast_ScriptAction_Achievement_ICE_BEAT( cast_state_t *cs, char *params ) ;
-qboolean AICast_ScriptAction_Achievement_ICE_DH( cast_state_t *cs, char *params ) ;
-qboolean AICast_ScriptAction_Achievement_ICE_STEALTH( cast_state_t *cs, char *params ) ;
-qboolean AICast_ScriptAction_Achievement_ICE_SECRET( cast_state_t *cs, char *params ) ;
-qboolean AICast_ScriptAction_Achievement_ICE_DEFENSE ( cast_state_t *cs, char *params ) ;
-qboolean AICast_ScriptAction_Achievement_ICE_EE( cast_state_t *cs, char *params ) ;
-
-qboolean AICast_ScriptAction_Achievement_6PERKS( cast_state_t *cs, char *params ) ;
-
-
+qboolean AICast_ScriptAction_AchievementGeneric( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_EndGame( cast_state_t *cs, char *params );			//----(SA)	added
 qboolean AICast_ScriptAction_Announce( cast_state_t *cs, char *params );		
 qboolean AICast_ScriptAction_Teleport( cast_state_t *cs, char *params );		//----(SA)	added
@@ -288,6 +140,8 @@ qboolean AICast_ScriptAction_NoTarget( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_Cvar( cast_state_t *cs, char *params );
 qboolean AICast_ScriptAction_decoy( cast_state_t *cs, char *params );
 
+qboolean AICast_ScriptAction_CinPlay( cast_state_t *cs, char *params );
+qboolean AICast_ScriptAction_CinStop( cast_state_t *cs, char *params );
 
 qboolean AICast_ScriptAction_MusicStart( cast_state_t *cs, char *params );		//----(SA)
 qboolean AICast_ScriptAction_MusicPlay( cast_state_t *cs, char *params );		//----(SA)
@@ -311,263 +165,441 @@ qboolean AICast_ScriptAction_AccumPrint(cast_state_t* cs, char* params);
 qboolean AICast_ScriptAction_GlobalAccumPrint(cast_state_t* cs, char* params);
 qboolean AICast_ScriptAction_Burned(cast_state_t* cs, char* params);
 
+qboolean AICast_ScriptAction_Defend( cast_state_t *cs, char *params );
+qboolean AICast_ScriptAction_DefendStop( cast_state_t *cs, char *params ) ;
+
+qboolean AICast_ScriptAction_ApplyLoadout( cast_state_t *cs, char *params );
+
+
+// Achievement condition functions
+
+static qboolean Ach_CanAward_Speedrun( cast_state_t *cs )
+{
+    gentity_t *player = AICast_FindEntityForName( "player" );
+    int playtime = 0;
+
+    if ( player ) {
+        AICast_AgePlayTime( player->s.number );
+        playtime = AICast_PlayTime( player->s.number );
+    }
+
+    return ( playtime <= 90000 );
+}
+
+static qboolean Ach_CanAward_FirstAttemptOnly( cast_state_t *cs )
+{
+    gentity_t *player = AICast_FindEntityForName( "player" );
+    int attempts = 0;
+
+    if ( player ) {
+        attempts = AICast_NumAttempts( player->s.number ) + 1;
+    }
+
+    return ( attempts <= 1 );
+}
+
+static qboolean Ach_CanAward_WalkInThePark( cast_state_t *cs ) {
+    return ( g_nohudchallenge.integer && !g_nopickupchallenge.integer && !g_ironchallenge.integer );
+}
+static qboolean Ach_CanAward_Ironman( cast_state_t *cs ) {
+    return ( g_ironchallenge.integer && !g_nohudchallenge.integer && !g_nopickupchallenge.integer );
+}
+static qboolean Ach_CanAward_Hardcore( cast_state_t *cs ) {
+    return ( g_nopickupchallenge.integer && !g_nohudchallenge.integer && !g_ironchallenge.integer );
+}
+static qboolean Ach_CanAward_999( cast_state_t *cs ) {
+    return ( g_decaychallenge.integer );
+}
+static qboolean Ach_CanAward_Nightmare( cast_state_t *cs ) {
+    return ( g_nohudchallenge.integer && g_nopickupchallenge.integer && g_ironchallenge.integer );
+}
+
+static qboolean Ach_CanAward_ETBonusChallengeAny( cast_state_t *cs )
+{
+    return ( g_decaychallenge.integer ||
+             g_ironchallenge.integer ||
+             g_nohudchallenge.integer ||
+             g_nopickupchallenge.integer );
+}
+
+
+// Achievements data
+static const cast_achievementDef_t ACH_W3D_1                 = { "ACH_W3D_1",                 NULL };
+static const cast_achievementDef_t ACH_W3D_2                 = { "ACH_W3D_2",                 NULL };
+
+static const cast_achievementDef_t ACH_SECRET_CRYPT2         = { "ACH_SECRET_CRYPT2",         NULL };
+static const cast_achievementDef_t ACH_KILL_CIVILIAN         = { "ACH_KILL_CIVILIAN",         NULL };
+
+static const cast_achievementDef_t ACH_MAGIC                 = { "ACH_MAGIC",                 NULL };
+static const cast_achievementDef_t ACH_ROCKET_STEALTH        = { "ACH_ROCKET_STEALTH",        NULL };
+static const cast_achievementDef_t ACH_CRYSTALSKULL          = { "ACH_CRYSTALSKULL",          NULL };
+
+static const cast_achievementDef_t ACH_CHAPTER_1             = { "ACH_CHAPTER_1",             NULL };
+static const cast_achievementDef_t ACH_CHAPTER_2             = { "ACH_CHAPTER_2",             NULL };
+static const cast_achievementDef_t ACH_CHAPTER_3             = { "ACH_CHAPTER_3",             NULL };
+static const cast_achievementDef_t ACH_CHAPTER_4             = { "ACH_CHAPTER_4",             NULL };
+static const cast_achievementDef_t ACH_CHAPTER_5             = { "ACH_CHAPTER_5",             NULL };
+static const cast_achievementDef_t ACH_CHAPTER_6             = { "ACH_CHAPTER_6",             NULL };
+static const cast_achievementDef_t ACH_CHAPTER_7             = { "ACH_CHAPTER_7",             NULL };
+
+static const cast_achievementDef_t ACH_CHAPTER_1_HARD        = { "ACH_CHAPTER_1_HARD",        NULL };
+static const cast_achievementDef_t ACH_CHAPTER_2_HARD        = { "ACH_CHAPTER_2_HARD",        NULL };
+static const cast_achievementDef_t ACH_CHAPTER_3_HARD        = { "ACH_CHAPTER_3_HARD",        NULL };
+static const cast_achievementDef_t ACH_CHAPTER_4_HARD        = { "ACH_CHAPTER_4_HARD",        NULL };
+static const cast_achievementDef_t ACH_CHAPTER_5_HARD        = { "ACH_CHAPTER_5_HARD",        NULL };
+static const cast_achievementDef_t ACH_CHAPTER_6_HARD        = { "ACH_CHAPTER_6_HARD",        NULL };
+static const cast_achievementDef_t ACH_CHAPTER_7_HARD        = { "ACH_CHAPTER_7_HARD",        NULL };
+
+static const cast_achievementDef_t ACH_BOSS1                 = { "ACH_BOSS1",                 NULL };
+static const cast_achievementDef_t ACH_BOSS2                 = { "ACH_BOSS2",                 NULL };
+static const cast_achievementDef_t ACH_BOSS3                 = { "ACH_BOSS3",                 NULL };
+
+static const cast_achievementDef_t ACH_TDA_DAY               = { "ACH_TDA_DAY",               NULL };
+static const cast_achievementDef_t ACH_TDA_NIGHT             = { "ACH_TDA_NIGHT",             NULL };
+static const cast_achievementDef_t ACH_TDA_DARK              = { "ACH_TDA_DARK",              NULL };
+static const cast_achievementDef_t ACH_TDA_PLUS              = { "ACH_TDA_PLUS",              NULL };
+static const cast_achievementDef_t ACH_TDA_ARENA             = { "ACH_TDA_ARENA",             NULL };
+
+static const cast_achievementDef_t ACH_SIWA                  = { "ACH_SIWA",                  NULL };
+static const cast_achievementDef_t ACH_SEAWALL               = { "ACH_SEAWALL",               NULL };
+static const cast_achievementDef_t ACH_GOLDRUSH              = { "ACH_GOLDRUSH",              NULL };
+static const cast_achievementDef_t ACH_RADAR                 = { "ACH_RADAR",                 NULL };
+static const cast_achievementDef_t ACH_FUEL                  = { "ACH_FUEL",                  NULL };
+static const cast_achievementDef_t ACH_ALLGOLDSIWA           = { "ACH_ALLGOLDSIWA",           NULL };
+static const cast_achievementDef_t ACH_CHESTSIWA             = { "ACH_CHESTSIWA",             NULL };
+static const cast_achievementDef_t ACH_SPEEDBATTERY          = { "ACH_SPEEDBATTERY",          NULL };
+static const cast_achievementDef_t ACH_ROOMBATTERY           = { "ACH_ROOMBATTERY",           NULL };
+static const cast_achievementDef_t ACH_SAFE                  = { "ACH_SAFE",                  NULL };
+static const cast_achievementDef_t ACH_HEIST                 = { "ACH_HEIST",                 NULL };
+static const cast_achievementDef_t ACH_KELLYS                = { "ACH_KELLYS",                NULL };
+static const cast_achievementDef_t ACH_MANSIONGOLD           = { "ACH_MANSIONGOLD",           NULL };
+static const cast_achievementDef_t ACH_PANTHER               = { "ACH_PANTHER",               NULL };
+static const cast_achievementDef_t ACH_DEPOT                 = { "ACH_DEPOT",                 NULL };
+static const cast_achievementDef_t ACH_DORA                  = { "ACH_DORA",                  NULL };
+static const cast_achievementDef_t ACH_ALLGOLDFUEL           = { "ACH_ALLGOLDFUEL",           NULL };
+static const cast_achievementDef_t ACH_BINOCS                = { "ACH_BINOCS",                NULL };
+
+static const cast_achievementDef_t ACH_WARBELL_MAP           = { "ACH_WARBELL_MAP",           NULL };
+static const cast_achievementDef_t ACH_WARBELL_WATERS        = { "ACH_WARBELL_WATERS",        NULL };
+static const cast_achievementDef_t ACH_WARBELL_BLAV          = { "ACH_WARBELL_BLAV",          NULL };
+static const cast_achievementDef_t ACH_WARBELL_OLARIC        = { "ACH_WARBELL_OLARIC",        NULL };
+static const cast_achievementDef_t ACH_WARBELL_HEIN          = { "ACH_WARBELL_HEIN",          NULL };
+
+static const cast_achievementDef_t ACH_MALTA_NIGHTMARE       = { "ACH_MALTA_NIGHTMARE",       NULL };
+static const cast_achievementDef_t ACH_MALTA_LEAP            = { "ACH_MALTA_LEAP",            NULL };
+static const cast_achievementDef_t ACH_MALTA_OSA             = { "ACH_MALTA_OSA",             NULL };
+static const cast_achievementDef_t ACH_MALTA_GOAT            = { "ACH_MALTA_GOAT",            NULL };
+static const cast_achievementDef_t ACH_MALTA_COURSE          = { "ACH_MALTA_COURSE",          NULL };
+static const cast_achievementDef_t ACH_MALTA_RADIO           = { "ACH_MALTA_RADIO",           NULL };
+static const cast_achievementDef_t ACH_MALTA_EGYPT           = { "ACH_MALTA_EGYPT",           NULL };
+static const cast_achievementDef_t ACH_MALTA_WIDE            = { "ACH_MALTA_WIDE",            NULL };
+static const cast_achievementDef_t ACH_MALTA_FIREFLY         = { "ACH_MALTA_FIREFLY",         NULL };
+static const cast_achievementDef_t ACH_MALTA_LAIR            = { "ACH_MALTA_LAIR",            NULL };
+static const cast_achievementDef_t ACH_MALTA_HIDEOUT         = { "ACH_MALTA_HIDEOUT",         NULL };
+static const cast_achievementDef_t ACH_MALTA_BARTENDER       = { "ACH_MALTA_BARTENDER",       NULL };
+static const cast_achievementDef_t ACH_MALTA_BETRAYER        = { "ACH_MALTA_BETRAYER",        NULL };
+static const cast_achievementDef_t ACH_MALTA_AGENT2          = { "ACH_MALTA_AGENT2",          NULL };
+
+static const cast_achievementDef_t ACH_ICE_BEAT              = { "ACH_ICE_BEAT",              NULL };
+static const cast_achievementDef_t ACH_ICE_DH                = { "ACH_ICE_DH",                NULL };
+static const cast_achievementDef_t ACH_ICE_STEALTH           = { "ACH_ICE_STEALTH",           NULL };
+static const cast_achievementDef_t ACH_ICE_SECRET            = { "ACH_ICE_SECRET",            NULL };
+static const cast_achievementDef_t ACH_ICE_DEFENSE           = { "ACH_ICE_DEFENSE",           NULL };
+static const cast_achievementDef_t ACH_ICE_EE                = { "ACH_ICE_EE",                NULL };
+
+static const cast_achievementDef_t ACH_6PERKS                = { "ACH_6PERKS",                NULL };
+static const cast_achievementDef_t ACH_TRAINING              = { "ACH_TRAINING",              NULL };
+static const cast_achievementDef_t ACH_RAILGUN               = { "ACH_RAILGUN",               NULL };
+
+// Special-condition achievements
+static const cast_achievementDef_t ACH_ESCAPE_SPEEDRUN       = { "ACH_ESCAPE_SPEEDRUN",       Ach_CanAward_Speedrun };
+
+static const cast_achievementDef_t ACH_STEALTH_1             = { "ACH_STEALTH_1",             Ach_CanAward_FirstAttemptOnly };
+static const cast_achievementDef_t ACH_STEALTH_2             = { "ACH_STEALTH_2",             Ach_CanAward_FirstAttemptOnly };
+static const cast_achievementDef_t ACH_FUEL1                 = { "ACH_FUEL1",                 Ach_CanAward_FirstAttemptOnly };
+
+static const cast_achievementDef_t ACH_WALKINTHEPARK         = { "ACH_WALKINTHEPARK",         Ach_CanAward_WalkInThePark };
+static const cast_achievementDef_t ACH_IRONMAN               = { "ACH_IRONMAN",               Ach_CanAward_Ironman };
+static const cast_achievementDef_t ACH_HARDCORE              = { "ACH_HARDCORE",              Ach_CanAward_Hardcore };
+static const cast_achievementDef_t ACH_999                   = { "ACH_999",                   Ach_CanAward_999 };
+static const cast_achievementDef_t ACH_NIGHTMARE             = { "ACH_NIGHTMARE",             Ach_CanAward_Nightmare };
+
+static const cast_achievementDef_t ACH_ETBONUS               = { "ACH_ETBONUS",               Ach_CanAward_ETBonusChallengeAny };
+
 // these are the actions that each event can call
 cast_script_stack_action_t scriptActions[] =
-{
-	{"drop_weapon", AICast_ScriptAction_DropWeapon},
-	{"changeaiteam", AICast_ScriptAction_ChangeAiTeam},
-	{"changeainame", AICast_ScriptAction_ChangeAiName},
-	{"changeaiskin", AICast_ScriptAction_ChangeAiSkin},
-	{"changeaihead", AICast_ScriptAction_ChangeAiHead},
-	{"burn", AICast_ScriptAction_Burned},
-	{"accumprint", AICast_ScriptAction_AccumPrint},
-	{"globalaccumprint", AICast_ScriptAction_GlobalAccumPrint},
-	{"gotomarker",       AICast_ScriptAction_GotoMarker},
-	{"runtomarker",      AICast_ScriptAction_GotoMarker},
-	{"walktomarker", AICast_ScriptAction_WalkToMarker},
-	{"crouchtomarker",   AICast_ScriptAction_CrouchToMarker},
-	{"gotocast",     AICast_ScriptAction_GotoCast},
-	{"runtocast",        AICast_ScriptAction_GotoCast},
-	{"walktocast",       AICast_ScriptAction_WalkToCast},
-	{"crouchtocast", AICast_ScriptAction_CrouchToCast},
-	{"followcast",       AICast_ScriptAction_FollowCast},
-	{"playsound",        AICast_ScriptAction_PlaySound},
-	{"playanim",     AICast_ScriptAction_PlayAnim},
-	{"clearanim",        AICast_ScriptAction_ClearAnim},
-	{"wait",         AICast_ScriptAction_Wait},
-	{"abort_if_loadgame",AICast_ScriptAction_AbortIfLoadgame},		//----(SA)	added
-	{"trigger",          AICast_ScriptAction_Trigger},
-	{"setammo",          AICast_ScriptAction_SetAmmo},
-	{"setclip",          AICast_ScriptAction_SetClip},				//----(SA)	added
-	{"selectweapon", AICast_ScriptAction_SelectWeapon},
-	{"noattack",     AICast_ScriptAction_NoAttack},
-	{"suggestweapon",    AICast_ScriptAction_SuggestWeapon},		//----(SA)	added
-	{"attack",           AICast_ScriptAction_Attack},
-	{"setmovespeed",     AICast_ScriptAction_SetMoveSpeed},					
-	{"givearmor",        AICast_ScriptAction_GiveArmor},			//----(SA)	added
-	{"setarmor",     AICast_ScriptAction_SetArmor},					//----(SA)	added
-	{"giveammo",        AICast_ScriptAction_GiveAmmo},			
-	{"givehealth",        AICast_ScriptAction_GiveHealth},
-	{"increaserespawns",        AICast_ScriptAction_IncreaseRespawns},					
-	{"giveinventory",    AICast_ScriptAction_GiveInventory},
-	{"giveperk",    AICast_ScriptAction_GivePerk},
-	{"giveweapon",       AICast_ScriptAction_GiveWeapon},
-	{"giveweaponfull",   AICast_ScriptAction_GiveWeaponFull},
-	{"takeweapon",       AICast_ScriptAction_TakeWeapon},
-	{"norespawn",       AICast_ScriptAction_NoRespawn},
-	{"randomrespawn",       AICast_ScriptAction_RandomRespawn},
-	{"movetype",     AICast_ScriptAction_Movetype},
-	{"alertentity",      AICast_ScriptAction_AlertEntity},
-	{"savegame",     AICast_ScriptAction_SaveGame},
-	{"savecheckpoint",     AICast_ScriptAction_SaveCheckpoint},
-	{"fireattarget", AICast_ScriptAction_FireAtTarget},
-	{"godmode",          AICast_ScriptAction_GodMode},
-	{"accum",            AICast_ScriptAction_Accum},
-	{"wave",            AICast_ScriptAction_Wave},
-	{"globalaccum",      AICast_ScriptAction_GlobalAccum},
-	{"spawncast",        AICast_ScriptAction_SpawnCast},
-	{"missionfailed",    AICast_ScriptAction_MissionFailed},
-	{"missionsuccess",   AICast_ScriptAction_ObjectiveMet},
-	{"objectivemet", AICast_ScriptAction_ObjectiveMet},				// dupe of missionsuccess so scripts can changeover to a more logical name
-	{"objectivesneeded",AICast_ScriptAction_ObjectivesNeeded},
-	{"printbonus",     AICast_ScriptAction_PrintBonus},
-	{"noaidamage",       AICast_ScriptAction_NoAIDamage},
-	{"print",            AICast_ScriptAction_Print},
-	{"facetargetangles",AICast_ScriptAction_FaceTargetAngles},
-	{"face_entity",      AICast_ScriptAction_FaceEntity},
-	{"resetscript",      AICast_ScriptAction_ResetScript},
-	{"mount",            AICast_ScriptAction_Mount},
-	{"unmount",          AICast_ScriptAction_Unmount},
-	{"savepersistant",   AICast_ScriptAction_SavePersistant},
-	{"changelevel",      AICast_ScriptAction_ChangeLevel},
-	// Achievements
-	{"achievement_map_w3d",      AICast_ScriptAction_AchievementMap_W3D},
-	{"achievement_map_w3dsec",      AICast_ScriptAction_AchievementMap_W3DSEC},
-	{"achievement_goldchest",      AICast_ScriptAction_Achievement_goldchest},
-	{"achievement_warcrime",      AICast_ScriptAction_Achievement_warcrime},
-	{"achievement_speedrun",      AICast_ScriptAction_Achievement_speedrun},
-	{"achievement_training",      AICast_ScriptAction_Achievement_training},
-	{"achievement_strangelove",      AICast_ScriptAction_Achievement_strangelove},
-	{"achievement_rocketstealth",      AICast_ScriptAction_Achievement_rocketstealth},
-	{"achievement_crystal",      AICast_ScriptAction_Achievement_crystal},
-	{"achievement_stealth1",      AICast_ScriptAction_Achievement_stealth1},
-	{"achievement_stealth2",      AICast_ScriptAction_Achievement_stealth2},
-	{"achievement_chapter1",      AICast_ScriptAction_Achievement_chapter1},
-	{"achievement_chapter2",      AICast_ScriptAction_Achievement_chapter2},
-	{"achievement_chapter3",      AICast_ScriptAction_Achievement_chapter3},
-	{"achievement_chapter4",      AICast_ScriptAction_Achievement_chapter4},
-	{"achievement_chapter5",      AICast_ScriptAction_Achievement_chapter5},
-	{"achievement_chapter6",      AICast_ScriptAction_Achievement_chapter6},
-	{"achievement_chapter7",      AICast_ScriptAction_Achievement_chapter7},
-	{"achievement_chapter1_hard",      AICast_ScriptAction_Achievement_chapter1_hard},
-	{"achievement_chapter2_hard",      AICast_ScriptAction_Achievement_chapter2_hard},
-	{"achievement_chapter3_hard",      AICast_ScriptAction_Achievement_chapter3_hard},
-	{"achievement_chapter4_hard",      AICast_ScriptAction_Achievement_chapter4_hard},
-	{"achievement_chapter5_hard",      AICast_ScriptAction_Achievement_chapter5_hard},
-	{"achievement_chapter6_hard",      AICast_ScriptAction_Achievement_chapter6_hard},
-	{"achievement_chapter7_hard",      AICast_ScriptAction_Achievement_chapter7_hard},
-	{"achievement_boss1",      AICast_ScriptAction_Achievement_boss1},
-	{"achievement_boss2",      AICast_ScriptAction_Achievement_boss2},
-	{"achievement_boss3",      AICast_ScriptAction_Achievement_boss3},
-	// Addons achievements
-	{"achievement_curse",      AICast_ScriptAction_Achievement_curse},
-	{"achievement_stalingrad",      AICast_ScriptAction_Achievement_stalingrad},
-	{"achievement_timegate",      AICast_ScriptAction_Achievement_timegate},
-	{"achievement_pro51",      AICast_ScriptAction_Achievement_pro51},
-	{"achievement_sf",      AICast_ScriptAction_Achievement_sf},
-	{"achievement_ra",      AICast_ScriptAction_Achievement_ra},
-	{"achievement_ic",      AICast_ScriptAction_Achievement_ic},
-	{"achievement_capuzzo",      AICast_ScriptAction_Achievement_capuzzo},
-	{"achievement_saucers",      AICast_ScriptAction_Achievement_saucers},
-	{"achievement_arkot",      AICast_ScriptAction_Achievement_arkot},
-	{"achievement_darkm",      AICast_ScriptAction_Achievement_darkm},
-	{"achievement_darkm_2",      AICast_ScriptAction_Achievement_darkm_2},
-	{"achievement_dm2",      AICast_ScriptAction_Achievement_dm2},
-	{"achievement_dm2_2",      AICast_ScriptAction_Achievement_dm2_2},
-	{"achievement_dm2_3",      AICast_ScriptAction_Achievement_dm2_3},
-	{"achievement_dm2_4",      AICast_ScriptAction_Achievement_dm2_4},
-	{"achievement_tda_day",      AICast_ScriptAction_Achievement_tda_day},
-	{"achievement_tda_night",      AICast_ScriptAction_Achievement_tda_night},
-	{"achievement_tda_dark",      AICast_ScriptAction_Achievement_tda_dark},
-	{"achievement_tda_plus",      AICast_ScriptAction_Achievement_tda_plus},
-	{"achievement_tda_arena",      AICast_ScriptAction_Achievement_tda_arena},
-	{"achievement_lion",      AICast_ScriptAction_Achievement_lion},
-	{"achievement_parkour",      AICast_ScriptAction_Achievement_parkour},
-	{"achievement_manor1",      AICast_ScriptAction_Achievement_manor1},
-	{"achievement_manor1_2",      AICast_ScriptAction_Achievement_manor1_2},
-	// Bonus modes achievements
-	{"achievement_walkinthepark",      AICast_ScriptAction_Achievement_walkinthepark},
-	{"achievement_ironman",      AICast_ScriptAction_Achievement_ironman},
-	{"achievement_hardcore",      AICast_ScriptAction_Achievement_hardcore},
-	{"achievement_999",      AICast_ScriptAction_Achievement_999},
-	{"achievement_nightmare",      AICast_ScriptAction_Achievement_nightmare},
-	// Winterstein achievements
-	{"achievement_booze",      AICast_ScriptAction_Achievement_booze},
-	{"achievement_party",      AICast_ScriptAction_Achievement_party},
-	{"achievement_winterstein",      AICast_ScriptAction_Achievement_winterstein},
-	{"achievement_speedrun_norway",      AICast_ScriptAction_Achievement_speedrun_norway},
-	// ETSP achievements
-	{"achievement_map_siwa",      AICast_ScriptAction_AchievementMap_SIWA},
-	{"achievement_map_seawall",      AICast_ScriptAction_AchievementMap_SEAWALL},
-	{"achievement_map_goldrush",      AICast_ScriptAction_Achievement_GOLDRUSH},
-	{"achievement_map_radar",      AICast_ScriptAction_Achievement_RADAR},
-	{"achievement_map_railgun",      AICast_ScriptAction_Achievement_RAILGUN},
-	{"achievement_map_fueldump",      AICast_ScriptAction_Achievement_FUEL},
-	{"achievement_allgoldsiwa",      AICast_ScriptAction_Achievement_ALLGOLDSIWA},
-	{"achievement_chestsiwa",      AICast_ScriptAction_Achievement_CHESTSIWA},
-	{"achievement_speedbattery",      AICast_ScriptAction_Achievement_SPEEDBATTERY},
-	{"achievement_roombattery",      AICast_ScriptAction_Achievement_ROOMBATTERY},
-	{"achievement_safe",      AICast_ScriptAction_Achievement_SAFE},
-	{"achievement_heist",      AICast_ScriptAction_Achievement_HEIST},
-	{"achievement_kellys",      AICast_ScriptAction_Achievement_KELLYS},
-	{"achievement_mansiongold",      AICast_ScriptAction_Achievement_MANSIONGOLD},
-	{"achievement_panther",      AICast_ScriptAction_Achievement_PANTHER},
-	{"achievement_depot",      AICast_ScriptAction_Achievement_DEPOT},
-	{"achievement_dora",      AICast_ScriptAction_Achievement_DORA},
-	{"achievement_fuel1",      AICast_ScriptAction_Achievement_FUEL1},
-	{"achievement_allgoldfuel",      AICast_ScriptAction_Achievement_ALLGOLDFUEL},
-	{"achievement_etbonus",      AICast_ScriptAction_Achievement_ETBONUS},
-	{"achievement_binocs",      AICast_ScriptAction_Achievement_BINOCS},
-	// Vendetta Dilogy achievements
-	{"achievement_VENDETTA1_1",      AICast_ScriptAction_Achievement_VENDETTA1_1},
-	{"achievement_VENDETTA1_2",      AICast_ScriptAction_Achievement_VENDETTA1_2},
-	{"achievement_VENDETTA1_3",      AICast_ScriptAction_Achievement_VENDETTA1_3},
-	{"achievement_VENDETTA1_4",      AICast_ScriptAction_Achievement_VENDETTA1_4},
-	{"achievement_VENDETTA1_5",      AICast_ScriptAction_Achievement_VENDETTA1_5},
-	{"achievement_VENDETTA1_6",      AICast_ScriptAction_Achievement_VENDETTA1_6},
-	{"achievement_VENDETTA1_7",      AICast_ScriptAction_Achievement_VENDETTA1_7},
-	{"achievement_VENDETTA1_8",      AICast_ScriptAction_Achievement_VENDETTA1_8},
-	{"achievement_VENDETTA1_9",      AICast_ScriptAction_Achievement_VENDETTA1_9},
-	{"achievement_VENDETTA1_10",      AICast_ScriptAction_Achievement_VENDETTA1_10},
-	{"achievement_VENDETTA1_11",      AICast_ScriptAction_Achievement_VENDETTA1_11},
-	{"achievement_VENDETTA2_1",      AICast_ScriptAction_Achievement_VENDETTA2_1},
-	{"achievement_VENDETTA2_2",      AICast_ScriptAction_Achievement_VENDETTA2_2},
-	{"achievement_VENDETTA2_3",      AICast_ScriptAction_Achievement_VENDETTA2_3},
-	{"achievement_VENDETTA2_4",      AICast_ScriptAction_Achievement_VENDETTA2_4},
-	{"achievement_VENDETTA2_5",      AICast_ScriptAction_Achievement_VENDETTA2_5},
-	{"achievement_VENDETTA2_6",      AICast_ScriptAction_Achievement_VENDETTA2_6},
-	{"achievement_VENDETTA2_7",      AICast_ScriptAction_Achievement_VENDETTA2_7},
-	{"achievement_VENDETTA2_8",      AICast_ScriptAction_Achievement_VENDETTA2_8},
-	{"achievement_VENDETTA2_9",      AICast_ScriptAction_Achievement_VENDETTA2_9},
-    // Warbell achievements
-	{"achievement_map_warbell",      AICast_ScriptAction_Achievement_WARBELL1},
-	{"achievement_watersWarbell",    AICast_ScriptAction_Achievement_WARBELL2},
-	{"achievement_blavWarbell",      AICast_ScriptAction_Achievement_WARBELL3},
-	{"achievement_olaricWarbell",    AICast_ScriptAction_Achievement_WARBELL4},
-	{"achievement_heinrichWarbell",  AICast_ScriptAction_Achievement_WARBELL5},
-	// Malta Update Achievements
-	{"achievement_malta_nightmare",  AICast_ScriptAction_Achievement_MALTA_NIGHTMARE},
-	{"achievement_malta_leap",       AICast_ScriptAction_Achievement_MALTA_LEAP},
-	{"achievement_malta_osa",       AICast_ScriptAction_Achievement_MALTA_OSA},
-	{"achievement_malta_goat",       AICast_ScriptAction_Achievement_MALTA_GOAT},
-	{"achievement_malta_course",       AICast_ScriptAction_Achievement_MALTA_COURSE},
-	{"achievement_malta_radio",       AICast_ScriptAction_Achievement_MALTA_RADIO},
-	{"achievement_malta_egypt",       AICast_ScriptAction_Achievement_MALTA_EGYPT},
-	{"achievement_malta_wide",       AICast_ScriptAction_Achievement_MALTA_WIDE},
-	{"achievement_malta_firefly",       AICast_ScriptAction_Achievement_MALTA_FIREFLY},
-	{"achievement_malta_lair",       AICast_ScriptAction_Achievement_MALTA_LAIR},
-	{"achievement_malta_hideout",       AICast_ScriptAction_Achievement_MALTA_HIDEOUT},
-	{"achievement_malta_bartender",       AICast_ScriptAction_Achievement_MALTA_BARTENDER},
-	{"achievement_malta_betrayer",       AICast_ScriptAction_Achievement_MALTA_BETRAYER},
-	{"achievement_malta_agent2",       AICast_ScriptAction_Achievement_MALTA_AGENT2},
-	//Ice
-	{"achievement_map_ice",       AICast_ScriptAction_Achievement_ICE_BEAT},
-	{"achievement_dhIce",       AICast_ScriptAction_Achievement_ICE_DH},
-	{"achievement_stealthIce",       AICast_ScriptAction_Achievement_ICE_STEALTH},
-	{"achievement_secretIce",       AICast_ScriptAction_Achievement_ICE_SECRET},
-	{"achievement_defenseIce",       AICast_ScriptAction_Achievement_ICE_DEFENSE},
-	{"achievement_easterIce",       AICast_ScriptAction_Achievement_ICE_EE},
-	
-	{"achievement_6perks",       AICast_ScriptAction_Achievement_6PERKS},
-     // achievements end
-	{"endgame",          AICast_ScriptAction_EndGame},				//----(SA)	added
-	{"announce",     AICast_ScriptAction_Announce},
-	{"teleport",     AICast_ScriptAction_Teleport},					//----(SA)	added
-	{"foundsecret",      AICast_ScriptAction_FoundSecret},
-	{"nosight",          AICast_ScriptAction_NoSight},
-	{"sight",            AICast_ScriptAction_Sight},
-	{"noavoid",          AICast_ScriptAction_NoAvoid},
-	{"avoid",            AICast_ScriptAction_Avoid},
-	{"attrib",           AICast_ScriptAction_Attrib},
-	{"denyactivate", AICast_ScriptAction_DenyAction},
-	{"lightningdamage",  AICast_ScriptAction_LightningDamage},
-	{"deny",         AICast_ScriptAction_DenyAction},
-	{"headlook",     AICast_ScriptAction_Headlook},
-	{"backupscript", AICast_ScriptAction_BackupScript},
-	{"restorescript",    AICast_ScriptAction_RestoreScript},
-	{"statetype",        AICast_ScriptAction_StateType},
-	{"knockback",        AICast_ScriptAction_KnockBack},
-	{"zoom",         AICast_ScriptAction_Zoom},
-	{"parachute",        AICast_ScriptAction_Parachute},
-	{"cigarette",        AICast_ScriptAction_Cigarette},			//----(SA)	added
-	{"startcam",     AICast_ScriptAction_StartCam},
-	{"startcamblack",    AICast_ScriptAction_StartCamBlack},
-	{"stopcam",          AICast_ScriptAction_StopCam},				//----(SA)	added
-	{"entityscriptname",AICast_ScriptAction_EntityScriptName},
-	{"aiscriptname", AICast_ScriptAction_AIScriptName},
-	{"sethealth",        AICast_ScriptAction_SetHealth},
-	{"notarget",     AICast_ScriptAction_NoTarget},
-	{"cvar",         AICast_ScriptAction_Cvar},
+	{
+		{"drop_weapon", AICast_ScriptAction_DropWeapon, NULL},
+		{"changeaiteam", AICast_ScriptAction_ChangeAiTeam, NULL},
+		{"changeainame", AICast_ScriptAction_ChangeAiName, NULL},
+		{"changeaiskin", AICast_ScriptAction_ChangeAiSkin, NULL},
+		{"changeaihead", AICast_ScriptAction_ChangeAiHead, NULL},
+		{"burn", AICast_ScriptAction_Burned, NULL},
+		{"accumprint", AICast_ScriptAction_AccumPrint, NULL},
+		{"globalaccumprint", AICast_ScriptAction_GlobalAccumPrint, NULL},
+		{"gotomarker", AICast_ScriptAction_GotoMarker, NULL},
+		{"runtomarker", AICast_ScriptAction_GotoMarker, NULL},
+		{"walktomarker", AICast_ScriptAction_WalkToMarker, NULL},
+		{"crouchtomarker", AICast_ScriptAction_CrouchToMarker, NULL},
+		{"gotocast", AICast_ScriptAction_GotoCast, NULL},
+		{"runtocast", AICast_ScriptAction_GotoCast, NULL},
+		{"walktocast", AICast_ScriptAction_WalkToCast, NULL},
+		{"crouchtocast", AICast_ScriptAction_CrouchToCast, NULL},
+		{"followcast", AICast_ScriptAction_FollowCast, NULL},
+		{"playsound", AICast_ScriptAction_PlaySound, NULL},
+		{"playanim", AICast_ScriptAction_PlayAnim, NULL},
+		{"clearanim", AICast_ScriptAction_ClearAnim, NULL},
+		{"wait", AICast_ScriptAction_Wait, NULL},
+		{"abort_if_loadgame", AICast_ScriptAction_AbortIfLoadgame, NULL}, //----(SA)    added
+		{"trigger", AICast_ScriptAction_Trigger, NULL},
+		{"setammo", AICast_ScriptAction_SetAmmo, NULL},
+		{"setclip", AICast_ScriptAction_SetClip, NULL}, //----(SA)    added
+		{"selectweapon", AICast_ScriptAction_SelectWeapon, NULL},
+		{"noattack", AICast_ScriptAction_NoAttack, NULL},
+		{"suggestweapon", AICast_ScriptAction_SuggestWeapon, NULL}, //----(SA)    added
+		{"attack", AICast_ScriptAction_Attack, NULL},
+		{"setmovespeed", AICast_ScriptAction_SetMoveSpeed, NULL},
+		{"givearmor", AICast_ScriptAction_GiveArmor, NULL}, //----(SA)    added
+		{"setarmor", AICast_ScriptAction_SetArmor, NULL},	//----(SA)    added
+		{"giveammo", AICast_ScriptAction_GiveAmmo, NULL},
+		{"givehealth", AICast_ScriptAction_GiveHealth, NULL},
+		{"increaserespawns", AICast_ScriptAction_IncreaseRespawns, NULL},
+		{"giveinventory", AICast_ScriptAction_GiveInventory, NULL},
+		{"giveperk", AICast_ScriptAction_GivePerk, NULL},
+		{"dropitem", AICast_ScriptAction_DropItem, NULL},
+		{"giveweapon", AICast_ScriptAction_GiveWeapon, NULL},
+		{"giveweaponfull", AICast_ScriptAction_GiveWeaponFull, NULL},
+		{"takeweapon", AICast_ScriptAction_TakeWeapon, NULL},
+		{"norespawn", AICast_ScriptAction_NoRespawn, NULL},
+		{"randomrespawn", AICast_ScriptAction_RandomRespawn, NULL},
+		{"movetype", AICast_ScriptAction_Movetype, NULL},
+		{"alertentity", AICast_ScriptAction_AlertEntity, NULL},
+		{"savegame", AICast_ScriptAction_SaveGame, NULL},
+		{"savecheckpoint", AICast_ScriptAction_SaveCheckpoint, NULL},
+		{"fireattarget", AICast_ScriptAction_FireAtTarget, NULL},
+		{"godmode", AICast_ScriptAction_GodMode, NULL},
+		{"accum", AICast_ScriptAction_Accum, NULL},
+		{"wave", AICast_ScriptAction_Wave, NULL},
+		{"globalaccum", AICast_ScriptAction_GlobalAccum, NULL},
+		{"spawncast", AICast_ScriptAction_SpawnCast, NULL},
+		{"missionfailed", AICast_ScriptAction_MissionFailed, NULL},
+		{"missionsuccess", AICast_ScriptAction_ObjectiveMet, NULL},
+		{"objectivemet", AICast_ScriptAction_ObjectiveMet, NULL}, // dupe of missionsuccess so scripts can changeover to a more logical name
+		{"objectivesneeded", AICast_ScriptAction_ObjectivesNeeded, NULL},
+		{"printbonus", AICast_ScriptAction_PrintBonus, NULL},
+		{"noaidamage", AICast_ScriptAction_NoAIDamage, NULL},
+		{"print", AICast_ScriptAction_Print, NULL},
+		{"facetargetangles", AICast_ScriptAction_FaceTargetAngles, NULL},
+		{"face_entity", AICast_ScriptAction_FaceEntity, NULL},
+		{"resetscript", AICast_ScriptAction_ResetScript, NULL},
+		{"mount", AICast_ScriptAction_Mount, NULL},
+		{"unmount", AICast_ScriptAction_Unmount, NULL},
+		{"savepersistant", AICast_ScriptAction_SavePersistant, NULL},
+		{"changelevel", AICast_ScriptAction_ChangeLevel, NULL},
+		{"endgame", AICast_ScriptAction_EndGame, NULL}, //----(SA)    added
+		{"announce", AICast_ScriptAction_Announce, NULL},
+		{"teleport", AICast_ScriptAction_Teleport, NULL}, //----(SA)    added
+		{"foundsecret", AICast_ScriptAction_FoundSecret, NULL},
+		{"nosight", AICast_ScriptAction_NoSight, NULL},
+		{"sight", AICast_ScriptAction_Sight, NULL},
+		{"noavoid", AICast_ScriptAction_NoAvoid, NULL},
+		{"avoid", AICast_ScriptAction_Avoid, NULL},
+		{"attrib", AICast_ScriptAction_Attrib, NULL},
+		{"denyactivate", AICast_ScriptAction_DenyAction, NULL},
+		{"lightningdamage", AICast_ScriptAction_LightningDamage, NULL},
+		{"deny", AICast_ScriptAction_DenyAction, NULL},
+		{"headlook", AICast_ScriptAction_Headlook, NULL},
+		{"backupscript", AICast_ScriptAction_BackupScript, NULL},
+		{"restorescript", AICast_ScriptAction_RestoreScript, NULL},
+		{"statetype", AICast_ScriptAction_StateType, NULL},
+		{"knockback", AICast_ScriptAction_KnockBack, NULL},
+		{"zoom", AICast_ScriptAction_Zoom, NULL},
+		{"parachute", AICast_ScriptAction_Parachute, NULL},
+		{"cigarette", AICast_ScriptAction_Cigarette, NULL}, //----(SA)    added
+		{"startcam", AICast_ScriptAction_StartCam, NULL},
+		{"startcamblack", AICast_ScriptAction_StartCamBlack, NULL},
+		{"stopcam", AICast_ScriptAction_StopCam, NULL}, //----(SA)    added
+		{"entityscriptname", AICast_ScriptAction_EntityScriptName, NULL},
+		{"aiscriptname", AICast_ScriptAction_AIScriptName, NULL},
+		{"sethealth", AICast_ScriptAction_SetHealth, NULL},
+		{"notarget", AICast_ScriptAction_NoTarget, NULL},
+		{"cvar", AICast_ScriptAction_Cvar, NULL},
 
-//----(SA)	added some music interface
-	{"mu_start",     AICast_ScriptAction_MusicStart},			// (char *new_music, int time)	// time to fade in
-	{"mu_play",          AICast_ScriptAction_MusicPlay},		// (char *new_music)
-	{"mu_stop",          AICast_ScriptAction_MusicStop},		// (int time)	// time to fadeout
-	{"mu_fade",          AICast_ScriptAction_MusicFade},		// (float target_volume, int time)	// time to fade to target
-	{"mu_queue",     AICast_ScriptAction_MusicQueue},			// (char *new_music)	// music that will start when previous fades to 0
-//----(SA)	end
+		{"cin_play", AICast_ScriptAction_CinPlay, NULL},
+		{"cin_stop", AICast_ScriptAction_CinStop, NULL},
 
-	{"explicit_routing", AICast_ScriptAction_ExplicitRouting},
-	{"lockplayer",       AICast_ScriptAction_LockPlayer},
-	{"screenfade",       AICast_ScriptAction_ScreenFade},
-	{"anim_condition",   AICast_ScriptAction_AnimCondition},
-	{"pushaway",     AICast_ScriptAction_PushAway},
-	{"catchfire",        AICast_ScriptAction_CatchFire},
-	{"givescore",        AICast_ScriptAction_GiveScore},		
-	{"setwave",        AICast_ScriptAction_SetWave},		
+		{"mu_start", AICast_ScriptAction_MusicStart, NULL}, // (char *new_music, int time)    // time to fade in
+		{"mu_play", AICast_ScriptAction_MusicPlay, NULL},	// (char *new_music)
+		{"mu_stop", AICast_ScriptAction_MusicStop, NULL},	// (int time)    // time to fadeout
+		{"mu_fade", AICast_ScriptAction_MusicFade, NULL},	// (float target_volume, int time)    // time to fade to target
+		{"mu_queue", AICast_ScriptAction_MusicQueue, NULL}, // (char *new_music)    // music that will start when previous fades to 0
 
-	{NULL,              0}
-};
+		{"explicit_routing", AICast_ScriptAction_ExplicitRouting, NULL},
+		{"lockplayer", AICast_ScriptAction_LockPlayer, NULL},
+		{"screenfade", AICast_ScriptAction_ScreenFade, NULL},
+		{"anim_condition", AICast_ScriptAction_AnimCondition, NULL},
+		{"pushaway", AICast_ScriptAction_PushAway, NULL},
+		{"catchfire", AICast_ScriptAction_CatchFire, NULL},
+		{"givescore", AICast_ScriptAction_GiveScore, NULL},
+		{"setwave", AICast_ScriptAction_SetWave, NULL},
+
+		{"defend", AICast_ScriptAction_Defend, NULL},
+		{"defend_stop", AICast_ScriptAction_DefendStop, NULL},
+
+		{"applyloadout", AICast_ScriptAction_ApplyLoadout, NULL},
+		// Achievements (core game)
+		{"achievement_map_w3d", AICast_ScriptAction_AchievementGeneric, &ACH_W3D_1},
+		{"achievement_map_w3dsec", AICast_ScriptAction_AchievementGeneric, &ACH_W3D_2},
+		{"achievement_goldchest", AICast_ScriptAction_AchievementGeneric, &ACH_SECRET_CRYPT2},
+		{"achievement_warcrime", AICast_ScriptAction_AchievementGeneric, &ACH_KILL_CIVILIAN},
+		{"achievement_speedrun", AICast_ScriptAction_AchievementGeneric, &ACH_ESCAPE_SPEEDRUN},
+		{"achievement_training", AICast_ScriptAction_AchievementGeneric, &ACH_TRAINING},
+		{"achievement_strangelove", AICast_ScriptAction_AchievementGeneric, &ACH_MAGIC},
+		{"achievement_rocketstealth", AICast_ScriptAction_AchievementGeneric, &ACH_ROCKET_STEALTH},
+		{"achievement_crystal", AICast_ScriptAction_AchievementGeneric, &ACH_CRYSTALSKULL},
+		{"achievement_stealth1", AICast_ScriptAction_AchievementGeneric, &ACH_STEALTH_1},
+		{"achievement_stealth2", AICast_ScriptAction_AchievementGeneric, &ACH_STEALTH_2},
+
+		{"achievement_chapter1", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_1},
+		{"achievement_chapter2", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_2},
+		{"achievement_chapter3", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_3},
+		{"achievement_chapter4", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_4},
+		{"achievement_chapter5", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_5},
+		{"achievement_chapter6", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_6},
+		{"achievement_chapter7", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_7},
+
+		{"achievement_chapter1_hard", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_1_HARD},
+		{"achievement_chapter2_hard", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_2_HARD},
+		{"achievement_chapter3_hard", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_3_HARD},
+		{"achievement_chapter4_hard", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_4_HARD},
+		{"achievement_chapter5_hard", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_5_HARD},
+		{"achievement_chapter6_hard", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_6_HARD},
+		{"achievement_chapter7_hard", AICast_ScriptAction_AchievementGeneric, &ACH_CHAPTER_7_HARD},
+
+		{"achievement_boss1", AICast_ScriptAction_AchievementGeneric, &ACH_BOSS1},
+		{"achievement_boss2", AICast_ScriptAction_AchievementGeneric, &ACH_BOSS2},
+		{"achievement_boss3", AICast_ScriptAction_AchievementGeneric, &ACH_BOSS3},
+
+		// Bonus modes achievements
+		{"achievement_walkinthepark", AICast_ScriptAction_AchievementGeneric, &ACH_WALKINTHEPARK},
+		{"achievement_ironman", AICast_ScriptAction_AchievementGeneric, &ACH_IRONMAN},
+		{"achievement_hardcore", AICast_ScriptAction_AchievementGeneric, &ACH_HARDCORE},
+		{"achievement_999", AICast_ScriptAction_AchievementGeneric, &ACH_999},
+		{"achievement_nightmare", AICast_ScriptAction_AchievementGeneric, &ACH_NIGHTMARE},
+
+		// TDA achievements
+		{"achievement_tda_day", AICast_ScriptAction_AchievementGeneric, &ACH_TDA_DAY},
+		{"achievement_tda_night", AICast_ScriptAction_AchievementGeneric, &ACH_TDA_NIGHT},
+		{"achievement_tda_dark", AICast_ScriptAction_AchievementGeneric, &ACH_TDA_DARK},
+		{"achievement_tda_plus", AICast_ScriptAction_AchievementGeneric, &ACH_TDA_PLUS},
+		{"achievement_tda_arena", AICast_ScriptAction_AchievementGeneric, &ACH_TDA_ARENA},
+
+		// ETSP achievements
+		{"achievement_map_siwa", AICast_ScriptAction_AchievementGeneric, &ACH_SIWA},
+		{"achievement_map_seawall", AICast_ScriptAction_AchievementGeneric, &ACH_SEAWALL},
+		{"achievement_map_goldrush", AICast_ScriptAction_AchievementGeneric, &ACH_GOLDRUSH},
+		{"achievement_map_radar", AICast_ScriptAction_AchievementGeneric, &ACH_RADAR},
+		{"achievement_map_railgun", AICast_ScriptAction_AchievementGeneric, &ACH_RAILGUN},
+		{"achievement_map_fueldump", AICast_ScriptAction_AchievementGeneric, &ACH_FUEL},
+
+		{"achievement_allgoldsiwa", AICast_ScriptAction_AchievementGeneric, &ACH_ALLGOLDSIWA},
+		{"achievement_chestsiwa", AICast_ScriptAction_AchievementGeneric, &ACH_CHESTSIWA},
+		{"achievement_speedbattery", AICast_ScriptAction_AchievementGeneric, &ACH_SPEEDBATTERY},
+		{"achievement_roombattery", AICast_ScriptAction_AchievementGeneric, &ACH_ROOMBATTERY},
+		{"achievement_safe", AICast_ScriptAction_AchievementGeneric, &ACH_SAFE},
+		{"achievement_heist", AICast_ScriptAction_AchievementGeneric, &ACH_HEIST},
+		{"achievement_kellys", AICast_ScriptAction_AchievementGeneric, &ACH_KELLYS},
+		{"achievement_mansiongold", AICast_ScriptAction_AchievementGeneric, &ACH_MANSIONGOLD},
+		{"achievement_panther", AICast_ScriptAction_AchievementGeneric, &ACH_PANTHER},
+		{"achievement_depot", AICast_ScriptAction_AchievementGeneric, &ACH_DEPOT},
+		{"achievement_dora", AICast_ScriptAction_AchievementGeneric, &ACH_DORA},
+		{"achievement_fuel1", AICast_ScriptAction_AchievementGeneric, &ACH_FUEL1},
+		{"achievement_allgoldfuel", AICast_ScriptAction_AchievementGeneric, &ACH_ALLGOLDFUEL},
+		{"achievement_etbonus", AICast_ScriptAction_AchievementGeneric, &ACH_ETBONUS},
+		{"achievement_binocs", AICast_ScriptAction_AchievementGeneric, &ACH_BINOCS},
+
+		// Warbell achievements
+		{"achievement_map_warbell", AICast_ScriptAction_AchievementGeneric, &ACH_WARBELL_MAP},
+		{"achievement_watersWarbell", AICast_ScriptAction_AchievementGeneric, &ACH_WARBELL_WATERS},
+		{"achievement_blavWarbell", AICast_ScriptAction_AchievementGeneric, &ACH_WARBELL_BLAV},
+		{"achievement_olaricWarbell", AICast_ScriptAction_AchievementGeneric, &ACH_WARBELL_OLARIC},
+		{"achievement_heinrichWarbell", AICast_ScriptAction_AchievementGeneric, &ACH_WARBELL_HEIN},
+
+		// Ice
+		{"achievement_map_ice", AICast_ScriptAction_AchievementGeneric, &ACH_ICE_BEAT},
+		{"achievement_dhIce", AICast_ScriptAction_AchievementGeneric, &ACH_ICE_DH},
+		{"achievement_stealthIce", AICast_ScriptAction_AchievementGeneric, &ACH_ICE_STEALTH},
+		{"achievement_secretIce", AICast_ScriptAction_AchievementGeneric, &ACH_ICE_SECRET},
+		{"achievement_defenseIce", AICast_ScriptAction_AchievementGeneric, &ACH_ICE_DEFENSE},
+		{"achievement_easterIce", AICast_ScriptAction_AchievementGeneric, &ACH_ICE_EE},
+
+		// Malta Update Achievements
+		{"achievement_malta_nightmare", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_NIGHTMARE},
+		{"achievement_malta_leap", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_LEAP},
+		{"achievement_malta_osa", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_OSA},
+		{"achievement_malta_goat", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_GOAT},
+		{"achievement_malta_course", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_COURSE},
+		{"achievement_malta_radio", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_RADIO},
+		{"achievement_malta_egypt", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_EGYPT},
+		{"achievement_malta_wide", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_WIDE},
+		{"achievement_malta_firefly", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_FIREFLY},
+		{"achievement_malta_lair", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_LAIR},
+		{"achievement_malta_hideout", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_HIDEOUT},
+		{"achievement_malta_bartender", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_BARTENDER},
+		{"achievement_malta_betrayer", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_BETRAYER},
+		{"achievement_malta_agent2", AICast_ScriptAction_AchievementGeneric, &ACH_MALTA_AGENT2},
+
+		// Survival mode Update
+		{"achievement_6perks", AICast_ScriptAction_AchievementGeneric, &ACH_6PERKS},
+
+		// Addons achievements (disabled achievements, kept for script compatibility)
+		{"achievement_curse", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_stalingrad", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_timegate", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_pro51", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_sf", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_ra", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_ic", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_capuzzo", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_saucers", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_arkot", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_darkm", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_darkm_2", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_dm2", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_dm2_2", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_dm2_3", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_dm2_4", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_lion", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_parkour", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_manor1", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_manor1_2", AICast_ScriptAction_AchievementGeneric, NULL},
+		// Winterstein achievements (disabled achievements, kept for script compatibility)
+		{"achievement_booze", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_party", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_winterstein", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_speedrun_norway", AICast_ScriptAction_AchievementGeneric, NULL},
+		// Vendetta Dilogy (disabled achievements, kept for script compatibility)
+		{"achievement_VENDETTA1_1", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA1_2", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA1_3", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA1_4", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA1_5", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA1_6", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA1_7", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA1_8", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA1_9", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA1_10", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA1_11", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA2_1", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA2_2", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA2_3", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA2_4", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA2_5", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA2_6", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA2_7", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA2_8", AICast_ScriptAction_AchievementGeneric, NULL},
+		{"achievement_VENDETTA2_9", AICast_ScriptAction_AchievementGeneric, NULL},
+		{NULL, 0, NULL}};
 
 qboolean AICast_EventMatch_StringEqual( cast_script_event_t *event, char *eventParm );
 qboolean AICast_EventMatch_IntInRange( cast_script_event_t *event, char *eventParm );
@@ -607,6 +639,7 @@ cast_script_event_define_t scriptEvents[] =
 	{"start_survival",          0},
 	{"specialwave_start",            0},
 	{"specialwave_end",          0},
+	{"stealthkill",          AICast_EventMatch_StringEqual},
 	{NULL,              0}
 };
 
@@ -749,7 +782,8 @@ void AICast_ScriptLoad( void ) {
 		}
 	}
 
-	level.scriptAI = G_Alloc( len );
+	level.scriptAI = G_Alloc( len + 1 );
+	memset( level.scriptAI, 0 , len + 1 );
 	trap_FS_Read( level.scriptAI, len, f );
 
 	trap_FS_FCloseFile( f );
@@ -780,6 +814,17 @@ void AICast_ScriptParse( cast_state_t *cs ) {
 	int i;
 	int bracketLevel;
 	qboolean buildScript;       //----(SA)	added
+
+	// ---- Multi-name header support:
+	// We collect names until '{', then decide if this block matches ent->aiName.
+	#define MAX_SCRIPT_NAMES_IN_HEADER  32
+	char scriptNames[MAX_SCRIPT_NAMES_IN_HEADER][MAX_QPATH];
+	int  numScriptNames = 0;
+	qboolean collectingNames = qfalse;
+	// ---- end multi-name support
+
+	// multi-name support helper: did we just consume '{' for a script block?
+	qboolean blockJustOpened = qfalse;
 
 	if ( !level.scriptAI ) {
 		return;
@@ -815,22 +860,69 @@ void AICast_ScriptParse( cast_state_t *cs ) {
 		// end of script
 		if ( token[0] == '}' ) {
 			if ( inScript ) {
+				blockJustOpened = qfalse;
 				break;
 			}
 			if ( wantName ) {
 				G_Error( "AICast_ScriptParse(), Error (line %d): '}' found, but not expected.\n", COM_GetCurrentParseLine() );
 			}
 			wantName = qtrue;
+
+			// reset multi-name header collection when a block ends
+			collectingNames = qfalse;
+			numScriptNames = 0;
+
 		} else if ( token[0] == '{' )    {
 			if ( wantName ) {
 				G_Error( "AICast_ScriptParse(), Error (line %d): '{' found, NAME expected.\n", COM_GetCurrentParseLine() );
 			}
-		} else if ( wantName )   {
-			if ( !Q_strcasecmp( ent->aiName, token ) ) {
-				inScript = qtrue;
-				numEventItems = 0;
+
+			// Multi-name header: when we hit '{' after collecting one or more names,
+			// decide whether we parse this block or skip it entirely.
+			if ( collectingNames ) {
+				qboolean match = qfalse;
+
+				for ( i = 0; i < numScriptNames; i++ ) {
+					if ( !Q_strcasecmp( ent->aiName, scriptNames[i] ) ) {
+						match = qtrue;
+						break;
+					}
+				}
+
+				if ( match ) {
+					inScript = qtrue;
+					numEventItems = 0;
+				} else {
+					inScript = qfalse;
+				}
+
+				// done with header regardless of match
+				collectingNames = qfalse;
+				numScriptNames = 0;
+
+				// We have consumed the opening brace for this script block.
+				blockJustOpened = qtrue;
 			}
+
+		} else if ( wantName || collectingNames )   {
+
+			// Multi-name header start/continue: collect all NAME tokens until '{'
+			// Old behavior (single name) still works: one name then '{' is identical.
+			if ( !collectingNames ) {
+				collectingNames = qtrue;
+				numScriptNames = 0;
+			}
+
+			if ( numScriptNames >= MAX_SCRIPT_NAMES_IN_HEADER ) {
+				G_Error( "AICast_ScriptParse(), Error (line %d): too many names in script header (max %d)\n",
+					COM_GetCurrentParseLine(), MAX_SCRIPT_NAMES_IN_HEADER );
+			}
+
+			Q_strncpyz( scriptNames[numScriptNames], token, sizeof( scriptNames[numScriptNames] ) );
+			numScriptNames++;
+
 			wantName = qfalse;
+
 		} else if ( inScript )   {
 			if ( !Q_strcasecmp( token, "attributes" ) ) {
 				// read in all the attributes
@@ -957,6 +1049,11 @@ void AICast_ScriptParse( cast_state_t *cs ) {
 			numEventItems++;
 		} else    // skip this character completely
 		{
+			// Multi-name header note:
+			// If we got here via the "collectingNames" '{' path, then the opening '{' was already consumed,
+			// so we must start bracketLevel at 1 to skip the whole block correctly.
+			bracketLevel = blockJustOpened ? 1 : 0;
+			blockJustOpened = qfalse;
 
 			while ( ( token = COM_Parse( &pScript ) ) )
 			{
@@ -970,7 +1067,16 @@ void AICast_ScriptParse( cast_state_t *cs ) {
 					}
 				}
 			}
+
+			// reset header collection state after skipping a full block
+			wantName = qtrue;
+			collectingNames = qfalse;
+			numScriptNames = 0;
 		}
+
+		// If we just collected names (wantName was consumed) but haven't hit '{' yet,
+		// keep wantName false so we continue collecting until '{' appears.
+		// If we're not collectingNames and not inScript, the next '}' will reset wantName as usual.
 	}
 
 	// alloc and copy the events into the cast_state_t for this cast
@@ -1154,6 +1260,7 @@ qboolean AICast_ScriptRun( cast_state_t *cs, qboolean force ) {
 			G_Printf( "(%s) AIScript command: %s %s\n", g_entities[cs->entityNum].aiName, stack->items[cs->castScriptStatus.castScriptStackHead].action->actionString, ( stack->items[cs->castScriptStatus.castScriptStackHead].params ? stack->items[cs->castScriptStatus.castScriptStackHead].params : "" ) );
 		}
 		//
+		cs->castScriptStatus.currentAction = stack->items[ cs->castScriptStatus.castScriptStackHead ].action;
 		if ( !stack->items[cs->castScriptStatus.castScriptStackHead].action->actionFunc( cs, stack->items[cs->castScriptStatus.castScriptStackHead].params ) ) {
 			// check that we are still running the same script that we were when we call the action
 			if ( cs->castScriptStatus.castScriptEventIndex >= 0 && stack == &cs->castScriptEvents[cs->castScriptStatus.castScriptEventIndex].stack ) {

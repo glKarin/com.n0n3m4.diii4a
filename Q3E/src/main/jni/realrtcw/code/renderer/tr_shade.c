@@ -575,7 +575,7 @@ static void ProjectDlightTexture_scalar( void ) {
 						floatColor[1] = luma;
 						floatColor[2] = luma;
 					}
-		}
+				}
 			} else if ( gsActive ) {
 				// Greyscale only (original behavior)
 				float luma = (float)LUMA( srcR, srcG, srcB );
@@ -588,13 +588,13 @@ static void ProjectDlightTexture_scalar( void ) {
 					floatColor[0] = LERP( rIn, luma, gsValue );
 					floatColor[1] = LERP( gIn, luma, gsValue );
 					floatColor[2] = LERP( bIn, luma, gsValue );
-		}
+				}
 			} else {
 				// Neither gothic nor greyscale → original dlight color
-			floatColor[0] = dl->color[0] * 255.0f;
-			floatColor[1] = dl->color[1] * 255.0f;
-			floatColor[2] = dl->color[2] * 255.0f;
-		}
+				floatColor[0] = dl->color[0] * 255.0f;
+				floatColor[1] = dl->color[1] * 255.0f;
+				floatColor[2] = dl->color[2] * 255.0f;
+			}
 		}
 		// --- END GOTHIC & GREYSCALE ---
 
@@ -1065,8 +1065,8 @@ static void ComputeColors( shaderStage_t *pStage ) {
 						tess.svars.colors[i][0] = tess.svars.colors[i][1] = tess.svars.colors[i][2] = (byte)luma;
 					}
 					// else: neither gothic nor greyscale → leave color as computed above
-		}
-	}
+				}
+			}
 		}
 	}
 }

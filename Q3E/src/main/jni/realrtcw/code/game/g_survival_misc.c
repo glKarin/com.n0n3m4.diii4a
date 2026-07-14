@@ -35,10 +35,10 @@ svParams_t svParams;
 
 /*
 ============
-TossClientItems
+TossClientItems_Survival
 ============
 */
-void TossClientItems(gentity_t *self, gentity_t *attacker) {
+void TossClientItems_Survival(gentity_t *self, gentity_t *attacker) {
     gitem_t *item;
     vec3_t forward;
     float angle;
@@ -48,6 +48,8 @@ void TossClientItems(gentity_t *self, gentity_t *attacker) {
     if (attacker->aiTeam == self->aiTeam) return;
 
     const char *treasure = "item_treasure";
+    const char *adrenaline = "holdable_bg_syringe";
+
     AngleVectors(self->r.currentAngles, forward, NULL, NULL);
     angle = 45;
 
@@ -62,6 +64,19 @@ void TossClientItems(gentity_t *self, gentity_t *attacker) {
             drop = Drop_Item(self, item, 0, qfalse);
             if (drop) {
                 drop->nextthink = level.time + 30000;
+            }
+        }
+    }
+
+    // Scavenger PRO: chance to drop adrenaline
+    if (attacker->client->ps.perks[PERK_SCAVENGER] >= 2) {
+        if (rand() % 100 < 3) {
+            item = BG_FindItemForClassName(adrenaline);
+            if (item) {
+                drop = Drop_Item(self, item, 0, qfalse);
+                if (drop) {
+                    drop->nextthink = level.time + 30000;
+                }
             }
         }
     }
@@ -120,6 +135,46 @@ void TossClientPowerups(gentity_t *self, gentity_t *attacker) {
     }
 }
 
+
+static qboolean Survival_SpotMatchesAI( gentity_t *spot, gentity_t *ent ) {
+    if ( !spot ) return qfalse;
+
+    // disabled?
+    if ( spot->spawnflags & 1 ) return qfalse;
+
+    // strict team gate (no wildcard)
+    if ( ent ) {
+        if ( spot->aiTeam != ent->aiTeam ) return qfalse;
+    } else {
+        // If ent is NULL, only allow neutral spots
+        if ( spot->aiTeam != 0 ) return qfalse;
+    }
+
+    // class/boss gate
+    if ( ent ) {
+        switch ( ent->aiCharacter ) {
+        case AICHAR_PROTOSOLDIER:
+        case AICHAR_SUPERSOLDIER:
+        case AICHAR_HELGA:
+        case AICHAR_HEINRICH:
+        case AICHAR_SUPERSOLDIER_LAB:
+            if ( !( spot->spawnflags & 2 ) ) return qfalse;
+            break;
+        default:
+            if ( spot->spawnflags & 2 ) return qfalse;
+            break;
+        }
+    }
+
+    // ainame gate
+    if ( spot->aiName && spot->aiName[0] ) {
+        if ( !ent || !ent->aiName || !ent->aiName[0] ) return qfalse;
+        if ( Q_stricmp( spot->aiName, ent->aiName ) != 0 ) return qfalse;
+    }
+
+    return qtrue;
+}
+
 gentity_t *SelectNearestDeathmatchSpawnPoint_AI( gentity_t *player, gentity_t *ent ) {
     gentity_t *spot = NULL, *nearestSpot = NULL;
     vec3_t delta;
@@ -127,45 +182,19 @@ gentity_t *SelectNearestDeathmatchSpawnPoint_AI( gentity_t *player, gentity_t *e
 
     while ( ( spot = G_Find( spot, FOFS(classname), "info_ai_respawn" ) ) != NULL ) {
 
-        // disabled?
-        if ( spot->spawnflags & 1 ) continue;
-
-        if (ent)
-        {
-            // If mapper didn't set aiteam on the spot (0), allow any team
-            if (spot->aiTeam && ent->aiTeam != spot->aiTeam)
-                continue;
-        }
-        else if (player)
-        {
-            if (spot->aiTeam && player->aiTeam != spot->aiTeam)
-                continue;
+        if ( !Survival_SpotMatchesAI( spot, ent ) ) {
+            continue;
         }
 
-        // class/boss gate
-        if ( ent ) {
-            switch ( ent->aiCharacter ) {
-            case AICHAR_PROTOSOLDIER:
-            case AICHAR_SUPERSOLDIER:
-            case AICHAR_HELGA:
-            case AICHAR_HEINRICH:
-            case AICHAR_SUPERSOLDIER_LAB:
-                if ( !( spot->spawnflags & 2 ) ) continue;
-                break;
-            default:
-                if ( spot->spawnflags & 2 ) continue;
-                break;
-            }
+        // distance is measured to player, if provided
+        if ( player ) {
+            VectorSubtract( spot->s.origin, player->r.currentOrigin, delta );
+            dist = VectorLength( delta );
+        } else {
+            // if no player passed, just pick first valid as "nearest"
+            dist = 0.0f;
         }
 
-        // NEW: ainame gate — if spot has aiName set, the AI must have the same aiName
-        if ( spot->aiName && spot->aiName[0] ) {
-            if ( !ent || !ent->aiName || !ent->aiName[0] ) continue;
-            if ( Q_stricmp( spot->aiName, ent->aiName ) != 0 ) continue;
-        }
-
-        VectorSubtract( spot->s.origin, player->r.currentOrigin, delta );
-        dist = VectorLength( delta );
         if ( dist < nearestDist ) {
             nearestDist = dist;
             nearestSpot = spot;
@@ -179,12 +208,11 @@ gentity_t *SelectNearestDeathmatchSpawnPoint_AI( gentity_t *player, gentity_t *e
 /*
 ================
 SelectRandomDeathmatchSpawnPoint_AI
-
-go to a random point that doesn't telefrag
 ================
 */
-#define MAX_SPAWN_POINTS_AI    128
-#define MAX_SPAWN_POINT_DISTANCE    8196
+#define MAX_SPAWN_POINTS_AI            128
+#define MAX_SPAWN_POINT_DISTANCE       8196
+
 gentity_t *SelectRandomDeathmatchSpawnPoint_AI( gentity_t *player, gentity_t *ent ) {
     gentity_t *spot = NULL;
     gentity_t *spots[MAX_SPAWN_POINTS_AI];
@@ -192,45 +220,13 @@ gentity_t *SelectRandomDeathmatchSpawnPoint_AI( gentity_t *player, gentity_t *en
 
     while ( ( spot = G_Find( spot, FOFS(classname), "info_ai_respawn" ) ) != NULL ) {
 
-        // disabled?
-        if ( spot->spawnflags & 1 ) continue;
-
-        if (ent)
-        {
-            // If mapper didn't set aiteam on the spot (0), allow any team
-            if (spot->aiTeam && ent->aiTeam != spot->aiTeam)
-                continue;
-        }
-        else if (player)
-        {
-            if (spot->aiTeam && player->aiTeam != spot->aiTeam)
-                continue;
-        }
-
-        // class/boss gate
-        if ( ent ) {
-            switch ( ent->aiCharacter ) {
-            case AICHAR_PROTOSOLDIER:
-            case AICHAR_SUPERSOLDIER:
-            case AICHAR_HELGA:
-            case AICHAR_HEINRICH:
-            case AICHAR_SUPERSOLDIER_LAB:
-                if ( !( spot->spawnflags & 2 ) ) continue;
-                break;
-            default:
-                if ( spot->spawnflags & 2 ) continue;
-                break;
-            }
-        }
-
-        // NEW: ainame gate — identical to nearest
-        if ( spot->aiName && spot->aiName[0] ) {
-            if ( !ent || !ent->aiName || !ent->aiName[0] ) continue;
-            if ( Q_stricmp( spot->aiName, ent->aiName ) != 0 ) continue;
+        if ( !Survival_SpotMatchesAI( spot, ent ) ) {
+            continue;
         }
 
         if ( player ) {
-            vec3_t delta; float dist;
+            vec3_t delta;
+            float dist;
             VectorSubtract( spot->s.origin, player->r.currentOrigin, delta );
             dist = VectorLength( delta );
             if ( dist >= MAX_SPAWN_POINT_DISTANCE ) continue;
@@ -250,34 +246,29 @@ gentity_t *SelectRandomDeathmatchSpawnPoint_AI( gentity_t *player, gentity_t *en
 /*
 ===========
 SelectSpawnPoint_AI
-
-Chooses a player start, deathmatch start, etc
-============
+===========
 */
 gentity_t *SelectSpawnPoint_AI( gentity_t *player, gentity_t *ent, vec3_t origin, vec3_t angles ) {
-    gentity_t   *spot;
-    gentity_t   *nearestSpot;
+    gentity_t *spot;
+    gentity_t *nearestSpot;
 
     nearestSpot = SelectNearestDeathmatchSpawnPoint_AI( player, ent );
 
     spot = SelectRandomDeathmatchSpawnPoint_AI( player, ent );
     if ( spot == nearestSpot ) {
-        // roll again if it would be real close to point of death
         spot = SelectRandomDeathmatchSpawnPoint_AI( player, ent );
         if ( spot == nearestSpot ) {
-            // last try
             spot = SelectRandomDeathmatchSpawnPoint_AI( player, ent );
         }
     }
 
-    // If no nearby spawn point was found, select any spawn point
+    // fallback: if no nearby spot was found, select any valid spot (still strict team)
     if ( !spot ) {
         spot = SelectRandomDeathmatchSpawnPoint_AI( NULL, ent );
     }
 
-    // If still no spawn point was found, report an error
     if ( !spot ) {
-        G_Error( "Couldn't find a spawn point" );
+        G_Error( "Couldn't find a spawn point (info_ai_respawn) for aiTeam=%d", ent ? ent->aiTeam : -1 );
     }
 
     VectorCopy( spot->s.origin, origin );
