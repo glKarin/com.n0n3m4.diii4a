@@ -259,7 +259,7 @@ static void RB_DrawAreaAmbients_builtin( drawSurf_t **drawSurfs, int numDrawSurf
     // with the general purpose path
     //GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
 
-    GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+    GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
 
     for( int i = 0; i < numDrawSurfs; i++ )
     {
@@ -312,7 +312,7 @@ static void RB_DrawAreaAmbients_external( drawSurf_t **drawSurfs, int numDrawSur
     // with the general purpose path
     //GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
 
-    GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+    GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
 
     for( int i = 0; i < numDrawSurfs; i++ )
     {

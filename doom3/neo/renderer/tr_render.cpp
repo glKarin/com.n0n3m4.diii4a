@@ -1331,7 +1331,7 @@ void RB_CreateSingleDrawAreaAmbient_builtin(const drawSurf_t *drawSurf, void (*D
     inter.localViewOrigin[3] = 1.0f;
     inter.ambientLight = true;
 
-    inter.diffuseColor[0] = inter.diffuseColor[1] = inter.diffuseColor[2] = inter.diffuseColor[3] = 1.0f;
+    inter.diffuseColor[0] = inter.diffuseColor[1] = inter.diffuseColor[2] = inter.diffuseColor[3] = 0.0f;
     inter.specularColor[0] = inter.specularColor[1] = inter.specularColor[2] = inter.specularColor[3] = 0.0f;
 
     inter.bumpImage = NULL;
@@ -1546,7 +1546,7 @@ void RB_CreateSingleDrawAreaAmbient_external(const drawSurf_t *drawSurf, void (*
     inter.localViewOrigin[3] = 1.0f;
     inter.ambientLight = true;
 
-    inter.diffuseColor[0] = inter.diffuseColor[1] = inter.diffuseColor[2] = inter.diffuseColor[3] = 1.0f;
+    inter.diffuseColor[0] = inter.diffuseColor[1] = inter.diffuseColor[2] = inter.diffuseColor[3] = 0.0f;
     inter.specularColor[0] = inter.specularColor[1] = inter.specularColor[2] = inter.specularColor[3] = 0.0f;
 
     inter.bumpImage = NULL;
