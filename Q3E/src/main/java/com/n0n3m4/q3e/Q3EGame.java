@@ -15,6 +15,7 @@ public enum Q3EGame
 {
     // KARIN_NEW_GAME_BOOKMARK: add game enum
 
+    // idTech4
     DOOM3(Q3EGameConstants.GAME_ID_DOOM3, Q3EGameConstants.GAME_DOOM3, Q3EGameConstants.LIB_ENGINE_ID, Q3EGameConstants.GAME_NAME_DOOM3, Q3EGameConstants.GAME_BASE_DOOM3,
             Q3EGameConstants.GAME_VERSION_DOOM3, Q3EGameConstants.GAME_SUBDIR_DOOM3, Q3EGameConstants.CONFIG_FILE_DOOM3,
             "fs_game", "fs_game_base", null, null,
@@ -33,76 +34,62 @@ public enum Q3EGame
             Q3EPreference.pref_harm_prey_fs_game, Q3EPreference.pref_harm_prey_user_mod, Q3EPreference.pref_harm_prey_game_mod, Q3EPreference.pref_harm_prey_game_lib, Q3EPreference.pref_params_prey, Q3EPreference.pref_harm_prey_command_record, null, Q3EPreference.pref_harm_prey_env,
             KeyCodesD3.class, Q3EGameConstants.FEATURE_PREY, Q3EGameConstants.ENGINE_IDTECH_4
     ),
-
-    RTCW(Q3EGameConstants.GAME_ID_RTCW, Q3EGameConstants.GAME_RTCW, Q3EGameConstants.LIB_ENGINE3_RTCW, Q3EGameConstants.GAME_NAME_RTCW, Q3EGameConstants.GAME_BASE_RTCW,
-            Q3EGameConstants.GAME_VERSION_RTCW, Q3EGameConstants.GAME_SUBDIR_RTCW, Q3EGameConstants.CONFIG_FILE_RTCW,
-            "fs_game", null, null, ".wolf",
-            Q3EPreference.pref_harm_rtcw_fs_game, Q3EPreference.pref_harm_rtcw_user_mod, Q3EPreference.pref_harm_rtcw_game_mod, Q3EPreference.pref_harm_rtcw_game_lib, Q3EPreference.pref_params_rtcw, Q3EPreference.pref_harm_rtcw_command_record, null, Q3EPreference.pref_harm_rtcw_env,
-            KeyCodesRTCW.class, Q3EGameConstants.FEATURE_RTCW, Q3EGameConstants.ENGINE_IDTECH_3
+    ETQW(Q3EGameConstants.GAME_ID_ETQW, Q3EGameConstants.GAME_ETQW, Q3EGameConstants.LIB_ENGINE4_SPLASHDAMAGE, Q3EGameConstants.GAME_NAME_ETQW, Q3EGameConstants.GAME_BASE_ETQW,
+            Q3EGameConstants.GAME_VERSION_ETQW, Q3EGameConstants.GAME_SUBDIR_ETQW, Q3EGameConstants.CONFIG_FILE_ETQW,
+            "fs_game", "fs_game_base", null, null,
+            Q3EPreference.pref_harm_etqw_fs_game, Q3EPreference.pref_harm_etqw_user_mod, Q3EPreference.pref_harm_etqw_game_mod, Q3EPreference.pref_harm_etqw_game_lib, Q3EPreference.pref_params_etqw, Q3EPreference.pref_harm_etqw_command_record, null, Q3EPreference.pref_harm_etqw_env,
+            KeyCodesETQW.class, Q3EGameConstants.FEATURE_ETQW, Q3EGameConstants.ENGINE_IDTECH_4
     ),
-    QUAKE3(Q3EGameConstants.GAME_ID_QUAKE3, Q3EGameConstants.GAME_QUAKE3, Q3EGameConstants.LIB_ENGINE3_ID, Q3EGameConstants.GAME_NAME_QUAKE3, Q3EGameConstants.GAME_BASE_QUAKE3,
-            Q3EGameConstants.GAME_VERSION_QUAKE3, Q3EGameConstants.GAME_SUBDIR_QUAKE3, Q3EGameConstants.CONFIG_FILE_QUAKE3,
-            "fs_game", null, null, ".q3a",
-            Q3EPreference.pref_harm_q3_fs_game, Q3EPreference.pref_harm_q3_user_mod, Q3EPreference.pref_harm_q3_game_mod, Q3EPreference.pref_harm_q3_game_lib, Q3EPreference.pref_params_q3, Q3EPreference.pref_harm_q3_command_record, null, Q3EPreference.pref_harm_q3_env,
-            KeyCodesQ3.class, Q3EGameConstants.FEATURE_QUAKE3, Q3EGameConstants.ENGINE_IDTECH_3
-    ),
-
-    QUAKE2(Q3EGameConstants.GAME_ID_QUAKE2, Q3EGameConstants.GAME_QUAKE2, Q3EGameConstants.LIB_ENGINE2_ID, Q3EGameConstants.GAME_NAME_QUAKE2, Q3EGameConstants.GAME_BASE_QUAKE2,
-            Q3EGameConstants.GAME_VERSION_QUAKE2, Q3EGameConstants.GAME_SUBDIR_QUAKE2, Q3EGameConstants.CONFIG_FILE_QUAKE2,
-            "game", null, null, ".yq2",
-            Q3EPreference.pref_harm_q2_fs_game, Q3EPreference.pref_harm_q2_user_mod, Q3EPreference.pref_harm_q2_game_mod, Q3EPreference.pref_harm_q2_game_lib, Q3EPreference.pref_params_q2, Q3EPreference.pref_harm_q2_command_record, null, Q3EPreference.pref_harm_q2_env,
-            KeyCodesQ2.class, Q3EGameConstants.FEATURE_QUAKE2, Q3EGameConstants.ENGINE_IDTECH_2
-    ),
-
-    QUAKE1(Q3EGameConstants.GAME_ID_QUAKE1, Q3EGameConstants.GAME_QUAKE1, Q3EGameConstants.LIB_ENGINE1_QUAKE, Q3EGameConstants.GAME_NAME_QUAKE1, Q3EGameConstants.GAME_BASE_QUAKE1,
-            Q3EGameConstants.GAME_VERSION_QUAKE1, Q3EGameConstants.GAME_SUBDIR_QUAKE1, Q3EGameConstants.CONFIG_FILE_QUAKE1,
-            "game", null, "darkplaces", null,
-            Q3EPreference.pref_harm_q1_fs_game, Q3EPreference.pref_harm_q1_user_mod, Q3EPreference.pref_harm_q1_game_mod, Q3EPreference.pref_harm_q1_game_lib, Q3EPreference.pref_params_q1, Q3EPreference.pref_harm_q1_command_record, null, Q3EPreference.pref_harm_q1_env,
-            KeyCodesQ1.class, Q3EGameConstants.FEATURE_QUAKE1, Q3EGameConstants.ENGINE_IDTECH_2
-    ),
-
     DOOM3BFG(Q3EGameConstants.GAME_ID_DOOM3BFG, Q3EGameConstants.GAME_DOOM3BFG, Q3EGameConstants.LIB_ENGINE4_D3BFG, Q3EGameConstants.GAME_NAME_DOOM3BFG, Q3EGameConstants.GAME_BASE_DOOM3BFG,
             Q3EGameConstants.GAME_VERSION_DOOM3BFG, Q3EGameConstants.GAME_SUBDIR_DOOMBFG, Q3EGameConstants.CONFIG_FILE_DOOM3BFG,
             "fs_game", "fs_game_base", null, ".local/share/rbdoom3bfg",
             Q3EPreference.pref_harm_d3bfg_fs_game, Q3EPreference.pref_harm_d3bfg_user_mod, Q3EPreference.pref_harm_d3bfg_game_mod, Q3EPreference.pref_harm_d3bfg_game_lib, Q3EPreference.pref_params_d3bfg, Q3EPreference.pref_harm_d3bfg_command_record, Q3EPreference.pref_harm_d3bfg_rendererBackend, Q3EPreference.pref_harm_d3bfg_env,
             KeyCodesD3BFG.class, Q3EGameConstants.FEATURE_DOOM3BFG, Q3EGameConstants.ENGINE_IDTECH_4
     ),
-
     TDM(Q3EGameConstants.GAME_ID_TDM, Q3EGameConstants.GAME_TDM, Q3EGameConstants.LIB_ENGINE4_TDM, Q3EGameConstants.GAME_NAME_TDM, Q3EGameConstants.GAME_BASE_TDM,
             Q3EGameConstants.GAME_VERSION_TDM, Q3EGameConstants.GAME_SUBDIR_TDM, Q3EGameConstants.CONFIG_FILE_TDM,
             "fs_currentfm" /* fs_mod */, null, "fms", null,
             Q3EPreference.pref_harm_tdm_fs_game, Q3EPreference.pref_harm_tdm_user_mod, Q3EPreference.pref_harm_tdm_game_mod, Q3EPreference.pref_harm_tdm_game_lib, Q3EPreference.pref_params_tdm, Q3EPreference.pref_harm_tdm_command_record, null /* Q3EPreference.pref_harm_tdm_version */, Q3EPreference.pref_harm_tdm_env,
             KeyCodesD3.class, Q3EGameConstants.FEATURE_TDM, Q3EGameConstants.ENGINE_IDTECH_4
     ),
-
-    ZDOOM(Q3EGameConstants.GAME_ID_ZDOOM, Q3EGameConstants.GAME_ZDOOM, Q3EGameConstants.LIB_ENGINE1_DOOM, Q3EGameConstants.GAME_NAME_ZDOOM, Q3EGameConstants.GAME_BASE_ZDOOM,
-            Q3EGameConstants.GAME_VERSION_ZDOOM, Q3EGameConstants.GAME_SUBDIR_ZDOOM, Q3EGameConstants.CONFIG_FILE_ZDOOM,
-            "iwad", null, null, ".config/uzdoom",
-            Q3EPreference.pref_harm_zdoom_fs_game, Q3EPreference.pref_harm_zdoom_user_mod, Q3EPreference.pref_harm_zdoom_game_mod, Q3EPreference.pref_harm_zdoom_game_lib, Q3EPreference.pref_params_zdoom, Q3EPreference.pref_harm_zdoom_command_record, null, Q3EPreference.pref_harm_zdoom_env,
-            KeyCodesSDL.class, Q3EGameConstants.FEATURE_ZDOOM, Q3EGameConstants.ENGINE_IDTECH_1
+    SKINDEEP(Q3EGameConstants.GAME_ID_SKINDEEP, Q3EGameConstants.GAME_SKINDEEP, Q3EGameConstants.LIB_ENGINE4_SKINDEEP, Q3EGameConstants.GAME_NAME_SKINDEEP, Q3EGameConstants.GAME_BASE_SKINDEEP,
+            Q3EGameConstants.GAME_VERSION_SKINDEEP, Q3EGameConstants.GAME_SUBDIR_SKINDEEP, Q3EGameConstants.CONFIG_FILE_SKINDEEP,
+            "fs_game", "fs_game_base", null, null,
+            Q3EPreference.pref_harm_skindeep_fs_game, Q3EPreference.pref_harm_skindeep_user_mod, Q3EPreference.pref_harm_skindeep_game_mod, Q3EPreference.pref_harm_skindeep_game_lib, Q3EPreference.pref_params_skindeep, Q3EPreference.pref_harm_skindeep_command_record, null, Q3EPreference.pref_harm_skindeep_env,
+            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_SKINDEEP, Q3EGameConstants.ENGINE_IDTECH_4
+    ),
+    QC(Q3EGameConstants.GAME_ID_QC, Q3EGameConstants.GAME_QC, Q3EGameConstants.LIB_ENGINE4_QC, Q3EGameConstants.GAME_NAME_QC, Q3EGameConstants.GAME_BASE_QC,
+            Q3EGameConstants.GAME_VERSION_QC, Q3EGameConstants.GAME_SUBDIR_QC, Q3EGameConstants.CONFIG_FILE_QC,
+            "fs_game", "fs_game_base", null, null,
+            Q3EPreference.pref_harm_qc_fs_game, Q3EPreference.pref_harm_qc_user_mod, Q3EPreference.pref_harm_qc_game_mod, Q3EPreference.pref_harm_qc_game_lib, Q3EPreference.pref_params_qc, Q3EPreference.pref_harm_qc_command_record, null, Q3EPreference.pref_harm_qc_env,
+            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_QC, Q3EGameConstants.ENGINE_IDTECH_4
+    ),
+    ICARUS(Q3EGameConstants.GAME_ID_ICARUS, Q3EGameConstants.GAME_ICARUS, Q3EGameConstants.LIB_ENGINE4_ICARUS, Q3EGameConstants.GAME_NAME_ICARUS, Q3EGameConstants.GAME_BASE_ICARUS,
+            Q3EGameConstants.GAME_VERSION_ICARUS, Q3EGameConstants.GAME_SUBDIR_ICARUS, Q3EGameConstants.CONFIG_FILE_ICARUS,
+            "fs_game", "fs_game_base", null, null,
+            Q3EPreference.pref_harm_icarus_fs_game, Q3EPreference.pref_harm_icarus_user_mod, Q3EPreference.pref_harm_icarus_game_mod, Q3EPreference.pref_harm_icarus_game_lib, Q3EPreference.pref_params_icarus, Q3EPreference.pref_harm_icarus_command_record, null, Q3EPreference.pref_harm_icarus_env,
+            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_ICARUS, Q3EGameConstants.ENGINE_IDTECH_4
     ),
 
+    // idTech3
+    QUAKE3(Q3EGameConstants.GAME_ID_QUAKE3, Q3EGameConstants.GAME_QUAKE3, Q3EGameConstants.LIB_ENGINE3_ID, Q3EGameConstants.GAME_NAME_QUAKE3, Q3EGameConstants.GAME_BASE_QUAKE3,
+            Q3EGameConstants.GAME_VERSION_QUAKE3, Q3EGameConstants.GAME_SUBDIR_QUAKE3, Q3EGameConstants.CONFIG_FILE_QUAKE3,
+            "fs_game", null, null, ".q3a",
+            Q3EPreference.pref_harm_q3_fs_game, Q3EPreference.pref_harm_q3_user_mod, Q3EPreference.pref_harm_q3_game_mod, Q3EPreference.pref_harm_q3_game_lib, Q3EPreference.pref_params_q3, Q3EPreference.pref_harm_q3_command_record, null, Q3EPreference.pref_harm_q3_env,
+            KeyCodesQ3.class, Q3EGameConstants.FEATURE_QUAKE3, Q3EGameConstants.ENGINE_IDTECH_3
+    ),
+    RTCW(Q3EGameConstants.GAME_ID_RTCW, Q3EGameConstants.GAME_RTCW, Q3EGameConstants.LIB_ENGINE3_RTCW, Q3EGameConstants.GAME_NAME_RTCW, Q3EGameConstants.GAME_BASE_RTCW,
+            Q3EGameConstants.GAME_VERSION_RTCW, Q3EGameConstants.GAME_SUBDIR_RTCW, Q3EGameConstants.CONFIG_FILE_RTCW,
+            "fs_game", null, null, ".wolf",
+            Q3EPreference.pref_harm_rtcw_fs_game, Q3EPreference.pref_harm_rtcw_user_mod, Q3EPreference.pref_harm_rtcw_game_mod, Q3EPreference.pref_harm_rtcw_game_lib, Q3EPreference.pref_params_rtcw, Q3EPreference.pref_harm_rtcw_command_record, null, Q3EPreference.pref_harm_rtcw_env,
+            KeyCodesRTCW.class, Q3EGameConstants.FEATURE_RTCW, Q3EGameConstants.ENGINE_IDTECH_3
+    ),
     ETW(Q3EGameConstants.GAME_ID_ETW, Q3EGameConstants.GAME_ETW, Q3EGameConstants.LIB_ENGINE3_ETW, Q3EGameConstants.GAME_NAME_ETW, Q3EGameConstants.GAME_BASE_ETW,
             Q3EGameConstants.GAME_VERSION_ETW, Q3EGameConstants.GAME_SUBDIR_ETW, Q3EGameConstants.CONFIG_FILE_ETW,
             "fs_game", null, null, ".etlegacy/legacy",
             Q3EPreference.pref_harm_etw_fs_game, Q3EPreference.pref_harm_etw_user_mod, Q3EPreference.pref_harm_etw_game_mod, Q3EPreference.pref_harm_etw_game_lib, Q3EPreference.pref_params_etw, Q3EPreference.pref_harm_etw_command_record, null, Q3EPreference.pref_harm_etw_env,
             KeyCodesQ3.class, Q3EGameConstants.FEATURE_ETW, Q3EGameConstants.ENGINE_IDTECH_3
     ),
-
-    REALRTCW(Q3EGameConstants.GAME_ID_REALRTCW, Q3EGameConstants.GAME_REALRTCW, Q3EGameConstants.LIB_ENGINE3_REALRTCW, Q3EGameConstants.GAME_NAME_REALRTCW, Q3EGameConstants.GAME_BASE_REALRTCW,
-            Q3EGameConstants.GAME_VERSION_REALRTCW, Q3EGameConstants.GAME_SUBDIR_REALRTCW, Q3EGameConstants.CONFIG_FILE_REALRTCW,
-            "fs_game", null, null, ".realrtcw",
-            Q3EPreference.pref_harm_realrtcw_fs_game, Q3EPreference.pref_harm_realrtcw_user_mod, Q3EPreference.pref_harm_realrtcw_game_mod, Q3EPreference.pref_harm_realrtcw_game_lib, Q3EPreference.pref_params_realrtcw, Q3EPreference.pref_harm_realrtcw_command_record, Q3EPreference.pref_harm_realrtcw_version, Q3EPreference.pref_harm_realrtcw_env,
-            KeyCodesRTCW.class, Q3EGameConstants.FEATURE_REALRTCW, Q3EGameConstants.ENGINE_IDTECH_3
-    ),
-
-    FTEQW(Q3EGameConstants.GAME_ID_FTEQW, Q3EGameConstants.GAME_FTEQW, Q3EGameConstants.LIB_ENGINE_FTEQW, Q3EGameConstants.GAME_NAME_FTEQW, Q3EGameConstants.GAME_BASE_FTEQW,
-            Q3EGameConstants.GAME_VERSION_FTEQW, Q3EGameConstants.GAME_SUBDIR_FTEQW, Q3EGameConstants.CONFIG_FILE_FTEQW,
-            "" /* game */, "game", null, null,
-            Q3EPreference.pref_harm_fteqw_fs_game, Q3EPreference.pref_harm_fteqw_user_mod, Q3EPreference.pref_harm_fteqw_game_mod, Q3EPreference.pref_harm_fteqw_game_lib, Q3EPreference.pref_params_fteqw, Q3EPreference.pref_harm_fteqw_command_record, null, Q3EPreference.pref_harm_fteqw_env,
-            KeyCodesQ3.class, Q3EGameConstants.FEATURE_FTEQW, Q3EGameConstants.ENGINE_ID_BASE
-    ),
-
     JA(Q3EGameConstants.GAME_ID_JA, Q3EGameConstants.GAME_JA, Q3EGameConstants.LIB_ENGINE3_JA, Q3EGameConstants.GAME_NAME_JA, Q3EGameConstants.GAME_BASE_JA,
             Q3EGameConstants.GAME_VERSION_JA, Q3EGameConstants.GAME_SUBDIR_JA, Q3EGameConstants.CONFIG_FILE_JA,
             "fs_game", null, null, null,
@@ -115,7 +102,78 @@ public enum Q3EGame
             Q3EPreference.pref_harm_jo_fs_game, Q3EPreference.pref_harm_jo_user_mod, Q3EPreference.pref_harm_jo_game_mod, Q3EPreference.pref_harm_jo_game_lib, Q3EPreference.pref_params_jo, Q3EPreference.pref_harm_jo_command_record, null, Q3EPreference.pref_harm_jo_env,
             KeyCodesJK.class, Q3EGameConstants.FEATURE_JO, Q3EGameConstants.ENGINE_IDTECH_3
     ),
+    OPENMOHAA(Q3EGameConstants.GAME_ID_MOHAA, Q3EGameConstants.GAME_MOHAA, Q3EGameConstants.LIB_ENGINE3_MOHAA, Q3EGameConstants.GAME_NAME_MOHAA, Q3EGameConstants.GAME_BASE_MOHAA,
+            Q3EGameConstants.GAME_VERSION_MOHAA, Q3EGameConstants.GAME_SUBDIR_MOHAA, Q3EGameConstants.CONFIG_FILE_MOHAA,
+            "fs_game", null, null, ".openmohaa",
+            Q3EPreference.pref_harm_openmohaa_fs_game, Q3EPreference.pref_harm_openmohaa_user_mod, Q3EPreference.pref_harm_openmohaa_game_mod, Q3EPreference.pref_harm_openmohaa_game_lib, Q3EPreference.pref_params_openmohaa, Q3EPreference.pref_harm_openmohaa_command_record, null, Q3EPreference.pref_harm_openmohaa_env,
+            KeyCodesQ3.class, Q3EGameConstants.FEATURE_MOHAA, Q3EGameConstants.ENGINE_IDTECH_3
+    ),
+    URT(Q3EGameConstants.GAME_ID_URT, Q3EGameConstants.GAME_URT, Q3EGameConstants.LIB_ENGINE3_URT, Q3EGameConstants.GAME_NAME_URT, Q3EGameConstants.GAME_BASE_URT,
+            Q3EGameConstants.GAME_VERSION_URT, Q3EGameConstants.GAME_SUBDIR_URT, Q3EGameConstants.CONFIG_FILE_URT,
+            "fs_game", null, null, ".q3a",
+            Q3EPreference.pref_harm_urt_fs_game, Q3EPreference.pref_harm_urt_user_mod, Q3EPreference.pref_harm_urt_game_mod, Q3EPreference.pref_harm_urt_game_lib, Q3EPreference.pref_params_urt, Q3EPreference.pref_harm_urt_command_record, null, Q3EPreference.pref_harm_urt_env,
+            KeyCodesQ3.class, Q3EGameConstants.FEATURE_URT, Q3EGameConstants.ENGINE_IDTECH_3
+    ),
+    REALRTCW(Q3EGameConstants.GAME_ID_REALRTCW, Q3EGameConstants.GAME_REALRTCW, Q3EGameConstants.LIB_ENGINE3_REALRTCW, Q3EGameConstants.GAME_NAME_REALRTCW, Q3EGameConstants.GAME_BASE_REALRTCW,
+            Q3EGameConstants.GAME_VERSION_REALRTCW, Q3EGameConstants.GAME_SUBDIR_REALRTCW, Q3EGameConstants.CONFIG_FILE_REALRTCW,
+            "fs_game", null, null, ".realrtcw",
+            Q3EPreference.pref_harm_realrtcw_fs_game, Q3EPreference.pref_harm_realrtcw_user_mod, Q3EPreference.pref_harm_realrtcw_game_mod, Q3EPreference.pref_harm_realrtcw_game_lib, Q3EPreference.pref_params_realrtcw, Q3EPreference.pref_harm_realrtcw_command_record, Q3EPreference.pref_harm_realrtcw_version, Q3EPreference.pref_harm_realrtcw_env,
+            KeyCodesRTCW.class, Q3EGameConstants.FEATURE_REALRTCW, Q3EGameConstants.ENGINE_IDTECH_3
+    ),
 
+    // idTech2
+    QUAKE2(Q3EGameConstants.GAME_ID_QUAKE2, Q3EGameConstants.GAME_QUAKE2, Q3EGameConstants.LIB_ENGINE2_ID, Q3EGameConstants.GAME_NAME_QUAKE2, Q3EGameConstants.GAME_BASE_QUAKE2,
+            Q3EGameConstants.GAME_VERSION_QUAKE2, Q3EGameConstants.GAME_SUBDIR_QUAKE2, Q3EGameConstants.CONFIG_FILE_QUAKE2,
+            "game", null, null, ".yq2",
+            Q3EPreference.pref_harm_q2_fs_game, Q3EPreference.pref_harm_q2_user_mod, Q3EPreference.pref_harm_q2_game_mod, Q3EPreference.pref_harm_q2_game_lib, Q3EPreference.pref_params_q2, Q3EPreference.pref_harm_q2_command_record, null, Q3EPreference.pref_harm_q2_env,
+            KeyCodesQ2.class, Q3EGameConstants.FEATURE_QUAKE2, Q3EGameConstants.ENGINE_IDTECH_2
+    ),
+    QUAKE1(Q3EGameConstants.GAME_ID_QUAKE1, Q3EGameConstants.GAME_QUAKE1, Q3EGameConstants.LIB_ENGINE1_QUAKE, Q3EGameConstants.GAME_NAME_QUAKE1, Q3EGameConstants.GAME_BASE_QUAKE1,
+            Q3EGameConstants.GAME_VERSION_QUAKE1, Q3EGameConstants.GAME_SUBDIR_QUAKE1, Q3EGameConstants.CONFIG_FILE_QUAKE1,
+            "game", null, "darkplaces", null,
+            Q3EPreference.pref_harm_q1_fs_game, Q3EPreference.pref_harm_q1_user_mod, Q3EPreference.pref_harm_q1_game_mod, Q3EPreference.pref_harm_q1_game_lib, Q3EPreference.pref_params_q1, Q3EPreference.pref_harm_q1_command_record, null, Q3EPreference.pref_harm_q1_env,
+            KeyCodesQ1.class, Q3EGameConstants.FEATURE_QUAKE1, Q3EGameConstants.ENGINE_IDTECH_2
+    ),
+
+    // idTech1
+    ZDOOM(Q3EGameConstants.GAME_ID_ZDOOM, Q3EGameConstants.GAME_ZDOOM, Q3EGameConstants.LIB_ENGINE1_DOOM, Q3EGameConstants.GAME_NAME_ZDOOM, Q3EGameConstants.GAME_BASE_ZDOOM,
+            Q3EGameConstants.GAME_VERSION_ZDOOM, Q3EGameConstants.GAME_SUBDIR_ZDOOM, Q3EGameConstants.CONFIG_FILE_ZDOOM,
+            "iwad", null, null, ".config/uzdoom",
+            Q3EPreference.pref_harm_zdoom_fs_game, Q3EPreference.pref_harm_zdoom_user_mod, Q3EPreference.pref_harm_zdoom_game_mod, Q3EPreference.pref_harm_zdoom_game_lib, Q3EPreference.pref_params_zdoom, Q3EPreference.pref_harm_zdoom_command_record, null, Q3EPreference.pref_harm_zdoom_env,
+            KeyCodesSDL.class, Q3EGameConstants.FEATURE_ZDOOM, Q3EGameConstants.ENGINE_IDTECH_1
+    ),
+
+    // idTech0
+    WOLF3D(Q3EGameConstants.GAME_ID_WOLF3D, Q3EGameConstants.GAME_WOLF3D, Q3EGameConstants.LIB_ENGINE1_WOLF3D, Q3EGameConstants.GAME_NAME_WOLF3D, Q3EGameConstants.GAME_BASE_WOLF3D,
+            Q3EGameConstants.GAME_VERSION_WOLF3D, Q3EGameConstants.GAME_SUBDIR_WOLF3D, Q3EGameConstants.CONFIG_FILE_WOLF3D,
+            "data", null, null, "ecwolf",
+            Q3EPreference.pref_harm_wolf3d_fs_game, Q3EPreference.pref_harm_wolf3d_user_mod, Q3EPreference.pref_harm_wolf3d_game_mod, Q3EPreference.pref_harm_wolf3d_game_lib, Q3EPreference.pref_params_wolf3d, Q3EPreference.pref_harm_wolf3d_command_record, null, Q3EPreference.pref_harm_wolf3d_env,
+            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_WOLF3D, Q3EGameConstants.ENGINE_IDTECH_0
+    ),
+
+    // idTech based
+    FTEQW(Q3EGameConstants.GAME_ID_FTEQW, Q3EGameConstants.GAME_FTEQW, Q3EGameConstants.LIB_ENGINE_FTEQW, Q3EGameConstants.GAME_NAME_FTEQW, Q3EGameConstants.GAME_BASE_FTEQW,
+            Q3EGameConstants.GAME_VERSION_FTEQW, Q3EGameConstants.GAME_SUBDIR_FTEQW, Q3EGameConstants.CONFIG_FILE_FTEQW,
+            "" /* game */, "game", null, null,
+            Q3EPreference.pref_harm_fteqw_fs_game, Q3EPreference.pref_harm_fteqw_user_mod, Q3EPreference.pref_harm_fteqw_game_mod, Q3EPreference.pref_harm_fteqw_game_lib, Q3EPreference.pref_params_fteqw, Q3EPreference.pref_harm_fteqw_command_record, null, Q3EPreference.pref_harm_fteqw_env,
+            KeyCodesQ3.class, Q3EGameConstants.FEATURE_FTEQW, Q3EGameConstants.ENGINE_ID_BASE
+    ),
+
+    // source
+    XASH3D(Q3EGameConstants.GAME_ID_XASH3D, Q3EGameConstants.GAME_XASH3D, Q3EGameConstants.LIB_ENGINE_XASH3D, Q3EGameConstants.GAME_NAME_XASH3D, Q3EGameConstants.GAME_BASE_XASH3D,
+            Q3EGameConstants.GAME_VERSION_XASH3D, Q3EGameConstants.GAME_SUBDIR_XASH3D, Q3EGameConstants.CONFIG_FILE_XASH3D,
+            "game", null, null, null,
+            Q3EPreference.pref_harm_xash3d_fs_game, Q3EPreference.pref_harm_xash3d_user_mod, Q3EPreference.pref_harm_xash3d_game_mod, Q3EPreference.pref_harm_xash3d_game_lib, Q3EPreference.pref_params_xash3d, Q3EPreference.pref_harm_xash3d_command_record, null, Q3EPreference.pref_harm_xash3d_env,
+            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_XASH3D, Q3EGameConstants.ENGINE_GOLD_SOURCE
+    ),
+    SOURCE(Q3EGameConstants.GAME_ID_SOURCE, Q3EGameConstants.GAME_SOURCE, Q3EGameConstants.LIB_ENGINE_SOURCE, Q3EGameConstants.GAME_NAME_SOURCE, Q3EGameConstants.GAME_BASE_SOURCE,
+            Q3EGameConstants.GAME_VERSION_SOURCE, Q3EGameConstants.GAME_SUBDIR_SOURCE, Q3EGameConstants.CONFIG_FILE_SOURCE,
+            "game", null, null, null,
+            Q3EPreference.pref_harm_source_fs_game, Q3EPreference.pref_harm_source_user_mod, Q3EPreference.pref_harm_source_game_mod, Q3EPreference.pref_harm_source_game_lib, Q3EPreference.pref_params_source, Q3EPreference.pref_harm_source_command_record, null, Q3EPreference.pref_harm_source_env,
+            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_SOURCE, Q3EGameConstants.ENGINE_SOURCE
+    ),
+
+    // other
     SAMTFE(Q3EGameConstants.GAME_ID_SAMTFE, Q3EGameConstants.GAME_SAMTFE, Q3EGameConstants.LIB_ENGINE_SAMTFE, Q3EGameConstants.GAME_NAME_SAMTFE, Q3EGameConstants.GAME_BASE_SAMTFE,
             Q3EGameConstants.GAME_VERSION_SAMTFE, Q3EGameConstants.GAME_SUBDIR_SAMTFE, Q3EGameConstants.CONFIG_FILE_SAMTFE,
             "", null, null, null,
@@ -129,68 +187,6 @@ public enum Q3EGame
             KeyCodesSDL.class, Q3EGameConstants.FEATURE_SAMTSE, Q3EGameConstants.ENGINE_OTHER
     ),
 
-    XASH3D(Q3EGameConstants.GAME_ID_XASH3D, Q3EGameConstants.GAME_XASH3D, Q3EGameConstants.LIB_ENGINE_XASH3D, Q3EGameConstants.GAME_NAME_XASH3D, Q3EGameConstants.GAME_BASE_XASH3D,
-            Q3EGameConstants.GAME_VERSION_XASH3D, Q3EGameConstants.GAME_SUBDIR_XASH3D, Q3EGameConstants.CONFIG_FILE_XASH3D,
-            "game", null, null, null,
-            Q3EPreference.pref_harm_xash3d_fs_game, Q3EPreference.pref_harm_xash3d_user_mod, Q3EPreference.pref_harm_xash3d_game_mod, Q3EPreference.pref_harm_xash3d_game_lib, Q3EPreference.pref_params_xash3d, Q3EPreference.pref_harm_xash3d_command_record, null, Q3EPreference.pref_harm_xash3d_env,
-            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_XASH3D, Q3EGameConstants.ENGINE_GOLD_SOURCE
-    ),
-
-    SOURCE(Q3EGameConstants.GAME_ID_SOURCE, Q3EGameConstants.GAME_SOURCE, Q3EGameConstants.LIB_ENGINE_SOURCE, Q3EGameConstants.GAME_NAME_SOURCE, Q3EGameConstants.GAME_BASE_SOURCE,
-            Q3EGameConstants.GAME_VERSION_SOURCE, Q3EGameConstants.GAME_SUBDIR_SOURCE, Q3EGameConstants.CONFIG_FILE_SOURCE,
-            "game", null, null, null,
-            Q3EPreference.pref_harm_source_fs_game, Q3EPreference.pref_harm_source_user_mod, Q3EPreference.pref_harm_source_game_mod, Q3EPreference.pref_harm_source_game_lib, Q3EPreference.pref_params_source, Q3EPreference.pref_harm_source_command_record, null, Q3EPreference.pref_harm_source_env,
-            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_SOURCE, Q3EGameConstants.ENGINE_SOURCE
-    ),
-
-    URT(Q3EGameConstants.GAME_ID_URT, Q3EGameConstants.GAME_URT, Q3EGameConstants.LIB_ENGINE3_URT, Q3EGameConstants.GAME_NAME_URT, Q3EGameConstants.GAME_BASE_URT,
-            Q3EGameConstants.GAME_VERSION_URT, Q3EGameConstants.GAME_SUBDIR_URT, Q3EGameConstants.CONFIG_FILE_URT,
-            "fs_game", null, null, ".q3a",
-            Q3EPreference.pref_harm_urt_fs_game, Q3EPreference.pref_harm_urt_user_mod, Q3EPreference.pref_harm_urt_game_mod, Q3EPreference.pref_harm_urt_game_lib, Q3EPreference.pref_params_urt, Q3EPreference.pref_harm_urt_command_record, null, Q3EPreference.pref_harm_urt_env,
-            KeyCodesQ3.class, Q3EGameConstants.FEATURE_URT, Q3EGameConstants.ENGINE_IDTECH_3
-    ),
-
-    OPENMOHAA(Q3EGameConstants.GAME_ID_MOHAA, Q3EGameConstants.GAME_MOHAA, Q3EGameConstants.LIB_ENGINE3_MOHAA, Q3EGameConstants.GAME_NAME_MOHAA, Q3EGameConstants.GAME_BASE_MOHAA,
-            Q3EGameConstants.GAME_VERSION_MOHAA, Q3EGameConstants.GAME_SUBDIR_MOHAA, Q3EGameConstants.CONFIG_FILE_MOHAA,
-            "fs_game", null, null, ".openmohaa",
-            Q3EPreference.pref_harm_openmohaa_fs_game, Q3EPreference.pref_harm_openmohaa_user_mod, Q3EPreference.pref_harm_openmohaa_game_mod, Q3EPreference.pref_harm_openmohaa_game_lib, Q3EPreference.pref_params_openmohaa, Q3EPreference.pref_harm_openmohaa_command_record, null, Q3EPreference.pref_harm_openmohaa_env,
-            KeyCodesQ3.class, Q3EGameConstants.FEATURE_MOHAA, Q3EGameConstants.ENGINE_IDTECH_3
-    ),
-
-    WOLF3D(Q3EGameConstants.GAME_ID_WOLF3D, Q3EGameConstants.GAME_WOLF3D, Q3EGameConstants.LIB_ENGINE1_WOLF3D, Q3EGameConstants.GAME_NAME_WOLF3D, Q3EGameConstants.GAME_BASE_WOLF3D,
-            Q3EGameConstants.GAME_VERSION_WOLF3D, Q3EGameConstants.GAME_SUBDIR_WOLF3D, Q3EGameConstants.CONFIG_FILE_WOLF3D,
-            "data", null, null, "ecwolf",
-            Q3EPreference.pref_harm_wolf3d_fs_game, Q3EPreference.pref_harm_wolf3d_user_mod, Q3EPreference.pref_harm_wolf3d_game_mod, Q3EPreference.pref_harm_wolf3d_game_lib, Q3EPreference.pref_params_wolf3d, Q3EPreference.pref_harm_wolf3d_command_record, null, Q3EPreference.pref_harm_wolf3d_env,
-            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_WOLF3D, Q3EGameConstants.ENGINE_IDTECH_0
-    ),
-
-    SKINDEEP(Q3EGameConstants.GAME_ID_SKINDEEP, Q3EGameConstants.GAME_SKINDEEP, Q3EGameConstants.LIB_ENGINE4_SKINDEEP, Q3EGameConstants.GAME_NAME_SKINDEEP, Q3EGameConstants.GAME_BASE_SKINDEEP,
-            Q3EGameConstants.GAME_VERSION_SKINDEEP, Q3EGameConstants.GAME_SUBDIR_SKINDEEP, Q3EGameConstants.CONFIG_FILE_SKINDEEP,
-            "fs_game", "fs_game_base", null, null,
-            Q3EPreference.pref_harm_skindeep_fs_game, Q3EPreference.pref_harm_skindeep_user_mod, Q3EPreference.pref_harm_skindeep_game_mod, Q3EPreference.pref_harm_skindeep_game_lib, Q3EPreference.pref_params_skindeep, Q3EPreference.pref_harm_skindeep_command_record, null, Q3EPreference.pref_harm_skindeep_env,
-            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_SKINDEEP, Q3EGameConstants.ENGINE_IDTECH_4
-    ),
-
-    QC(Q3EGameConstants.GAME_ID_QC, Q3EGameConstants.GAME_QC, Q3EGameConstants.LIB_ENGINE4_QC, Q3EGameConstants.GAME_NAME_QC, Q3EGameConstants.GAME_BASE_QC,
-            Q3EGameConstants.GAME_VERSION_QC, Q3EGameConstants.GAME_SUBDIR_QC, Q3EGameConstants.CONFIG_FILE_QC,
-            "fs_game", "fs_game_base", null, null,
-            Q3EPreference.pref_harm_qc_fs_game, Q3EPreference.pref_harm_qc_user_mod, Q3EPreference.pref_harm_qc_game_mod, Q3EPreference.pref_harm_qc_game_lib, Q3EPreference.pref_params_qc, Q3EPreference.pref_harm_qc_command_record, null, Q3EPreference.pref_harm_qc_env,
-            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_QC, Q3EGameConstants.ENGINE_IDTECH_4
-    ),
-
-    ICARUS(Q3EGameConstants.GAME_ID_ICARUS, Q3EGameConstants.GAME_ICARUS, Q3EGameConstants.LIB_ENGINE4_ICARUS, Q3EGameConstants.GAME_NAME_ICARUS, Q3EGameConstants.GAME_BASE_ICARUS,
-            Q3EGameConstants.GAME_VERSION_ICARUS, Q3EGameConstants.GAME_SUBDIR_ICARUS, Q3EGameConstants.CONFIG_FILE_ICARUS,
-            "fs_game", "fs_game_base", null, null,
-            Q3EPreference.pref_harm_icarus_fs_game, Q3EPreference.pref_harm_icarus_user_mod, Q3EPreference.pref_harm_icarus_game_mod, Q3EPreference.pref_harm_icarus_game_lib, Q3EPreference.pref_params_icarus, Q3EPreference.pref_harm_icarus_command_record, null, Q3EPreference.pref_harm_icarus_env,
-            KeyCodesAndroid.class, Q3EGameConstants.FEATURE_ICARUS, Q3EGameConstants.ENGINE_IDTECH_4
-    ),
-
-    ETQW(Q3EGameConstants.GAME_ID_ETQW, Q3EGameConstants.GAME_ETQW, Q3EGameConstants.LIB_ENGINE4_SPLASHDAMAGE, Q3EGameConstants.GAME_NAME_ETQW, Q3EGameConstants.GAME_BASE_ETQW,
-            Q3EGameConstants.GAME_VERSION_ETQW, Q3EGameConstants.GAME_SUBDIR_ETQW, Q3EGameConstants.CONFIG_FILE_ETQW,
-            "fs_game", "fs_game_base", null, null,
-            Q3EPreference.pref_harm_etqw_fs_game, Q3EPreference.pref_harm_etqw_user_mod, Q3EPreference.pref_harm_etqw_game_mod, Q3EPreference.pref_harm_etqw_game_lib, Q3EPreference.pref_params_etqw, Q3EPreference.pref_harm_etqw_command_record, null, Q3EPreference.pref_harm_etqw_env,
-            KeyCodesETQW.class, Q3EGameConstants.FEATURE_ETQW, Q3EGameConstants.ENGINE_IDTECH_4
-    ),
     ;
 
     public final int    ID;

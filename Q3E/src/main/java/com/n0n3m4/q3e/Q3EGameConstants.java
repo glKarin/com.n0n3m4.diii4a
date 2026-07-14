@@ -229,37 +229,76 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_ICARUS   = "1.0.9";
     public static final String GAME_VERSION_ETQW     = "1.5.12658.33244";
 
+    public enum GAME {
+        // idTech4
+        DOOM3,
+        QUAKE4,
+        PREY,
+        ETQW,
+        DOOM3BFG,
+        TDM,
+        SKINDEEP,
+        QUADCOWBOY,
+        ICARUS,
+        // idTech3
+        QUAKE3,
+        RTCW,
+        ETW,
+        JEDIACADEMY,
+        JEDIOUTCAST,
+        MOHAA,
+        URBANTERROR,
+        REALRTCW,
+        // idTech2
+        QUAKE2,
+        QUAKE1,
+        // idTech1
+        ZDOOM,
+        // idTech0
+        WOLF3D,
+        // idTech based
+        FTEQW,
+        // source
+        XASH3D,
+        SOURCE,
+        // other
+        SAMTFE,
+        SAMTSE,
+        // total
+        TOTAL,
+    }
+
     // game type index(ID)
-    public static final int GAME_ID_DOOM3    = 0;
-    public static final int GAME_ID_QUAKE4   = 1;
-    public static final int GAME_ID_PREY     = 2;
-    public static final int GAME_ID_RTCW     = 3;
-    public static final int GAME_ID_QUAKE3   = 4;
-    public static final int GAME_ID_QUAKE2   = 5;
-    public static final int GAME_ID_QUAKE1   = 6;
-    public static final int GAME_ID_DOOM3BFG = 7;
-    public static final int GAME_ID_TDM      = 8;
-    public static final int GAME_ID_ZDOOM    = 9;
-    public static final int GAME_ID_ETW      = 10;
-    public static final int GAME_ID_REALRTCW = 11;
-    public static final int GAME_ID_FTEQW    = 12;
-    public static final int GAME_ID_JA       = 13;
-    public static final int GAME_ID_JO       = 14;
-    public static final int GAME_ID_SAMTFE   = 15;
-    public static final int GAME_ID_SAMTSE   = 16;
-    public static final int GAME_ID_XASH3D   = 17;
-    public static final int GAME_ID_SOURCE   = 18;
-    public static final int GAME_ID_URT      = 19;
-    public static final int GAME_ID_MOHAA    = 20;
-    public static final int GAME_ID_WOLF3D   = 21;
-    public static final int GAME_ID_SKINDEEP = 22;
-    public static final int GAME_ID_QC       = 23;
-    public static final int GAME_ID_ICARUS   = 24;
-    public static final int GAME_ID_ETQW     = 25;
+    public static final int GAME_ID_DOOM3    = GAME.DOOM3.ordinal();
+    public static final int GAME_ID_QUAKE4   = GAME.QUAKE4.ordinal();
+    public static final int GAME_ID_PREY     = GAME.PREY.ordinal();
+    public static final int GAME_ID_ETQW     = GAME.ETQW.ordinal();
+    public static final int GAME_ID_DOOM3BFG = GAME.DOOM3BFG.ordinal();
+    public static final int GAME_ID_TDM      = GAME.TDM.ordinal();
+    public static final int GAME_ID_SKINDEEP = GAME.SKINDEEP.ordinal();
+    public static final int GAME_ID_QC       = GAME.QUADCOWBOY.ordinal();
+    public static final int GAME_ID_ICARUS   = GAME.ICARUS.ordinal();
+    public static final int GAME_ID_QUAKE3   = GAME.QUAKE3.ordinal();
+    public static final int GAME_ID_RTCW     = GAME.RTCW.ordinal();
+    public static final int GAME_ID_ETW      = GAME.ETW.ordinal();
+    public static final int GAME_ID_JA       = GAME.JEDIACADEMY.ordinal();
+    public static final int GAME_ID_JO       = GAME.JEDIOUTCAST.ordinal();
+    public static final int GAME_ID_MOHAA    = GAME.MOHAA.ordinal();
+    public static final int GAME_ID_URT      = GAME.URBANTERROR.ordinal();
+    public static final int GAME_ID_REALRTCW = GAME.REALRTCW.ordinal();
+    public static final int GAME_ID_QUAKE2   = GAME.QUAKE2.ordinal();
+    public static final int GAME_ID_QUAKE1   = GAME.QUAKE1.ordinal();
+    public static final int GAME_ID_ZDOOM    = GAME.ZDOOM.ordinal();
+    public static final int GAME_ID_WOLF3D   = GAME.WOLF3D.ordinal();
+    public static final int GAME_ID_FTEQW    = GAME.FTEQW.ordinal();
+    public static final int GAME_ID_SAMTFE   = GAME.SAMTFE.ordinal();
+    public static final int GAME_ID_SAMTSE   = GAME.SAMTSE.ordinal();
+    public static final int GAME_ID_XASH3D   = GAME.XASH3D.ordinal();
+    public static final int GAME_ID_SOURCE   = GAME.SOURCE.ordinal();
 
 
     // KARIN_NEW_GAME_BOOKMARK: increment
-    public static final int NUM_SUPPORT_GAME = 26;
+    public static final int NUM_SUPPORT_GAME = GAME.TOTAL.ordinal();
 
     public static final String GAME_EXECUABLE = "game.arm";
 

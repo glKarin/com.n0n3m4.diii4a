@@ -11,54 +11,47 @@ public enum LauncherGame
 {
     // KARIN_NEW_GAME_BOOKMARK: add launcher game enum
 
+    // idTech4
     DOOM3(Q3EGameConstants.GAME_ID_DOOM3, Q3EGameConstants.GAME_DOOM3, R.drawable.d3_icon, R.string.doom_iii, R.color.theme_doom3_main_color, R.string.doom_3),
     QUAKE4(Q3EGameConstants.GAME_ID_QUAKE4, Q3EGameConstants.GAME_QUAKE4, R.drawable.q4_icon, R.string.quake_iv_q4base, R.color.theme_quake4_main_color, R.string.quake_4),
     PREY(Q3EGameConstants.GAME_ID_PREY, Q3EGameConstants.GAME_PREY, R.drawable.prey_icon, R.string.prey_preybase, R.color.theme_prey_main_color, R.string.prey_2006),
-
-
-    RTCW(Q3EGameConstants.GAME_ID_RTCW, Q3EGameConstants.GAME_RTCW, R.drawable.rtcw_icon, R.string.rtcw_base, R.color.theme_rtcw_main_color, R.string.rtcw),
-
-    QUAKE3(Q3EGameConstants.GAME_ID_QUAKE3, Q3EGameConstants.GAME_QUAKE3, R.drawable.q3_icon, R.string.quake_3_base, R.color.theme_quake3_main_color, R.string.quake_3),
-
-    QUAKE2(Q3EGameConstants.GAME_ID_QUAKE2, Q3EGameConstants.GAME_QUAKE2, R.drawable.q2_icon, R.string.quake_2_base, R.color.theme_quake2_main_color, R.string.quake_2),
-
-    QUAKE1(Q3EGameConstants.GAME_ID_QUAKE1, Q3EGameConstants.GAME_QUAKE1, R.drawable.q1_icon, R.string.quake_1_base, R.color.theme_quake1_main_color, R.string.quake_1),
-
+    ETQW(Q3EGameConstants.GAME_ID_ETQW, Q3EGameConstants.GAME_ETQW, R.drawable.etqw_icon, R.string.etqw_base, R.color.theme_etqw_main_color, R.string.etqw),
     DOOM3BFG(Q3EGameConstants.GAME_ID_DOOM3BFG, Q3EGameConstants.GAME_DOOM3BFG, R.drawable.d3bfg_icon, R.string.d3bfg_base, R.color.theme_d3bfg_main_color, R.string.doom_3_bfg),
-
     TDM(Q3EGameConstants.GAME_ID_TDM, Q3EGameConstants.GAME_TDM, R.drawable.tdm_icon, R.string.tdm_base, R.color.theme_tdm_main_color, R.string.tdm),
-
-    ZDOOM(Q3EGameConstants.GAME_ID_ZDOOM, Q3EGameConstants.GAME_ZDOOM, R.drawable.uzdoom_icon, R.string.doom_base, R.color.theme_uzdoom_main_color, R.string.doom),
-
-    ETW(Q3EGameConstants.GAME_ID_ETW, Q3EGameConstants.GAME_ETW, R.drawable.etw_icon, R.string.etw_base, R.color.theme_etw_main_color, R.string.etw),
-
-    REALRTCW(Q3EGameConstants.GAME_ID_REALRTCW, Q3EGameConstants.GAME_REALRTCW, R.drawable.realrtcw_icon, R.string.realrtcw_base, R.color.theme_realrtcw_main_color, R.string.realrtcw),
-
-    FTEQW(Q3EGameConstants.GAME_ID_FTEQW, Q3EGameConstants.GAME_FTEQW, R.drawable.fteqw_icon, R.string.fteqw_base, R.color.theme_fteqw_main_color, R.string.fteqw),
-
-    JA(Q3EGameConstants.GAME_ID_JA, Q3EGameConstants.GAME_JA, R.drawable.ja_icon, R.string.openja_base, R.color.theme_ja_main_color, R.string.openja),
-    JO(Q3EGameConstants.GAME_ID_JO, Q3EGameConstants.GAME_JO, R.drawable.jo_icon, R.string.openjo_base, R.color.theme_jo_main_color, R.string.openjo),
-
-    SAMTFE(Q3EGameConstants.GAME_ID_SAMTFE, Q3EGameConstants.GAME_SAMTFE, R.drawable.samtfe_icon, R.string.samtfe_base, R.color.theme_samtfe_main_color, R.string.samtfe),
-    SAMTSE(Q3EGameConstants.GAME_ID_SAMTSE, Q3EGameConstants.GAME_SAMTSE, R.drawable.samtse_icon, R.string.samtse_base, R.color.theme_samtse_main_color, R.string.samtse),
-
-    XASH3D(Q3EGameConstants.GAME_ID_XASH3D, Q3EGameConstants.GAME_XASH3D, R.drawable.xash3d_icon, R.string.xash3d_base, R.color.theme_xash3d_main_color, R.string.xash3d),
-
-    SOURCE(Q3EGameConstants.GAME_ID_SOURCE, Q3EGameConstants.GAME_SOURCE, R.drawable.source_icon, R.string.sourceengine_base, R.color.theme_source_main_color, R.string.sourceengine),
-
-    URT(Q3EGameConstants.GAME_ID_URT, Q3EGameConstants.GAME_URT, R.drawable.urbanterror_icon, R.string.urbanterror_base, R.color.theme_urt_main_color, R.string.urbanterror),
-
-    MOHAA(Q3EGameConstants.GAME_ID_MOHAA, Q3EGameConstants.GAME_MOHAA, R.drawable.mohaa_icon, R.string.openmohaa_base, R.color.theme_mohaa_main_color, R.string.openmohaa),
-
-    WOLF3D(Q3EGameConstants.GAME_ID_WOLF3D, Q3EGameConstants.GAME_WOLF3D, R.drawable.wolf3d_icon, R.string.wolf3d_base, R.color.theme_wolf3d_main_color, R.string.wolf3d),
-
     SKINDEEP(Q3EGameConstants.GAME_ID_SKINDEEP, Q3EGameConstants.GAME_SKINDEEP, R.drawable.skindeep_icon, R.string.skin_deep, R.color.theme_skindeep_main_color, R.string.skin_deep),
-
     QC(Q3EGameConstants.GAME_ID_QC, Q3EGameConstants.GAME_QC, R.drawable.empty_icon, R.string.qc_base, R.color.theme_qc_main_color, R.string.qc),
-
     ICARUS(Q3EGameConstants.GAME_ID_ICARUS, Q3EGameConstants.GAME_ICARUS, R.drawable.empty_icon, R.string.icarus_base, R.color.theme_icarus_main_color, R.string.icarus),
 
-    ETQW(Q3EGameConstants.GAME_ID_ETQW, Q3EGameConstants.GAME_ETQW, R.drawable.etqw_icon, R.string.etqw_base, R.color.theme_etqw_main_color, R.string.etqw),
+    // idTech3
+    QUAKE3(Q3EGameConstants.GAME_ID_QUAKE3, Q3EGameConstants.GAME_QUAKE3, R.drawable.q3_icon, R.string.quake_3_base, R.color.theme_quake3_main_color, R.string.quake_3),
+    RTCW(Q3EGameConstants.GAME_ID_RTCW, Q3EGameConstants.GAME_RTCW, R.drawable.rtcw_icon, R.string.rtcw_base, R.color.theme_rtcw_main_color, R.string.rtcw),
+    ETW(Q3EGameConstants.GAME_ID_ETW, Q3EGameConstants.GAME_ETW, R.drawable.etw_icon, R.string.etw_base, R.color.theme_etw_main_color, R.string.etw),
+    JA(Q3EGameConstants.GAME_ID_JA, Q3EGameConstants.GAME_JA, R.drawable.ja_icon, R.string.openja_base, R.color.theme_ja_main_color, R.string.openja),
+    JO(Q3EGameConstants.GAME_ID_JO, Q3EGameConstants.GAME_JO, R.drawable.jo_icon, R.string.openjo_base, R.color.theme_jo_main_color, R.string.openjo),
+    MOHAA(Q3EGameConstants.GAME_ID_MOHAA, Q3EGameConstants.GAME_MOHAA, R.drawable.mohaa_icon, R.string.openmohaa_base, R.color.theme_mohaa_main_color, R.string.openmohaa),
+    URT(Q3EGameConstants.GAME_ID_URT, Q3EGameConstants.GAME_URT, R.drawable.urbanterror_icon, R.string.urbanterror_base, R.color.theme_urt_main_color, R.string.urbanterror),
+    REALRTCW(Q3EGameConstants.GAME_ID_REALRTCW, Q3EGameConstants.GAME_REALRTCW, R.drawable.realrtcw_icon, R.string.realrtcw_base, R.color.theme_realrtcw_main_color, R.string.realrtcw),
+
+    // idTech2
+    QUAKE2(Q3EGameConstants.GAME_ID_QUAKE2, Q3EGameConstants.GAME_QUAKE2, R.drawable.q2_icon, R.string.quake_2_base, R.color.theme_quake2_main_color, R.string.quake_2),
+    QUAKE1(Q3EGameConstants.GAME_ID_QUAKE1, Q3EGameConstants.GAME_QUAKE1, R.drawable.q1_icon, R.string.quake_1_base, R.color.theme_quake1_main_color, R.string.quake_1),
+
+    // idTech1
+    ZDOOM(Q3EGameConstants.GAME_ID_ZDOOM, Q3EGameConstants.GAME_ZDOOM, R.drawable.uzdoom_icon, R.string.doom_base, R.color.theme_uzdoom_main_color, R.string.doom),
+
+    // idTech0
+    WOLF3D(Q3EGameConstants.GAME_ID_WOLF3D, Q3EGameConstants.GAME_WOLF3D, R.drawable.wolf3d_icon, R.string.wolf3d_base, R.color.theme_wolf3d_main_color, R.string.wolf3d),
+
+    // idTech based
+    FTEQW(Q3EGameConstants.GAME_ID_FTEQW, Q3EGameConstants.GAME_FTEQW, R.drawable.fteqw_icon, R.string.fteqw_base, R.color.theme_fteqw_main_color, R.string.fteqw),
+
+    // source
+    XASH3D(Q3EGameConstants.GAME_ID_XASH3D, Q3EGameConstants.GAME_XASH3D, R.drawable.xash3d_icon, R.string.xash3d_base, R.color.theme_xash3d_main_color, R.string.xash3d),
+    SOURCE(Q3EGameConstants.GAME_ID_SOURCE, Q3EGameConstants.GAME_SOURCE, R.drawable.source_icon, R.string.sourceengine_base, R.color.theme_source_main_color, R.string.sourceengine),
+
+    // other
+    SAMTFE(Q3EGameConstants.GAME_ID_SAMTFE, Q3EGameConstants.GAME_SAMTFE, R.drawable.samtfe_icon, R.string.samtfe_base, R.color.theme_samtfe_main_color, R.string.samtfe),
+    SAMTSE(Q3EGameConstants.GAME_ID_SAMTSE, Q3EGameConstants.GAME_SAMTSE, R.drawable.samtse_icon, R.string.samtse_base, R.color.theme_samtse_main_color, R.string.samtse),
     ;
 
     public final int    GAME_ID;
