@@ -1238,6 +1238,8 @@ void AICast_TickSurvivalWave(void) {
 	gentity_t *player;
 	player = AICast_FindEntityForName("player");
 
+	//if (!player) //karin: TODO is null
+        //return;
 	if (!svParams.wavePending)
         return;
     if (level.time < svParams.waveChangeTime)
@@ -1253,6 +1255,7 @@ void AICast_TickSurvivalWave(void) {
 	int killReq = 0;
 
 	if (wave == 1) {
+	    if (player) //karin: TODO is null
 		AICast_ScriptEvent( AICast_GetCastState( player->s.number ), "start_survival", "" );
 		// Explicitly use user-defined value for wave 1
 		killReq = svParams.initialKillCountRequirement;
@@ -1295,10 +1298,13 @@ void AICast_TickSurvivalWave(void) {
         cl->client->ps.persistant[PERS_WAVES]++;
     }
 
+	if (player) //karin: TODO is null
+	{
     if (svParams.specialWaveActive) {
         AICast_ScriptEvent(AICast_GetCastState(player->s.number), "specialwave_start", "");
     } else {
         AICast_ScriptEvent(AICast_GetCastState(player->s.number), "wave_start", "");
+    }
     }
 
 }
