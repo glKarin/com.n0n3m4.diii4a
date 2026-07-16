@@ -1,15 +1,13 @@
 #ifndef _DL_FFMPEG_H
 #define _DL_FFMPEG_H
 
-#if defined(USE_FFMPEG)
-#ifdef _DL_FFMPEG
+#ifdef DL_FFMPEG
 
 #define av_frame_alloc qav_frame_alloc
 #define av_frame_free qav_frame_free
 #define avformat_open_input qavformat_open_input
 #define avformat_find_stream_info qavformat_find_stream_info
 #define av_strerror qav_strerror
-#define avcodec_open2 qavcodec_open2
 #define avcodec_parameters_to_context qavcodec_parameters_to_context
 #define avcodec_alloc_context3 qavcodec_alloc_context3
 #define av_find_best_stream qav_find_best_stream
@@ -32,21 +30,26 @@
 #define swr_convert qswr_convert
 #define sws_scale qsws_scale
 
+#define avcodec_open2 qavcodec_open2
+#define swr_get_delay qswr_get_delay
+#define av_malloc qav_malloc
+#define av_packet_alloc qav_packet_alloc
+#define av_guess_sample_aspect_ratio qav_guess_sample_aspect_ratio
+#define av_packet_free qav_packet_free
+#define avformat_open_input qavformat_open_input
+#define avformat_alloc_context qavformat_alloc_context
+#define avio_alloc_context qavio_alloc_context
+#define av_rescale_rnd qav_rescale_rnd
+#define avcodec_find_decoder qavcodec_find_decoder
+#define avio_context_free qavio_context_free
+#define av_channel_layout_uninit qav_channel_layout_uninit
+#define swr_alloc_set_opts2 qswr_alloc_set_opts2
+#define av_channel_layout_copy qav_channel_layout_copy
+#define av_channel_layout_default qav_channel_layout_default
+#define av_frame_get_buffer qav_frame_get_buffer
+
 #define QFFMPEGPROC(name, rettype, args) extern rettype (* q##name) args;
 #include "qffmpeg.h"
-
-extern bool ffmpeg_available;
-#define FFMPEG_AVAILABLE() (ffmpeg_available)
-#define FFMPEG_IF_AVAILABLE if(FFMPEG_AVAILABLE())
-#define FFMPEG_IF_NOT_AVAILABLE(x) if(!FFMPEG_AVAILABLE()) { x }
-
-#else
-
-#define FFMPEG_AVAILABLE() (true)
-#define FFMPEG_IF_AVAILABLE
-#define FFMPEG_IF_NOT_AVAILABLE(x)
-
-#endif
 
 #endif
 

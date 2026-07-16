@@ -53,6 +53,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "libswscale/swscale.h"
 #include "libswresample/swresample.h"
 #endif
+#ifdef DL_FFMPEG
+#include "dl_ffmpeg.h"
+#include "dl_ffmpeg_interface.h"
+#endif
 
 #define MAXSIZE             8
 #define MINSIZE             4
@@ -178,7 +182,7 @@ typedef struct {
 	AVCodec *vCodec;
 	AVCodecContext *vCodecCtx;
 	AVFrame *vFrame, *vRgbaFrame;
-	SwsContext *swsCtx;
+	struct SwsContext *swsCtx;
 	qboolean eof;
 	qboolean demuxEOF;
 	AVIOContext *avioCtx;
@@ -210,6 +214,10 @@ static qboolean CL_levelCinPaused = qfalse;
 
 static int FFMPEG_Read( void *opaque, byte *buf, int bufSize ) {
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(!FFMPEG_AVAILABLE())
+		return AVERROR_EOF;
+#endif
 	int r = FS_Read( buf, bufSize, cinTable[currentHandle].iFile );
 
 	return r > 0 ? r : AVERROR_EOF;
@@ -220,6 +228,10 @@ static int FFMPEG_Read( void *opaque, byte *buf, int bufSize ) {
 
 static long long FFMPEG_Seek( void *opaque, long long offset, int whence ) {
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(!FFMPEG_AVAILABLE())
+		return -1;
+#endif
     if ( whence == AVSEEK_SIZE ) {
 		if ( FS_isFileHandleInPak(cinTable[currentHandle].iFile) ) {
 			return FS_filelengthInPak(cinTable[currentHandle].iFile);
@@ -1259,6 +1271,10 @@ static void RoQReset( void ) {
 
 static void FFMPEG_Reset( void ) {
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(!FFMPEG_AVAILABLE())
+		return;
+#endif
 	if ( currentHandle < 0 ) {
 		return;
 	}
@@ -1420,6 +1436,10 @@ redump:
 
 static int FFMPEG_ReadFrame( qboolean onlyAudio ) {
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(!FFMPEG_AVAILABLE())
+		return -1;
+#endif
     int ret = av_read_frame( cinTable[currentHandle].formatCtx,
                              cinTable[currentHandle].packet );
 
@@ -1451,6 +1471,10 @@ static int FFMPEG_ReadFrame( qboolean onlyAudio ) {
 
 static void FFMPEG_PredecodeAudio( void ) {
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(!FFMPEG_AVAILABLE())
+		return;
+#endif
     int ret;
     int outSamples;
     short tmp[65536];
@@ -1552,6 +1576,10 @@ static void FFMPEG_PredecodeAudio( void ) {
 
 static int FFMPEG_DecodeVideo( ) {
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(!FFMPEG_AVAILABLE())
+		return -1;
+#endif
 	int ret;
 	ret = avcodec_receive_frame(
         cinTable[currentHandle].vCodecCtx,
@@ -1603,6 +1631,10 @@ static int FFMPEG_DecodeVideo( ) {
 ******************************************************************************/
 static void FFMPEG_Interrupt( void ) {
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(!FFMPEG_AVAILABLE())
+		return;
+#endif
 	int t0;
 	static int dbg_frame = 0;
 	dbg_frame++;
@@ -1707,6 +1739,10 @@ static void RoQ_init( void ) {
 ******************************************************************************/
 static int FFMPEG_Init( void ) {
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(!FFMPEG_AVAILABLE())
+		return -1;
+#endif
 	int i;
 	int ret;
 
@@ -2000,6 +2036,10 @@ static void RoQShutdown( void ) {
 ******************************************************************************/
 static void FFMPEG_Free( void ) {
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(!FFMPEG_AVAILABLE())
+		return;
+#endif
 	if ( cinTable[currentHandle].packet ) {
 		av_packet_free( &cinTable[currentHandle].packet );
 		cinTable[currentHandle].packet = NULL;
@@ -2072,6 +2112,10 @@ static void FFMPEG_Free( void ) {
 ******************************************************************************/
 static void FFMPEG_Shutdown( void ) {
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(!FFMPEG_AVAILABLE())
+		return;
+#endif
 	const char *s;
 
 	FFMPEG_Free( );
@@ -2516,6 +2560,9 @@ h = cls.glconfig.vidHeight;
 
 	// Update source size for FFmpeg video (ROQ already has CIN_WIDTH/HEIGHT set via ROQ_QUAD_INFO).
 #if !defined(NO_FFMPEG)
+#ifdef DL_FFMPEG
+	if(FFMPEG_AVAILABLE())
+#endif
 	if ( !cin.isRoq ) {
 		cinTable[handle].drawX = cinTable[handle].CIN_WIDTH  = cinTable[handle].vFrame->width;
 		cinTable[handle].drawY = cinTable[handle].CIN_HEIGHT = cinTable[handle].vFrame->height;
@@ -2531,6 +2578,9 @@ h = cls.glconfig.vidHeight;
 
 #if !defined(NO_FFMPEG)
 		// Prefer SAR, but clamp insane values
+#ifdef DL_FFMPEG
+		if(FFMPEG_AVAILABLE())
+#endif
 		if (!cin.isRoq)
 		{
 			int sn = cinTable[handle].sar_num;
