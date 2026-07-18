@@ -1,0 +1,127 @@
+renderProgram megaTexture/oob {
+	
+	program vertex cg { <%
+		struct VsInputs {
+			float3 pos	: $positionAttrib;
+			float2 tex	: $texCoordAttrib;
+			float3 norm	: $normalAttrib;
+			float4 color: $colorAttrib;
+			$if r_32ByteVtx
+			float4 signs : $signAttrib;
+			$endif
+		};
+
+		struct VsOutputs {
+			float2 tex	: TEXCOORD0;
+			float3 norm	: TEXCOORD1;
+
+			float4 megaCoords0 : TEXCOORD2;
+			float4 megaCoords1 : TEXCOORD3;
+			float4 megaCoords2 : TEXCOORD4;
+			float4 megaCoords3 : TEXCOORD5;
+
+			float4 color	: COLOR0;
+		};
+
+		uniform float3 toSun 	: $sunDirection;
+
+		uniform float4 megaParms0 : $megaMaskParams_0;
+		uniform float4 megaParms1 : $megaMaskParams_1;
+		uniform float4 megaParms2 : $megaMaskParams_2;
+		uniform float4 megaParms3 : $megaMaskParams_3;
+		uniform float4 megaParms4 : $megaTextureParams_0;
+		uniform float4 megaParms5 : $megaTextureParams_1;
+		uniform float4 megaParms6 : $megaTextureParams_2;
+		uniform float4 megaParms7 : $megaTextureParams_3;
+		
+		float GetZ( float2 value, float sign ) {
+			return ( sqrt( 1.0f - ( dot( value.xy, value.xy ) ) ) * ( sign - 1.f ) );
+		}
+		
+
+		VsOutputs vertex(VsInputs indata) {
+			VsOutputs outData;
+
+			$if r_32ByteVtx
+			indata.tex *= 1.f/4096.f;
+			indata.norm.xy *= 1.f / 32767.f;
+			indata.norm.z = GetZ( indata.norm.xy, indata.signs.x );
+			$endif
+			
+			outData.tex = indata.tex;
+			outData.norm = indata.norm;
+			outData.color = dot( indata.norm, toSun );
+
+			outData.megaCoords0.xy = indata.tex * megaParms0.w + megaParms0.xy;
+			outData.megaCoords1.xy = indata.tex * megaParms1.w + megaParms1.xy;
+			outData.megaCoords2.xy = indata.tex * megaParms2.w + megaParms2.xy;
+			outData.megaCoords3.xy = indata.tex * megaParms3.w + megaParms3.xy;
+
+			outData.megaCoords0.zw = indata.tex * megaParms4.xy;
+			outData.megaCoords1.zw = indata.tex * megaParms5.xy;
+			outData.megaCoords2.zw = indata.tex * megaParms6.xy;
+			outData.megaCoords3.zw = indata.tex * megaParms7.xy;
+
+			return outData;
+		}
+	%> }
+
+	program fragment cg { <%
+
+		struct VsOutputs {
+			float2 tex		: TEXCOORD0;
+			float3 norm		: TEXCOORD1;
+
+			float4 megaCoords0 : TEXCOORD2;
+			float4 megaCoords1 : TEXCOORD3;
+			float4 megaCoords2 : TEXCOORD4;
+			float4 megaCoords3 : TEXCOORD5;
+
+			float4 color	: COLOR0;
+		};
+
+		uniform float4 megaParms0 : megaTextureParams_0;
+		uniform float4 megaParms1 : megaTextureParams_1;
+		uniform float4 megaParms2 : megaTextureParams_2;
+		uniform float4 megaParms3 : megaTextureParams_3;
+
+		sampler2D megaMask 	: $borderClampMap;
+		sampler2D megaTexture0	: $megaTextureLevel_0;
+		sampler2D megaTexture1	: $megaTextureLevel_1;
+		sampler2D megaTexture2	: $megaTextureLevel_2;
+		sampler2D megaTexture3	: $megaTextureLevel_3;
+		samplerCUBE ambientCubemap : $ambientCubeMap;
+		uniform float ambientBrightness : $ambientBrightness;
+
+		uniform float4 sunColor	: $sunColor;	//Fragment
+
+		float4 fragment(VsOutputs  indata) : COLOR {
+			float4 mask;
+
+			// Load the masks ( cg compiler generates some suboptimal code for this :( )
+			mask.x = tex2D( megaMask, indata.megaCoords0.xy ).x;
+			mask.y = tex2D( megaMask, indata.megaCoords1.xy ).y;
+			mask.z = tex2D( megaMask, indata.megaCoords2.xy ).z;
+			mask.w = tex2D( megaMask, indata.megaCoords3.xy ).w;
+			float4 invMask = 1.0f-mask;
+
+			// Lookup the different levels
+			float4 mega0 = tex2D( megaTexture0, indata.megaCoords0.zw );
+			float4 mega1 = tex2D( megaTexture1, indata.megaCoords1.zw );
+			float4 mega2 = tex2D( megaTexture2, indata.megaCoords2.zw );
+			float4 mega3 = tex2D( megaTexture3, indata.megaCoords3.zw );
+
+			// Merge levels together
+			float4 comb = mega0;
+			comb *= invMask.y;
+			comb += mega1 * mask.y;
+			comb *= invMask.z;
+			comb += mega2 * mask.z;
+			comb *= invMask.w;
+			comb += mega3 * mask.w;
+
+			float4 amb = texCUBE( ambientCubemap, indata.norm ) * ambientBrightness;
+			return min( amb * comb, 1 ) + min( comb.a * indata.color * sunColor * comb, 1 );
+		}
+	%> }	
+}

@@ -1,0 +1,51 @@
+renderProgram debugTools/showTexelDensity {
+	
+	program vertex glsl { <%
+		
+		attribute vec4 $texCoordAttrib;
+		varying	vec4 texcoord0;
+		void main()
+		{
+			gl_Position = ftransform();
+			texcoord0 = $texCoordAttrib;
+		}
+	%> }
+	
+	program fragment glsl { <%
+	
+		uniform vec4 $imageSize;
+		varying	vec4 texcoord0;
+		void main( void ) {
+			vec4 mult = $imageSize;//vec4( 4096, 4096, 1024, 1024 );
+			vec4 dx = dFdx( texcoord0 * mult );
+			vec4 dy = dFdy( texcoord0 * mult );
+			vec4 delta = ( dx * dx + dy * dy );
+			float minDelta = max( delta.x, delta.y );
+			float mipLevel;
+			if ( minDelta > 0.0 ) {
+				mipLevel = 0.5 * log2( minDelta );
+			} else {
+				mipLevel = 0.0;
+			}
+			float l = log2( max(mult.x,mult.y) );
+			int idx = int(mipLevel * l);
+			gl_FragColor = vec4( mipLevel, mipLevel, mipLevel, mipLevel );
+			if ( idx <= 0 ) {
+				gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+			} 
+			if ( idx == 1 ) {
+				gl_FragColor = vec4(0.0,1.0,0.0,1.0);
+			}
+			if ( idx == 2 ) {
+				gl_FragColor = vec4(0.0,0.0,1.0,1.0);
+			}
+			if ( idx == 3 ) {
+				gl_FragColor = vec4(1.0,0.0,1.0,1.0);
+			}
+			if ( idx == 4 ) {
+				gl_FragColor = vec4(0.0,1.0,1.0,1.0);
+			}
+		}
+	%> }
+	
+}

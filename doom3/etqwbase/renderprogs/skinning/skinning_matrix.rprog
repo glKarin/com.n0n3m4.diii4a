@@ -1,0 +1,368 @@
+template skinningMatrix_ARB {
+	parameters < PositionParm = "position", NormalParm = "", TangentsParm = "", BiTangentParm = "" >
+
+	text { <%
+		ATTRIB	_jointIndices = $weightIndexAttrib;
+		ATTRIB	_jointWeights = $weightValueAttrib;
+		
+		PARAM	_joints[210] = { program.env[32..241] };	# 74 joints
+		PARAM	_mvp[4] = { state.matrix.mvp };
+
+		ADDRESS	_A0;
+		TEMP	_R0, _R1, _R2;
+
+		# accumulate weighted joint matrices
+		ARL		_A0.x, _jointIndices.x;
+		MUL		_R0, _joints[_A0.x+0], _jointWeights.x;
+		MUL		_R1, _joints[_A0.x+1], _jointWeights.x;
+		MUL		_R2, _joints[_A0.x+2], _jointWeights.x;
+		ARL		_A0.x, _jointIndices.y;
+		MAD		_R0, _joints[_A0.x+0], _jointWeights.y, _R0;
+		MAD		_R1, _joints[_A0.x+1], _jointWeights.y, _R1;
+		MAD		_R2, _joints[_A0.x+2], _jointWeights.y, _R2;
+		ARL		_A0.x, _jointIndices.z;
+		MAD		_R0, _joints[_A0.x+0], _jointWeights.z, _R0;
+		MAD		_R1, _joints[_A0.x+1], _jointWeights.z, _R1;
+		MAD		_R2, _joints[_A0.x+2], _jointWeights.z, _R2;
+		ARL		_A0.x, _jointIndices.w;
+		MAD		_R0, _joints[_A0.x+0], _jointWeights.w, _R0;
+		MAD		_R1, _joints[_A0.x+1], _jointWeights.w, _R1;
+		MAD		_R2, _joints[_A0.x+2], _jointWeights.w, _R2;
+
+		$if ( r_skinningDualQuaternion > 0 )
+		TEMP _M0, _M1, _M2, _M3;
+		MOV _M1.xyz, _R0.yzww;
+		MOV _M2.xyz, _R1.yzww;
+		MUL _M0.x, _M2.y, _R0.y;
+		MUL _M0.y, _M0.x, 2;
+		MUL _M0.x, _M1.z, _R1;
+		MAD _M0.y, _M0.x, -2, _M0;
+		MUL _M3.y, _M1.z, _R1;
+		MUL _M0.x, _M2.z, _R0;
+		MAD _M0.z, _M0.x, 2, _M0.y;
+		MUL _M0.y, _M1, _R1;
+		MUL _M0.x, _R0.w, _R0.w;
+		DP4 _M2.w, _R0, _R0;
+		MUL _M2.x, _M2, _R0;
+		MAD _M0.w, -_M0.y, 2, _M0.z;
+		MAD _M0.x, _R0, _R0, _M0;
+		MAD _M0.y, -_R0, _R0, _M0.x;
+		MUL _M3.x, _R0, _R0.y;
+		MAD _M0.x, _R0.z, _R0.w, _M3;
+		MAD _M0.z, -_R0, _R0, _M0.y;
+		MUL _M1.w, _R0.x, _R0.z;
+		MUL _M0.y, _M0.x, 2;
+		MAD _M0.x, _R0.y, _R0.w, -_M1.w;
+		RCP _M2.w, _M2.w;
+		MUL _M0.x, _M0, 2;
+		MUL _R2, _M0, _M2.w;
+		MUL _M0.y, _M1, _R1.x;
+		MUL _M0.x, _M3.y, 2;
+		MAD _M0.y, _M0, -2, _M0.x;
+		MUL _M0.x, _M2.z, _R0.y;
+		MAD _M0.x, -_M0, 2, _M0.y;
+		MUL _M0.y, _M2, _R0.x;
+		MAD _M0.w, _M0.y, 2, _M0.x;
+		MAD _M0.x, _R0.z, _R0.w, -_M3;
+		MUL _M0.z, _M0.x, 2;
+		MUL _M0.x, _R0.z, _R0.z;
+		MAD _M0.y, _R0.x, _R0.x, _M0.x;
+		MUL _M1.y, _R0.x, _R0.w;
+		MAD _M0.x, _R0.y, _R0.z, _M1.y;
+		MAD _M0.y, -_R0, _R0, _M0;
+		MUL _M1.z, _M1, _R1;
+		MUL _M0.x, _M0, 2;
+		MAD _M0.y, -_R0.w, _R0.w, _M0;
+		MUL _M0, _M0, _M2.w;
+		MUL _M2.x, _M2, 2;
+		MUL _M1.x, _M1, _R1;
+		MAD _M1.x, _M1, -2, _M2;
+		MAD _M1.x, -_M1.z, 2, _M1;
+		MUL _M1.z, _M2, _R0;
+		MAD _M3.w, _M1.z, 2, _M1.x;
+		MAD _M1.z, _R0.y, _R0.w, _M1.w;
+		MUL _M1.x, _R0.y, _R0.y;
+		MAD _M1.x, _R0, _R0, _M1;
+		MUL _M3.z, _M1, 2;
+		MAD _M1.z, -_R0, _R0, _M1.x;
+		MAD _M1.x, _R0.y, _R0.z, -_M1.y;
+		MAD _M3.x, -_R0.w, _R0.w, _M1.z;
+		MUL _M3.y, _M1.x, 2;
+		MUL _R0, _M3, _M2.w;
+		MOV _R1, _M0;
+		$endif
+		
+		# transform vertex
+		DP4		PositionParm.x, _R0, $positionAttrib;
+		DP4		PositionParm.y, _R1, $positionAttrib;
+		DP4		PositionParm.z, _R2, $positionAttrib;
+		MOV		PositionParm.w, 1;
+
+		DP4		result.position.x, _mvp[0], PositionParm;
+		DP4		result.position.y, _mvp[1], PositionParm;
+		DP4		result.position.z, _mvp[2], PositionParm;
+		DP4		result.position.w, _mvp[3], PositionParm;
+	%> }
+
+	commands {
+		if ( NormalParm != "" ) {
+			append { <%
+				# transform normal
+				DP3		NormalParm.x, _R0, $normalAttrib;
+				DP3		NormalParm.y, _R1, $normalAttrib;
+				DP3		NormalParm.z, _R2, $normalAttrib;
+			%> }
+		}
+
+		if ( TangentsParm != "" ) {
+			append { <%
+				# transform tangent
+				DP3		TangentsParm.x, _R0, $tangentAttrib;
+				DP3		TangentsParm.y, _R1, $tangentAttrib;
+				DP3		TangentsParm.z, _R2, $tangentAttrib;
+			%> }
+		}
+
+		if ( BiTangentParm != "" ) {
+			append { <%
+				# derive bitangent
+				XPD		BiTangentParm, NormalParm, TangentsParm;
+				MUL		BiTangentParm, BiTangentParm, $tangentAttrib.w;
+			%> }
+		}
+	}
+}
+
+template hardSkinningMatrix_ARB {
+	parameters < PositionParm = "position", NormalParm = "", TangentsParm = "", BiTangentParm = "" >
+
+	text { <%
+		ATTRIB	_jointIndices = $signAttrib;
+		
+		PARAM	_joints[210] = { program.env[32..241] };	# 74 joints
+		PARAM	_mvp[4] = { state.matrix.mvp };
+
+		ADDRESS	_A0;
+		TEMP	_R0, _R1, _R2;
+
+		# accumulate weighted joint matrices
+		ARL		_A0.x, _jointIndices.w;
+		MOV		_R0, _joints[_A0.x+0];
+		MOV		_R1, _joints[_A0.x+1];
+		MOV		_R2, _joints[_A0.x+2];
+		
+		# transform vertex
+		DP4		PositionParm.x, _R0, $positionAttrib;
+		DP4		PositionParm.y, _R1, $positionAttrib;
+		DP4		PositionParm.z, _R2, $positionAttrib;
+		MOV		PositionParm.w, 1;
+
+		DP4		result.position.x, _mvp[0], PositionParm;
+		DP4		result.position.y, _mvp[1], PositionParm;
+		DP4		result.position.z, _mvp[2], PositionParm;
+		DP4		result.position.w, _mvp[3], PositionParm;
+	%> }
+
+	commands {
+		if ( NormalParm != "" ) {
+			append { <%
+				# transform normal
+				DP3		NormalParm.x, _R0, $normalAttrib;
+				DP3		NormalParm.y, _R1, $normalAttrib;
+				DP3		NormalParm.z, _R2, $normalAttrib;
+			%> }
+		}
+
+		if ( TangentsParm != "" ) {
+			append { <%
+				# transform tangent
+				DP3		TangentsParm.x, _R0, $tangentAttrib;
+				DP3		TangentsParm.y, _R1, $tangentAttrib;
+				DP3		TangentsParm.z, _R2, $tangentAttrib;
+			%> }
+		}
+
+		if ( BiTangentParm != "" ) {
+			append { <%
+				# derive bitangent
+				XPD		BiTangentParm, NormalParm, TangentsParm;
+				MUL		BiTangentParm, BiTangentParm, $tangentAttrib.w;
+			%> }
+		}
+	}
+}
+
+template skinningMatrix_GLSL_position {
+	text { <%
+		attribute vec4 $weightIndexAttrib;
+		attribute vec4 $weightValueAttrib;
+
+		uniform vec4 joints[222];	// 74 joints
+		
+		void accumulateJointMatrices( out vec4 R0, out vec4 R1, out vec4 R2 ) {
+			// accumulate weighted joint matrices
+			R0 = $weightValueAttrib.x * joints[ int($weightIndexAttrib.x) + 0 ];
+			R1 = $weightValueAttrib.x * joints[ int($weightIndexAttrib.x) + 1 ];
+			R2 = $weightValueAttrib.x * joints[ int($weightIndexAttrib.x) + 2 ];
+
+			R0 += $weightValueAttrib.y * joints[ int($weightIndexAttrib.y) + 0 ];
+			R1 += $weightValueAttrib.y * joints[ int($weightIndexAttrib.y) + 1 ];
+			R2 += $weightValueAttrib.y * joints[ int($weightIndexAttrib.y) + 2 ];
+ 
+			R0 += $weightValueAttrib.z * joints[ int($weightIndexAttrib.z) + 0 ];
+			R1 += $weightValueAttrib.z * joints[ int($weightIndexAttrib.z) + 1 ];
+			R2 += $weightValueAttrib.z * joints[ int($weightIndexAttrib.z) + 2 ];
+
+			R0 += $weightValueAttrib.w * joints[ int($weightIndexAttrib.w) + 0 ];
+			R1 += $weightValueAttrib.w * joints[ int($weightIndexAttrib.w) + 1 ];
+			R2 += $weightValueAttrib.w * joints[ int($weightIndexAttrib.w) + 2 ];
+		}
+
+		void skinningMatrix( vec4 vertexPosition, out vec4 transformedPosition ) {
+			vec4 R0, R1, R2;
+			
+			accumulateJointMatrices( R0, R1, R2 );
+			
+			// transform vertex
+			transformedPosition.x = dot( R0, vertexPosition );
+			transformedPosition.y = dot( R1, vertexPosition );
+			transformedPosition.z = dot( R2, vertexPosition );
+			transformedPosition.w = 1.0;
+
+			transformedPosition = gl_ModelViewProjectionMatrix * transformedPosition;
+		}
+
+		void skinningMatrix( vec4 vertexPosition, out vec4 transformedPosition,
+							 vec3 vertexNormal, out vec3 transformedNormal ) {
+			vec4 R0, R1, R2;
+
+			accumulateJointMatrices( R0, R1, R2 );
+			
+			// transform vertex
+			transformedPosition.x = dot( R0, vertexPosition );
+			transformedPosition.y = dot( R1, vertexPosition );
+			transformedPosition.z = dot( R2, vertexPosition );
+			transformedPosition.w = 1.0;
+
+			transformedPosition = gl_ModelViewProjectionMatrix * transformedPosition;
+			
+			// transform normal
+			transformedNormal.x = dot( R0.xyz, vertexNormal );
+			transformedNormal.y = dot( R1.xyz, vertexNormal );
+			transformedNormal.z = dot( R2.xyz, vertexNormal );
+			
+		}
+
+		void skinningMatrix( vec4 vertexPosition, out vec4 transformedPosition,
+							 vec3 vertexNormal, out vec3 transformedNormal,
+							 vec3 vertexTangent, out vec3 transformedTangent,
+							 out vec3 transformedBiTangent ) {
+			vec4 R0, R1, R2;
+
+			accumulateJointMatrices( R0, R1, R2 );
+			
+			// transform vertex
+			transformedPosition.x = dot( R0, vertexPosition );
+			transformedPosition.y = dot( R1, vertexPosition );
+			transformedPosition.z = dot( R2, vertexPosition );
+			transformedPosition.w = 1.0;
+
+			transformedPosition = gl_ModelViewProjectionMatrix * transformedPosition;
+			
+			// transform normal
+			transformedNormal.x = dot( R0.xyz, vertexNormal );
+			transformedNormal.y = dot( R1.xyz, vertexNormal );
+			transformedNormal.z = dot( R2.xyz, vertexNormal );
+			
+			// transform tangent
+			transformedTangent.x = dot( R0.xyz, transformedTangent );
+			transformedTangent.y = dot( R1.xyz, transformedTangent );
+			transformedTangent.z = dot( R2.xyz, transformedTangent );
+			
+			// derive bitangent
+			transformedBiTangent = cross( transformedNormal, vertexTangent );
+			transformedBiTangent = transformedBiTangent * $tangentAttrib.w;			
+		}
+	%> }
+}
+
+template hardSkinningMatrix_GLSL_position {
+	text { <%
+		attribute vec4 $signAttrib;
+
+		uniform vec4 joints[222];	// 74 joints
+		
+		void accumulateJointMatrices( out vec4 R0, out vec4 R1, out vec4 R2 ) {
+			// accumulate weighted joint matrices
+			R0 = joints[ int($weightIndexAttrib.w) + 0 ];
+			R1 = joints[ int($weightIndexAttrib.w) + 1 ];
+			R2 = joints[ int($weightIndexAttrib.w) + 2 ];
+		}
+
+		void skinningMatrix( vec4 vertexPosition, out vec4 transformedPosition ) {
+			vec4 R0, R1, R2;
+			
+			accumulateJointMatrices( R0, R1, R2 );
+			
+			// transform vertex
+			transformedPosition.x = dot( R0, vertexPosition );
+			transformedPosition.y = dot( R1, vertexPosition );
+			transformedPosition.z = dot( R2, vertexPosition );
+			transformedPosition.w = 1.0;
+
+			transformedPosition = gl_ModelViewProjectionMatrix * transformedPosition;
+		}
+
+		void skinningMatrix( vec4 vertexPosition, out vec4 transformedPosition,
+							 vec3 vertexNormal, out vec3 transformedNormal ) {
+			vec4 R0, R1, R2;
+
+			accumulateJointMatrices( R0, R1, R2 );
+			
+			// transform vertex
+			transformedPosition.x = dot( R0, vertexPosition );
+			transformedPosition.y = dot( R1, vertexPosition );
+			transformedPosition.z = dot( R2, vertexPosition );
+			transformedPosition.w = 1.0;
+
+			transformedPosition = gl_ModelViewProjectionMatrix * transformedPosition;
+			
+			// transform normal
+			transformedNormal.x = dot( R0.xyz, vertexNormal );
+			transformedNormal.y = dot( R1.xyz, vertexNormal );
+			transformedNormal.z = dot( R2.xyz, vertexNormal );
+			
+		}
+
+		void skinningMatrix( vec4 vertexPosition, out vec4 transformedPosition,
+							 vec3 vertexNormal, out vec3 transformedNormal,
+							 vec3 vertexTangent, out vec3 transformedTangent,
+							 out vec3 transformedBiTangent ) {
+			vec4 R0, R1, R2;
+
+			accumulateJointMatrices( R0, R1, R2 );
+			
+			// transform vertex
+			transformedPosition.x = dot( R0, vertexPosition );
+			transformedPosition.y = dot( R1, vertexPosition );
+			transformedPosition.z = dot( R2, vertexPosition );
+			transformedPosition.w = 1.0;
+
+			transformedPosition = gl_ModelViewProjectionMatrix * transformedPosition;
+			
+			// transform normal
+			transformedNormal.x = dot( R0.xyz, vertexNormal );
+			transformedNormal.y = dot( R1.xyz, vertexNormal );
+			transformedNormal.z = dot( R2.xyz, vertexNormal );
+			
+			// transform tangent
+			transformedTangent.x = dot( R0.xyz, transformedTangent );
+			transformedTangent.y = dot( R1.xyz, transformedTangent );
+			transformedTangent.z = dot( R2.xyz, transformedTangent );
+			
+			// derive bitangent
+			transformedBiTangent = cross( transformedNormal, vertexTangent );
+			transformedBiTangent = transformedBiTangent * $tangentAttrib.w;			
+		}
+	%> }
+}

@@ -1,0 +1,82 @@
+renderprogram game/railgunScope {
+	program vertex glsl { <%
+		varying vec4 var_TexCoord;
+
+		void main ( void ) { 
+			// ARB_position_invariant ; 
+			vec4 scalar;
+			vec4 R0;
+			scalar.y = $colorAttrib.x - 0.5;
+			R0.x = float ( scalar.y < 0.0 );
+			R0.y = 1.0 + -R0.x;
+			// if < 0, use extended range, else use initial range 
+			R0.z = R0.y * $parameters.x;
+			R0.w = R0.y * $parameters.y;
+			R0.z = R0.x * $parameters.z + R0.z;
+			R0.w = R0.x * $parameters.w + R0.w;
+			// calculate scalar 
+			scalar.x = 2.0 * scalar.y;
+			scalar.x = abs ( scalar.x );
+			scalar.y = 1.0 + -scalar.x;
+			scalar.x = R0.x * scalar.x;
+			scalar.x = R0.y * scalar.y + scalar.x;
+			var_TexCoord.x = scalar.x * R0.w + R0.z;
+			var_TexCoord.y = $colorAttrib.x + -0.01;
+			// cut-off epsilon for effect 
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		} 
+	%> }
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 consts = vec4(1.0,0.0,0.5,0.0);
+			vec4 scale = vec4(0.299,0.587,0.114,1.0);
+			vec4 R0;
+			vec4 R1;
+			vec4 texcoord;
+			vec4 clean;
+			vec4 blur;
+			// calculate the screen texcoord in the 0.0 to 1.0 range 
+			texcoord = gl_FragCoord * $currentRenderTexelSize.zwzw;
+			// ensure scaling from center of screen 
+			texcoord.xy = texcoord.xy + consts.zz;
+			R1.a = 1.0 / var_TexCoord.x;
+			R0.a = var_TexCoord.x;
+			R0.rg = R0.aa * texcoord.rg;
+			R0.rg = fract ( R0.rg );
+			R1.y = abs ( R1.a );
+			R1.rg = R0.rg * R1.yy;
+			R0.r = texcoord.r > 0.0 ? consts.r : consts.g;
+			R0.g = texcoord.g > 0.0 ? consts.r : consts.g;
+			R0.r = -R0.r > 0.0 ? -R1.r : R1.r;
+			R0.g = -R0.g > 0.0 ? -R1.g : R1.g;
+			R0.rg = -R0.rg + texcoord.rg;
+			R0.rg = R1.aa * consts.bb + R0.rg;
+			// check cut-off 
+			R0 = var_TexCoord.y > 0.0 ? texcoord : R0;
+			// move back 
+			R0.xy = R0.xy + vec2(-consts.b);
+			// scale by the screen adjust 
+			texcoord = R0 * $currentRenderTexelSize.xyzy;
+			R0 = texture2D ( $currentRender , texcoord.xy / $currentRenderTexSize.xy ); // rect
+																						// grayscale factor 
+			R1 = vec4( dot ( R0 , scale ) );
+			clean = mix ( R1 , R0 , $parameters2.x );
+			// post processing 
+			R0 = 0.25 * texcoord;
+			blur = texture2D ( $map , R0.xy / $mapTexSize.xy ); // rect
+			R0 = blur * $postGlareParameters.y;
+			R0 = clean * $postGlareParameters.x + R0;
+			R1.x = dot ( R0.xyz , scale.xyz );
+			R0 = R0 + -R1.x;
+			R0 = $postSaturationContrast.x * R0 + R1.x;
+			R0 = R0 + -0.5;
+			R1 = $postSaturationContrast.y * R0 + 0.5;
+			R1 = R1 * $postTint;
+			gl_FragColor = R1 * $diffuseColor;
+		} 
+	%> }
+}

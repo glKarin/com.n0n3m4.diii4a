@@ -1,0 +1,346 @@
+//
+//	Interaction shader which allows a separate alpha testing mask (the default alpha test one uses the
+//	diffuse alpha channel) this allows speparate scrolls,...
+//	(Set usking mask and maskMatrix renderbindings)
+//
+
+renderProgram ambient/separate_depth {
+	hwSkinningVersion ambient/separate_depth_skinning_matrix ambient/separate_depth_hardskinning_matrix
+
+	state force {
+		depthFunc less // so it looks at what's already in the depth buffer
+		//blend GL_ZERO, GL_ONE
+		//blend GL_ONE, GL_ZERO
+	}
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		TEMP	bitangent;
+		TEMP	R0, R1, R2;
+
+		PARAM	defaultTexCoord = { 0, 0.5, 0, 1 };
+
+		XPD		bitangent, $normalAttrib, $tangentAttrib;
+		MUL		bitangent, bitangent, $tangentAttrib.w;
+
+		# textures 1 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[1], defaultTexCoord;
+		DP4		result.texcoord[1].x, $texCoordAttrib, $bumpMatrix_s;
+		DP4		result.texcoord[1].y, $texCoordAttrib, $bumpMatrix_t;
+
+		# textures 4 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[4], defaultTexCoord;
+		DP4		result.texcoord[4].x, $texCoordAttrib, $diffuseMatrix_s;
+		DP4		result.texcoord[4].y, $texCoordAttrib, $diffuseMatrix_t;
+
+		# textures 2 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[0], defaultTexCoord;
+		DP4		result.texcoord[0].x, $texCoordAttrib, $maskMatrix_s;
+		DP4		result.texcoord[0].y, $texCoordAttrib, $maskMatrix_t;
+
+		# generate the vertex color, which can be 1.0, color, or 1.0 - color
+		MAD		result.color, $colorAttrib, $colorModulate, $colorAdd;
+
+		# build tangent space -> world space conversion matrix
+		DP3		result.texcoord[5].x, $transposedModelMatrix_x, $tangentAttrib;
+		DP3		result.texcoord[6].x, $transposedModelMatrix_y, $tangentAttrib;
+		DP3		result.texcoord[7].x, $transposedModelMatrix_z, $tangentAttrib;
+
+		DP3		result.texcoord[5].y, $transposedModelMatrix_x, bitangent;
+		DP3		result.texcoord[6].y, $transposedModelMatrix_y, bitangent;
+		DP3		result.texcoord[7].y, $transposedModelMatrix_z, bitangent;
+
+		DP3		result.texcoord[5].z, $transposedModelMatrix_x, $normalAttrib;
+		DP3		result.texcoord[6].z, $transposedModelMatrix_y, $normalAttrib;
+		DP3		result.texcoord[7].z, $transposedModelMatrix_z, $normalAttrib;
+
+		# flat ambient lookup texcoord
+		MOV		result.texcoord[2], defaultTexCoord;
+		DP4		R0.x, $transposedModelMatrix_x, $positionAttrib;
+		DP4		R0.y, $transposedModelMatrix_y, $positionAttrib;
+		ADD		R0, R0, 16384;
+		MUL		result.texcoord[2], R0, 0.000030517578125;
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP	R0, R1, color, localNormal, ambient, localAmbient, mask;
+
+		PARAM	subOne = { -1, -1, -1, -1 };
+		PARAM	scaleTwo = { 2, 2, 2, 2 };
+
+		# lookup mask texture
+		TEX		mask, fragment.texcoord[0], $mask, 2D;
+		SUB		R1, mask.a, $parameters.x;
+		KIL		R1;
+
+		# lookup normal map
+		TEX		localNormal, fragment.texcoord[1], $bumpMap, 2D;
+$if !r_dxnNormalMaps
+		MOV		localNormal.x, localNormal.a;
+$endif
+		MAD		localNormal, localNormal, scaleTwo, subOne;
+
+		$if r_normalizeNormalMaps
+		MOV		localNormal.z, 0;
+		DP3		R1.x, localNormal,localNormal;
+		ADD		R1.x, 1, -R1.x;
+		RSQ		R1.x, R1.x;
+		RCP		localNormal.z, R1.x;
+		$endif
+
+
+		# put normal into world space
+		DP3		R0.x, fragment.texcoord[5], localNormal;
+		DP3		R0.y, fragment.texcoord[6], localNormal;
+		DP3		R0.z, fragment.texcoord[7], localNormal;
+
+		# get ambient from cubemap
+		TEX		ambient, R0, $ambientCubeMap, CUBE;
+		MUL		ambient, ambient, $ambientBrightness;
+
+		# modulate by the diffuse map and constant diffuse factor
+		TEX		R0, fragment.texcoord[4], $diffuseMap, 2D;
+		MUL		color, R0, $diffuseColor;
+
+		# modulate by ambient
+		MUL		color, ambient, color;
+
+		# multiply with ambient brightness
+		MUL		color, $ambientScale.x, color;
+
+		# modify by the vertex color
+		MUL		result.color, color, fragment.color;
+		SUB		result.color.a, 1, R0.a;
+	%> }
+}
+
+
+renderProgram ambient/separate_depth_skinning_matrix {
+
+	state force {
+		depthFunc less // so it looks at what's already in the depth buffer
+	}
+
+	program vertex arb { <%
+		TEMP	bitangent, tangent, normal, position;
+		TEMP	R0, R1, R2;
+
+		PARAM	defaultTexCoord = { 0, 0.5, 0, 1 };
+
+		useTemplate skinningMatrix_ARB< "position", "normal", "tangent", "bitangent" >
+
+		# textures 1 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[1], defaultTexCoord;
+		DP4		result.texcoord[1].x, $texCoordAttrib, $bumpMatrix_s;
+		DP4		result.texcoord[1].y, $texCoordAttrib, $bumpMatrix_t;
+
+		# textures 4 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[4], defaultTexCoord;
+		DP4		result.texcoord[4].x, $texCoordAttrib, $diffuseMatrix_s;
+		DP4		result.texcoord[4].y, $texCoordAttrib, $diffuseMatrix_t;
+
+		# textures 2 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[0], defaultTexCoord;
+		DP4		result.texcoord[0].x, $texCoordAttrib, $maskMatrix_s;
+		DP4		result.texcoord[0].y, $texCoordAttrib, $maskMatrix_t;
+
+		# generate the vertex color, which can be 1.0, color, or 1.0 - color
+		MAD		result.color, $colorAttrib, $colorModulate, $colorAdd;
+
+		# build tangent space -> world space conversion matrix
+		DP3		result.texcoord[5].x, $transposedModelMatrix_x, tangent;
+		DP3		result.texcoord[6].x, $transposedModelMatrix_y, tangent;
+		DP3		result.texcoord[7].x, $transposedModelMatrix_z, tangent;
+
+		DP3		result.texcoord[5].y, $transposedModelMatrix_x, bitangent;
+		DP3		result.texcoord[6].y, $transposedModelMatrix_y, bitangent;
+		DP3		result.texcoord[7].y, $transposedModelMatrix_z, bitangent;
+
+		DP3		result.texcoord[5].z, $transposedModelMatrix_x, normal;
+		DP3		result.texcoord[6].z, $transposedModelMatrix_y, normal;
+		DP3		result.texcoord[7].z, $transposedModelMatrix_z, normal;
+
+		# flat ambient lookup texcoord
+		MOV		result.texcoord[2], defaultTexCoord;
+		DP4		R0.x, $transposedModelMatrix_x, position;
+		DP4		R0.y, $transposedModelMatrix_y, position;
+		ADD		R0, R0, 16384;
+		MUL		result.texcoord[2], R0, 0.000030517578125;
+	%> }	
+
+	program fragment reference ambient/separate_depth	
+}
+
+renderProgram ambient/separate_depth_hardskinning_matrix {
+
+	state force {
+		depthFunc less // so it looks at what's already in the depth buffer
+	}
+
+	program vertex arb { <%
+		TEMP	bitangent, tangent, normal, position;
+		TEMP	R0, R1, R2;
+
+		PARAM	defaultTexCoord = { 0, 0.5, 0, 1 };
+
+		useTemplate hardSkinningMatrix_ARB< "position", "normal", "tangent", "bitangent" >
+
+		# textures 1 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[1], defaultTexCoord;
+		DP4		result.texcoord[1].x, $texCoordAttrib, $bumpMatrix_s;
+		DP4		result.texcoord[1].y, $texCoordAttrib, $bumpMatrix_t;
+
+		# textures 4 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[4], defaultTexCoord;
+		DP4		result.texcoord[4].x, $texCoordAttrib, $diffuseMatrix_s;
+		DP4		result.texcoord[4].y, $texCoordAttrib, $diffuseMatrix_t;
+
+		# textures 2 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[0], defaultTexCoord;
+		DP4		result.texcoord[0].x, $texCoordAttrib, $maskMatrix_s;
+		DP4		result.texcoord[0].y, $texCoordAttrib, $maskMatrix_t;
+
+		# generate the vertex color, which can be 1.0, color, or 1.0 - color
+		MAD		result.color, $colorAttrib, $colorModulate, $colorAdd;
+
+		# build tangent space -> world space conversion matrix
+		DP3		result.texcoord[5].x, $transposedModelMatrix_x, tangent;
+		DP3		result.texcoord[6].x, $transposedModelMatrix_y, tangent;
+		DP3		result.texcoord[7].x, $transposedModelMatrix_z, tangent;
+
+		DP3		result.texcoord[5].y, $transposedModelMatrix_x, bitangent;
+		DP3		result.texcoord[6].y, $transposedModelMatrix_y, bitangent;
+		DP3		result.texcoord[7].y, $transposedModelMatrix_z, bitangent;
+
+		DP3		result.texcoord[5].z, $transposedModelMatrix_x, normal;
+		DP3		result.texcoord[6].z, $transposedModelMatrix_y, normal;
+		DP3		result.texcoord[7].z, $transposedModelMatrix_z, normal;
+
+		# flat ambient lookup texcoord
+		MOV		result.texcoord[2], defaultTexCoord;
+		DP4		R0.x, $transposedModelMatrix_x, position;
+		DP4		R0.y, $transposedModelMatrix_y, position;
+		ADD		R0, R0, 16384;
+		MUL		result.texcoord[2], R0, 0.000030517578125;
+	%> }	
+
+	program fragment reference ambient/separate_depth	
+}
+
+renderProgram interaction/separate_depth {
+	interaction
+
+	amblitVersion interaction/separate_depth_amblit
+	ambientVersion ambient/separate_depth
+	hwSkinningVersion interaction/separate_depth_skinning_matrix interaction/separate_depth_hardskinning_matrix
+
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/separate_depth_amblit {
+	interaction
+
+	ambientVersion ambient/separate_depth
+	hwSkinningVersion interaction/basic_skinning_matrix interaction/basic_hardskinning_matrix
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		$define enable_separate_depth
+		$include "interaction/basic_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define enable_separate_depth
+		$define  ambient	
+		$define amblit
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/separate_depth_skinning_matrix {
+	interaction
+
+	amblitVersion interaction/separate_depth_skinning_matrix_amblit
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/separate_depth_skinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+//	program vertex reference interaction/basic_skinning_matrix
+	program vertex arb { <%
+		$define enable_separate_depth
+		$include "interaction/basic_skinning_matrix_vertex.inc"
+	%> }
+
+//	program fragment reference interaction/basic_amblit
+	program fragment arb { <%
+		$define enable_separate_depth
+		$define  ambient	
+		$define amblit
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/separate_depth_hardskinning_matrix {
+	interaction
+
+	amblitVersion interaction/separate_depth_hardskinning_matrix_amblit
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/separate_depth_hardskinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+//	program vertex reference interaction/basic_hardskinning_matrix
+	program vertex arb { <%
+		$define enable_separate_depth
+		$include "interaction/basic_hardskinning_matrix_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define enable_separate_depth
+		$define  ambient	
+		$define amblit
+		$include "interaction/basic_fragment.inc"
+	%> }
+//	program fragment reference interaction/basic_amblit
+}

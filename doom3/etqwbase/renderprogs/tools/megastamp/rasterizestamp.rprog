@@ -1,0 +1,103 @@
+renderprogram tools/megaStamp/rasterizeStamp {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		MOV result.texcoord[0], vertex.texcoord[0];
+
+		# transform texture coordinates
+		DP4 result.texcoord[1].x, vertex.texcoord[0], program.local[0];
+		DP4 result.texcoord[1].y, vertex.texcoord[0], program.local[1];
+
+		MOV result.color, vertex.color;
+	%> }
+
+	program fragment arb { <%
+		TEMP dest, cover, stamp;
+		TEMP stampTexCoord, oneMinusCover;
+		TEMP R0;
+
+		TEX dest, fragment.texcoord[0], texture[0], 2D;
+		TEX cover, fragment.texcoord[1], texture[1], 2D;
+
+		CMP stampTexCoord, program.local[2].x, fragment.texcoord[0], fragment.texcoord[1];
+
+		TEX stamp, stampTexCoord, texture[2], 2D;
+
+		SUB oneMinusCover, 1, cover;
+
+		MUL R0, oneMinusCover, dest;
+		MAD result.color.rgb, cover, stamp, R0;
+		MOV result.color.a, 1;
+	%> }
+}
+
+renderprogram tools/megaStamp/rasterizeStampAddNormals {
+	program vertex reference tools/megastamp/rasterizeStamp
+	
+	program fragment arb { <%
+		$include "tools/megastamp/rasterizestampaddnormals_fragment.inc"
+	%> }
+}
+
+renderprogram tools/megaGen/rasterizeStampAddNormals {
+	program vertex reference tools/megastamp/rasterizeStamp
+	
+	program fragment arb { <%
+		$define megagen
+		$include "tools/megastamp/rasterizestampaddnormals_fragment.inc"
+	%> }
+}
+
+renderProgram tools/megaGen/rasterizeStampSurfaceType {
+	program vertex reference tools/megastamp/rasterizeStamp
+
+	program fragment arb { <%
+		TEMP dest, cover, base;
+		TEMP R0, R1;
+
+		TEX dest, fragment.texcoord[0], texture[0], 2D;
+		TEX cover, fragment.texcoord[1], texture[1], 2D;
+
+		# check coverage against the treshold
+		SUB R0.a, cover.r, program.local[3].x;
+		
+		# if the surface type is invalid use the dest at all times
+		CMP R1, program.local[3].y, dest, program.local[3].yyyy;
+
+		# decide to use dest or new surface type
+		CMP R0.rgb, R0.a, dest, R1;
+
+		# get base, required if we need to erase
+		TEX base, fragment.texcoord[0], texture[2], 2D;
+
+		# erase?
+		CMP result.color.rgb, program.local[2].x, base, R0;
+		MOV result.color.a, 1;
+	%> }
+}
+
+renderProgram tools/megaGen/rasterizeStampDetailTextureMask {
+	program vertex reference tools/megastamp/rasterizeStamp
+
+	program fragment arb { <%
+		TEMP dest, cover, stamp;
+		TEMP oneMinusCover;
+		TEMP R0;
+
+		TEX dest, fragment.texcoord[0], texture[0], 2D;
+		TEX cover, fragment.texcoord[1], texture[1], 2D;
+
+		# get base, required if we need to erase
+		TEX stamp, fragment.texcoord[0], texture[2], 2D;
+		
+		# erase?
+		CMP stamp, program.local[2].x, stamp, program.local[3].xxxx;
+
+		# blend
+		SUB oneMinusCover, 1, cover;
+
+		MUL R0, oneMinusCover, dest;
+		MAD result.color.rgb, cover, stamp, R0;
+		MOV result.color.a, 1;
+	%> }
+}

@@ -1,0 +1,540 @@
+renderProgram fogLight {
+	hwSkinningVersion fogLight_skinning_matrix fogLight_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		blend GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+	}
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		PARAM defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+
+		# do texture coordinate generation
+		MOV		result.texcoord[0], defaultCoord; 
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[0].x, $positionAttrib, $lightFalloff_0;
+		DP4		result.texcoord[0].y, $positionAttrib, $lightFalloff_1;
+		DP4		result.texcoord[1].x, $positionAttrib, $lightFalloff_2;
+		DP4		result.texcoord[1].y, $positionAttrib, $lightFalloff_3;
+
+		MOV		result.color, $diffuseColor;
+		MOV		result.color.w, 1.0; # alpha channel is used for fog density... doesn't make sense here
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP R0, R1;
+		
+		TEX R0, fragment.texcoord[0], $fogMap, 2D;
+		TEX R1, fragment.texcoord[1], $fogEnterMap, 2D;
+		MUL R0, fragment.color, R0;
+		MUL result.color, R1, R0;
+	%> }
+}
+
+renderProgram fogLight_skinning_matrix {
+	state {
+		depthFunc equal
+		blend GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+	}
+
+	program vertex arb  { <%
+		PARAM defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+		
+		TEMP	position;
+		
+		useTemplate skinningMatrix_ARB< "position" >
+
+		# do texture coordinate generation
+		MOV		result.texcoord[0], defaultCoord; 
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[0].x, position, $lightFalloff_0;
+		DP4		result.texcoord[0].y, position, $lightFalloff_1;
+		DP4		result.texcoord[1].x, position, $lightFalloff_2;
+		DP4		result.texcoord[1].y, position, $lightFalloff_3;
+
+		MOV		result.color, $diffuseColor;
+		MOV		result.color.w, 1.0; # alpha channel is used for fog density... doesn't make sense here
+	%> }
+	
+	program fragment reference fogLight
+}
+
+renderProgram fogLight_hardskinning_matrix {
+	state {
+		depthFunc equal
+		blend GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+	}
+
+	program vertex arb  { <%
+		PARAM defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+		
+		TEMP	position;
+		
+		useTemplate hardSkinningMatrix_ARB< "position" >
+
+		# do texture coordinate generation
+		MOV		result.texcoord[0], defaultCoord; 
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[0].x, position, $lightFalloff_0;
+		DP4		result.texcoord[0].y, position, $lightFalloff_1;
+		DP4		result.texcoord[1].x, position, $lightFalloff_2;
+		DP4		result.texcoord[1].y, position, $lightFalloff_3;
+
+		MOV		result.color, $diffuseColor;
+		MOV		result.color.w, 1.0; # alpha channel is used for fog density... doesn't make sense here
+	%> }
+	
+	program fragment reference fogLight
+}
+
+renderProgram blendLight {
+	hwSkinningVersion blendLight_skinning_matrix blendLight_hardskinning_matrix
+
+	state {
+		depthFunc equal
+	}
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		PARAM	defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+		TEMP R1;
+
+		# do texture coordinate generation
+		MOV		R1, defaultCoord; 
+		DP4		R1.x, $positionAttrib, $lightFalloff_0;
+		DP4		R1.y, $positionAttrib, $lightFalloff_1;
+		DP4		result.texcoord.x, R1, $diffuseMatrix_s;
+		DP4		result.texcoord.y, R1, $diffuseMatrix_t;		
+		MOV		result.texcoord.z, 0;
+		DP4		result.texcoord.w, $positionAttrib, $lightFalloff_2;
+		
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[1].x, $positionAttrib, $lightFalloff_3;
+
+		MOV		result.color, $diffuseColor;
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP R0, R1;
+		
+		TEX R0, fragment.texcoord[0], $lightProjectionMap, 2D;
+		TEX R1, fragment.texcoord[1], $lightFalloffMap, 2D;
+		MUL R0, fragment.color, R0;
+		MUL result.color, R1, R0;
+		#MOV result.color.a, R0.x;
+		#MUL result.color, R1.aaaa, R0.aaaa;
+	%> }
+}
+
+renderProgram blendLight_skinning_matrix {
+	state {
+		depthFunc equal
+	}
+
+	program vertex arb { <%
+		PARAM	defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+		TEMP	position;
+		TEMP	R1;
+		
+		useTemplate skinningMatrix_ARB< "position" >
+
+		# do texture coordinate generation
+		MOV		R1, defaultCoord; 
+		DP4		R1.x, position, $lightFalloff_0;
+		DP4		R1.y, position, $lightFalloff_1;
+		DP4		result.texcoord.x, R1, $diffuseMatrix_s;
+		DP4		result.texcoord.y, R1, $diffuseMatrix_t;		
+		MOV		result.texcoord.z, 0;
+		DP4		result.texcoord.w, position, $lightFalloff_2;
+		
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[1].x, position, $lightFalloff_3;
+
+		MOV		result.color, $diffuseColor;
+	%> }
+
+	program fragment reference blendLight
+}
+
+renderProgram blendLight_hardskinning_matrix {
+	state {
+		depthFunc equal
+	}
+
+	program vertex arb { <%
+		PARAM	defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+		TEMP	position;
+		TEMP	R1;
+		
+		useTemplate hardSkinningMatrix_ARB< "position" >
+
+		# do texture coordinate generation
+		MOV		R1, defaultCoord; 
+		DP4		R1.x, position, $lightFalloff_0;
+		DP4		R1.y, position, $lightFalloff_1;
+		DP4		result.texcoord.x, R1, $diffuseMatrix_s;
+		DP4		result.texcoord.y, R1, $diffuseMatrix_t;		
+		MOV		result.texcoord.z, 0;
+		DP4		result.texcoord.w, position, $lightFalloff_2;
+		
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[1].x, position, $lightFalloff_3;
+
+		MOV		result.color, $diffuseColor;
+	%> }
+
+	program fragment reference blendLight
+}
+
+renderProgram blendLightTreeShadow {
+	hwSkinningVersion blendLightTreeShadow_skinning_matrix blendLightTreeShadow_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		blend GL_ZERO, GL_ONE_MINUS_SRC_COLOR
+		maskAlpha
+	}
+
+	program vertex glsl { <%
+		varying vec4 var_TexCoord0;
+		varying vec4 var_TexCoord2;
+		varying vec4 var_TexCoord1;
+		varying vec4 var_Color;
+
+		void main ( void ) { 
+			// ARB_position_invariant; 
+			vec4 defaultCoord = vec4(0.5,0.5,0.0,1.0);
+			vec4 R1;
+			// do texture coordinate generation 
+			R1 = defaultCoord;
+			R1.x = dot ( $positionAttrib , $lightFalloff_0 );
+			R1.y = dot ( $positionAttrib , $lightFalloff_1 );
+			var_TexCoord0.x = dot ( R1 , $maskMatrix_s );
+			var_TexCoord0.y = dot ( R1 , $maskMatrix_t );
+			var_TexCoord0.z = 0.0;
+			var_TexCoord0.w = dot ( $positionAttrib , $lightFalloff_2 );
+			var_TexCoord2.x = dot ( R1 , $maskMatrix2_s );
+			var_TexCoord2.y = dot ( R1 , $maskMatrix2_t );
+			var_TexCoord2.z = 0.0;
+			var_TexCoord2.w = dot ( $positionAttrib , $lightFalloff_2 );
+			var_TexCoord1 = defaultCoord;
+			var_TexCoord1.x = dot ( $positionAttrib , $lightFalloff_3 );
+			var_Color = $diffuseColor * $fadeFraction;
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		} 
+	%> }
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord0;
+		varying vec4 var_TexCoord2;
+		varying vec4 var_TexCoord1;
+		varying vec4 var_Color;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 R0;
+			vec4 R1;
+			vec4 R2;
+			R0 = texture2D ( $lightProjectionMap , var_TexCoord0.xy );
+			R1 = texture2D ( $lightProjectionMap , var_TexCoord2.xy );
+			R2 = texture2D ( $lightFalloffMap , var_TexCoord1.xy );
+			R0 = vec4( max ( R1 , R0 ) );
+			R0 = R0 * R2;
+			gl_FragColor = var_Color * R0;
+			// MOV result.color.a, R0.x; 
+			// MUL result.color, R1.aaaa, R0.aaaa; 
+		} 
+	%> }
+}
+
+renderProgram blendLightTreeShadow_skinning_matrix {
+	state {
+		depthFunc equal
+		blend GL_ZERO, GL_ONE_MINUS_SRC_COLOR
+		maskAlpha
+	}
+
+	program vertex arb { <%
+		PARAM	defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+		TEMP	position;
+		TEMP	R1;
+		
+		useTemplate skinningMatrix_ARB< "position" >
+
+		# do texture coordinate generation
+		MOV		R1, defaultCoord; 
+		DP4		R1.x, position, $lightFalloff_0;
+		DP4		R1.y, position, $lightFalloff_1;
+		DP4		result.texcoord[0].x, R1, $maskMatrix_s;
+		DP4		result.texcoord[0].y, R1, $maskMatrix_t;		
+		MOV		result.texcoord[0].z, 0;
+		DP4		result.texcoord[0].w, position, $lightFalloff_2;
+		
+		DP4		result.texcoord[2].x, R1, $maskMatrix2_s;
+		DP4		result.texcoord[2].y, R1, $maskMatrix2_t;		
+		MOV		result.texcoord[2].z, 0;
+		DP4		result.texcoord[2].w, position, $lightFalloff_2;		
+		
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[1].x, position, $lightFalloff_3;
+
+		MUL		result.color, $diffuseColor, $fadeFraction;
+	%> }
+
+	program fragment reference blendLightTreeShadow
+}
+
+renderProgram blendLightTreeShadow_hardskinning_matrix {
+	state {
+		depthFunc equal
+		blend GL_ZERO, GL_ONE_MINUS_SRC_COLOR
+		maskAlpha
+	}
+
+	program vertex arb { <%
+		PARAM	defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+		TEMP	position;
+		TEMP	R1;
+		
+		useTemplate hardSkinningMatrix_ARB< "position" >
+
+		# do texture coordinate generation
+		MOV		R1, defaultCoord; 
+		DP4		R1.x, position, $lightFalloff_0;
+		DP4		R1.y, position, $lightFalloff_1;
+		DP4		result.texcoord[0].x, R1, $maskMatrix_s;
+		DP4		result.texcoord[0].y, R1, $maskMatrix_t;		
+		MOV		result.texcoord[0].z, 0;
+		DP4		result.texcoord[0].w, position, $lightFalloff_2;
+		
+		DP4		result.texcoord[2].x, R1, $maskMatrix2_s;
+		DP4		result.texcoord[2].y, R1, $maskMatrix2_t;		
+		MOV		result.texcoord[2].z, 0;
+		DP4		result.texcoord[2].w, position, $lightFalloff_2;		
+		
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[1].x, position, $lightFalloff_3;
+
+		MUL		result.color, $diffuseColor, $fadeFraction;
+	%> }
+
+	program fragment reference blendLightTreeShadow
+}
+
+
+/***********************************/
+
+renderProgram blendLightTreeShadowFixedFallOff {
+	hwSkinningVersion blendLightTreeShadowFixedFallOff_skinning_matrix blendLightTreeShadowFixedFallOff_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		blend GL_ZERO, GL_ONE_MINUS_SRC_COLOR
+		maskAlpha
+	}
+
+	program vertex reference blendLightTreeShadow
+	program fragment glsl { <%
+		varying vec4 var_TexCoord0;
+		varying vec4 var_TexCoord2;
+		varying vec4 var_TexCoord1;
+		varying vec4 var_Color;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 R0;
+			vec4 R1;
+			vec4 R2;
+			R0 = texture2D ( $lightProjectionMap , var_TexCoord0.xy );
+			R1 = texture2D ( $lightProjectionMap , var_TexCoord2.xy );
+			// TEX R2, fragment.texcoord[1], $lightFalloffMap, 2D; 
+			R2.x = clamp ( -var_TexCoord1.y * 1.255 + 0.816 , 0.0 , 1.0 );
+			R2.y = -var_TexCoord1.y * 1.056 + 1.0369;
+			R2.x = clamp ( R2.x + R2.y , 0.0 , 1.0 );
+			R0 = vec4( max ( R1 , R0 ) );
+			R0 = R0 * R2.x;
+			gl_FragColor = var_Color * R0;
+			// MOV result.color.a, R0.x; 
+			// MUL result.color, R1.aaaa, R0.aaaa; 
+		} 
+	%> }
+}
+
+renderProgram blendLightTreeShadowFixedFallOff_skinning_matrix {
+	state {
+		depthFunc equal
+		blend GL_ZERO, GL_ONE_MINUS_SRC_COLOR
+		maskAlpha
+	}
+
+	program vertex reference blendLightTreeShadow_skinning_matrix 
+	program fragment reference blendLightTreeShadowFixedFallOff
+}
+
+renderProgram blendLightTreeShadowFixedFallOff_hardskinning_matrix {
+	state {
+		depthFunc equal
+		blend GL_ZERO, GL_ONE_MINUS_SRC_COLOR
+		maskAlpha
+	}
+
+	program vertex reference blendLightTreeShadow_hardskinning_matrix
+	program fragment reference blendLightTreeShadowFixedFallOff
+}
+
+/**********************************/
+
+renderProgram blendLightTreeShadowMask {
+	hwSkinningVersion blendLightTreeShadowMask_skinning_matrix blendLightTreeShadowMask_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		blend GL_ZERO, GL_ONE_MINUS_SRC_COLOR
+		maskAlpha
+	}
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		PARAM	defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+		TEMP R1, R2;
+
+		# do texture coordinate generation
+		#MOV		result.texcoord[0], defaultCoord;
+		#DP4		result.texcoord[0].x, $positionAttrib, $maskMatrix_s;
+		#DP4		result.texcoord[0].y, $positionAttrib, $maskMatrix_t;			
+	
+		MOV		R2, defaultCoord;
+		DP4		R2.x, $positionAttrib, $lightFalloff_0;
+		DP4		R2.y, $positionAttrib, $lightFalloff_1;		
+		DP4		R1.x, R2, $maskMatrix_s;
+		DP4		R1.y, R2, $maskMatrix_t;
+		#MOV		R1.x, R2.x;
+		#MOV		R1.y, R2.y;		
+		MOV		R1.z, 0;
+		DP4		R1.w, $positionAttrib, $lightFalloff_2;		
+			
+		MOV		result.texcoord[0], R1;
+		MUL		R2, $lightRadius, 0.01; #scale by light radius so the shadow tiling is independent of the light's bounds
+		MUL		result.texcoord[0].xy, R1, R2;
+		
+		MOV		result.texcoord[2], R1;
+		
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[1].x, $positionAttrib, $lightFalloff_3;
+
+		MUL		result.color, $diffuseColor, $fadeFraction;
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP R0, R1, R2;
+		
+		TEX R0, fragment.texcoord[0], $lightProjectionMap, 2D;
+		TEX R1, fragment.texcoord[2], $mask, 2D;
+		TEX R2, fragment.texcoord[1], $lightFalloffMap, 2D;
+
+		#TEX result.color, fragment.texcoord[2], $lightFalloffMap, 2D;
+		#MOV result.color, R2;
+		
+		MUL R0, R1, R0;
+		MUL R0, R0, R2;
+		MUL result.color, fragment.color, R0;
+	%> }
+}
+
+renderProgram blendLightTreeShadowMask_skinning_matrix {
+	state {
+		depthFunc equal
+		blend GL_ZERO, GL_ONE_MINUS_SRC_COLOR
+		maskAlpha
+	}
+
+	program vertex arb { <%
+		PARAM	defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+		TEMP	position;
+		TEMP	R1, R2;
+		
+		useTemplate skinningMatrix_ARB< "position" >
+
+		# do texture coordinate generation
+		#MOV		result.texcoord[0], defaultCoord;
+		#DP4		result.texcoord[0].x, position, $maskMatrix_s;
+		#DP4		result.texcoord[0].y, position, $maskMatrix_t;			
+	
+		MOV		R2, defaultCoord;
+		DP4		R2.x, position, $lightFalloff_0;
+		DP4		R2.y, position, $lightFalloff_1;		
+		DP4		R1.x, R2, $maskMatrix_s;
+		DP4		R1.y, R2, $maskMatrix_t;
+		#MOV		R1.x, R2.x;
+		#MOV		R1.y, R2.y;		
+		MOV		R1.z, 0;
+		DP4		R1.w, $positionAttrib, $lightFalloff_2;		
+			
+		MOV		result.texcoord[0], R1;
+		MUL		R2, $lightRadius, 0.01; #scale by light radius so the shadow tiling is independent of the light's bounds
+		MUL		result.texcoord[0].xy, R1, R2;
+		
+		MOV		result.texcoord[2], R1;
+		
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[1].x, position, $lightFalloff_3;
+
+		MUL		result.color, $diffuseColor, $fadeFraction;
+	%> }
+
+	program fragment reference blendLightTreeShadowMask
+}
+
+renderProgram blendLightTreeShadowMask_hardskinning_matrix {
+	state {
+		depthFunc equal
+		blend GL_ZERO, GL_ONE_MINUS_SRC_COLOR
+		maskAlpha
+	}
+
+	program vertex arb { <%
+		PARAM	defaultCoord = { 0.5, 0.5, 0.0, 1.0 };
+		TEMP	position;
+		TEMP	R1, R2;
+		
+		useTemplate hardSkinningMatrix_ARB< "position" >
+
+		# do texture coordinate generation
+		#MOV		result.texcoord[0], defaultCoord;
+		#DP4		result.texcoord[0].x, position, $maskMatrix_s;
+		#DP4		result.texcoord[0].y, position, $maskMatrix_t;			
+	
+		MOV		R2, defaultCoord;
+		DP4		R2.x, position, $lightFalloff_0;
+		DP4		R2.y, position, $lightFalloff_1;		
+		DP4		R1.x, R2, $maskMatrix_s;
+		DP4		R1.y, R2, $maskMatrix_t;
+		#MOV		R1.x, R2.x;
+		#MOV		R1.y, R2.y;		
+		MOV		R1.z, 0;
+		DP4		R1.w, $positionAttrib, $lightFalloff_2;		
+			
+		MOV		result.texcoord[0], R1;
+		MUL		R2, $lightRadius, 0.01; #scale by light radius so the shadow tiling is independent of the light's bounds
+		MUL		result.texcoord[0].xy, R1, R2;
+		
+		MOV		result.texcoord[2], R1;
+		
+		MOV		result.texcoord[1], defaultCoord; 
+		DP4		result.texcoord[1].x, position, $lightFalloff_3;
+
+		MUL		result.color, $diffuseColor, $fadeFraction;
+	%> }
+
+	program fragment reference blendLightTreeShadowMask
+}

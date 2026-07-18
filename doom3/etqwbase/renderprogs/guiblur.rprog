@@ -1,0 +1,102 @@
+renderProgram guiBlur {
+	program vertex glsl { <%
+		varying vec2 texCoord0;
+		varying vec4 col;
+		void main() {
+			vec4 tex = $texCoordAttrib;
+			$if r_32ByteVtx
+				tex *= 1.0 / 4096.0;
+			$endif
+
+			vec2 coord = tex.xy;
+			coord.y = 1.0 - coord.y;
+
+			texCoord0 = coord * $currentRenderTexelSize.xy;
+			col = VERTEX_BYTE_COLOR($colorAttrib);
+            gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec2 texCoord0;
+		varying vec4 col;
+
+		$define OFFSET_START -2.0
+		$define GRID_SIZE 4
+		
+		void main() {
+			// this is the number of pixels between grid squares, increase to expand blur grid area
+			vec2 offset = vec2( 2.2, 2.2 );
+
+			vec4 clean = texture2D( $currentRender, texCoord0 / $currentRenderTexSize.xy ); // rect
+
+			vec4 blur = vec4 ( 0.0 );
+			vec2 currentOffset = offset * OFFSET_START;
+
+			for ( int y = 0; y < GRID_SIZE; y++ ) {
+				for ( int x = 0; x < GRID_SIZE; x++ ) {
+					blur += texture2D( $map, (texCoord0 + currentOffset)/4.0 / $mapTexSize.xy ); // rect
+					currentOffset.x += offset.x;
+				}
+				
+				currentOffset.x = offset.x * OFFSET_START;
+				currentOffset.y += offset.y;
+			}
+			
+			blur /= float( GRID_SIZE * GRID_SIZE );
+
+			gl_FragColor = mix( clean, blur, col.a );
+		}
+	%> }
+}
+
+renderProgram guiBlur_4x4 {
+	program vertex glsl { <%
+		varying vec2 texCoord0;
+		varying vec4 col;
+
+		void main() {
+			vec4 tex = $texCoordAttrib;
+
+			$if r_32ByteVtx
+				ex *= 1.0f / 4096.0f;
+			$endif
+
+			vec2 coord = tex.xy;
+			coord.y = 1.0 - coord.y;
+
+			texCoord0 = coord * $currentRenderTexelSize.xy;
+			col = VERTEX_BYTE_COLOR($colorAttrib);
+            gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec2 texCoord0;
+		varying vec4 col;
+
+		$define OFFSET_START -2.0
+		$define GRID_SIZE 4
+		
+		void main() {
+			// this is the number of pixels between grid squares, increase to expand blur grid area
+			vec2 offset = vec2( 2.2, 2.2 );
+			vec4 blur = vec4( 0.0 );
+			vec2 currentOffset = offset * OFFSET_START;
+
+			for ( int y = 0; y < GRID_SIZE; y++ ) {
+				for ( int x = 0; x < GRID_SIZE; x++ ) {
+					blur += texture2D( $currentRender, (texCoord0 + currentOffset) / $currentRenderTexSize.xy ); // rect
+					currentOffset.x += offset.x;
+				}
+				
+				currentOffset.x = offset.x * OFFSET_START;
+				currentOffset.y += offset.y;
+			}
+			
+			blur /= float( GRID_SIZE * GRID_SIZE );
+
+			gl_FragColor = blur;
+		}
+	%> }
+}

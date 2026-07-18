@@ -1,0 +1,28 @@
+renderprogram tools/megastamp/editMesh {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		MOV	result.texcoord, $texCoordAttrib;
+	%> }
+	
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP diffuse, borderClamp;
+		TEMP R0, R1;
+
+		PARAM color = { 0.2, 0, 0, 0.5 };
+
+		CMP R0, fragment.texcoord, 0, 1;
+		MAD R1, fragment.texcoord, -1, 1;
+		CMP R1, R1, 0, 1;
+
+		MUL R0.x, R0.x, R1.x;
+		MUL R0.x, R0.x, R0.y;
+		MUL R0.x, R0.x, R1.y;
+		MAD R0.x, R0.x, -1, 1;
+
+		MOV result.color, color;
+		MUL result.color.a, R0.x, color.a;
+	%> }
+}

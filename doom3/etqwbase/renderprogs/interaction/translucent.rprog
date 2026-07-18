@@ -1,0 +1,197 @@
+renderProgram interaction/translucent {
+	interaction
+
+	amblitVersion interaction/translucent_amblit
+	ambientVersion ambient/basic
+	hwSkinningVersion interaction/translucent_skinning_matrix interaction/translucent_hardskinning_matrix
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$include "interaction/translucent_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/translucent_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$include "interaction/translucent_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/translucent_skinning_matrix {
+	interaction
+
+	amblitVersion interaction/translucent_skinning_matrix_amblit
+	ambientVersion ambient/basic_skinning_matrix
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+	program fragment reference interaction/translucent
+}
+
+renderProgram interaction/translucent_skinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+	program fragment reference interaction/translucent_amblit
+}
+
+renderProgram interaction/translucent_hardskinning_matrix {
+	interaction
+
+	amblitVersion interaction/translucent_hardskinning_matrix_amblit
+	ambientVersion ambient/basic_hardskinning_matrix
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+	program fragment reference interaction/translucent
+}
+
+renderProgram interaction/translucent_hardskinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+	program fragment reference interaction/translucent_amblit
+}
+
+renderProgram interaction/translucent_alphatest {
+	interaction
+
+	machineSpec 2
+	fallback interaction/basic_alphatest
+	instanceVersion	interaction/translucent_alphatest_instance
+	ambientVersion ambient/basic_alphatest
+	amblitVersion interaction/translucent_alphatest_amblit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define alphatest
+		$include "interaction/translucent_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/translucent_alphatest_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define alphatest
+		$include "interaction/translucent_fragment.inc"
+	%> }
+}
+
+
+renderProgram interaction/translucent_alphatest_instance {
+	interaction
+
+	machineSpec 2
+	fallback interaction/basic_alphatest_instance
+	ambientVersion ambient/basic_alphatest_instance
+	amblitVersion interaction/translucent_alphatest_instance_amblit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_instance
+
+	program fragment reference interaction/translucent_alphatest
+}
+
+renderProgram interaction/translucent_alphatest_instance_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_instance
+
+	program fragment reference interaction/translucent_alphatest_amblit
+}
+
+renderBinding subsurfaceColor  { vector { 0.02352941 0.2 0.282353 0 } }	// Controls the color of sscattering
+renderBinding subsurfacePower	{ vector { 1 } }			// x: Controls the "width" of the rim around the surface
+															// y: Controls the power of the specular highlight
+
+//
+//	Wrap lighting to back of object to look good use "noshadows" AND "noselfshadow" in the shader
+//
+renderProgram interaction/subsurface {
+	interaction
+
+	amblitVersion interaction/subsurface_amblit
+	ambientVersion ambient/basic
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$include "interaction/subsurface_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/subsurface_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$include "interaction/subsurface_fragment.inc"
+	%> }
+}

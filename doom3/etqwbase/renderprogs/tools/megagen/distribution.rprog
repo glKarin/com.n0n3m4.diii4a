@@ -1,0 +1,93 @@
+renderProgram megagen/generateDistribution {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		TEMP R0, R1, R2;
+
+		# rotate the alphaSource texcoords
+		SUB R0, vertex.texcoord[0], 0.5;
+
+		MUL R1.x, R0.x, program.local[0].y;
+		MUL R1.y, R0.y, program.local[0].x;
+		SUB R2.x, R1.x, R1.y;
+
+		MUL R1.x, R0.y, program.local[0].y;
+		MUL R1.y, R0.x, program.local[0].x;
+		ADD R2.y, R1.x, R1.y;
+
+		ADD result.texcoord[0].xy, R2, 0.5;
+		
+		# rotate the alphaModulationSource texcoords
+		SUB R0, vertex.texcoord[1], 0.5;
+
+		MUL R1.x, R0.x, program.local[0].w;
+		MUL R1.y, R0.y, program.local[0].z;
+		SUB R2.x, R1.x, R1.y;
+
+		MUL R1.x, R0.y, program.local[0].w;
+		MUL R1.y, R0.x, program.local[0].z;
+		ADD R2.y, R1.x, R1.y;
+
+		ADD result.texcoord[1].xy, R2, 0.5;
+
+		# copy the global mask texcoords
+		MOV result.texcoord[2], vertex.texcoord[2];
+	%> }
+
+	program fragment arb { <%
+		TEMP R0, R1, R2;
+		TEMP colorSource, alphaSource, alphaModulationSource, globalMaskSource;
+
+		PARAM	consts = { 3.14159265358979323846, 0, 0, 0 };	# pi
+
+		TEX alphaSource, fragment.texcoord[0], texture[0], 2D;
+		TEX alphaModulationSource, fragment.texcoord[1], texture[1], 2D;
+		TEX globalMaskSource, fragment.texcoord[2], texture[2], 2D;
+
+		# Invert alpha if needed (program.local[0].y < -1)
+		SUB R0, 1, alphaSource;
+		CMP alphaSource, program.local[0].y, R0, alphaSource;
+
+		# Multiply with global mask if needed (program.local[0].w < -1)
+		MUL R0, alphaSource, globalMaskSource;
+		CMP alphaSource, program.local[0].w, R0, alphaSource;
+
+		# Add noise if needed (program.local[0].z < -1)
+		ADD R0, alphaModulationSource, -0.5;
+		MUL R1, alphaSource, consts.x;
+		SIN R1, R1.x;
+		MUL R0, R1.x, R0;
+		ADD_SAT R0, alphaSource, R0;
+		CMP alphaSource, program.local[0].z, R0, alphaSource;
+
+		# Increase contrast
+		ADD R0, alphaSource, -program.local[1].x;		# ramp start clamp
+		MUL R1, program.local[1].y, consts.x;
+		MUL R1, R1, R0;
+		COS R1, R1.x;
+		MAD R1, R1, -0.5, 0.5;
+		CMP R1, R0, 0, R1;
+		ADD R0, alphaSource, -program.local[1].z;		# ramp end clamp
+		CMP alphaSource, R0, R1, 1;
+
+		# scale
+		MUL result.color, program.local[0].x, alphaSource;
+	%> }
+}
+
+renderProgram megagen/mergeDistribution {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		MOV result.texcoord[0], vertex.texcoord[0];
+	%> }
+
+	program fragment arb { <%
+		TEMP parentAlpha, childAlpha, R0;
+
+		TEX	parentAlpha, fragment.texcoord[0], texture[0], 2D;
+		TEX	childAlpha, fragment.texcoord[0], texture[1], 2D;
+
+		MUL result.color, parentAlpha, childAlpha;
+	%> }
+}

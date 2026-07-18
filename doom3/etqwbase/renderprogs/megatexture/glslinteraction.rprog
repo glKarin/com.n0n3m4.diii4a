@@ -1,0 +1,185 @@
+renderProgram megaTexture/interaction_glsl {
+	interaction
+	lowrangeuv
+
+	amblitVersion megaTexture/notlit_lit
+	ambientVersion megaTexture/ambient_glsl
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex glsl { <%
+		$include "megatexture/interaction_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$include "megatexture/interaction_glsl_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_premult_glsl {
+	interaction
+	lowrangeuv
+
+	amblitVersion megaTexture/notlit_lit
+	ambientVersion megaTexture/ambient_premult_glsl
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex glsl { <%
+		$define premult
+		$include "megatexture/interaction_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$define premult
+		$include "megatexture/interaction_glsl_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_spec_glsl {
+	interaction
+	lowrangeuv
+	
+	amblitVersion megaTexture/notlit_lit
+	ambientVersion megaTexture/ambient_glsl
+
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex glsl { <%
+		$define megatexSpecular
+		$include "megatexture/interaction_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$define megatexSpecular
+		$include "megatexture/interaction_glsl_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_premult_spec_glsl {
+	interaction
+	lowrangeuv
+
+	amblitVersion megaTexture/notlit_lit
+	ambientVersion megaTexture/ambient_premult_glsl
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex glsl { <%
+		$define premult
+		$define megatexSpecular
+		$include "megatexture/interaction_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$define premult
+		$define megatexSpecular
+		$include "megatexture/interaction_glsl_fragment.inc"
+	%> }	
+}
+
+
+renderProgram megaTexture/interaction_bakedamb_glsl {
+	interaction
+	lowrangeuv
+	
+	amblitVersion megaTexture/notlit_lit
+	ambientVersion megaTexture/ambient_bakedamb_glsl
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex glsl { <%
+		$include "megatexture/interaction_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$define bakedamb
+		$include "megatexture/interaction_glsl_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_bakedamb_spec_glsl {
+	interaction
+	lowrangeuv
+	
+	amblitVersion megaTexture/notlit_lit
+	ambientVersion megaTexture/ambient_bakedamb_glsl
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex glsl { <%
+		$define megatexSpecular
+		$include "megatexture/interaction_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$define bakedamb
+		$define megatexSpecular
+		$include "megatexture/interaction_glsl_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_brightness_glsl {
+	interaction
+	lowrangeuv
+	
+	amblitVersion megaTexture/notlit_lit
+	ambientVersion megaTexture/ambient_brightness_glsl
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex glsl { <%
+		$include "megatexture/interaction_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$define brightness
+		$include "megatexture/interaction_glsl_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_spec_brightness_glsl {
+	interaction
+	lowrangeuv
+	
+	amblitVersion megaTexture/notlit_lit
+	ambientVersion megaTexture/ambient_brightness_glsl
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex glsl { <%
+		$define megatexSpecular
+		$include "megatexture/interaction_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$define brightness
+		$define megatexSpecular
+		$include "megatexture/interaction_glsl_fragment.inc"
+	%> }	
+}

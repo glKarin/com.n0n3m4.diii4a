@@ -1,0 +1,23 @@
+
+
+sampler3D noiseMap : $noiseMap;
+
+//FIXME: Use a different number of octaves based on the shader quality settings?
+
+
+half bandLimitedNoise( float3 P ) {
+	return tex3D( noiseMap, P ).x;
+}
+
+half perlin(float3 inpos) {
+	half4 octaveScales = { 0.5, 0.25, 0.125, 0.0625 };
+	half4 noiseSamples;
+
+	//FIXME: use inpos+inpos? is add still faster than a mul?
+	noiseSamples.x = bandLimitedNoise( inpos );
+	noiseSamples.y = bandLimitedNoise( inpos*2 );
+	noiseSamples.z = bandLimitedNoise( inpos*4 );
+	noiseSamples.w = bandLimitedNoise( inpos*8 );
+
+	return dot( noiseSamples, octaveScales );
+}

@@ -1,0 +1,724 @@
+/**
+	This template gives a ARB vertex program implementation of the extinction function in atmosphere.hg
+*/
+template atmosphere_ARB {
+	parameters < InPositionParm, OutResultParm >
+
+	text { <%
+		PARAM _ATM_fogParams = $fogParams;
+		PARAM _ATM_fogMatrix_x = $transposedModelMatrix_x;
+		PARAM _ATM_fogMatrix_y = $transposedModelMatrix_y;
+		PARAM _ATM_fogMatrix_z = $transposedModelMatrix_z;	
+		PARAM _ATM_UP = { 0, 0, 1, 0 };
+		PARAM _ATM_POWER = { 0.5, 0.5, 0.5, 0 };
+
+		TEMP _ATM_R0, _ATM_R1,_ATM_R2, _ATM_Z, _ATM_eye;
+		
+		MOV _ATM_eye, $viewOriginWorld;
+		
+		# vertex in world space
+		DP4	_ATM_R0.x, _ATM_fogMatrix_x, InPositionParm;
+		DP4	_ATM_R0.y, _ATM_fogMatrix_y, InPositionParm;
+		DP4	_ATM_R0.z, _ATM_fogMatrix_z, InPositionParm;
+		
+		# clutch for horizontal rays
+		SUB _ATM_R1.x, _ATM_eye.z, _ATM_R0.z;
+		ABS _ATM_R1.y, _ATM_R1.x;
+		SLT _ATM_R1.z, _ATM_R1.y, 5; #R1.z to one if difference was smaller than 5 else 0
+		MAD _ATM_eye.z, _ATM_R1.z, 5, _ATM_eye.z;
+		
+		# normalize ray to eye in R1
+		SUB _ATM_R1, _ATM_R0, _ATM_eye;
+		DP3 _ATM_R1.w, _ATM_R1, _ATM_R1;
+		RSQ _ATM_R1.w, _ATM_R1.w;
+		MUL _ATM_R1.xyz, _ATM_R1, _ATM_R1.w;
+		RCP	_ATM_R1.w, _ATM_R1.w; # R1.w is ray length now
+		
+		# deviation from ray to eye with up direction
+		DP3 _ATM_R2.x, _ATM_R1, _ATM_UP;
+
+		# parameter setup
+		ADD _ATM_Z.x, _ATM_R0.z, _ATM_fogParams.z;
+		MAX _ATM_Z.x, _ATM_Z.x, 0;
+		ADD _ATM_Z.y, _ATM_eye.z, _ATM_fogParams.z;
+		MAX _ATM_Z.y, _ATM_Z.y, 0;		
+
+		# Integrate along vertical ray
+		MUL _ATM_Z.xy, _ATM_Z, _ATM_fogParams.y;
+		
+		POW _ATM_Z.x, _ATM_POWER.x, _ATM_Z.x;
+		POW _ATM_Z.y, _ATM_POWER.x, _ATM_Z.y;
+		SUB _ATM_Z.z, _ATM_Z.y, _ATM_Z.x;
+		
+		# Correct for horizontal rays
+		RCP _ATM_R2.x, _ATM_R2.x;
+		MUL _ATM_Z.z, _ATM_Z.z, _ATM_R2.x;
+		
+		# Multiply with distance
+		MUL _ATM_Z.z, _ATM_Z.z, _ATM_R1.w;
+		MUL _ATM_Z.z, _ATM_Z.z, _ATM_fogParams.x;		
+		
+		POW OutResultParm, _ATM_POWER.x, _ATM_Z.z;
+	%> }
+}
+
+template atmosphere_GLSL {
+	parameters < InPositionParm, OutResultParm >
+
+	text { <%
+		vec4 _ATM_fogParams = $fogParams;
+		vec4 _ATM_fogMatrix_x = $transposedModelMatrix_x;
+		vec4 _ATM_fogMatrix_y = $transposedModelMatrix_y;
+		vec4 _ATM_fogMatrix_z = $transposedModelMatrix_z;
+		vec4 _ATM_UP = vec4(0.0,0.0,1.0,0.0);
+		vec4 _ATM_POWER = vec4(0.5,0.5,0.5,0.0);
+		vec4 _ATM_R0;
+		vec4 _ATM_R1;
+		vec4 _ATM_R2;
+		vec4 _ATM_Z;
+		vec4 _ATM_eye;
+		_ATM_eye = $viewOriginWorld;
+		// vertex in world space 
+		_ATM_R0.x = dot ( _ATM_fogMatrix_x , InPositionParm );
+		_ATM_R0.y = dot ( _ATM_fogMatrix_y , InPositionParm );
+		_ATM_R0.z = dot ( _ATM_fogMatrix_z , InPositionParm );
+		// clutch for horizontal rays 
+		_ATM_R1.x = _ATM_eye.z - _ATM_R0.z;
+		_ATM_R1.y = abs ( _ATM_R1.x );
+		_ATM_R1.z = _ATM_R1.y < 5.0 ? 1.0 : 0.0;
+		// R1.z to one if difference was smaller than 5 else 0 
+		_ATM_eye.z = _ATM_R1.z * 5.0 + _ATM_eye.z;
+		// normalize ray to eye in R1 
+		_ATM_R1 = _ATM_R0 - _ATM_eye;
+		_ATM_R1.w = dot ( _ATM_R1.xyz , _ATM_R1.xyz );
+		_ATM_R1.w = 1.0 / sqrt ( _ATM_R1.w );
+		_ATM_R1.xyz = _ATM_R1.xyz * _ATM_R1.w;
+		_ATM_R1.w = 1.0 / _ATM_R1.w;
+		// R1.w is ray length now 
+		// deviation from ray to eye with up direction 
+		_ATM_R2.x = dot ( _ATM_R1.xyz , _ATM_UP.xyz );
+		// parameter setup 
+		_ATM_Z.x = _ATM_R0.z + _ATM_fogParams.z;
+		_ATM_Z.x = max ( _ATM_Z.x , 0.0 );
+		_ATM_Z.y = _ATM_eye.z + _ATM_fogParams.z;
+		_ATM_Z.y = max ( _ATM_Z.y , 0.0 );
+		// Integrate along vertical ray 
+		_ATM_Z.xy = _ATM_Z.xy * _ATM_fogParams.y;
+		_ATM_Z.x = pow ( _ATM_POWER.x , _ATM_Z.x );
+		_ATM_Z.y = pow ( _ATM_POWER.x , _ATM_Z.y );
+		_ATM_Z.z = _ATM_Z.y - _ATM_Z.x;
+		// Correct for horizontal rays 
+		_ATM_R2.x = 1.0 / _ATM_R2.x;
+		_ATM_Z.z = _ATM_Z.z * _ATM_R2.x;
+		// Multiply with distance 
+		_ATM_Z.z = _ATM_Z.z * _ATM_R1.w;
+		_ATM_Z.z = _ATM_Z.z * _ATM_fogParams.x;
+		OutResultParm = vec4( pow ( _ATM_POWER.x , _ATM_Z.z ) );
+	%> }
+}
+
+/**
+	The atmosphere does a pass with this shader
+*/
+renderProgram atmosphere {
+
+	hwSkinningVersion atmosphere_hwskinning atmosphere_hardskinning
+	instanceVersion atmosphere_instance
+
+	state force {
+		depthfunc equal
+		blend  GL_ONE, GL_ONE_MINUS_SRC_ALPHA
+		maskDepth
+	}
+	
+	program vertex glsl { <%
+		varying vec4 var_Color;
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord0;
+
+		void main ( void ) { 
+			// ARB_position_invariant; 
+			vec4 ray;
+			vec4 extinct;
+			useTemplate atmosphere_GLSL< "$positionAttrib", "extinct" >
+			var_Color = vec4( 1.0 - extinct.x );
+			ray = $positionAttrib - $viewOrigin;
+			// normalized object space ray in texcoord 1 
+			ray.w = dot ( ray.xyz , ray.xyz );
+			ray.w = 1.0 / sqrt ( ray.w );
+			var_TexCoord1 = ray * ray.w;
+			// unnormalized worldspace ray 
+			var_TexCoord0.x = dot ( ray.xyz , $fogRotation_x.xyz );
+			var_TexCoord0.y = dot ( ray.xyz , $fogRotation_y.xyz );
+			var_TexCoord0.z = dot ( ray.xyz , $fogRotation_z.xyz );
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		} 
+	%> }
+
+	program fragment glsl { <%
+		varying vec4 var_Color;
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord0;
+
+		$define extinction var_Color.xyz
+		$define tex var_TexCoord0.xyz
+		$define pos var_TexCoord1.xyz
+
+		$define colorParams $sunHaloParameters
+		$define sunDir $sunDirection.xyz
+
+		$define image $skyGradientCubeMap
+
+		void main() {
+			float scale = dot(normalize(pos), sunDir);
+			float halo = max(scale*colorParams.x+colorParams.y, 0.0);
+			vec4 look = (textureCube(image, tex)+halo)*extinction.r;
+			gl_FragColor = vec4(look.rgb,extinction.r);
+		}
+	%> }
+
+}
+
+renderProgram atmosphere_hwskinning {
+
+	state force {
+		depthfunc equal
+		blend  GL_ONE, GL_ONE_MINUS_SRC_ALPHA
+		maskDepth
+	}
+
+	program vertex arb { <%
+		TEMP position, extinct, ray, rayn;
+		useTemplate skinningMatrix_ARB< "position" >
+		useTemplate atmosphere_ARB< "position", "extinct" >
+
+		SUB result.color, 1, extinct.x;
+		
+		SUB ray, position, $viewOrigin;
+		
+		# normalized object space ray in texcoord 1
+		DP3 ray.w, ray, ray;
+		RSQ ray.w, ray.w;
+		MUL result.texcoord[1], ray, ray.w;
+		
+		# unnormalized worldspace ray
+		DP3 result.texcoord[0].x, ray, $fogRotation_x;
+		DP3 result.texcoord[0].y, ray, $fogRotation_y;		
+		DP3 result.texcoord[0].z, ray, $fogRotation_z;	
+		
+	%> }
+	
+	program fragment reference atmosphere
+
+}
+
+renderProgram atmosphere_hardskinning {
+
+	state force {
+		depthfunc equal
+		blend  GL_ONE, GL_ONE_MINUS_SRC_ALPHA
+		maskDepth
+	}
+
+	program vertex arb { <%
+		TEMP position, extinct, ray, rayn;
+		useTemplate hardSkinningMatrix_ARB< "position" >
+		useTemplate atmosphere_ARB< "position", "extinct" >
+
+		SUB result.color, 1, extinct.x;
+		
+		SUB ray, position, $viewOrigin;
+		
+		# normalized object space ray in texcoord 1
+		DP3 ray.w, ray, ray;
+		RSQ ray.w, ray.w;
+		MUL result.texcoord[1], ray, ray.w;
+		
+		# unnormalized worldspace ray
+		DP3 result.texcoord[0].x, ray, $fogRotation_x;
+		DP3 result.texcoord[0].y, ray, $fogRotation_y;		
+		DP3 result.texcoord[0].z, ray, $fogRotation_z;	
+		
+	%> }
+	
+	program fragment reference atmosphere
+
+}
+
+renderProgram atmosphere_instance {
+
+	state force {
+		depthfunc equal
+		blend  GL_ONE, GL_ONE_MINUS_SRC_ALPHA
+		maskDepth
+	}
+
+	program vertex arb { <%
+		TEMP extinct, ray, rayn;
+		TEMP position;
+		TEMP _tan;
+		DP4 position.x, vertex.texcoord[5], $positionAttrib;
+		DP4 position.y, vertex.texcoord[6], $positionAttrib;
+		DP4 position.z, vertex.texcoord[7], $positionAttrib;
+		MOV position.w, $positionAttrib.w;
+
+		PARAM  mvp[4]       = { state.matrix.mvp };
+		OUTPUT oPos         = result.position;
+		# Transform the vertex to clip coordinates. 
+		DP4   oPos.x, mvp[0], position;
+		DP4   oPos.y, mvp[1], position;
+		DP4   oPos.z, mvp[2], position;
+		DP4   oPos.w, mvp[3], position;
+		useTemplate atmosphere_ARB< "position", "extinct" >
+
+		SUB result.color, 1, extinct.x;
+		
+		SUB ray, position, $viewOrigin;
+		
+		# normalized object space ray in texcoord 1
+		DP3 ray.w, ray, ray;
+		RSQ ray.w, ray.w;
+		MUL result.texcoord[1], ray, ray.w;
+		
+		# unnormalized worldspace ray
+		DP3 result.texcoord[0].x, ray, $fogRotation_x;
+		DP3 result.texcoord[0].y, ray, $fogRotation_y;		
+		DP3 result.texcoord[0].z, ray, $fogRotation_z;	
+		
+	%> }
+	
+	program fragment reference atmosphere
+
+}
+
+renderProgram atmosphere_postprocess {
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+		
+		MOV	result.color, 1;
+	%> }
+	
+	program fragment arb { <%	
+		TEMP	R0, R1, R2, R3, Z, dist, avgDensity, depth, fogDens;
+		PARAM	upDir = { 0.0, 0.0, 1.0, 0.0 };
+		PARAM	consts = { 0.5, 0.5, 0.5, 0.5 };
+
+		# load the depth texture as a high precision intensity value in the range 0.0 to 1.0
+		TEX		depth, fragment.position, $mask, RECT;
+
+		# convert to -1.0 to 1.0 NDC
+		ADD		R0, depth.x, depth.x;
+		SUB		R0, R0, 1;
+
+		# calculate the view space z by deriving w from depth.  This will be negative.
+		SUB		R0.z, -R0.z, $proj2View.x;
+		RCP		R0.z, R0.z;
+		MUL		R0.z, R0.z, $proj2View.y;
+
+		# now make it a full xyz in view space
+		MAD		R0.xy, fragment.position, $pos2View.zwzw, $pos2View.xyxy;
+		MUL		R0.xy, R0.xyxy, -R0.z;
+		MOV		R0.w, 1;
+
+		# calculate world space distance to the point and normalized direction (in view space) in R1
+		DP3		dist, R0, R0;
+		RSQ		dist.x, dist.x;
+		MUL		R1, R0, dist.x;
+		RCP		dist.x, dist.x;
+
+		# calc position-z in world space
+		DP4		Z, R0, $fogViewMatrix_z;
+		
+		#MUL		result.color, Z, 0.0001;
+
+		# parameter setup
+		ADD Z.x, Z.z, $fogParams.z;
+		MAX Z.x, Z.x, 0;
+
+		# Integrate along vertical ray
+		MUL Z.xy, Z, $fogParams.y;
+		
+		POW Z.x, consts.x, Z.x;
+		SUB Z.z, $fogEyePrecalc.x, Z.x;
+		
+		# put direction in world space
+		DP3		R2.x, $fogViewMatrix_x, R1;
+		DP3		R2.y, $fogViewMatrix_y, R1;
+		DP3		R2.z, $fogViewMatrix_z, R1;	
+		MOV		R2.w, -5.0;
+		
+		DP3		R3, $fogUpInView, R1;
+		
+		# Correct for horizontal rays
+		RCP 	R3.x, R3.x;
+		MUL 	Z.z, Z.z, R3.x;
+		
+		# Multiply with distance
+		MUL 	Z.z, Z.z, dist.x;
+		MUL 	Z.z, Z.z, $fogParams.x;		
+		
+		POW_SAT	fogDens, consts.x, Z.z;
+		MAX		fogDens, fogDens, 0;
+		MIN		fogDens, fogDens, 1;	
+		
+		# Mask sky out...
+		SGE		R3, depth, 1.0;
+		#ADD_SAT	fogDens, fogDens, R3;
+				
+		TEX 	R1, fragment.position, $map, RECT;
+		TXB 	R0, R2, $skyGradientCubeMap, CUBE; #This has a bias since the difference calculations sometimes blow up at the horizon causing a much lower mip to be selected for "ridge" pixels
+
+		LRP		result.color, fogDens, R1, R0;
+		
+		#MOV		result.color, fogDens;
+		#MAD		result.color, R2, 0.5, 0.5;
+		#MAD		result.color, R3.x, 0.5, 0.5;
+		
+		
+		# put depth in result buffer for further rendering passes
+		MOV		result.depth, depth;
+	%> }
+	
+}
+
+renderProgram atmosphere_postprocess2 {
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+		
+		MOV	result.color, 1;
+	%> }
+	
+	program fragment arb { <%	
+		TEMP	R0, R1, R2, R3, Z, dist, avgDensity, depth, fogDens;
+		PARAM	upDir = { 0.0, 0.0, 1.0, 0.0 };
+		PARAM	consts = { 0.5, 0.5, 0.5, 0.5 };
+
+		# load the depth texture as a high precision intensity value in the range 0.0 to 1.0
+		TEX		depth, fragment.position, $currentDepth, RECT;
+
+		# convert to -1.0 to 1.0 NDC
+		ADD		R0, depth.x, depth.x;
+		SUB		R0, R0, 1;
+		#MAD		R0, depth.x, 2, -1;
+
+		# calculate the view space z by deriving w from depth.  This will be negative.
+		SUB		R0.z, -R0.z, $proj2View.x;
+		RCP		R0.z, R0.z;
+		MUL		R0.z, R0.z, $proj2View.y;
+
+		# now make it a full xyz in view space
+		MAD		R0.xy, fragment.position, $pos2View.zwzw, $pos2View.xyxy;
+		MUL		R0.xy, R0.xyxy, -R0.z;
+		MOV		R0.w, 1;
+
+		# calculate world space distance to the point and normalized direction (in view space) in R1
+		DP3		dist, R0, R0;
+		RSQ		dist.x, dist.x;
+		MUL		R1, R0, dist.x;
+		RCP		dist.x, dist.x;
+
+		# calc position-z in world space
+		DP4		Z, R0, $fogViewMatrix_z;
+		
+		# parameter setup
+		ADD 	Z.x, Z.z, $fogParams.z;
+		MAX 	Z.x, Z.x, 0;
+
+		# Integrate along vertical ray
+		MUL 	Z.x, Z.x, $fogParams.y;
+		
+		POW 	Z.x, consts.x, Z.x;
+		SUB 	Z.z, $fogEyePrecalc.x, Z.x;
+		
+		# put direction in world space
+		DP3		R2.x, $fogViewMatrix_x, R1;
+		DP3		R2.y, $fogViewMatrix_y, R1;
+		DP3		R2.z, $fogViewMatrix_z, R1;	
+		MOV		R2.w, -5.0;
+		
+		DP3		R3, $fogUpInView, R1;
+		
+		# Correct for horizontal rays
+		RCP 	R3.x, R3.x;
+		MUL 	Z.z, Z.z, R3.x;
+		
+		# Multiply with distance
+		MUL 	Z.z, Z.z, dist.x;
+		MUL 	Z.z, Z.z, $fogParams.x;		
+		
+		POW_SAT	fogDens, consts.x, Z.z;
+
+		# Mask sky out...
+		#SGE		R3, depth, 1.0;
+		#ADD_SAT	fogDens, fogDens, R3;
+		#SUB		fogDens, 1, fogDens;
+
+		#MOV		result.color.rgb, 0.1;
+		TXB 	result.color.rgb, R2, $skyGradientCubeMap, CUBE; #This has a bias since the difference calculations sometimes blow up at the horizon causing a much lower mip to be selected for "ridge" pixels
+		SUB		result.color.a, 1, fogDens;
+	%> }
+	
+}
+
+
+renderProgram atmosphere_postprocess2_Linear {
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+		
+		MOV	result.color, 1;
+	%> }
+	
+	program fragment arb { <%	
+		TEMP	R0, R1, R2, R3, Z, dist, avgDensity, depth, fogDens;
+		PARAM	upDir = { 0.0, 0.0, 1.0, 0.0 };
+		PARAM	consts = { 0.5, 0.5, 0.5, 0.5 };
+
+		# load the depth texture as a high precision intensity value in the range 0.0 to 1.0
+		TEX		depth, fragment.position, $currentDepth, RECT;
+
+		# convert to -1.0 to 1.0 NDC
+		ADD		R0, depth.x, depth.x;
+		SUB		R0, R0, 1;
+		#MAD		R0, depth.x, 2, -1;
+
+		# calculate the view space z by deriving w from depth.  This will be negative.
+		SUB		R0.z, -R0.z, $proj2View.x;
+		RCP		R0.z, R0.z;
+		MUL		R0.z, R0.z, $proj2View.y;
+
+		# now make it a full xyz in view space
+		MAD		R0.xy, fragment.position, $pos2View.zwzw, $pos2View.xyxy;
+		MUL		R0.xy, R0.xyxy, -R0.z;
+		MOV		R0.w, 1;
+
+		# calculate world space distance to the point and normalized direction (in view space) in R1
+		DP3		dist, R0, R0;
+		RSQ		dist.x, dist.x;
+		RCP		dist.x, dist.x;
+
+		MOV 	result.color.rgb, $fogColor;
+		MAD		result.color.a, dist.x, $fogDepths.z, $fogDepths.w;
+	%> }
+	
+}
+
+
+/**
+	The atmosphere does a pass with this shader
+*/
+/*
+renderProgram atmosphere_rain {
+
+	hwSkinningVersion atmosphere_rain_hwskinning atmosphere_rain_hardskinning
+
+	state force {
+		depthfunc equal
+		blend  GL_ONE, GL_ONE_MINUS_SRC_ALPHA
+		maskDepth
+	}
+	
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+		TEMP ray, extinct;
+		useTemplate atmosphere_ARB< "$positionAttrib", "extinct" >
+
+		SUB result.color, 1, extinct.x;
+		
+		SUB ray, $positionAttrib, $viewOrigin;
+		
+		# normalized object space ray in texcoord 1
+		DP3 ray.w, ray, ray;
+		RSQ ray.w, ray.w;
+		MUL result.texcoord[1], ray, ray.w;
+		
+		# unnormalized worldspace ray
+		DP3 result.texcoord[0].x, ray, $fogRotation_x;
+		DP3 result.texcoord[0].y, ray, $fogRotation_y;		
+		DP3 result.texcoord[0].z, ray, $fogRotation_z;	
+		
+		MOV result.texcoord[2], $normalAttrib;
+		
+		MAD result.texcoord[3], $positionAttrib, 0.01, $parameters;
+		MAD result.texcoord[3], $positionAttrib, 0.01, $parameters.zwzw;
+	%> }
+
+	program fragment cg { <%
+		struct VsOutputs {
+			float4 wpos : WPOS;
+			float3 extinction   : COLOR0;
+			float3 tex	: TEXCOORD0;
+			float3 pos	: TEXCOORD1;
+			float3 worldnrm	: TEXCOORD2;
+			float3 worldpos	: TEXCOORD3;
+		};
+
+		uniform float4 colorParams 	: $sunHaloParameters;
+		uniform float3 sunDir 		: $sunDirection;
+
+		sampler2D nmap : $map;
+		samplerRECT screen : $currentRender;
+		samplerCUBE image : $skyGradientCubeMap;
+
+		float4 fragment(VsOutputs indata) : COLOR {
+			float scale = dot(normalize(indata.pos), sunDir);
+			float halo = max(scale*colorParams.x+colorParams.y, 0);
+			float4 look = (texCUBE(image, indata.tex)+halo)*indata.extinction.r;
+			float4 s = texRECT( screen, indata.wpos.xy );
+			float4 n = tex2D( nmap, indata.worldpos.xy ) - 0.5;
+			float4 n = tex2D( nmap, indata.worldpos.xy + ) - 0.5;
+			float4 s2 = texRECT( screen, indata.wpos.xy + n.xy*10 ) + saturate( n.x );
+			return float4( s2.xyz, 1.f );//float4( n.xyz * 0.5 + 0.5, 1.f );//float4(look.rgb,indata.extinction.r);
+		}
+	%> }
+
+}
+
+renderProgram atmosphere_rain_hwskinning {
+
+	state force {
+		depthfunc equal
+		blend  GL_ONE, GL_ONE_MINUS_SRC_ALPHA
+		maskDepth
+	}
+
+	program vertex arb { <%
+		TEMP position, extinct, ray, rayn;
+		useTemplate skinningMatrix_ARB< "position" >
+		useTemplate atmosphere_ARB< "position", "extinct" >
+
+		SUB result.color, 1, extinct.x;
+		
+		SUB ray, position, $viewOrigin;
+		
+		# normalized object space ray in texcoord 1
+		DP3 ray.w, ray, ray;
+		RSQ ray.w, ray.w;
+		MUL result.texcoord[1], ray, ray.w;
+		
+		# unnormalized worldspace ray
+		DP3 result.texcoord[0].x, ray, $fogRotation_x;
+		DP3 result.texcoord[0].y, ray, $fogRotation_y;		
+		DP3 result.texcoord[0].z, ray, $fogRotation_z;	
+		
+	%> }
+	
+	program fragment reference atmosphere_rain
+
+}
+*/
+
+renderProgram atmosphereLinear {
+	hwSkinningVersion atmosphereLinear_hwskinning atmosphereLinear_hardskinning
+	instanceVersion atmosphereLinear_instance
+
+	state force {
+		depthfunc equal
+		blend  GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		maskDepth
+		maskAlpha
+	}
+	program vertex glsl { <%
+		varying vec4 var_Color2;
+
+		void main ( void ) { 
+			// ARB_position_invariant; 
+			vec4 _F1;
+			vec4 _F2;
+			_F2 = attr_Vertex - $viewOrigin;
+			_F1.x = dot ( _F2.xyz , _F2.xyz );
+			_F1.y = 1.0 / sqrt ( _F1.x );
+			_F1.x = _F1.y * _F1.x;
+			var_Color2 = vec4( _F1.x * $fogDepths.z + $fogDepths.w );
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		} 
+	%> }
+	program fragment glsl { <%
+		varying vec4 var_Color2;
+
+		void main ( void ) { 
+			gl_FragColor.rgb = $fogColor.rgb * 1.0; // fragment.color.secondary.r; 
+			// MOV result.color.rgb, fragment.color.secondary.r; 
+			gl_FragColor.a = var_Color2.r;
+		} 
+	%> }
+}
+
+renderProgram atmosphereLinear_hwskinning {
+
+	state force {
+		depthfunc equal
+		blend  GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		maskDepth
+		maskAlpha
+	}
+	program vertex arb { <%
+		TEMP position;
+		useTemplate skinningMatrix_ARB< "position" >
+
+		TEMP _F1, _F2;
+		SUB		_F2, position, $viewOrigin;
+		DP3		_F1.x, _F2, _F2;
+		RSQ		_F1.y, _F1.x;
+		MUL		_F1.x, _F1.y, _F1.x;
+		MAD		result.color.secondary, _F1.x, $fogDepths.z, $fogDepths.w; 
+	%> }
+	program fragment reference atmosphereLinear
+}
+
+renderProgram atmosphereLinear_hardskinning {
+
+	state force {
+		depthfunc equal
+		blend  GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		maskDepth
+		maskAlpha
+	}
+	program vertex arb { <%
+		TEMP position;
+		useTemplate hardSkinningMatrix_ARB< "position" >
+
+		TEMP _F1, _F2;
+		SUB		_F2, position, $viewOrigin;
+		DP3		_F1.x, _F2, _F2;
+		RSQ		_F1.y, _F1.x;
+		MUL		_F1.x, _F1.y, _F1.x;
+		MAD		result.color.secondary, _F1.x, $fogDepths.z, $fogDepths.w; 
+	%> }
+	program fragment reference atmosphereLinear
+}
+
+renderProgram atmosphereLinear_instance {
+
+	state force {
+		depthfunc equal
+		blend  GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		maskDepth
+	}
+	program vertex arb { <%
+		TEMP position;
+		DP4 position.x, vertex.texcoord[5], $positionAttrib;
+		DP4 position.y, vertex.texcoord[6], $positionAttrib;
+		DP4 position.z, vertex.texcoord[7], $positionAttrib;
+		MOV position.w, $positionAttrib.w;
+
+		PARAM  mvp[4]       = { state.matrix.mvp };
+		OUTPUT oPos         = result.position;
+		# Transform the vertex to clip coordinates. 
+		DP4   oPos.x, mvp[0], position;
+		DP4   oPos.y, mvp[1], position;
+		DP4   oPos.z, mvp[2], position;
+		DP4   oPos.w, mvp[3], position;
+
+		TEMP _F1, _F2;
+		SUB		_F2, position, $viewOrigin;
+		DP3		_F1.x, _F2, _F2;
+		RSQ		_F1.y, _F1.x;
+		MUL		_F1.x, _F1.y, _F1.x;
+		MAD		result.color.secondary, _F1.x, $fogDepths.z, $fogDepths.w; 
+	%> }
+	program fragment reference atmosphereLinear
+}
+

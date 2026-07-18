@@ -1,0 +1,120 @@
+/***********************************************************************/
+
+renderProgram ambient/basic_parallax {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	lodVersion ambient/basic
+	
+	program vertex arb { <%
+		$define parallax
+		$include "interaction/basic_ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define parallax
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_parallax {
+	interaction
+
+	amblitVersion interaction/basic_parallax_amblit
+	ambientVersion ambient/basic_parallax
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	lodVersion interaction/basic
+
+
+	program vertex arb { <%
+		$define parallax
+		$include "interaction/basic_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define parallax
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_parallax_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_parallax
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define parallax
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram ambient/basic_parallax_alphatest {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	lodVersion ambient/basic
+	
+	program vertex arb { <%
+		$define parallax
+		$include "interaction/basic_ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define parallax
+		$define alphatest_kill
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_parallax_alphatest {
+	interaction
+
+	amblitVersion interaction/basic_parallax_alphatest_amblit
+	ambientVersion ambient/basic_parallax_alphatest
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	lodVersion interaction/basic
+
+
+	program vertex reference interaction/basic_parallax
+
+	program fragment reference interaction/basic_parallax
+}
+
+
+renderProgram interaction/basic_parallax_alphatest_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_parallax
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define alphatest_kill
+		$define parallax
+		$include "interaction/basic_fragment.inc"
+	%> }
+}

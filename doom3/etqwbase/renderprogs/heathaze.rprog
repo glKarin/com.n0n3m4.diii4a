@@ -1,0 +1,392 @@
+renderBinding deformScroll { vector { 0 } }
+renderBinding deformMagnitude { vector { 1 } }
+
+renderProgram heatHaze {
+	state {
+		maskAlpha
+	}
+
+	program vertex glsl { <%
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord2;
+
+		void main ( void ) {
+			// ARB_position_invariant;
+			vec4 R0;
+			vec4 R1;
+			vec4 R2;
+			vec4 TC;
+			TC.x = dot ( $texCoordAttrib , $diffuseMatrix_s );
+			TC.y = dot ( $texCoordAttrib , $diffuseMatrix_t );
+			// texture 1 takes the texture coordinates and adds a scroll
+			var_TexCoord1 = TC + $deformScroll;
+			// texture 2 takes the deform magnitude and scales it by the projection distance
+			vec4 vec = vec4(1.0,0.0,0.0,1.0);
+			R0 = vec;
+			R0.z = dot ( $positionAttrib , $transposedModelViewMatrix[2] );
+			R1 = vec4( dot ( R0 , $transposedProjectionMatrix[0] ) );
+			R2 = vec4( dot ( R0 , $transposedProjectionMatrix[3] ) );
+			// don't let the recip get near zero for polygons that cross the view plane
+			R2 = max ( R2 , vec4( 1.0 ) );
+			R2 = vec4( 1.0 / R2.w );
+			R1 = R1 * R2;
+			// clamp the distance so the the deformations don't get too wacky near the view
+			R1 = min ( R1 , vec4( 0.02 ) );
+			var_TexCoord2 = R1 * $deformMagnitude;
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord2;
+
+		void main ( void ) {
+			// ARB_precision_hint_fastest;
+			vec4 localNormal;
+			vec4 R0;
+			vec4 subOne = vec4(-1.0,-1.0,-1.0,-1.0);
+			vec4 scaleTwo = vec4(2.0,2.0,2.0,2.0);
+			// load the filtered normal map and convert to -1 to 1 range
+			localNormal = texture2D ( $bumpMap , var_TexCoord1.xy );
+			$if !r_dxnNormalMaps
+				localNormal.x = localNormal.a;
+			$endif
+				localNormal = localNormal * scaleTwo + subOne;
+			$if r_normalizeNormalMaps
+				localNormal.z = 0;
+			R0.x = dot ( localNormal.xyz , localNormal.xyz );
+			R0.x = 1.0 + -R0.x;
+			R0.x = 1.0 / sqrt ( R0.x );
+			localNormal.z = 1.0 / R0.x;
+			$endif
+			// calculate the screen texcoord in the 0.0 to 1.0 range
+			R0 = gl_FragCoord * $currentRenderTexelSize.zwzw;
+			// offset by the scaled localNormal and clamp it to 0.0 - 1.0
+			R0 = clamp ( localNormal * var_TexCoord2 + R0 , 0.0 , 1.0 );
+			// scale by the screen adjust
+			R0 = R0 * $currentRenderTexelSize.xyzy;
+			// load the screen render
+			gl_FragColor.xyz = texture2D ( $currentRender , (R0 / $currentRenderTexSize).xy ).xyz;
+		}
+	%> }
+}
+
+renderProgram heatHazeWithVertex {
+	state {
+		maskAlpha
+	}
+
+	program vertex glsl { <%
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord2;
+		varying vec4 var_Color;
+
+		void main ( void ) {
+			// ARB_position_invariant;
+			vec4 R0;
+			vec4 R1;
+			vec4 R2;
+			vec4 TC;
+			TC.x = dot ( $texCoordAttrib , $diffuseMatrix_s );
+			TC.y = dot ( $texCoordAttrib , $diffuseMatrix_t );
+			// texture 1 takes the texture coordinates and adds a scroll
+			var_TexCoord1 = TC + $deformScroll;
+			// texture 2 takes the deform magnitude and scales it by the projection distance
+			vec4 vec = vec4(1.0,0.0,0.0,1.0);
+			R0 = vec;
+			R0.z = dot ( $positionAttrib , $transposedModelViewMatrix[2] );
+			R1 = vec4( dot ( R0 , $transposedProjectionMatrix[0] ) );
+			R2 = vec4( dot ( R0 , $transposedProjectionMatrix[3] ) );
+			// don't let the recip get near zero for polygons that cross the view plane
+			R2 = max ( R2 , vec4( 1.0 ) );
+			R2 = vec4( 1.0 / R2.w );
+			R1 = R1 * R2;
+			// clamp the distance so the the deformations don't get too wacky near the view
+			R1 = min ( R1 , vec4( 0.02 ) );
+			var_TexCoord2 = R1 * $deformMagnitude;
+			var_Color = VERTEX_BYTE_COLOR($colorAttrib);
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec4 var_Color;
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord2;
+
+		void main ( void ) {
+			// ARB_precision_hint_fastest;
+			vec4 localNormal;
+			vec4 mask;
+			vec4 R0;
+			vec4 subOne = vec4(-1.0,-1.0,-1.0,-1.0);
+			vec4 scaleTwo = vec4(2.0,2.0,2.0,2.0);
+			// kill the pixel if the distortion wound up being very small
+			mask.xy = (var_Color - 0.01).xy;
+			mask.zw = vec2( 0.0 );
+			if ( mask.x < 0.0 || mask.y < 0.0 || mask.z < 0.0 || mask.w < 0.0 ) discard;
+			// load the filtered normal map and convert to -1 to 1 range
+			localNormal = texture2D ( $bumpMap , var_TexCoord1.xy );
+			$if !r_dxnNormalMaps
+				localNormal.x = localNormal.a;
+			$endif
+				localNormal = localNormal * scaleTwo + subOne;
+			$if r_normalizeNormalMaps
+				localNormal.z = 0.0;
+			R0.x = dot ( localNormal.xyz , localNormal.xyz );
+			R0.x = 1.0 + -R0.x;
+			R0.x = 1.0 / sqrt ( R0.x );
+			localNormal.z = 1.0 / R0.x;
+			$endif
+			localNormal = localNormal * mask;
+			// calculate the screen texcoord in the 0.0 to 1.0 range
+			R0 = gl_FragCoord * $currentRenderTexelSize.zwzw;
+			// offset by the scaled localNormal and clamp it to 0.0 - 1.0
+			R0 = clamp ( localNormal * var_TexCoord2 + R0 , 0.0 , 1.0 );
+			// scale by the screen adjust
+			R0 = R0 * $currentRenderTexelSize.xyzy;
+			// load the screen render
+			gl_FragColor.xyz = texture2D ( $currentRender , (R0 / $currentRenderTexSize).xy ).xyz;
+		}
+	%> }
+}
+
+renderProgram heatHazeWithMask {
+	state {
+		maskAlpha
+	}
+
+	program vertex glsl { <%
+		varying vec4 var_TexCoord0;
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord2;
+
+		void main ( void ) {
+			// ARB_position_invariant;
+			vec4 R0;
+			vec4 R1;
+			vec4 R2;
+			vec4 TC;
+			TC.x = dot ( $texCoordAttrib , $diffuseMatrix_s );
+			TC.y = dot ( $texCoordAttrib , $diffuseMatrix_t );
+			var_TexCoord0 = TC;
+			// texture 1 takes the texture coordinates and adds a scroll
+			var_TexCoord1 = TC + $deformScroll;
+			// texture 2 takes the deform magnitude and scales it by the projection distance
+			vec4 vec = vec4(1.0,0.0,0.0,1.0);
+			R0 = vec;
+			R0.z = dot ( $positionAttrib , $transposedModelViewMatrix[2] );
+			R1 = vec4( dot ( R0 , $transposedProjectionMatrix[0] ) );
+			R2 = vec4( dot ( R0 , $transposedProjectionMatrix[3] ) );
+			// don't let the recip get near zero for polygons that cross the view plane
+			R2 = max ( R2 , vec4( 1.0 ) );
+			R2 = vec4( 1.0 / R2.w );
+			R1 = R1 * R2;
+			// clamp the distance so the the deformations don't get too wacky near the view
+			R1 = min ( R1 , vec4( 0.02 ) );
+			var_TexCoord2 = R1 * $deformMagnitude;
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord0;
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord2;
+
+		void main ( void ) {
+			// ARB_precision_hint_fastest;
+			vec4 localNormal;
+			vec4 _mask;
+			vec4 R0;
+			vec4 subOne = vec4(-1.0,-1.0,-1.0,-1.0);
+			vec4 scaleTwo = vec4(2.0,2.0,2.0,2.0);
+			// load the distortion map
+			_mask = texture2D ( $mask , var_TexCoord0.xy );
+			// kill the pixel if the distortion wound up being very small
+			_mask.xy = ( _mask - 0.01 ).xy;
+			_mask.zw = vec2( 0.0 );
+			if ( _mask.x < 0.0 || _mask.y < 0.0 || _mask.z < 0.0 || _mask.w < 0.0 ) discard;
+			// load the filtered normal map and convert to -1 to 1 range
+			localNormal = texture2D ( $bumpMap , var_TexCoord1.xy );
+			$if !r_dxnNormalMaps
+				localNormal.x = localNormal.a;
+			$endif
+				localNormal = localNormal * scaleTwo + subOne;
+			$if r_normalizeNormalMaps
+				localNormal.z = 0.0;
+			R0.x = dot ( localNormal.xyz , localNormal.xyz );
+			R0.x = 1 + -R0.x;
+			R0.x = 1.0 / sqrt ( R0.x );
+			localNormal.z = 1.0 / R0.x;
+			$endif
+			localNormal = localNormal * _mask;
+			// calculate the screen texcoord in the 0.0 to 1.0 range
+			R0 = gl_FragCoord * $currentRenderTexelSize.zwzw;
+			// offset by the scaled localNormal and clamp it to 0.0 - 1.0
+			R0 = clamp ( localNormal * var_TexCoord2 + R0 , 0.0 , 1.0 );
+			// scale by the screen adjust
+			R0 = R0 * $currentRenderTexelSize.xyxy;
+			// load the screen render
+			gl_FragColor.xyz = texture2D ( $currentRender , (R0 / $currentRenderTexSize).xy ).xyz;
+		}
+	%> }
+}
+
+renderProgram heatHazeWithMaskAndVertex {
+	state {
+		maskAlpha
+	}
+
+	program vertex glsl { <%
+		varying vec4 var_TexCoord0;
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord2;
+		varying vec4 var_Color;
+
+		void main ( void ) {
+			// ARB_position_invariant;
+			vec4 R0;
+			vec4 R1;
+			vec4 R2;
+			vec4 TC;
+			TC.x = dot ( $texCoordAttrib , $diffuseMatrix_s );
+			TC.y = dot ( $texCoordAttrib , $diffuseMatrix_t );
+			var_TexCoord0 = TC;
+			// texture 1 takes the texture coordinates and adds a scroll
+			var_TexCoord1 = TC + $deformScroll;
+			// texture 2 takes the deform magnitude and scales it by the projection distance
+			vec4 vec = vec4(1.0,0.0,0.0,1.0);
+			R0 = vec;
+			R0.z = dot ( $positionAttrib , $transposedModelViewMatrix[2] );
+			R1 = vec4( dot ( R0 , $transposedProjectionMatrix[0] ) );
+			R2 = vec4( dot ( R0 , $transposedProjectionMatrix[3] ) );
+			// don't let the recip get near zero for polygons that cross the view plane
+			R2 = max ( R2 , 1.0 );
+			R2 = vec4( 1.0 / R2.w );
+			R1 = R1 * R2;
+			// clamp the distance so the the deformations don't get too wacky near the view
+			R1 = min ( R1 , 0.02 );
+			var_TexCoord2 = R1 * $deformMagnitude;
+			var_Color = VERTEX_BYTE_COLOR($colorAttrib);
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord0;
+		varying vec4 var_Color;
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord2;
+
+		void main ( void ) {
+			// ARB_precision_hint_fastest;
+			vec4 localNormal;
+			vec4 _mask;
+			vec4 R0;
+			vec4 subOne = vec4(-1.0,-1.0,-1.0,-1.0);
+			vec4 scaleTwo = vec4(2.0,2.0,2.0,2.0);
+			// load the distortion map
+			_mask = texture2D ( $mask , var_TexCoord0.xy );
+			// kill the pixel if the distortion wound up being very small
+			_mask.xy = ( _mask * var_Color ).xy;
+			_mask.xy = _mask.xy - 0.01;
+			_mask.zw = vec2( 0.0 );
+			if ( _mask.x < 0.0 || _mask.y < 0.0 || _mask.z < 0.0 || _mask.w < 0.0 ) discard;
+			// load the filtered normal map and convert to -1 to 1 range
+			localNormal = texture2D ( $bumpMap , var_TexCoord1.xy );
+			$if !r_dxnNormalMaps
+				localNormal.x = localNormal.a;
+			$endif
+				localNormal = localNormal * scaleTwo + subOne;
+			$if r_normalizeNormalMaps
+				localNormal.z = 0.0;
+			R0.x = dot ( localNormal.xyz , localNormal.xyz );
+			R0.x = 1.0 + -R0.x;
+			R0.x = 1.0 / sqrt ( R0.x );
+			localNormal.z = 1.0 / R0.x;
+			$endif
+			localNormal = localNormal * _mask;
+			// calculate the screen texcoord in the 0.0 to 1.0 range
+			R0 = gl_FragCoord * $currentRenderTexelSize.zwzw;
+			// offset by the scaled localNormal and clamp it to 0.0 - 1.0
+			R0 = clamp ( localNormal * var_TexCoord2 + R0 , 0.0 , 1.0 );
+			// scale by the screen adjust
+			R0 = R0 * $currentRenderTexelSize.xyxy;
+			// load the screen render
+			gl_FragColor.xyz = texture2D ( $currentRender , (R0 / $currentRenderTexSize).xy ).xyz;
+		}
+	%> }
+}
+
+// With a proper matrix instead of just a scroll
+renderProgram heatHazeMatrix {
+	state {
+		maskAlpha
+	}
+
+	program vertex glsl { <%
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord2;
+
+		void main ( void ) {
+			// ARB_position_invariant;
+			vec4 R0;
+			vec4 R1;
+			vec4 R2;
+			// texture 1 takes the texture coordinates and adds a scroll
+			// ADD  result.texcoord[1], $texCoordAttrib, $deformScroll;
+			var_TexCoord1.x = dot ( $texCoordAttrib , $diffuseMatrix_s );
+			var_TexCoord1.y = dot ( $texCoordAttrib , $diffuseMatrix_t );
+			// texture 2 takes the deform magnitude and scales it by the projection distance
+			vec4 vec = vec4(1.0,0.0,0.0,1.0);
+			R0 = vec;
+			R0.z = dot ( $positionAttrib , $transposedModelViewMatrix[2] );
+			R1 = vec4( dot ( R0 , $transposedProjectionMatrix[0] ) );
+			R2 = vec4( dot ( R0 , $transposedProjectionMatrix[3] ) );
+			// don't let the recip get near zero for polygons that cross the view plane
+			R2 = max ( R2 , vec4( 1.0 ) );
+			R2 = vec4( 1.0 / R2.w );
+			R1 = R1 * R2;
+			// clamp the distance so the the deformations don't get too wacky near the view
+			R1 = min ( R1 , vec4( 0.02 ) );
+			var_TexCoord2 = R1 * $deformMagnitude;
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord1;
+		varying vec4 var_TexCoord2;
+
+		void main ( void ) {
+			// ARB_precision_hint_fastest;
+			vec4 localNormal;
+			vec4 R0;
+			vec4 subOne = vec4(-1.0,-1.0,-1.0,-1.0);
+			vec4 scaleTwo = vec4(2.0,2.0,2.0,2.0);
+			// load the filtered normal map and convert to -1 to 1 range
+			localNormal = texture2D ( $bumpMap , var_TexCoord1.xy );
+			$if !r_dxnNormalMaps
+				localNormal.x = localNormal.a;
+			$endif
+				localNormal = localNormal * scaleTwo + subOne;
+			$if r_normalizeNormalMaps
+				localNormal.z = 0.0;
+			R0.x = dot ( localNormal.xyz , localNormal.xyz );
+			R0.x = 1.0 + -R0.x;
+			R0.x = 1.0 / sqrt ( R0.x );
+			localNormal.z = 1.0 / R0.x;
+			$endif
+			// calculate the screen texcoord in the 0.0 to 1.0 range
+			R0 = gl_FragCoord * $currentRenderTexelSize.zwzw;
+			// offset by the scaled localNormal and clamp it to 0.0 - 1.0
+			R0 = clamp ( localNormal * var_TexCoord2 + R0 , 0.0 , 1.0 );
+			// scale by the screen adjust
+			R0 = R0 * $currentRenderTexelSize.xyzy;
+			// load the screen render
+			gl_FragColor.xyz = texture2D ( $currentRender , (R0 / $currentRenderTexSize).xy ).xyz;
+		}
+	%> }
+}

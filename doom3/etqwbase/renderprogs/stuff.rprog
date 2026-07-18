@@ -1,0 +1,346 @@
+renderBinding grass_times { vector { 0 } }
+
+/*
+*	The grass shader used by the stuff system, does sine wave wind and grass positioning
+*/
+renderProgram stuff/grass {
+
+	program vertex glsl { <%
+		varying vec2 var_TexCoord0;
+		varying vec3 var_TexCoord1;
+		varying vec4 var_Color;
+		varying vec4 var_Color2;
+		varying float var_TexCoord2;
+
+		void main ( void ) { 
+			// This is not position invariant! 
+			vec4 r0;
+			vec4 r1;
+			vec4 r2;
+			vec4 r3;
+			vec4 r4;
+			vec4 r5;
+			vec4 r7;
+			vec4 r9;
+			vec4 vert;
+			vec4 scale;
+			vec4 normal;
+			vec4 normalMod;
+			$define mat u_modelViewProjectionMatrix
+			vec4 taylor = vec4( -0.16666666666666666666666666666667, 0.0083333333333333333333333333333333, -0.0001984126984126984126984126984127, 2.7557319223985890652557319223986e-6 );
+			vec4 waveDistortx = vec4(30.0,20.0,0.0,0.0);
+			vec4 waveDistortz = vec4(0.0,0.0,0.0,0.0);
+			vec4 waveDistorty = vec4(0.0,-10.0,0.0,0.0);
+			vec4 waveDirx = vec4(0.001,0.0,0.0,0.0);
+			vec4 waveDiry = vec4(0.001,-0.001,0.0,0.0);
+			vec4 waveSpeed = vec4(0.3,0.6,0.7,1.4);
+			vec4 piVector = vec4(4.0,1.570796,3.141593,6.283185);
+			vec4 lightingWaveScale = vec4(0.35,0.1,0.1,0.03);
+			vec4 lightingScaleBias = vec4(0.6,0.7,0.2,0.0);
+			// Put the stuff on it's final spot 
+			vert = $positionAttrib;
+			// Calculate arguments for the sines 
+			r0 = waveDirx * vert;
+			// use vertex pos x as inputs to sinusoidal warp 
+			r0 = waveDiry * vert + r0;
+			// use vertex pos y as inputs to sinusoidal warp 
+			r0 = $grass_times.x + r0;
+			// add time to animate them 
+			r0 = fract ( r0 );
+			// wrap to 0-1 interval 
+			r0 = r0 - 0.5;
+			// subtract 0.5 
+			r1 = r0 * piVector.w;
+			// *=2pi, means coords now range from(-pi to pi) 
+			// Calculate powers 
+			r2 = r1 * r1;
+			// (wave vec)^2 
+			r3 = r2 * r1;
+			// (wave vec)^3 
+			r5 = r3 * r2;
+			// (wave vec)^5 
+			r7 = r5 * r2;
+			// (wave vec)^7 
+			// MUL r9, r7, r2;          # (wave vec)^9 
+			// Approx sin with taylor coeffs 
+			r0 = r3 * taylor.x + r1;
+			// (wave vec) - ((wave vec)^3)/3! 
+			r0 = r5 * taylor.y + r0;
+			// + ((wave vec)^5)/5! 
+			r0 = r7 * taylor.z + r0;
+			// - ((wave vec)^7)/7! 
+			// MAD r0, r9, taylor.w, r0;   #  - ((wave vec)^9)/9! 
+			// Every componenst of r0 contains the sin of a different argument 
+			// sum them together to get the final offset value 
+			r3.x = dot ( r0 , waveDistortx );
+			r3.y = dot ( r0 , waveDistorty );
+			// Calculate the amount of warping 
+			r4.xy = r3.xy * VERTEX_BYTE_COLOR($colorAttrib).w;
+			r4.z = 0.0;
+			// Displace the vertex 
+			r2.w = 1.0;
+			r2.xyz = (r4 + vert).xyz;
+			// add sinusoidal warping to grass position 
+			normal = r3 * $grass_times.w + vec4( $normalAttrib, 1.0 );
+			normal.w = dot ( normal .xyz , normal .xyz );
+			normal.w = 1.0 / sqrt ( normal.w );
+			normal = normal * normal.w;
+			// do atmosphereing 
+			// seTemplate atmosphere_ARB< r2, r1 > 
+			// MUL scale, scale, r1.x; 
+			// MUL scale, scale, r1.x; ##boost fog fade a bit 
+			// Put it in projection space 
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+			// Output texcoords & light contribution 
+			var_TexCoord0 = $texCoordAttrib.xy;
+			var_TexCoord1 = normal.xyz;
+			// normal map for ambient cubemap lookup 
+			r2 = vec4( dot ( normal .xyz , $sunDirection .xyz ) );
+			// dot normal,sun 
+			r2 = r2 * 0.5 + 0.5;
+			var_Color.xyz = ( r2 * $sunColor ).xyz;
+			// multiply with sunlight color (WARNING: if the lightscale is to high this will get clamped to 0 ".." 1!) 
+			var_Color2 = VERTEX_BYTE_COLOR($colorAttrib);
+			// vertex color 
+			r0 = $positionAttrib - $viewOrigin;
+			scale = vec4( dot ( r0 .xyz , r0 .xyz ) );
+			scale = scale * $stuffParameters.w;
+			scale.x = 1.0 / sqrt ( scale.x );
+			scale.x = 1.0 / scale.x;
+			r0 = vec4( $foliageHackDistance.x < scale.x ? 1.0 : 0.0 );
+			scale.x = scale.x * $stuffParameters.y + -$stuffParameters.z;
+			scale.x = 1.0 - scale.x;
+			var_Color.w = scale.x * r0.x;
+			// for fading 
+			vec4 R1;
+			vec4 R2;
+			R2 = $positionAttrib - $viewOrigin;
+			R1.x = dot ( R2 .xyz , R2 .xyz );
+			R1.y = 1.0 / sqrt ( R1.x );
+			R1.x = R1.y * R1.x;
+			var_TexCoord2 = R1.x * $fogDepths.z + $fogDepths.w;
+		} 
+	%> }
+
+	program fragment glsl { <%
+		varying vec2 var_TexCoord0;
+		varying vec3 var_TexCoord1;
+		varying vec4 var_Color2;
+		varying vec4 var_Color;
+		varying float var_TexCoord2;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 r0;
+			vec4 r1;
+			r0 = texture2D ( $diffuseMap , var_TexCoord0.xy );
+			// use kill instead of alpha testing, this should theoretically be faster but also 
+			// it means we can blend using a different alpha than the alpha we test against ".." . 
+			// 
+			// Acutal benchmarks reveal kill is actually a very big bottleneck in this shader 
+			// but alpha testing has a similar cost, it's probably early z-culling or whatever 
+			// related stuff that causes this. 
+			// Optimizing other parts of the shader seems useless only the kill and the 
+			// dependencies seem to change the render time, hiding the kill dependencies 
+			// between other instructions (to hide pipeline latency) seems to make no 
+			// noticeable difference 
+			r1.a = r0.a - 0.5;
+			if ( r1.a < 0.0 ) discard;
+			r1 = textureCube ( $ambientCubeMap , var_TexCoord1.xyz );
+			r1 = r1 * $ambientBrightness;
+			r0.rgb = ( r0 * var_Color2 ).rgb;
+			// diffuse color 
+			r1 = r1 + var_Color;
+			// add ambient and sun 
+			gl_FragColor = r0 * r1;
+			// final color 
+			gl_FragColor.a = r0.a * var_Color.a;
+			// distance scaled alpha 
+		} 
+	%> }
+}
+
+renderProgram stuff/grass_alphatestarb {
+
+	program vertex reference stuff/grass
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP	r0, r1;
+		TEMP r3;
+		MUL r3, fragment.position, 0.0625;
+
+		TEX	r1, fragment.texcoord[1], $ambientCubeMap, CUBE;
+		TEMP noise;
+		TEX noise, r3, $noiseMap, 2D;
+		SLT noise.w, noise.w, fragment.color.a;
+		#KIL	-noise.w; #alphaout.a;
+		TEX	r0, fragment.texcoord[0], $diffuseMap, 2D;
+		MUL r1.w, noise.w, r0.w;
+		
+		# use kill instead of alpha testing, this should theoretically be faster but also 
+		# it means we can blend using a different alpha than the alpha we test against...
+		#
+		# Acutal benchmarks reveal kill is actually a very big bottleneck in this shader
+		# but alpha testing has a similar cost, it's probably early z-culling or whatever
+		# related stuff that causes this.
+		# Optimizing other parts of the shader seems useless only the kill and the 
+		# dependencies seem to change the render time, hiding the kill dependencies
+		# between other instructions (to hide pipeline latency) seems to make no
+		# noticeable difference
+		SUB	r3, r1, 0.4;
+		KIL	r3.a;
+		
+		MUL	r1, r1, $ambientBrightness;
+		MUL	r0.rgb, r0, fragment.color.secondary;		# diffuse color
+		ADD	r1, r1, fragment.color;				# add ambient and sun
+		MUL	result.color, r0, r1;				# final color
+		MUL result.color.a, r0.a, 1.15;
+		#MOV	result.color.rgb, noise.w;		# distance scaled alpha
+	%> }
+}
+
+renderProgram stuff/grass_alphatestcg {
+
+	program vertex cg {
+	<%
+		struct VsInputs {
+			float3 norm : $normalAttrib;
+			float2 diff	: $texCoordAttrib;
+		};
+		struct VsOutputs {
+			float2 diff	: TEXCOORD0;
+			float3 norm	: TEXCOORD1;
+			float4 color0 : COLOR;
+			float4 color1 : COLOR1;
+		};
+		
+		VsOutputs vertex( VsInputs indata ) {
+			VsOutputs o;
+			
+			$if r_32ByteVtx
+			indata.diff *= 1.f/4096.f;
+			$endif
+			
+			o.color0 = 1;
+			o.color1 = 1;
+			o.norm = indata.norm;
+			o.diff = indata.diff;
+			return o;
+		}
+	%>
+	}
+	program fragment cg {
+	<%
+		struct VsOutputs {
+			float2 pos  : WPOS;
+			float2 diff	: TEXCOORD0;
+			float3 norm	: TEXCOORD1;
+			float fog : TEXCOORD2;
+			float4 color0 : COLOR;
+			float4 color1 : COLOR1;
+		};
+		samplerCUBE ambientMap : $ambientCubeMap;
+		sampler2D noiseMap : $noiseMap;
+		sampler2D diffuseMap : $diffuseMap;
+		float4 ambientBrightness : $ambientBrightness;
+		float4 fogColor : $fogColor;
+		float4 fragment(VsOutputs  indata) : COLOR {
+		
+			float4 noise = tex2D( noiseMap, indata.diff * 3 );
+			if ( indata.color0.w < noise.w  ) {
+				discard;
+			}
+			
+			float4 diff = tex2D( diffuseMap, indata.diff );
+			if ( diff.w < 0.4 ) {
+				discard;
+			}
+
+			float3 amb = texCUBE( ambientMap, indata.norm ).rgb * ambientBrightness.rgb + indata.color0.rgb;
+			
+			diff.rgb *= indata.color1.rgb;
+			diff.rgb *= amb;
+			diff.a *= 1.15f;
+					
+			return float4( lerp( diff.rgb, fogColor.rgb, indata.fog ), diff.a );
+		}
+	%>
+	}
+}
+
+renderProgram stuff/grass_alphatestglsl {
+
+	program vertex glsl {
+	<%
+		$define indata_norm $normalAttrib
+
+		$define diff var_TexCoord0
+		$define norm var_TexCoord1
+		$define color0 var_Color
+		$define color1 var_Color2
+		$define fog var_TexCoord2
+		varying vec2 var_TexCoord0;
+		varying vec3 var_TexCoord1;
+		varying vec4 var_Color2;
+		varying vec4 var_Color;
+		varying float var_TexCoord2;
+		
+		void main() {
+			vec2 indata_diff = $texCoordAttrib.xy;
+			
+			$if r_32ByteVtx
+			indata_diff *= 1.0/4096.0;
+			$endif
+			
+			color0 = vec4( 1.0 );
+			color1 = vec4( 1.0 );
+			norm = indata_norm;
+			diff = indata_diff;
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%>
+	}
+	program fragment glsl {
+	<%
+		$define diff var_TexCoord0
+		$define norm var_TexCoord1
+		$define color0 var_Color
+		$define color1 var_Color2
+		$define fog var_TexCoord2
+		varying vec2 var_TexCoord0;
+		varying vec3 var_TexCoord1;
+		varying vec4 var_Color2;
+		varying vec4 var_Color;
+		varying float var_TexCoord2;
+
+		$define ambientMap $ambientCubeMap
+
+		void main() {
+		
+			vec4 noise = texture2D( $noiseMap, diff * 3.0 );
+			if ( color0.w < noise.w  ) {
+				discard;
+			}
+			
+			vec4 _diff = texture2D( $diffuseMap, diff );
+			if ( _diff.w < 0.4 ) {
+				discard;
+			}
+
+			vec3 amb = textureCube( ambientMap, norm ).rgb * $ambientBrightness.rgb + color0.rgb;
+			
+			_diff.rgb *= color1.rgb;
+			_diff.rgb *= amb;
+			_diff.a *= 1.15;
+					
+			gl_FragColor = vec4( mix( _diff.rgb, $fogColor.rgb, fog ), _diff.a );
+		}
+	%>
+	}
+}
+
+renderProgram stuff/grass_alphatest {
+	program vertex reference stuff/grass
+	program fragment reference stuff/grass_alphatestglsl
+}

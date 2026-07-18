@@ -1,0 +1,497 @@
+/*********************************************************/
+
+renderProgram ambient/basic_detail {
+	hwSkinningVersion ambient/basic_skinning_matrix_detail ambient/basic_hardskinning_matrix_detail
+	instanceVersion ambient/basic_detail_instance
+	lodVersion ambient/basic
+
+	machineSpec 3
+	fallBack ambient/basic
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex arb { <%
+		$define enable_detail_fade
+		$include "interaction/basic_ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_diffdetail
+		$define enable_specdetail
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+renderProgram ambient/basic_detail_instance {
+	lodVersion ambient/basic_instance
+
+	machineSpec 3
+	fallBack ambient/basic_instance
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex arb { <%
+		$define instance
+		$define enable_detail_fade
+		$include "interaction/basic_ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define enable_instdither
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_diffdetail
+		$define enable_specdetail
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+
+renderProgram ambient/basic_skinning_matrix_detail {
+	lodVersion ambient/basic_skinning_matrix
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		$define enable_detail_fade
+		$include "interaction/basic_ambient_skinning_matrix_vertex.inc"
+	%> }
+
+	program fragment reference ambient/basic_detail
+}
+
+renderProgram ambient/basic_hardskinning_matrix_detail {
+	lodVersion ambient/basic_hardskinning_matrix
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		$define enable_detail_fade
+		$include "interaction/basic_ambient_hardskinning_matrix_vertex.inc"
+	%> }
+
+	program fragment reference ambient/basic_detail
+}
+
+renderProgram interaction/basic_detail {
+	interaction
+
+	amblitVersion interaction/basic_detail_amblit
+	ambientVersion ambient/basic_detail
+	hwSkinningVersion interaction/basic_skinning_matrix_detail interaction/basic_hardskinning_matrix_detail
+	instanceVersion interaction/basic_instance_detail
+	lodVersion interaction/basic
+
+	machineSpec 3
+	fallBack interaction/basic
+
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$define enable_detail_fade
+		$include "interaction/basic_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_detail_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_detail
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+
+
+renderProgram interaction/basic_skinning_matrix_detail {
+	interaction
+
+	amblitVersion interaction/basic_skinning_matrix_detail_amblit
+	ambientVersion ambient/basic_skinning_matrix_detail
+	lodVersion interaction/basic_skinning_matrix
+
+	machineSpec 3
+	fallBack interaction/basic_skinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$define enable_detail_fade
+		$include "interaction/basic_skinning_matrix_vertex.inc"
+	%> }
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram interaction/basic_skinning_matrix_detail_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix_detail
+
+	program fragment reference interaction/basic_detail_amblit
+}
+
+
+renderProgram interaction/basic_hardskinning_matrix_detail {
+	interaction
+
+	amblitVersion interaction/basic_hardskinning_matrix_detail_amblit
+	ambientVersion ambient/basic_hardskinning_matrix_detail
+	lodVersion interaction/basic_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$define enable_detail_fade
+		$include "interaction/basic_hardskinning_matrix_vertex.inc"
+	%> }
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram interaction/basic_hardskinning_matrix_detail_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix_detail
+
+	program fragment reference interaction/basic_detail_amblit
+}
+
+/*********************************************************/
+
+renderProgram ambient/basic_detail_alphatest {
+	hwSkinningVersion ambient/basic_skinning_matrix_detail ambient/basic_hardskinning_matrix_detail
+	instanceVersion ambient/basic_alphatest_detail_instance
+	lodVersion ambient/basic_alphatest
+
+	machineSpec 3
+	fallBack ambient/basic_alphatest
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_detail
+
+	program fragment arb { <%
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$define alphatest_kill
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+renderProgram ambient/basic_skinning_matrix_detail_alphatest {
+	lodVersion ambient/basic_skinning_matrix_alphatest
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference ambient/basic_skinning_matrix_detail
+
+	program fragment reference ambient/basic_detail_alphatest
+}
+
+renderProgram ambient/basic_hardskinning_matrix_detail_alphatest {
+	lodVersion ambient/basic_hardskinning_matrix_alphatest
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference ambient/basic_hardskinning_matrix_detail
+
+	program fragment reference ambient/basic_detail_alphatest
+}
+
+renderProgram interaction/basic_detail_alphatest {
+	interaction
+
+	amblitVersion interaction/basic_detail_alphatest_amblit
+	ambientVersion ambient/basic_detail_alphatest
+	hwSkinningVersion interaction/basic_skinning_matrix_detail_alphatest interaction/basic_hardskinning_matrix_detail_alphatest
+	instanceVersion interaction/basic_alphatest_detail_instance
+	lodVersion interaction/basic_alphatest
+
+	machineSpec 3
+	fallBack interaction/basic_alphatest
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_detail
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram interaction/basic_detail_alphatest_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_detail
+
+	program fragment arb { <%
+		$define amblit
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$define alphatest_kill
+		$define ambient
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_skinning_matrix_detail_alphatest {
+	interaction
+
+	amblitVersion interaction/basic_skinning_matrix_detail_alphatest_amblit
+	ambientVersion ambient/basic_skinning_matrix_detail_alphatest
+	lodVersion interaction/basic_skinning_matrix_alphatest
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix_detail
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram interaction/basic_skinning_matrix_detail_alphatest_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix_detail
+
+	program fragment reference interaction/basic_detail_alphatest_amblit
+}
+
+renderProgram interaction/basic_hardskinning_matrix_detail_alphatest {
+	interaction
+
+	amblitVersion interaction/basic_hardskinning_matrix_detail_alphatest_amblit
+	ambientVersion ambient/basic_hardskinning_matrix_detail_alphatest
+	lodVersion interaction/basic_hardskinning_matrix_alphatest
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix_detail
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram interaction/basic_hardskinning_matrix_detail_alphatest_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix_detail
+
+	program fragment reference interaction/basic_detail_alphatest_amblit
+}
+
+
+
+renderProgram interaction/basic_instance_detail {
+	interaction
+
+	amblitVersion interaction/basic_instance_detail_amblit
+	ambientVersion ambient/basic_detail_instance
+	
+	machineSpec 4
+	fallBack interaction/basic_instance
+
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$define instance
+		$define enable_detail_fade
+		$include "interaction/basic_vertex.inc"
+	%> }
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram interaction/basic_instance_detail_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	machineSpec 4
+	fallBack interaction/basic_instance_amblit
+
+	program vertex reference interaction/basic_instance_detail
+
+	program fragment arb { <%
+		$define amblit
+		$define  ambient	
+		$define enable_instdither
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_diffdetail
+		$define enable_specdetail
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+
+
+
+renderProgram interaction/basic_alphatest_detail_instance {
+	interaction
+
+	amblitVersion interaction/basic_instance_alphatest_detail_amblit
+	ambientVersion ambient/basic_alphatest_detail_instance
+	
+	machineSpec 4
+	fallBack interaction/basic_alphatest_instance
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_instance_detail
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram ambient/basic_alphatest_detail_instance {
+	lodVersion ambient/basic_alphatest_instance
+
+	machineSpec 4
+	fallBack ambient/basic_alphatest_instance
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex arb { <%
+		$define instance
+		$define enable_detail_fade
+		$include "interaction/basic_ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_diffdetail
+		$define enable_specdetail
+		$define alphatest_kill
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_instance_alphatest_detail_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	machineSpec 4
+	fallBack interaction/basic_alphatest_instance_amblit
+
+	program vertex reference interaction/basic_instance_detail
+
+	program fragment arb { <%
+		$define amblit
+		$define  ambient	
+		$define enable_instdither
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_diffdetail
+		$define enable_specdetail
+		$define alphatest_kill
+		$include "interaction/basic_fragment.inc"
+	%> }
+}

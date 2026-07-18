@@ -1,0 +1,216 @@
+renderProgram megaTexture/snow_specular {
+
+	state {
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		TEMP	bitangent;
+		TEMP	R0, R1, R2;
+
+		# derive bitangent
+		XPD		bitangent, $normalAttrib, $tangentAttrib;
+		MUL		bitangent, bitangent, $tangentAttrib.w;
+
+		#
+		# Texture coord 0: Specular and normal map coordinates
+		#
+		DP4	result.texcoord[0].x, $texCoordAttrib, $diffuseMatrix_s;
+		DP4	result.texcoord[0].y, $texCoordAttrib, $diffuseMatrix_t;
+
+		MOV	result.texcoord[4].x, $texCoordAttrib;
+		MOV	result.texcoord[4].y, $texCoordAttrib;
+
+		#
+		# Texture coord 1: Megatexture detail mask lookup
+		#
+		MOV		result.texcoord[1], $texCoordAttrib;
+
+		#
+		# Texture coord 2: Tangent sun dir
+		#
+		DP3		result.texcoord[2].x, $tangentAttrib, $sunDirection;
+		DP3		result.texcoord[2].y, bitangent, $sunDirection;
+		DP3		result.texcoord[2].z, $normalAttrib, $sunDirection;
+
+		#
+		# Texture coord 3: Tangent view dir
+		#
+		SUB		R1, $viewOrigin, $positionAttrib;		
+		DP3		result.texcoord[3].x, $tangentAttrib, R1;
+		DP3		result.texcoord[3].y, bitangent, R1;
+		DP3		result.texcoord[3].z, $normalAttrib, R1;
+		
+		# 
+		# Color: Diffuse normal dot product (so specular doesn't appear on backsides) and sun color
+		#
+		DP3		R1, $normalAttrib, $sunDirection;
+		MUL		result.color, $sunColor, R1;
+		
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP	R0, R1, localNormal, specular;
+		PARAM	subOne = { -1, -1, -1, -1 };
+		PARAM	scaleTwo = { 2, 2, 2, 2 };
+		PARAM	flat = { 0, 0, 1, 0 };
+
+		# Half angle (per vertex gives really bad errors on landscape)
+		DP3		R0.w, fragment.texcoord[2], fragment.texcoord[2];
+		RSQ		R0.w, R0.w;
+		MUL		R0, R0.w, fragment.texcoord[2];
+
+		DP3		R1.w, fragment.texcoord[3], fragment.texcoord[3];
+		RSQ		R1.w, R1.w;
+		MUL		R1, R1.w, fragment.texcoord[3];
+	
+		ADD		specular, R0, R1;
+		DP3		specular.w, specular, specular;
+		RSQ		specular.w, specular.w;
+		MUL		specular, specular.w, specular;
+
+		# lookup normal map
+		TEX		localNormal, fragment.texcoord[0], $bumpMap, 2D;
+$if !r_dxnNormalMaps
+		MOV 	localNormal.x, localNormal.a;
+$endif
+		MAD		localNormal, localNormal, scaleTwo, subOne;
+		
+		$if r_normalizeNormalMaps
+		MOV		localNormal.z, 0;
+		DP3		R1.x, localNormal,localNormal;
+		ADD		R1.x, 1, -R1.x;
+		RSQ		R1.x, R1.x;
+		RCP		localNormal.z, R1.x;
+		$endif		
+
+		# perform the specular bump mapping
+		DP3		R1, specular, localNormal;
+		MAX		R1, R1, 0;
+		POW_SAT	R1, R1.x, $parameters.z;
+
+		DP3		R0, specular, flat;
+		MAX		R0, R0, 0;
+		POW_SAT	R0, R0.x, $parameters.x;
+
+		MUL		R1, R1, $parameters.w;
+		MAD		R1, R0, $parameters.y, R1;
+
+		# apply detail texture mask blue channel
+		TEX		R0, fragment.texcoord[1], $megaDetailTextureMask, 2D;
+		MUL		R1, R1, R0.z;
+
+		TEMP	shadowMask;
+		TEX		shadowMask, fragment.texcoord[4], $mask, 2D;
+		MUL		R1, R1, shadowMask.z;
+
+		# multiply with sunlight contribution
+		MUL		result.color, R1, fragment.color;
+	%> }	
+}
+
+renderProgram megaTexture/specular {
+	interaction
+
+	ambientVersion ambient/basic
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP	light, color, R1, R2, localNormal, specular;
+
+		PARAM	subOne = { -1, -1, -1, -1 };
+		PARAM	scaleTwo = { 2, 2, 2, 2 };
+		PARAM	grayscale = { 0.3, 0.59, 0.11, 0.0 };
+		PARAM	power = { 32.0, 0.0, 0.0, 0.0 };
+		
+		# normalize with math
+		DP3	specular.x, fragment.texcoord[6], fragment.texcoord[6];
+		RSQ	specular.x, specular.x;
+		MUL	specular, specular.x, fragment.texcoord[6];
+
+		#
+		# the amount of light contacting the fragment is the
+		# product of the two light projections and the surface
+		# bump mapping
+		#
+
+		# perform the diffuse bump mapping
+		$if !r_shaderPreferALU
+			TEX	light, fragment.texcoord[0], $normalCubeMap, CUBE;
+			MAD	light, light, scaleTwo, subOne;
+		$else
+			# instead of using the normalization cube map, normalize with math
+			DP3	light.x, fragment.texcoord[0], fragment.texcoord[0];
+			RSQ	light.x, light.x;
+			MUL	light, light.x, fragment.texcoord[0];
+		$endif
+
+		TEX	localNormal, fragment.texcoord[1], $bumpMap, 2D;
+$if !r_dxnNormalMaps
+		MOV localNormal.x, localNormal.a;
+$endif
+		MAD	localNormal, localNormal, scaleTwo, subOne;
+
+		#Renormalize
+		$if r_normalizeNormalMaps
+		MOV		localNormal.z, 0;
+		DP3		R1.x, localNormal,localNormal;
+		ADD		R1.x, 1, -R1.x;
+		RSQ		R1.x, R1.x;
+		RCP		localNormal.z, R1.x;
+		$endif
+
+		DP3	light.x, light, localNormal;
+
+		# modulate by the light projection
+		TXP	R1, fragment.texcoord[3], $lightProjectionMap, 2D;
+		MUL	light, light.x, R1;
+
+		# modulate by the light falloff
+		TEX	R1.x, fragment.texcoord[2], $lightFalloffMap, 2D;
+		MUL	light, light, R1.x;
+
+		# Specular only
+
+		# perform the specular bump mapping
+		DP3	specular.x, specular, localNormal;
+
+		POW_SAT R1.x, specular.x, power.x;
+
+		# modulate by the constant specular factor
+		MUL	R1, R1.x, $specularColor;
+
+		# modulate by the specular map * 2
+		TEX	R2, fragment.texcoord[5], $specularMap, 2D;
+		ADD	R2, R2, R2;
+		MUL	color, R1, R2;
+
+
+		MUL	color, light, color;
+		
+		# apply detail texture mask blue channel
+		TEX		R1, fragment.texcoord[4], $megaDetailTextureMask, 2D;
+		MUL		color, color, R1.z;		
+
+		# modify by the vertex color
+		MUL result.color.rgb, color, fragment.color;
+
+		# Bloom value
+		MUL R1, R1, R2;
+		MUL R1, R1, light;
+		DP3 result.color.a, R1, grayscale;
+	%> }
+}

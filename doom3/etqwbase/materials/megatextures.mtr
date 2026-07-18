@@ -1,0 +1,627 @@
+// ===========================================================
+// megatextures/default
+// default megatexture behavior
+// ===========================================================
+$template templates/game/maps/cmMapAsMegatexture( MapParm )
+	{
+		blend diffusemap
+		map nopicmip commandmaps/MapParm.tga
+	}
+$endtemplate
+
+template megatextures/default {
+  parameters < TextureParm, SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		program megaTexture/interaction
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		program megaTexture/interaction_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_brightness {
+  parameters < TextureParm, _amb = "1.0", _interact = "1.0", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters _amb, _interact, 0, 0
+		program megaTexture/interaction_brightness
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters _amb, _interact, 0, 0
+		program megaTexture/interaction_brightness_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_spec_brightness {
+  parameters < TextureParm, _amb = "1.0", _interact = "1.0", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		mask  megatextures/TextureParm_lit_spec.tga
+		parameters _amb, _interact, 0, 0
+		program megaTexture/interaction_spec_brightness
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		mask  megatextures/TextureParm_lit_spec.tga
+		parameters _amb, _interact, 0, 0
+		program megaTexture/interaction_spec_brightness_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_rgb {
+  parameters < TextureParm, SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+//	bakedInAtmosLightCol
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		program megaTexture/interaction_premult
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		program megaTexture/interaction_premult_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_spec {
+  parameters < TextureParm, SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_spec
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_spec_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_rgb_spec {
+  parameters < TextureParm, SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+//	bakedInAtmosLightCol
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		program megaTexture/interaction_premult_spec
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		program megaTexture/interaction_premult_spec_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_ambient {
+  parameters < TextureParm, AmbientMult = "0.75", InteractionMult = "0.5", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		program megaTexture/interaction_bakedamb
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		program megaTexture/interaction_bakedamb_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_ambient_noshadows {
+  parameters < TextureParm, AmbientMult = "0.75", InteractionMult = "0.5", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+	noshadows
+	
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		program megaTexture/interaction_bakedamb
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		program megaTexture/interaction_bakedamb_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+
+template megatextures/default_ambient_brightness {
+  parameters < TextureParm, _amb = "1.0", _interact = "1.0", AmbientMult = "0.75", InteractionMult = "0.5", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters _amb, _interact, AmbientMult, InteractionMult
+		program megaTexture/interaction_bakedamb_brightness
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters _amb, _interact, AmbientMult, InteractionMult
+		program megaTexture/interaction_bakedamb_brightness_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_ambient_spec {
+  parameters < TextureParm, AmbientMult = "0.75", InteractionMult = "0.5", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+	//diffusemap megatextures/sdk/terrain_mesh_sdk_lit_preview.tga
+
+	diffusemap nopicmip commandmaps/TextureParm.tga
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+
+	//templates/game/maps/cmMapAsMegatexture( TextureParm )
+		/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_spec
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_spec_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_ambient_ambspec {
+  parameters < TextureParm, AmbientMult = "0.75", InteractionMult = "0.5", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_ambspec
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_ambspec_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_ambient_ambspec_noshadows {
+  parameters < TextureParm, AmbientMult = "0.75", InteractionMult = "0.5", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+	noshadows
+	
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_ambspec
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_ambspec_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+
+
+template megatextures/default_ambient_spec_brightness {
+  parameters < TextureParm, _amb = "1.0", _interact = "1.0", AmbientMult = "0.75", InteractionMult = "0.5", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters _amb, _interact, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_spec_brightness
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters _amb, _interact, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_spec_brightness_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+
+template megatextures/default_ambient_spec_brightness_noshadows {
+  parameters < TextureParm, _amb = "1.0", _interact = "1.0", AmbientMult = "0.75", InteractionMult = "0.5", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+	noshadows
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters _amb, _interact, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_spec_brightness
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters _amb, _interact, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_spec_brightness_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+template megatextures/default_ambient_spec_noshadows {
+  parameters < TextureParm, AmbientMult = "0.75", InteractionMult = "0.5", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+	noshadows
+	
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+	diffusemap nopicmip commandmaps/TextureParm.tga
+
+	/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_spec
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_spec_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+// a coder should probably replace this with a more suitable material - Wils
+template megatextures/bounds_water {
+  parameters < TextureParm, SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.001
+	sort opaqueNearer
+	lowrangeuvs
+
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+
+	noshadows
+	noimpact // needed so the oob doesn't affect the gameplay masks
+	{
+		if cvar !r_megaTexturePreferConditional
+		program megaTexture/interaction
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		program megaTexture/interaction_glsl
+		megaTexture TextureParm_lit.mega
+	}
+  }
+}
+
+material megatextures/area22            		{ useTemplate megatextures/default_ambient_spec< "area22"            > }
+material megatextures/area22_noshadows  		{ useTemplate megatextures/default_ambient_spec_noshadows< "area22"            > }
+material megatextures/ark        				{ useTemplate megatextures/default_ambient_spec< "ark", "0.7", "0.7" > }
+material megatextures/ark_noshadows     		{ useTemplate megatextures/default_ambient_spec_noshadows< "ark", "0.7", "0.7" > }
+material megatextures/canyon            		{ useTemplate megatextures/default_ambient_spec< "canyon" > }
+material megatextures/canyon_noshadows  		{ useTemplate megatextures/default_ambient_spec_noshadows< "canyon" > }
+material megatextures/outskirts        			{ useTemplate megatextures/default_ambient_spec< "outskirts" > }
+material megatextures/outskirts_noshadows     	{ useTemplate megatextures/default_ambient_spec_noshadows< "outskirts" > }
+material megatextures/island           			{ useTemplate megatextures/default_ambient_spec  < "island" > }
+material megatextures/island_noshadows  		{ useTemplate megatextures/default_ambient_spec_noshadows < "island" > }
+material megatextures/quarry           			{ useTemplate megatextures/default_ambient< "quarry"            > }
+material megatextures/quarry_noshadows          { useTemplate megatextures/default_ambient_noshadows  < "quarry"            > }
+material megatextures/refinery      			{ useTemplate megatextures/default_ambient_spec< "refinery" > }
+material megatextures/refinery_noshadows 		{ useTemplate megatextures/default_ambient_spec_noshadows < "refinery" > }
+material megatextures/road_demo     			{ useTemplate megatextures/default< "road_demo" > }
+material megatextures/salvage     				{ useTemplate megatextures/default_ambient_spec_brightness<"salvage", "1", "0.75" , "0.575", "0.25" > }
+material megatextures/salvage_noshadows 		{ useTemplate megatextures/default_ambient_spec_brightness_noshadows 	<"salvage", "1", "0.75" , "0.575", "0.25" > }
+material megatextures/sewer						{ useTemplate megatextures/default_ambient_spec< "sewer" > }
+material megatextures/sewer_noshadows 			{ useTemplate megatextures/default_ambient_spec_noshadows < "sewer" > }
+material megatextures/slipgate         			{ useTemplate megatextures/default_ambient_spec< "slipgate_1" > }
+material megatextures/slipgate_noshadows   		{ useTemplate megatextures/default_ambient_spec_noshadows < "slipgate_1" > }
+material megatextures/slipgate_snow    			{ useTemplate megatextures/default_ambient_ambspec< "slipgate_2", "0" > }
+material megatextures/slipgate_snow_noshadows   { useTemplate megatextures/default_ambient_ambspec_noshadows < "slipgate_2", "0" > }
+material megatextures/temperate        			{ useTemplate megatextures/default< "temperate" > }
+material megatextures/temperate_new    			{ useTemplate megatextures/default< "temperate_new" > }
+material megatextures/valley          			{ useTemplate megatextures/default_ambient_spec< "valley" > }
+material megatextures/valley_noshadows 			{ useTemplate megatextures/default_ambient_spec_noshadows < "valley" > }
+material megatextures/volcano          			{ useTemplate megatextures/default_ambient_spec< "volcano" > }
+material megatextures/volcano_noshadows			{ useTemplate megatextures/default_ambient_spec_noshadows< "volcano" > }
+material megatextures/island_test      			{ useTemplate megatextures/default< "island_test" > }
+material megatextures/snowy_terrain    			{ 
+	useTemplate megatextures/default< "snowy_terrain" >
+	
+	// Add an extra snow specular layer
+	{
+		if shaderQuality < 1	// Only for high quality settings
+	
+
+		program megaTexture/snow_specular
+
+		// Put highquality on this or it will look quite bad!
+		// If you change the height scale it will affect the amount of sparklies, lower is less and more
+		// narrowly distributed around the highlight
+		bumpMap highquality heightmap( textures/sfx/snownormal.tga, 0.7 )	
+		
+		//The parameters are 
+		// 1: Specular power, how wide is the highlight
+		// 2: Specular scale, how bright is the highlight
+		// 3: Sparklies power, how wide is the sparkly specular
+		// 4: Sparklies scale, how bright are the sparklies
+		parameters 8, 0.5, 128, 1.0
+		
+		// The scale controlls the overal "size" or repeat of the sparklies
+		scale 200, 200
+	}
+}
+
+// ===========================================================
+// temp for devmap review
+// ===========================================================
+material megatextures/mothership
+{
+	diffusemap megatextures/mothership_lit_preview.tga
+}
+
+// ===========================================================
+// Horizon materials
+//	( Hmmz these are not really megatextures... maybe put them somewhere else? )
+// ===========================================================
+material megatextures/desert_horizon	{
+	forceatmosphere
+	sort 0
+	{
+		maskalpha
+		program sfx/horizon
+		diffuseMap "models/terrain/desert_horizon_d.tga"
+		bumpMap "models/terrain/desert_horizon_local.tga"
+		writeDepth
+	}
+
+	// Disable z-fill pass
+	translucent // this goes AFTER the stages or it will be disabled by the shader parsing!
+}
+
+// ===========================================================
+// debug
+// ===========================================================
+/*
+renderProgram showSurfaceTypes {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		MOV result.texcoord, $texCoordAttrib;
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP surfaceType;
+
+		TEX surfaceType, fragment.texcoord, $map, 2D;
+
+		MUL result.color, 25.5, surfaceType;
+		MOV result.color.a, 1;
+	%> }
+}
+
+material megatextures/temperate_new {
+	surfaceTypeMap maps/temperate_new.stm
+	staticOccluder
+	slopTexCoordMod 0.001
+	{
+		//map maps/temperate_new_color.tga
+		program showSurfaceTypes
+		map maps/temperate_new_map.tga
+	}
+}
+*/

@@ -1,0 +1,342 @@
+renderProgram megaTexture/interaction {
+	interaction
+	lowrangeuv
+	
+	ambientVersion megaTexture/ambient
+	amblitVersion megaTexture/notlit_lit
+
+	machineSpec 2
+	fallback megaTexture/interaction_fallback
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex arb { <%
+		$include "megatexture/interaction_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_fallback {
+	interaction
+	lowrangeuv
+	
+	ambientVersion megaTexture/ambient
+	amblitVersion megaTexture/notlit_lit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex arb { <%
+		$include "megatexture/interaction_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define fallback		
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+
+renderProgram megaTexture/interaction_premult {
+	interaction
+	lowrangeuv
+
+	ambientVersion megaTexture/ambient_premult
+	amblitVersion megaTexture/notlit_lit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex arb { <%
+		$define premult
+		$include "megatexture/interaction_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define premult
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_spec {
+	interaction
+	lowrangeuv
+	
+	ambientVersion megaTexture/ambient
+	machineSpec 3
+	fallback megaTexture/interaction
+	amblitVersion megaTexture/notlit_lit
+
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex arb { <%
+		$define megatexSpecular
+		$include "megatexture/interaction_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define megatexSpecular
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_premult_spec {
+	interaction
+	lowrangeuv
+
+	ambientVersion megaTexture/ambient_premult
+	amblitVersion megaTexture/notlit_lit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex arb { <%
+		$define premult
+		$define megatexSpecular
+		$include "megatexture/interaction_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define premult
+		$define megatexSpecular
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+
+renderProgram megaTexture/interaction_bakedamb {
+	interaction
+	lowrangeuv
+	
+	ambientVersion megaTexture/ambient_bakedamb
+	amblitVersion megaTexture/notlit_lit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex arb { <%
+		$include "megatexture/interaction_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define bakedamb
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_bakedamb_spec {
+	interaction
+	lowrangeuv
+	
+	ambientVersion megaTexture/ambient_bakedamb
+	machineSpec 3
+	fallback megaTexture/interaction_bakedamb
+	amblitVersion megaTexture/notlit_lit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex arb { <%
+		$define megatexSpecular
+		$include "megatexture/interaction_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define bakedamb
+		$define megatexSpecular
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_bakedamb_ambspec {
+	interaction
+	lowrangeuv
+	
+	ambientVersion megaTexture/ambient_bakedamb_ambspec
+	machineSpec 3
+	fallback megaTexture/interaction_bakedamb
+	amblitVersion megaTexture/notlit_lit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex reference megaTexture/interaction_bakedamb
+
+	program fragment reference megaTexture/interaction_bakedamb
+}
+
+
+renderProgram megaTexture/interaction_brightness {
+	interaction
+	lowrangeuv
+	
+	ambientVersion megaTexture/ambient_brightness
+	machineSpec 3
+	fallback megaTexture/interaction
+	amblitVersion megaTexture/notlit_lit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex reference megaTexture/interaction
+
+	program fragment arb { <%
+		$define brightness
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_spec_brightness {
+	interaction
+	lowrangeuv
+	
+	ambientVersion megaTexture/ambient_brightness
+	machineSpec 3
+	fallback megaTexture/interaction
+	amblitVersion megaTexture/notlit_lit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex reference megaTexture/interaction_spec
+
+	program fragment arb { <%
+		$define brightness
+		$define megatexSpecular
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_bakedamb_brightness {
+	interaction
+	lowrangeuv
+	
+	ambientVersion megaTexture/ambient_bakedamb_brightness
+	machineSpec 3
+	fallback megaTexture/interaction_bakedamb
+	amblitVersion megaTexture/notlit_lit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex arb { <%
+		$include "megatexture/interaction_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define brightness
+		$define bakedamb
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+renderProgram megaTexture/interaction_bakedamb_spec_brightness {
+	interaction
+	lowrangeuv
+	
+	ambientVersion megaTexture/ambient_bakedamb_brightness
+	machineSpec 3
+	fallback megaTexture/interaction_bakedamb
+	amblitVersion megaTexture/notlit_lit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	
+	program vertex arb { <%
+		$define megatexSpecular
+		$include "megatexture/interaction_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define brightness
+		$define bakedamb
+		$define megatexSpecular
+		$include "megatexture/interaction_fragment.inc"
+	%> }	
+}
+
+
+renderProgram megaTexture/notlit_lit {
+	interaction
+	lowrangeuv
+	
+	notlitVersion megaTexture/notlit_notlit
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		$include "megatexture/mt_common_vertex.inc"
+
+		TEMP _F1, _F2;
+		SUB		_F2, $positionAttrib, $viewOrigin;
+		DP3		_F1.x, _F2, _F2;
+		RSQ		_F1.y, _F1.x;
+		MUL		_F1.x, _F1.y, _F1.x;
+		MAD		result.color.secondary, _F1.x, $fogDepths.z, $fogDepths.w; 
+
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		$include "megatexture/mt_common_fragment.inc"
+
+		TEMP D;
+		LRP D, 0.35, $diffuseColor, 1;
+		MUL		combined.xyz, combined, D;
+		LRP result.color.rgb, fragment.color.secondary.x, $fogColor, combined;		
+		MOV		result.color.a, 0;
+	%> }
+}
+
+renderProgram megaTexture/notlit_notlit {
+
+	state {
+		maskDepth
+	}
+
+	program vertex arb { <%
+		$define premult	
+		$include "megatexture/ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define premult	
+		$define bakedamb
+		$include "megatexture/ambient_fragment.inc"
+	%> }
+}

@@ -1,0 +1,217 @@
+/**
+
+	Template cg program
+
+*/
+
+struct VsInputs {
+	float3 corner	: $positionAttrib;
+	float4 tex		: $texCoordAttrib;
+	float4 col		: $colorAttrib;
+	float3 center 	: $normalAttrib;
+	float4 tang		: $tangentAttrib;
+	$if r_32ByteVtx
+	float4 signs : $signAttrib;
+	$endif
+};
+
+struct VsOutputs {
+	float4 col  : COLOR1;
+	float4 atten: COLOR0;
+	float2 tex	: TEXCOORD0;
+	float3 tang : TEXCOORD1;
+	float3 bino : TEXCOORD2;
+	float3 norm : TEXCOORD3;
+	float3 toLight0 : TEXCOORD4;
+	float3 toLight1 : TEXCOORD5;
+	float3 toLight2 : TEXCOORD6;
+	float3 toLight3 : TEXCOORD7;
+};
+
+uniform float3 viewOrigin : $viewOrigin;
+uniform float4 lightOrigin0 : $lightOrigin_0;
+uniform float4 lightOrigin1 : $lightOrigin_1;
+uniform float4 lightOrigin2 : $lightOrigin_2;
+uniform float4 lightOrigin3 : $lightOrigin_3;
+uniform float4 lightFallOff0 : $lightFalloff_0;
+uniform float4 lightFallOff1 : $lightFalloff_1;
+uniform float4 lightFallOff2 : $lightFalloff_2;
+uniform float4 lightFallOff3 : $lightFalloff_3;
+uniform float4 lightColor0 : $lightColor_0;
+uniform float4 lightColor1 : $lightColor_1;
+uniform float4 lightColor2 : $lightColor_2;
+uniform float4 lightColor3 : $lightColor_3;
+
+#ifdef TRAIL
+uniform float2 normalScroll : $parameters;
+#endif
+
+sampler2D diffuseMap : $diffuseMap;
+sampler2D normalMap : $bumpMap;
+samplerCUBE ambientMap : $ambientCubeMapSun;
+
+float GetZ( float2 value, float sign ) {
+	return ( sqrt( 1.0f - ( dot( value.xy, value.xy ) ) ) * ( sign - 1.f ) );
+}
+
+
+#define TO_LIGHT( lightOrigin, lightFallOff, dest, atten )	\
+toLight = lightOrigin.xyz - indata.center;\
+temp = toLight * lightFallOff.xyz;\
+atten = length( temp );\
+toLight = normalize( toLight );\
+dest.x = dot( tang, toLight );\
+dest.y = dot( bino, toLight );\
+dest.z = dot( normal, toLight )
+
+$include "atmosphere.hg"
+
+uniform float4 Matrix_x : $transposedModelMatrix_x;
+uniform float4 Matrix_y : $transposedModelMatrix_y;
+uniform float4 Matrix_z : $transposedModelMatrix_z;
+uniform float4 diffuseMatrix_s : $diffuseMatrix_s;
+uniform float4 diffuseMatrix_t : $diffuseMatrix_t;
+
+VsOutputs vertex(VsInputs indata) {
+	VsOutputs outdata;
+
+	$if r_32ByteVtx
+	indata.tex.xy *= 1.f/4096.f;
+#ifdef TRAIL
+	indata.center.xy *= 1.f / 32767.f;
+	indata.tang.xy *= 1.f / 32767.f;
+	indata.center.z = GetZ( indata.center.xy, indata.signs.x );
+	indata.tang.z = GetZ( indata.tang.xy, indata.signs.y );
+	indata.tang.w = ( indata.signs.z - 1.f );
+#else
+	indata.center.z = indata.tang.x;
+	indata.tang = indata.signs;
+#endif
+	$endif
+
+	outdata.tex.x = dot( indata.tex, diffuseMatrix_s );
+	outdata.tex.y = dot( indata.tex, diffuseMatrix_t );
+	outdata.col = indata.col;
+
+	//
+	//	Atmosphere
+	//
+#if 0
+	float2 r = float2(0.5, 1.0 );
+#else
+
+	float2 r = Extinction(indata.center);
+#endif
+
+	float4 tempc = float4( indata.col.rgb, r.x * indata.col.a );
+	outdata.col= tempc;
+
+#ifdef TRAIL
+	float3 normal = indata.center;
+	float3 bino = indata.tang.xyz;
+	float3 tang = cross( bino, normal );
+
+	float3 toView = normalize( viewOrigin - indata.center );
+	outdata.col.a *= 1-pow( abs( dot( toView, tang ) ), 32 );
+#else
+	// Calculate the tangent space for this billboard, this is a bit tricky as our billboards are all lying in planes paralel
+	// to the near plane, this makes for cheap billboard calculations on the CPU.  But then they all lit identical because they
+	// all have identical tangent space, and it is also dependent on the view angles. So we want a view-vector billboard tangent
+	// space. We fake this by taking the view-vector and thus not the billboard-normal as the normal for our tangent space and
+	// rederive the other two vectors.
+	float3 normal = normalize( viewOrigin - indata.center );
+	float3 bino = cross( normal, indata.tang.xyz );
+	float3 tang = cross( normal, bino );
+#endif
+
+#if 1
+	// Tangent -> World (for the ambient cubemap lookup)
+	outdata.tang.x = dot( tang, Matrix_x.xyz );
+	outdata.tang.y = dot( bino, Matrix_x.xyz );
+	outdata.tang.z = dot( normal, Matrix_x.xyz );
+
+	outdata.bino.x = dot( tang, Matrix_y.xyz );
+	outdata.bino.y = dot( bino, Matrix_y.xyz );
+	outdata.bino.z = dot( normal, Matrix_y.xyz );
+
+	outdata.norm.x = dot( tang, Matrix_z.xyz );
+	outdata.norm.y = dot( bino, Matrix_z.xyz );
+	outdata.norm.z = dot( normal, Matrix_z.xyz );
+#else
+	outdata.tang = tang;
+	outdata.bino = bino;
+	outdata.norm = normal;
+#endif
+
+	// toLight in tangent space
+	float3 toLight;
+	float3 temp;
+	float len;
+
+	outdata.atten = 0;
+#ifdef LIGHT_1
+	TO_LIGHT( lightOrigin0, lightFallOff0, outdata.toLight0, outdata.atten.r );
+#endif
+#ifdef LIGHT_2
+	TO_LIGHT( lightOrigin1, lightFallOff1, outdata.toLight1, outdata.atten.g );
+#endif
+#ifdef LIGHT_3
+	TO_LIGHT( lightOrigin2, lightFallOff2, outdata.toLight2, outdata.atten.b );
+#endif
+#ifdef LIGHT_4
+	TO_LIGHT( lightOrigin3, lightFallOff3, outdata.toLight3, outdata.atten.a );
+#endif
+
+#ifdef LIGHT_1
+	// Atten just contains the lengt of the scaled tolight vector now make it in the 0-1 range
+	outdata.atten = 1.0 - min( outdata.atten, 1.0 );
+#endif
+
+	//outdata.atten.y = 1.0f;
+	return outdata;
+}
+
+float3 CalculateLight( float3 normal, float3 direction, float3 color, float3 falloff ) {
+	return max( dot( normal, direction), 0 ) * color * falloff;
+}
+
+float4 fragment(VsOutputs indata) : COLOR {
+	float4 diffuse = tex2D( diffuseMap, indata.tex );
+	if ( diffuse.a < 0.01 ) discard;
+
+#ifdef TRAIL
+	float4 normalt = tex2D( normalMap, indata.tex - normalScroll ) * 2 - 1;
+	//float4 normalt = ( 0.5 * tex2D( normalMap, indata.tex ) + 0.5 * tex2D( normalMap, indata.tex - normalScroll ) ) * 2 - 1;
+#else
+	float4 normalt = tex2D( normalMap, indata.tex ) * 2 - 1;
+#endif
+	$if !r_dxnNormalMaps
+	normalt.x = normalt.a;
+	$endif
+	normalt.z = sqrt( 1.f - dot( normalt.xy, normalt.xy ) );
+	float3 normal = normalt.rgb;
+	diffuse *= indata.col;
+
+	float3 wNormal;
+	wNormal.x = dot( indata.tang, normal );
+	wNormal.y = dot( indata.bino, normal );
+	wNormal.z = dot( indata.norm, normal );
+
+	float3 light = texCUBE( ambientMap, wNormal ).rgb * 4;
+#ifdef LIGHT_1
+	light += CalculateLight( normal, normalize( indata.toLight0 ), lightColor0.rgb, indata.atten.x );
+#endif
+#ifdef LIGHT_2
+	light += CalculateLight( normal, normalize( indata.toLight1 ), lightColor1.rgb, indata.atten.y );
+#endif
+#ifdef LIGHT_3
+	light += CalculateLight( normal, normalize( indata.toLight2 ), lightColor2.rgb, indata.atten.z );
+#endif
+#ifdef LIGHT_4
+	light += CalculateLight( normal, normalize( indata.toLight3 ), lightColor3.rgb, indata.atten.w );
+#endif
+
+    return float4( light * diffuse.rgb, diffuse.a );
+    //return float4( diffuse.rgb, diffuse.a );
+}
+	

@@ -1,0 +1,172 @@
+renderProgram megaTexture/ambient {
+	lowrangeuv
+	
+	machineSpec 2
+	fallback megaTexture/ambient_fallback
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		$include "megatexture/ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$include "megatexture/ambient_fragment.inc"
+	%> }
+}
+
+renderProgram megaTexture/ambient_fallback {
+	lowrangeuv
+	
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference megaTexture/ambient
+
+	program fragment arb { <%
+		$define fallback
+		$include "megatexture/ambient_fragment.inc"
+	%> }
+}
+
+
+renderProgram megaTexture/ambient_premult {
+	lowrangeuv
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		$define premult	
+		$include "megatexture/ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define premult
+		$include "megatexture/ambient_fragment.inc"
+	%> }
+}
+
+
+renderProgram megaTexture/ambient_bakedamb {
+	lowrangeuv
+
+	machineSpec 2
+	fallback megaTexture/ambient_bakedamb_fallback
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		$define premult	
+		$include "megatexture/ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define premult
+		$define bakedamb
+		$include "megatexture/ambient_fragment.inc"
+	%> }
+}
+
+renderProgram megaTexture/ambient_bakedamb_ambspec {
+	lowrangeuv
+
+	machineSpec 2
+	fallback megaTexture/ambient_bakedamb_fallback
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		$define premult	
+		$define megatexSpecular
+		$include "megatexture/ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define premult
+		$define bakedamb
+		$define megatexSpecular
+		$include "megatexture/ambient_fragment.inc"
+	%> }
+}
+
+renderProgram megaTexture/ambient_brightness {
+	lowrangeuv
+
+	machineSpec 2
+	fallback megaTexture/ambient_brightness_fallback
+	
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference megaTexture/ambient
+
+	program fragment arb { <%
+		$define brightness
+		$include "megatexture/ambient_fragment.inc"
+	%> }
+}
+
+renderProgram megaTexture/ambient_bakedamb_brightness {
+	lowrangeuv
+
+	machineSpec 2
+	fallback megaTexture/ambient_bakedamb_fallback
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference megaTexture/ambient_bakedamb
+
+	program fragment arb { <%
+		$define premult
+		$define bakedamb
+		$define brightness
+		$include "megatexture/ambient_fragment.inc"
+	%> }
+}
+
+renderProgram megaTexture/ambient_bakedamb_fallback {
+	lowrangeuv
+	
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference megaTexture/ambient_bakedamb
+
+	program fragment arb { <%
+		$define premult
+		$define bakedamb
+		$define fallback
+		$include "megatexture/ambient_fragment.inc"
+	%> }
+}
+
+renderProgram megaTexture/ambient_bakedamb_brightness_brightness {
+	lowrangeuv
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference megaTexture/ambient_bakedamb
+
+	program fragment arb { <%
+		$define premult
+		$define bakedamb
+		$define brightness
+		$define fallback
+		$include "megatexture/ambient_fragment.inc"
+	%> }
+}

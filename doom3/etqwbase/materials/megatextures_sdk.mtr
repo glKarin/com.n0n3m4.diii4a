@@ -1,0 +1,34 @@
+template megatextures/default_ambient_spec_preview {
+  parameters < TextureParm, AmbientMult = "0.75", InteractionMult = "0.5", SurfaceTypeParm = "pavement" >
+  text {
+	surfaceType SurfaceTypeParm
+	surfaceTypeMap maps/TextureParm.stm
+	staticOccluder
+	slopTexCoordMod 0.0001
+	sort opaqueNearer
+	lowrangeuvs
+	diffusemap nopicmip megatextures/TextureParm_lit_preview.tga
+
+	//diffusemap nopicmip commandmaps/TextureParm.tga
+	qer_editorimage megatextures/TextureParm_lit_preview.tga
+
+		/*
+	{
+		if cvar !r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_spec
+		megaTexture TextureParm_lit.mega
+	}
+	{
+		if cvar r_megaTexturePreferConditional
+		parameters 0, 0, AmbientMult, InteractionMult
+		mask  megatextures/TextureParm_lit_spec.tga
+		program megaTexture/interaction_bakedamb_spec_glsl
+		megaTexture TextureParm_lit.mega
+	}
+	*/
+  }
+}
+
+material megatextures/sdk/terrain_mesh_sdk						{ useTemplate megatextures/default_ambient_spec_preview< "sdk/terrain_mesh_sdk" > }

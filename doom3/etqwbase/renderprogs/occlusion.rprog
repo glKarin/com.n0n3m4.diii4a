@@ -1,0 +1,25 @@
+renderProgram occlusion {
+
+	program vertex glsl { <%
+
+		varying vec4 color;
+
+
+		void main() {
+			color = vec4( 1.0 );
+            gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+
+	%> }
+	
+	program fragment glsl { <%
+
+		varying vec4 color;
+
+		void main() {
+		
+			gl_FragColor = color;
+		}	
+	%> }
+}
+

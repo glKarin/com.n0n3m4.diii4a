@@ -1,0 +1,15 @@
+renderProgram postprocess/showAlpha {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP R0;
+
+		TEX R0, fragment.position, $currentRender, RECT;
+
+		MOV result.color, R0.aaaa;
+	%> }
+}

@@ -1,0 +1,18 @@
+renderProgram tools/pathFinder {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+		
+		MOV	result.texcoord[0], vertex.position;
+	%> }
+
+	program fragment arb { <%
+		TEMP	R0;
+
+		# move to min and scale
+		ADD		R0.x, fragment.texcoord[0].z, -program.local[0].x;
+		MUL		R0.x, R0.x, program.local[0].y;
+
+		# output
+		MOV		result.color, R0.x;
+	%> }
+}
