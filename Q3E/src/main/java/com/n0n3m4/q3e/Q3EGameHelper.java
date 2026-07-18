@@ -699,6 +699,7 @@ class Q3EGameHelper
         Q3EUtils.mkdir(Q3EUtils.FileDir(systemVersionPath), true);
         Q3EUtils.file_put_contents(systemVersionPath, apkVersion);
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Write " + name + " file version is " + apkVersion);
+        ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_version, name, apkVersion));
     }
 
     void ExtractTDMGLSLShaderSource()

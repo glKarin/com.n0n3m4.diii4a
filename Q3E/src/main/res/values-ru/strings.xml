@@ -74,4 +74,5 @@
     <string name="restart">Перезапустить</string>
     <string name="skin_deep_glsl_shader">Skin Deep GLSL шейдер</string>
     <string name="etqw_glsl_shader_and_resource_patches">ETQW GLSL shader and resource patches</string>
+    <string name="extract_files_version">Extract %1$s files(version %2$s)</string>
 </resources>
