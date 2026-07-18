@@ -597,5 +597,7 @@
     <string name="other_engine">Other engine</string>
     <string name="etqw">ETQW</string>
     <string name="etqw_base">Enemy Territory: QUAKE Wars</string>
+    <string name="gyroscope_dead_zone">Gyroscope dead zone</string>
+    <string name="dead_zone_rad_s">rad/s</string>
 
 </resources>

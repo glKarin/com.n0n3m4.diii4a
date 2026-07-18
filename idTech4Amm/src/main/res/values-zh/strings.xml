@@ -593,4 +593,6 @@
     <string name="other_engine">其他引擎</string>
     <string name="etqw">深入敌后: 雷神战争</string>
     <string name="etqw_base">深入敌后: 雷神战争</string>
+    <string name="gyroscope_dead_zone">陀螺仪死区</string>
+    <string name="dead_zone_rad_s">弧度/秒</string>
 </resources>

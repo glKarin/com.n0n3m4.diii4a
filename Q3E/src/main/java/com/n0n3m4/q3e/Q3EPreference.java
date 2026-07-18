@@ -291,6 +291,7 @@ public final class Q3EPreference
     public static final String pref_harm_view_motion_control_gyro     = "q3e_harm_mouse_move_control_gyro"; //k
     public static final String pref_harm_view_motion_gyro_x_axis_sens = "q3e_harm_view_motion_gyro_x_axis_sens"; //k
     public static final String pref_harm_view_motion_gyro_y_axis_sens = "q3e_harm_view_motion_gyro_y_axis_sens"; //k
+    public static final String pref_harm_view_motion_gyro_dead_zone = "q3e_harm_view_motion_gyro_dead_zone"; //k
     public static final String pref_harm_auto_quick_load              = "q3e_harm_auto_quick_load"; //k
     public static final String pref_harm_multithreading               = "q3e_harm_multithreading"; //k
     public static final String pref_harm_s_driver                     = "q3e_harm_s_driver"; //k

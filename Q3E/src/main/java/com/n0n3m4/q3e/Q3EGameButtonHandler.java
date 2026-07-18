@@ -430,10 +430,13 @@ class Q3EGameButtonHandler extends Q3EOnScreenButtonHandler
             gyroscopeControl.EnableGyroscopeControl(true);
             float gyroXSens = mPrefs.getFloat(Q3EPreference.pref_harm_view_motion_gyro_x_axis_sens, Q3EGlobals.GYROSCOPE_X_AXIS_SENS);
             float gyroYSens = mPrefs.getFloat(Q3EPreference.pref_harm_view_motion_gyro_y_axis_sens, Q3EGlobals.GYROSCOPE_Y_AXIS_SENS);
+            float gyroDeadZone = mPrefs.getFloat(Q3EPreference.pref_harm_view_motion_gyro_dead_zone, Q3EGlobals.GYROSCOPE_DEAD_ZONE);
             if(gyroXSens != 0.0f || gyroYSens != 0.0f)
                 gyroscopeControl.SetGyroscopeSens(gyroXSens, gyroYSens);
+            if(gyroDeadZone >= 0.0f)
+                gyroscopeControl.SetDeadZoneGyroSens(gyroDeadZone);
 
-            KLog.I("Enable gyroscope control: x=%f, y=%f", gyroscopeControl.XAxisGyroSens(), gyroscopeControl.YAxisGyroSens());
+            KLog.I("Enable gyroscope control: x=%f, y=%f, dead zone=%f", gyroscopeControl.XAxisGyroSens(), gyroscopeControl.YAxisGyroSens(), gyroscopeControl.DeadZoneGyroSens());
         }
     }
 

@@ -146,6 +146,7 @@ public final class Q3EGlobals
     // gyroscope
     public static final float GYROSCOPE_X_AXIS_SENS = 18;
     public static final float GYROSCOPE_Y_AXIS_SENS = 18;
+    public static final float GYROSCOPE_DEAD_ZONE = 0;
 
     // device
     public static final int DEVICE_TOUCHSCREEN = 1;
