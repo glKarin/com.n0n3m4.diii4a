@@ -350,32 +350,32 @@
 						android:layout_gravity="right|center_vertical"
 						android:autofillHints="" />
 				</LinearLayout>
-			</LinearLayout>
 
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center_vertical"
-				android:orientation="horizontal">
-				<TextView
-					android:layout_width="0dp"
-					android:layout_height="match_parent"
-					android:layout_weight="1"
-					android:gravity="center_vertical"
-					android:text="@string/gyroscope_dead_zone"
-					android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-				<EditText
-					android:id="@+id/launcher_tab2_gyro_dead_zone"
-					android:inputType="numberDecimal|textNoSuggestions"
-					android:ems="5"
-					android:hint="@string/dead_zone_rad_s"
-					android:imeOptions="flagNoExtractUi"
-					android:text="0"
-					android:layout_width="wrap_content"
+				<LinearLayout
+					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:layout_gravity="right|center_vertical"
-					android:autofillHints="" />
+					android:layout_gravity="center_vertical"
+					android:orientation="horizontal">
+					<TextView
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:gravity="center_vertical"
+						android:text="@string/gyroscope_dead_zone"
+						android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+					<EditText
+						android:id="@+id/launcher_tab2_gyro_dead_zone"
+						android:inputType="numberDecimal|textNoSuggestions"
+						android:ems="5"
+						android:hint="@string/dead_zone_rad_s"
+						android:imeOptions="flagNoExtractUi"
+						android:text="0"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_gravity="right|center_vertical"
+						android:autofillHints="" />
+				</LinearLayout>
 			</LinearLayout>
 
 		</LinearLayout> <!-- end Gyro section -->
