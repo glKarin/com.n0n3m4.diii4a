@@ -3226,7 +3226,7 @@ void idCommonLocal::LoadGameDLL(void)
 	//karin: make same key/value allocator for idDict in engine and game, because idDict of engine maybe modified in game
 	idStrPool *keypool = NULL;
 	idStrPool *valuepool = NULL;
-	idDict::GetGlobalPools(globalKeyPool, globalValuePool);
+	idDict::GetGlobalPools(keypool, valuepool);
 	gameImport.adManager				= ::adManager;
 	gameImport.keyInputManager			= ::keyInputManager;
 	gameImport.notificationSystem		= ::notificationSystem;
@@ -3366,11 +3366,11 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 		// initialize idLib
 #ifdef _SPLASHDAMAGE //karin: must call before idLib::Init
 		//karin: must in heap
-		globalKeyPool = new idStrPool;
-		globalValuePool = new idStrPool;
-		idDict::SetGlobalPools(globalKeyPool, globalValuePool);
 		idStr::SetStringAllocator(&globalStringDataAllocator);
 		idWStr::SetStringAllocator(&globalWideStringDataAllocator);
+		globalKeyPool = new idStrPool(1024);
+		globalValuePool = new idStrPool(1024);
+		idDict::SetGlobalPools(globalKeyPool, globalValuePool);
 #endif
 		idLib::Init();
 
