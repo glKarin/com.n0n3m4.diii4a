@@ -5351,6 +5351,13 @@ bool idFileSystemLocal::ParseMetaConfFile(const char *text, int length, bool isA
 			break;
 		}
 
+		if(token.Icmp("mapMetaData") && token.Icmp("campaignMetaData"))
+		{
+			src.SkipUntilString("{");
+			src.SkipBracedSection(false);
+			continue;
+		}
+
 		metaDataContext_t md;
 		if(ParseMetaConf(src, md))
 		{
