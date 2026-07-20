@@ -82,6 +82,12 @@ sdDeviceContextLocal::sdDeviceContextLocal()
 }
 
 void sdDeviceContextLocal::Reset() {
+	xScale = 0.0;
+	SetSize(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+	enableClipping = true;
+	clipRects.Clear();
+	tempColor = vec4_one;
+	usingTempColor = false;
 	whiteImage = declManager->FindMaterial("guis/assets/white");
 	whiteImage->SetSort(SS_GUI);
 }

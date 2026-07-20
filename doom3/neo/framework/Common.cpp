@@ -3720,6 +3720,7 @@ void idCommonLocal::ShutdownGame(bool reloading)
 
 #ifdef _SPLASHDAMAGE
 	networkService->Shutdown();
+	fontManager->Shutdown();
 #else
 	// shut down the user interfaces
 	uiManager->Shutdown();

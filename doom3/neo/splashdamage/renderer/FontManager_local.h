@@ -77,7 +77,6 @@ private:
 	int						DrawText(const wchar_t *text, float textScale, int textAlign, idVec4 color, const sdBounds2D &rectDraw, bool wrap, bool noclipping, int cursor, bool calcOnly, idList<int> *breaks, int limit, int** charAdvances = NULL, int rSize[] = NULL);
 
 private:
-	idStr					fontName;
 	idStr					fontLang;
 
 	fontInfoEx_t			*activeFont;

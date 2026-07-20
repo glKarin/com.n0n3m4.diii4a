@@ -43,7 +43,17 @@ void sdFontManagerLocal::Init(void) {
 }
 
 void sdFontManagerLocal::Shutdown(void) {
-
+	fontLang.Clear();
+	activeFont = NULL;
+	useFont = NULL;
+	for(int i = 0; i < fonts.Num(); i++)
+	{
+		common->Printf("Free font '%s'.\n", fonts[i].name);
+		R_Font_FreeFontInfoEx(&fonts[i]);
+	}
+	fontConfigs.Clear();
+	fonts.Clear();
+	overStrikeMode = true;
 }
 
 qhandle_t sdFontManagerLocal::FindFont( const char* name ) {
