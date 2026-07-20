@@ -68,18 +68,6 @@ class idAASFileLocal : public idAASFile
 
 #ifdef _SPLASHDAMAGE //karin: parse binary aasb file
 		bool						LoadBinary(const idStr &fileName, unsigned int mapFileCRC);
-		bool						ParseIndexBinary(idFile *file, idList<aasIndex_t> &indexes);
-		bool						ParsePlanesBinary(idFile *file);
-		bool						ParseVerticesBinary(idFile *file);
-		bool						ParseEdgesBinary(idFile *file);
-		bool						ParseReachabilitiesBinary(idFile *file);
-		bool						ParseAreasBinary(idFile *file);
-		bool						ParseNodesBinary(idFile *file);
-		bool						ParsePortalsBinary(idFile *file);
-		bool						ParseClustersBinary(idFile *file);
-		bool						ParseObstaclePVSsBinary(idFile *file);
-		bool						ParseReachabilityNamesBinary(idFile *file);
-
 		size_t						MemorySize(void) const;
 #else
 		int							MemorySize(void) const;
@@ -120,6 +108,22 @@ class idAASFileLocal : public idAASFile
 		}
 #endif
 #ifdef _SPLASHDAMAGE
+		bool						ParseObstaclePVSs(idLexer &src);
+		bool						ParseReachabilities(idLexer &src);
+		bool						ParseReachNames(idLexer &src);
+
+		bool						ParseIndexBinary(idFile *file, idList<aasIndex_t> &indexes);
+		bool						ParsePlanesBinary(idFile *file);
+		bool						ParseVerticesBinary(idFile *file);
+		bool						ParseEdgesBinary(idFile *file);
+		bool						ParseReachabilitiesBinary(idFile *file);
+		bool						ParseAreasBinary(idFile *file);
+		bool						ParseNodesBinary(idFile *file);
+		bool						ParsePortalsBinary(idFile *file);
+		bool						ParseClustersBinary(idFile *file);
+		bool						ParseObstaclePVSsBinary(idFile *file);
+		bool						ParseReachabilityNamesBinary(idFile *file);
+
 		virtual int					FindReachabilityByName( const char *name ) const;
 		virtual bool				PushPointIntoArea( int areaNum, idVec3 &point ) const;
 #endif

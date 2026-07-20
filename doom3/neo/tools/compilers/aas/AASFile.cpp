@@ -433,6 +433,83 @@ bool idAASSettings::FromParser(idLexer &src)
 			if (!ParseInt(src, tt_startWalkOffLedge)) {
 				return false;
 			}
+#ifdef _SPLASHDAMAGE //karin: ascii aas
+		} else if (token == "type") {
+			src.ExpectTokenString("=");
+			src.ReadToken(&token);
+			if(!token.Icmp("player"))
+				type = AAS_PLAYER;
+			else if(!token.Icmp("vehicle"))
+				type = AAS_VEHICLE;
+			else
+			{
+				src.Error("Unknown aas type '%s' in file %s", token.c_str(), src.GetFileName());
+				return false;
+			}
+		} else if (token == "bbox") {
+			src.ExpectTokenString("=");
+			src.Parse1DMatrix(3, boundingBox[0].ToFloatPtr());
+
+			if (!src.ExpectTokenString("-")) {
+				return false;
+			}
+
+			src.Parse1DMatrix(3, boundingBox[1].ToFloatPtr());
+
+			boundingBoxes[numBoundingBoxes++] = boundingBox;
+		} else if (token == "fileExtensionAAS") {
+			src.ExpectTokenString("=");
+			src.ExpectTokenType(TT_STRING, 0, &token);
+			fileExtension = token;
+		} else if (token == "primitiveModeBrush") {
+			if (!ParseInt(src, primitiveModeBrush)) {
+				return false;
+			}
+		} else if (token == "primitiveModePatch") {
+			if (!ParseInt(src, primitiveModePatch)) {
+				return false;
+			}
+		} else if (token == "primitiveModeModel") {
+			if (!ParseInt(src, primitiveModeModel)) {
+				return false;
+			}
+		} else if (token == "primitiveModeTerrain") {
+			if (!ParseInt(src, primitiveModeTerrain)) {
+				return false;
+			}
+		} else if (token == "minHighCeiling") {
+			if (!ParseFloat(src, minHighCeiling)) {
+				return false;
+			}
+		} else if (token == "groundSpeed") {
+			if (!ParseFloat(src, groundSpeed)) {
+				return false;
+			}
+		} else if (token == "waterSpeed") {
+			if (!ParseFloat(src, waterSpeed)) {
+				return false;
+			}
+		} else if (token == "ladderSpeed") {
+			if (!ParseFloat(src, ladderSpeed)) {
+				return false;
+			}
+		} else if (token == "wallCornerEdgeRadius") {
+			if (!ParseFloat(src, wallCornerEdgeRadius)) {
+				return false;
+			}
+		} else if (token == "ledgeCornerEdgeRadius") {
+			if (!ParseFloat(src, ledgeCornerEdgeRadius)) {
+				return false;
+			}
+		} else if (token == "obstaclePVSRadius") {
+			if (!ParseFloat(src, obstaclePVSRadius)) {
+				return false;
+			}
+		} else if (token == "tt_startLadderClimb") {
+			if (!ParseInt(src, tt_startLadderClimb)) {
+				return false;
+			}
+#endif
 		} else {
 			src.Error("invalid token '%s'", token.c_str());
 		}
@@ -1087,6 +1164,9 @@ bool idAASFileLocal::ParseEdges(idLexer &src)
 		src.ExpectTokenString("(");
 		edge.vertexNum[0] = src.ParseInt();
 		edge.vertexNum[1] = src.ParseInt();
+#ifdef _SPLASHDAMAGE //karin: ascii aas
+		edge.flags = src.ParseInt();
+#endif
 		src.ExpectTokenString(")");
 		edges.Append(edge);
 	}
@@ -1254,7 +1334,7 @@ bool idAASFileLocal::ParseAreas(idLexer &src)
 	for (i = 0; i < numAreas; i++) {
 		src.ParseInt();
 		src.ExpectTokenString("(");
-#ifdef _SPLASHDAMAGE
+#ifdef _SPLASHDAMAGE //karin: ascii aas
 		area.travelFlags = src.ParseInt();
 		area.flags = src.ParseInt();
 		area.numEdges = src.ParseInt();
@@ -1287,7 +1367,9 @@ bool idAASFileLocal::ParseAreas(idLexer &src)
 #endif
 		src.ExpectTokenString(")");
 		areas.Append(area);
+#if !defined(_SPLASHDAMAGE) //karin: ascii aas
 		ParseReachabilities(src, i);
+#endif
 	}
 
 	if (!src.ExpectTokenString("}")) {
@@ -1330,6 +1412,9 @@ bool idAASFileLocal::ParseNodes(idLexer &src)
 		src.ParseInt();
 		src.ExpectTokenString("(");
 		node.planeNum = src.ParseInt();
+#ifdef _SPLASHDAMAGE //karin: ascii aas
+		node.flags = src.ParseInt();
+#endif
 		node.children[0] = src.ParseInt();
 		node.children[1] = src.ParseInt();
 		src.ExpectTokenString(")");
@@ -1368,6 +1453,9 @@ bool idAASFileLocal::ParsePortals(idLexer &src)
 		portal.clusters[1] = src.ParseInt();
 		portal.clusterAreaNum[0] = src.ParseInt();
 		portal.clusterAreaNum[1] = src.ParseInt();
+#ifdef _SPLASHDAMAGE //karin: ascii aas
+		portal.maxAreaTravelTime = 0;
+#endif
 		src.ExpectTokenString(")");
 		portals.Append(portal);
 	}
@@ -1483,7 +1571,9 @@ bool idAASFileLocal::Load(const idStr &fileName, unsigned int mapFileCRC)
 
 	if (mapFileCRC && c != mapFileCRC) {
 		common->Warning("AAS file '%s' is out of date", name.c_str());
+#if !defined(_SPLASHDAMAGE) //karin: ascii aas
 		return false;
+#endif
 	}
 
 	// clear the file in memory
@@ -1586,6 +1676,20 @@ bool idAASFileLocal::Load(const idStr &fileName, unsigned int mapFileCRC)
 
 			src.ExpectTokenString("}");
 // jmarshall end
+#endif
+#ifdef _SPLASHDAMAGE //karin: ascii aas
+		} else if (token == "reachabilities") {
+			if (!ParseReachabilities(src)) {
+				return false;
+			}
+		} else if (token == "obstaclePVS") {
+			if (!ParseObstaclePVSs(src)) {
+				return false;
+			}
+		} else if (token == "reachNames") {
+			if (!ParseReachNames(src)) {
+				return false;
+			}
 #endif
 
 		} else {
@@ -1757,6 +1861,120 @@ void idAASFileLocal::DeleteClusters(void)
 }
 
 #ifdef _SPLASHDAMAGE //karin: parse binary aasb file
+/*
+================
+idAASFileLocal::ParseObstaclePVSs
+================
+*/
+bool idAASFileLocal::ParseObstaclePVSs(idLexer &src)
+{
+	int numIndexes, i;
+	int index;
+
+	numIndexes = src.ParseInt();
+	obstaclePVS.Resize(numIndexes);
+
+	if (!src.ExpectTokenString("{")) {
+		return false;
+	}
+
+	for (i = 0; i < numIndexes; i++) {
+		src.ParseInt();
+		src.ExpectTokenString("(");
+		index = src.ParseInt();
+		src.ExpectTokenString(")");
+		obstaclePVS.Append((byte)index);
+	}
+
+	if (!src.ExpectTokenString("}")) {
+		return false;
+	}
+
+	return true;
+}
+
+/*
+================
+idAASFileLocal::ParseReachabilities
+================
+*/
+bool idAASFileLocal::ParseReachabilities(idLexer &src)
+{
+	int numReachabilities, i;
+	aasReachability_t reach;
+
+	numReachabilities = src.ParseInt();
+	reachabilities.Resize(numReachabilities);
+
+	if (!src.ExpectTokenString("{")) {
+		return false;
+	}
+
+	for (i = 0; i < numReachabilities; i++) {
+		src.ParseInt();
+		src.ExpectTokenString("(");
+		reach.travelFlags = src.ParseInt();
+		reach.travelTime = src.ParseInt();
+		reach.fromAreaNum = src.ParseInt();
+		reach.toAreaNum = src.ParseInt();
+		src.ExpectTokenString("(");
+		reach.start[0] = src.ParseInt();
+		reach.start[1] = src.ParseInt();
+		reach.start[2] = src.ParseInt();
+		src.ExpectTokenString(")");
+		src.ExpectTokenString("(");
+		reach.end[0] = src.ParseInt();
+		reach.end[1] = src.ParseInt();
+		reach.end[2] = src.ParseInt();
+		src.ExpectTokenString(")");
+		src.ExpectTokenString(")");
+		reach.areaTTOfsAndNumber = 0; // missing
+		reachabilities.Append(reach);
+	}
+
+	if (!src.ExpectTokenString("}")) {
+		return false;
+	}
+
+	return true;
+}
+
+/*
+================
+idAASFileLocal::ParseReachNames
+================
+*/
+bool idAASFileLocal::ParseReachNames(idLexer &src)
+{
+	int numNames, i;
+	idToken token;
+
+	numNames = src.ParseInt();
+	reachabilityNames.Resize(numNames);
+
+	if (!src.ExpectTokenString("{")) {
+		return false;
+	}
+
+	for (i = 0; i < numNames; i++) {
+		src.ParseInt();
+		src.ExpectTokenString("(");
+		src.ReadToken(&token);
+		aasName_t &name = reachabilityNames.Alloc();
+		memset(name.name, 0, sizeof(name.name));
+		idStr::Copynz(name.name, token.c_str(), sizeof(name.name));
+		name.index = src.ParseInt();
+		src.ExpectTokenString(")");
+	}
+
+	if (!src.ExpectTokenString("}")) {
+		return false;
+	}
+
+	return true;
+}
+
+
 /*
 ============
 idAASSettings::ReadFromFileBinary
