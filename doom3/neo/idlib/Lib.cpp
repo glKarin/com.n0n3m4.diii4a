@@ -98,8 +98,10 @@ idLib::ShutDown
 void idLib::ShutDown(void)
 {
 
+#if !defined(_SPLASHDAMAGE) //karin: key/value pools are shared between engine and game, and idLib::Shutdown will be called on game library. So it shouldn't call in idLib::Shutdown
 	// shut down the dictionary string pools
 	idDict::Shutdown();
+#endif
 
 	// shut down the string memory allocator
 	idStr::ShutdownMemory();

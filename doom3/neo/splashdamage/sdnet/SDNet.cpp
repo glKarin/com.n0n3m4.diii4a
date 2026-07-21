@@ -56,6 +56,8 @@ bool sdNetService_Local::Init() {
 }
 
 void sdNetService_Local::Shutdown() {
+	activeUser = NULL;
+	userList.DeleteContents(true);
 }
 
 void sdNetService_Local::RunFrame() {
@@ -249,8 +251,6 @@ void sdNetService_Local::AddTask(sdNetTask *task) {
 void sdNetService_Local::LoadOfflineUsers(void)
 {
 	common->Printf("Load local offline users...");
-	activeUser = NULL;
-	userList.DeleteContents(true);
 
 	idStr path = fileSystem->GetUserPath();
 	path.AppendPath("sdnet");

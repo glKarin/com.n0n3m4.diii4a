@@ -552,6 +552,7 @@ class idFileSystemLocal : public idFileSystem
         void                    InitExtraGame(const char *configFile);
 
 #ifdef _SPLASHDAMAGE
+		sdAddonMetaDataList*	FindAddonMetaData( const char* metaDataTag );
 		bool					ParseMetaConfFile(const char *text, int length, bool isAddon, const char *type = NULL);
 		bool					ParseMetaConf(idLexer &src, metaDataContext_t &md);
 		void					InitMetaConf(const char *type = NULL);
@@ -3485,7 +3486,7 @@ void idFileSystemLocal::Shutdown(bool reloading)
 	cmdSystem->RemoveCommand("touchFile");
 
 	mapDict.Clear();
-#ifdef _SPLASHDAMAGE //karin: free map meta data
+#ifdef _SPLASHDAMAGE //karin: free map meta data, must call FreeAddonMetaDataList in game before this
 	addonMetaDataNames.Clear();
 	addonMetaDataList.DeleteContents(true);
 #endif
@@ -5362,7 +5363,7 @@ bool idFileSystemLocal::ParseMetaConfFile(const char *text, int length, bool isA
 		if(ParseMetaConf(src, md))
 		{
 			if (!type || !type[0] || !idStr::Icmp(token, type)) {
-				sdAddonMetaDataList *list = ListAddonMetaData(token);
+				sdAddonMetaDataList *list = FindAddonMetaData(token);
 				const metaDataContext_t *exists = list->FindMetaDataContext(md.meta->GetString("metadata_name"));
 				if (!exists) {
 					md.addon = isAddon;
@@ -5375,7 +5376,7 @@ bool idFileSystemLocal::ParseMetaConfFile(const char *text, int length, bool isA
 	return true;
 }
 
-sdAddonMetaDataList* idFileSystemLocal::ListAddonMetaData( const char* metaDataTag ) {
+sdAddonMetaDataList* idFileSystemLocal::FindAddonMetaData( const char* metaDataTag ) {
 	sdAddonMetaDataList *value;
 	int index;
 
@@ -5387,12 +5388,18 @@ sdAddonMetaDataList* idFileSystemLocal::ListAddonMetaData( const char* metaDataT
 	addonMetaDataNames.Append(metaDataTag);
 	value = new sdAddonMetaDataList;
 	addonMetaDataList.Append(value);
-	InitMetaConf(metaDataTag);
+	return value;
+}
+
+sdAddonMetaDataList* idFileSystemLocal::ListAddonMetaData( const char* metaDataTag ) {
+	sdAddonMetaDataList *value = FindAddonMetaData(metaDataTag);
+	//if(value->GetNumMetaData() == 0)
+		InitMetaConf(metaDataTag);
 	return value;
 }
 
 void idFileSystemLocal::FreeAddonMetaDataList( sdAddonMetaDataList* list ) {
-#if 0 //karin: TODO don't clear list, it is empty when in loading screen gui
+#if 1 //karin: TODO don't clear list, it is empty when in loading screen gui
 	int index;
 
 	index = addonMetaDataList.FindIndex(list);

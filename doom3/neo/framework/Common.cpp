@@ -45,9 +45,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "sdnet/SDNet.h"
 #include "sdnet/SDNet_local.h"
 
-static idStrPool *globalKeyPool;
-static idStrPool *globalValuePool;
-
 static stringDataAllocator_t globalStringDataAllocator;
 static wideStringDataAllocator_t globalWideStringDataAllocator;
 #endif
@@ -3227,6 +3224,7 @@ void idCommonLocal::LoadGameDLL(void)
 	idStrPool *keypool = NULL;
 	idStrPool *valuepool = NULL;
 	idDict::GetGlobalPools(keypool, valuepool);
+
 	gameImport.adManager				= ::adManager;
 	gameImport.keyInputManager			= ::keyInputManager;
 	gameImport.notificationSystem		= ::notificationSystem;
@@ -3368,9 +3366,6 @@ void idCommonLocal::Init(int argc, const char **argv, const char *cmdline)
 		//karin: must in heap
 		idStr::SetStringAllocator(&globalStringDataAllocator);
 		idWStr::SetStringAllocator(&globalWideStringDataAllocator);
-		globalKeyPool = new idStrPool(1024);
-		globalValuePool = new idStrPool(1024);
-		idDict::SetGlobalPools(globalKeyPool, globalValuePool);
 #endif
 		idLib::Init();
 
@@ -3536,6 +3531,9 @@ void idCommonLocal::Shutdown(void)
 	Mem_EnableLeakTest("doom");
 
 	// shutdown idLib
+#ifdef _SPLASHDAMAGE //karin: shutdown idDict manual, because it is removed from idLib::Shutdown
+	idDict::Shutdown();
+#endif
 	idLib::ShutDown();
 }
 

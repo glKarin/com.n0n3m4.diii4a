@@ -683,6 +683,10 @@ void idSessionLocal::ShowLoadingGui()
 	console->Close();
 
 #ifdef _SPLASHDAMAGE //karin: level loading UI
+	// keep addonMetaDataList not empty
+	(void *)fileSystem->ListAddonMetaData( "mapMetaData" );
+	(void *)fileSystem->ListAddonMetaData( "campaignMetaData" );
+
 	idStr mapName = mapSpawnData.serverInfo.GetString("si_map");
 	if(idStr::Icmpn(mapName, "maps/", 5))
 		mapName.Insert("maps/", 0);
