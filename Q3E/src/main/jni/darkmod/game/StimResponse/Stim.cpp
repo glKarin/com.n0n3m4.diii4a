@@ -194,7 +194,6 @@ float CStim::GetRadius()
 CStimResponseTimer* CStim::AddTimerToGame()
 {
 	gameLocal.m_StimTimer.AddUnique(this);
-	m_Timer.SetTicks(sys->ClockTicksPerSecond()/1000);
 
 	return(&m_Timer);
 }

@@ -716,11 +716,11 @@ void	idRenderWorldLocal::ReadRenderEntity() {
 
 	/*
 	if ( ent.decals ) {
-		ent.decals = idRenderModelDecal::Alloc();
+		ent.decals = idDecalOnRenderModel::Alloc();
 		ent.decals->ReadFromDemoFile( session->readDemo );
 	}
 	if ( ent.overlay ) {
-		ent.overlay = idRenderModelOverlay::Alloc();
+		ent.overlay = idOverlayOnRenderModel::Alloc();
 		ent.overlay->ReadFromDemoFile( session->readDemo );
 	}
 	*/

@@ -143,7 +143,7 @@ static void FrobOutlinePreset( const idCmdArgs &args ) {
 void FrobOutlineStage::Init() {
 	silhouetteShader = programManager->LoadFromFiles( "frob_silhouette", "stages/frob/frob.vert.glsl", "stages/frob/frob_flat.frag.glsl" );
 	highlightShader = programManager->LoadFromFiles( "frob_highlight", "stages/frob/frob.vert.glsl", "stages/frob/frob_highlight.frag.glsl" );
-    extrudeShader = programManager->LoadFromFiles( "frob_extrude", "stages/frob/frob.vert.glsl", "stages/frob/frob_modalpha.frag.glsl", "stages/frob/frob_extrude.geom.glsl" );
+	extrudeShader = programManager->LoadFromFiles( "frob_extrude", "stages/frob/frob.vert.glsl", "stages/frob/frob_modalpha.frag.glsl", "stages/frob/frob_extrude.geom.glsl" );
 	applyShader = programManager->LoadFromFiles( "frob_apply", "fullscreen_tri.vert.glsl", "stages/frob/frob_apply.frag.glsl" );
 	gaussianBlurShader = programManager->LoadFromFiles( "gaussian_blur", "fullscreen_tri.vert.glsl", "gaussian_blur.frag.glsl" );
 
@@ -169,7 +169,7 @@ void FrobOutlineStage::CreateFbo( int idx ) {
 #ifdef _GLES //karin: only GL_RGBA if texture
 	colorTex[idx]->GenerateAttachment( width, height, GL_RGBA );
 #else
-    colorTex[idx]->GenerateAttachment( width, height, GL_R8 );
+	colorTex[idx]->GenerateAttachment( width, height, GL_R8 );
 #endif
 	fbo[idx]->Init( width, height );
 	fbo[idx]->AddColorRenderTexture( 0, colorTex[idx] );
@@ -182,7 +182,7 @@ void FrobOutlineStage::CreateDrawFbo() {
 #ifdef _GLES //karin: only GL_RGBA8 if render buffer
 	drawFbo->AddColorRenderBuffer( 0, GL_RGBA8 );
 #else
-    drawFbo->AddColorRenderBuffer( 0, GL_R8 );
+	drawFbo->AddColorRenderBuffer( 0, GL_R8 );
 #endif
 }
 

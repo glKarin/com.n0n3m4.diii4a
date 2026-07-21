@@ -27,7 +27,7 @@ R_LocalTrace
 If we resort the vertexes so all silverts come first, we can save some work here.
 =================
 */
-localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float radius, const srfTriangles_t *tri ) {
+localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float radius, bool frontOnly, const srfTriangles_t *tri ) {
 	int			i, j;
 	byte *		cullBits;
 	idPlane		planes[4];
@@ -88,7 +88,6 @@ localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float r
 	for ( i = 0, j = 0; i < tri->numIndexes; i += 3, j++ ) {
 		float		d1, d2, f, d;
 		float		edgeLengthSqr;
-		idPlane *	plane;
 		idVec3		point;
 		idVec3		dir[3];
 		idVec3		cross;
@@ -112,28 +111,33 @@ localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float r
 
 		c_testPlanes++;
 
-		plane = &tri->facePlanes[j];
-		d1 = plane->Distance( start );
-		d2 = plane->Distance( end );
+		idPlane plane = tri->facePlanes[j];
+		d1 = plane.Distance( start );
+		d2 = plane.Distance( end );
 
-		if ( d1 <= d2 ) {
-			continue;		// comning at it from behind or parallel
+		bool backHit = false;
+		if ( d1 < d2 ) {
+			// coming at it from behind
+			if ( frontOnly ) {
+				continue;
+			} else {
+				backHit = true;
+			}
 		}
 
-		if ( d1 < 0.0f ) {
-			continue;		// starts past it
+		if ( d1 == d2 ) {
+			continue;		// going parallel
 		}
-
-		if ( d2 > 0.0f ) {
-			continue;		// finishes in front of it
+		if ( d1 < 0.0f && d2 < 0.0f ) {
+			continue;		// fully behind plane
+		}
+		if ( d1 > 0.0f && d2 > 0.0f ) {
+			continue;		// fully in front of the plane
 		}
 
 		f = d1 / ( d1 - d2 );
+		assert( f >= 0.0f && f <= 1.0f );
 
-		if ( f < 0.0f ) {
-			continue;		// shouldn't happen
-		}
-		
 		if ( f >= hit.fraction ) {
 			continue;		// have already hit something closer
 		}
@@ -150,7 +154,7 @@ localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float r
 		dir[1] = tri->verts[ tri->indexes[i+1] ].xyz - point;
 
 		cross = dir[0].Cross( dir[1] );
-		d = plane->Normal() * cross;
+		d = plane.Normal() * cross;
 		if ( d > 0.0f ) {
 			if ( radiusSqr <= 0.0f ) {
 				continue;
@@ -183,7 +187,7 @@ localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float r
 		dir[2] = tri->verts[ tri->indexes[i+2] ].xyz - point;
 
 		cross = dir[1].Cross( dir[2] );
-		d = plane->Normal() * cross;
+		d = plane.Normal() * cross;
 		if ( d > 0.0f ) {
 			if ( radiusSqr <= 0.0f ) {
 				continue;
@@ -214,7 +218,7 @@ localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float r
 		}
 
 		cross = dir[2].Cross( dir[0] );
-		d = plane->Normal() * cross;
+		d = plane.Normal() * cross;
 		if ( d > 0.0f ) {
 			if ( radiusSqr <= 0.0f ) {
 				continue;
@@ -248,8 +252,9 @@ localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float r
 		c_intersect++;
 
 		hit.fraction = f;
-		hit.normal = plane->Normal();
+		hit.normal = plane.Normal();
 		hit.point = point;
+		hit.backHit = backHit;
 		hit.indexes[0] = tri->indexes[i];
 		hit.indexes[1] = tri->indexes[i+1];
 		hit.indexes[2] = tri->indexes[i+2];

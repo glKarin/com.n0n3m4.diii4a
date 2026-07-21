@@ -43,7 +43,7 @@ const char *ui_teamArgs[]			= { "Red", "Blue", NULL };
 * DarkMod Cvars - see text description in declaration below for descriptions
 **/
 idCVar cv_player_spawnclass(		"tdm_player_spawnclass",	"atdm:player_thief",	CVAR_GAME, "The player's classname." );
-idCVar cv_player_waituntilready(	"tdm_player_wait_until_ready",	"1", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "If set to 1 (default), the player must be ready before the map is started.");
+idCVar cv_player_wait_until_ready(	"tdm_player_wait_until_ready",	"1", CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "If set to 1 (default), the player must be ready before the map is started.");
 
 idCVar cv_default_mission_info_file("tdm_default_mission_info_file", "fms/missions.tdminfo",	CVAR_GAME, "The filename relative to darkmod/fms/ where all the persistent mission data is stored." );
 
@@ -119,6 +119,8 @@ idCVar cv_ai_max_hiding_spot_tests_per_frame(	"tdm_ai_max_hiding_spot_tests_per_
 idCVar cv_ai_debug_transition_barks(			"tdm_ai_debug_transition_barks",			"0",	CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "If set to 1, prints to the console the AI barks during alert level transitions, and events that would cause the AI to use Alert Idle");
 idCVar cv_ai_debug_greetings(					"tdm_ai_debug_greetings",			"0",			CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE, "If set to 1, prints to the console the AI greeting and response barks");
 idCVar cv_ai_debug_anims (						"tdm_ai_debug_anims",				"0",			CVAR_GAME | CVAR_BOOL, "If true (nonzero), show debug info about AI anims in the console and log file." );
+
+idCVar cv_ai_ko_susceptibility_after_flash_duration("tdm_ai_ko_susceptibility_after_flash_duration", "4000", CVAR_GAME | CVAR_INTEGER, "AI will be susecptible to ko after flash for this duration in ms.");
 
 idCVar cv_show_health (							"tdm_show_health",					"0",            CVAR_ARCHIVE | CVAR_GAME | CVAR_BOOL, "If true (nonzero), show health of entities for debugging." );
 
@@ -320,12 +322,13 @@ idCVar cv_pm_lean_angle_mod("pm_lean_angle_mod", "0.5", CVAR_GAME | CVAR_FLOAT, 
 * Dark Mod Frobbing
 * Frob expansion radius for easier frobbing, time it takes for frob highlight to fade in and out
 **/
-idCVar cv_frob_distance_default(	"tdm_frob_distance_default",	"63",	CVAR_GAME | CVAR_ARCHIVE | CVAR_INTEGER, "Default frob distance for all items in doom units.  For developer use only, will break game if set wrong!  Default is 63.");
-idCVar cv_frob_width(				"tdm_frob_width",		"10.0",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "When frobbing, a cube of this dimension is created at the point the frob hit, and things within are frob candidates.  Makes frobbing easier but can go thru solid objects if set too high.  Default is 10.");
-idCVar cv_frob_fadetime(			"tdm_frob_fadetime",	"100",		CVAR_GAME | CVAR_ARCHIVE | CVAR_INTEGER, "Time it takes for frob highlight effect to fade in and out." );
-idCVar cv_frob_debug_bounds(		"tdm_frob_debug_bounds", "0",		CVAR_GAME | CVAR_BOOL,					"Set to 1 to see a visualization of the bounds that are used to check for frobable items within them." );
-idCVar cv_frob_weapon_selects_weapon(	"tdm_frob_weapon_selects_weapon", "0",		CVAR_GAME | CVAR_BOOL,	"Set to 1 to have weapons automatically selected when the respective item is picked up." );
-idCVar cv_frob_debug_hud(	"tdm_frob_debug_hud", "0",		CVAR_GAME | CVAR_BOOL,	"Set to 1 to show some frobbing info." );
+idCVar cv_frob_distance_default(		"tdm_frob_distance_default",	"63",	CVAR_GAME | CVAR_ARCHIVE | CVAR_INTEGER,	"Default frob distance for all items in doom units.  For developer use only, will break game if set wrong!  Default is 63.");
+idCVar cv_frob_width(					"tdm_frob_width",		"10.0",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT,		"When frobbing, a cube of this dimension is created at the point the frob hit, and things within are frob candidates.  Makes frobbing easier but can go thru solid objects if set too high.  Default is 10.");
+idCVar cv_frob_fadetime(				"tdm_frob_fadetime",	"100",			CVAR_GAME | CVAR_ARCHIVE | CVAR_INTEGER,	"Time it takes for frob highlight effect to fade in and out." );
+idCVar cv_frob_debug_bounds(			"tdm_frob_debug_bounds", "0",			CVAR_GAME | CVAR_BOOL,						"Set to 1 to see a visualization of the bounds that are used to check for frobable items within them." );
+idCVar cv_frob_weapon_selects_weapon(	"tdm_frob_weapon_selects_weapon", "0",	CVAR_GAME | CVAR_BOOL | CVAR_ARCHIVE | CVAR_NOCHEAT,	"Set to 1 to have weapons automatically selected when the respective item is picked up." );
+idCVar cv_frob_item_selects_item(		"tdm_frob_item_selects_item", "1",		CVAR_GAME |CVAR_BOOL | CVAR_ARCHIVE | CVAR_NOCHEAT,		"Set to 1 to have items automatically selected when the respective item is picked up.");
+idCVar cv_frob_debug_hud(				"tdm_frob_debug_hud", "0",				CVAR_GAME | CVAR_BOOL,						"Set to 1 to show some frobbing info." );
 
 idCVar cv_frobhelper_active(			"tdm_frobhelper_active",			"1",	CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL | CVAR_NOCHEAT,	"Set to 1 to activate the FrobHelper cursor.", 0.0f, 1.0f);
 idCVar cv_frobhelper_alwaysVisible(     "tdm_frobhelper_alwaysVisible",     "0",    CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL | CVAR_NOCHEAT,    "Set to 1 to always display the frobhelper like a crosshair.", 0, 1); // stifu #4990
@@ -585,10 +588,6 @@ idCVar cv_pm_climb_distance(	"pm_climb_distance",	"10",		CVAR_GAME | CVAR_FLOAT 
  * Darkmod lightgem variables. These are only for debuggingpurpose to tweak the lightgem
  * in a release version they should be disabled.
  */
-idCVar cv_lg_distance("tdm_lg_distance",	"0",		CVAR_GAME | CVAR_FLOAT,	"Sets the distance for camera of the lightgem testmodel." );
-idCVar cv_lg_xoffs("tdm_lg_xoffs",		"0",		CVAR_GAME | CVAR_FLOAT,	"Sets the x adjustment value for the camera on the testmodel" );
-idCVar cv_lg_yoffs("tdm_lg_yoffs",		"0",		CVAR_GAME | CVAR_FLOAT,	"Sets the y adjustment value for the camera on the testmodel" );
-idCVar cv_lg_zoffs("tdm_lg_zoffs",		"17",		CVAR_GAME | CVAR_FLOAT,	"Sets the z adjustment value for the camera on the testmodel" );
 idCVar cv_lg_oxoffs("tdm_lg_oxoffs",		"0",		CVAR_GAME | CVAR_FLOAT,	"Sets the x adjustment value for the testmodels object position" );
 idCVar cv_lg_oyoffs("tdm_lg_oyoffs",		"0",		CVAR_GAME | CVAR_FLOAT,	"Sets the y adjustment value for the testmodels object position" );
 idCVar cv_lg_ozoffs("tdm_lg_ozoffs",		"-20",		CVAR_GAME | CVAR_FLOAT,	"Sets the z adjustment value for the testmodels object position" );
@@ -613,7 +612,7 @@ idCVar cv_lg_fade_delay			("tdm_lg_fade_delay",			"0.09",		CVAR_GAME | CVAR_FLOA
 idCVar cv_empty_model("tdm_empty_model", "models/darkmod/misc/system/empty.lwo", CVAR_GAME | CVAR_ARCHIVE, "The empty model referenced by the 'waitForRender' script event.");
 
 idCVar g_lightQuotientAlgo(
-	"g_lightQuotientAlgo", "1", CVAR_INTEGER | CVAR_GAME,
+	"g_lightQuotientAlgo", "2", CVAR_INTEGER | CVAR_GAME,
 	"If set to 0, then use old LAS-based code.\n"
 	"If set to 1, then use new code in renderer frontend\n"
 	"If set to 2, then old LAS system is completely disabled",
@@ -655,7 +654,12 @@ idCVar cv_moveable_collision("tdm_show_moveable_collision",  "0", CVAR_GAME | CV
 /**
 * DarkMod LOD system
 **/
-idCVar cv_lod_bias("tdm_lod_bias",	"1.0",	CVAR_GAME | CVAR_FLOAT | CVAR_ARCHIVE, "A factor to multiply the LOD (level of detail) distance with. Default is 1.0 (meaning no change). Values < 1.0 make the distances smaller, reducing detail and increasing framerate, values > 1 increase the distance and thus detail at the expense of framerate." );
+idCVar cv_lod_bias("tdm_lod_bias",	"1.0",	CVAR_GAME | CVAR_FLOAT | CVAR_ARCHIVE,
+	"A factor to multiply the LOD (level of detail) distance with.\n"
+	"Default is 1.0 (meaning no change).\n"
+	"Value < 1.0 does not affect distances, but can fully hide some objects.\n"
+	"Value > 1.0 increases the hide/switch distance at the expense of performance."
+);
 
 /**
 * End DarkMod cvars

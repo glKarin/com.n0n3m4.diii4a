@@ -17,6 +17,13 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "game/Entity.h"
 #include "renderer/resources/Model.h"
 
+struct LesModelSampling {
+	idList<samplePointOnModel_t> samples;	// points to be sampled for light estimation
+	int period = 0;							// game time to evaluate all samples
+	idList<int> schedule;					// reminder module period where a sample should be evaluated
+	float approxAreaPerSample = 0.0f;		// for debug visualization
+};
+
 class LightEstimateSystem {
 public:
 	// drops all data
@@ -36,6 +43,12 @@ public:
 	// -1 means "default duration" like in GetLightOnEntity
 	// note: tracking takes CPU time for evaluating light samples
 	void TrackEntity(const idEntity *entity, int duration = -1);
+
+	// override model sampling for a given entity with this set of points
+	// pass NULL to remove the override
+	void SetExplicitSamplingForEntity(idEntity *entity, const idList<idVec3> *samples);
+	static void SaveExplicitSampling(idSaveGame *savefile, const idEntity *entity);
+	static void RestoreExplicitSampling(idRestoreGame *savefile, idEntity *entity);
 
 	void DebugVisualize();
 	bool DebugIgnorePlayer(const idEntity *entity) const;
@@ -62,15 +75,12 @@ private:
 		idList<EvaluatedSample> samples;	// light values for sample points (same-indexed as ModelCache::samples)
 		idList<PendingSample> pending;		// pending light queries for samples
 		int periodStartsAt = -1;			// when current period started (game time)
+		bool needsUpdate = false;			// if true, entity should be reinitialized as for model change
 	};
 
-	struct ModelCache {
+	struct ModelCache : public LesModelSampling {
 		const idRenderModel *model = nullptr;	// all info corresponds to this model
 		int loadVersion = -1;					// used to detect model reloads
-		idList<samplePointOnModel_t> samples;	// points to be sampled for light estimation
-		int period;								// game time to evaluate all samples
-		idList<int> schedule;					// reminder module period where a sample should be evaluated
-		float approxAreaPerSample = 0.0f;		// for debug visualization
 	};
 
 	// reduced version of TrackedEntity loaded from save
@@ -85,8 +95,10 @@ private:
 	float ComputeAverageLightBrightness(const TrackedEntity &trackedEnt) const;
 
 	ModelCache &FindOrAddModel(const idRenderModel *model);
+	void FinishModelSampling(LesModelSampling &msampling, const idBounds &bbox);
 	TrackedEntity &FindOrAddEntity(const idEntity *entity);
 	const TrackedEntity *FindEntity(const idEntity *entity) const;
+	const LesModelSampling *GetSamplingOfTrackedEntity(const TrackedEntity &trackedEnt) const;
 
 	const idRenderModel *GetModelOfEntity(const idEntity *entity) const;
 	idList<qhandle_t> GetIgnoredRenderEntityList(const idEntity *entity) const;

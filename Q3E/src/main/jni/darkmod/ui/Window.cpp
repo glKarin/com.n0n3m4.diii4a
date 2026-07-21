@@ -268,6 +268,11 @@ void idWindow::CleanUp() {
 	// Cleanup the named events
 	namedEvents.DeleteContents(true);
 
+	// Cleanup the operations and update vars
+	// (if it is not fixed, orphan register references are possible)
+	ops.Clear();
+	updateVars.Clear();
+
 	drawWindows.ClearFree();
 	children.DeleteContents(true);
 	definedVars.DeleteContents(true);

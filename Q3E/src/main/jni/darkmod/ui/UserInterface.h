@@ -107,6 +107,8 @@ public:
 
 	//stgatilov #2454: fetch subtitles from sound world and update GUI variables accordingly
 	virtual void				UpdateSubtitles() = 0;
+
+	virtual const textureStage_t *GetXrayMaterialStage() = 0;
 };
 
 

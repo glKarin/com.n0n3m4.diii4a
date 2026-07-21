@@ -21,6 +21,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include <minizip/unzip.h>
 #include "minizip/minizip_extra.h"	//unzSeek
 
+idSysInterlockedInteger filesOpenNowPermanent;
+idSysInterlockedInteger filesOpenNowInZip;
+
 /*
 =================
 FS_WriteFloatString
@@ -996,6 +999,8 @@ idFile_Permanent::idFile_Permanent( void ) {
 	fileSize = 0;
 	handleSync = false;
 	domain = FDOM_UNKNOWN;
+
+	filesOpenNowPermanent.Increment();
 }
 
 /*
@@ -1007,6 +1012,9 @@ idFile_Permanent::~idFile_Permanent( void ) {
 	if ( o ) {
 		fclose( o );
 	}
+
+	int rem = filesOpenNowPermanent.Decrement();
+	assert(rem >= 0);
 }
 
 /*
@@ -1221,6 +1229,8 @@ idFile_InZip::idFile_InZip( void ) {
 	fileSize = 0;
 	memset( &z, 0, sizeof( z ) );
 	domain = FDOM_UNKNOWN;
+
+	filesOpenNowInZip.Increment();
 }
 
 /*
@@ -1231,6 +1241,9 @@ idFile_InZip::~idFile_InZip
 idFile_InZip::~idFile_InZip( void ) {
 	unzCloseCurrentFile( z );
 	unzClose( z );
+
+	int rem = filesOpenNowInZip.Decrement();
+	assert(rem >= 0);
 }
 
 /*

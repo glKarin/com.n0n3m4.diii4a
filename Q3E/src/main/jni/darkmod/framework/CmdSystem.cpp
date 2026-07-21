@@ -72,6 +72,7 @@ private:
 	int						wait;
 	int						textLength;
 	byte					textBuf[MAX_CMD_BUFFER];
+	idSysMutex				textBufferMutex;	// protects global buffer of commands posted for execution
 
 	idStr					completionString;
 	idStrList				completionParms;
@@ -509,7 +510,7 @@ Adds a \n to the text
 ============
 */
 void idCmdSystemLocal::InsertCommandText( const char *text ) {
-	int		i;
+	idScopedCriticalSection lock( textBufferMutex );
 
 	int len = static_cast<int>(strlen( text )) + 1;
 	if ( len + textLength > (int)sizeof( textBuf ) ) {
@@ -518,7 +519,7 @@ void idCmdSystemLocal::InsertCommandText( const char *text ) {
 	}
 
 	// move the existing command text
-	for ( i = textLength - 1; i >= 0; i-- ) {
+	for ( int i = textLength - 1; i >= 0; i-- ) {
 		textBuf[ i + len ] = textBuf[ i ];
 	}
 
@@ -539,9 +540,9 @@ Adds command text at the end of the buffer, does NOT add a final \n
 ============
 */
 void idCmdSystemLocal::AppendCommandText( const char *text ) {
-		
-    int l = static_cast<int>(strlen(text));
+	idScopedCriticalSection lock( textBufferMutex );
 
+	int l = static_cast<int>(strlen(text));
 	if ( textLength + l >= (int)sizeof( textBuf ) ) {
 		common->Printf( "idCmdSystemLocal::AppendText: buffer overflow\n" );
 		return;
@@ -603,6 +604,8 @@ idCmdSystemLocal::ExecuteCommandBuffer
 ============
 */
 void idCmdSystemLocal::ExecuteCommandBuffer( void ) {
+	idScopedCriticalSection lock( textBufferMutex );
+
 	int			i;
 	char *		text;
 	int			quotes;

@@ -86,8 +86,10 @@ void TiledCustomMipmapStage::Init(MipmapMode mode, GLenum imageFormat, int width
 				fbo->AddColorRenderTexture( 0, mipmapImage, textureLevel );
 			}
 		);
+		// make sure FBO generate is called, so that mipmapImage data is allocated now
+		mipmapFBO[level]->Bind();
 	}
-	frameBuffers->defaultFbo->Bind();
+	frameBuffers->currentRenderFbo->Bind();
 
 	firstShader = programManager->LoadFromGenerator("tiled_mipmap_first", [this](GLSLProgram *shader) {
 		LoadShader(shader, true);

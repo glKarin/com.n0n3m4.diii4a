@@ -40,7 +40,7 @@ public:
 		return ""; 
 	}
 	void SetName(const char *_name) { 
-		delete []name; 
+		delete[] name; 
 		name = NULL;
 		if (_name) {
 			name = new char[strlen(_name)+1]; 

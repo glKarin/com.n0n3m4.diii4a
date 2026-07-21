@@ -210,7 +210,9 @@ void OsUtils::ReplaceAndRestartExecutable(const std::string &targetPath, const s
 			g_logger->errorf("Failed to fork process");
 		if (code == 0) {
 			//don't wait for the subprocess to finish
-			system((batchFilePath + " &").c_str());
+			code = system((batchFilePath + " &").c_str());
+			if (code != 0)
+				g_logger->errorf("Failed to start shell script (error %d)", code);
 			exit(0);
 		}
 #endif

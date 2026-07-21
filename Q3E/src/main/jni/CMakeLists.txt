@@ -154,7 +154,7 @@ if(GAME_QUAKE1) # https://github.com/DarkPlacesEngine/DarkPlaces/commit/dbebfea9
     add_subdirectory ( quake1 ) # Quake 1
 endif()
 
-if(GAME_TDM) # 2.13 | 2da36cc9e83046160b91bca91c116dc642740b78 | Mar 8, 2025 | Merge one commit from trunk.
+if(GAME_TDM) # 2.14 | 6f73ae5ac7824d56752521e13d98c17bd26ea342 | Mar 19, 2026 | Hardcode savegame revision to 11208.
     message(STATUS "Build The Dark Mod")
     add_subdirectory ( darkmod ) # The Dark Mod
 #[[    if(BUILD_BACKPORT)

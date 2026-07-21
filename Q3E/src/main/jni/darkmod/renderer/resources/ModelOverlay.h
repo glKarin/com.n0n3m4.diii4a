@@ -46,13 +46,13 @@ typedef struct overlayMaterial_s {
 } overlayMaterial_t;
 
 
-class idRenderModelOverlay {
+class idOverlayOnRenderModel {
 public:
-								idRenderModelOverlay();
-								~idRenderModelOverlay();
+								idOverlayOnRenderModel();
+								~idOverlayOnRenderModel();
 
-	static idRenderModelOverlay *Alloc( void );
-	static void					Free( idRenderModelOverlay *overlay );
+	static idOverlayOnRenderModel *Alloc( void );
+	static void					Free( idOverlayOnRenderModel *overlay );
 
 	// Projects an overlay onto deformable geometry and can be added to
 	// a render entity to allow decals on top of dynamic models.

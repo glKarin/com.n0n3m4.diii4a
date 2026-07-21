@@ -206,6 +206,7 @@ public:
 	void Size(float x, float y, float w, float h);
 	void SetupFromState();
 	void SetupBackground();
+	const idMaterial* GetBackground() const { return background; }
 	drawWin_t FindChildByName(const char *name, bool ignoreSimple = false);
 	idWindow *GetParent() { return parent; }
 	idUserInterfaceLocal *GetGui() {return gui;};

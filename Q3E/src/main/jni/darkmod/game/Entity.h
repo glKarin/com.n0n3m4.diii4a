@@ -36,6 +36,8 @@ typedef std::shared_ptr<CInventoryItem> CInventoryItemPtr;
 class CInventoryCursor;
 typedef std::shared_ptr<CInventoryCursor> CInventoryCursorPtr;
 
+struct LesModelSampling;
+
 /**
 * This struct defines one entity with an optional offset, count and
 * probability, to spawn it upon the death of another entity.
@@ -246,6 +248,7 @@ typedef struct SAttachPosition_s
 	int						decal_starttime;
 	float					decal_depth;
 	bool					decal_parallel;
+	bool					decal_randomizeAngle;
 	float					decal_angle;
 } SDecalInfo;
 
@@ -429,6 +432,8 @@ public:
 	float					m_LightQuotient;
 	// The last time the above value has been calculated
 	int						m_LightQuotientLastEvalTime;
+
+	LesModelSampling *		m_lesExplicitSampling;		// stgatilov #6623: samples for Light Estimate System (override rendermodel)
 
 	bool					m_droppedByAI;	// grayman #1330
 
@@ -990,6 +995,8 @@ public:
 	void					Event_DestroyOverlay(int handle);
 	void					DestroyOverlay(int handle);
 
+	void					Event_CreateXrayOverlay(const char *guiFile);
+
 	// Returns the GUI with the given handle or NULL if not found
 	idUserInterface*		GetOverlay(int handle);
 
@@ -1532,8 +1539,7 @@ private:
 public:
 	virtual void		ProjectOverlay( const idVec3 &origin, const idVec3 &dir, float size, const char *material, bool save = true );
 	void				RestoreDecals();	// Deferred action, done at end of Think() after model has been Presented
-	void				SaveDecalInfo( const idVec3 &origin, const idVec3 &dir, float depth, bool parallel, float size, 
-									   const char *decal, float angle = 0.0f ); // Applied by gameLocal, so needs to be public
+	void				SaveDecalInfo( const ProjectDecalParams &params ); // Applied by gameLocal, so needs to be public
 protected:
 	std::list<SDecalInfo>	decals_list;
 	bool				needsDecalRestore;

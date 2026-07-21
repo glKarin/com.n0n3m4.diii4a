@@ -40,6 +40,7 @@ void bvhNode_t::Init() {
 	static bool initialized = false;
 	if (initialized)
 		return;
+	initialized = true;
 	for (int i = 0; i < 128; i++)
 		quantizedSinLut[i] = sinf(i / 255.0f * idMath::PI);
 }

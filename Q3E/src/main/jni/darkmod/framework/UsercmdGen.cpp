@@ -255,6 +255,7 @@ userCmdString_t	userCmdStrings[] = {
 	{ "_impulse25",		UB_IMPULSE25 },
 	{ "_impulse26",		UB_IMPULSE26 },
 	{ "_impulse27",		UB_IMPULSE27 },
+	{ "_display_aas_areas",	UB_IMPULSE27 },
 	{ "_impulse28",		UB_IMPULSE28 },
 	{ "_impulse29",		UB_IMPULSE29 },
 	{ "_impulse30",		UB_INVENTORY_GRID },

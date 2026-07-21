@@ -29,7 +29,7 @@ idWinVar::idWinVar() {
 }
 
 idWinVar::~idWinVar() { 
-	delete name;
+	delete[] name;
 	name = NULL;
 }
 

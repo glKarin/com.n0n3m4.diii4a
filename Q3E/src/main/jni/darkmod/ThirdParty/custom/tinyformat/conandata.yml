@@ -1,4 +1,7 @@
 sources:
+  2.1.0:
+    sha256: 7cf39fa0503a3a24ddfbbafddf1c2b332cc32b1a125fe61ea4b22dcb3b6b88c4
+    url: https://github.com/c42f/tinyformat/archive/v2.1.0.tar.gz
   2.3.0:
     sha256: ecba2fbbd3829002a63e141b77b9f1fc30e920962f68466b50c3244652d69391
     url: https://github.com/c42f/tinyformat/archive/v2.3.0.tar.gz

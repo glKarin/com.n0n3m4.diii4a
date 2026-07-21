@@ -41,7 +41,7 @@ const char *imageFilter[] = {
 };
 
 idCVar idImageManager::image_filter( "image_filter", imageFilter[1], CVAR_RENDERER | CVAR_ARCHIVE, "changes texture filtering on mipmapped images", imageFilter, idCmdSystem::ArgCompletion_String<imageFilter> );
-idCVar idImageManager::image_anisotropy( "image_anisotropy", "1", CVAR_RENDERER | CVAR_ARCHIVE, "set the maximum texture anisotropy if available" );
+idCVar idImageManager::image_anisotropy( "image_anisotropy", "4", CVAR_RENDERER | CVAR_ARCHIVE, "set the maximum texture anisotropy if available" );
 idCVar idImageManager::image_lodbias( "image_lodbias", "0", CVAR_RENDERER | CVAR_ARCHIVE, "change lod bias on mipmapped images" );
 idCVar idImageManager::image_downSize( "image_downSize", "0", CVAR_RENDERER | CVAR_ARCHIVE, "controls texture downsampling" );
 idCVar idImageManager::image_downSizeAll( "image_downSizeAll", "0", CVAR_RENDERER | CVAR_ARCHIVE, "Force all image types to use the same size limit" );
@@ -1764,6 +1764,7 @@ void idImageManager::Init() {
 	// used for screen wipes/doublevision/etc., also used as dynamic texture
 	scratchImage = ImageScratch( "_scratch" );
 	scratchImage->isDynamicImagePlaceholder = true;
+	menuLastGameFrame = ImageScratch( "_menuLastGameFrame" );
 	// were used as dynamic textures, since #6434 they are interchangeable with _dynamic image
 	ImageScratch( "_scratch2" )->isDynamicImagePlaceholder = true;
 	for (int k = 1; k <= 9; k++)
@@ -1920,8 +1921,8 @@ void idImageManager::EndLevelLoad() {
 
 			R_UploadImageData( *image );
 			session->UpdateLoadingProgressBar( PROGRESS_STAGE_IMAGES, float(i) / imagesToLoad.Num() );
-			}
 		}
+	}
 
 
 	imagesToLoad.ClearFree();

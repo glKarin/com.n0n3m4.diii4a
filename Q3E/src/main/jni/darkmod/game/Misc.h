@@ -393,6 +393,7 @@ private:
 	int						smokeTime;
 	const idDeclParticle *	smoke;
 	bool					restart;
+	bool					useCycles;
 };
 
 

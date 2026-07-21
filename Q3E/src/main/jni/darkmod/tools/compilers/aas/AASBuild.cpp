@@ -674,10 +674,10 @@ bool idAASBuild::Build( const idStr &fileName, const idAASSettings *settings ) {
 	brushList.Merge( MergeAllowed );
 
 	// if there is a .proc file newer than the .map file
-	if ( LoadProcBSP( fileName, mapFile->GetFileTime() ) ) {
-		ClipBrushSidesWithProcBSP( brushList );
-		DeleteProcBSP();
-	}
+	if ( !LoadProcBSP( fileName, mapFile->GetFileTime() ) )
+		common->Error( "Failed to load %s file or it is older than %s", fileName.c_str(), mapFile->GetFileName() );
+	ClipBrushSidesWithProcBSP( brushList );
+	DeleteProcBSP();
 
 	// make copies of the brush list
 	expandedBrushes.Append( &brushList );

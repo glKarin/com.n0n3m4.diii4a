@@ -1329,7 +1329,18 @@ void idStaticEntity::ReapplyDecals()
 				di = decals_list.erase( di );
 				continue;
 			}
-			gameLocal.ProjectDecal( di->origin, di->dir, di->decal_depth, di->decal_parallel, di->size, di->decal, di->decal_angle, this, false, di->decal_starttime );
+
+			ProjectDecalParams params;
+			params.origin = di->origin;
+			params.dir = di->dir;
+			params.depth = di->decal_depth;
+			params.parallel = di->decal_parallel;
+			params.size = di->size;
+			params.material = di->decal;
+			params.randomizeAngle = di->decal_randomizeAngle;
+			params.angle = di->decal_angle;
+			params.starttime = di->decal_starttime;
+			gameLocal.ProjectDecal( params );
 		}
 		++di;
 	}
@@ -1893,6 +1904,7 @@ idFuncSmoke::idFuncSmoke() {
 	smokeTime = 0;
 	smoke = NULL;
 	restart = false;
+	useCycles = false;
 }
 
 /*
@@ -1904,6 +1916,7 @@ void idFuncSmoke::Save(	idSaveGame *savefile ) const {
 	savefile->WriteInt( smokeTime );
 	savefile->WriteParticle( smoke );
 	savefile->WriteBool( restart );
+	savefile->WriteBool( useCycles );
 }
 
 /*
@@ -1915,6 +1928,7 @@ void idFuncSmoke::Restore( idRestoreGame *savefile ) {
 	savefile->ReadInt( smokeTime );
 	savefile->ReadParticle( smoke );
 	savefile->ReadBool( restart );
+	savefile->ReadBool( useCycles );
 }
 
 /*
@@ -1929,6 +1943,7 @@ void idFuncSmoke::Spawn( void ) {
 	} else {
 		smoke = NULL;
 	}
+	useCycles = spawnArgs.GetBool( "use_cycles" );
 	if ( spawnArgs.GetBool( "start_off" ) ) {
 		smokeTime = 0;
 		restart = false;
@@ -1938,7 +1953,6 @@ void idFuncSmoke::Spawn( void ) {
 		restart = true;
 	}
 	GetPhysics()->SetContents( 0 );
-	
 }
 
 /*
@@ -1983,8 +1997,9 @@ void idFuncSmoke::Think( void ) {
 	}
 
 	if ( ( thinkFlags & TH_UPDATEPARTICLES) && !fl.hidden ) {
-		if ( !gameLocal.smokeParticles->EmitSmoke( smoke, smokeTime, gameLocal.random.CRandomFloat(), GetPhysics()->GetOrigin(), GetPhysics()->GetAxis() ) ) {
-			if ( restart ) {
+		bool continues = gameLocal.smokeParticles->EmitSmoke( smoke, smokeTime, gameLocal.random.CRandomFloat(), GetPhysics()->GetOrigin(), GetPhysics()->GetAxis(), useCycles );
+		if ( !continues ) {
+			if ( restart && !useCycles ) {
 				smokeTime = gameLocal.time;
 			} else {
 				smokeTime = 0;
@@ -3259,36 +3274,37 @@ void idFuncPortal::OpenPortal( void )
 
 void idFuncPortal::Think( void )
 {
-	extern idCVar r_lockView;
-	idVec3 delta;
-	bool bWithinDist;
+	auto ThinkImpl = [&]() {
+		if( !m_bDistDependent )
+			return;
 
-	if( !m_bDistDependent )
-		goto Quit;
+		if( (gameLocal.time - m_TimeStamp) < m_Interval )
+			return;
 
-	if( (gameLocal.time - m_TimeStamp) < m_Interval )
-		goto Quit;
+		extern idCVar r_lockView;
+		if ( r_lockView.GetInteger() != 0 )
+			return;
 
-	if ( r_lockView.GetInteger() != 0 )
-		goto Quit;
+		m_TimeStamp = gameLocal.time;
+		bool bWithinDist = false;
 
-	m_TimeStamp = gameLocal.time;
-	bWithinDist = false;
+		idVec3 delta = gameLocal.GetLocalPlayer()->GetPhysics()->GetOrigin();
+		delta -= GetPhysics()->GetOrigin();
 
-	delta = gameLocal.GetLocalPlayer()->GetPhysics()->GetOrigin();
-	delta -= GetPhysics()->GetOrigin();
+		// stgatilov: this is obviously LOD-related portal closing
+		// make it respect LOD distance multiplier
+		float lodCoeff = idMath::Fmax( cv_lod_bias.GetFloat(), 1.0f );
+		bWithinDist = (delta.LengthSqr() < m_Distance * lodCoeff * lodCoeff);
 
-	bWithinDist = (delta.LengthSqr() < m_Distance);
+		if( (!state && !bWithinDist) || (state && bWithinDist) )
+		{
+			// toggle portal and trigger targets
+			Event_Activate( gameLocal.GetLocalPlayer() );
+		}
+	};
 
-	if( (!state && !bWithinDist) || (state && bWithinDist) )
-	{
-		// toggle portal and trigger targets
-		Event_Activate( gameLocal.GetLocalPlayer() );
-	}
-
-Quit:
+	ThinkImpl();
 	idEntity::Think();
-	return;
 }
 
 /*

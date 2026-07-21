@@ -62,10 +62,16 @@ bool CAbsenceMarker::initAbsenceReference(idEntity* owner, idBounds& startBounds
 		GetPhysics()->SetContents(0);
 	}
 
-	// Move to position where missing entity should have been
-	// angua: place marker at the center of the original bounds
-	idVec3 markerOrg = startBounds.GetCenter();
-	SetOrigin (markerOrg);
+	// stgatilov #6623: set same visual model as the original entity, but invisible
+	// this model will be sampled by LightEstimateSystem to determine light factor
+	idRenderModel *ownerModel = owner->GetRenderEntity()->hModel;
+	if ( ownerModel && !ownerModel->IsDynamicModel() ) {
+		SetModel( ownerModel->Name() );
+	} else {
+		common->Warning( "Absence marker: '%s' has no static model", owner->name.c_str() );
+	}
+	SetOrigin( owner->GetPhysics()->GetOrigin() );
+	SetAxis( owner->GetPhysics()->GetAxis() );
 
 	team = owner->team;
 	

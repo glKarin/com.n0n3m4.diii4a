@@ -2211,7 +2211,7 @@ bool idProgram::Restore( idRestoreGame *savefile ) {
 	savefile->ReadInt( saved_checksum );
 	checksum = CalculateChecksum();
 
-	if ( saved_checksum != checksum ) {
+	if ( !cv_force_savegame_load.GetBool() && saved_checksum != checksum ) {
 		result = false;
 	}
 

@@ -46,8 +46,6 @@ public:
 
 	// stgatilov #6434: X-ray in GUI overlay
 	void	ProcessOverlaySubviews(drawSurf_t *drawSurf);
-	const textureStage_t *NeedXraySubview() const;
-	void	SetXrayImageOverride(idImageScratch *image);
 
 	//---------------------------
 private:
@@ -59,9 +57,5 @@ private:
 	idList<guiModelSurface_t>	surfaces;
 	idList<glIndex_t>		indexes;
 	idList<idDrawVert>	verts;
-
-	// stgatilov #6434: X-ray in GUI overlay
-	const textureStage_t *needXraySubview;
-	idImageScratch *xrayImageOverride;
 };
 

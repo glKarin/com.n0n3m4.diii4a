@@ -22,6 +22,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "DarkModGlobals.h"
 #include "Intersection.h"
 
+void R_SetLightFrustum(const idPlane lightProject[4], idPlane frustum[6]);
+void R_SetLightProject(idPlane lightProject[4], const idVec3 &origin, const idVec3 &target, idVec3 &right, idVec3 &up, const idVec3 &start, const idVec3 &stop);
+
 // grayman #3584 - use this version for illumination purposes
 EIntersection IntersectLinesegmentLightEllipsoid(const idVec3 Segment[LSG_COUNT], 
 								 const idVec3 Ellipsoid[ELL_COUNT],

@@ -123,3 +123,11 @@ void idParticle_PrepareCutoffMap(
 float idParticle_FetchCutoffTimeTexture(const idImageAsset *image, const idPartSysCutoffTextureInfo &texinfo, idVec2 texcoord);
 //fetches cutoffTime from the image (with "mapLayout linear") using index of particle and its current cycle
 float idParticle_FetchCutoffTimeLinear(const idImageAsset *image, int totalParticles, int index, int cycIdx);
+
+//---------------------------------------------------------------------------
+
+//counts total number of particles spawned by the system by the time = psys.viewTimeMs
+//this includes currently active particles as well as already dead ones, as well as the particles from old cycles, etc.
+//the output number monotonically grows and can be used to determine which new particles to spawn since last check
+//isFullyOver receives true iff the particle system has generated all the particles it ever can
+int64 idParticle_CoundEmitted(const idPartStageData &stg, const idPartSysEmit &psys, bool &isFullyOver);

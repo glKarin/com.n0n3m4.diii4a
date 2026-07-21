@@ -28,6 +28,7 @@ class BlindedState :
 	public State
 {
 private:
+	int   _startTime;
 	int   _endTime;
 	float _oldVisAcuity; // to restore visual acuity
 	float _oldAudAcuity; // Smoke #2829 - to restore audio acuity
@@ -35,6 +36,8 @@ private:
 	bool  _initialized;  // grayman #4270
 
 public:
+	BlindedState();
+
 	// Get the name of this state
 	virtual const idStr& GetName() const override;
 
@@ -47,6 +50,9 @@ public:
 	// Save/Restore methods
 	virtual void Save(idSaveGame* savefile) const override;
 	virtual void Restore(idRestoreGame* savefile) override;
+
+	int GetStartTime() const;
+	int GetEndTime() const;
 
 	static StatePtr CreateInstance();
 };

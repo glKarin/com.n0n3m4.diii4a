@@ -2,6 +2,7 @@
 #define STD_FILESYSTEM_H_
 
 #include <stdint.h>
+#include <cstdint>
 #include <ctime>
 #include <string>
 #include <memory>
@@ -65,9 +66,9 @@ namespace stdext {
     bool equivalent(const path &pathA, const path &pathB);
 
     struct space_info {
-        std::uintmax_t capacity;
-        std::uintmax_t free;
-        std::uintmax_t available;
+        uintmax_t capacity;
+        uintmax_t free;
+        uintmax_t available;
     };
     space_info space(const path& p);
 

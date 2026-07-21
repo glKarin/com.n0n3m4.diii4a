@@ -32,7 +32,6 @@ CStimResponseTimer::CStimResponseTimer()
 	m_TimerVal.Flags = TIMER_UNDEFINED;
 	m_LastTick = 0;
 	m_Ticker = 0;
-	m_TicksPerMilliSecond = 0;
 	m_Fired = false;
 }
 
@@ -61,7 +60,6 @@ void CStimResponseTimer::Save(idSaveGame *savefile) const
 {
 	savefile->WriteFloat(static_cast<float>(m_LastTick));
 	savefile->WriteFloat(static_cast<float>(m_Ticker));
-	savefile->WriteFloat(static_cast<float>(m_TicksPerMilliSecond));
 	savefile->WriteBool(m_Fired);
 
 	savefile->WriteInt(static_cast<int>(m_Type));
@@ -85,9 +83,6 @@ void CStimResponseTimer::Restore(idRestoreGame *savefile)
 	savefile->ReadFloat(tempFloat);
 	m_Ticker = static_cast<int>(tempFloat);
 
-	savefile->ReadFloat(tempFloat);
-	m_TicksPerMilliSecond = static_cast<int>(tempFloat);
-
 	savefile->ReadBool(m_Fired);
 
 	savefile->ReadInt(tempInt);
@@ -101,11 +96,6 @@ void CStimResponseTimer::Restore(idRestoreGame *savefile)
 
 	::Restore(savefile, m_Timer);
 	::Restore(savefile, m_TimerVal);
-}
-
-void CStimResponseTimer::SetTicks(double const &TicksPerSecond)
-{
-	m_TicksPerMilliSecond = static_cast<unsigned int>(TicksPerSecond);
 }
 
 TimerValue CStimResponseTimer::ParseTimeString(idStr &str)

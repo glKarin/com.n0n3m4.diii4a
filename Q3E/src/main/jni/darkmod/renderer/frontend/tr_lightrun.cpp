@@ -916,6 +916,7 @@ void R_FreeEntityDefDerivedData( idRenderEntityLocal *def, bool keepDecals, bool
 	if ( !keepDecals ) {
 		R_FreeEntityDefDecals( def );
 		R_FreeEntityDefOverlay( def );
+		R_FreeEntityDefChildren( def );
 	}
 
 	bool forceShadowsBehindOpaque = ( def->parms.hModel->IsStaticWorldModel() || def->parms.forceShadowBehindOpaque );
@@ -984,13 +985,36 @@ void R_ClearEntityDefDynamicModel( idRenderEntityLocal *def ) {
 
 /*
 ===================
+R_FreeEntityDefChildren
+===================
+*/
+void R_FreeEntityDefChildren( idRenderEntityLocal *def ) {
+	while ( def->children.Num() > 0 ) {
+		def->world->FreeEntityDef( def->children.Last()->GetIndex() );
+	}
+}
+
+/*
+===================
+R_InheritRenderParmsForChildEntity
+===================
+*/
+void R_InitRenderParmsForChildEntity( renderEntity_t &parms, idRenderEntityLocal *def, idRenderModel *model ) {
+	memset( &parms, 0, sizeof(parms) );
+	parms.origin = def->parms.origin;
+	parms.axis = def->parms.axis;
+	parms.hModel = model;
+}
+
+/*
+===================
 R_FreeEntityDefDecals
 ===================
 */
 void R_FreeEntityDefDecals( idRenderEntityLocal *def ) {
 	while( def->decals ) {
-		idRenderModelDecal *next = def->decals->Next();
-		idRenderModelDecal::Free( def->decals );
+		idDecalOnRenderModel *next = def->decals->Next();
+		idDecalOnRenderModel::Free( def->decals );
 		def->decals = next;
 	}
 }
@@ -1001,7 +1025,7 @@ R_FreeEntityDefFadedDecals
 ===================
 */
 void R_FreeEntityDefFadedDecals( idRenderEntityLocal *def, int time ) {
-	def->decals = idRenderModelDecal::RemoveFadedDecals( def->decals, time );
+	def->decals = idDecalOnRenderModel::RemoveFadedDecals( def->decals, time );
 }
 
 /*
@@ -1011,7 +1035,7 @@ R_FreeEntityDefOverlay
 */
 void R_FreeEntityDefOverlay( idRenderEntityLocal *def ) {
 	if ( def->overlay ) {
-		idRenderModelOverlay::Free( def->overlay );
+		idOverlayOnRenderModel::Free( def->overlay );
 		def->overlay = NULL;
 	}
 }

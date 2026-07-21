@@ -48,7 +48,7 @@ class idFileSystemLocal;
 
 class idFile {
 public:
-	virtual					~idFile( void ) {};
+	virtual					~idFile( void ) {}
 							// Get the name of the file.
 	virtual const char *	GetName( void );
 							// Get the full file path.
@@ -212,6 +212,8 @@ private:
 	bool					handleSync;		// true if written data is immediately flushed
 	domainStatus_t			domain;			// stgatilov #5766
 };
+// total number of idFile_Permanent objects alive (including FILE* = 0)
+extern idSysInterlockedInteger filesOpenNowPermanent;
 
 
 class idFile_InZip : public idFile {
@@ -243,5 +245,7 @@ private:
 	void *					z;				// unzip info
 	domainStatus_t			domain;			// stgatilov #5766
 };
+// total number of idFile_Permanent objects alive (including z = 0)
+extern idSysInterlockedInteger filesOpenNowInZip;
 
 #endif /* !__FILE_H__ */

@@ -24,8 +24,6 @@ idRenderSystemLocal	tr;
 idRenderSystem	*renderSystem = &tr;
 
 idCVar r_tonemap( "r_tonemap", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Use the tonemap correction (gamma, brightness, etc)" );
-idCVar r_tonemapOnlyGame3d( "r_tonemapOnlyGame3d", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Skip tonemap in main menu, loading, and other GUI situations when game is not rendered" );
-idCVar r_tonemapInternal( "r_tonemapInternal", "-666", CVAR_RENDERER | CVAR_BOOL, "Internal cvar which shows whether tonemap is actually used" );
 idCVar r_smallCharSpacing( "r_smallCharSpacing", "1", CVAR_RENDERER | CVAR_ARCHIVE, "Console text symbol spacing", 0.5, 1 );
 
 /*
@@ -148,7 +146,7 @@ R_IssueRenderCommands
 Called by R_EndFrame each frame
 ====================
 */
-void R_IssueRenderCommands( frameData_t *frameData ) {
+void R_IssueRenderCommands( frameData_t *frameData, bool swapBuffers ) {
 	TRACE_GL_SCOPE( "R_IssueRenderCommands" )
 	TRACE_CPU_SCOPE( "R_IssueRenderCommands" )
 
@@ -172,7 +170,8 @@ void R_IssueRenderCommands( frameData_t *frameData ) {
 	}
 	R_ClearCommandChain( frameData );
 
-	RB_SwapBuffers();
+	if ( swapBuffers )
+		RB_SwapBuffers();
 }
 
 /*
@@ -731,12 +730,6 @@ void idRenderSystemLocal::BeginFrame( int windowWidth, int windowHeight ) {
 	cmd = ( setBufferCommand_t * )R_GetCommandBuffer( sizeof( *cmd ) );
 	cmd->commandId = RC_SET_BUFFER;
 	cmd->frameCount = frameCount;
-
-	if ( r_frontBuffer.GetBool() ) {
-		cmd->buffer = ( int )GL_FRONT;
-	} else {
-		cmd->buffer = ( int )GL_BACK;
-	}
 }
 
 void idRenderSystemLocal::WriteDemoPics() {
@@ -771,7 +764,7 @@ void idRenderSystemLocal::EndFrame( int *frontEndMsec, int *backEndMsec ) {
 		session->ActivateFrontend();
 		frameBuffers->BeginFrame();
 		// start the back end up again with the new command list
-		R_IssueRenderCommands( backendFrameData );
+		R_IssueRenderCommands( backendFrameData, true );
 		renderBackend->EndFrame();
 		session->WaitForFrontendCompletion();
 		common->SetErrorIndirection( false );
@@ -1061,7 +1054,7 @@ void idRenderSystemLocal::PostProcess() {
 CaptureRenderToImage
 ================
 */
-void idRenderSystemLocal::CaptureRenderToImage( idImageScratch &image ) {
+void idRenderSystemLocal::CaptureRenderToImage( idImageScratch &image, const renderCrop_t *scissor ) {
 	if ( !glConfig.isInitialized ) {
 		return;
 	}
@@ -1087,6 +1080,11 @@ void idRenderSystemLocal::CaptureRenderToImage( idImageScratch &image ) {
 	cmd.imageHeight = rc.height;
 	cmd.image = &image;
 	cmd.buffer = NULL;
+	if ( scissor ) {
+		cmd.scissor = *scissor;
+	} else {
+		cmd.scissor = rc;
+	}
 }
 
 void idRenderSystemLocal::CaptureRenderToBuffer( unsigned char *buffer, bool usePbo ) {
@@ -1114,8 +1112,9 @@ void idRenderSystemLocal::CaptureRenderToBuffer( unsigned char *buffer, bool use
 	cmd.y = rc.y;
 	cmd.imageWidth = rc.width;
 	cmd.imageHeight = rc.height;
+	cmd.scissor = rc;
 
-	R_IssueRenderCommands( frameData );
+	R_IssueRenderCommands( frameData, false );
 }
 
 /*

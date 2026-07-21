@@ -94,10 +94,14 @@ textures/darkmod/stone/brick/blocks_light_stained_trimmed
 textures/darkmod/stone/brick/blocks_palemasonry_small_regular_trimmed
 textures/darkmod/stone/brick/blocks_palemasonry_irregular_trimmed
 textures/darkmod/stone/brick/blocks_palemasonry_irregular
+textures/darkmod/stone/brick/blocks_concrete_small_trimmed2
 textures/darkmod/wood/boards/planks_floor_redwood_posh_scuffed
 textures/darkmod/wood/boards/roof_framework_boards_large_old_red
 textures/darkmod/wood/panels/panel_decorative_red_grated
 textures/darkmod/wood/panels/panel_decorative_red_grated_grime
+textures/darkmod/paint_paper/fleur_blue
+textures/darkmod/paint_paper/fleur_green
+textures/darkmod/paint_paper/fleur_red
 
 If you believe any asset has been wrongfully included in The Dark Mod, please contact
 the team.
@@ -1367,3 +1371,32 @@ ThirdParty/artefacts/tracy/*/libbacktrace
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
+
+RenderDoc
+---------------------------------------------------------------------------
+sys/renderdoc/renderdoc_app.h
+
+/******************************************************************************
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019-2025 Baldur Karlsson
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ ******************************************************************************/

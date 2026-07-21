@@ -428,6 +428,26 @@ struct SuspiciousEvent
 	int time;						// grayman #3857 - when
 };
 
+struct ProjectDecalParams
+{
+	idVec3 origin = idVec3(0);
+	idVec3 dir = idVec3(0);
+	float depth = 0.0f;
+	bool parallel = false;
+	float size = 0.0f;
+	const char *material = nullptr;
+
+	// fading start time (default = current game time)
+	int starttime = -1;
+
+	// rotate decal in its plane (default: random rotation)
+	float angle = 0.0f;
+	bool randomizeAngle = true;
+
+	// save decal info into given entity (to reapply after LOD switch)
+	idEntity *saveOnTarget = nullptr;
+};
+
 #include "SearchManager.h" // grayman #3857 - must follow the definition of "EventType"
 #include "Entity.h"
 #include "EntityList.h"
@@ -701,7 +721,6 @@ public:
 	virtual const idDict &	GetPersistentPlayerInfo( int clientNum ) override;
 	virtual void			SetPersistentPlayerInfo( int clientNum, const idDict &playerInfo ) override;
 	// Obsttorte
-	virtual idStr			triggeredSave() override;
 	virtual bool			savegamesDisallowed() override;
 	virtual bool			quicksavesDisallowed() override;
 	virtual bool			PlayerReady() override;	// SteveL #4139. Prevent saving before player has clicked "ready" to start the map
@@ -834,8 +853,7 @@ public:
 	void					RadiusDouse( const idVec3 &origin, const float radius, const bool checkSpawnarg ); // grayman #3857. checkSpawnarg SteveL #4201
 	void					RadiusPushClipModel( const idVec3 &origin, const float push, const idClipModel *clipModel );
 
-	void					ProjectDecal( const idVec3 &origin, const idVec3 &dir, float depth, bool parallel, float size, const char *material,
-										  float angle = 0, idEntity* target = NULL, bool save = false, int starttime = -1, bool allowRandomAngle = true ); // target, save, startime added #3817 -- SteveL
+	void					ProjectDecal( ProjectDecalParams params );
 	void					BloodSplat( const idVec3 &origin, const idVec3 &dir, float size, const char *material );
 
 	void					CallFrameCommand( idEntity *ent, const function_t *frameCommand );
@@ -858,6 +876,7 @@ public:
 	idPlayer *				GetLocalPlayer() const;
 	// stgatilov #5819: position reported by "getviewpos" cmd
 	bool					GetViewPos_Cmd(idVec3 &origin, idMat3 &axis) const;
+	bool					GetViewPos_Cmd(idStr &text) const;
 
 	void					SpreadLocations();
 	idLocationEntity *		LocationForPoint( const idVec3 &point );	// May return NULL

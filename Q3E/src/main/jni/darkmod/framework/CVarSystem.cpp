@@ -354,6 +354,7 @@ public:
 
 	virtual idDict			GetMissionOverrides() const override;
 	virtual void			SetMissionOverrides( const idDict &dict = {} ) override;
+	virtual idDict			ReadMissionCvars() const override;
 
 	void					RegisterInternal( idCVar *cvar );
 	idCVar *				FindInternal( const char *name ) const;
@@ -849,6 +850,41 @@ void idCVarSystemLocal::SetMissionOverrides( const idDict &dict ) {
 
 /*
 ============
+idCVarSystemLocal::SetMissionOverrides
+============
+*/
+idDict idCVarSystemLocal::ReadMissionCvars() const {
+	idScopedCriticalSection lock( mutex );
+
+	// same rules as in decl files
+	idLexer lexer( "mission.cfg", DECL_LEXER_FLAGS );
+	if ( !lexer.IsLoaded() )
+		return idDict();
+
+	idDict result;
+
+	idToken token, tokValue;
+	while ( lexer.ReadToken( &token ) ) {
+
+		if ( token.Icmp( "set" ) == 0 || token.Icmp( "seta" ) == 0 ) {
+			// skip set/seta command for compatibility with pre-2.14 code
+			// which executed mission.cfg as a list of game console commands
+			lexer.ExpectAnyToken( &token );
+		}
+
+		lexer.ExpectTokenType( TT_STRING, 0, &tokValue );
+
+		if ( lexer.HadError() )
+			return {};
+
+		result.Set( token, tokValue ); 
+	}
+
+	return result;
+}
+
+/*
+============
 idCVarSystemLocal::Toggle_f
 ============
 */
@@ -1042,6 +1078,7 @@ void idCVarSystemLocal::ListByFlags( const idCmdArgs &args, cvarFlags_t flags ) 
 
 	argNum = 1;
 	show = SHOW_VALUE;
+	bool onlyMissionOverrides = false;
 
 	if ( idStr::Icmp( args.Argv( argNum ), "-" ) == 0 || idStr::Icmp( args.Argv( argNum ), "/" ) == 0 ) {
 		if ( idStr::Icmp( args.Argv( argNum + 1 ), "help" ) == 0 || idStr::Icmp( args.Argv( argNum + 1 ), "?" ) == 0 ) {
@@ -1053,6 +1090,10 @@ void idCVarSystemLocal::ListByFlags( const idCmdArgs &args, cvarFlags_t flags ) 
 		} else if ( idStr::Icmp( args.Argv( argNum + 1 ), "flags" ) == 0 ) {
 			argNum = 3;
 			show = SHOW_FLAGS;
+		} else if ( idStr::Icmp( args.Argv( argNum + 1 ), "mission" ) == 0 ) {
+			argNum = 3;
+			show = SHOW_VALUE;
+			onlyMissionOverrides = true;
 		}
 	}
 
@@ -1071,7 +1112,9 @@ void idCVarSystemLocal::ListByFlags( const idCmdArgs &args, cvarFlags_t flags ) 
 		if ( !( cvar->GetFlags() & flags ) ) {
 			continue;
 		}
-
+		if ( onlyMissionOverrides && !cvar->missionOverride ) {
+			continue;
+		}
 		if ( match.Length() && !cvar->nameString.Filter( match, false ) ) {
 			continue;
 		}
@@ -1186,7 +1229,8 @@ void idCVarSystemLocal::ListByFlags( const idCmdArgs &args, cvarFlags_t flags ) 
 	common->Printf(	"listCvar [search string]          = list cvar values\n"
 				"listCvar -help [search string]    = list cvar descriptions\n"
 				"listCvar -type [search string]    = list cvar types\n"
-				"listCvar -flags [search string]   = list cvar flags\n" );
+				"listCvar -flags [search string]   = list cvar flags\n"
+				"listCvar -mission [search string] = list cvar mission overrides\n");
 }
 
 /*

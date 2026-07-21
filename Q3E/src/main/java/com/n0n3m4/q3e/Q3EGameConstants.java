@@ -208,7 +208,7 @@ public final class Q3EGameConstants
     public static final String GAME_VERSION_QUAKE2   = "8.60";
     public static final String GAME_VERSION_QUAKE3   = "1.36";
     public static final String GAME_VERSION_RTCW     = "1.51d";
-    public static final String GAME_VERSION_TDM      = "2.13";
+    public static final String GAME_VERSION_TDM      = "2.14";
     public static final String GAME_VERSION_QUAKE1   = "";
     public static final String GAME_VERSION_DOOM3BFG = "1.4.0";
     public static final String GAME_VERSION_ZDOOM    = "4.14.3";

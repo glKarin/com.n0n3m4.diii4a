@@ -84,7 +84,7 @@ static void R_AutospriteDeform( drawSurf_t *surf ) {
 	R_GlobalVectorToLocal( surf->space->modelMatrix, tr.viewDef->renderView.viewaxis[1], leftDir );
 	R_GlobalVectorToLocal( surf->space->modelMatrix, tr.viewDef->renderView.viewaxis[2], upDir );
 
-	if ( tr.viewDef->isMirror ) {
+	if ( tr.viewDef->isMirrorInverted ) {
 		leftDir = vec3_origin - leftDir;
 	}
 

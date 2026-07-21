@@ -233,6 +233,7 @@ idSoundEmitterLocal *idSoundWorldLocal::AllocLocalSoundEmitter(idVec3 loc) // gr
 	def->removeStatus = REMOVE_STATUS_ALIVE;
 	def->soundWorld = this;
 	def->origin = loc; // grayman #4882
+	def->listenerId = -1;
 
 	return def;
 }

@@ -181,7 +181,6 @@ private:
 	int				flags;						// flags used for script parsing
 	idLexer *		scriptstack;				// stack with scripts of the source
 	idToken *		tokens;						// tokens to read first
-	define_t *		defines;					// list with macro definitions
 	define_t **		definehash;					// hash chain with defines
 	indent_t *		indentstack;				// stack with indents
 	int				skip;						// > 0 if skipping conditional code
@@ -211,7 +210,6 @@ private:
 	static void		FreeDefine( define_t *define );
 	static define_t *FindDefine( define_t *defines, const char *name );
 	static define_t *DefineFromString( const char *string);
-	define_t *		CopyFirstDefine( void );
 	int				Directive_include( void );
 	int				Directive_undef( void );
 	int				Directive_if_def( int type );

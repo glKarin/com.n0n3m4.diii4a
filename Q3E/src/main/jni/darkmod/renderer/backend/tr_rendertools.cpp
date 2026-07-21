@@ -2602,7 +2602,8 @@ void RB_ShowTrace( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		return;
 	}
 
-	if ( r_showTrace.GetInteger() == 2 ) {
+	bool frontOnly = r_showTrace.GetInteger() > 0;
+	if ( idMath::Abs( r_showTrace.GetInteger() ) == 2 ) {
 		radius = 5.0f;
 	} else {
 		radius = 0.0f;
@@ -2660,7 +2661,7 @@ void RB_ShowTrace( drawSurf_t **drawSurfs, int numDrawSurfs ) {
 		}
 
 		// check the exact surfaces
-		hit = R_LocalTrace( localStart, localEnd, radius, tri );
+		hit = R_LocalTrace( localStart, localEnd, radius, frontOnly, tri );
 		if ( hit.fraction < 1.0 ) {
 			ir.glColor4f( 1, 1, 1, 1 );
 			RB_DrawBounds( ir, idBounds( hit.point ).Expand( 1 ) );

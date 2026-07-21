@@ -39,9 +39,9 @@ public:
 	void Save();
 
 	// Returns the mission info structure for this fs_currentfm
-	// Always returns non-NULL, if the name is not existing, 
+	// Unless skipCreate == true, always returns non-NULL, if the name is not existing, 
 	// a new structure will be created
-	const CModInfoPtr& GetModInfo(const idStr& name);
+	const CModInfoPtr& GetModInfo(const idStr& name, bool skipCreate = false);
 
 	// Checks whether there is a record for the given mod name
 	bool ModInfoExists(const idStr& name);

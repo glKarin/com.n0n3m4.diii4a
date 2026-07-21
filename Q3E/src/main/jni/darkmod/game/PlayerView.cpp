@@ -955,6 +955,8 @@ idPlayerView::RenderPlayerView
 */
 void idPlayerView::RenderPlayerView( idUserInterface *hud )
 {
+	player->CheckForXrayOverlay();
+
 	const renderView_t *view = player->GetRenderView();
 
 	if(g_skipViewEffects.GetBool())

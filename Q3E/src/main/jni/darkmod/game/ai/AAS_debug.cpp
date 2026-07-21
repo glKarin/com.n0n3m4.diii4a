@@ -550,14 +550,18 @@ void idAASLocal::DrawAreas(const idVec3& playerOrigin)
 
 	// Paint the AAS areas
 
-	for ( int i = 0 ; i < file->GetNumAreas() ; i++ )
+	for (int i = 0; i < file->GetNumAreas(); i++)
 	{
 		idVec3 areaCenter = AreaCenter(i);
+		idBounds areaBounds = GetAreaBounds(i);
+		idVec3 size = areaBounds.GetSize();
+		idVec3 dist = areaCenter - playerOrigin;
 
 		// angua: only draw areas near the player, no need to see them at the other end of the map
-		if ( (areaCenter - playerOrigin).LengthFast() < 150 )
+		if (idMath::Abs(dist.z) < 250 &&
+			idMath::Abs(dist.x) < 250 + idMath::Abs(size.x) * 0.5f &&
+			idMath::Abs(dist.y) < 250 + idMath::Abs(size.y) * 0.5f)
 		{
-			idBounds areaBounds = GetAreaBounds(i);
 			int clusterNum = file->GetArea(i).cluster;
 			clusterNums.AddUnique(clusterNum);
 			idVec4 color = (clusterNum <= 0) ? colorWhite : aasColors[clusterNum];
@@ -566,7 +570,6 @@ void idAASLocal::DrawAreas(const idVec3& playerOrigin)
 			gameRenderWorld->DebugBox(color, idBox(areaBounds), 16);
 		}
 	}
-
 	// Paint the cluster numbers
 
 	for ( int i = 0 ; i < clusterNums.Num() ; i++ )

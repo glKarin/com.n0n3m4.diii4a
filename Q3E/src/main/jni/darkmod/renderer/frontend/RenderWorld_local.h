@@ -152,11 +152,13 @@ public:
 
 	virtual void			ProjectDecalOntoWorld( const idFixedWinding &winding, const idVec3 &projectionOrigin, const bool parallel, const float fadeDepth, const idMaterial *material, const int startTime ) override;
 	virtual void			ProjectDecal( qhandle_t entityHandle, const idFixedWinding &winding, const idVec3 &projectionOrigin, const bool parallel, const float fadeDepth, const idMaterial *material, const int startTime ) override;
+	void					FinishProjectDecal( idRenderEntityLocal *def, const idRenderModel *model, const decalProjectionInfo_t &info );
 	virtual void			ProjectOverlay( qhandle_t entityHandle, const idPlane localTextureAxis[2], const idMaterial *material ) override;
 	virtual void			RemoveDecals( qhandle_t entityHandle ) override;
 
 	virtual void			SetRenderView( const renderView_t *renderView ) override;
 	virtual	void			RenderScene( const renderView_t &renderView ) override;
+	virtual void			SetXrayGuiOverlayStage( const textureStage_t *stage ) override;
 
 	virtual	int				NumAreas( void ) const override;
 	virtual int				GetAreaAtPoint( const idVec3 &point ) const override;
@@ -238,6 +240,8 @@ public:
 	bool					generateAllInteractionsCalled;
 
 	LightQuerySystem *		lightQuerySystem;
+
+	const textureStage_t *	xrayGuiOverlayStage;
 
 	typedef idFlexList<int, 128> AreaList;
 
@@ -325,7 +329,7 @@ public:
 	};
 	void					RecurseFullLineIntersectionBSP_r( idList<LineIntersectionPoint> &result, int nodeNum, int parentNodeNum, float paramMin, float paramMax, const idVec3 &origin, const idVec3 &dir ) const;
 
-	void					BoundsInAreas_r( int nodeNum, const idBounds &bounds, int *areas, int *numAreas, int maxAreas ) const;
+	void					BoundsInAreas_r( int nodeNum, const idBounds &bounds, AreaList &areaIds ) const;
 
 	float					DrawTextLength( const char *text, float scale, int len = 0 );
 
@@ -345,6 +349,9 @@ public:
 
 	void					AddEntityToAreas(idRenderEntityLocal* def);
 	void					AddLightToAreas(idRenderLightLocal* def);
+
+	idDecalOnRenderModel	*cachedNewDecal = nullptr;
+	void					CreateDecalInModel( idRenderEntityLocal *def, const idRenderModel *model, const decalProjectionInfo_t &localInfo );
 
 	//-------------------------------
 	// tr_light.c

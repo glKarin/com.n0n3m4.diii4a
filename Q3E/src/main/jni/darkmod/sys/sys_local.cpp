@@ -36,11 +36,11 @@ void idSysLocal::DebugVPrintf( const char *fmt, va_list arg ) {
 	Sys_DebugVPrintf( fmt, arg );
 }
 
-double idSysLocal::GetClockTicks( void ) {
+uint64 idSysLocal::GetClockTicks( void ) {
 	return Sys_GetClockTicks();
 }
 
-double idSysLocal::ClockTicksPerSecond( void ) {
+uint64 idSysLocal::ClockTicksPerSecond( void ) {
 	return Sys_ClockTicksPerSecond();
 }
 

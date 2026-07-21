@@ -498,10 +498,15 @@ void idFuncSplat::Event_Splat( void ) {
 	for ( int i = 0; i < count; i++ ) {
 		splat = spawnArgs.RandomPrefix( "mtr_splat", gameLocal.random );
 		if ( splat && *splat ) {
-			float size = spawnArgs.GetFloat( "splatSize", "128" );
-			float dist = spawnArgs.GetFloat( "splatDistance", "128" );
-			float angle = spawnArgs.GetFloat( "splatAngle", "0" );
-			gameLocal.ProjectDecal( GetPhysics()->GetOrigin(), GetPhysics()->GetAxis()[2], dist, true, size, splat, angle );
+			ProjectDecalParams params;
+			params.origin = GetPhysics()->GetOrigin();
+			params.dir = GetPhysics()->GetAxis()[2];
+			params.depth = spawnArgs.GetFloat( "splatDistance", "128" );
+			params.parallel = true;
+			params.size = spawnArgs.GetFloat( "splatSize", "128" );
+			params.material = splat;
+			params.randomizeAngle = !spawnArgs.GetFloat( "splatAngle", "0", params.angle );
+			gameLocal.ProjectDecal( params );
 		}
 	}
 	StartSound( "snd_splat", SND_CHANNEL_ANY, 0, false, NULL );

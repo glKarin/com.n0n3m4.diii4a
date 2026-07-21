@@ -231,6 +231,7 @@ public:
 					// skip tokens until the given token string is read
 	int				SkipUntilString( const char *string );
 					// skip the rest of the current line
+					// BEWARE: it still tokenizes the skipped text, so any error there will kill lexer!
 	int				SkipRestOfLine( void );
 					// skip the braced section
 	int				SkipBracedSection( bool parseFirstBrace = true );
@@ -239,8 +240,12 @@ public:
 					// read a token only if on the same line
 	int				ReadTokenOnLine( idToken *token );
 
-					//Returns the rest of the current line
-	const char*		ReadRestOfLine(idStr& out);
+					// skip/read the rest of the current line
+					// does not tokenize the line, so any incorrect syntax can be there
+					//	 eatEoln = false: stops just before EOL
+					//	 eatEoln = true: stops just after first EOL
+					// can return skipped section to *out (without eaten EOL)
+	int				ReadRestOfLineUnp( idStr *out = nullptr, bool eatEoln = false );
 
 					// read a signed integer
 	int				ParseInt( void );

@@ -1036,7 +1036,15 @@ void CMeleeWeapon::MeleeCollision( idEntity *other, idVec3 dir, trace_t *tr, int
 		decal = DmgDef->GetString( "mtr_strike" );
 		if ( decal && *decal ) 
 		{
-			gameLocal.ProjectDecal( tr->c.point, -tr->c.normal, 8.0f, true, 6.0, decal, 0.0f, other, true );
+			ProjectDecalParams params;
+			params.origin = tr->c.point;
+			params.dir = -tr->c.normal;
+			params.depth = 8.0f;
+			params.parallel = true;
+			params.size = 6.0f;
+			params.material = decal;
+			params.saveOnTarget = other;
+			gameLocal.ProjectDecal( params );
 		}
 
 		// DM_LOG(LC_WEAPON,LT_DEBUG)LOGSTRING("MeleeCollision: Launching smoke\r");

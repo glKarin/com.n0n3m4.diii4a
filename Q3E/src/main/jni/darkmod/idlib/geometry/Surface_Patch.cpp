@@ -540,8 +540,15 @@ idSurface_Patch::Subdivide
 =================
 */
 void idSurface_Patch::Subdivide( float maxHorizontalError, float maxVerticalError, float maxLength, bool genNormals ) {
+
 	int			i, j, k, l;
-	idDrawVert	prev, next, mid;
+
+	// DG: to shut up GCC (maybe-)uninitialized warnings, initialize prev, next and mid
+	//     (maybe the warnings were at least partly correct, because .tangent and .color aren't set by idSurface_Patch::LerpVert())
+	idDrawVert	prev;
+	prev.Clear();
+	idDrawVert next = prev, mid = prev;
+
 	idVec3		prevxyz, nextxyz, midxyz;
 	idVec3		delta;
 	float		maxHorizontalErrorSqr, maxVerticalErrorSqr, maxLengthSqr;

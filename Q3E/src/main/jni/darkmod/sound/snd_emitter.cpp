@@ -1020,11 +1020,26 @@ int idSoundEmitterLocal::StartSound( const idSoundShader *shader, const s_channe
 		chan->leadinSample = shader->entries[ choice ];
 	}
 
+	// stgatilov #6647: load both leadin and main sound in the looping case
+	idStaticList<idSoundSample *, 2> usedSamples;
+	if ( chan->leadinSample )
+		usedSamples.AddUnique( chan->leadinSample );
+	if ( shader && shader->entries[0] && ( chanParms.soundShaderFlags & SSF_LOOPING ) )
+		usedSamples.AddUnique( shader->entries[0] );
+	// check which of sounds are not loaded
+	int unloadedCount = 0;
+	for ( idSoundSample *smp : usedSamples ) {
+		if ( smp->purged )
+			unloadedCount++;
+	}
 	// if the sample is onDemand (voice mails, etc), load it now
-	if ( chan->leadinSample->purged ) {
-		int		start = Sys_Milliseconds();
-		chan->leadinSample->Load();
-		int		end = Sys_Milliseconds();
+	if ( unloadedCount > 0 ) {
+		int start = Sys_Milliseconds();
+		for ( idSoundSample *smp : usedSamples ) {
+			if ( smp->purged )
+				smp->Load();
+		}
+		int end = Sys_Milliseconds();
 		session->TimeHitch( end - start );
 		// recalculate start44kHz, because loading may have taken a fair amount of time
 		if ( !soundWorld->fpa[0] ) {
@@ -1384,9 +1399,13 @@ idSlowChannel::Reset
 ===================
 */
 void idSlowChannel::Reset() {
-	memset( this, 0, sizeof( *this ) );
+// DG: memset() on this is problematic, because lowpass (SoundFX_LowpassFast) has a vtable
+	//memset( this, 0, sizeof( *this ) );
 
-	this->chan = chan;
+	active = false;
+	chan = NULL;
+	playbackState = triggerOffset = 0;
+	lowpass.Clear();
 
 	curPosition.Set( 0 );
 	newPosition.Set( 0 );

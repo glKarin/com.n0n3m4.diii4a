@@ -437,3 +437,43 @@ float idParticle_FetchCutoffTimeLinear(const idImageAsset *image, int totalParti
 	float ratio = ((texel[0] * 256 + texel[1]) * 256 + texel[2]) * TWO_POWER_MINUS_24;
 	return ratio;
 }
+
+int64 idParticle_CoundEmitted(const idPartStageData &stg, const idPartSysEmit &psys, bool &isFullyOver) {
+	// note: the logic must closely follow idParticle_EmitParticle!
+	isFullyOver = false;
+
+	int viewTimeMs = psys.viewTimeMs;
+	if (psys.entityParmsStopTime) {
+		// particles stop spawning at this moment, so limit input time by it
+		int timeCap = psys.entityParmsStopTime * 1000;
+		if (viewTimeMs > timeCap) {
+			viewTimeMs = timeCap;
+			isFullyOver = true;
+		}
+	}
+
+	int stageAge = viewTimeMs + psys.entityParmsTimeOffset * 1000 - stg.timeOffset * 1000;
+
+	if (stageAge < 0) {
+		// then in idParticle_EmitParticle: particleAge < 0 => no particles generated yet
+		return 0;
+	}
+	int stageCycle = stageAge / stg.cycleMsec;
+	int stageAgeInCycle = stageAge - stageCycle * stg.cycleMsec;
+
+	float bunchSpawnFullDuration = stg.particleLife * 1000 * stg.spawnBunching;
+	float numEmitterFloat = stageAgeInCycle / idMath::Fmax(bunchSpawnFullDuration, 1e-9f) * psys.totalParticles;
+	int numEmittedInCycle = (int)idMath::ClampFloat(0, psys.totalParticles, numEmitterFloat + 1.0f);
+
+	if (stg.cycles) {
+		// the particle system was disabled in all subsequent cycles
+		int cyclesCount = idMath::Ceil(stg.cycles);
+		if (stageCycle >= cyclesCount) {
+			isFullyOver = true;
+			return int64(psys.totalParticles) * cyclesCount;
+		}
+	}
+
+	int64 globalNum = int64(psys.totalParticles) * stageCycle + numEmittedInCycle;
+	return globalNum;
+}

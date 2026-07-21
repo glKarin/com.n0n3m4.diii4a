@@ -31,7 +31,7 @@ const float FOG_ENTER = ( FOG_ENTER_SIZE + 1.0f ) / ( FOG_ENTER_SIZE * 2 );
 // picky to get the bilerp correct at terminator
 
 
-typedef struct {
+typedef struct renderCrop_s {
 	int		x, y, width, height;	// these are in physical, OpenGL Y-at-bottom pixels
 } renderCrop_t;
 
@@ -366,8 +366,11 @@ public:
 	// note that an entity could still be in the view frustum and not be visible due
 	// to portal passing
 
-	idRenderModelDecal		*decals;					// chain of decals that have been projected on this model
-	idRenderModelOverlay 	*overlay;					// blood overlays on animated models
+	idDecalOnRenderModel		*decals;					// chain of decals that have been projected on this model
+	idOverlayOnRenderModel 	*overlay;					// blood overlays on animated models
+
+	idList<idRenderEntityLocal*> children;				// #5867 children entities get some properties synchronized from parent
+	idRenderEntityLocal		*parent;					// when this parent dies, children must die too
 
 	areaReference_t 		*entityRefs;				// chain of all references
 	idInteraction 			*firstInteraction;			// doubly linked list
@@ -375,6 +378,9 @@ public:
 
 	bool					needsPortalSky;
 	int						centerArea;
+
+	static const int		TimedViewsPerFrame = 8;
+	float					timeAddSingleModel[8];		// #6650. statistics of R_AddSingleModel per view on the last frame
 
 	idSysMutex				mutex;						// needed to synchronize R_EntityDefDynamicModel over multiple threads
 };
@@ -503,6 +509,7 @@ typedef struct viewDef_s {
 
 	idRenderWorldLocal *renderWorld;
 
+	int					viewCount;				// tr.viewCount recorded during R_RenderView 
 	float				floatTime;
 
 	idVec3				initialViewAreaOrigin;
@@ -516,7 +523,8 @@ typedef struct viewDef_s {
 	// a different side than the renderView.viewOrg is.
 
 	bool				isSubview;				// true if this view is not the main view
-	bool				isMirror;				// the portal is a mirror, invert the face culling
+	bool				isMirrorInverted;		// mirrored/inverted view: invert the face culling (false inside double-mirror)
+	bool				isMirrorGen;			// true if view is generated for mirror
 	bool				isPortalSky;			// true if view is generated for portalSky
 	bool				isXray;					// true if view is generated for xray
 	xrayEntityMask_t	xrayEntityMask;
@@ -641,12 +649,15 @@ struct bloomCommand_t : emptyCommand_t {
 };
 
 struct setBufferCommand_t : emptyCommand_t {
-	GLenum	buffer;
 	int		frameCount;
 };
 
 struct drawSurfsCommand_t : emptyCommand_t {
 	viewDef_t	*viewDef;
+};
+
+struct tonemapCommand_t : emptyCommand_t {
+	bool forceOutputToBlack;
 };
 
 struct drawLightgemCommand_t : drawSurfsCommand_t {
@@ -659,6 +670,7 @@ struct copyRenderCommand_t : emptyCommand_t {
 	int		cubeFace;			// when copying to a cubeMap
 	unsigned char	*buffer;	// to memory instead of to texture
 	bool	usePBO;				// lightgem optimization
+	renderCrop_t scissor;		// only copy given scissor without image/buffer
 };
 
 //=======================================================================
@@ -716,6 +728,7 @@ void R_ReloadGuis_f( const idCmdArgs &args );
 void R_ListGuis_f( const idCmdArgs &args );
 
 void *R_GetCommandBuffer( int bytes );
+void R_IssueRenderCommands( frameData_t *frameData, bool swapBuffers );
 
 // this allows a global override of all materials
 bool R_GlobalShaderOverride( const idMaterial **shader );
@@ -883,7 +896,7 @@ public:
 	virtual void			TakeScreenshot( int width, int height, const char *fileName, int downSample, renderView_t *ref, bool envshot = false ) override;
 	virtual void			CropRenderSize( int width, int height, bool makePowerOfTwo = false, bool forceDimensions = false ) override;
 	virtual void			GetCurrentRenderCropSize( int &width, int &height ) override;
-	virtual void			CaptureRenderToImage( idImageScratch &image ) override;
+	virtual void			CaptureRenderToImage( idImageScratch &image, const renderCrop_t *scissor = nullptr ) override;
 	virtual void			CaptureRenderToBuffer( unsigned char *buffer, bool usePbo = false ) override;
 	virtual void			PostProcess() override;
 	virtual void			UnCrop() override;
@@ -950,6 +963,8 @@ public:
 	int						guiRecursionLevel;		// to prevent infinite overruns
 	class idGuiModel 		*guiModel;
 	class idGuiModel 		*demoGuiModel;
+
+	idImageScratch			*xrayGuiImageOverride;
 
 	unsigned short			gammaTable[256];	// brightness / gamma modify this
 	idParallelJobList*		frontEndJobList;
@@ -1445,6 +1460,7 @@ void R_DeriveEntityData( idRenderEntityLocal *def );
 void R_CreateEntityRefs( idRenderEntityLocal *def );
 void R_CreateLightRefs( idRenderLightLocal *light );
 
+void R_SetLightFrustum( const idPlane lightProject[4], idPlane frustum[6] );
 void R_DeriveLightData( idRenderLightLocal *light );
 void R_FreeLightDefDerivedData( idRenderLightLocal *light );
 void R_CheckForEntityDefsUsingModel( idRenderModel *model );
@@ -1453,7 +1469,9 @@ void R_ClearEntityDefDynamicModel( idRenderEntityLocal *def );
 void R_FreeEntityDefDerivedData( idRenderEntityLocal *def, bool keepDecals, bool keepCachedDynamicModel );
 void R_FreeEntityDefDecals( idRenderEntityLocal *def );
 void R_FreeEntityDefOverlay( idRenderEntityLocal *def );
+void R_FreeEntityDefChildren( idRenderEntityLocal *def );
 void R_FreeEntityDefFadedDecals( idRenderEntityLocal *def, int time );
+void R_InitRenderParmsForChildEntity( renderEntity_t &parms, idRenderEntityLocal *def, idRenderModel *model );
 
 void R_CreateLightDefFogPortals( idRenderLightLocal *ldef );
 
@@ -1610,6 +1628,7 @@ void				R_ResizeStaticTriSurfShadowVerts( srfTriangles_t *tri, int numVerts );
 void				R_ReferenceStaticTriSurfVerts( srfTriangles_t *tri, const srfTriangles_t *reference );
 void				R_ReferenceStaticTriSurfIndexes( srfTriangles_t *tri, const srfTriangles_t *reference );
 void				R_FreeStaticTriSurfSilIndexes( srfTriangles_t *tri );
+void				R_FreeStaticTriSurfSilEdges( srfTriangles_t *tri );
 void				R_FreeStaticTriSurf( srfTriangles_t *tri );
 void				R_FreeStaticTriSurfVertexCaches( srfTriangles_t *tri );
 void				R_FreeStaticTriSurfIndexes( srfTriangles_t *tri );
@@ -1620,6 +1639,7 @@ int					R_TriSurfMemory( const srfTriangles_t *tri );
 void				R_BoundTriSurf( srfTriangles_t *tri );
 void				R_RemoveDuplicatedTriangles( srfTriangles_t *tri );
 void				R_CreateSilIndexes( srfTriangles_t *tri );
+void				R_IdentifySilEdges( srfTriangles_t *tri, bool omitCoplanarEdges );
 void				R_RemoveDegenerateTriangles( srfTriangles_t *tri );
 void				R_RemoveUnusedVerts( srfTriangles_t *tri );
 void				R_RangeCheckIndexes( const srfTriangles_t *tri );
@@ -1817,9 +1837,10 @@ typedef struct {
 	idVec3		point;
 	idVec3		normal;
 	int			indexes[3];
+	bool		backHit;
 } localTrace_t;
 
-localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float radius, const srfTriangles_t *tri );
+localTrace_t R_LocalTrace( const idVec3 &start, const idVec3 &end, const float radius, bool frontOnly, const srfTriangles_t *tri );
 
 /*
 =============================================================

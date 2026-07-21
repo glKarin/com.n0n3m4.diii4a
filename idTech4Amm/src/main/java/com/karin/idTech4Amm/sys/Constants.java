@@ -32,6 +32,7 @@ public final class Constants
         return new String[] {
             "Add `Enemy Territory: QUAKE Wars`(ver 1.5) support, game standalone directory named `etqw`, game data directory named `etqwbase`. More view in `" + TextHelper.GenLinkText("https://www.splashdamage.com/games/enemy-territory-quake-wars/", "Enemy Territory: QUAKE Wars") + "`.",
             "Update RealRTCW version to 5.4.",
+            "Update The Dark Mod version to 2.14.",
             "Add gyroscope dead zone(rad/s) setting in launcher's controls tab panel.",
         };
 	};

@@ -86,7 +86,4 @@ EIntersection IntersectLineCone(const idVec3 rkLine[LSG_COUNT], idVec3 rkCone[EL
 EIntersection IntersectLineLightCone(const idVec3 rkLine[LSG_COUNT], idVec3 rkCone[ELC_COUNT], idVec3 akPoint[2], bool inside[2]); // grayman #3584
 bool LineSegTriangleIntersect(const idVec3 Seg[LSG_COUNT], idVec3 Triangle[3], idVec3 &Intersect, float &t);
 
-void R_SetLightFrustum(const idPlane lightProject[4], idPlane frustum[6]);
-void R_SetLightProject(idPlane lightProject[4], const idVec3 &origin, const idVec3 &target, idVec3 &right, idVec3 &up, const idVec3 &start, const idVec3 &stop);
-
 #endif

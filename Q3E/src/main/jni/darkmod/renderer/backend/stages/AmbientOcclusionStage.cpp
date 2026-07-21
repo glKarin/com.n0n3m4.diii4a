@@ -36,6 +36,7 @@ idCVar r_ssao_intensity("r_ssao_intensity", "1.0", CVAR_FLOAT | CVAR_RENDERER | 
 idCVar r_ssao_base("r_ssao_base", "0.1", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE,
 	"Minimum baseline visibility below which AO cannot drop");
 idCVar r_ssao_edgesharpness("r_ssao_edgesharpness", "1", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "Edge sharpness in SSAO blur");
+idCVar r_ssao_insubview("r_ssao_insubview", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Allow SSAO effects in subviews like mirrors" );
 
 extern idCVar r_fboResolution;
 
@@ -88,7 +89,7 @@ namespace {
 #ifdef _GLES //karin: only GL_RGBA if texture
 		color->GenerateAttachment( frameBuffers->renderWidth, frameBuffers->renderHeight, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE );
 #else
-        color->GenerateAttachment( frameBuffers->renderWidth, frameBuffers->renderHeight, GL_RGBA8, GL_LINEAR, GL_CLAMP_TO_EDGE );
+		color->GenerateAttachment( frameBuffers->renderWidth, frameBuffers->renderHeight, GL_RGBA8, GL_LINEAR, GL_CLAMP_TO_EDGE );
 #endif
 		fbo->AddColorRenderTexture( 0, color );
 	}
@@ -219,7 +220,7 @@ void AmbientOcclusionStage::BindSSAOTexture(int index) {
 }
 
 bool AmbientOcclusionStage::ShouldEnableForCurrentView() const {
-	return r_ssao.GetBool() && !backEnd.viewDef->IsLightGem() && !backEnd.viewDef->isSubview && !backEnd.viewDef->renderWorld->mapName.IsEmpty();
+	return r_ssao.GetBool() && !backEnd.viewDef->IsLightGem() && ( !backEnd.viewDef->isSubview || ( r_ssao_insubview.GetBool() && !backEnd.viewDef->isPortalSky )) && !backEnd.viewDef->renderWorld->mapName.IsEmpty();
 }
 
 void AmbientOcclusionStage::PrepareDepthPass() {

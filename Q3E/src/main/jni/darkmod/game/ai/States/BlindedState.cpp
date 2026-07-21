@@ -27,6 +27,11 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 namespace ai
 {
 
+BlindedState::BlindedState()
+	: _startTime(gameLocal.time)
+{
+}
+
 // Get the name of this state
 const idStr& BlindedState::GetName() const
 {
@@ -156,6 +161,7 @@ void BlindedState::Save(idSaveGame* savefile) const
 {
 	State::Save(savefile);
 
+	savefile->WriteInt(_startTime);
 	savefile->WriteInt(_endTime);
 	savefile->WriteFloat(_oldVisAcuity);
 	savefile->WriteFloat(_oldAudAcuity); // Smoke #2829
@@ -167,11 +173,22 @@ void BlindedState::Restore(idRestoreGame* savefile)
 {
 	State::Restore(savefile);
 
+	savefile->ReadInt(_startTime);
 	savefile->ReadInt(_endTime);
 	savefile->ReadFloat(_oldVisAcuity);
 	savefile->ReadFloat(_oldAudAcuity); // Smoke #2829
 	savefile->ReadBool(_staring); // grayman #3431
 	savefile->ReadBool(_initialized); // grayman #4270
+}
+
+int BlindedState::GetStartTime() const 
+{
+	return _startTime;
+}
+
+int BlindedState::GetEndTime() const 
+{
+	return _endTime;
 }
 
 StatePtr BlindedState::CreateInstance()

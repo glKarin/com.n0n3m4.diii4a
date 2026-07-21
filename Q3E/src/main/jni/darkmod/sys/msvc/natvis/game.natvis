@@ -166,7 +166,36 @@
       <ExpandedItem Condition="commandId==4">*(copyRenderCommand_t*)this</ExpandedItem>
     </Expand>
   </Type>
+  <Type Name="frameData_t">
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[deferredFreeSurfs]">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>firstDeferredFreeTriSurf</HeadPointer>
+            <NextPointer>nextDeferredFree</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
 
+  <Type Name="activeSmokeStage_t">
+    <Expand>
+      <ExpandedItem>this,!</ExpandedItem>
+      <Synthetic Name="[All particles]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>smokes</HeadPointer>
+            <NextPointer>next</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+  
   <Type Name="CInventory">
     <DisplayString>Inventory: {m_Category}</DisplayString>
   </Type>
@@ -451,6 +480,15 @@
             <Size>numDrawSurfs</Size>
             <ValuePointer>drawSurfs</ValuePointer>
           </ArrayItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="[Subview stack]" ExcludeView="raw">
+        <Expand>
+          <LinkedListItems>
+            <HeadPointer>this</HeadPointer>
+            <NextPointer>superView</NextPointer>
+            <ValueNode>this</ValueNode>
+          </LinkedListItems>
         </Expand>
       </Synthetic>
     </Expand>

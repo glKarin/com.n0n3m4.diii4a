@@ -27,6 +27,29 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ***********************************************************************/
 
+idRenderModelMD3::~idRenderModelMD3() {
+	srfTriangles_t tri;
+	memset( &tri, 0, sizeof( tri ) );
+
+	for ( int i=0, n=silInfos.Num() ; i < n ; ++i ) {
+		md3SilInfo_t& silInfo = silInfos[i];
+		// Note: Because tri.sil* was allocated by specialized allocators only available
+		//       in tr.trisurf.cpp, they need to be free'd with them as well.
+		//       The easiest way to do this is by putting them into a srfTriangles_t first
+		tri.silIndexes = silInfo.silIndexes;
+		tri.silEdges = silInfo.silEdges;
+
+		R_FreeStaticTriSurfSilIndexes( &tri );
+		R_FreeStaticTriSurfSilEdges( &tri );
+
+		// Note: silInfos[i].indexes points directly into the corresponding data
+		//  in this->md3 so it will be freed together with the rest of this->md3
+	}
+	silInfos.Clear();
+
+	Mem_Free(md3);
+}
+
 #define	LL(x) x=LittleInt(x)
 
 /*
@@ -44,7 +67,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 	md3St_t				*st;
 	md3XyzNormal_t		*xyz;
 	md3Tag_t			*tag;
-	void				*buffer;
+	void				*buffer = NULL;
 	int					version;
 	int					size;
 
@@ -52,7 +75,10 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
 	name = fileName;
 
 	size = fileSystem->ReadFile( fileName, &buffer, NULL );
-	if (!size || size<0 ) {
+	if ( size <= (int)sizeof(md3Header_t) ) {
+		if (buffer != NULL) {
+			fileSystem->FreeFile( buffer );
+		}
 		return;
 	}
 
@@ -154,10 +180,10 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
         // register the shaders
         shader = (md3Shader_t *) ( (byte *)surf + surf->ofsShaders );
         for ( j = 0 ; j < surf->numShaders ; j++, shader++ ) {
-            const idMaterial *sh;
-
-            sh = declManager->FindMaterial( shader->name );
-			shader->shader = sh;
+			const idMaterial *sh = declManager->FindMaterial( shader->name );
+			// DG: md3Shader_t must use an index to the material instead of a pointer,
+			//     otherwise the sizes are wrong on 64bit and we get data corruption
+			shader->shaderIndex = (sh != NULL) ? shaders.AddUnique( sh ) : -1;
         }
 
 		// swap all the triangles
@@ -186,6 +212,7 @@ void idRenderModelMD3::InitFromFile( const char *fileName ) {
             xyz->normal = LittleShort( xyz->normal );
         }
 
+		silInfos.Append( BuildSilInfo( surf ) );
 
 		// find the next surface
 		surf = (md3Surface_t *)( (byte *)surf + surf->ofsEnd );
@@ -264,9 +291,7 @@ idRenderModelMD3::InstantiateDynamicModel
 idRenderModel *idRenderModelMD3::InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel ) {
 	int				i, j;
 	float			backlerp;
-	int *			triangles;
 	float *			texCoords;
-	int				indexes;
 	int				numVerts;
 	md3Surface_t *	surface;
 	int				frame, oldframe;
@@ -278,24 +303,41 @@ idRenderModel *idRenderModelMD3::InstantiateDynamicModel( const struct renderEnt
 	}
 
 	staticModel = new idRenderModelStatic;
+	staticModel->InitEmpty("_MD3_Snapshot_");
 	staticModel->bounds.Clear();
 
 	if ( !md3 ) {
 		common->FatalError( "NULL model for entity %s\n", ent->hModel->Name() );
 	}
 
+	int numFrames = md3->numFrames;
+
 	surface = (md3Surface_t *) ((byte *)md3 + md3->ofsSurfaces);
 
 	// TODO: these need set by an entity
-	frame = ent->shaderParms[SHADERPARM_MD3_FRAME];			// probably want to keep frames < 1000 or so
-	oldframe = ent->shaderParms[SHADERPARM_MD3_LASTFRAME];
+	frame = idMath::ClampInt(0, numFrames-1, ent->shaderParms[SHADERPARM_MD3_FRAME]);	// probably want to keep frames < 1000 or so
+	oldframe = idMath::ClampInt(0, numFrames-1, ent->shaderParms[SHADERPARM_MD3_LASTFRAME]);
 	backlerp = ent->shaderParms[SHADERPARM_MD3_BACKLERP];
 
 	for( i = 0; i < md3->numSurfaces; i++ ) {
 
 		srfTriangles_t *tri = R_AllocStaticTriSurf();
 		R_AllocStaticTriSurfVerts( tri, surface->numVerts );
-		R_AllocStaticTriSurfIndexes( tri, surface->numTriangles * 3 );
+
+		// DG: set sil edges for shadows
+		const md3SilInfo_t& silInfo = silInfos[i];
+		tri->numSilEdges = silInfo.numSilEdges;
+		tri->silEdges = silInfo.silEdges;
+		tri->silIndexes = silInfo.silIndexes;
+
+		tri->indexes = silInfo.indexes;
+		tri->numIndexes = silInfo.numIndexes;
+		assert(surface->numTriangles * 3 == silInfo.numIndexes);
+
+		// deformedSurface prevents silEdges, silIndexes, indexes (and more not used here)
+		// from being freed (they belong to silInfo which is freed in ~idRenderModelMD3())
+		tri->deformedSurface = true;
+
 		tri->bounds.Clear();
 
 		modelSurface_t	surf;
@@ -306,16 +348,12 @@ idRenderModel *idRenderModelMD3::InstantiateDynamicModel( const struct renderEnt
 		surf.id = i;
 
 		md3Shader_t* shaders = (md3Shader_t *) ((byte *)surface + surface->ofsShaders);
-		surf.material = shaders->shader;
+		// FIXME: theoretically there can be multiple shaders?
+		// DG: turned md3Shader_t::shader (pointer) into an int (index)
+		int shaderIdx = shaders->shaderIndex;
+		surf.material = (shaderIdx >= 0) ? this->shaders[shaderIdx] : NULL;
 
 		LerpMeshVertexes( tri, surface, backlerp, frame, oldframe );
-
-		triangles = (int *) ((byte *)surface + surface->ofsTriangles);
-		indexes = surface->numTriangles * 3;
-		for (j = 0 ; j < indexes ; j++) {
-			tri->indexes[j] = triangles[j];
-		}
-		tri->numIndexes += indexes;
 
 		texCoords = (float *) ((byte *)surface + surface->ofsSt);
 
@@ -358,6 +396,8 @@ idBounds idRenderModelMD3::Bounds(const struct renderEntity_s *ent) const {
 	}
 
 	md3Frame_t	*frame = (md3Frame_t *)( (byte *)md3 + md3->ofsFrames );
+	int frameNum = idMath::ClampInt(0, md3->numFrames-1, (int)ent->shaderParms[SHADERPARM_MD3_FRAME]);
+	frame += frameNum; // DG: use bounds of current frame
 
 	ret.AddPoint( frame->bounds[0] );
 	ret.AddPoint( frame->bounds[1] );
@@ -365,3 +405,68 @@ idBounds idRenderModelMD3::Bounds(const struct renderEntity_s *ent) const {
 	return ret;
 }
 
+/*
+=====================
+idRenderModelMD3::BuildSilInfo
+
+Note: This is basically the subset of the MD5-centric R_BuildDeformInfo()
+      that is required for MD3, adjusted for MD3 types
+=====================
+*/
+
+md3SilInfo_t idRenderModelMD3::BuildSilInfo( md3Surface_t *surf ) {
+	//
+	// build the information that will be common to all animations of this surface:
+	// silhouette edge connectivity and normal / tangent generation information
+	//
+	int numVerts = surf->numVerts;
+	md3SilInfo_t ret = {0};
+
+	md3XyzNormal_t *xyzs = (md3XyzNormal_t *) ( (byte *)surf + surf->ofsXyzNormals );
+
+	idList<idDrawVert> verts;
+	verts.SetNum( numVerts );
+
+	for ( int i=0; i < numVerts; ++i ) {
+		idDrawVert& v = verts[i];
+		v.Clear();
+		// Note: MD3 defines these for all frames - using frame 0 here
+		short* xyz = xyzs[i].xyz;
+		v.xyz.x = xyz[0] * float(MD3_XYZ_SCALE);
+		v.xyz.y = xyz[1] * float(MD3_XYZ_SCALE);
+		v.xyz.z = xyz[2] * float(MD3_XYZ_SCALE);
+		// Note: idDrawVert has more fields, but R_CreateSilIndexes() and R_IdentifySilEdges()
+		//       only use .xyz
+	}
+
+	int numIndexes = surf->numTriangles * 3;
+	md3Triangle_t *md3TriIdx = (md3Triangle_t *) ( (byte *)surf + surf->ofsTriangles );
+	int *triIndexes = (int*)md3TriIdx->indexes;
+
+	srfTriangles_t tri;
+	memset( &tri, 0, sizeof( tri ) );
+
+	tri.verts = verts.Ptr();
+	tri.numVerts = numVerts;
+	tri.numIndexes = numIndexes;
+
+	static_assert( sizeof(triIndexes[0]) == sizeof(tri.indexes[0]) , "index sizes don't match!");
+	// if that static_assert triggers, R_AllocStaticTriSurfIndexes( &tri, numIndexes );
+	// and then loop tri.indexes[i] = triIndexes[i] (and free that in destructor)
+	tri.indexes = triIndexes;
+
+	R_CreateSilIndexes(&tri); // allocates and sets tri.silIndexes with triSilIndexAllocator
+	// if there's only one frame (no animation), the omitCoplanarEdges optimization can be used
+	// (otherwise it can't because edges that are coplanar in frame 0 may not be in another frame)
+	bool omitCoplanarEdges = (surf->numFrames == 1);
+	R_IdentifySilEdges(&tri, omitCoplanarEdges); // allocates and sets tri.silEdges with triSilEdgeAllocator
+
+	ret.numIndexes = tri.numIndexes;
+	ret.numSilEdges = tri.numSilEdges;
+	ret.indexes = tri.indexes;
+	ret.silIndexes = tri.silIndexes;
+	ret.silEdges = tri.silEdges;
+
+
+	return ret;
+}

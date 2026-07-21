@@ -24,6 +24,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "MovementSubsystem.h"
 #include "Memory.h"
 #include "States/KnockedOutState.h"
+#include "States/BlindedState.h"
 #include "States/DeadState.h"
 #include "States/ConversationState.h"
 #include "States/PainState.h"
@@ -1109,6 +1110,7 @@ void idAI::Save(idSaveGame *savefile) const {
 	SAVE_TIMER_HANDLE(aiPointReachableAreaNumTimer, savefile);
 	SAVE_TIMER_HANDLE(aiCanSeeTimer, savefile);
 
+	savefile->WriteString(m_NextIdleAnim.c_str());
 }
 
 /*
@@ -1628,6 +1630,8 @@ void idAI::Restore( idRestoreGame *savefile ) {
 	RESTORE_TIMER_HANDLE(aiGetFloorPosTimer, savefile);
 	RESTORE_TIMER_HANDLE(aiPointReachableAreaNumTimer, savefile);
 	RESTORE_TIMER_HANDLE(aiCanSeeTimer, savefile);
+
+	savefile->ReadString(m_NextIdleAnim);
 }
 
 ai::Subsystem* idAI::GetSubsystem(ai::SubsystemId id)
@@ -4196,7 +4200,10 @@ idVec3 idAI::GetObservationPosition (const idVec3& pointToObserve, const float v
 
 	// What is the lighting along the line where the thing to be observed
 	// might be.
-	float maxDistanceToObserve = GetMaximumObservationDistanceForPoints(pointToObserve, pointToObserve2);
+	float maxDistanceToObserve = cv_ai_sight_scale.GetFloat() * GetAcuity("vis") * 1.0f;
+	if ( g_lightQuotientAlgo.GetInteger() < 2 ) {
+		maxDistanceToObserve = GetMaximumObservationDistanceForPoints(pointToObserve, pointToObserve2);
+	}
 		
 	idAASFindObservationPosition findGoal
 	(
@@ -5048,7 +5055,7 @@ bool idAI::GetMovePos(idVec3 &seekPos)
 				// angua: check whether there is a door in the path
 				if (path.firstDoor != NULL)
 				{
-					const idVec3& doorOrg = path.firstDoor->GetClosedBox().GetCenter(); // grayman #3755 - use door center, not origin
+					const idVec3 doorOrg = path.firstDoor->GetClosedBox().GetCenter(); // grayman #3755 - use door center, not origin
 					//const idVec3& doorOrg = path.firstDoor->GetPhysics()->GetOrigin();
 					const idVec3& org = GetPhysics()->GetOrigin();
 					idVec3 dir = doorOrg - org;
@@ -5939,9 +5946,6 @@ void idAI::DeadMove( void ) {
 	physicsObj.SetDelta( delta );
 
 	RunPhysics();
-
-	// stgatilov #6546: keep light quotient always valid for AI bodies
-	gameLocal.m_LightEstimateSystem->TrackEntity( this );
 
 	//moveResult = physicsObj.GetMoveResult();
 	AI_ONGROUND = physicsObj.OnGround();
@@ -11883,13 +11887,23 @@ bool idAI::TestKnockoutBlow( idEntity* attacker, const idVec3& dir, trace_t *tr,
 	   below m_KoAlertImmuneState, a KO can occur only from behind.
     6. Finally, check the KO angles and determine if the blow has landed in the right place.
 	7. A sleeping AI can be KOed from the front, unless he's wearing a helmet with a facemask.
+	8. A recently blinded AI can be KOed from any angle, at any alert level, unless he's wearing a helmet with a facemask.
  */
-
+	const bool isRecentlyBlinded = [BlindedState = std::dynamic_pointer_cast<ai::BlindedState>(GetMind()->GetState())] 
+		{
+			if (BlindedState == nullptr)
+				return false;
+			const int KOSusceptibilityDuration = cv_ai_ko_susceptibility_after_flash_duration.GetInteger();
+			if (KOSusceptibilityDuration <= 0)
+				return false;
+			const int KOSusceptibilityEndTime = std::min<>(BlindedState->GetStartTime() + KOSusceptibilityDuration, BlindedState->GetEndTime());
+			return gameLocal.time < KOSusceptibilityEndTime;
+		}();
+	const bool hasEliteFaceguardHelmet = minDotVert == 1.0f || minDotHoriz == 1.0f;
 	bool immune2KO = false;
-	if ((GetMoveType() == MOVETYPE_SLEEP) && // grayman #3951
-		((minDotVert != 1.0f) && (minDotHoriz != 1.0f))) // cos(DEG2RAD(0.0f)) indicates elite faceguard helmet
+	if ((GetMoveType() == MOVETYPE_SLEEP || isRecentlyBlinded) && // Rule #7 & Rule #8
+		!hasEliteFaceguardHelmet)
 	{
-		// Rule #7 - no immunity
 		minDotVert = minDotHoriz = -1.0f; // cos(DEG2RAD(180.0f)) everyone gets KO'ed
 	}
 	else if (spawnArgs.GetBool("is_civilian", "0"))
@@ -11897,10 +11911,10 @@ bool idAI::TestKnockoutBlow( idEntity* attacker, const idVec3& dir, trace_t *tr,
 		// Rule #1
 	}
 	// everyone else is a combatant
-	else if ( AI_AlertIndex >= m_KoAlertImmuneState )
+	else if ( AI_AlertIndex >= m_KoAlertImmuneState)
 	{
 		// is the AI immune at high alert levels?
-		if ( m_bKoAlertImmune )
+		if (m_bKoAlertImmune)
 		{
 			immune2KO = true; // Rule #2
 		}
@@ -12811,8 +12825,6 @@ void idAI::DropOnRagdoll( void )
 			pWeap->DeactivateAttack();
 			pWeap->DeactivateParry();
 			pWeap->ClearOwner();
-			// stgatilov #6546: track dropped melee weapon forever
-			gameLocal.m_LightEstimateSystem->TrackEntity( ent, 1000000000 );
 		}
 
 		// greebo: Check if we should set some attachments to nonsolid

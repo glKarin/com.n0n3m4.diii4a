@@ -127,7 +127,7 @@ obj_file_t *OBJ_Load(const char *fileName) {
 		}
 		else if (token.Cmp("usemtl") == 0) {
 			idStr matname;
-			lexer.ReadRestOfLine(matname);
+			lexer.ReadRestOfLineUnp(&matname);
 			matname.StripWhitespace();
 
 			materialIdx = -1;
@@ -153,7 +153,7 @@ obj_file_t *OBJ_Load(const char *fileName) {
 
 		if (lexer.HadError())
 			return nullptr;
-		lexer.SkipRestOfLine();
+		lexer.ReadRestOfLineUnp();
 	}
 
 	if (numFacesExcessive) {

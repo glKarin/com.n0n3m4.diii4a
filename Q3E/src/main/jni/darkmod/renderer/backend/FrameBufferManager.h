@@ -44,7 +44,7 @@ public:
 	void UpdateCurrentRenderCopy();
 	void UpdateCurrentDepthCopy();
 
-	void CopyRender( const copyRenderCommand_t &cmd );
+	void CopyRender( const copyRenderCommand_t &cmd ); 
 
 private:
 	idList<FrameBuffer*> fbos;
@@ -54,7 +54,7 @@ private:
 	void CreateResolve(FrameBuffer *resolve);
 	void CreateGui(FrameBuffer *gui);
 
-	void CopyRender( idImageScratch *image, int x, int y, int imageWidth, int imageHeight );
+	void CopyRender( idImageScratch *image, int x, int y, int imageWidth, int imageHeight, renderCrop_t scissor );
 	void CopyRender( unsigned char *buffer, int x, int y, int imageWidth, int imageHeight, bool usePBO );
 	bool EnsureScratchImageCreated( idImageScratch *image, int width, int height );
 	GLuint pbo = 0;
@@ -87,6 +87,10 @@ public:
 
 	FrameBuffer *activeFbo = nullptr;
 	FrameBuffer *activeDrawFbo = nullptr;
+
+	// #6644: whether tonemap has been run yet or not
+	// ideally, this state should be in tr_backend.cpp near drawToPrimary
+	bool tonemapNotYet = false;
 };
 
 extern FrameBufferManager *frameBuffers;

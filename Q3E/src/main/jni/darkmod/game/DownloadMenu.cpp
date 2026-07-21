@@ -643,6 +643,12 @@ void CDownloadMenu::UpdateDownloadableGUI(idUserInterface* gui, bool redraw)
 			title = "#" + title;
 			updateInList = true;
 		}
+		title += '\t';
+		auto ModInfo = gameLocal.m_MissionManager->GetModInfo(mods[index]->modName, true);
+		if (ModInfo && ModInfo->ModCompleted())
+		{
+			title += "mtr_complete";
+		}
 
 		// Workaround: Create a tabstop in order to keep text from overflowing rectangle.
 		title += "\t";

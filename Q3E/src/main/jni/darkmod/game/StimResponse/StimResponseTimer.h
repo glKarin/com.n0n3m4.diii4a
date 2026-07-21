@@ -90,14 +90,6 @@ public:
 	static TimerValue ParseTimeString(idStr &s);
 
 	/**
-	 * Set ticks defines the number of ticks, that this timer should 
-	 * use to define a second. This value will differ on different machine
-	 * depending on their speed. It would also be possible to use this
-	 * value to speed up or delay a timer by adjusting the value accordingly.
-	 */
-	virtual void SetTicks(double const &TicksPerSecond);
-
-	/**
 	 * SetTimer loads the timer with the intended time, that the timer should
 	 * run. This time is NOT the actual daytime, it is actually the intervall
 	 * that the timer should last.
@@ -164,7 +156,7 @@ public:
 protected:
 	unsigned int	m_LastTick;
 	unsigned int	m_Ticker;
-	unsigned int	m_TicksPerMilliSecond;
+	static const unsigned int m_TicksPerMilliSecond = 1;
 
 	bool			m_Fired;
 

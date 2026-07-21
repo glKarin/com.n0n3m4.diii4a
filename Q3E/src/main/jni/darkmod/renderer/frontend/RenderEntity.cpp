@@ -38,11 +38,14 @@ idRenderEntityLocal::idRenderEntityLocal() {
 	visibleCount			= 0;
 	decals					= NULL;
 	overlay					= NULL;
+	parent					= NULL;
+	children.Clear();
 	entityRefs				= NULL;
 	firstInteraction		= NULL;
 	lastInteraction			= NULL;
 	needsPortalSky			= false;
 	centerArea				= 0;
+	memset( timeAddSingleModel, 0, sizeof(timeAddSingleModel) );
 }
 
 void idRenderEntityLocal::FreeRenderEntity() {

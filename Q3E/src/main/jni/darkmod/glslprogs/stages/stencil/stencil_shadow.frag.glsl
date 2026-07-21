@@ -16,11 +16,9 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 precision highp float;
 precision highp int;
-   
-in vec4 var_Color;  
 
 out vec4 FragColor;
   
 void main( void ) {   
-	FragColor = var_Color;  
+	FragColor = vec4(1.0);  
 }

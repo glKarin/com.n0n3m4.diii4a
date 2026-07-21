@@ -482,8 +482,11 @@ void SurfacePassesStage::DrawSoftParticle( const drawSurf_t *drawSurf, const sha
 void SurfacePassesStage::DrawCustomShader( const drawSurf_t *drawSurf, const shaderStage_t *pStage ) {
 	newShaderStage_t *newStage = pStage->newStage;
 
-	newStage->glslProgram->Activate();
-	CustomShaderUniforms *uniforms = newStage->glslProgram->GetUniformGroup<CustomShaderUniforms>();
+	GLSLProgram *program = newStage->GetGlslProgram();
+	if ( !program )
+		return;
+	program->Activate();
+	CustomShaderUniforms *uniforms = program->GetUniformGroup<CustomShaderUniforms>();
 
 	// set standard transformations
 	uniforms->projectionMatrix.Set( viewDef->projectionMatrix );

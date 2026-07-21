@@ -357,7 +357,9 @@ void VolumetricStage::RenderRaymarching(const TemporaryData &data) {
 
 	uniforms->viewOrigin.Set( viewDef->renderView.vieworg );
 	uniforms->lightProject.Set( viewLight->lightProject[0].ToFloatPtr() );
-	uniforms->lightFrustum.SetArray( 6, viewLight->lightDef->frustum[0].ToFloatPtr() );
+	idPlane frustum[6];
+	R_SetLightFrustum( viewLight->lightProject, frustum );
+	uniforms->lightFrustum.SetArray( 6, frustum[0].ToFloatPtr() );
 	uniforms->lightOrigin.Set( viewLight->globalLightOrigin );
 	uniforms->lightColor.Set( data.lightColor );
 	uniforms->lightTextureMatrix.SetArray( 2, data.lightTexRows[0].ToFloatPtr() );

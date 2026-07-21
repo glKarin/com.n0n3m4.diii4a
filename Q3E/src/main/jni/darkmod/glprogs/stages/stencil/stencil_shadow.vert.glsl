@@ -21,9 +21,6 @@ uniform mat4 u_modelViewMatrix;
 uniform vec4 u_localLightOrigin;
 
 in vec4 attr_Position;
-in vec4 attr_Color;
-
-out vec4 var_Color;
   
 void main( void ) {
 	vec4 projectedPosition = attr_Position;
@@ -32,7 +29,4 @@ void main( void ) {
 		projectedPosition -= u_localLightOrigin;
 	}
 	gl_Position = objectPosToClip(projectedPosition, u_modelViewMatrix, u_projectionMatrix);
-
-	// primary color
-	var_Color = attr_Color; 
 }

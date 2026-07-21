@@ -141,13 +141,13 @@ void GL_Cull( const int cullType ) {
 		}
 
 		if ( cullType == CT_BACK_SIDED ) {
-			if ( backEnd.viewDef->isMirror ) {
+			if ( backEnd.viewDef->isMirrorInverted ) {
 				qglCullFace( GL_FRONT );
 			} else {
 				qglCullFace( GL_BACK );
 			}
 		} else {
-			if ( backEnd.viewDef->isMirror ) {
+			if ( backEnd.viewDef->isMirrorInverted ) {
 				qglCullFace( GL_BACK );
 			} else {
 				qglCullFace( GL_FRONT );
@@ -421,9 +421,9 @@ static void	RB_SetBuffer( const void *data ) {
 	backEnd.frameCount = cmd->frameCount;
 
 #if !defined(_GLES)
-	qglDrawBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK );
+	qglDrawBuffer( GL_BACK );
 #endif
-	qglReadBuffer( r_frontBuffer.GetBool() ? GL_FRONT : GL_BACK );
+	qglReadBuffer( GL_BACK );
 
 	// note: clear was moved to RB_BeginDrawingView
 }
@@ -610,9 +610,7 @@ void RB_SwapBuffers() {
 	}
 
 	// don't flip if drawing to front buffer
-	if ( !r_frontBuffer.GetBool() ) {
-		GLimp_SwapBuffers();
-	}
+	GLimp_SwapBuffers();
 }
 
 /*
@@ -622,16 +620,12 @@ RB_CopyRender
 Copy part of the current framebuffer to an image
 =============
 */
-bool RB_CopyRender( const void *data ) {
+void RB_CopyRender( const void *data ) {
 	if ( r_skipCopyTexture.GetBool() ) {
-		return false;
+		return;
 	}
 	const copyRenderCommand_t &cmd = *( copyRenderCommand_t * )data;
-
-	if ( cmd.imageWidth * cmd.imageHeight == 0 )
-		return false;
 	frameBuffers->CopyRender( cmd );
-	return true;
 }
 
 /*
@@ -702,18 +696,28 @@ void RB_ExecuteBackEndCommands( const emptyCommand_t *cmds ) {
 				c_drawBloom++;
 				FB_DebugShowContents();
 				frameBuffers->LeavePrimary();
-				drawToPrimary = false;
 			}
 			break;
 		case RC_COPY_RENDER:
 			RB_CopyRender( cmds );
 			c_copyRenders++;
 			break;
-		case RC_TONEMAP:
+		case RC_TONEMAP: {
+			bool forceOutputToBlack = ( ( const tonemapCommand_t * )cmds )->forceOutputToBlack;
 			// duzenko #4425: display the fbo content
 			frameBuffers->LeavePrimary();
-			renderBackend->Tonemap();
+			if ( !forceOutputToBlack ) {
+				renderBackend->Tonemap();
+			} else {
+				frameBuffers->defaultFbo->Bind();
+				qglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+				qglClear( GL_COLOR_BUFFER_BIT );
+			}
+			drawToPrimary = false;	// never draw to primaryFbo again
+			frameBuffers->tonemapNotYet = false;	// never render to guiFbo again
+			frameBuffers->LeavePrimary(false);		// a hack to set proper currentRenderFbo
 			break;
+		}
 		default:
 			common->Error( "RB_ExecuteBackEndCommands: bad commandId" );
 			break;

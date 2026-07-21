@@ -1,6 +1,6 @@
---- TracyOpenGL.hpp
-+++ TracyOpenGL.hpp
-@@ -128,6 +128,11 @@
+--- public/tracy/TracyOpenGL.hpp
++++ public/tracy/TracyOpenGL.hpp
+@@ -124,6 +124,11 @@
          TracyLfqCommit;
      }
  

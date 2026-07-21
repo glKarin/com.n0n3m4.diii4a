@@ -1005,6 +1005,10 @@ void LodSystem::ThinkAllLod()
 {
 	TRACE_CPU_SCOPE( "CheckLOD" )
 
+	extern idCVar r_lockView;
+	if ( r_lockView.GetInteger() != 0 )
+		return;
+
 	int gameTime = gameLocal.time;
 	for (int j = 0; j < m_components.Num(); j++)
 	{

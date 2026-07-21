@@ -51,6 +51,9 @@ idCVar g_lesSingleEntity(
 
 static idCVar* cvarsToClearOnChange[] = {&g_lesEvaluationPeriod, &g_lesSamplingMinPerSurface, &g_lesSamplingMaxPerModel, &g_lesSamplingAreaPerSample, &g_lesSingleEntity};
 
+// if modelIndex == X, then use idEntity::m_lesExplicitSampling
+static const int MODEL_INDEX_EXPLICIT = 1000000000;
+
 void LightEstimateSystem::Clear() {
 	for (int i = 0; i < trackedEntities.Num(); i++)
 		ForgetAllQueries(trackedEntities[i]);
@@ -113,13 +116,22 @@ void LightEstimateSystem::Think() {
 			continue;
 		}
 
-		const idRenderModel *oldModel = trackedEnt.modelIndex >= 0 ? modelsCache[trackedEnt.modelIndex].model : nullptr;
-		const idRenderModel *newModel = GetModelOfEntity(ent);
-		if (oldModel != newModel) {
-			// model change: extract tracked entity for special handling
+		if (trackedEnt.needsUpdate) {
+			// marked for update explicitly
 			ForgetAllQueries(trackedEnt);
 			entitiesWithModelChange.AddGrow(trackedEnt);
 			continue;
+		}
+
+		if (trackedEnt.modelIndex != MODEL_INDEX_EXPLICIT) {
+			const idRenderModel *oldModel = trackedEnt.modelIndex >= 0 ? modelsCache[trackedEnt.modelIndex].model : nullptr;
+			const idRenderModel *newModel = GetModelOfEntity(ent);
+			if (oldModel != newModel) {
+				// model change: extract tracked entity for special handling
+				ForgetAllQueries(trackedEnt);
+				entitiesWithModelChange.AddGrow(trackedEnt);
+				continue;
+			}
 		}
 
 		// check if any pending light queries are ready
@@ -156,10 +168,10 @@ void LightEstimateSystem::DebugVisualize() {
 		if (DebugIgnorePlayer(ent))
 			continue;
 
-		if (trackedEnt.modelIndex < 0)
+		const LesModelSampling *msampling = GetSamplingOfTrackedEntity(trackedEnt);
+		if (!msampling)
 			continue;
-		ModelCache &mcache = modelsCache[trackedEnt.modelIndex];
-		float areaPerSample = mcache.approxAreaPerSample;
+		float areaPerSample = msampling->approxAreaPerSample;
 		float sampleRadius = idMath::Sqrt(areaPerSample);
 
 		for (int s = 0; s < trackedEnt.samples.Num(); s++) {
@@ -169,7 +181,7 @@ void LightEstimateSystem::DebugVisualize() {
 			if (smp.excluded)
 				continue;
 			int deltaTime = lastThinkTime - smp.evalTime;
-			float validity = idMath::Fmax(1.0f - float(deltaTime) / mcache.period, 0.0f);
+			float validity = idMath::Fmax(1.0f - float(deltaTime) / msampling->period, 0.0f);
 
 			float boxSize = sampleRadius * 0.02f;
 			float textSize = sampleRadius * 0.003f;
@@ -266,7 +278,6 @@ int LightEstimateSystem::ReceiveQueryResults(TrackedEntity &trackedEnt) {
 
 	for (int i = 0; i < trackedEnt.pending.Num(); i++) {
 		PendingSample pend = trackedEnt.pending[i];
-		assert((pend.queryId < 0) == pend.proto.excluded);
 
 		bool finished = false;
 		if (pend.queryId < 0) {
@@ -294,31 +305,52 @@ int LightEstimateSystem::StartNewQueries(TrackedEntity &trackedEnt) {
 	int nowTime = gameLocal.time;
 	const idEntity *entity = trackedEnt.entity.GetEntity();
 
-	if (trackedEnt.modelIndex < 0)
-		return 0;		// no model?
-	const ModelCache &mcache = modelsCache[trackedEnt.modelIndex];
-	assert(GetModelOfEntity(entity) == mcache.model);
-
+	const LesModelSampling *msampling = GetSamplingOfTrackedEntity(trackedEnt);
+	if (!msampling)
+		return 0;
+	
 	int oldNumPending = trackedEnt.pending.Num();
-	for (int s = 0; s < mcache.samples.Num(); s++) {
+	for (int s = 0; s < msampling->samples.Num(); s++) {
 		// evaluation moments for each sample must have prescribed reminder module period
-		int maxK = (nowTime + mcache.period - mcache.schedule[s]) / mcache.period - 1;
-		int maxEvalTime = mcache.schedule[s] + maxK * mcache.period;
-		assert(maxEvalTime <= nowTime && maxEvalTime + mcache.period > nowTime);
-		if (trackedEnt.samples[s].evalTime >= maxEvalTime)
-			continue;	// fresh enough
+		int maxK = (nowTime + msampling->period - msampling->schedule[s]) / msampling->period - 1;
+		int maxEvalTime = msampling->schedule[s] + maxK * msampling->period;
+		assert(maxEvalTime <= nowTime && maxEvalTime + msampling->period > nowTime);
 
-		PendingSample pend;
-		pend.sampleIndex = s;
-		pend.proto.evalTime = nowTime;
-		pend.proto.excluded = ShouldSampleBeExcluded(entity, mcache.samples[s]);
-		// don't waste time on excluded sample, don't send query
-		if (!pend.proto.excluded) {
-			idList<qhandle_t> ignoredHandles = GetIgnoredRenderEntityList(entity);
-			pend.queryId = gameRenderWorld->LightAtPointQuery_AddQuery(entity->GetModelDefHandle(), mcache.samples[s], ignoredHandles);
+		// the most recent moment when this sample was evaluated
+		// important: including the pending samples!
+		// this becomes an issue when several game tics happen per frame due to low FPS
+		int lastEvalTime = trackedEnt.samples[s].evalTime;
+		for (int p = 0; p < oldNumPending; p++) {
+			const PendingSample& pold = trackedEnt.pending[p];
+			if (pold.sampleIndex == s)
+				lastEvalTime = idMath::Imax(lastEvalTime, pold.proto.evalTime);
 		}
 
-		trackedEnt.pending.AddGrow(pend);
+		if (lastEvalTime >= maxEvalTime)
+			continue;	// fresh enough
+
+		PendingSample pnew;
+		pnew.sampleIndex = s;
+		pnew.proto.evalTime = nowTime;
+		pnew.proto.excluded = ShouldSampleBeExcluded(entity, msampling->samples[s]);
+		// don't waste time on excluded sample, don't send query
+		if (!pnew.proto.excluded) {
+			idList<qhandle_t> ignoredHandles = GetIgnoredRenderEntityList(entity);
+			pnew.queryId = gameRenderWorld->LightAtPointQuery_AddQuery(entity->GetModelDefHandle(), msampling->samples[s], ignoredHandles);
+		}
+
+		trackedEnt.pending.AddGrow(pnew);
+
+		// note: LQS in renderer frontend processes !all! pending queries in every Think call
+		// so if we already have pending queries for this sample, we can drop the older ones
+		for (int p = 0; p < oldNumPending; p++) {
+			PendingSample &pold = trackedEnt.pending[p];
+			assert(pnew.proto.evalTime >= pold.proto.evalTime);
+			if (pold.sampleIndex == s && pold.queryId >= 0) {
+				gameRenderWorld->LightAtPointQuery_Forget(pold.queryId);
+				pold.queryId = -1;
+			}
+		}
 	}
 
 	return trackedEnt.pending.Num() - oldNumPending;
@@ -341,11 +373,13 @@ idList<qhandle_t> LightEstimateSystem::GetIgnoredRenderEntityList(const idEntity
 }
 
 bool LightEstimateSystem::ShouldSampleBeExcluded(const idEntity *entity, const samplePointOnModel_t &sample) const {
-	const renderEntity_t *rent = gameRenderWorld->GetRenderEntity(entity->GetModelDefHandle());
-	const idRenderModel *rmodel = rent->hModel;
-	const idMaterial *material = rmodel->GetSampleMaterial(rent, sample);
-	if (!material->IsDrawn())
-		return true;
+	if (sample.surfaceIndex >= 0) {
+		const renderEntity_t *rent = gameRenderWorld->GetRenderEntity(entity->GetModelDefHandle());
+		const idRenderModel *rmodel = rent->hModel;
+		const idMaterial *material = rmodel->GetSampleMaterial(rent, sample);
+		if (!material->IsDrawn() && !entity->spawnArgs.GetBool("les_sample_invisible"))
+			return true;
+	}
 	return false;
 }
 
@@ -387,17 +421,39 @@ LightEstimateSystem::TrackedEntity &LightEstimateSystem::FindOrAddEntity(const i
 	trackedEnt.entity = entity;
 	trackedEnt.periodStartsAt = gameLocal.time;
 
-	if (const idRenderModel *rmodel = GetModelOfEntity(entity)) {
+	const LesModelSampling *sampling = nullptr;
+	if (entity->m_lesExplicitSampling) {
+		// override rendermodel with sampling stored in the entity
+		trackedEnt.modelIndex = MODEL_INDEX_EXPLICIT;
+		sampling = entity->m_lesExplicitSampling;
+	}
+	else if (const idRenderModel *rmodel = GetModelOfEntity(entity)) {
 		const ModelCache &mcache = FindOrAddModel(rmodel);
 		trackedEnt.modelIndex = modelsCache.IndexOf(&mcache);
+		sampling = &mcache;
+	}
 
-		int n = mcache.samples.Num();
+	if (sampling) {
+		int n = sampling->samples.Num();
 		trackedEnt.samples.SetNum(n);
 		for (int i = 0; i < n; i++)
 			trackedEnt.samples[i] = EvaluatedSample();	// reset to defaults
 	}
 
 	return trackedEnt;
+}
+
+const LesModelSampling *LightEstimateSystem::GetSamplingOfTrackedEntity(const TrackedEntity &trackedEnt) const {
+	const idEntity *entity = trackedEnt.entity.GetEntity();
+
+	if (trackedEnt.modelIndex < 0)
+		return nullptr;		// no model
+	if (trackedEnt.modelIndex == MODEL_INDEX_EXPLICIT)
+		return entity->m_lesExplicitSampling;
+
+	const ModelCache &mcache = modelsCache[trackedEnt.modelIndex];
+	assert(GetModelOfEntity(entity) == mcache.model);
+	return &mcache;
 }
 
 LightEstimateSystem::ModelCache &LightEstimateSystem::FindOrAddModel(const idRenderModel *model) {
@@ -419,18 +475,53 @@ LightEstimateSystem::ModelCache &LightEstimateSystem::FindOrAddModel(const idRen
 	params.areaPerSample = g_lesSamplingAreaPerSample.GetFloat();
 	idRandom rnd(123456789);	// samples are deterministic for now
 	model->GenerateSamples(mcache.samples, params, rnd);
-	int n = mcache.samples.Num();
 
-	mcache.period = g_lesEvaluationPeriod.GetInteger();
-	mcache.schedule.SetNum(n);
-	for (int i = 0; i < n; i++)
-		mcache.schedule[i] = mcache.period * i / n;
-
-	idVec3 boxSize = model->Bounds().GetSize();
-	mcache.approxAreaPerSample = (boxSize.x * boxSize.y + boxSize.y * boxSize.z + boxSize.z * boxSize.x);
-	mcache.approxAreaPerSample /= idMath::Imax(n, 1);
-
+	FinishModelSampling(mcache, model->Bounds());
 	return mcache;
+}
+
+void LightEstimateSystem::FinishModelSampling(LesModelSampling &msampling, const idBounds &bbox) {
+	int n = msampling.samples.Num();
+
+	msampling.period = g_lesEvaluationPeriod.GetInteger();
+	msampling.schedule.SetNum(n);
+	for (int i = 0; i < n; i++)
+		msampling.schedule[i] = msampling.period * i / n;
+
+	idVec3 boxSize = bbox.GetSize();
+	msampling.approxAreaPerSample = (boxSize.x * boxSize.y + boxSize.y * boxSize.z + boxSize.z * boxSize.x);
+	msampling.approxAreaPerSample /= idMath::Imax(n, 1);
+}
+
+void LightEstimateSystem::SetExplicitSamplingForEntity(idEntity *entity, const idList<idVec3> *samples) {
+	LesModelSampling *msampling = nullptr;
+
+	if (samples) {
+		int n = samples->Num();
+
+		msampling = new LesModelSampling();
+		msampling->samples.SetNum(n);
+		idBounds bbox;
+		bbox.Clear();
+		for (int i = 0; i < n; i++) {
+			samplePointOnModel_t &smp = msampling->samples[i];
+			smp.staticPosition = (*samples)[i];
+			smp.surfaceIndex = -1;
+			smp.triangleIndex = -1;
+			smp.baryCoords = idVec3(0.0f);
+			bbox.AddPoint(smp.staticPosition);
+		}
+		bbox.ExpandSelf(1.0f);
+		FinishModelSampling(*msampling, bbox);
+	}
+
+	delete entity->m_lesExplicitSampling;
+	entity->m_lesExplicitSampling = msampling;
+
+	if (const TrackedEntity *found = FindEntity(entity)) {
+		// mark this entity so that it's completely readded during next Think
+		const_cast<TrackedEntity*>(found)->needsUpdate = true;
+	}
 }
 
 void LightEstimateSystem::Save(idSaveGame *savegame) const {
@@ -462,4 +553,52 @@ void LightEstimateSystem::Restore(idRestoreGame *savegame) {
 		savegame->ReadInt(loadedEntities[i].trackedUntil);
 		// other model-dependent information will get recomputed in one period
 	}
+}
+
+void LightEstimateSystem::SaveExplicitSampling(idSaveGame *savefile, const idEntity *entity) {
+	if (const LesModelSampling *msampling = entity->m_lesExplicitSampling) {
+		int n = msampling->samples.Num();
+		savefile->WriteInt(n);
+		for (int i = 0; i < n; i++) {
+			const samplePointOnModel_t &smp = msampling->samples[i];
+			savefile->WriteVec3(smp.staticPosition);
+			savefile->WriteInt(smp.surfaceIndex);
+			savefile->WriteInt(smp.triangleIndex);
+			savefile->WriteVec3(smp.baryCoords);
+		}
+		savefile->WriteInt(msampling->period);
+		savefile->WriteFloat(msampling->approxAreaPerSample);
+		for (int i = 0; i < n; i++)
+			savefile->WriteInt(msampling->schedule[i]);
+	}
+	else {
+		savefile->WriteInt(-1);
+	}
+}
+
+void LightEstimateSystem::RestoreExplicitSampling(idRestoreGame *savefile, idEntity *entity) {
+	int n;
+	savefile->ReadInt(n);
+
+	LesModelSampling *msampling = nullptr;
+	if (n >= 0) {
+		msampling = new LesModelSampling();
+		msampling->samples.SetNum(n);
+		for (int i = 0; i < n; i++) {
+			samplePointOnModel_t &smp = msampling->samples[i];
+			savefile->ReadVec3(smp.staticPosition);
+			savefile->ReadInt(smp.surfaceIndex);
+			savefile->ReadInt(smp.triangleIndex);
+			savefile->ReadVec3(smp.baryCoords);
+		}
+		savefile->ReadInt(msampling->period);
+		savefile->ReadFloat(msampling->approxAreaPerSample);
+		msampling->schedule.SetNum(n);
+		for (int i = 0; i < n; i++)
+			savefile->ReadInt(msampling->schedule[i]);
+	}
+
+	delete entity->m_lesExplicitSampling;
+	entity->m_lesExplicitSampling = msampling;
+	// during restore, LES is cleared completely, so update will happen immediately afterwards
 }

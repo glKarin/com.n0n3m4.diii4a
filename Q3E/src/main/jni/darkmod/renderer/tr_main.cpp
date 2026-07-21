@@ -225,6 +225,7 @@ void R_ToggleSmpFrame( void ) {
 	if (com_smp.GetBool()) {
 		backendFrameData = frameData;
 		frameData = &smpFrameData[smpFrame % NUM_FRAME_DATA];
+		assert(frameData != backendFrameData);
 	} else {
 		frameData = backendFrameData = &smpFrameData[0];
 	}
@@ -254,10 +255,18 @@ R_ShutdownFrameData
 */
 void R_ShutdownFrameData( void ) {
 	R_FreeDeferredTriSurfs( frameData );
+
 	frameData = NULL;
+	backendFrameData = NULL;
+
 	for ( int i = 0; i < NUM_FRAME_DATA; i++ ) {
 		Mem_Free16( smpFrameData[i].frameMemory );
 		smpFrameData[i].frameMemory = NULL;
+		// note: we leak memory of these backend deferred surfaces
+		// trying to free this memory results in a crash:
+		// tri->ambientSurface is inaccessible because it was deleted earlier
+		// it only on "reloadEngine" from in-game, so I'll better just allow the leak...
+		smpFrameData[i].firstDeferredFreeTriSurf = smpFrameData[i].lastDeferredFreeTriSurf = NULL;
 	}
 }
 
@@ -274,6 +283,7 @@ void R_InitFrameData( void ) {
 	}
 
 	// must be set before calling R_ToggleSmpFrame()
+	smpFrame = 0;
 	frameData = &smpFrameData[0];
 	backendFrameData = &smpFrameData[1];
 
@@ -749,7 +759,8 @@ void R_TransformModelToClip( const idVec3 &src, const float *modelMatrix, const 
 ==========================
 R_GlobalToNormalizedDeviceCoordinates
 
--1 to 1 range in x, y, and z
+-1 to 1 range in x, y
+0 to 1 range in z
 ==========================
 */
 void R_GlobalToNormalizedDeviceCoordinates( const idVec3 &global, idVec3 &ndc ) {
@@ -891,36 +902,16 @@ void R_IdentityGLMatrix( float out[16] ) {
 
 /*
 =================
-R_SetViewMatrix
+R_ComputeViewMatrix
 
-Sets up the world to view matrix for a given viewParm
+Computes world to view matrix for a given viewParm (pure function)
 =================
 */
-void R_SetViewMatrix( viewDef_t &viewDef ) {
-	idVec3	origin;
-	viewEntity_t *world;
-	float	viewerMatrix[16];
-	static float	s_flipMatrix[16] = {
-		// convert from our coordinate system (looking down X)
-		// to OpenGL's coordinate system (looking down -Z)
-		0, 0, -1, 0,
-		-1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 0, 1
-	};
-
-	world = &viewDef.worldSpace;
-
-	memset( world, 0, sizeof( *world ) );
-
-	// the model matrix is an identity
-	world->modelMatrix[0 * 4 + 0] = 1;
-	world->modelMatrix[1 * 4 + 1] = 1;
-	world->modelMatrix[2 * 4 + 2] = 1;
-
+void R_ComputeViewMatrix( const viewDef_t &viewDef, float viewMatrix[16] ) {
 	// transform by the camera placement
-	origin = viewDef.renderView.vieworg;
+	idVec3 origin = viewDef.renderView.vieworg;
 
+	float viewerMatrix[16];
 	viewerMatrix[0] = viewDef.renderView.viewaxis[0][0];
 	viewerMatrix[4] = viewDef.renderView.viewaxis[0][1];
 	viewerMatrix[8] = viewDef.renderView.viewaxis[0][2];
@@ -943,10 +934,85 @@ void R_SetViewMatrix( viewDef_t &viewDef ) {
 
 	// convert from our coordinate system (looking down X)
 	// to OpenGL's coordinate system (looking down -Z)
-	myGlMultMatrix( viewerMatrix, s_flipMatrix, world->modelViewMatrix );
+	static const float s_flipMatrix[16] = {
+		0, 0, -1, 0,
+		-1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 0, 1
+	};
+	myGlMultMatrix( viewerMatrix, s_flipMatrix, viewMatrix );
+}
+
+/*
+=================
+R_SetViewMatrix
+
+Sets up the world to view matrix for a given viewParm
+=================
+*/
+void R_SetViewMatrix( viewDef_t &viewDef ) {
+	viewEntity_t *world = &viewDef.worldSpace;
+
+	memset( world, 0, sizeof( *world ) );
+
+	// the model matrix is an identity
+	world->modelMatrix[0 * 4 + 0] = 1;
+	world->modelMatrix[1 * 4 + 1] = 1;
+	world->modelMatrix[2 * 4 + 2] = 1;
+
+	R_ComputeViewMatrix( viewDef, world->modelViewMatrix );
 
 	// set BFG-convention view matrix too
 	idRenderMatrix::Transpose( *(idRenderMatrix*)world->modelViewMatrix, viewDef.viewRenderMatrix );
+}
+
+/*
+===============
+R_ComputeProjection
+
+Computes projection matrix (pure function)
+This uses the "infinite far z" trick
+===============
+*/
+void R_ComputeProjection( const viewDef_t &viewDef, float zNear, float jitterx, float jittery, float projectionMatrix[16] ) {
+	float ymax = zNear * tan( viewDef.renderView.fov_y * idMath::PI / 360.0f );
+	float ymin = -ymax;
+
+	float xmax = zNear * tan( viewDef.renderView.fov_x * idMath::PI / 360.0f );
+	float xmin = -xmax;
+
+	float width = xmax - xmin;
+	float height = ymax - ymin;
+
+	jitterx = jitterx * width / ( viewDef.viewport.x2 - viewDef.viewport.x1 + 1 );
+	xmin += jitterx;
+	xmax += jitterx;
+	jittery = jittery * height / ( viewDef.viewport.y2 - viewDef.viewport.y1 + 1 );
+	ymin += jittery;
+	ymax += jittery;
+
+	projectionMatrix[0] = 2 * zNear / width;
+	projectionMatrix[4] = 0;
+	projectionMatrix[8] = ( xmax + xmin ) / width;	// normally 0
+	projectionMatrix[12] = 0;
+
+	projectionMatrix[1] = 0;
+	projectionMatrix[5] = 2 * zNear / height;
+	projectionMatrix[9] = ( ymax + ymin ) / height;	// normally 0
+	projectionMatrix[13] = 0;
+
+	// this is the far-plane-at-infinity formulation, and
+	// crunches the Z range slightly so w=0 vertexes do not
+	// rasterize right at the wraparound point
+	projectionMatrix[2] = 0;
+	projectionMatrix[6] = 0;
+	projectionMatrix[10] = -0.999f;
+	projectionMatrix[14] = -2.0f * zNear;
+
+	projectionMatrix[3] = 0;
+	projectionMatrix[7] = 0;
+	projectionMatrix[11] = -1;
+	projectionMatrix[15] = 0;
 }
 
 /*
@@ -957,68 +1023,24 @@ This uses the "infinite far z" trick
 ===============
 */
 void R_SetupProjection( viewDef_t &viewDef ) {
-	float	xmin, xmax, ymin, ymax;
-	float	width, height;
-	float	zNear;
-	float	jitterx, jittery;
-	static	idRandom random;
-
 	// random jittering is usefull when multiple
 	// frames are going to be blended together
 	// for motion blurred anti-aliasing
+	float jitterx, jittery;
 	if ( r_jitter.GetBool() ) {
+		static idRandom random;
 		jitterx = random.RandomFloat();
 		jittery = random.RandomFloat();
 	} else {
 		jitterx = jittery = 0;
 	}
 
-	//
-	// set up projection matrix
-	//
-	zNear	= r_znear.GetFloat();
+	float zNear = r_znear.GetFloat();
 	if ( tr.viewDef->renderView.cramZNear ) {
 		zNear *= 0.25;
 	}
 
-	ymax = zNear * tan( tr.viewDef->renderView.fov_y * idMath::PI / 360.0f );
-	ymin = -ymax;
-
-	xmax = zNear * tan( viewDef.renderView.fov_x * idMath::PI / 360.0f );
-	xmin = -xmax;
-
-	width = xmax - xmin;
-	height = ymax - ymin;
-
-	jitterx = jitterx * width / ( viewDef.viewport.x2 - viewDef.viewport.x1 + 1 );
-	xmin += jitterx;
-	xmax += jitterx;
-	jittery = jittery * height / ( viewDef.viewport.y2 - viewDef.viewport.y1 + 1 );
-	ymin += jittery;
-	ymax += jittery;
-
-	viewDef.projectionMatrix[0] = 2 * zNear / width;
-	viewDef.projectionMatrix[4] = 0;
-	viewDef.projectionMatrix[8] = ( xmax + xmin ) / width;	// normally 0
-	viewDef.projectionMatrix[12] = 0;
-
-	viewDef.projectionMatrix[1] = 0;
-	viewDef.projectionMatrix[5] = 2 * zNear / height;
-	viewDef.projectionMatrix[9] = ( ymax + ymin ) / height;	// normally 0
-	viewDef.projectionMatrix[13] = 0;
-
-	// this is the far-plane-at-infinity formulation, and
-	// crunches the Z range slightly so w=0 vertexes do not
-	// rasterize right at the wraparound point
-	viewDef.projectionMatrix[2] = 0;
-	viewDef.projectionMatrix[6] = 0;
-	viewDef.projectionMatrix[10] = -0.999f;
-	viewDef.projectionMatrix[14] = -2.0f * zNear;
-
-	viewDef.projectionMatrix[3] = 0;
-	viewDef.projectionMatrix[7] = 0;
-	viewDef.projectionMatrix[11] = -1;
-	viewDef.projectionMatrix[15] = 0;
+	R_ComputeProjection( viewDef, zNear, jitterx, jittery, viewDef.projectionMatrix );
 
 	// setup render matrices for faster culling
 	idRenderMatrix::Transpose( *(idRenderMatrix*)viewDef.projectionMatrix, viewDef.projectionRenderMatrix );
@@ -1097,7 +1119,6 @@ static void R_ConstrainViewFrustum( void ) {
 		tr.viewDef->viewFrustum.MoveFarDistance( r_useFrustumFarDistance.GetFloat() );
 	}
 }
-
 /*
 ==========================================================================================
 
@@ -1155,18 +1176,16 @@ Parms will typically be allocated with R_FrameAlloc
 ================
 */
 void R_RenderView( viewDef_t &parms ) {
-	TRACE_CPU_SCOPE( "R_RenderView" )
-	
-	viewDef_t		*oldView;
+	parms.viewCount = tr.viewCount++;
+	TRACE_CPU_SCOPE_FORMAT( "R_RenderView", "viewCount = %d\nID = %d", parms.viewCount, parms.renderView.viewID );
 
 	if ( parms.renderView.width <= 0 || parms.renderView.height <= 0 ) {
 		return;
 	}
-	tr.viewCount++;
 	parms.renderWorld->entityDefsInView.SetBitsSameAll(false);
 
 	// save view in case we are a subview
-	oldView = tr.viewDef;
+	viewDef_t *oldView = tr.viewDef;
 
 	tr.viewDef = &parms;
 

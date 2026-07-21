@@ -85,7 +85,7 @@ public:
 	void Save			( idSaveGame &		a_saveGame );
 	void Restore		( idRestoreGame &	a_savedGame );
 	//---------------------------------
-
+	
 	//---------------------------------
 	// SpawnlightgemEntity will create exactly one lightgem entity for the map and ensures
 	//  that no multiple copies of it will exist.
@@ -96,7 +96,7 @@ public:
 	//---------------------------------
 	// Calculation
 	//---------------------------------
-	float Calculate		( idPlayer *	a_pPlayer );
+	float Calculate		( idPlayer *	a_pPlayer );	
 
 private:
 	void AnalyzeRenderImage	( );

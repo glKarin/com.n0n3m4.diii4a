@@ -36,6 +36,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 // non-portable system services
 #include "../sys/sys_public.h"
+#include "../sys/renderdoc/RenderDoc.h"
 
 //stgatilov: make sure build defines take effect on idlib headers included from Lib.h
 #include "../framework/BuildDefines.h"

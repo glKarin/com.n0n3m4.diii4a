@@ -39,6 +39,7 @@ typedef struct shard_s {
 	int							droppedTime;
 	bool						atEdge;
 	int							islandNum;
+	float						nextDecalTime;  // Amadeus #6588
 } shard_t;
 
 
