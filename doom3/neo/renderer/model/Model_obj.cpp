@@ -141,10 +141,10 @@ objModel_t* OBJ_Parse( const char* fileName, const char* objFileBuffer, int leng
 						}
 					}
 				}
-			}
 
-			// Skip comments
-			src.ReadRestOfLine( line );
+				// Skip comments
+				src.ReadRestOfLine( line );
+			}
 		}
 		else if( token == "mtllib" )
 		{
