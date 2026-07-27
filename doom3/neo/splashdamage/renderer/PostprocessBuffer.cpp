@@ -8,10 +8,10 @@
 static idCVar harm_r_clearPostprocessBuffer("harm_r_clearPostprocessBuffer", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "clear postprocess buffer image on every draw");
 
 sdPostprocessBuffer::sdPostprocessBuffer()
-	: width(-1),
+	: currentBuffer(-1),
+	width(-1),
 	height(-1),
-	fb(NULL),
-	currentBuffer(-1)
+	fb(NULL)
 {
 	for(int k = 0; k < sizeof(globalImages->postProcessBuffers) / sizeof(globalImages->postProcessBuffers[0]); k++)
     {
@@ -33,6 +33,7 @@ bool sdPostprocessBuffer::Init(int w, int h, float scale)
 		}
 	}
 
+	int width, height;
 	if(scale == 1.0f)
 	{
 		width = w;
@@ -43,6 +44,8 @@ bool sdPostprocessBuffer::Init(int w, int h, float scale)
 		width = idMath::Ftoi(roundf((float)w * scale));
 		height = idMath::Ftoi(roundf((float)h * scale));
 	}
+	this->width = width;
+	this->height = height;
 	fb = new idFramebuffer("sdPostprocessBuffer", w, h);
 	for(int k = 0; k < sizeof(globalImages->postProcessBuffers) / sizeof(globalImages->postProcessBuffers[0]); k++)
 	{
@@ -75,7 +78,7 @@ void sdPostprocessBuffer::Shutdown(void)
 void sdPostprocessBuffer::Begin(int index)
 {
     assert(fb);
-    assert(index >= 0 && index < sizeof(globalImages->postProcessBuffers) / sizeof(globalImages->postProcessBuffers[0]));
+    assert(index >= 0 && index < sizeof(globalImages->postProcessBuffers) / sizeof(globalImages->postProcessBuffers[0]) && images[index]);
     fb->Bind();
 	currentBuffer = index;
 	UploadImage();
@@ -86,7 +89,8 @@ void sdPostprocessBuffer::Begin(int index)
 
 void sdPostprocessBuffer::UploadImage(void) const
 {
-    assert(currentBuffer != -1 && images[currentBuffer]);
+    assert(fb);
+    assert(currentBuffer >= 0 && currentBuffer < sizeof(globalImages->postProcessBuffers) / sizeof(globalImages->postProcessBuffers[0]) && images[currentBuffer]);
 	if(images[currentBuffer]->uploadWidth < fb->Width() || images[currentBuffer]->uploadHeight < fb->Height())
 	{
 		int nw = MakePowerOfTwo(fb->Width());
@@ -102,6 +106,7 @@ void sdPostprocessBuffer::UploadImage(void) const
 void sdPostprocessBuffer::End(void)
 {
     assert(fb);
+    assert(currentBuffer >= 0 && currentBuffer < sizeof(globalImages->postProcessBuffers) / sizeof(globalImages->postProcessBuffers[0]) && images[currentBuffer]);
 	/*
 	images[currentBuffer]->CopyFramebuffer(backEnd.viewDef->viewport.x1,
 			backEnd.viewDef->viewport.y1,  backEnd.viewDef->viewport.x2 -  backEnd.viewDef->viewport.x1 + 1,
@@ -111,18 +116,18 @@ void sdPostprocessBuffer::End(void)
 	static idCVar ppp("ppp", "0", 0, "");
 	int w = images[currentBuffer]->uploadWidth;
 	int h = images[currentBuffer]->uploadHeight;
-	if (ppp.GetBool())
+	if (ppp.GetInteger() & (1<<currentBuffer))
 	{
 		GLint packAlign;
 		qglGetIntegerv(GL_PACK_ALIGNMENT, &packAlign);
-		qglPixelStorei(GL_PACK_ALIGNMENT, 1);	// otherwise small rows get padded to 32 bits
+		qglPixelStorei(GL_PACK_ALIGNMENT, 4);	// otherwise small rows get padded to 32 bits
 
 		byte *data = (byte *)malloc(w * h * 4);
 		qglReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		qglPixelStorei(GL_PACK_ALIGNMENT, packAlign);	// otherwise small rows get padded to 32 bits
 
 		extern void R_WritePNG(const char *filename, const byte *data, int w, int h, int comp, bool flipVertical = false, int quality = 100, const char *basePath = NULL);
-		//R_WritePNG(va("texturesxxx/%d_%d.png", tr.frameCount, currentBuffer), data, w, h, 4);
+		R_WritePNG(va("texturesxxx/%d_%d.png", tr.frameCount, currentBuffer), data, fb->Width(), fb->Height(), 4);
 
 		//fileSystem->WriteTGA(va("texturesxxx/%d_%d.tga", tr.frameCount, currentBuffer), data, w, h);
 		free(data);
@@ -153,13 +158,13 @@ void sdPostprocessBuffer::End(void)
 
 int sdPostprocessBuffer::UploadWidth(void) const
 {
-    assert(currentBuffer != -1 && images[currentBuffer]);
+    assert(currentBuffer >= 0 && currentBuffer < sizeof(globalImages->postProcessBuffers) / sizeof(globalImages->postProcessBuffers[0]) && images[currentBuffer]);
     return images[currentBuffer]->uploadWidth;
 }
 
 int sdPostprocessBuffer::UploadHeight(void) const
 {
-    assert(currentBuffer != -1 && images[currentBuffer]);
+    assert(currentBuffer >= 0 && currentBuffer < sizeof(globalImages->postProcessBuffers) / sizeof(globalImages->postProcessBuffers[0]) && images[currentBuffer]);
     return images[currentBuffer]->uploadHeight;
 }
 
@@ -184,9 +189,9 @@ void sdPostprocessBuffer::ClearAll(void) const
 	{
 		fb->AttachImage2D(images[k]);
 		Clear();
-		fb->AttachColorBuffer();
 	}
-    fb->Unbind();
+	fb->AttachColorBuffer();
+	fb->Unbind();
 }
 
 sdPostprocessBuffer postprocessBuffer;

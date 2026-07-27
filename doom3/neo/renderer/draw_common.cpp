@@ -1141,9 +1141,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 			if(materialBuiltinVariablesLoaded.FindIndex(renderProgram->GetShaderProgram()) == -1) {
 				RB_SetBuiltinProgramEnvironment();
 
-				// bind builtin program variables
-				RB_BindBuiltinProgramEnvironment(renderProgram, surf);
-
 				// set standard transformations
 				GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), rb_MVP);
 
@@ -1160,6 +1157,9 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 
 				materialBuiltinVariablesLoaded.Append(renderProgram->GetShaderProgram());
 			}
+
+			// bind builtin program variables
+			RB_BindBuiltinProgramEnvironment(renderProgram, surf);
 
 			// set the color([0, 255])
 			color[0] = regs[ pStage->color.registers[0] ];

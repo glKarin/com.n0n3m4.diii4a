@@ -31,11 +31,11 @@ class sdPostprocessBuffer
 		void				UploadImage(void) const;
 
 	private:
+		int					currentBuffer;
 		int					width;
 		int					height;
 		idFramebuffer		*fb;
         idImage				*images[2];
-		int					currentBuffer;
 
 							sdPostprocessBuffer(const sdPostprocessBuffer &);
 							sdPostprocessBuffer & operator=(const sdPostprocessBuffer &);
