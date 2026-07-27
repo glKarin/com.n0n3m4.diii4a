@@ -4792,6 +4792,7 @@ findFile_t idFileSystemLocal::FindFile(const char *path, bool scheduleAddons)
 
 	if (!pak) {
 		// found in FS, not even in paks
+		CloseFile(f); //k2026
 		return FIND_YES;
 	}
 
