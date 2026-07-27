@@ -1458,9 +1458,7 @@ int idTraceModel::GetOrderedSilhouetteEdges(const int edgeIsSilEdge[MAX_TRACEMOD
 #endif
 
 	numSilEdges = 0;
-#if !defined(_SPLASHDAMAGE)
     unsortedSilEdges[0] = 0;
-#endif
 
 	for (i = 1; i <= numEdges; i++) {
 		if (edgeIsSilEdge[i]) {

@@ -1355,6 +1355,9 @@ bool idAASFileLocal::ParseAreas(idLexer &src)
         area.bounds.Zero();
         area.center.Zero();
 #ifdef _SPLASHDAMAGE
+		// compat for DOOM3
+		area.firstFace = 0;
+		area.numFaces = 0;
 		area.contents = area.flags;
 #else
         area.travelFlags = 0;
@@ -1489,13 +1492,8 @@ bool idAASFileLocal::ParseClusters(idLexer &src)
 		src.ExpectTokenString("(");
 		cluster.numAreas = src.ParseInt();
 		cluster.numReachableAreas = src.ParseInt();
-#ifdef _SPLASHDAMAGE //karin: numPortals is before firstPortal on ETQW
-		cluster.numPortals = src.ParseInt();
-		cluster.firstPortal = src.ParseInt();
-#else
 		cluster.firstPortal = src.ParseInt();
 		cluster.numPortals = src.ParseInt();
-#endif
 		src.ExpectTokenString(")");
 		clusters.Append(cluster);
 	}
@@ -1929,6 +1927,10 @@ bool idAASFileLocal::ParseReachabilities(idLexer &src)
 		src.ExpectTokenString(")");
 		src.ExpectTokenString(")");
 		reach.areaTTOfsAndNumber = 0; // missing
+		reach.travelType = 0;
+		reach.edgeNum = 0;
+		reach.next = NULL;
+		reach.rev_next = NULL;
 		reachabilities.Append(reach);
 	}
 
