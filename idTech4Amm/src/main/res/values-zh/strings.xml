@@ -595,4 +595,10 @@
     <string name="etqw_base">深入敌后: 雷神战争</string>
     <string name="gyroscope_dead_zone">陀螺仪死区</string>
     <string name="dead_zone_rad_s">弧度/秒</string>
+    <string name="debug_overlay_x_offset">调试文本层X</string>
+    <string name="setup_debug_text_x_offset">设置调试文本层X</string>
+    <string name="debug_overlay_y_offset">调试文本层Y</string>
+    <string name="setup_debug_text_y_offset">设置调试文本层Y</string>
+    <string name="debug_overlay_background">调试文本层背景</string>
+    <string name="show_debug_text_background">显示调试文本层黑色背景</string>
 </resources>

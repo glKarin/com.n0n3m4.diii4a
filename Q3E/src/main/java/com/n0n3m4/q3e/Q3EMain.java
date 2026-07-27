@@ -80,11 +80,11 @@ public class Q3EMain extends Activity
     private Runnable backCallback;
 
     private       Q3EKeyboard keyboard;
-    private static final int VIEW_BASE_Z = 100;
-    private static final int TOOLBAR_Z = VIEW_BASE_Z + 4;
-    private static final int VKB_Z = VIEW_BASE_Z + 3;
-    private static final int MEM_DEBUG_Z = VIEW_BASE_Z + 2;
-    private static final int SETTING_Z = VIEW_BASE_Z + 1;
+    private static final int  VIEW_BASE_Z = 100;
+    private static final int  TOOLBAR_Z   = VIEW_BASE_Z + 4;
+    private static final int  VKB_Z       = VIEW_BASE_Z + 3;
+    private static final int  SETTING_Z   = VIEW_BASE_Z + 2;
+    private static final int  MEM_DEBUG_Z = VIEW_BASE_Z + 1;
 
     private static final float MENU_ICON_ALPHA = 0.5f;
     private static final int MENU_ICON_HIDE_DELAY = 10;
@@ -412,14 +412,7 @@ public class Q3EMain extends Activity
             Q3EUtils.SetViewZ(vkb, VKB_Z);
         }
 
-        if(m_renderMemStatus > 0) //k
-        {
-            memoryUsageText = new KDebugTextView(mainLayout.getContext());
-            params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            mainLayout.addView(memoryUsageText, params);
-            Q3EUtils.SetViewZ(memoryUsageText, MEM_DEBUG_Z);
-            memoryUsageText.setTypeface(Typeface.MONOSPACE);
-        }
+        CreateDebugOverlay();
         SetupSettingGate();
     }
 
@@ -503,22 +496,47 @@ public class Q3EMain extends Activity
             Q3EUtils.SetViewZ(vkb, VKB_Z);
         }
 
-        if(m_renderMemStatus > 0) //k
-        {
-            memoryUsageText = new KDebugTextView(mainLayout.getContext());
-            params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            params.addRule(RelativeLayout.BELOW, mGLSurfaceView.getId());
-            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
-            mainLayout.addView(memoryUsageText, params);
-            Q3EUtils.SetViewZ(memoryUsageText, MEM_DEBUG_Z);
-            memoryUsageText.setTypeface(Typeface.MONOSPACE);
-
-            memoryUsageText.Start(m_renderMemStatus * 1000);
-        }
+        CreateDebugOverlay();
         SetupSettingGate();
 
         keyboard.onAttachedToWindow(m_offsetY);
+    }
+
+    private void CreateDebugOverlay()
+    {
+        if(m_renderMemStatus <= 0) //k
+            return;
+
+        RelativeLayout.LayoutParams params;
+        memoryUsageText = new KDebugTextView(mainLayout.getContext());
+        params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        if(m_portrait)
+        {
+            params.addRule(RelativeLayout.BELOW, mGLSurfaceView.getId());
+            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+        }
+
+        int x = Q3EPreference.GetIntFromString(this, Q3EPreference.pref_harm_debug_text_x, 0);
+        int y = Q3EPreference.GetIntFromString(this, Q3EPreference.pref_harm_debug_text_y, 0);
+        if(x > 0)
+            memoryUsageText.setX(x);
+        if(y > 0)
+            memoryUsageText.setY(y);
+
+        boolean bg = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Q3EPreference.pref_harm_debug_text_background, false);
+        if(bg)
+            memoryUsageText.ShowBackground();
+
+        mainLayout.addView(memoryUsageText, params);
+        Q3EUtils.SetViewZ(memoryUsageText, MEM_DEBUG_Z);
+        memoryUsageText.setTypeface(Typeface.MONOSPACE);
+
+        if(m_portrait)
+        {
+            memoryUsageText.Start(m_renderMemStatus * 1000);
+        }
     }
 
     @Override

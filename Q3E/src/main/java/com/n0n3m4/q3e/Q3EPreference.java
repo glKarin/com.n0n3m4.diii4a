@@ -297,6 +297,9 @@ public final class Q3EPreference
     public static final String pref_harm_s_driver                     = "q3e_harm_s_driver"; //k
     public static final String pref_harm_function_key_toolbar         = "harm_function_key_toolbar"; //k
     public static final String pref_harm_function_key_toolbar_y       = "harm_function_key_toolbar_y"; //k
+    public static final String pref_harm_debug_text_x       = "harm_harm_debug_text_x";
+    public static final String pref_harm_debug_text_y       = "harm_harm_debug_text_y"; //k
+    public static final String pref_harm_debug_text_background       = "harm_harm_debug_text_background"; //k
     public static final String pref_harm_joystick_release_range       = "harm_joystick_release_range"; //k
     public static final String pref_harm_joystick_unfixed             = "harm_joystick_unfixed"; //k
     public static final String pref_harm_joystick_visible             = "harm_joystick_visible"; //k

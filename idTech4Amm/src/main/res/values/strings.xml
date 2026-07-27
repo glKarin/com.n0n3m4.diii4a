@@ -599,5 +599,11 @@
     <string name="etqw_base">Enemy Territory: QUAKE Wars</string>
     <string name="gyroscope_dead_zone">Gyroscope dead zone</string>
     <string name="dead_zone_rad_s">rad/s</string>
+    <string name="debug_overlay_x_offset">Debug overlay X offset</string>
+    <string name="setup_debug_text_x_offset">Setup debug text X offset</string>
+    <string name="debug_overlay_y_offset">Debug overlay Y offset</string>
+    <string name="setup_debug_text_y_offset">Setup debug text Y offset</string>
+    <string name="debug_overlay_background">Debug overlay background</string>
+    <string name="show_debug_text_background">Show debug text black background</string>
 
 </resources>

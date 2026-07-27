@@ -12,6 +12,7 @@ import com.karin.idTech4Amm.lib.ContextUtility;
 import com.karin.idTech4Amm.misc.TextHelper;
 import com.karin.idTech4Amm.sys.GameManager;
 import com.karin.idTech4Amm.sys.PreferenceKey;
+import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.Theme;
 import com.n0n3m4.q3e.Q3EInterface;
 import com.n0n3m4.q3e.Q3ELang;
@@ -95,18 +96,7 @@ public class LauncherSettingPreference extends PreferenceFragment implements Pre
                 return true;
             case Q3EPreference.pref_harm_function_key_toolbar_y:
             {
-                int i;
-                try
-                {
-                    i = Integer.parseInt((String) newValue);
-                    if (i >= 0)
-                        return true;
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-                return false;
+                return Q3EUtils.parseInt_s((String) newValue) >= 0;
             }
             case Q3EPreference.LANG:
             {
