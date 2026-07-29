@@ -2550,11 +2550,11 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #if !defined(GL_ES_VERSION_2_0)
 	if (newStage.fragmentProgram || newStage.vertexProgram)
 #else
-	if (newStage.fragmentProgram || newStage.vertexProgram || newStage.glslProgram
 #ifdef _SPLASHDAMAGE //karin: check newStage
-			&& !spd.declRenderProgram
+	if ((newStage.fragmentProgram || newStage.vertexProgram || newStage.glslProgram) && !spd.declRenderProgram)
+#else
+	if (newStage.fragmentProgram || newStage.vertexProgram || newStage.glslProgram)
 #endif
-			)
 #endif
 	{
 		ss->newStage = (newShaderStage_t *)Mem_Alloc(sizeof(newStage));

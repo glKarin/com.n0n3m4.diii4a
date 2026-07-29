@@ -425,7 +425,7 @@ static srfTriangles_t *R_CreateLightTris(const idRenderEntityLocal *ent,
 
 	// it is debatable if non-shadowing lights should light back faces. we aren't at the moment
 	if (r_lightAllBackFaces.GetBool() || light->lightShader->LightEffectsBackSides()
-		|| shader->ReceivesLightingOnBackSides()
+	    || shader->ReceivesLightingOnBackSides()
 #ifdef _SPLASHDAMAGE
 	    || ent->parms.flags.noSelfShadow || ent->parms.flags.noShadow
 #else

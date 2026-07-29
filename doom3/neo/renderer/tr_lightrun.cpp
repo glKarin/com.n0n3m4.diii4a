@@ -237,7 +237,7 @@ void R_CreateEntityRefs(idRenderEntityLocal *def)
 
         // push these points down the BSP tree into areas
         def->world->PushFrustumIntoTree(def, NULL, ID_RENDER_MATRIX def->inverseBaseModelProject, bounds_unitCube);
-
+        
         // return;
     }
     else

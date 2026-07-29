@@ -1150,7 +1150,7 @@ void idRenderWorldLocal::AddAreaLightRefs(int areaNum, const portalStack_t *ps)
 
             // check for being closed off behind a door
             // stgatilov #5172: there are many conditions when this should not be done, we just set areaNum = -1 in bad cases
-        	if (r_useLightAreaCulling.GetInteger() &&
+            if (r_useLightAreaCulling.GetInteger() &&
 #ifdef _SPLASHDAMAGE
                 !light->parms.flags.noShadows && light->lightShader->LightCastsShadows() &&
                 light->areaNum != -1 && !tr.viewDef->connectedAreas[light->areaNum]
@@ -1805,7 +1805,7 @@ void idRenderWorldLocal::AddAreaEffectRefs(int areaNum, const portalStack_s *ps)
 
     p_effectRefs = &portalAreas[areaNum].effectRefs;
     for (i = p_effectRefs->areaNext; i != p_effectRefs; i = i->areaNext) {
-    	effect = i->effect;
+        effect = i->effect;
 #ifdef _SPLASHDAMAGE //karin: vis dist check
     	//karin: check visible distance range
     	if (effect->parms.maxVisDist > 0.0f && !harm_r_skipVisDistCheck.GetBool()) {

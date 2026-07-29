@@ -717,9 +717,9 @@ void R_InitOpenGL(void)
 	{
         for(int vertexCacheFrame = vertexCache.GetNextListNum(); vertexCacheFrame < NUM_FRAME_DATA; vertexCacheFrame++)
         {
-            vertexCache.BeginBackEnd(vertexCacheFrame);
-            vertexCache.EndBackEnd(vertexCacheFrame);
-            vertexCache.EndFrame();
+			vertexCache.BeginBackEnd(vertexCacheFrame);
+			vertexCache.EndBackEnd(vertexCacheFrame);
+			vertexCache.EndFrame();
         }
 
 		cmdSystem->AddCommand("multithread", /*idRenderThread::*/R_EnableRenderThread_f, CMD_FL_RENDERER, "enable/disable multi-threading rendering");
@@ -2221,7 +2221,7 @@ void R_VidRestart_f(const idCmdArgs &args)
 		globalImages->PurgeAllImages();
 
         // delete framebuffer: shadow map, stencil texture
-		Framebuffer::Shutdown();
+        Framebuffer::Shutdown();
 #ifdef _SPLASHDAMAGE //karin: free occlusion test
 		occlusionTestManager->Shutdown();
 #endif
@@ -2574,7 +2574,7 @@ void idRenderSystemLocal::Shutdown(void)
 	globalImages->Shutdown();
 
     // delete framebuffer: shadow map, stencil texture
-	Framebuffer::Shutdown();
+    Framebuffer::Shutdown();
 
 #ifdef _SPLASHDAMAGE //karin: free occlusion test
 	occlusionTestManager->Shutdown();
