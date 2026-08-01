@@ -1390,7 +1390,7 @@ soundShaderParms_t* idSoundEmitterLocal::GetSoundParms(idSoundShader* shader, co
 		idSoundChannel	*chan = &channels[i];
 
 		if (chan->triggerChannel == channel) {
-			return chan->parms;
+			return &chan->parms;
 		}
 	}
 	// else using SCHANNEL_ANY
@@ -1398,10 +1398,10 @@ soundShaderParms_t* idSoundEmitterLocal::GetSoundParms(idSoundShader* shader, co
 		idSoundChannel	*chan = &channels[i];
 
 		if (chan->triggerChannel == SCHANNEL_ANY) {
-			return chan->parms;
+			return &chan->parms;
 		}
 	}
-	return channels[0].parms; // TODO: if missing
+	return &channels[0].parms; // TODO: if missing
 }
 
 void idSoundEmitterLocal::ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier)
