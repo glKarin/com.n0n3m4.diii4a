@@ -1386,17 +1386,34 @@ void idSlowChannel::GatherChannelSamples(int sampleOffset44k, int sampleCount44k
 #ifdef _HUMANHEAD
 soundShaderParms_t* idSoundEmitterLocal::GetSoundParms(idSoundShader* shader, const s_channelType channel)
 {
-    idSoundChannel* chan = &channels[channel];
+	for (int i = 0; i < SOUND_MAX_CHANNELS; i++) {
+		idSoundChannel	*chan = &channels[i];
 
-    return &chan->parms; // jmarshall - I think this is right?
+		if (chan->triggerChannel == channel) {
+			return chan->parms;
+		}
+	}
+	// else using SCHANNEL_ANY
+	for (int i = 0; i < SOUND_MAX_CHANNELS; i++) {
+		idSoundChannel	*chan = &channels[i];
+
+		if (chan->triggerChannel == SCHANNEL_ANY) {
+			return chan->parms;
+		}
+	}
+	return channels[0].parms; // TODO: if missing
 }
 
 void idSoundEmitterLocal::ModifySound(idSoundShader* shader, const s_channelType channel, const hhSoundShaderParmsModifier& parmModifier)
 {
-    // jmarshall - implement me!
-    idSoundChannel* chan = &channels[channel];
-	if(chan)
-	parmModifier.ModifyParms(chan->parms);
+	for (int i = 0; i < SOUND_MAX_CHANNELS; i++) {
+		idSoundChannel	*chan = &channels[i];
+
+		if (chan->triggerChannel == channel) {
+			parmModifier.ModifyParms(chan->parms);
+			return;
+		}
+	}
 }
 #endif
 

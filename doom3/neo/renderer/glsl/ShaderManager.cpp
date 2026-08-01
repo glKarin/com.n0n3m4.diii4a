@@ -13,27 +13,27 @@ int idGLSLShaderManager::AddCustom(const GLSLShaderProp &prop) // return added s
 	assert(shader->type == prop.type);
 	if (shader->type < SHADER_CUSTOM)
 	{
-		common->FatalError("idGLSLShaderManager::Add custom shader %s type %d is build-in!", shader->name, shader->type);
+		common->FatalError("Add custom shader %s type %d is build-in!", shader->name, shader->type);
 		return -1;
 	}
 	if(shader->type >= shaders.Num())
 	{
-		common->Warning("idGLSLShaderManager::Add custom shader not alloc slot '%s'!", shader->name);
+		common->Warning("Add custom shader not alloc slot '%s'!", shader->name);
 		return -1;
 	}
 	if (shaders[shader->type])
 	{
-		common->FatalError("idGLSLShaderManager::Add custom shader %s type %d slot is used!", shader->name, shader->type);
+		common->FatalError("Add custom shader %s type %d slot is used!", shader->name, shader->type);
 		return -1;
 	}
 	int index = FindIndex(shader->name);
 	if(index >= 0)
 	{
-		common->Warning("idGLSLShaderManager::Add custom shader name is dup '%s'!", shader->name);
+		common->Warning("Add custom shader name is dup '%s'!", shader->name);
 		return index; // -1
 	}
 
-	common->Printf("idGLSLShaderManager::Add custom shader program %d '%s' -> %d.\n", prop.type, shader->name, shader->program);
+	common->Printf("Add custom shader program %d '%s' -> %d.\n", prop.type, shader->name, shader->program);
 	shaders[shader->type] = shader;
 	//shaderProps[shader->type] = prop;
 
@@ -50,22 +50,22 @@ int idGLSLShaderManager::AddBuiltin(const GLSLShaderProp &prop)
 	assert(shader->type == prop.type);
 	if (shader->type >= SHADER_CUSTOM)
 	{
-		common->FatalError("idGLSLShaderManager::Add built-in shader %s type %d is not build-in!", shader->name, shader->type);
+		common->FatalError("Add built-in shader %s type %d is not build-in!", shader->name, shader->type);
 		return -1;
 	}
 	if (shader->type < shaders.Num() && shaders[shader->type])
 	{
-		common->FatalError("idGLSLShaderManager::Add built-in shader %s type %d slot is used!", shader->name, shader->type);
+		common->FatalError("Add built-in shader %s type %d slot is used!", shader->name, shader->type);
 		return -1;
 	}
 	int index = FindIndex(shader->name);
 	if(index >= 0)
 	{
-		common->Warning("idGLSLShaderManager::Add built-in shader name is dup '%s'!", shader->name);
+		common->Warning("Add built-in shader name is dup '%s'!", shader->name);
 		return index; // -1
 	}
 
-	common->Printf("idGLSLShaderManager::Add built-in shader program %d '%s' -> %d.\n", prop.type, shader->name, shader->program);
+	common->Printf("Add built-in shader program %d '%s' -> %d.\n", prop.type, shader->name, shader->program);
 	Resize(shader->type);
 	shaders[shader->type] = shader;
 	shaderProps[shader->type] = prop;
@@ -81,20 +81,20 @@ int idGLSLShaderManager::AddPlaceholder(const GLSLShaderProp &prop)
 
 	if (prop.type != SHADER_CUSTOM)
 	{
-		common->FatalError("idGLSLShaderManager::Add placeholder shader %s type %d is build-in!", prop.name.c_str(), prop.type);
+		common->FatalError("Add placeholder shader %s type %d is builtin!", prop.name.c_str(), prop.type);
 		return -1;
 	}
 	int index = FindIndex(prop.name);
 	if(index >= 0)
 	{
-		common->Warning("idGLSLShaderManager::Add placeholder shader name is dup '%s'!", prop.name.c_str());
+		common->Warning("Add placeholder shader name is dup '%s'!", prop.name.c_str());
 		return index; // -1
 	}
 
 	int newType = shaders.Num();
 	if (newType < SHADER_CUSTOM) // built-in shaders not loaded???
 		newType = SHADER_CUSTOM;
-	common->Printf("idGLSLShaderManager::Add placeholder shader program '%s': %d.\n", prop.name.c_str(), newType);
+	common->Printf("Add placeholder shader program '%s': %d.\n", prop.name.c_str(), newType);
 	Resize(newType);
 	shaders[newType] = NULL;
 	shaderProps[newType] = prop;
@@ -119,11 +119,11 @@ const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
 		const shaderProgram_t *shader = shaders[i];
 		if(shader && !idStr::Icmp(name, shader->name))
         {
-            common->Printf("idGLSLShaderManager::Find '%s' -> %d, type=%d %s.\n", shader->name, shader->program, shader->type, shader->type < SHADER_CUSTOM ? "built-in" : "custom");
+            common->Printf("Find shader '%s': %d, type=%d %s.\n", shader->name, shader->program, shader->type, shader->type < SHADER_CUSTOM ? "built-in" : "custom");
             return shader;
         }
 	}
-	common->Printf("idGLSLShaderManager::Find '%s' -> NOT FOUND.\n", name);
+	common->Printf("Find shader '%s': NOT FOUND.\n", name);
 	return NULL;
 }
 
@@ -147,7 +147,7 @@ int idGLSLShaderManager::FindIndex(const char *name) const
 		const shaderProgram_t *shader = shaders[i];
 		if(shader && !idStr::Icmp(name, shader->name))
 		{
-			common->Printf("idGLSLShaderManager::FindIndex '%s' -> %d %s.\n", shader->name, shader->type, shader->type < SHADER_CUSTOM ? "built-in" : "custom");
+			common->Printf("FindIndex shader '%s': %d %s.\n", shader->name, shader->type, shader->type < SHADER_CUSTOM ? "built-in" : "custom");
 			return i;
 		}
 	}
@@ -229,7 +229,7 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 	index = FindIndex(inProp.name.c_str());
 	if(index >= 0)
 	{
-		common->Printf("idGLSLShaderManager::Load shader '%s' has loaded.\n", inProp.name.c_str());
+		common->Printf("Load shader '%s' has loaded.\n", inProp.name.c_str());
 		return GLSL_BUILTIN_SHADER_INDEX_TO_HANDLE(index);
 	}
 
@@ -241,18 +241,18 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 		{
 			if(prop->program->program > 0)
 			{
-				common->Printf("idGLSLShaderManagerr::Load custom shader '%s' has already loaded.\n", inProp.name.c_str());
+				common->Printf("Load custom shader '%s' has already loaded.\n", inProp.name.c_str());
 				return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
 			}
 			else
 			{
-				common->Printf("idGLSLShaderManager::Load custom shader '%s' has already load failed.\n", inProp.name.c_str());
+				common->Printf("Load custom shader '%s' has already load failed.\n", inProp.name.c_str());
 				return INVALID_SHADER_HANDLE;
 			}
 		}
 		else
 		{
-			common->Printf("idGLSLShaderManager::Load custom shader '%s' wait loading.\n", inProp.name.c_str());
+			common->Printf("Load custom shader '%s' wait loading.\n", inProp.name.c_str());
             return GLSL_CUSTOM_SHADER_INDEX_TO_HANDLE(index);
 		}
 	}
@@ -264,7 +264,7 @@ shaderHandle_t idGLSLShaderManager::Load(const GLSLShaderProp &inProp)
 	index = AddPlaceholder(p);
 	if (index < 0)
 		return INVALID_SHADER_HANDLE;
-	common->Printf("idGLSLShaderManager::Load shader push '%s' into queue.\n", p.name.c_str());
+	common->Printf("Load shader '%s' push into queue.\n", p.name.c_str());
 	prop = &shaderProps[index];
 	if (prop->read_source)
 		prop->read_source(prop);
@@ -284,7 +284,7 @@ void idGLSLShaderManager::ActuallyLoad(void)
 {
 	unsigned int index = queueCurrentIndex;
 	if (queueCurrentIndex < SHADER_CUSTOM) {
-		common->FatalError("idGLSLShaderManager::ActuallyLoad: could not load built-in shaders: index = %d", queueCurrentIndex);
+		common->FatalError("ActuallyLoad shader: could not load built-in shaders: index = %d", queueCurrentIndex);
 		return;
 	}
 	const unsigned int num = shaderProps.Num();
@@ -309,7 +309,7 @@ void idGLSLShaderManager::ActuallyLoad(void)
 		// it's not happened, using assert
 		if(index >= shaderProps.Num())
 		{
-			common->Warning("idGLSLShaderManager::ActuallyLoad custom shader index '%d' over( >= %d ).", index, shaderProps.Num());
+			common->Warning("ActuallyLoad custom shader index '%d' over( >= %d ).", index, shaderProps.Num());
 			continue;
 		}*/
 
@@ -318,17 +318,17 @@ void idGLSLShaderManager::ActuallyLoad(void)
 
 		if(FindIndex(prop.name.c_str()) >= 0)
 		{
-			common->Warning("idGLSLShaderManager::ActuallyLoad custom shader '%s' has loaded.", prop.name.c_str());
+			common->Warning("ActuallyLoad custom shader '%s' has loaded.", prop.name.c_str());
 			continue;
 		}
 		if(prop.program)
 		{
-			common->Warning("idGLSLShaderManager::ActuallyLoad custom shader '%s' has handle.", prop.name.c_str());
+			common->Warning("ActuallyLoad custom shader '%s' has handle.", prop.name.c_str());
 			continue;
 		}
 
 		// create shader on heap
-		common->Printf("idGLSLShaderManager::ActuallyLoad shader '%s'.\n", prop.name.c_str());
+		common->Printf("ActuallyLoad shader '%s'.\n", prop.name.c_str());
 		shaderProgram_t *shader = (shaderProgram_t *)malloc(sizeof(*shader));
         R_InitShaderProgram(shader);
         idStr::Copynz(shader->name, prop.name.c_str(), sizeof(shader->name));
@@ -343,7 +343,7 @@ void idGLSLShaderManager::ActuallyLoad(void)
 		else
 		{
 			prop.program = NULL;
-			common->Warning("idGLSLShaderManager::ActuallyLoad shader '%s' error!", prop.name.c_str());
+			common->Warning("ActuallyLoad shader '%s' error!", prop.name.c_str());
 		}
 	}
 
@@ -357,7 +357,7 @@ idGLSLShaderManager::~idGLSLShaderManager()
 
 void idGLSLShaderManager::Shutdown(void)
 {
-    printf("idGLSLShaderManager destroying: %d shaders, %d customer shaders\n", shaders.Num(), shaderProps.Num());
+    printf("Shader manager destroying: %d shaders, %d customer shaders\n", shaders.Num(), shaderProps.Num());
     // stop load queue;
     queueCurrentIndex = shaderProps.Num();
     // delete shader programs
@@ -374,7 +374,7 @@ void idGLSLShaderManager::Shutdown(void)
     // clear load queue
     queueCurrentIndex = SHADER_CUSTOM;
     shaderProps.Clear();
-    printf("idGLSLShaderManager shutdown\n");
+    printf("Shader manager shutdown\n");
 }
 
 void idGLSLShaderManager::ReloadShader(int i)
