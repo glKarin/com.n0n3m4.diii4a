@@ -1,0 +1,98 @@
+.Dd $Mdocdate$
+.Dt DWARFGEN \&1 "dwarfdump and libdwarf"
+.Os
+.Sh NAME
+.Nm dwarfgen
+.Nd generate example DWARF data.
+.Sh SYNOPSIS
+.Nm
+.Op Fl t Ar type
+.Op Fl o Ar outpath
+.Op Fl c cunum
+.Ar pathname
+.
+.Sh DESCRIPTION
+The
+.Nm
+creates DWARF sections as requested by specific options.
+.Pp
+Using some information source, create a tree of dwarf
+information (speaking of a DIE tree).
+Turn the die tree into dwarfdata using libdwarf producer
+and write the resulting data in an object file.
+It is a bit inconsistent in error handling just to
+demonstrate the various possibilities using the producer
+library.
+.Pp
+Main options:
+.Bl -tag -compact
+.It Fl t Ar type
+what sort of input to read.  May be one of:
+.Bl -tag -compact
+.It Ar def
+means predefined (no input is read, the output
+is based on some canned setups built into dwarfgen).
+.Ar path
+is ignored in this case. This is the default, and does not work.
+.It Ar obj
+means
+.Ar path
+is the object file to
+read (The dwarf sections are duplicated in the output file.)
+Requires 
+.Ar path .
+.It Ar txt
+.Ar path
+contains plain text
+(in a form rather like output by dwarfdump)
+that defines the dwarf that is to be output.
+Requires 
+.Ar path .
+.El
+.
+.It Fl o Ar outpath
+specifies the pathname of the output object. If not supplied,
+.Pa testout.o
+is used as the default output path.
+.
+.It Fl c Ar cunum
+supplies a CU number of the
+.Ql obj
+.Ar type
+input to read .
+.\" not "output" ??? jkl
+because the dwarf producer wants just one CU.
+Default is -1 which won't match anything.
+.El
+.Pp
+Other options:
+.Bl -tag -compact
+.It Fl h
+transform high PC to const. 
+.It Fl s
+output as text.
+.It Fl r
+show relocation details.
+.It Fl v Ar version
+DWARF version 2, 3, 4, or 5. 
+.It Fl p Ar size
+pointer size, 4 or 8.
+.It Fl f Ar offset
+offset size, 4 or 8.
+.El
+.
+.\" .Sh ENVIRONMENT
+.\" For sections 1, 6, 7, and 8 only.
+.\" .Sh FILES
+.\" .Sh EXIT	STATUS
+.\" For sections 1, 6, and 8 only.
+.\" .Sh EXAMPLES
+.\" .Sh DIAGNOSTICS
+.\" For sections 1, 4, 6, 7, 8, and 9 printf/stderr messages only.
+.\" .Sh SEE ALSO
+.\" .Xr foobar 1
+.\" .Sh STANDARDS
+.\" .Sh HISTORY
+.\" .Sh AUTHORS
+.\" .Sh CAVEATS
+.\" .Sh BUGS

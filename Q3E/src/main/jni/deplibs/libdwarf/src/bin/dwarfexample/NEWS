@@ -1,0 +1,38 @@
+December 18, 2025
+Added frame2.c which uses the new dwarf_iterate_fde_all_regs3()
+to get a report of all rows in all fdes.
+Example frame1.c continues to use the original set of functions
+to get a similar report, and can do additional reports.
+
+Both frame1.c and frame2.c support option
+--skip-all-printf
+which means times (as in time(1))
+are then independent of printf time.
+
+frame1.c runtime just getting all rows in each FDE
+is of order(n*n/2) in the number of frame rows of an FDE.
+frame2.c runtime just getting all rows in each FDE
+is of order(n) in the number of frame rows of an FDE.
+
+September 30, 2020
+  Renamed getdebuglink to dwdebuglink and added the ability
+  fo find the debuglink target properly.
+November 11, 2019
+  Added getdebuglink.c to show how to use libdwarf to find a GNU alternate
+  DWARF file.
+  Add dummyexample.c as a trivial C test case, compiled into
+  the file dummyexample.  Compiled as
+  cc -g dummyexample.c -o dummyexample
+  This dummyexample (the executable) is a static, unchanging, file
+  that getdebuglink can use in runtests.sh to verify getdebuglink
+  works.
+September 05, 2016
+  simplereader.c: Added the --dumpallnames option so one can
+  get all the strings from debug_info,_types into a file.
+  A simple way to enable further examination of the strings.
+July 21, 2009
+  Roni Simonian noticed a call to  print_die_data(dbg,cur_die,in_level);
+  was missing so not all DIEs would print.  Good Catch!
+July 8, 2009
+  Created a sample libdwarf consumer. Using BSD license so
+  anyone can use it.  And a trivial Makefile.

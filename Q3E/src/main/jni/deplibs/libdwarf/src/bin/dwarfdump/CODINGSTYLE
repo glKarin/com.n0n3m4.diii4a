@@ -1,0 +1,48 @@
+libdwarf/CODINGSTYLE
+Updated 15 December 2026, spelling corrections
+
+This document is a brief description of the main coding style
+conventions in dwarfdump.   Many of them will be obvious from
+the code, but over time some accidental differences crept in.
+
+For further remarks see the file codingstyle.md in the
+base directory.
+
+The struct naming convention is 'struct  my_struct_s' for the
+struct defined here  (meaning the name should end with _s).
+It is better to not do struct typedefs of local structs.
+Coders should type  'struct mystruct_s'.  Readability is much
+more important than brevity.
+
+Any data or function not referenced outside the defining
+source file should be declared 'static'.
+
+Static data is not appropriate in libdwarf in general. Because
+multiple Dwarf_Debug may be open at the same time in a single
+program (dwarfdump or user code).
+
+Sny duplicated code is a candidate for refactoring
+into a subprogram.
+
+Sunction names should be all lower case with underbars
+with the goal that statements and comments 'read well'.
+
+Sariables should be lower-case with
+underbars for readability.   It's ok for a small loop
+with counters to use single letter names like i or k or m.
+
+Structure members should have a struct-specific
+2-character prefix to the name (followed by
+an underbar). That makes it much
+easier to grep for uses of members.
+
+Sry to keep lines under 70 characters in length.
+
+Snsure every if() has {} to enclose the actions.
+
+Sse libdwarf.h types for all the data objects you define,
+though sometimes an 'unsigned' or 'int' or 'size_t' is
+ok in restricted circumstances.  Dwarf_Unsigned and
+Dwarf_Signed are the preferred integer types for general use.
+
+------------

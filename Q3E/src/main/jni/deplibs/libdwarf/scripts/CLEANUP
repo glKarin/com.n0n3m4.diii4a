@@ -1,0 +1,107 @@
+#!/bin/bash
+# CLEANUP
+# This is not really needed, as autogen.sh updates
+# what needs to be updated,
+# And if all built in-tree 'make maintainer-clean'
+# does a good job.  But this does a lot towards cleanup.
+
+chkisdir() {
+  if [ ! -d $1 ]
+  then
+    echo "The directory $1 is not found"
+    echo "we are in the wrong directory to run scripts/CLEANUP"
+    exit 1
+  fi
+}
+
+chkisdir scripts
+chkisdir test
+chkisdir doc
+chkisdir src/lib/libdwarf
+chkisdir src/bin/dwarfdump
+chkisdir src/bin/dwarfexample
+
+l=`pwd`
+#echo "Now at $l"
+#echo "sloc $sloc"
+
+# Won't work unless configure was done.
+# in the source tree.
+if [ -f Makefile ]
+then
+  make maintainer-clean
+fi
+
+# Some unlikely but possible files no one wants:
+
+rm -f src/bin/dwarfgen/configure.lineno
+rm -f junk* */junk*
+rm -f *~ */*~
+rm -rf autom4te.cache/
+
+#Leftovers from building in-tree.
+for i in src/bin/dwarfdump/dwarfdump src/bin/dwarfexample/dwdebuglink \
+  src/bin/dwarfexample/findfuncbypc src/bin/dwarfexample/frame1 \
+  src/bin/dwarfexample/simplereader test/runtestdd.sh.log \
+  test/runtestdd.sh.trs test/runtestsexample.sh.log \
+  test/runtestsexample.sh.trs test/test_dwarfstring \
+  test/test_dwarfstring.log test/test_dwarfstring.trs \
+  test/test_dwgetopt test/test_dwgetopt.log \
+  test/test_dwgetopt.trs test/test_extra_flag_strings \
+  test/test_extra_flag_strings.log test/test_extra_flag_strings.trs \
+  test/test_headersok test/test_headersok.log \
+  test/test_headersok.trs test/test_helpertree \
+  test/test_helpertree.log test/test_helpertree.trs \
+  test/test_linkedtopath test/test_linkedtopath.log \
+  test/test_linkedtopath.trs test/test_macrocheck \
+  test/test_macrocheck.log test/test_macrocheck.trs \
+  test/test_makenametest test/test_makenametest.log \
+  test/test_makenametest.trs test/test_sectionbitmaps \
+  test/test_sectionbitmaps.log test/test_sectionbitmaps.trs \
+  test/test_testesb test/test_testesb.log \
+  test/test_testesb.trs test/dwarfdump.conf
+do
+  rm -f $i
+done
+
+#Leftovers from autoreconf /autogen.sh
+for i in junk* *~ cscope.files TAGS *.exe *.lo *.la .dirstamp \
+  aclocal.m4 \
+  ar-lib compile config.guess config.h config.h.in config.log config.sub \
+  configure config.status depcomp install-sh libdwarf.pc libtool ltmain.sh \
+  m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4 \
+  missing stamp-h1 test-driver test-suite.log
+do
+  rm -f $i
+done
+
+rm -f	doc/Makefile
+rm -f	doc/Makefile.in
+rm -f	test-driver
+rm -f	test/junk.debuglink1
+rm -f	test/junk.debuglink1a
+rm -f	test/junk.debuglink1b
+rm -f	test/junk.debuglink1sed1
+rm -f	test/junk.debuglink1sed2
+rm -f	test/junk.debuglink2
+rm -f	test/junk.debuglink2a
+rm -f	test/junk.debuglink2b
+
+for i in Makefile Makefile.in
+do
+  for d in . test src/bin/dwarfdump src/bin/dwarfgen src/bin/dwarfexample \
+    src/lib/libdwarf
+  do
+    rm -f $d/$i
+  done
+done
+
+for dl in CMakeFiles/ Testing/ src/bin/dwarfdump/CMakeFiles/ src/lib/libdwarf/CMakeFiles/ test/CMakeFiles/
+do
+  rm -rf $dl
+done
+for fi in CMakeCache.txt CTestTestfile.cmake cmake_install.cmake src/bin/dwarfdump/CTestTestfile.cmake src/bin/dwarfdump/cmake_install.cmake src/lib/libdwarf/CTestTestfile.cmake src/lib/libdwarf/cmake_install.cmake test/CTestTestfile.cmake test/cmake_install.cmake test/selfesb test/selfgetopttest test/selfhelpertree test/selfleb test/selfmakename test/selfmc test/selfsectionbitmaps test/selftestesb test/selftied test/teststring
+do
+  rm -f $fi
+done
+

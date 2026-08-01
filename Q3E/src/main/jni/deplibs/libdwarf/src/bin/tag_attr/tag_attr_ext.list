@@ -1,0 +1,219 @@
+/*
+  Copyright (C) 2000-2010 Silicon Graphics, Inc.  All Rights Reserved.
+  Portions Copyright (C) 2008-2012 SN Systems Ltd. All Rights Reserved.
+  Portions Copyright (C) 2009-2020 David Anderson. All Rights Reserved.
+
+  This program is free software; you can redistribute it
+  and/or modify it under the terms of version 2.1 of the
+  GNU Lesser General Public License as published by the Free
+  Software Foundation.
+
+  This program is distributed in the hope that it would be
+  useful, but WITHOUT ANY WARRANTY; without even the implied
+  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+  PURPOSE.
+
+  Further, this software is distributed without any warranty
+  that it is free of the rightful claim of any third person
+  regarding infringement or the like.  Any license provided
+  herein, whether implied or otherwise, applies only to this
+  software file.  Patent licenses, if any, provided herein
+  do not apply to combinations of this program with other
+  software, or any other product whatsoever.
+
+  You should have received a copy of the GNU Lesser General
+  Public License along with this program; if not, write the
+  Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+  Boston MA 02111-1307, USA.
+
+*/
+
+#include <dwarf.h>
+
+/*  list for semantic check of tag-attr relation.
+    See tag_attr.list for details.
+
+    Notes:
+        If new top level TAGs are added/removed, update EXT_ATTR_TABLE_ROWS
+        If new child TAGs are added/removed, update EXT_ATTR_TABLE_COLS
+
+        EXT_ATTR_TABLE_ROWS is defined in tag_tree.c and specifies the
+        maximum number of top level TAGs.
+        Current value is 10.
+
+        EXT_ATTR_TABLE_COLS is defined in tag_tree.c and specifies the
+        maximum number of entries for the top level TAGs.
+        Current value is 10.
+*/
+
+/* Common DWARF extensions */
+
+0xffffffff
+DW_TAG_structure_type
+DW_AT_MIPS_linkage_name
+DW_AT_go_runtime_type
+DW_AT_go_kind
+DW_AT_go_elem
+
+0xffffffff
+DW_TAG_compile_unit
+DW_AT_APPLE_optimized /* Used by LLVM */
+DW_AT_APPLE_sdk       /* Used by LLVM */
+DW_AT_GNU_dwo_id
+DW_AT_GNU_pubnames
+DW_AT_GNU_pubtypes
+DW_AT_GNU_dwo_name
+DW_AT_GNU_ranges_base
+DW_AT_GNU_addr_base
+DW_AT_GNU_macros
+DW_AT_LLVM_sysroot
+DW_AT_go_package_name
+
+0xffffffff
+DW_TAG_skeleton_unit
+DW_AT_GNU_dwo_id
+DW_AT_GNU_pubnames
+DW_AT_GNU_pubtypes
+DW_AT_GNU_dwo_name
+DW_AT_GNU_ranges_base
+DW_AT_GNU_addr_base
+DW_AT_GNU_macros
+
+0xffffffff
+DW_TAG_base_type
+DW_AT_go_runtime_type
+DW_AT_go_kind
+
+0xffffffff
+DW_TAG_partial_unit
+
+0xffffffff
+DW_TAG_pointer_type
+DW_AT_go_kind
+DW_AT_go_runtime_type
+
+0xffffffff
+DW_TAG_member
+DW_AT_GNU_guarded_by    /* gcc.gnu.org/wiki/ThreadSafetyAnnotationsInDWARF */
+DW_AT_GNU_pt_guarded_by /* gcc.gnu.org/wiki/ThreadSafetyAnnotationsInDWARF */
+DW_AT_GNU_guarded       /* gcc.gnu.org/wiki/ThreadSafetyAnnotationsInDWARF */
+DW_AT_GNU_pt_guarded    /* gcc.gnu.org/wiki/ThreadSafetyAnnotationsInDWARF */
+DW_AT_MIPS_linkage_name
+DW_AT_go_embedded_field
+
+0xffffffff
+DW_TAG_array_type
+DW_AT_GNU_vector
+DW_AT_go_kind
+DW_AT_go_runtime_type
+
+0xffffffff
+DW_TAG_subprogram
+DW_AT_MIPS_linkage_name  /* Used by GNU, SGI-IRIX, and others. */
+DW_AT_MIPS_fde /* SGI-IRIX uses this */
+DW_AT_GNU_locks_excluded /* gcc.gnu.org/wiki/ThreadSafetyAnnotationsInDWARF */
+DW_AT_GNU_exclusive_locks_required
+DW_AT_GNU_shared_locks_required
+DW_AT_APPLE_omit_frame_ptr  /* Used by LLVM */
+DW_AT_APPLE_optimized /* Used by LLVM */
+DW_AT_GNU_all_tail_call_sites
+DW_AT_GNU_all_call_sites
+DW_AT_ghs_rsm
+DW_AT_ghs_frsm
+DW_AT_ghs_rso
+DW_AT_ghs_frames
+DW_AT_ghs_subcpu
+
+0xffffffff
+DW_TAG_typedef
+DW_AT_go_kind
+DW_AT_go_runtime_type
+DW_AT_go_key
+DW_AT_go_elem
+
+0xffffffff
+DW_TAG_type_unit
+DW_AT_GNU_addr_base
+DW_AT_GNU_dwo_name
+DW_AT_GNU_odr_signature
+DW_AT_GNU_pubnames
+
+0xffffffff
+DW_TAG_variable
+DW_AT_MIPS_linkage_name   /* Used by GNU, SGI-IRIX, and others. */
+DW_AT_GNU_guarded_by
+DW_AT_GNU_pt_guarded_by
+DW_AT_GNU_guarded
+DW_AT_GNU_pt_guarded
+DW_AT_GNU_locviews
+
+0xffffffff
+DW_TAG_GNU_template_template_parameter
+DW_AT_decl_column
+DW_AT_decl_file
+DW_AT_decl_line
+DW_AT_name
+DW_AT_GNU_template_name
+DW_AT_GNU_guarded_by /* GNU changed the name of 0x2108! */
+
+0xffffffff
+DW_TAG_GNU_template_parameter_pack
+DW_AT_decl_column
+DW_AT_decl_file
+DW_AT_decl_line
+DW_AT_name
+DW_AT_sibling
+
+0xffffffff
+DW_TAG_formal_parameter
+DW_AT_GNU_locviews
+
+0xffffffff
+DW_TAG_GNU_formal_parameter_pack
+DW_AT_decl_column
+DW_AT_decl_file
+DW_AT_decl_line
+DW_AT_name
+DW_AT_sibling
+
+0xffffffff
+DW_TAG_GNU_call_site
+DW_AT_abstract_origin
+DW_AT_GNU_call_site_target
+DW_AT_low_pc
+DW_AT_sibling
+DW_AT_GNU_tail_call
+
+0xffffffff
+DW_TAG_GNU_call_site_parameter
+DW_AT_GNU_call_site_value
+DW_AT_GNU_call_site_data_value
+DW_AT_abstract_origin
+DW_AT_location
+
+0xffffffff
+DW_TAG_constant
+DW_AT_GNU_numerator
+DW_AT_GNU_denominator
+
+0xffffffff
+DW_TAG_subroutine_type
+DW_AT_go_elem
+DW_AT_go_kind
+DW_AT_go_runtime_type
+
+
+0xffffffff
+DW_TAG_subrange_type
+DW_AT_GNU_bias
+
+0xffffffff
+DW_TAG_inlined_subroutine
+DW_AT_GNU_discriminator  /* Used by LLVM */
+DW_AT_GNU_entry_view
+DW_AT_GNU_locviews
+
+0xffffffff
+DW_TAG_lexical_block
+
+0xffffffff

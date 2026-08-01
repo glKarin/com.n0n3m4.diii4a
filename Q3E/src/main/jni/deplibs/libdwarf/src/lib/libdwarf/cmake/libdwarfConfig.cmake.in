@@ -1,0 +1,18 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+
+set(LIBDWARF_BUILT_WITH_ZLIB_AND_ZSTD "@BUILT_WITH_ZLIB_AND_ZSTD@")
+
+if(LIBDWARF_BUILT_WITH_ZLIB_AND_ZSTD)
+  find_dependency(ZLIB)
+  set(CMAKE_MODULE_PATH_OLD "${CMAKE_MODULE_PATH}")
+  set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_LIST_DIR}")
+  find_dependency(zstd)
+  set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH_OLD}")
+  unset(CMAKE_MODULE_PATH_OLD)
+endif()
+
+if(NOT TARGET libdwarf::dwarf)
+    include(${CMAKE_CURRENT_LIST_DIR}/libdwarf-targets.cmake)
+    check_required_components(libdwarf)
+endif()

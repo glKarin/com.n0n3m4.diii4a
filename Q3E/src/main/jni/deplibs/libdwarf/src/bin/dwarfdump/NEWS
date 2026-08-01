@@ -1,0 +1,311 @@
+March 5, 2021
+  "dwarfdump found no file !" is a message one might see in
+  dwarfdump before March 2021. It means dwarfdump cannot
+  find a dwarfdump.conf .  For several months dwarfdump
+  has required a dwarfdump.conf be present in one of the
+  defined standard places.  $HOME/dwarfdump.conf  and
+  $HOME/.dwarfdump.conf are good choices.  dwarfdump.conf
+  is in every release.  In years past dwarfdump.conf was
+  only required if printing frames, but now dwarfdump
+  needs to know appropriate register names in a variety
+  of situations, hence a dwarfdump.conf is needed.
+  As of the March 6 2021 release the basic error for this case is
+  "dwarfdump found no dwarfdump.conf file in any of the
+  standard places!"
+February 15, 2021
+  dwarfdump given -ku now prints brief lists counting
+  the uses of each TAG, each ATtribute, and each FORM
+  at the end..
+  These new lists report on all standard and extension
+  attributes and forms used in the object file.
+November 16, 2020
+  dwarfdump now prints DWARF expression ops
+  on indivdidual lines which makes it much easier to read the
+  contents of a DWARF expression.
+  dwarfdump.conf now implements support of
+  'option: --format-expr-ops-joined' which gets you
+  the older format without specifying --format-expr-ops-joined
+  on the command line.
+May 23, 2020
+  dwarfdump now takes much less malloc() to work, as measured
+  by valgrind --tool=massif  and massif-visualizer.
+  A dwarfdump run that did 2.2Gib of malloc/free before the changes
+  now does 1.4GiB. If you add --suppress-de-alloc-tree
+  to the dwarfdump options dwarfdump uses 1.1GB on the
+  test run.
+December 24, 2018
+  Any - or -- option on the dwarfdump command line turns off the
+  default set of things to print.  So, for example, instead
+  of 'dwarfdump -v a.out' or 'dwarfdump -x abi=mips a.out'
+  (which do nothing)
+  do 'dwarfdump -v -a a.out' or 'dwarfdump -f -x abi=mips a.out'.
+  Or maybe  'dwarfdump a.out' suffices for you.
+  Or use other print or check options depending
+  on your needs.
+June 14, 2018
+  A small simplification of build options simplifies building
+  across different environments.  If your environment needs
+  to use the non-standard elf_open() call instead of plain open()
+  then at configure time do --enable-elf-open.
+May 17, 2017
+  Now dwarfdump understands both split-dwarf and COMDAT sections
+  (it calls the section-groups 'Groups')
+  so it is possible to properly print all such.  A traditional
+  DWARF2,3,4,5 consumer can ignore section groups.
+  To print in more complicate situations the -x groupnumber=3
+  (3 as an example) lets you choose a specific group/comdat to print.
+  Dwarfdump prints out a section-groupnumber table when appropriate
+  a making it easy to know what groups are present.
+March 24, 2017
+  dwarfdump: Now argv[0] is checked before setting the program_name
+  global variable.  If it contains '/dwarfdump.O'  that part of
+  the string is shortened to '/dwarfdump'.
+  Doing this removes a need for the regressiontests to use sed
+  and shortens the regressiontests runtime on one machine from
+  77 minutes to 23 minutes.
+September 20, 2016
+  dwarfdump now frees all memory it used when it terminates normally.
+  No malloc space left behind.
+  It gets a clean report from
+      valgrind --leak-check=full  --show-leak-kinds=all
+May 5, 2016
+  By default dwarfdump sanitizes strings, so if a corrupted
+  DWARF file has non-printable bytes in a string they are
+  each turned into %xx (% followed by
+  two hex digits for a single string character).
+  This is safe for terminals to print and shows the actual value.
+  The '-x nosanitizestrings' option turns off this feature so bytes
+  are shown as printf and your system show them.
+  The same format as uri style, but only using % on characters
+  that may have bad effects if printed to a terminal (not,
+  for example, space or tab characters).
+  Nor are normal '%' in a string altered (in uri such would be
+  turned to %25 or to %%).
+February  25, 2015
+  Copied dwgetopt.c dwgetopt.h from libdwarf so dwarfdump can
+  use dwgetopt() and still build without necessarily
+  having the libdwarfsource easily available.
+  Some environments do not have a getopt() so copying
+  dwgetopt.h,.h here ensures we have this functionality
+  for everyone.
+January 08, 2015
+  dwarfdump does new checking. See options -kD -kG -ku -kuf.
+  In addition, dwarfdump output can be written to a file without
+  using redirection by using the new  -O file=<path>
+  option.
+January 29, 2014
+  Now using dwarf_tsearch() so tsearch is available on every platform.
+November 17, 2012
+  Added new checking options.
+  To get good relocation-handling dwarfdump now expects to read
+  headers from libdwarf with the relocation numbers. That means
+  building dwarfdump separate from the libdwarf source is no
+  longer as useful as it was.  It is best to build libdwarf
+  and dwarfdump together for decent handling of relocatable
+  objects.
+December 13, 2011
+  Now prints missing line table column number as 0 (now
+  matching the DWARF spec), the previous
+  practice of printing -1 was always wrong.
+  And prints the DWARF3/4 new line table fields (when present).
+October 29, 2011
+  Added support for printing .debug_types (type unit) data.
+October 26, 2011
+  Added new features to Makefile.in and documented in README
+  how to build dwarfdump with headers or libraries in
+  non-standard places.
+October 23, 2011
+  By default the various places with string option values
+  and file paths all use URI transformation on input and
+  if the transformation does anything at all dwarfdump reports
+  the input and transformed strings.  This makes it easy
+  to deal with strings and expressions and file paths
+  that are difficult to express in a shell (or that getopt
+  mangles). Options  -q and -U give you  control over this process.
+October 07, 2011
+  The -x abi=mips  frame register abi in dwarfdump.conf is now
+  usable with modern MIPS objects as well as old IRIX objects.
+  There are other mips-* frame register setups described
+  in dwarfdump.conf for anyone testing that nothing new has
+  been added that conflicts with old IRIX/MIPS frame generation.
+June 04, 2011
+  Error checking is now distinct from section printing, making
+  error checking (the -k options) much easier to work with on
+  large objects.
+  So compiler-created errors can be found, the error reporting
+  now prints context information.
+March 29, 2011
+  Added many new correctness tests.  Changed the format of
+  various items (line data prints in a more compact form, numbers
+  are more uniformly hexadecimal fixed length where that makes sense).
+  All the source files are uniformly indented to a multiple of 4
+  characters and all intent-tabs in the source have been removed.
+  Major logic changes involved changing error-reporting to be
+  more detailed and adding new tests for incorrect DWARF.
+  Now reports error summary by the compiler name, not just overall.
+January 26, 2010
+  Changed the default frame-data register names from MIPS to
+  a generic set of registers.
+  Try  '-x abi=mips' to get the traditional old MIPS register
+  naming.
+June 22, 2009
+  Added the -S option to dwarfdump.
+June 10, 2009
+  Moved the gennames.c code to libdwarf.
+May 4, 2009
+  Replaced awk source-generation of certain functions
+  with new gennames.c code.
+  Now we can print an object with an address_size that
+  varies by compilation unit.
+April 4, 2009
+  Corrected aspects of the frame-printing by ensuring we pass
+  all the information libdwarf needs for fully consistent behavior.
+  Three newly defined libdwarf calls calls made to ensure
+  that better behavior (specifically having dwarfdump consistently
+  recognize when registers are the cfa, undefined-value or same-value
+  pseudo registers). Updated dwarfdump.conf to set these same
+  things consistently.
+Mar 22, 2009
+  The -f and -F flags no longer also imply -i (it just
+  did not make sense to tie them (cannot recall why
+  it might have been tied before).
+Mar 20, 2009
+  Moved print_* functions from print_sections.c to individual
+  source files. Hopefully making the code a bit easier
+  to read.
+Feb 16, 2009
+  Added the -C option.  It is a sort of 'pedantic' option
+  as it turns on warnings about certain commonly used
+  non-standard tag->tag and tag->attr relationships.
+  Added the tag_attr_ext.list  tag_tree_ext.list files which
+  define the 'common use' extensions.
+Feb 14, 2009
+  Added configure option --enable-nonstandardprintf
+  which makes it easy to get printf of Dwarf_Unsigned (etc)
+  types correct even for non-standard compilers.
+December 30, 2008
+  Now we print the .debug_ranges section (with -N)
+  and the data for DW_AT_ranges (with -i).
+December 8, 2008
+  The -M option now causes printing of FORM details.
+  And -v adds details about abbreviation 'indexes' into
+  an abbreviation table (.debug_abbrev)
+  providing more detail for folks debugging or
+  improving their understanding of DWARF data.
+April 9, 2008
+  Added -H  <num>  to limit the number of compilation-units/FDEs
+  dwarfdump prints in one run.  Added -n to eliminate function-name
+  printing in .debug_frame output (with a large-enough debug_info
+  section function-name printing is too slow). The function name
+  printing will be fixed in another release.
+December 8, 2007
+  Had to add an ugly configure conditional as libelf has
+  unconditional use of off64_t in recent libelf.h
+July 3, 2007
+  Now with -v dwarf expression blocks in frame operations
+  are printed expanded out.
+July 2, 2007
+  Added a new abi -x abi=general usable for any cpu with
+  up to 1000 registers.
+May 7, 2007
+  Sun Microsystems contributes new dwarf.h extensions and a new -G option
+  to dwarfdump -i (so one can see the 'global' offset to DIEs).
+  Thanks to Chris Quenelle of Sun.
+April 17, 2006
+  New -x name=<conf file> -x abi=<abiname> and configuration file
+  enable sensible printing of a wide range of .debug_frame eh_frame
+  correctly without recompiling dwarfdump or touching libdwarf.h or
+  dwarf.h.
+March 29, 2005
+  Now handles DWARF3. For non-MIPS objects, the list of register
+  names in print_sections.c is not appropriate, #define
+  DWARFDUMP_TURN_OFF_MIPS_REG_NAMES to turn off the MIPS names.
+December 1, 2005
+  Added new DWARF3 TAGs and ATtributes to the -k lists,
+  clarified the -k reporting, and made the build more robust
+  in the face of errors in the *.list relationship-spec-files.
+
+August 1, 2005
+  Now print_die.c deals with long loclists without a coredump.
+  Added esb.h esb.c (and testesb.c for testing) to encapsulate
+  getting space for possibly-long strings.
+  Now print_die.c uses snprintf() not sprintf (hopefully this
+  will not inconvenience anyone, snprintf() has been available
+  on most systems for years now).
+  Altered print of location lists a little bit - for better appearance.
+
+July 15, 2005
+  Now completely frees all allocated memory. Various
+  routines were not calling dealloc() code and
+  new libdwarf dealloc routines are now used where those
+  are needed.
+
+  Now prints DWARF3 .debug_pubtypes section (with -a or -y).
+  The .debug_pubtypes section and  SGI-specific .debug_typenames
+  are equivalent so they are treated alike.
+
+Mar 21, 2005
+  The -f flag now prints only .debug_frame data. The .eh_frame section
+  (GNU exceptions data) now prints with -F (not -a).
+  Printing gcc 3.3 or 3.4 .eh_frame with zR augmentation
+  does not work at this time, so do not use -F
+  to print such an object.
+  The line section print now prints a CU-DIE offset for each such DIEs
+  line information.   This makes it much easier to correctly associate
+  -l (or -v -l) output with -v -v -l when debugging a faulty
+  linetable in an executable.
+  With -v -v -l (two -v) the output of line info continues to be a
+  completely different format than zero or one -v, the two-v
+  form showing the detailed line table opcodes.
+  With g++ 3.3.3 one sees bad line addresses at times as the
+  DW_LNE_set_address address for header files do not always
+  get their relocations applied.  I am told this is fixed in 3.4.x.
+
+
+Mar 18, 2005
+  In correcting printing of macro information the format
+  of the macro (-m) output has changed substantially.
+  Much more complete now.  Still could use enhancement.
+
+Oct 28, 2004
+  Updated contact address in copyright: SGI moved 1/4 mile
+  to a new address: 1500 Crittenden Lane.
+
+Oct 02, 2003
+  Now fully supports .debug_loc section.
+
+June 14, 2001
+  Now calling a new function dwarf_get_arange_cu_header_offset()
+  in libdwarf and printing the returned cu header offset for
+  aranges entries.   Making it easier to track down internal
+  errors in the dwarf2 data.  Also added small other
+  consistency checks, printing a message and exit()ing on
+  error.
+
+April 14, 2000
+  The libdwarf copyright has changed to
+     version 2.1 of the GNU Lesser General Public License.
+  Anyone holding a version of libdwarf that was published
+              before this new copyright
+  is allowed to use
+    the copyright published in that earlier libdwarf source
+    on the earlier source
+  or to use
+    this new copyright on the earlier source,
+  at their option.
+
+July 21, 1999
+  Added gnu extensions to the frame information printer
+  and handling for egcs eh_frame printing.
+  libdwarf changes mean this now can print little-endian
+  object dwarf on a big-endian system and vice-versa.
+
+December, 1998
+  added dwarfdump to the dwarf public source distribution.
+
+June, 1994
+  libdwarf consumer interface changed completely so updated to match.
+
+May,  1993
+  Initial version of dwarfdump  for dwarf version 2
+  written at sgi.

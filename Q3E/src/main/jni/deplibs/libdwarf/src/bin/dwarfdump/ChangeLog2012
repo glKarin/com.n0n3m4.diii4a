@@ -1,0 +1,125 @@
+2012-11-29  David Anderson
+     * dwarfdump.c, common.c: Update version string.
+     * dwarfdump.c, print_die.c: Now all follow dicheck
+       indent rules.
+2012-11-29  David Anderson
+     * dwarfdump.c, common.c: Update version string.
+2012-11-27  David Anderson
+     * dwarfdump.c, common.c: Update version string.
+2012-11-20  David Anderson
+     * dwarfdump.c, common.c: Update version string.
+     * print_reloc.c: Inserted missing 'const' qualifiers
+       fixing 3 compiler warnings.
+2012-11-17  David Anderson
+     * configure regenerated with autoconf 2.69
+     * dwarfdump.c, common.c: Update version string.
+2012-11-17  David Anderson
+     * addrmap.c,checkutil.c,common.c,dwarfdump.c,dwconf.c,
+       globals.h,naming.c,print_aranges.c,print_die.c,print_frames.c,
+       print_locs.c,print_ranges.c,print_reloc.c,print_reloc.h,
+       print_strings.c,strstrnocase.c,tag_attr.c,tag_common.c,
+       tag_tree.c,uri.c,
+       tag_attr_ext.list,tag_attr.list,tag_tree_ext.list,
+       tag_tree.list : Update copyright year.
+2012-11-15  CarlosAlbertoEnciso <carlos.alberto.enciso@gmail.com>
+     * addrmap.c: Consistent layout for if statements.
+     * checkutil.c: Incorrect string prefix for .text
+       linkonce section name,
+       is '.text.' for the applicable linke once sections, not
+       simply '.text'
+       Added print of internal (debugging dwarfdump) data not
+       previously printed.
+     * common.c: Consistent layout for if statements.
+       Include "config.h".
+       Minor layout change for #ifdef _DEBUG.
+       Add HAVE_STDAFX_H check.
+     * dwarfdump.1: Changes for new options: -E*, -h, -ls, -kE, plus
+       some minor typo corrections.
+     * dwarfdump.c: Consistent layout for if, for statements.
+       Expand -E option to print the full information for
+       the ELF header
+       (32-bit and 64-bit) to include additional fields (e_ehsize,
+       e_phentsize, e_phnum, e_shentsize, e_shnum, e_shstrndx). Also,
+       depending on the additional option to -E, the index, address,
+       size and name for sections is printed. The additional option
+       follow the convention used for -o option and can include any of
+       the letters: hliaprfoRstxd.
+       -Eh print information for the ELF header
+       -E{liaprfoRs} print information for debug related sections
+       -Ex print information for .text section
+       -Ed same as -E{liaprfoRstx}.
+       -E print the ELF header and the info for all available sections.
+       New option: -kE, the attribute encodings are checked
+       to see if they can use fewer bytes when encoded using LEB128.
+       Expand -l option to print line information with no offsets
+       values (-ls). Useful for comparisons.
+       Expand -S option to print number of occurrences for the
+       searched pattern (-Sv<search_options>.
+       Remove support for internally quoted strings.
+       Remove extra 'break' for case 'o' in 'process_args'.
+       Include the value zero for -# (internal debug level)
+       Fix layout for 'qsort_compare_compiler' and use compiler
+       name in the sort to get a stable sort.
+       Now that name strings are not qoted internally,
+       ensure that we do not expect such quotes in checking
+       compiler names.
+     * dwconf.c: Consistent layout for if statements.
+     * globals.h: Add externs and defines for the items
+       newly needed globally.
+     * naming.c: Consistent layout for if, for statements.
+     * print_aranges.c: Consistent layout for if statements.
+     * print_die.c: Consistent layout for if, for and switch statements.
+       Remove unused symbols 'seen_PU_base_address',
+       'seen_PU_high_address'.  Rename 'errno' to
+       'dwerrno' to avoid conflict with system symbol.
+       Missing DWARF_CHECK_COUNT and DWARF_CHECK_ERROR
+       when testing self references category.
+       Support for counting number of occurrences of the pattern being
+       searched (See -S option).
+       Add support for new option -kE; the attribute
+       encodings are checked to see if they can use
+       fewer bytes when encoded using LEB128. New
+       functions 'check_attributes_encoding',
+       'print_attributes_encoding'
+       and new data structure 'a_attr_encoding' were created.
+       Include DW_TAG_template_alias in the function
+       'get_attr_value' as it
+       refers to a type in the case of checks for type offsets.
+       Remove support for internally quoted strings.
+       Add space so DW_OP_bregx prints more readably.
+     * print_frames.c: Consistent layout for if statements.
+     * print_lines.c: Consistent layout for if statements.
+       Implement the ability to print line information
+       with no offset values (useful when comparisons are
+       required, as the pc values can change
+       but the basic line information remains the same).
+       Minor layout changes.
+     * print_locs.c: Consistent layout for if statements.
+     * print_ranges.c: Consistent layout for if and for statements.
+     * print_reloc.c: Consistent layout for if statements.
+       Move names for relocation types to individual
+       header files based on architecture (ARM, MIPS, PPC,
+       PPC64, X86_64).
+       Fix incorrect layout for 'set_relocation_table_names' function.
+       Use condition compilation symbols (DWARF_RELOC_MIPS,
+       DWARF_RELOC_PPC, DWARF_RELOC_PPC64, DWARF_RELOC_ARM,
+       DWARF_RELOC_X86_64)in the function
+       'set_relocation_table_names' to get relocation
+       table information.
+       Add support for X86_64 architecture.
+     * print_reloc.h: Move definitions for relocation types
+       to individual header files based on architecture
+       (ARM, MIPS, PPC, PPC64, X86_64).
+     * print_strings.c: Consistent layout for if statements.
+     * strstrnocase.c: Consistent layout for if and for statements.
+     * tag_attr.c: Consistent layout for if and for statements.
+     * tag_attr.list: Add some missing attributes and
+       the complete set for DW_TAG_rvalue_reference_type;
+       remove a duplicated DW_AT_name.
+     * tag_common.c: Consistent layout for if statements.
+     * tag_tree.c: Consistent layout for if and for statements.
+     * tag_tree.list: Missing DW_TAG_union_type to allow
+       verification of nested unions.
+     * uri.c: Consistent layout for if and for statements.
+2012-04-10  DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.c, common.c: Updated version string.

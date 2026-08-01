@@ -1,0 +1,105 @@
+2010-09-30  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c: Now -a no longer implies -c because
+        the -c option is not guaranteed to work by the DWARF spec,
+        nor is -c really necessary.
+      * README: More tweaks on the 'install' issue.
+2010-09-29  DavidAnderson <davea42@earthlink.net>
+      * README, Makefile.in: Amplified make install instructions.
+2010-09-20  DavidAnderson <da
+      * dwarfdump.1: The -c option is not guaranteed to work.
+        Because .debug_loc can have garbage bytes in areas
+        not referenced by .debug_info.
+2010-06-29  DavidAnderson <davea42@earthlink.net>
+      * print_die.c: If a location form is wrong report
+        an error but continue operating.
+      * dwarfdump.c: Implement print_error_and_continue().
+        Fix mistakes in usage message.
+      * globals.h: Declare print_error_and_continue().
+2010-04-04  DavidAnderson
+      * dwarfdump.c: New version date.
+      * configure:  regenerated.
+      * addrmap.c: Added a comment to mention that tdestroy is
+        GNU only, POSIX does not mention a way to delete the
+        tsearch tree.  Hence the code does #define USE_GNU 1
+        to expose the tdestroy function prototype.
+2010-04-03  DavidAnderson <davea42@earthlink.net>
+      * print_frames.h: Added new arguments to a function to get better
+        function names printing.
+      * configure.in: Added test for tsearch functions so dwarfdump
+        will still compile if they are not present.
+        See HAVE_TSEARCH macro.
+      * configure: regenerated.
+      * Makefile.in:  Now names object for addrmap.c
+      * addrmap.c: New file to map pc address to function names
+        so fde printing gets functions named properly (using tsearch).
+      * addrmap.h: New file to map pc address to function names
+        so fde printing gets functions named properly (using tsearch).
+      * print_lines.c: Correct the calculation of the number
+        of error checks.
+      * dwarfdump.c: Added fdes error check print.
+      * config.h.in: Now handles the HAVE_TSEARCH macro.
+      * globals.h: Added declarations for the fde error check
+        globals.
+      * print_frames.c: Now uses addrmap.h functions to do a
+        better job of printing function names in the frame output.
+2010-03-31  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.1: Added some text about 'harmless'
+        errors.
+      * dwarfdump.c: Change the size of the harmless error list
+        to 50. Change harmless error reporting to be associated
+        with -k flags.
+      * dwconf.c: Initialize uninitialized fields to satisfy
+        a compiler warning.
+      * globals.h: Declarations added for 'harmless' error
+        reporting.
+      * print_die.c: Added commentary.
+      * print_frames.cc: Change harmless error reporting to be
+        associated with -k flags.
+      * print_aranges.c: Now calls dwarf_get_arange_info_b()
+        allowing proper printing of DWARF4 segment-sensitive
+        aranges. Change harmless error reporting to be
+        associated with -k flags.
+2010-03-28  DavidAnderson <davea42@earthlink.net>
+      * dwarf_globals.h: Added interface to print_any_harmless_errors().
+      * dwarfdump.c: Added print_any_harmless_errors() implementation
+        and we call it just before closing libdwarf.
+      * print_frames.c: Call print_any_harmless_errors after
+        getting cie/fde list.
+      * dwarfdump.conf: Add abi named 'arm' for Arm users.
+      * print_die.c: Initialize a local string pointer to NULL at
+        the point of definition.
+2010-02-14  DavidAnderson <davea42@earthlink.net>
+      * print_die.c: Add newer DW_OP operators, remove
+        bogus test of DW_OP_nop as the highest valid operator.
+        Add table of DW_OPs to simplify testing for zero-operand
+        operators.
+        Revise so that the FORM of all attributes print with -M.
+        Move a local variable declaration to the front of a block
+        to match C 1990 rules.
+        String searches now also match on attribute name.
+      * tag_attr.list: Updated copyright.
+      * dwarfdump.c: Remove a switch  FALL THROUGH in the 'g' case.
+      * tag_tree_ext.list, tag_attr_ext.list: Added GNU template
+        parameter tags, attributes. Updated copyright.
+      * tag_tree.list: Added template parameter tags. Added
+        entry for nested classes. Updated copyright.
+      * tag_common.h: Increased STD_TAG_TABLE_COLUMNS and
+        EXT_ATTR_TABLE_COLS.
+2010-01-30  DavidAnderson <davea42@earthlink.net>
+      * print_die.c: Changed the spelling of one
+        'DW_AT_type offset does not point to type info' error message so
+        one can distinguish which check lead to the message.
+2010-01-26  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.1, dwconf.c, dwconf.h, dwarfdump.conf: The default
+        frame values in frame
+        output are now generic registers like r0 to r99
+        instead of MIPS register names.
+        For the MIPS register names use '-x abi=mips'.
+      * print_frames.c: Added commentary.
+2010-01-17  DavidAnderson <davea42@earthlink.net>
+      * print_die.c: The special case DW_AT_SUN_func_offsets
+        now prints identically in dwarfdump and dwarfdump2.
+2010-01-03  DavidAnderson <davea42@earthlink.net>
+      * tag_common.c, common.h, common.c: Remove <cr> line
+        terminator characters.  Update copyright year.
+      * All other files: Update copyright year.

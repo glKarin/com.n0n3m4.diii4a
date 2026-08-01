@@ -1,0 +1,261 @@
+2019-11-10 David Anderson
+     * configure.ac: Version 20191108.
+     * configure: Regenerated
+2019-11-06 David Anderson
+     * configure.ac: Version 20191106. separating
+       cxx_compiler flags from c_compiler_flags
+       as C does not understand -Wno-unused-private-field
+       and we have -Werror set at times.
+     * configure: Regenerated
+2019-11-05 David Anderson
+     * configure.ac: Version 20191104
+     * configure: Regenerated
+2019-11-04 David Anderson
+     * Makefile.am: Removed inproper SUBDIRS if clauses.
+     * Makefile.in: Regenerated.
+     * configure.ac: Removed dist-xz frm AM_INIT_AUTOMAKE
+       as we don't use it and MacOS command line tools
+       do not have xz.
+     * configure: Regenerated.
+2019-10-23 David Anderson
+     * CMakeLists.txt: Create a separate compile options
+       list DW_FWALLXX from C DW_FWALL.
+2019-10-22 David Anderson
+     * configure.ac:   Package Version 20191022.
+     * configure: regenerated.
+     * CMakeLists.txt: Package Version 20191022.
+       Revised the settings so PACKAGE_VERSION winds up
+       in string quotes in config.h.
+     * config.h.in.cmake: Revisions so PACKAGE_VERSION winds up
+       in string quotes in config.h.
+2019-10-21 David Anderson
+     * configure.ac : Added additional AC_CHECK_HEADERS.
+       Version 20191021
+     * config.h.in, configure: Regenerated
+2019-10-18 David Anderson
+     * CMakeLists.txt: Code the isBigEndian test correctly.
+     * config.h.in.cmake: Code the #cmakedefine for WORDS_BIGENDIAN
+2019-10-16 David Anderson
+     * configure.ac: The use of AC_C_BIGENDIAN was incorrect
+       and a revised use works properly so config.h
+       has WORDS_BIGENDIAN when it should.
+     * configure: regenerated.
+     * config.h.in: regenerated.
+2019-10-14 David Anderson
+     * CMakeLists.txt: Corrected the cmake version of
+       a couple tests so they work.
+     * configure.ac: Now version 20191014.
+     * configure: Regenerated.
+2019-10-02 David Anderson
+     * README.cmake: Updated and improved the comments
+       about ctest. ctest now tests that dwarfdump
+       and libdwarf basically work (as well as
+       testing internal interfaces).
+2019-10-02 David Anderson
+     * configure.ac: Now version 20191002
+     * configure: regenerated. Version 20191002
+2019-10-01 David Anderson
+     * configure.ac: Now version 20190929
+     * configure: regenerated. Version 20190929
+2019-09-19 David Anderson
+     * configure.ac: Now version 20190919
+     * configure: regenerated. Version 20190919
+2019-07-05 David Anderson
+     * dwarf_elf_load_headers.c(read_gs_section_group): The
+       check for an invalid gh_entsize of an SHT_GROUP
+       secion was done too late.
+       Now the check is before using the value (avoiding
+       a divide-by-zero error).
+2019-06-04 David Anderson
+     * CMakeLists.txt,config.h.in.cmake,configure.ac:
+       No longer reference inttypes.h or HAVE_INTTYPES_H
+       as we do not refer to anything in that C99 include file.
+     * configure: regenerated. Version 20190604
+2019-05-29  David Anderson
+    * CMakeLists.txt, configure.ac: Version 20190529
+    * configure: regenerated.
+2019-05-24  David Anderson
+    * CMakeLists.txt: Ensure there is a reasonable
+      definition of uintptr_t even if stdint.h missing.
+    * Makefile.am:Add config.h.in.cmake to the list
+      of files.
+    * Makefile.in:Regenerate
+    * config.h.in: Add HAVE_INTPTR_T and intptr_t.
+    * config.h.in.cmake: Add the 1 to several HAV_*
+      config variables that lacked it.
+    * Add PACKAGE_NAME etc via cmakedefine.
+    * configure.ac: Add AC_TYPE_INTPTR_T, add comments
+      about the *INTPTR_T stuff.
+    * configure: Regenerated.
+    * scripts/buildandreleasetest.sh. Add --nodwarfgen
+      option to enable building with no stdint.h
+      (c++ finds the #define of uintptr_t useless).
+2019-05-22  David Anderson
+    * CMakeLists.txt: check_include_file( "sys/elf_386.h"
+      and check_include_file( "stdint.h" both had badly
+      spelled (erronous) target variables.
+2019-05-21  David Anderson
+    * CmakeLlists.txt: The generator expression was unnecessary
+      and is no longer used, instead a simple list variable
+      is named DW_FWALL.
+2019-05-20  David Anderson
+    * CmakeLlists.txt: Now generates config.h at top binary level.
+    * config.h.in.cmake: New, now the only config.h.in present
+2019-05-20  David Anderson
+    * CmakeLists.txt: The checks for elf64_getehdr and
+      elf64_getshdr were written incorrectly.
+      The library options changed to be consistent
+      with standard practice:
+      nonshared->BUILD_NON_SHARED
+      shared->BUILD_SHARED
+      wall->WALL (and the option generator expression corrected)
+      nonstandardprintf->HAVE_NONSTANDARD_PRINTF_64_FORMAT
+      HAVE_CUSTOM_LIBELF (new, not of general interest)
+      dodwarfexample->BUILD_DWARFEXAMPLE
+      dodwarfgen->BUILD_DWARFGEN
+      test->DO_TESTING
+      Version 20190520
+    * README.cmake: updated to match the new option names,
+    * appveyor.yml: Updated to match cmake new option names.
+    * config.h.in: Adding HAVE_CUSTOM_LIBELF line.
+    * configure.ac: Typo correction and addition of
+      --enable-havecustomlibelf
+      Version 20190520
+    * scripts/buildandreleasetest.sh. Now reflects
+      the new cmake option names, such as dodwarfgen=ON
+      becoming DWARFGEN=ON.
+2019-05-13  David Anderson
+    * CmakeLists.txt: Now -Dwall=ON adds -Werror
+      and reports the warning/error options.
+    * configure.ac: Now version 20190513. --enable-wall
+      now adds -Werror so warnings are considered errors
+      by gcc.
+    * configure: regenerated.
+    * scripts/buildandreleasetest.sh: Now does a
+      full compile with WORDS_BIGENDIAN forced on.
+      Since most testing is little-endian this forces
+      a compile testing that the code
+      actually builds with WORDS_BIGENDIAN 1.
+2019-05-07  David Anderson
+    * CMakeLists.txt: Added comment on how the find_package()
+      command works. See cmake documentation.
+    * cmake/FindLibElf.cmake: Added comment mentioning how
+      and where this is referenced.
+2019-05-07  David Anderson
+    * CMakeLists.txt: Added CXX to the project languages
+      so dwarfgen will build with cmake. Version 20190507.
+    * Makefile.am: Removed a file name: not needed.
+    * configure: regenerated
+    * configure.ac: Version 20190507
+2019-05-05  David Anderson
+    * Makefile.am, dwarfdump/Makefile.am, dwarfexample/Makefile.am,
+      dwarfgen/Makefile.am: cmake and configure
+      needed to agree on the list of files. Specifically
+      configure.ac etc lists just cmake files that
+      exist so it can generate a complete
+      release, while CmakeLists.txt etc will not currently
+      generate a complete release.  Regenerated configure.in.
+2019-05-05  David Anderson
+    * configure.ac,configure.cmake: Version 20190505
+    * configure: regenerated
+2019-05-02  David Anderson
+    * scripts/buildstandardsource.sh: cmake has serious trouble
+      with semicolons so now this copies the base
+      libdwarf.h.in to generated_libdwarf.in while changing
+      struct Elf to struct _Elf. cmake can do a simple copy.
+    * configure.cmake: Now just copies the right file with
+      Elf or _Elf to libdwarf.h.
+    * scripts/buildstandardsource.sh: Now creates
+      generated_libdwarf.h.in from libdwarf.h.in.
+      using sed. Run by developer, not library users.
+    * scripts/fixlibdwarfelf.sh Now just copies the
+      right file with Elf or _Elf to libdwarf.h
+      (used by configure, not cmake).
+2019-05-02  David Anderson
+    * Makefile.in: regenerated.
+2019-05-01  David Anderson
+    * CMakeLists.txt: Sets language C
+    * cmake/AutoconfHelper.cmake: deleted, nothing here
+      used any more.
+    * cmake/FindLibElf.cmake: Now does C source test, not c++.
+    * configure.cmake: moved the cmake macro includes to
+      the first lines in the file.  Added a JUST_LIBELF
+      variable to correctly test for off64_t
+      Does checking/setting for essentially all the needed HAVE_
+      etc variables.
+
+2019-05-01  David Anderson
+    * README.cmake: Made more complete.
+    * configure.cmake: Even more setup here.
+2019-05-01  David Anderson
+    * CMakeLists.txt: Corrected a mistake in reporting install
+      prefix.
+    * cmake/AutoconfHelper.cmake: Removed unused functions,
+      and for some functions changed to native cmake
+      in configure.cmake.
+    * configure.cmake: Now does a lot more setup here and
+      using cmake (replacing some autoconf-like functions)
+      And this now sets many things for each build directory,
+      reducing the size of */configure.cmake files.
+2019-04-30  David Anderson
+    * README.cmake: New, describes use of cmake.
+    * cmake/LibdwarfMacros.cmake: Added a final newline
+      charcter as such is expected.
+    * configure.cmake: Added testing lines.
+2019-04-26  David Anderson
+    * README.cmake. New. Describes cmake use and options.
+    * CMakeLists.txt,cmake/FindLibElf.cmake,configure.cmake:
+      Revised to be closer to configure as to what
+      it does.
+2019-04-25  David Anderson
+    * configure.ac: Version 20190425. Updated
+      to recognize recent changes. And some
+      #include/define updates for Windows.
+2019-04-22  David Anderson
+    * configure.ac: Version 20190422. Now tests for
+      stdint.h and inttypes.h. Uses AC_TYPE_UINTPTR_T
+      so we can avoid a lot of warnings in 32bit and
+      mingw builds.
+2019-04-21  David Anderson
+    * configure.ac: Version 20190421. Now --enable-nonstandardprintf
+      (build with some non-standard printf formats allowed)
+      adds -Wno-pedantic-ms-format so gcc will not warn
+      about the non-standard formats. Only affects mingw.
+      Otherwise the -Wno-pedantic-ms-format option
+      (which nothing but mingw has) gets dropped.
+2019-04-19  David Anderson
+    * NEWS: Now --disable-libelf just disables linking
+      with libelf.  Elf files are read (libdwarf) and
+      printf(dwarfdump). As always. The Elf reader detects
+      corrupted Elf early on.
+2019-02-24  David Anderson
+    * configure.ac. Version 20190223. With --disable-libelf
+      most header checking is unnecessary and suppressed.
+      All the checks for int32 and the like removed
+      as we no longer use such types.
+2019-02-18  David Anderson
+    * configure.ac: One can build forcing a non-elf build with
+      --disable-libelf . If libelf is missing or will not compile
+      the disable is automatic.  Now zlib is separated so
+      -lz is added to the link line with or without libelf.
+      Version is 20190217
+    * configure.cmake: Now always defines DWARF_WITH_LIBELF
+      so cmake builds continue to work as always.
+2019-02-07  David Anderson
+    * configure.ac. Version 20190201. Now allows lack of
+      elf.h libelf.h and if those and zlib.h missing
+      then the link line shows neither -lelf nor -lz
+      (libdwarf and dwarfdump will then support PE
+      and mach-o objects but not elf)
+2019-01-15  David Anderson
+    * configure.ac: Version 20190112
+2019-01-10  David Anderson
+    * configure.ac: Version 20190110
+2019-01-09  David Anderson
+    * configure.ac: Version 20190108
+2019-01-05  David Anderson
+    * configure.ac: Version 20190104
+2019-01-02  David Anderson
+    * ChangeLog: renamed ChangeLog2018
+    * configure.ac: Version 20190102
+    * Makefile.am: Now includes the tsearch files in the dist.

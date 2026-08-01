@@ -1,0 +1,13 @@
+CU header length..........0x60
+Version stamp.............2
+Address size .............8
+Offset size...............4
+Next cu header offset.....0x64
+  0:  Die: DW_TAG_compile_unit
+  [ 0] Attr: DW_AT_producer   Form: DW_FORM_strp    GNU C17 9.3.0 -mtune=generic -march=x86-64 -gdwarf-2 -O0 -fasynchronous-unwind-tables -fstack-protector-strong -fstack-clash-protection -fcf-protection
+  [ 1] Attr: DW_AT_language   Form: DW_FORM_data1
+  [ 2] Attr: DW_AT_name       Form: DW_FORM_string  t.c
+  [ 3] Attr: DW_AT_comp_dir   Form: DW_FORM_strp    GNU C17 9.3.0 -mtune=generic -march=x86-64 -gdwarf-2 -O0 -fasynchronous-unwind-tables -fstack-protector-strong -fstack-clash-protection -fcf-protection
+  [ 4] Attr: DW_AT_low_pc     Form: DW_FORM_addr
+  [ 5] Attr: DW_AT_high_pc    Form: DW_FORM_addr
+  [ 6] Attr: DW_AT_stmt_list  Form: DW_FORM_data4

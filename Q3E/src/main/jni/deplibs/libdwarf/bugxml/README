@@ -1,0 +1,32 @@
+
+The files here are for maintaining a list of bugs
+fixed so html and xml can be posted to prevanders.net
+and CVE (see cert.org) issues can reference a public
+database.
+
+This is intended mainly for bugs  that can result in
+application crashes as such can represent a vulnerability
+that can be exploited.
+Bugs that result simply in errors in output (but no crash)
+will typically not be mentioned.
+
+Bugs in dwarfdump are not vulnerabilities in the same way
+and at present these do not get CVE identifiers.
+
+
+To update the report with a new bug prepend
+a copy of data.template to data.txt.
+Then enter the data available for the new bug.
+
+To update the local web page to check it
+go to /home/davea/web4/gweb and do
+  sh dwarfbugupdate.sh
+which will use ./readbugs.py here to  update the
+relevant web pages.
+
+Carefully follow the existing formats, the  parser
+is very very simple.
+
+David Anderson
+Created: 2016-05-03.
+Updated: 2017-07-06.

@@ -1,0 +1,45 @@
+The following binary test cases are included in the dwarfdump
+distribution to provide an unchanging means of verifying that
+dwarfdump basically works.  November 5, 2019.
+
+ Each .base is  the inital 500 lines produced by dwarfdump
+ as a baseline to check against the latest compiled dwarfdump
+ output.
+
+
+testobjLE32PE.test.c was compiled to an executable on a
+Windows 8.1 system with MinGW using a gcc compiler (called
+just test.c at the time of the compilation).
+
+testobjLE32PE.test.c
+testobjLE32PE.base
+testobjLE32PE.exe
+
+testuriLE64ELf is a compilation of dwarfdump/uri.c and is
+a plain .o, a relocatable (renamed .obj to avoid a reader
+confusing this with build-time .o objects).
+The testuriLE64ELfsource .c is the c used to compile
+the obj, but we cannot name it testuriLE64ELf.c  as doing so
+will let the test framework *rebuild* the .obj
+if the .testme is older than the source,
+and that is a (slightly surprising) disaster, it results in failure.
+So we prevent it rebuilding with odd naming.
+
+testuriLE64ELf.base
+testuriLE64ELfsource.c
+testuriLE64ELf.testme
+
+test-mach-o-32 is a little-endian compilation to an executable
+of dwarfexample/simplereader.c on a 32bit Apple system using
+Apple compilers.  The DWARF is in the .dSYM as is normal
+for Apple and the executable is not present here: There is
+no executable code here.  Notice the __TEXT and __DATA and
+__PAGEZERO sections are empty (zero length).
+
+test-mach-o-32.base
+test-mach-o-32.dSYM
+
+The readelfobj project on sourceforge.net
+can build executables for all three object
+formats: readelfobj readobjpe readobjmacho
+which will show the  object file headers.

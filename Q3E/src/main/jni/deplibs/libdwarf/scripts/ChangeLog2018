@@ -1,0 +1,21 @@
+2018-09-21 David Anderson
+    * buildandreleasetest.sh: Now uses the 2nd-generation
+      release as source and does a cmake to verify cmake
+      works. The new test lines added at the end (about line
+      129) but /tmp/cmakebld directory setup occurs early
+      in this script.
+2018-08-02 David Anderson
+    * FIX-CONFIGURE-TIMES: Added another cautionary
+      check before doing anything.
+2018-08-01 David Anderson
+    * FIX-CONFIGURE-TIMES: Was not cautious enough about
+      whether it was in the right place and also was fussy
+      about the top-level name being 'code'.
+      Both issues fixed.
+2018-07-16 David Anderson
+    * CLEANUP: Now uses distclean so  deleted a few lines here.
+    * fixlibdwarfelf.sh: Used by configure to create libdwarf.h
+      from libdwarf.h.in
+    * generatedcasetext.c: A utility used to generate a ctype-like
+      table for converting to uri-style.  The table exists
+      in dwarfdump so this C file likely will not be used again.

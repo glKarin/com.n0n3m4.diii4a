@@ -1,0 +1,29 @@
+2020-11-24 David Anderson
+    * buildandreleasetest.sh: Now does additional cmake builds
+      to verify -DDWARF_WITH_LIBELF=OFF and -DBUILD_SHARED=ON
+      work.
+2020-10-21 David Anderson
+    * run-all-tests.sh: getting directory right
+      for modified regressiontests configre.
+2020-10-21 David Anderson
+    * buildandreleasetest.sh: Now uses temp files under
+      /tmp/bart and if all passes removes that directory
+      to clean up.
+2020-10-20 David Anderson
+    * ddbuild.sh: Changes to sanitized.c meant a bit
+      of changing for tag_tree etc.
+    * buildandreleasetest.sh: A major revision.
+      Directory naming used in /tmp is now easier to
+      follow, and using a couple script functions
+      eliminated many busywork lines.
+2020-02-25 David Anderson
+    * run-all-tests.sh: Added echo statments to make
+      it clearer were we are in the run.
+2020-02-16 David Anderson
+    * FIX-CONFIGURE-TIMES: alter the startup message so
+      anyone seeing it will understand it is the code (libdwarf etc)
+      fix script.
+2020-01-14 David Anderson
+    * buildandreleasetest.sh: The script element that finds
+      the version in configure.ac
+      now also allows for 202xmmdd versions, not just 201xmmdd

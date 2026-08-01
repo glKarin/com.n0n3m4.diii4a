@@ -1,0 +1,578 @@
+2018-12-24 David Anderson
+    * dwarfdump.1: Clarifying the effect of any - or -- option
+      on the output of dwarfdump.
+2018-12-21 David Anderson
+    * command_options.c: Reformat a few lines of the usage text
+      so it all prints in around 70 characters without overlap.
+2018-12-20 David Anderson
+    * dwarfdump.1: Clarifying: the abi=ppc etc options
+      are only made use of if -a, -F, or -f (or the long
+      versions of these) are used.
+2018-12-20 David Anderson
+    * dwarfdump.c,dwconf_using_functions.h,esb_using_functions.h:
+      Removing trailing whitespace,empty last lines.
+2018-12-20 David Anderson
+    * globals.h: Removed include of <stdarg.h>
+    * esb.c: Now includes <stdarg.h>
+2018-12-20 David Anderson
+    * print_frames.c: Now properly deals with endian mismatch
+      in printing frame instruction details and avoids
+      requiring we have a precise definiion of type lengths.
+    * CMakeLists.txt,Makefile.am: Adding memcpy_swap.h. New header.
+2018-12-19 David Anderson
+    * CMakeLists.txt: Now has dwconf_using_functions.h and
+      esb_using_functions.h listed so cmake works.
+    * Makefile.am: Added new header dwconf_using_functions.h
+    * dwarfdump.c: Includes new header.
+    * globals.h: Remove dwconf_s forward decl, remove
+      dwconf-using functions.
+    * dwconf_using_functions.h: New, has the function
+      declarations removed from globals.h
+    * print_abbrevs.c,print_aranges.c, print_dnames.c,
+      print_lines.c,print_locs.c,print_macro.c,
+      print_macros.c,print_pubnames.c,print_section_groups.c,
+      print_sections.c,print_static_funcs.c,
+      print_static_vars.c,print_str_offsets.c,
+      print_strings.c,print_types.c,print_weaknames.c:
+      Removed include of "dwconf.h"
+    * print_frames.c: Includes new header dwconf_using_functions.h.
+2018-12-19 David Anderson
+    * Makefile.am: Added new header esb_using_functions.h
+      with content extracted from globals.h.
+    * globals.h: Remove forward decl of esb_s
+      and remove functions using that to esb_using_functions.h
+    * dwarfdump.c,print_abbrevs.c,print_aranges.c,
+      print_debugfission.c,print_die.c,print_dnames.c,
+      print_frames.c,print_gdbindex.c,print_lines.c,
+      print_locs.c,print_macro.c,print_macros.c,print_pubnames.c,
+      print_ranges.c,print_static_funcs.c,print_static_vars.c,
+      print_str_offsets.c,print_strings.c,print_types.c,
+      print_weaknames.c,print_true_section_name.c: Include
+      esb_using_functions.h
+2018-12-19 David Anderson
+    * globals.h: Removed an include of section_bitmaps.h
+      and duplicate lines about UNUSEDARG.
+    * command_options.c: Now includes section_bitmaps.h.
+    * section_bitmaps.c: Now includes section_bitmaps.h.
+2018-12-19 David Anderson
+    * dwarfdump.c: Moved elf-header printing to print_reloc.c
+      (print_object_header()).
+      Removed elf argument from print_object_header().
+    * globals.h: Removed elf argument from print_object_header().
+    * print_reloc.c: Now all the elf header/sym/reloc
+      printing is in this one file.
+2018-12-19 David Anderson
+    * dwarfdump.c: Now uses the new libdwarf function
+      dwarf_errmsg_by_number() so we get more specific
+      messages about problems when all we have is an errorcode.
+2018-12-07 David Anderson
+    * dwarfdump.1: -E missed its long-form (--elf)
+      and -h (--help) was improperly documented.
+2018-11-26 David Anderson
+    * dwarfdump.c: Now dumps DWARF from PE objects.
+2018-11-01 David Anderson
+    * strstrnocase.c had include <globals.h>
+      which is now  "globals.h" as it was always
+      supposed to be.
+2018-10-30 David Anderson
+    * dwarfdump.1: Now shows long and short options.
+      For a few options it references the help file.
+    * command_options.c: The available help options
+      are now -h and --help, and both report
+      the new options list with both short and long
+      options shown.
+2018-10-26 David Anderson
+    * dwarfdump.c: A single instance of a malloc
+      in main() had no associated free().
+      Memory Leak of a couple hundred bytes
+      exactly once per run of dwarfdump.  Now we free().
+2018-10-19 David Anderson
+    * command_options.c,glflags.c,glflags.h: New option
+      --file-use-no-libelf, function arg_file_use_no_libelf(),
+      glflags.gf_file_use_no_libelf now exist.
+    * dwarfdump.c: process_one_file() and main()
+      are refactored to allow additional object files.
+2018-09-29 David Anderson
+    * command_options.c: Fixed indent issues.
+2018-09-26 Carlos Alberto Enciso
+    * command_options.c: At this point, the regression test pass,
+      with the exception of 2 test cases, that verify the output
+      from the '-h' option,
+      which fails due to missing options in the usage data.
+2018-09-25 Carlos Alberto Enciso
+    * command_options.c: Add support for long name options that expect
+      an argument by using the same code from the short options.
+2018-09-25 Carlos Alberto Enciso
+    * command_options.c: Add -he and --help-extended to display
+      usage for
+      the long name options.
+2018-09-24 Carlos Alberto Enciso
+    * command_options.c: Add support for long name options.
+2018-09-24 Carlos Alberto Enciso
+    * command_options.c: Add missing descriptions in the
+      usage message for
+      -q, -U, -x line5 and -x noprintsettinggroups.
+2018-09-24 Carlos Alberto Enciso
+    * command_options.c: Add missing descriptions in the
+      usage message for
+      -EI, -Em and -kw.
+2018-09-20 Carlos Alberto Enciso
+    * command_options.c: Move the code associated with each
+      sub-option, to an individual function. Preliminary work for
+      the implementation of long name options.
+2018-09-19 Carlos Alberto Enciso
+    * command_options.c: Move the code associated with each
+      option, to an individual function. Preliminary work for
+      the implementation of long name options.
+    * glflags.h, glflags.c: New field to record the full program
+      name. It is used by the '-V' option.
+2018-09-21  David Anderson
+    * Makefile.am: Ensured cmake files get into distributions.
+      and the CODINGSTYLE text too.
+2018-09-12  David Anderson
+    * esb.c: Corrected the use of HAVE_NONSTANDARD_PRINTF_64_FORMAT.
+2018-09-11 David Anderson & Carlos Alberto Enciso
+    * dwconf.c: Fixed typo in a comment.
+    * dwarf_tsearchbal.c: int->size_t three places.
+      A couple too-long lines indented. Matches
+      tsearch directory version now.
+    * esb.c: The test for _WIN32 in looking
+      at printf formats  also allows
+      config.h define HAVE_NONSTANDARD_PRINTF_64_FORMAT.
+2018-09-11 David Anderson & Carlos Alberto Enciso
+    * dwarfdump.c: Simplify the WIN32 code redirecting
+      stderr to stdout as earlier workarounds no longer needed.
+      Printing of parts of an Elf32 header had the wrong
+      printf format-- fixed.
+    * print_die.c: An implicit fallthrough to case DW_AT_LOCATION
+      about line 2943 generates a warning with --enable-wall
+      so added a comment to make it clear to readers
+      this is intended.
+2018-09-02 David Anderson
+    * Makefile.am: Changed the way to build tag_tree and tag_attr
+      executables to the automake way, eliminating make warnings
+      when building.
+    * Makefile.in: regenerated.
+2018-08-23 David Anderson
+    * CMakeLists.txt: Adjusted to fit new/changed file names.
+2018-08-21 David Anderson
+    * Makefile.am: Now honors --enable-wall
+    * print_die.c,print_ranges.c,print_strings.c: Removed
+      unused variables.
+    * print_dnames.c: Removed unused variables and fixed the section-name
+      print (.debug_str-> .debug_names).
+2018-08-14 David Anderson
+    * Makefile.am: CPPFLAGS_FOR_BUILD a few places it
+      was accidentally omitted.
+2018-08-09 David Anderson
+    * Makefile.am: Added AM_TESTS_ENVIRONMENT enabling
+      make check from any build directory. Also,add
+      getopttest.c and testesb.c to the files in a release
+      so make check can work
+    * runtests.sh: Handle the environment variable
+      AM_TESTS_ENVIRONMENT sets: DWTOPSRCDIR
+2018-08-08 David Anderson
+    * Makefile.am: corrected dwarfdump_DATA
+      reference to be dwarfdumpdev_DATA
+2018-08-07 David Anderson
+    * dwconf.c: Removed trailing whitespace.
+    * globals.h: Added DWARF_SECNAME_BUFFER_SIZE define
+      (space for a small string) so if it need change
+      there is just one place to change it. Used in many
+      files with esb_constructor_fixed()..
+    * print_abbrevs.c,print_die.c,print_locs.c,print_strings.c:
+      Refactored the section name printing
+      into a function and call after calling libdwarf
+      so the interesting section compression info
+      is available to print.
+    * print_aranges.c,print_pubnames.c, print_ranges.c,
+      print_static_funcs.c,print_static_vars.c,print_weaknames.c:
+      Moved a libdwarf call above the
+      section name print
+      so the interesting section compression info
+      is available to print.
+    * print_dnames.c,print_frames.c: Removed trailing whitespace, use
+      DWARF_SECNAME_BUFFER_SIZE.
+    * print_gdbindex.c,print_lines.c,print_macro.c,
+      print_macros.c,print_str_offsets.c:
+      Use  DWARF_SECNAME_BUFFER_SIZE .
+    * true_section_name.c: Now prints compression values.
+2018-08-06 David Anderson
+    * globals.h: Added  DWARF_SECNAME_BUFFER_SIZE
+      for the esb preallocation of section names.
+    * print_abbrevs.c,print_aranges.c,print_debugfission.c,
+      print_die.c,print_dnames.c,print_frames.c,
+      print_gdbindex.c,print_lines.c,print_locs.c,print_macro.c,
+      print_macros.c,print_pubnames.c,print_ranges.c,
+      print_static_funcs.c,print_static_vars.c,print_str_offsets.c,
+      print_strings.c,print_types.c,print_weaknames.c:
+      Now uses DWARF_SECNAME_BUFFER_SIZE instead of plain 40.
+    * print_die.c: In print_ranges_list_to_extra() we do not want
+      the section name to have the compressed-notes appear.
+    * print_lines.c: In print_line_numbers_this_cu() we do not want
+      the section name to have the compressed-notes appear.
+    * print_ranges.c: In check_ranges_list() we do not want
+      the section name to have the compressed-notes appear.
+    * true_section_name.c: Added a pointer argument to
+      get_true_section_name() so it returns three distinct
+      compression flags. one for .zdebug*, one for SHF_COMPRESSED,
+      and one for a ZLIB initial byte group in the section.
+2018-08-05 David Anderson
+    * Makefile.am: Fixed dwarfdump_CFLAGS to set
+      CONFPREFIX
+    * command_options.c Fixed config_file_defaults[]
+      to honor CONFPREFIX sensibly.
+    * globals.h: Declares get_true_section_name(),
+      a new function/refactoring so section names print more
+      usefully.
+    * true_section_name.c: New. Implements get_true_section_name().
+    * print_abbrevs.c, print_aranges.c, print_debugfission.c,
+      print_die.c, print_dnames.c, print_frames.c, print_gdbindex.c,
+      print_lines.c, print_locs.c, print_macro.c, print_macros.c,
+      print_pubnames.c, print_ranges.c, print_static_funcs.c,
+      print_static_vars.c, print_str_offsets.c, print_strings.c,
+      print_types.c, print_weaknames.c.
+2018-08-02 David Anderson
+    * Makefile.am: Removed unused variables and references
+      to them.
+    * Makefile.in: Regenerated (usually won't mention this).
+2018-07-31 David Anderson
+    * command_options.c: New option --print-debug-names.
+    * print_dnames.c: Giving print_debug_names() some
+      content.
+2018-07-30 David Anderson
+    * command_options.c: For abbreviation checking also try running
+      print_abbrevs() with its checks.
+    * print_abbrevs.c: If checking turn off normal printing, just
+      print checking issues.
+2018-07-30 David Anderson
+    * tag_attr.list,tag_attr_ext.list,tag_common.h,tag_tree.list,
+      tag_tree_ext.list: Some important relationships needed to be
+      added to avoid -ka warnings about normal DWARF.
+      And the table sizes are just a tiny bit bigger.
+2018-07-13 David Anderson
+    * Makefile.am: Add dwarfdump.1 to output. Move
+      COPYRIGHT and a few files out of the installed set,
+      leaving just dwarfdump.1, and libdwarf*pdf in
+      /usr/local/share.
+    * command_options.c: Removed duplicate extern declaration
+      of dwoptind.
+2018-07-16 David Anderson
+    * dwarf_tsearch.h: Corrected web-reference links in
+      the comments.
+    * uritableblebuild.c: Changed some commentary to have
+      shorter line lengths. Added comment explaining
+      how the source was used in creating uri.c .
+    * common.c: Refines the ifdef HAVE_STDAFX_H.
+    * dwarf_tsearch.h: Remove obsolete link in comment and
+      substitute a valid link.
+    * dwarf_tsearchbal.c: Remove include of dwarf_incl.h and
+      use config.h to set UNUSEDARG as appropriate.
+    * dwconf.c,globals.h: Refines the ifdef HAVE_STDAFX_H.
+    * uritablebuild.c: Reformat initial comments to fit
+      on shorter lines.
+2018-07-16 David Anderson
+    * Makefile.am: New, used by autotools to create configure.
+    * configure.ac, Makefile.in, config.h.in: Deleted.
+2018-06-21 David Anderson
+    * esb.c: For _WIN32 a closing } was missing
+      int two places. Fixed.
+2018-06-19 David Anderson
+    * common.c: Added missing ; for Windows code
+    * dwconf.c: ifdef _WIN32, not a HAVE* name.
+      Spell include windows.h not Windows.h for maximum
+      compatibility.
+2018-06-13 David Anderson
+    * Remove mention of HAVE_NONSTANDARD_PRINTF.
+2018-06-13 David Anderson
+    * configure.ac: New option --enable-elf-open
+      setting HAVE_ELF_OPEN
+    * config.h.in: HAVE_ELF_OPEN
+    * configure.ac: Regenerated.
+    * dwarfdump.c: Now uses open() unless HAVE_ELF_OPEN
+      is explicitly set.
+2018-06-10 David Anderson
+    * checkutil.c: Fixed indentation mistake.
+    * common.c: Removed trailing blank.
+2018-06-10 David Anderson
+    * checkutil.c: snprintf-> esb
+    * common.c: snprint -> printf
+    * dwarf_tsearchbal.c: snprintf -> sprintf, it is safe.
+    * naming.c: snprintf-> esb.
+    * print_die.c: Trimmed the size of a buffer in a safe
+      sprintf use.
+    * esb.c: Modified to remove an implementation-defined
+      conversion issue.
+2018-06-10 David Anderson
+    * esb.c: Added checks so passing %s to _d or _u gets
+      a useful output (an ESBERR string).
+    * print_abbrevs.c,print_die.c,print_lines.c: Converted
+      all sprintf to the new esb_append_printf_s,i,u.
+2018-06-09 David Anderson
+    * esb.c: Fixed an issue printing the most-negative integer.
+    * print_die.c: Now all the relevant places avoid s[n]printf.
+2018-06-09 David Anderson
+    * esb.c, testesb.c: These now support and test %+d.
+    * print_die.c: Used esb_constructor_fixed() and
+      esb_append_printf_s,_i,_u(), replacing
+      many s[n]printf.
+2018-06-08 David Anderson
+    * Makefile.in: Altered the esb testing lines.
+    * testesb.c: Now this is the esb test code.
+    * esb.c: Removed test code, moved to testesb.c.
+      Added esb_append_printf_s(), esb_append_printf_i() and
+      esb_append_printf_u() to get faster formatting without
+      any varargs.
+2018-06-07 David Anderson
+    * print_frames.c: Vincent T. noticed unnecessary and/or
+      incorrect casts, here fixed. Also fixed some too-long
+      lines -- changed the existing line break to a better place.
+2018-06-05 David Anderson
+    * dwarfdump.c: Remove erroneous _MSC_VER
+      per Carlos Alberto Enciso.
+      Change WIN32 to _WIN32.
+2018-05-26 David Anderson
+    * common.c,dwarfdump.c,tag_attr.c,tag_tree.c:
+      Remove DW_VERSION_DATE_STR
+      and #include ../libdwarf/libdwarf_version.h to provide it.
+2018-05-26 David Anderson
+    * dwarfdump.c,tag_attr.c,tag_tree.c, common.c:
+      Update version string
+2018-05-23 David Anderson
+    * esb.c, esb.h: Added esb_constructor_fixed()
+      and new fields in esb_s to support use of
+      a static buffer so normally no malloc needed
+      when using the esb.
+    * print_frames.c: Changed, where appropriate,
+      to use esb_constructor_fixed.
+    * dwarfdump/sanitized.c: The static initializer
+      of all zero needed update for the new esb_s
+      declaration.
+2018-05-22 David Anderson
+    * glflags.h, glflags.c: set_checks_off(void) needed
+      the (void) as argument to be a C90 prototype.
+2018-05-22 David Anderson
+    * esb.c: Changed INITIAL_ALLOC to 100 as experiments
+      show that a length in a range near 100 gives
+      the best runtimes, by 10-20% user time.
+2018-05-22 David Anderson
+    * glflags.c: Removed the c99 'for (int i=0;'
+      and declare the 'i' separately.
+2018-05-20 David Anderson
+    * dwarfdump.c: Change strcpy to safe_strcpy. Comment a safe sprintf
+      call.
+    * glflags.c: Change strcpy to safe_strcpy and fix indents.
+    * dwconf.c: Change strcpy to safe_strcpy.
+    * print_frames.c: Change snprintf to esb_append.
+      Change the name of a local pointer to make it clearer
+      it is not the same as other similar local variables.
+      Use esb instead of char *,
+      Change strcpy to safe_strcpy (and eliminate strcat).
+    * print_gdbindex.c: Reinserted return statement that
+      was accidentally dropped.
+    * print_lines.c,print_macros.c: Remove trailing whitespace.
+    * print_ranges.c: Remove trailing whitespace.
+    * tag_attr.c: Remove unused 'len' local variable, 3 places.
+2018-05-19 David Anderson
+    * print_die.c,print_lines.c,print_macros.c,print_gdbindex.c,
+      print_pubnames.c,print_ranges.c: Replace snprintf with esb_append_printf.
+    * sanitized.c: Deleted a function call and snprintf with
+      simple esb_append_printf.
+2018-05-17 David Anderson
+    * Makefile.in: Adding esb.c to build time of tag_tree_build
+      and tag_attr_build. See besb.o
+    * config.h.in: #undef for HAVE_VSNPRINTF and HAVE_SNPRINTF
+    * configure: regenerated
+    * configure.ac: Added AC_CHECK_FUNCS(snprintf),
+      AC_CHECK_FUNCS(vsnprintf)
+    * esb.c: Removed static buffers. No longer needed.
+      Allocated extra byte in esb_force_allocation()
+      and in calls to esb_allocate_more.
+      Checks HAVE_VSNPRINTF. Added extra checks
+      of esb_append_printf().
+      Moved one static function up in the source
+      to eliminate an explicit prototype.
+    * esb.h: Added comments documenting esb_s field use.
+    * print_die.c,print_reloc.c,tag_attr.c,
+      tag_tree.c,uri.c: Removed snprintf,sprintf. Using esb_append_printf.
+    * makename.c: Removed noise from selftest, just print pass/fail.
+2018-05-16 David Anderson
+    * dwarfdump.c,esb.c,esb.h,globals.h: Removed of C99
+      vsnprintf and completely removed esb_printf_append_ap()
+      from esb.
+2018-05-15 David Anderson
+    * tmp-tt-table.c,tmp-ta-table.c,tmp-ta-ext-table.c,
+      tmp-tt-ext-table.c: All endings changed from .c to .h
+      as these are all used via #include.
+    * Makefile.in: Reflect the .c->.h change for these files.
+    * checkutil.c,dwarf_tsearch.h,dwarf_tsearchbal.c,
+      glflags.c,naming.c,naming.h,print_debugfission.c,
+      print_die.c,print_frames.c,print_gdbindex.c,print_macros.c,
+      print_pubnames.c,print_reloc.h,print_sections.c,
+      print_static_vars.c,uri.c,uritablebuild.c:
+      Removed trailing blank lines.
+2018-05-15 David Anderson
+    * command_options.c: Removed an extra break on option -ER
+      that was an accident. It's been broken for quite a long time.
+      section_map[DW_HDR_DEBUG_RNGLISTS]=TRUE, applicable
+      to DWARF5, was getting ignored due to the mistake.
+      This has to do with printing section header information.
+2018-05-14 David Anderson
+    * command_options.c,compiler_info.c,print_frames.c: Fix
+      indents, remove trailing whitespace.
+2018-05-14 David Anderson
+    * dwarfdump.c,tag_attr.c,tag_tree.c, common.c:
+      Update version string
+2018-05-14 David Anderson
+    * print_frames.c: Validate augmentation bytes from
+      eh_frame to catch bogus augmentation length.
+2018-05-14 David Anderson
+    * dwarfdump.c: gcc caught a memset given a pointer
+      as the size. Fixed.
+    * naming.c: Needed #ifndef TRIVIAL_NAMING
+      around skipunder() to compile without warnings.
+    * section_bitmaps.c, section_bitmaps.h: Needed
+      (void) as function argument list, for example
+      set_all_sections_on(void) .
+2018-05-14 Carlos Alberto Enciso
+    * Rename producer_info.[ch] to compiler_info.[ch].
+2018-05-11 Carlos Alberto Enciso
+    * New files: command_options.c,command_options.h
+      Command line arguments processing; the original code moved
+      from dwarfdump.c.
+    * New files: producer_info.c,producer_info.h
+      Record statistics about the producers (compilers). The original
+      code moved from dwarfdump.c.
+    * glflags.c,glflags.h,globals.h:
+      Moved the remaining individual global flags and what they
+      control into glflags.h.
+    * section_bitmaps.c,section_bitmaps.h: process the header and
+      relocation maps. Original code moved from dwarfdump.c
+    * dwarfdump.c:
+      Moved the code for command line arguments processing to
+      command_options.c and producer_info.c.
+    * print_reloc.c,sanitized.h,defined_types.h,dwconf.c,print_aranges.c
+      Minor changes due to refactoring of the command line and
+      producer refactoring.
+2018-05-09 David Anderson
+    * common.c,dwarfdump.c,glflags.c,glflags.h,print_aranges.c,
+      print_die.c: Fixed indents to match dicheck requirements
+      and removed some trailing whitespace.
+2018-05-01 Carlos Alberto Enciso
+    * common.c,dwarfdump.c,dwconf.c,glflags.c,glflags.h,globals.h,
+      naming.c,print_abbrevs.c,print_aranges.c,print_die.c,
+      print_dnames.c,print_frames.c,print_gdbindex.c,print_lines.c,
+      print_locs.c,print_macro.c,print_macros.c,print_pubnames.c,
+      print_ranges.c,print_static_funcs.c,print_static_vars.c,
+      print_strings.c,print_weaknames.c,tag_attr.c,tag_tree.c:
+      Moved the remaining individual global flags and what they
+      control into glflags.h, making it easier to understand
+      what one is looking at when reading the code.
+2018-04-22 David Anderson
+    * print_str_offsets.c: Created consistent terminology
+      for the parts of a table and reflecting that in
+      the table output. The DWARF5 standard uses more
+      than one set of terms for the section contents.
+    * dwarfdump.c,tag_attr.c,tag_tree.c:
+      Update version string
+    * common.c: Update version string.
+      Now that  usage text in full is only on request
+      it now becomes stdout instead of stderr.
+2018-04-19 David Anderson
+    * Makefile.in: Added additional lines to test native
+      getopt_long to verify dwgetopt_long works consistently
+      with GNU getopt_long (for the features tested, anyway).
+    * dwgetopt.c: Better checking for dwgetopt_long correctness.
+    * getopttest.c: Added tests and revised the checking to
+      avoid nasty corner cases.
+2018-04-17 David Anderson
+    * dwarfdump.c, dwarfdump.1: The -h option has not been supported
+      for years (it printed an IRIX table of no interest now)
+      so now -h means print the help message showing the options
+      available.
+    * dwgetopt.c: Now prints the name of any incorrect long-option
+      it sees and prints if user-specified =arg
+      on a long option violates requirements . For either returns -1.
+      Should have done that all along.
+    * getopttest.c: Added tests and revised the checking functions
+      to show all the relevant data if a test fails.  Added line number
+      of the original test to the output so it's easier to find
+      the actual test.
+2018-04-16 David Anderson
+    * common.c,dwarfdump.c,tag_attr.c,tag_tree.c:
+      Update version string
+2018-04-14 David Anderson
+    * dwarfdump.1: Add --print-str-offsets.
+    * dwarfdump.c: Add --print-str-offsets to the usage text.
+2018-04-13 David Anderson
+    * CMakeLists.txt: Added new source files to cmake info.
+2018-04-13 David Anderson
+    * common.c,tag_attr.c,tag_tree.c: Updated
+      version string.
+    * configure.ac: Added a comment about HAVE_LOCATION_OF_LIBELFHEADER
+    * dwarfdump.c:  Added support for option --print_str_offsets
+      to print .debug_str_offsets.
+      Updated version string.
+    * glflags.h: Added new flag: boolean gf_print_str_offsets.
+    * globals.h: Added print function print_str_offsets_section()
+      to interfaces.
+    * print_str_offsets.c: New code to print the .debug_str_offsets
+      section independent of anything else.
+    * Makefile.in: Added print_str_offsets.o to targets.
+2018-04-06 David Anderson
+    * configure.ac: Previous recent change introduced a mistake.
+      Now we set HAVE_ELF64_R_INFO as intended all along.
+    * configure: Regenerated
+2018-04-02 David Anderson
+    * CMakeLists.txt: Added defined_types.h to the set_source_group
+      HEADERS list, but cmake is not currently working
+      with libdwarf or dwarfdump.
+    * configure.ac: Removed AC_CHECK_LIB and replaced
+      with the newer AC_SEARCH_LIBS.
+      Removed two cases using HAVE_LOCATION_OF_LIBELF_HEADER
+      that never worked, it seems.
+    * configure: Regenerated
+2018-03-29 David Anderson
+    * configure.ac: Corrected AC_CHECK_HEADERS use.
+      Removed AC_TRY_COMPILE in favor of AC_COMPILE_IFELSE.
+      Revamped checks for libelf and zlib.
+    * configure: regenerated
+    * config.h.in: regenerated
+2018-03-28 David Anderson
+    * configure.in renamed configure.ac
+2018-03-27 David Anderson
+    * configure.in: Cross compiling tested, working.
+    * configure: regenerated.
+2018-03-25 David Anderson
+    * configure.in: Support for cross compiling
+    * configure: regenerated.
+    * Makefile.in: Support for cross compiling
+2018-03-25 David Anderson
+    * defined_types.h,dwarfdump/dwarfdump.c,esb.c,esb.h,
+      globals.h,print_aranges.c,print_die.c,print_frames.c,
+      print_lines.c,print_macro.c,print_macros.c,
+      print_ranges.c, sanitized.c,sanitized.h,uri.h:
+      Updated copyright year on the merged changes.
+    * getopttest.c: Fixed compiler warnings (this
+      is just for selftest, not usually compiled).
+2018-03-25 Carlos Alberto Enciso:
+    * many: Merged header simplifications into master.
+2018-03-24 David Anderson
+    * print_lines.c: Now uses dwarf_srclines_files_indexes()
+      to simplify printing of DWARF2,3,4 and 5 line headers
+      in a simple uniform way.
+2018-03-22 David Anderson
+    * print_lines.c: Now works with DWARF5 line table,
+      showing correct file index for all versions.
+2018-03-21 David Anderson
+    * common.c,dwarfdump.c,tag_attr.c,tag_tree.c: Updated
+      version string.
+2018-03-21 David Anderson
+    * print_die.c: Add support for DWARF5 FORMs.
+    * print_lines.c: Fix a too-long line.
+2018-01-29 David Anderson
+    * print_frames.c: When printing detailed frame data
+      ensure we check for corrupt data.
+2018-01-29 David Anderson
+    * common.c,dwarfdump.c,tag_attr.c,tag_tree.c:
+      Update version string

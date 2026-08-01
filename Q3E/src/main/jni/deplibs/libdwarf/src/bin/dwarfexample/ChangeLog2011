@@ -1,0 +1,5 @@
+2011-06-04  DavidAnderson <davea42@earthlink.net>
+      * frame1.c, simplereader.c: Altered indentation to
+        multiples of 4 spaces, no tabs. No substantive change.
+2011-01-13  DavidAnderson <davea42@earthlink.net>
+      * New year starts.

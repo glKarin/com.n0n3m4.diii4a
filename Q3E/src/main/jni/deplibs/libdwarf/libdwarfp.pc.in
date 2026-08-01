@@ -1,0 +1,14 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+pkgincludedir=@includedir@/libdwarf-@VMAJ@
+
+Name: libdwarfp
+Description: DWARF debug symbols producer library
+Version: @PROJECT_VERSION@
+Requires.private: @requirements_libdwarfp_pc@
+Requires: libdwarf
+Libs: -L${libdir} -ldwarfp
+Libs.private: @requirements_libdwarfp_libs@
+Cflags: -I${pkgincludedir}

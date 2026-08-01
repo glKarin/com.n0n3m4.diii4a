@@ -1,0 +1,34 @@
+2014-12-28  David Anderson
+     * fakemalloc.c: Renamed to fakemalloc.in .
+2014-12-28  David Anderson
+     * fakemalloc.c,TESTmallocfail: This makes possible
+       a simple test that we handle malloc failure
+       as sensible as possible. The test requires hand
+       modification of the dwarfgen Makefile.
+     * createirepfrombinary.cc: Now prints the libdwarf error
+       number for better error reporting when there is a libdwarf
+       error (running out of malloc space, for example).
+2014-12-09  David Anderson
+     * dwarfgen.cc: Add try/catch for bad malloc and
+       any other disasters..
+       Add dwarfgen in the string for all the errors
+       leading to exit
+     * dwarf_tsearchhash.c: Add check for NULL return
+       in tsearch_inner() so we don't just core dump
+       when malloc fails.
+2014-05-08  David Anderson
+     * dwarfgen.cc: Now uses the newest form of dwarf_producer_init().
+       The old forms no longer are supported.
+2014-02-08  David Anderson
+     * dwarfgen.cc: Added commentary about the callback function
+       setting sect_name_index.
+2014-01-29  David Anderson
+     * createirepformfrombinary.cc,createirepfrombinary.cc,createirepfrombinary.h,
+       dwarfgen.cc,general.h,irepattrtodbg.cc,irepattrtodbg.h,irepdie.h,
+       irepform.h,irepframe.h,irepline.h,irepmacro.h,ireppubnames.h,
+       irepresentation.h,ireptodbg.cc,ireptodbg.h,strtabdata.h: Remove
+       trailing whitespace.
+2014-01-10  David Anderson
+     * createirepformfrombinary.cc,createirepfrombinary.cc,dwarfgen.cc,
+       irepattrtodbg.cc,ireptodbg.cc: Removed include of elf.h as it
+       is not needed given the include of gelf.h.

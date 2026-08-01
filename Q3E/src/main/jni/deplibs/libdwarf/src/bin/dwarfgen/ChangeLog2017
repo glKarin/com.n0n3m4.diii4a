@@ -1,0 +1,25 @@
+2017-12-17  David Anderson
+     * dwarfgen.1: The options to dwarfgen are now documented.
+2017-10-20  David Anderson
+     * createirepformfrombinary.cc,irepattrtodbg.cc, irepform.h,
+       ireptodbg.cc: Added support for DW_FORM_data16.
+2017-10-15  David Anderson
+     * dwarfgen.cc,general.h,ireptodbg.cc: Moved global
+       command-line options
+       into a single global struct to clarify their use for
+       a reader of the code. See 'cmdoptions'.
+2017-08-21  David Anderson
+     * config.h.in: Adding HAVE_LIBELF_LIBELF for consistency.
+     * createirepformfrombinary.cc,createirepfrombinary.cc,
+       irepattrtodbg.cc,ireptodbg.cc:
+       Add ifdef HAVE_UNISTD_H.
+     * dwarfgen.cc:
+       Add ifdef HAVE_UNISTD_H, HAVE_LIBELF_LIBELF_H.
+       Improve #ifdefs for Windows builds.
+2017-04-21  David Anderson
+     * dwarfgen.cc: Now supports -v with 2,3,4, or 5.
+2017-04-20  David Anderson
+     * dwarfgen.cc: Use dwoptarg. Not optarg. oops.
+2017-04-20  David Anderson
+     * dwarfgen.cc: Added new options allowing
+       specification of the desired dwarf version.

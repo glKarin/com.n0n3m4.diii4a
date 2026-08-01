@@ -1,0 +1,288 @@
+2011-12-14  DavidAnderson <davea42@earthlink.net>
+     * print_die.c: Add support for newer DW_OP_GNU_* .
+2011-12-13  DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.c, common.c: Update version string.
+     * tag_attr_ext.list, tag_common.h: New information on GNU
+       attributes meant allowing a larger row count.
+2011-12-13  DavidAnderson <davea42@earthlink.net>
+     * tag_common.h: A new attr in the .list means increasing
+       the column count.
+2011-12-13  DavidAnderson <davea42@earthlink.net>
+     * print_lines.c: Now prints no-column as 0 not -1.
+       And prints the DWARF3/4 line table values when present.
+     * tag_attr_ext.list: Add a GNU extension.
+2011-10-30  DavidAnderson <davea42@earthlink.net>
+     * configure.in: Removed a couple bogus lines which were
+       reporting strange shell errors.
+     * configure:  Regenerated.
+     * dwarfdump.c: Refine the error outputs so bogus reports
+       do not print.  Refactor the debuginfo/types prints for
+       better reporting of errors.
+     * globals.h: Refactoring meant changing one prototype here,
+       the print_infos() prototype.
+     * print_die.c: Refactor the debuginfo/types prints for
+       better reporting of errors.  Remove an 'error' report
+       about DW_DLE_REF_SIG8_NOT_HANDLED.  It's unclear
+       what we might want to do here in future, but an error
+       report is misleading.
+2011-10-29  DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.c, common.c: Update version strings.
+2011-10-29  DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.c: Reset the CU hints at each new section.
+       Set up reloc flags so debug_types gets relocated if necessary.
+     * globals.h: Add DEBUG_TYPES for the .debug_types section.
+       Add a type-unit signature pretty-printer function.
+       Add DW_SECTION_REL_DEBUG_TYPES so debug_types can be relocated.
+     * print_reloc.c: Add entries so debug_types can get relocated.
+     * print_die.c: Now we handle both debug_info and debug_types
+       sections.  Moved some CU header print operations to little
+       helper functions to clarify the code. Refactored print_infos()
+       to deal with debug_types and debug_info.
+       Using the new libdwarf functions that allow debug_types.
+     * print_lines.c: Delete unused local variable and its setting code.
+2011-10-26  DavidAnderson <davea42@earthlink.net>
+     * Makefile.in, README: Added Make settings of PREINCS POSTINCS
+       PRELIBS, POSTLIBS to simplify building when libdwarf or libelf
+       are not in the normal locations.   Documented usable ways to
+       deal with unusual situations at build time.
+2011-10-24  DavidAnderson <davea42@earthlink.net>
+     * common.c: Update version string.
+     * dwarfdump.c: Update version string.
+       To get '-c cu-name'  to work we need to set a local flag which is now set.
+     * dwarfdump.1: Clearly identify the command line options where
+       URI style input is expected.
+2011-10-23  DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.c: Fix omission of a 'break' statement for case 'q'.
+2011-10-23  DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.1: Now command line input strings
+       are translated from uri-style
+     * dwarfdump.c: Translate input strings to from uri style to characters.
+       Fix indentation mistakes.
+       Fix constness issues on character strings.
+     * dwconf.c: Fix constness issues on character strings.
+     * dwconf.h: Fix constness issues on character strings.
+     * globals.h: Fix constness issues on character strings.
+     * makename.c: Fix constness issues on character strings.
+     * makename.h: Fix constness issues on character strings.
+     * uri.c: Fix indentation mistakes.
+2011-10-22  DavidAnderson <davea42@earthlink.net>
+     * common.c :Update version string.
+     * dwarfdump.c: Update version string. Do not set ranges_flag
+       with -a because that is unsafe to print separately in general.
+     * dwarfdump.1: Rewrite the man page for completeness and
+       accuracy.
+2011-10-11  DavidAnderson <davea42@earthlink.net>
+     * common.c: Update version string.
+     * dwarfdump.c: Update version string and translate -S strings
+       from uri-style to standard strings so spaces and other standard
+       characters are easily represented (no quoting problems).
+       Update version string.
+     * print_die.c: For -S -W we were printing the wrong die-level.
+     * uri.h,uri.c: Add the translate_from_uri() function.
+       Fix some of the tests in uri.c to match to- and from-uri.
+2011-10-09  DavidAnderson <davea42@earthlink.net>
+     * common.c, dwarfdump.c: Update version strings.
+2011-10-09  DavidAnderson <davea42@earthlink.net>
+     * dwconf.c,print_die.c, print_frames.c: Fix bad indentation.
+2011-10-09  DavidAnderson <davea42@earthlink.net>
+     * print_die.c (get_location_list): Tests for DW_DLV_ERROR
+       were written without {}, added in the braces.
+2011-10-08  DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.cc: If doing any relevant checking,
+       instantiate all three possibly-usable BucketGroup objects.
+       That makes it simpler to avoid a coredump when the user
+       provides a nonsensical option set  --  at a cost of
+       a very small amount of memory.
+2011-10-06  DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.c: Removed a newline in a printf to match dwarfdump2.
+       Calls of get_attr_value() now have extra argument, so
+       fix them.
+     * dwarfdump.conf: Having 'mips' be an ABI which really reflected
+       the IRIX abi and IRIX compilers was a mistake.   Now that
+       abi works for modern MIPS.
+     * globals.h: get_attr_value() adds an argument.
+     * print_die.c: Expanded the error messages in a couple type_offset_result
+       checks.  Worked around the global nature of esb_base by
+       saving it locally while we recursively traverse DW_AT_type like things
+       looking for bad references. Added a 'verbose' argument a few places
+       so (at a critical point) show_form_itself won't add a form
+       string when we really don't want it to.
+     * print_static_funcs.c:  Fixed an error string so it says
+       static funcs, not pubnames.
+     * print_lines.c: Ensure we only check for errors when
+       we request such checking.
+     * print_reloc.c: Ensure we don't index off the end of scn_names.
+       Deal with missing names and bad symbol indexes consistently.
+       When working with a .rela, report name as the section name
+       instead of calling it .rel in the relocations output.
+2011-10-05  DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.c: Increased COMPILER_TABLE_MAX for better reporting.
+       Provide a 'HARMLESS ERROR' title in output if there are any such.
+       One issue is (for relocatable objects) libdwarf attempts to continue
+       even if relocations fail, and a relocation failure is now
+       counted as a harmless error (even if it turns out to be harmful!).
+       When sorting compilers_detected, use the producer name to sort
+       when error counts are identical.  If the compiler table fills up,
+       print a note. With -ka, no longer explicitly turn check_frames_extended
+       off, it is off already unless the user turned it on explicitly with
+       -kxe.
+     * print_die.c: The check for a file number (decl_file) was simply wrong.
+       Made some detail changes to reporting.
+     * print_frames.c: Added comments about the inefficiency for getting
+       function names when printing frames (dwarfdump2 does not suffer
+       the same inefficiency).
+     * print_locs.c: Do not use a side effect for updating the index
+       before printing in print_locs().
+2011-10-03  DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.c: for -kF, add check_lines. Ensure uniformity
+       in the usage-text ending.
+     * print_lines.c: Ensure lines printing suppresses some
+       error reporting when appropriate.
+2011-10-03  DavidAnderson <davea42@earthlink.net>
+     * print_die.c: Fix the formx code by removing recently-added use of llabs().
+       Fix format botch, and correct small error string mistakes. Empty
+       esb_extra string when it is no longer valid.
+2011-10-03  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c: Minor formatting changes.
+      * print_die.c: Initialize some local variables at definition. Ensure that
+        we do not get a FORM name in a name string (so a test
+        works right).  And also ensure a FORM name does not get
+        into a compiler-target setting.  Refine the formx_print_value()
+        so it is more complete (like dwarfdump2). Ensure show_form_itself()
+        uses the argument, not a global, for the show-form test.
+      * naming.c:  Introduce a {} pair on an 'if'
+        to reduce the possibility of future
+        errors.
+      * print_pubnames.c: Add error details to match dwarfdump2.
+      * print_ranges.c: If not printing, return immediately.
+      * print_reloc.c: A test was coded with = where == was needed.
+      * print_types.c: Move local variable definitions to the
+        block they are used in.
+2011-09-29  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c: Amplifying the -n help string.
+      * print_abbrev.c: Adding the standard test of the section
+        print option before printing the header line for the abbrevs section.
+      * print_die.c: Added a {} pair to avoid eventual bug.
+      * print_frames.c: Reformatted a comment for readability.
+      * print_lines.c: Added a status test for consistency with the rest
+        of the code.
+      * print_reloc.c: One of the assign-and-test removal changes
+        in the previous changes was wrong.
+2011-09-26  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c: Removed duplicate usage_text strings.
+      * print_reloc.c:  In case we don't have ELF64 headers,
+        do the last-best-hope internal define in the right place
+        so it actually helps. For some local variables, ensure
+        they have values defined at the definition point.
+        Switch some assign-and-test into two lines.
+2011-09-20  DavidAnderson <davea42@earthlink.net>
+      * Makefile.in: Fixed typo in comment.
+      * common.c: Use snprintf, not sprintf. Updated version string.
+      * dwarfdump.c: Correct typo and move usage_text to
+        a source position corresponding to that in dwarfdump.cc.
+        Updated version string.
+2011-09-16  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c, common.c: Update version string.
+2011-09-15  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c, common.c: Update version string.
+2011-09-14  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c, common.c: Update version string.
+2011-09-08  DavidAnderson <davea42@earthlink.net>
+      * config.h, configure.in, dwconf.c, globals.h: Switch
+        compile dependency to configure time HAVE_STDAFX_H
+        instead a system-dependent ifdef.
+      * configure: regenerate.
+2011-09-08  DavidAnderson <davea42@earthlink.net>
+      * print_frames.c: Ensure each tsearch tree pointer is zeroed
+        after emptying the tree.
+      * addrmap.c: Now we actually free all the records, we were
+        misusing tsearch a little bit.
+2011-09-05  DavidAnderson <davea42@earthlink.net>
+      * print_frames.c: Now only check duplicate fdes if checking
+        frames.
+      * dwarfdump.conf: Updated to use address_size and includeabi.
+      * dwconf.h, dwconf.c: Adding configure keywords address_size
+        and includeabi.
+2011-09-02  DavidAnderson <davea42@earthlink.net>
+      * common.c,dwarfdump.c: Update version string.
+2011-06-07  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c,common.c: Updated version string.
+      * dwarfdump.c: Refactor setting of do_print_dwarf
+        and do_check_dwarf into a function. Ensure that one of
+        the refactored new functions is called in every case
+        an option requires such call. Ensured indents ok.
+      * print_lines.c (print_line_numbers_this_cu): When not checking
+        added a check to insure we don't try to call a
+        checking-related function.
+2011-06-07  DavidAnderson <davea42@earthlink.net>
+      * CODINGSTYLE: Added this new document.
+      * common.c: Updated version string.
+      * dwarfdump.c: Updated version string, fixed indentation.
+      * print_lines.c: Two line table checks moved from
+        decl_file to line_table sections of the summary report
+        and both now show the possibly-wrong pc.
+        Since one is not necessarily a bug, the wording of the
+        message now has 'possibly' in it.
+      * print_die.c: Reinitialize subprogram-relative pc high/low
+        seen_PU_high_address
+        whenever compilation unit changes, and use that field
+        to avoid an erroneous  comparison (when checking for an error).
+        Fix some indentation errors introduced recently.
+2011-06-06  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c: Changed the missing-producer-attribute
+        default string used in summary/error
+        outputs to  "<CU-missing-DW_AT_producer>"
+        so it is this string clearer.
+2011-06-06  DavidAnderson <davea42@earthlink.net>
+      * print_die.c: Now we strip off quotes dwarfdump
+        added so -S match=main and the like work.
+2011-06-06  DavidAnderson <davea42@earthlink.net>
+      * common.c: Updated version string.
+      * dwarfdump.c: Updated version string.
+      * print_die.c: Corrected handling of DW_AT_data_member_location.
+        Corrected handling of 'class constant' function
+        formxdata_print_value() so it does not leak memory.
+2011-06-05  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c: Updated version string.
+        Now -kd forces a summary error report, always.
+        Even if no errors found or even checked-for.
+      * common.c: Updated version string.
+2011-06-05  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c,print_aranges.c,print_reloc.c: A few indents
+        did not match the standard multiple-of-4-spaces. Corrected.
+2011-06-03  DavidAnderson <davea42@earthlink.net>
+      * checkutil.c (ProcessBucketGroup): Deleted unused
+        local variables.
+      * common.c: Updated version string.
+      * dwarfdump.1: Made the -k discussion more complete and accurate.
+        Most option details are in the dwarfdump help/usage message, not
+        in dwarfdump.1, to keep the man page small.
+      * dwarfdump.c: Updated version string. Made more variables static
+        in recognition they are only touched in this file.  Added {} on
+        some if statements to make the body clear. Parenthesized a
+        complex test with && || to clarify intent.  Added sanity testing
+        of the 'current compiler' count and its use.
+      * globals.h: Added safe_strcpy() prototype as it is used by multiple
+        source files so we need a visible prototype.
+      * print_aranges.c: Add 'arange end' printing (it is a real DWARF
+        record type, so should be printed). Add a test to avoid duplicated
+        die printing and error-counting when it is not requested.
+      * print_die.c: An = in an if corrected to ==.  Parenthesized a
+        complex test with && || to clarify intent.  Deleted an unused
+        local variable.
+      * print_lines.c: Deleted unused local variables. Added {} for each
+        struct in an array so the initialization gets done right.
+      * tag_attr.c: Deleted an unused local variable.
+      * tag_tree.c: Deleted an unused local variable.
+2011-04-23  DavidAnderson <davea42@earthlink.net>
+      * dwarfdump.c, common.c: Updated DWARF_VERSION string.
+2011-01-04  DavidAnderson <davea42@earthlink.net>
+      * print_frames.h print_static_vars.c Makefile.in
+        print_static_funcs.c print_sections.c print_strings.c print_locs.c
+        print_die.c print_reloc.c print_reloc.h print_lines.c print_pubnames.c
+        dwarfdump.c strstrnocase.c tag_tree.c print_ranges.c print_abbrevs.c
+        print_macros.c configure.in tag_attr.c dwarfdump.1 naming.c
+        esb.c checkutil.c makename.c dwconf.c print_types.c checkutil.h
+        tag_tree.list print_weaknames.c globals.h common.c print_frames.c
+        print_aranges.c common.h:  New correctness tests and new
+        formatting of various reports.

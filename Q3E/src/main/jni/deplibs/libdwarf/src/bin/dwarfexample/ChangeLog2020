@@ -1,0 +1,99 @@
+2020-11-25:   David Anderson
+    * Makefile.am: Now creates DWARF_BIGENDIAN env var for the tests
+    * Makefile.in: Regenerated.
+    * runtests.sh: Now skips the test (of crc32) that will always fail
+      on a bigendian build.
+2020-10-27:   David Anderson
+    * simplereader.c: changed a few lines
+      to have shorter line lengths. No logic change.
+2020-10-21:   David Anderson
+    * dwdebuglink.c,findfuncbypc.c,frame1.c: Cleaning
+      up line formatting a little.
+2020-10-19:   David Anderson
+    * Makefile.am: adding dummyexecutable.debug
+      and debuglink2.base so 'make check' can work.
+2020-10-19:   David Anderson
+    * frame1.c,simplereader.c: Copyright lines reformatted
+      to a shorter line to match libdwarf/dwarfdump
+      formatting.  No change in copyright terms.
+2020-10-11:   David Anderson
+    * debuglink.base, debuglink2.base: Improved debuglink
+      formatting now in the make check baselines.
+2020-10-11:   David Anderson
+    * Makefile.am: Added simplecrc.c
+    * Makefile.in: Regenerated
+2020-10-11:   David Anderson
+    * debuglink.base, debuglink2.base: New baselines
+      with a small formatting correction.
+    * dwdebuglink.c: Changes to correctly support dSYM
+      and GNU debuglink and clarify the printed output.
+    * simplecrc.c: A demonstration of using the debuglink
+      crc.
+2020-10-04:   David Anderson
+	* dwdebuglink.c: now works as intended.
+	* runtests.sh Added a second test of debuglink
+    * debuglink.base,debuglink2.base: Baseline output
+      for dwdebuglink. Pathnames have source and
+      build directory in the output replaced with strings
+      ...src... or ...bld... so make check should
+      work anywhere.
+2020-10-03:   David Anderson
+    * Makefile.am: Added a recent shell script to the files
+      brought into a release.
+    * Makefile.in: Ubuntu 20.04 first autoreconf and
+      the Makefile.am created small changes.
+    * COPYING: Corrected the references to the BSD copyright
+      to use "two-clause BSD license".
+2020-10-02:   David Anderson
+    * dwdebuglink.c,debuglink.base: Removed debug print lines.
+2020-10-02:   David Anderson
+    * dummyexecutable: For testing in make check.
+    * dummyexecutable.debug: For testing in make check.
+    * dwdebuglink.c:  Now checks paths a allows adding
+      debuglink global paths.
+    * runtests.sh : now has testoutput strip out blddir
+      and srcdir so no reliance on anyone's home directory name.
+    * buildingdummy.sh: Not usable as general regression test
+      but tests a number of things the regression test does
+      not (yet) and shows how a .debug is built.
+2020-10-01:   David Anderson
+    * dwdebuglink.c: Refined the #includes so they worked
+      with cmake.
+2020-09-30:   David Anderson
+    * Renamed getdebuglink.c to dwdebuglink.c
+      and the example executable is now dwdebuglink.
+    * Makefile.am,CMakeLists.txt: reference new name.
+    * Makefile.in: regenerated.
+2020-09-30:   David Anderson
+    * findfuncbypc.c: Removed a mistaken version
+      of include string.h
+    * getdebuglink.c: Now finds debuglink objects
+      and if one is truly a separate debug it
+      reports that.
+2020-09-29:   David Anderson
+    * getdebuglink.c: Now follows paths and compares
+      buildid of the executable vs the debug object.
+2020-09-27:   David Anderson
+    * getdebuglink.c: Removed trailing whitespace, improved
+      the new messages in previous commit (greater
+      clarity in the reference).
+    * findfuncbypc.c,simplereader.c: Removed trailing
+      whitespace.
+2020-09-27:   David Anderson
+    * getdebuglink.c: Now looks to see if target files exist
+      and reports which files were found.
+2020-09-25:   David Anderson
+    * debuglink.base: New baseline test output
+      reflecting corrected debuglink in libdwarf.
+2020-09-18:   David Anderson
+    * CMakeLists.txt: Add getdebuglink to the
+      examples built (source getdebuglink.c added
+      November 2019).
+2020-03-14:   David Anderson
+    * findfuncbypc.c: do not call dwarf_dealloc on a
+      name that should not be dealloc'd (it is a static
+      string from a .debug section ).
+    * simplereader.c (resetsrcfiles): Only do dealloc
+      calls on non-null pointers.
+2020-01-16:   David Anderson
+    * simplereader.c: Remove trailing whitespace (1 place).

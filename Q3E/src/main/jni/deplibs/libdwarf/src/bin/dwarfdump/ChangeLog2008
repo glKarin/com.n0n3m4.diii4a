@@ -1,0 +1,96 @@
+2008-12-30 David Anderson <davea42@earthlink.net>
+      * tag_attr.list: Mark DW_AT_artificial as sensible on
+        DW_TAG_variable.
+      * dwarfdump.1: Document -N option to print .debug_ranges.
+      * Makefile.in: add new source header files
+      * dwarfdump.c: Implement -N to print .debug_ranges.
+      * print_sections.c: Allow more flexible printing
+        of function names for .debug_frame section.
+	With -N, print .debug_ranges.
+      * print_die.c: Print .debug_ranges details.
+      * print_frames.c: Delete useless comment.
+      * globals.h: Allow reuse of debug_ranges formatting code.
+      * Makefile.in: Make the header dependency list more complete.
+      * makename.h: Comment tweaked.
+2008-12-08 David Anderson <davea42@earthlink.net>
+      * print_die.c: the -M option now also prints the form
+        number (after the form name).  And -v prints the DIE
+        abbreviation code, the index into the relevant abbreviation
+        table.
+      * globals.h: Removed unused global variable.
+      * dwarfdump.c: Removed unused global variable.
+      * dwarfdump.1: document -M and the new -v features.
+2008-12-07 David Anderson <davea42@earthlink.net>
+      * print_reloc.c (print_relocinfo): Removed unused local variable.
+2008-11-19 David Anderson <davea42@earthlink.net>
+      * globals.h: Added new boolean to support -M.
+      * dwarfdump.1: Mentioning the -M option.
+      * dwarfdump.c: Implementing -M, which has each attribute line
+        show the name of the form.
+      * print_die.c: Implementing -M option.
+2008-10-12 David Anderson <davea42@earthlink.net>
+      * dwarfdump.conf: Adding power pc register names and table
+        size for use with -x abi=ppc  .
+2008-08-13 David Anderson <davea42@earthlink.net>
+      * dwarfdump.1: When no options (just object files) present
+        all sections print, now we say that.  Renamed fields
+        in synopsis for readability.
+2008-06-23 David Anderson <davea42@earthlink.net>
+      * print_reloc.c (print_reloc_information_64): Was testing
+        sym_data_entry_count one place where sym_data_64_entry_count
+        should have been tested. Thanks to Carlos Alberto Enciso
+        for noticing.
+2008-06-17 David Anderson <davea42@earthlink.net>
+      * print_die.c: Add to dwarf_formstring failure message.
+      * README: Correct email: the old sgi.com address is no
+        longer correct.
+2008-06-13 David Anderson <davea42@earthlink.net>
+      * dwconf.c: Fix an off-by-one condition where
+        we could index off the end of the cf_regs array in printing
+        a register name.
+2008-04-12 David Anderson <davea42@earthlink.net>
+      * print_reloc.c:  Verify stringtab exists and is
+        large enough before indexing into it to get a string
+        in printing relocations.
+        (Providing default name "<no name>" so it's evident from
+        the output that we used a default name string).
+2008-04-09 David Anderson <davea42@earthlink.net>
+      * print_sections.c (get_fde_proc_name): Initialize some
+        local variables at declaration.  The function is very slow
+        and needs a replacement.
+      * print_die.c:  Fixes a typo in a comment.
+      * dwarfdump.c: Added -n option to suppress function name search
+        when printing FDEs. Current dwarfdump is n-squared at least
+        getting those names, this is a bandage-type-workaround when
+        there are so many FDEs the slowness is painful.
+      * globals.h: Support for -n option.
+      * print_frames.c: Support for -n option.
+2008-04-08 David Anderson <davea42@earthlink.net>
+      * dwarfdump.c: Added -H option for testing
+        (it limits the run length).
+        And the support for -H in printing DIEs.
+      * globals.h: Added extern for -H option declaration.
+      * print_sections.c: Added -H option support to limit frames printing.
+
+2008-04-04 David Anderson <davea42@earthlink.net>
+      * print_die.c (tag_tree_combination, tag_attr_combination):
+        Ensure we do not index off the end of the -k checking arrays.
+      * print_sections.c: Increase the size of a local variable,.
+2008-03-03 David Anderson <davea42@earthlink.net>
+      * dwarfdump.1: Add description of -ka option.
+      * print_frames.h print_sections.c testesb.c print_die.c print_reloc.c
+        dwarfdump.c tag_tree.c tag_attr.c esb.c esb.h makename.c dwconf.c
+        makename.h dwconf.h globals.h print_frames.c: Change tabs
+        to spaces with expand(1).
+2008-03-03 David Anderson <davea42@earthlink.net>
+      * print_die.c: Now check that DW_AT_decl_file
+        and DW_AT_call_file indexes are valid and count instances of the
+        attribute and errors found in it.
+      * dwarfdump.c: With -ka and -ky now check that DW_AT_decl_file
+        and DW_AT_call_file indexes are valid and warn if bad.
+        Thanks to Carlos Alberto Enciso for the suggestion.
+      * globals.h: Declare new fields for the  DW_AT_decl_file
+        DW_AT_call_file checks.
+2008-02-26 David Anderson <davea42@earthlink.net>
+      * print_die.c (get_attr_value): Print DW_AT_call_file,
+        DW_AT_call_line, DW_AT_call_column nicely.

@@ -1,0 +1,14 @@
+2017-12-21  David Anderson
+     * simplereader.c: A DIE was not getting deallocated, now
+       it is deallocated, avoiding a memory leak.
+2017-12-17  David Anderson
+     * Makefile.in: Add CPPFLAGS, helpful for one user build,
+       harmless to others.
+2017-08-21  David Anderson
+     * configure.in: Add unistd.h to AC_CHECK_HEADERS.
+     * configure: Regenerated.
+     * frame1.c: Add #ifdef and include config.h to
+       make windows builds easier.
+     * simplereader.c: Change #ifdef to
+       make windows builds easier.
+

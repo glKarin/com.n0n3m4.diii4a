@@ -1,0 +1,165 @@
+2014-12-31  David Anderson
+     * dwarfdump.c, common.c: Updated version string.
+2014-12-28  David Anderson
+     * dwarfdump.c, common.c: Updated version string.
+2014-08-15  David Anderson
+     * print_die.c(print_one_die_section): A c99-ism of declarations
+       mixed with statements was present. Moved declaration of 'res'
+       up a few lines.
+2014-08-05  David Anderson
+     * print_gdbindex.c: A couple places: Fixed indents
+       on a comment.
+2014-08-05  David Anderson
+     * dwarfdump.c, common.c: Updated version string.
+2014-08-04  David Anderson
+     * dwarfdump.1: Mention -I option.
+     * dwarfdump.c: Add -I to help output.
+     * print_gdbindex.c: Add cu_list_len argument to
+       print_culist_array  so it can pass back the culist length
+       for use by symboltable code.  So symboltable code can
+       know what indexes are type units and which compilation
+       units.
+2014-08-03  David Anderson
+     * dwarfdump.c: Corrected typo in comment.
+     * print_debugfission.c: Removed trailing whitespace.
+       Fixed some small mistakes in the output.
+     * print_die.c: Removed trailing whitespace.
+       Fixed the section name. It was showing .debug_types
+       when not wanted.
+2014-08-02  David Anderson
+     * print_debugfission.c, print_gdbindex.c: Use the section name
+       strings returned by section-open
+       for object files that have them (like Elf).
+2014-07-12  David Anderson
+     * print_die.c: Using a new interface to print the
+       actual section name, not just .debug_info or .debug_types.
+       dwarf_get_die_section_name();
+     * dwarfdump.c: Corrected a comment relating to
+       .gdb_index and .debug_[ct]u_index sections
+     * debugfission.c: Fix indentation mistakes.
+2014-07-11  David Anderson
+     * print_debugfission.c: Prints the offset and size tables.
+2014-07-10  David Anderson
+     * print_debugfission.c: Prints the hash table values of
+       the .debug_tu_index and .debug_cu_index sections.
+2014-07-09  David Anderson
+     * print_debugfission.c: Removed trailing whitespace
+       characters.
+2014-07-09  David Anderson
+     * Makefile.n: Add print_debugfission.o to the list.
+     * globals.h: Add print_debugfission_index() interface.
+     * print_debugfission.c: New file beginning to
+       support  print of .debug_tu_index and
+       .debug_cu_index sections  (DWARF5).
+2014-07-02  David Anderson
+     * dwarfdump.c: A missing comma after DW_SECTNAME_GDB_INDEX
+       lead to a core dump.
+     * print_die.c: The printf format for a warning message was
+       messed up. Fixed.
+2014-07-01  David Anderson
+     * dwarfdump.c, print_gdbindex.c: Fixed indentation and trailing whitespaces.
+2014-07-01  David Anderson
+     * print_gdbindex.c: Now prints gdb_index symboltable.
+2014-06-30  David Anderson
+     * print_gdbindex.c: Add types printing.
+       Add addressarea printing.
+2014-06-29  David Anderson
+     * print_gdbindex.c: Call latest libdwarf interfaces.
+       Fix the formatting a bit.
+2014-06-28  David Anderson
+     * Makefile.in: Add print_dgbindex.o to objects list.
+     * dwarfdump.1: Add -I to options list (for gdb_index section).
+     * dwarfdump.c: Add gdbindex_flag and a call to print_gdb_index().
+     * globals.h: Add DW_HDR_GDB_INDEX to  flags.
+     * print_gdbindex.c: New file, prints .gdb_index section
+       if the section is present in an object.
+2014-05-20  David Anderson
+     * dwarfdump.c, common.c: Updated version string.
+     * print_die.c: now the dwo_id value prints as hex.
+2014-05-19  David Anderson
+     * dwarfdump.cc, common.cc: Updated version string.
+2014-05-19  David Anderson
+     *  print_die.c: Removed two unused local variables.
+2014-05-18  David Anderson
+     *  dwarfdump.c,print_die.c: Fixed indent errors and
+        removed trailing whitespace.
+2014-05-14  David Anderson
+     * print_die.c: Complete printing of DW_FORM_GNU_str_index,
+       DW_FORM_GNU_addr_index,
+       DW_FORM_addrx, DW_FORM_constx.
+     * print_frames.c: Now supports DW_FORM_GNU_addr_index,
+       DW_FORM_addrx, DW_FORM_constx.
+     * dwarfdump.c: Update version string.
+       Trivial text realignment of argument strings
+       in print_error() and print_error_and_continue().
+     * common.c: Update version string.
+2014-05-11  David Anderson
+     * print_die.c: Add printing of DW_FORM_GNU_str_index, partial
+       of DW_FORM_GNU_addr_index.
+       Support for DW_OP_GNU_const_index too.
+     * dwarfdump.c: Trivial change to error strings so each is unique.
+       Update version string.
+     * common.c: Update version string.
+2014-04-15  David Anderson
+     * uri.c(hexdig): was testing 0, fixed to be '0'.
+2014-04-14  David Anderson
+     * dwarfdump.c,common.c: Update version string.
+2014-04-12  David Anderson
+     * dwarfdump.c,common.c: Update version string.
+2014-02-13  David Anderson
+     * dwarfdump.cc: Minor changes in the commentary relating
+       to the search paths for dwarfdump.conf. No code changed.
+2014-02-08  David Anderson
+     * dwarfdump.c,common.c: Update version string.
+2014-02-08  David Anderson
+     * Makefile.in: Having a single rule build two independent things
+       interacted badly with make -j 2 , so now each rule just builds
+       a single target (see tag*.list builds).
+2014-02-02  David Anderson
+     * tag_attr.list,tag_attr_ext.list,tag_tree.list,tag_tree_ext.list:
+       Removed trailing whitespace.
+2014-01-31  David Anderson
+      * addrmap.c: Forgot to add include of dwarf_tsearch.h here. Added.
+      * dwarfdump.c, common.c: Updated version string.
+2014-01-30  David Anderson
+      * print_die.c: Add limited support for DW_FORM_GNU_ref_alt
+        and DW_FORM_GNU_strp_alt.
+2014-01-29  David Anderson
+      * addrmap.c addrmap.h checkutil.c,checkutil.h,
+        common.c common.h,dwarf_tsearch.h,dwarfdump.c,dwconf.c,
+        dwconf.h,esb.c,esb.h,globals.h,makename.h,naming.c,naming.h:
+        Remove trailing whitespace.
+      * print_abbrevs.c,print_aranges.c,print_die.c,print_frames.c,
+        print_frames.h,
+        print_lines.c,print_locs.c,print_macros.c,print_pubnames.c,
+        print_ranges.c,
+        print_reloc.c,print_reloc.h,print_sections.c,print_sections.h,
+        print_static_funcs.c,
+        print_static_vars.c,print_strings.c,print_types.c,
+        print_weaknames.c,strstrnocase.c,
+        tag_attr.c,tag_common.c,tag_common.h,tag_tree.c,
+        testesb.c,uri.c,uri.h,uritablebuild.c:
+        Remove trailing whitespace.
+2014-01-29  David Anderson
+      * dwarf_tsearchbal.c,dwarf_tsearch.h: New source files.
+      * print_frames.c: dwarf_tsearch now built in, we are
+        no longer using libc tsearch.
+      * addrmap.c: Now uses dwarf_tsearch.
+      * configure.in, config.h.in: No longer need HAVE_TSEARCH or
+        HAVE_TDESTROY
+      * configure: regenerated
+2014-01-10  David Anderson
+      * dwarfdump.c: Change // comments to /* */ comments.
+      * makename.c: Delete blank line and trailing space. Add cast
+        so gcc -ansi compiles without complaint.
+      * print_die.c, uri.c: Change // comments to /* */ comments.
+      * tag_attr.c: Add getopt.h include so gcc -ansi compiles
+        without complaint.
+      * tag_tree.c: Add getopt.h and string.h include so gcc -ansi compiles
+        without complaint. Add cast so strdup call to avoid warning.
+      * addr_map.c: Add cast so strdup call does not cause warning gcc -ansi.
+2014-01-04  David Anderson
+      * dwarfdump.c: Initialize a local variable to zero and
+        move a declaration (avoiding a c99-ism, the code
+        is not supposed to be using c99 features).
+

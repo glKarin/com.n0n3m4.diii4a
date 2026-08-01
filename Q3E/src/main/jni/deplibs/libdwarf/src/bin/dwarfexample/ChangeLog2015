@@ -1,0 +1,28 @@
+2015-12-31  David Anderson
+     * configure.in: Now allows --enable-shared and --disable-nonshared
+     * configure: regenerated.
+2015-11-26  David Anderson
+     * config.h.in, configure.in, Makefile.in: Deals with
+       zlib when present.
+     * configure: Generated.
+2015-11-15  David Anderson
+     * configure.in, Makefile.in: So we now use configure to build.
+     * configure: Generated
+2015-09-22  David Anderson
+     * simplereader.c: Removed trailing whitespace.
+2015-09-15  Carlos Alberto Enciso
+     * simplereader.c:  Fix some C99 issues with
+       local variables declaration
+       in main() and read_cu_list().
+       Include the 'config.h' and 'stdafx.h' headers for Windows port.
+       Include the Dwarfdump generic open_a_file() and
+       close_a_file() calls.
+2015-06-19  David Anderson
+     * frame1.c: Add printf and comments suggesting
+       use of dwarf_get_fde_list_eh() if dwarf_get_fde_list()
+       gets DW_DLV_NO_ENTRY.
+2015-05-05  David Anderson
+     * simplereader.c:  Added code to help testing
+       in libdwarf DebugFission Package File interfaces.
+2015-01-01  David Anderson
+     * A new year begins.

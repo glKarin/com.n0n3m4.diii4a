@@ -1,0 +1,41 @@
+David Anderson
+    * Makefile.in: Clean *~
+2016-11-20  David Anderson
+     * Makefile.in: Now we have proper setting of CC
+       and CFLAGS, which was missing before.
+2016-10-07  David Anderson
+     * dwarfgen.cc:For the reporting of .debug_str
+       stats (just 3 lines of it)
+       there is now a fixed prefix "Debug_Str:" so it is easier to
+       verify things do not go wrong over time by just comparing
+       those few lines, which should match across
+       and across OS and libelf versions. There will still
+       be 32/64bit differences though as the notion of 'short'
+       string is longer with a 64bit offset in an object..
+       (pointer size is not the issue).
+2016-09-30  David Anderson
+     * configure.in: Add additional -fsanitize tests to
+       --enable-sanitize.
+     * configure: Regenerated.
+2016-09-21  David Anderson
+     * Makefile.in: implement sanitize support.
+     * configure.in: Add support for --enable-sanitize
+     * configure: Regenerated.
+2016-08-28  David Anderson
+     * dwarfgen.cc: Now calls dwarf_pro_get_string_stats()
+       and prints the string counts information.
+2016-08-25  David Anderson
+     * dwarfgen.cc: Clarified and expanded the debug output of dwarfgen
+       about relocations (and added the -r option to expand
+       the output further).
+     * irepresentation.h: Added comments explaining the intent
+       of two small classes.
+2016-08-23  David Anderson
+     * dwarfgen.cc: Added the -s option which has .debug_info strings
+       generated into .debug_str.
+2016-06-01  David Anderson
+     * Makefile.in: Tweaked for debian build compatibility
+2016-04-21  Carlos Alberto Enciso
+     * Use the _WIN32 macro to identify a WINDOWS specific code.
+2016-01-14  David Anderson
+     * irepform.h: Missing return *this from several functions. Fixed.
