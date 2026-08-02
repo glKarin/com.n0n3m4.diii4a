@@ -383,7 +383,6 @@ void idRenderModelStatic::InitFromFile(const char *fileName)
 	if (!loaded && extension.Icmp("modelb")) {
 		idStr modelbName = ModelBinaryName(name);
 		loaded		= LoadModelBinary(modelbName.c_str());
-		//printf("lll|%s|%s|%d\n", fileName, modelbName.c_str(),loaded);
 		reloadable	= true;
 	}
 #endif
@@ -398,6 +397,9 @@ void idRenderModelStatic::InitFromFile(const char *fileName)
 	purged = false;
 
 	// create the bounds for culling and dynamic surface creation
+#ifdef _SPLASHDAMAGE //karin: trigger models have not surfaces, but we need to keep bounds infomation
+	if (NumSurfaces() > 0)
+#endif
 	FinishSurfaces();
 }
 
@@ -6078,7 +6080,7 @@ bool idRenderModelStatic::LoadModelBinary(const char *fileName)
 
 	int numSurf;
 	file->ReadInt(numSurf);
-	if(numSurf <= 0)
+	if(numSurf </*=*/ 0) // trigger models have not surfaces
 	{
 		common->Warning("modelb : read %i surface in '%s'", numSurf, fileName);
 		fileSystem->CloseFile(file);

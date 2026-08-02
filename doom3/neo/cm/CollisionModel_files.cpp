@@ -1133,7 +1133,13 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile_Binary(const char *nam
 
 	idFile *file = fileSystem->OpenFileRead(fileName.c_str());
 	if (!file) {
-		return false;
+		//karin: try to load prebuilt collision model for non-map cm files
+		idStr tmp = "generated/cm";
+		tmp.AppendPath(fileName);
+		fileName = tmp;
+		file = fileSystem->OpenFileRead(fileName.c_str());
+		if (!file)
+			return false;
 	}
 
 	//karin: 1. read fileID
