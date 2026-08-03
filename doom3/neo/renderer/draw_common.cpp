@@ -2051,18 +2051,10 @@ static void RB_T_BlendLight_external(const drawSurf_t *surf)
 			R_GlobalPlaneToLocal(surf->space->modelMatrix, vLight->lightProject[i], lightProject[i]);
 		}
 
-		idMat4 fogMatrix;
-		fogMatrix[0] = lightProject[0].ToVec4();
-		fogMatrix[1] = lightProject[1].ToVec4();
-		fogMatrix[2] = lightProject[2].ToVec4();
-		fogMatrix[3] = lightProject[3].ToVec4();
-		fogMatrix.TransposeSelf();
-		//GL_UniformMatrix4fv(offsetof(shaderProgram_t, fogMatrix), fogMatrix.ToFloatPtr());
-
-		blendLightProgram->BindVector("lightFalloff_0", fogMatrix[0]);
-		blendLightProgram->BindVector("lightFalloff_1", fogMatrix[4]);
-		blendLightProgram->BindVector("lightFalloff_2", fogMatrix[8]);
-		blendLightProgram->BindVector("lightFalloff_3", fogMatrix[12]);
+		blendLightProgram->BindVector("lightFalloff_0", lightProject[0].ToVec4());
+		blendLightProgram->BindVector("lightFalloff_1", lightProject[1].ToVec4());
+		blendLightProgram->BindVector("lightFalloff_2", lightProject[2].ToVec4());
+		blendLightProgram->BindVector("lightFalloff_3", lightProject[3].ToVec4());
 	}
 
 	// This gets used for both blend lights and shadow draws
@@ -2100,12 +2092,13 @@ static void RB_BlendLight_external(const shaderStage_t *pStage, const drawSurf_t
 	if(!blendLightProgram->Bind(pStage, lightShader, regs))
 		return;
 
+	int oldDrawBits = backEnd.glState.glStateBits;
 
 	// Setup the drawState
 	GL_State(GLS_DEPTHMASK | pStage->drawStateBits | GLS_DEPTHFUNC_EQUAL);
 	//GL_State( pStage->drawStateBits );
 
-	int oldDrawBits = blendLightProgram->SetupState();
+	blendLightProgram->SetupState();
 
 	GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 
