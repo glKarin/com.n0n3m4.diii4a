@@ -49,6 +49,11 @@ If you have questions concerning this license or the applicable additional terms
 #define MD5_VERSION				10
 #endif
 
+#ifdef _SPLASHDAMAGE //karin: default trigger model collison material
+#define CM_DEFAULT_COLLISION_SHADER "textures/common/rendermodel_clip"
+//#define CM_DEFAULT_COLLISION_SHADER "textures/common/collision"
+#endif
+
 #define MD5_STATIC_MESH_EXT     "md5meshs" // mark as static model, but file content is same as md5mesh
 
 // using shorts for triangle indexes can save a significant amount of traffic, but

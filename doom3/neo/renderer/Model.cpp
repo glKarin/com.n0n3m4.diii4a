@@ -401,6 +401,76 @@ void idRenderModelStatic::InitFromFile(const char *fileName)
 	if (NumSurfaces() > 0)
 #endif
 	FinishSurfaces();
+#ifdef _SPLASHDAMAGExxx //karin: only create it when collision model loading if have not surfaces
+	else
+	{
+		srfTriangles_t *tri = R_AllocStaticTriSurf();
+
+		tri->numIndexes = 36;
+		R_AllocStaticTriSurfIndexes(tri, tri->numIndexes);
+		// bottom
+		tri->indexes[0] = 0;
+		tri->indexes[1] = 1;
+		tri->indexes[2] = 2;
+		tri->indexes[3] = 0;
+		tri->indexes[4] = 2;
+		tri->indexes[5] = 3;
+		// top
+		tri->indexes[6] = 4;
+		tri->indexes[7] = 6;
+		tri->indexes[8] = 5;
+		tri->indexes[9] = 4;
+		tri->indexes[10] = 7;
+		tri->indexes[11] = 6;
+		// left
+		tri->indexes[12] = 0;
+		tri->indexes[13] = 3;
+		tri->indexes[14] = 4;
+		tri->indexes[15] = 3;
+		tri->indexes[16] = 7;
+		tri->indexes[17] = 4;
+		// right
+		tri->indexes[18] = 1;
+		tri->indexes[19] = 5;
+		tri->indexes[20] = 2;
+		tri->indexes[21] = 2;
+		tri->indexes[22] = 5;
+		tri->indexes[23] = 6;
+		// forward
+		tri->indexes[24] = 0;
+		tri->indexes[25] = 4;
+		tri->indexes[26] = 1;
+		tri->indexes[27] = 1;
+		tri->indexes[28] = 4;
+		tri->indexes[29] = 5;
+		// backward
+		tri->indexes[30] = 3;
+		tri->indexes[31] = 2;
+		tri->indexes[32] = 7;
+		tri->indexes[33] = 2;
+		tri->indexes[34] = 6;
+		tri->indexes[35] = 7;
+
+		tri->numVerts = 8;
+		R_AllocStaticTriSurfVerts(tri, tri->numVerts);
+		idVec3 points[8];
+		bounds.ToPoints(points);
+		for (int i = 0; i < 8; i++)
+		{
+			idDrawVert &dv = tri->verts[i];
+			dv.Clear();
+			dv.xyz = points[i];
+		}
+
+		tri->bounds = bounds;
+
+		modelSurface_t surf;
+		surf.id = 0;
+		surf.geometry = tri;
+		surf.material = declManager->FindMaterial(CM_DEFAULT_COLLISION_SHADER);
+		AddSurface(surf);
+	}
+#endif
 }
 
 /*

@@ -665,6 +665,8 @@ class idCollisionModelManagerLocal : public idCollisionModelManager
 		void			ParseMaterials_Binary(idFile *file, idStrList &materials);
 
 		void			InitModels(void);
+		
+		cm_model_t 	*LoadEmptyRenderModel(const idRenderModel *renderModel, const char *fileName = NULL);					// empty surface models
 #endif
 
 	private:			// CollisionMap_debug

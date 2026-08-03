@@ -3681,6 +3681,14 @@ cm_model_t *idCollisionModelManagerLocal::LoadRenderModel(const char *fileName)
 	}
 
 	renderModel = renderModelManager->FindModel(fileName);
+#ifdef _SPLASHDAMAGE //karin: trigger models have not surfaces, so create by model bounds
+	if(renderModel->NumSurfaces() == 0 && !renderModel->IsDefaultModel())
+	{
+		model = LoadEmptyRenderModel(renderModel, fileName);
+		if(model)
+			return model;
+	}
+#endif
 
 	model = AllocModel();
 	model->name = fileName;
@@ -5666,4 +5674,148 @@ void idCollisionModelManagerLocal::DrawModel( idCollisionModel *model, const idV
 	(void)viewAxis;
 	DrawModel(model, modelOrigin, modelAxis, viewOrigin, radius);
 }
+
+cm_model_t *idCollisionModelManagerLocal::LoadEmptyRenderModel(const idRenderModel *renderModel, const char *fileName)
+{
+	int i, j;
+	idFixedWinding w;
+	cm_node_t *node;
+	cm_model_t *model;
+	idPlane plane;
+	idBounds bounds;
+	bool collisionSurface;
+	const idMaterial *material;
+
+	if(!fileName)
+		fileName = renderModel->Name();
+	model = AllocModel();
+	model->name = fileName;
+	node = AllocNode(model, NODE_BLOCK_SIZE_SMALL);
+	node->planeType = -1;
+	model->node = node;
+
+	model->maxVertices = 0;
+	model->numVertices = 0;
+	model->maxEdges = 0;
+	model->numEdges = 0;
+
+#define CM_DEFAULT_COLLISION_SHADER2 "textures/common/rendermodel_clip"
+	material = declManager->FindMaterial(CM_DEFAULT_COLLISION_SHADER);
+	if(!material)
+	{
+		common->Warning("Default collision material not found: %s", CM_DEFAULT_COLLISION_SHADER);
+		return NULL;
+	}
+	if(material->GetState() == DS_DEFAULTED)
+	{
+		common->Warning("Default collision material is defaulted: %s", CM_DEFAULT_COLLISION_SHADER);
+		return NULL;
+	}
+	bounds = renderModel->Bounds(NULL);
+
+	collisionSurface = (material->GetSurfaceFlags() & SURF_COLLISION) != 0;
+
+	// if this surface has no contents
+	if (!(material->GetContentFlags() & CONTENTS_REMOVE_UTIL))
+	{
+		return NULL;
+	}
+
+	// if the model has a collision surface and this surface is not a collision surface
+	if (collisionSurface && !(material->GetSurfaceFlags() & SURF_COLLISION))
+	{
+		return NULL;
+	}
+
+	// make box surface by bounds
+	const int numIndexes = 36;
+	const glIndex_t indexes[numIndexes] = {
+		// bottom
+		0,
+		1,
+		2,
+		0,
+		2,
+		3,
+		// top
+		4,
+		6,
+		5,
+		4,
+		7,
+		6,
+		// left
+		0,
+		3,
+		4,
+		3,
+		7,
+		4,
+		// right
+		1,
+		5,
+		2,
+		2,
+		5,
+		6,
+		// forward
+		0,
+		4,
+		1,
+		1,
+		4,
+		5,
+		// backward
+		3,
+		2,
+		7,
+		2,
+		6,
+		7,
+	};
+
+	const int numVerts = 8;
+	idVec3 verts[numVerts];
+	bounds.ToPoints(verts);
+
+	// get max verts and edges
+	model->maxVertices += numVerts;
+	model->maxEdges += numIndexes;
+
+	model->vertices = (cm_vertex_t *) Mem_ClearedAlloc(model->maxVertices * sizeof(cm_vertex_t));
+	model->edges = (cm_edge_t *) Mem_ClearedAlloc(model->maxEdges * sizeof(cm_edge_t));
+
+	// setup hash to speed up finding shared vertices and edges
+	SetupHash();
+
+	cm_vertexHash->ResizeIndex(model->maxVertices);
+	cm_edgeHash->ResizeIndex(model->maxEdges);
+
+	ClearHash(bounds);
+
+	for (j = 0; j < numIndexes; j += 3) {
+		w.Clear();
+		w += verts[ indexes[ j + 2 ] ];
+		w += verts[ indexes[ j + 1 ] ];
+		w += verts[ indexes[ j + 0 ] ];
+		w.GetPlane(plane);
+		plane = -plane;
+		PolygonFromWinding(model, &w, plane, material, 1);
+	}
+
+	// create a BSP tree for the model
+	model->node = CreateAxialBSPTree(model, model->node);
+
+	model->isConvex = false;
+
+	FinishModel(model);
+
+	// shutdown the hash
+	ShutdownHash();
+
+	common->Printf("loaded empty collision model %s\n", model->name.c_str());
+
+	return model;
+}
+
 #endif
