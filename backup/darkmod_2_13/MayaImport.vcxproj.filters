@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="MayaImport\exporter.h" />
+    <ClInclude Include="MayaImport\maya_main.h" />
+    <ClInclude Include="MayaImport\Maya6.0\maya.h">
+      <Filter>Maya6.0</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MayaImport\maya_main.cpp" />
+    <ClCompile Include="idlib\precompiled.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MayaImport\mayaimport.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Maya6.0">
+      <UniqueIdentifier>{f8291648-d816-40dc-b1a6-8d7940ec7696}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,33 @@
+# Debug-compatible profile with maximum optimizations enabled in third-party libs.
+# This way we avoid stupidly huge slowdown of Debug TDM builds.
+#
+# First of all, we enable compiler optimizations.
+# In case of MSVC we also tweak runtime/CRT that libs are compiled against:
+#  * C++ libs (marked as 'vcdebug' in packages.yaml) are compiled against Debug runtime as usual.
+#  * C and header-only libs are compiled against Release runtime.
+# For GCC there is no runtime differences.
+#
+# So we use almost-Release build for C++ libs on MSVC, and fully-release build in all other cases.
+
+[settings]
+build_type=Release
+compiler.runtime_type=Debug
+thedarkmod/*:build_type=Debug
+
+# AUTOGEN #
+tinyformat/*:compiler.runtime_type=Release
+doctest/*:compiler.runtime_type=Release
+tracy/*:compiler.runtime_type=Release
+zlib/*:compiler.runtime_type=Release
+minizip/*:compiler.runtime_type=Release
+libcurl/*:compiler.runtime_type=Release
+mbedtls/*:compiler.runtime_type=Release
+libjpeg/*:compiler.runtime_type=Release
+libpng/*:compiler.runtime_type=Release
+ffmpeg/*:compiler.runtime_type=Release
+vorbis/*:compiler.runtime_type=Release
+ogg/*:compiler.runtime_type=Release
+fltk/*:compiler.runtime_type=Release
+blake2/*:compiler.runtime_type=Release
+glfw/*:compiler.runtime_type=Release
+xorg/*:compiler.runtime_type=Release

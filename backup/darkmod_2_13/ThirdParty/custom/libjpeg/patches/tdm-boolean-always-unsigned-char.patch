@@ -1,0 +1,36 @@
+--- jmorecfg.h	2013-09-17 14:20:20.000000000 +0700
++++ jmorecfg.h	2022-04-22 10:48:25.591266100 +0700
+@@ -296,26 +296,21 @@
+ #endif
+ 
+ 
+-/*
+- * On a few systems, type boolean and/or its values FALSE, TRUE may appear
+- * in standard header files.  Or you may have conflicts with application-
+- * specific header files that you want to include together with these files.
+- * Defining HAVE_BOOLEAN before including jpeglib.h should make it work.
++#ifndef HAVE_BOOLEAN
++/* stgatilov: always set boolean as unsigned char!
++ * So that same headers can be used for all platforms.
+  */
+ 
+-#ifndef HAVE_BOOLEAN
+-#if defined FALSE || defined TRUE || defined QGLOBAL_H
+-/* Qt3 defines FALSE and TRUE as "const" variables in qglobal.h */
+-typedef int boolean;
++#ifndef __RPCNDR_H__		/* don't conflict if rpcndr.h already read */
++typedef unsigned char boolean;
++#endif
+ #ifndef FALSE			/* in case these macros already exist */
+ #define FALSE	0		/* values of boolean */
+ #endif
+ #ifndef TRUE
+ #define TRUE	1
+ #endif
+-#else
+-typedef enum { FALSE = 0, TRUE = 1 } boolean;
+-#endif
++
+ #endif
+ 
+ 

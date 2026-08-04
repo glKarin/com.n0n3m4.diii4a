@@ -1,0 +1,6 @@
+# note: pass as build profile on Windows
+[settings]
+os=Windows
+compiler=msvc
+arch=x86_64
+build_type=Release

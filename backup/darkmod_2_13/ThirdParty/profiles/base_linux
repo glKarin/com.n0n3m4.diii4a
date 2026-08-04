@@ -1,0 +1,9 @@
+# note: pass as build profile on Linux
+[settings]
+os=Linux
+compiler=gcc
+arch=x86_64
+build_type=Release
+
+# wanted by AppVeyor CI =(
+compiler.version=5

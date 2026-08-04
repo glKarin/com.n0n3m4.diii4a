@@ -1,0 +1,114 @@
+version: trunk{build}
+
+shallow_clone: true
+
+# configure matrix of builds
+image:
+  - Visual Studio 2022
+  - Ubuntu1604
+platform:
+  - 64
+  - 32
+configuration:
+  - msvc_main     # build Debug + Release on vcxproj
+  - msvc_extra    # build extra configurations on vcxproj
+  - cmake         # build using CMake
+environment:
+  matrix:
+    - thirdparty: artefacts     # use artefacts from SVN (conan-less)
+    - thirdparty: rebuild       # regenerate artefacts using conan then use them
+    - thirdparty: conan         # conan build
+
+matrix:
+  exclude:
+    - image: Ubuntu1604         # too hard to configure cross-compilation for 32-bit on Linux
+      platform: 32
+    - configuration: msvc_main
+      image: Ubuntu1604
+    - configuration: msvc_extra
+      image: Ubuntu1604
+    - configuration: msvc_main
+      thirdparty: conan
+    - configuration: msvc_extra
+      thirdparty: conan
+    - configuration: msvc_extra
+      thirdparty: rebuild
+
+# Linux-only: don't use Python 2 please =)
+stack: python 3.8
+
+# build scripts
+for:
+  - matrix:
+      only:
+        - image: Visual Studio 2022
+          configuration: msvc_main
+          thirdparty: artefacts
+    build_script:
+      - |
+          cd CiScripts
+          build_msvc_main.cmd
+
+  - matrix:
+      only:
+        - image: Visual Studio 2022
+          configuration: msvc_extra
+          thirdparty: artefacts
+    build_script:
+      - |
+          cd CiScripts
+          build_msvc_extra.cmd
+
+  - matrix:
+      only:
+        - image: Visual Studio 2022
+          configuration: msvc_main
+          thirdparty: rebuild
+    install:
+      - pip install conan
+    build_script:
+      - |
+          cd CiScripts
+          python conan_rebuild_artefacts_ci.py force
+          build_msvc_main.cmd
+
+  - matrix:
+      only:
+        - configuration: cmake
+          thirdparty: artefacts
+    build_script:
+      - |
+          cd CiScripts
+          python ./linux_install.py
+          python ./build_cmake.py
+
+  - matrix:
+      only:
+        - configuration: cmake
+          thirdparty: rebuild
+    install:
+      - pip install conan
+    build_script:
+      - |
+          cd CiScripts
+          python ./linux_install.py
+          python ./conan_rebuild_artefacts_ci.py force
+          python ./build_cmake.py
+
+  - matrix:
+      only:
+        - configuration: cmake
+          thirdparty: conan
+    install:
+      - pip install conan
+    build_script:
+      - |
+          cd CiScripts
+          python ./linux_install.py
+          python ./conan_build.py
+
+# can be used for debugging issues on AppVeyor =(
+#after_build:
+#  - 7z a C:\projects\trunk\crap.7z "C:\Users\appveyor\.conan2"
+#artifacts:
+#  - path: crap.7z
