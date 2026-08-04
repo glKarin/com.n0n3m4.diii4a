@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 
 namespace {
 
-    //karin: define in bse_segmenttemplate.h::enum eBSESegment
+    //karin: define in BSE_SegmentTemplate.h::enum eBSESegment
     typedef int eSegType;
 
     // convert “emitter”, “sound”, … token → enum

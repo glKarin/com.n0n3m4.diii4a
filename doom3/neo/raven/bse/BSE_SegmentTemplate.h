@@ -1,4 +1,4 @@
-// bse_segmenttemplate.h
+// BSE_SegmentTemplate.h
 //
 
 /* -------------------------------------------------  flags & enums  ------ */
