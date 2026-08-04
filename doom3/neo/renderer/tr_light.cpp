@@ -1886,7 +1886,7 @@ void R_RemoveUnecessaryViewLights(void)
 #endif
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
-#ifdef _RAVEN_BSE
+#if !defined(_BSE_NULL)
 idRenderModel * R_EffectDefDynamicModel(rvRenderEffectLocal *def)
 {
     rvBSEManager *v1; // ebx

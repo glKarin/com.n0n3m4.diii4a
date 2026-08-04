@@ -250,7 +250,7 @@ typedef struct areaReference_s {
 	idRenderLightLocal 	*light;					// only one of entity / light will be non-NULL
 	struct portalArea_s		*area;					// so owners can find all the areas they are in
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
-#ifdef _RAVEN_BSE
+#if !defined(_BSE_NULL)
     rvRenderEffectLocal	*effect;		// head/tail of doubly linked list, may change
 #endif
 #endif
@@ -1580,7 +1580,7 @@ void R_SetLightProject(idPlane lightProject[4], const idVec3 origin, const idVec
                        const idVec3 rightVector, const idVec3 upVector, const idVec3 start, const idVec3 stop);
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#ifdef _RAVEN_BSE
+#if !defined(_BSE_NULL)
 void R_AddEffectSurfaces(void);
 viewEffect_s * R_SetEffectDefViewEntity(rvRenderEffectLocal *def);
 #endif
@@ -2355,7 +2355,7 @@ typedef struct viewEffect_s/* : viewEntity_s*/ // 164 bytes in 32bits
     float distanceToCamera;
 } viewEffect_t;
 
-#ifdef _RAVEN_BSE
+#if !defined(_BSE_NULL)
 #include "../raven/bse/BSE.h"
 #endif
 class rvRenderModelBSE;
@@ -2383,26 +2383,13 @@ public:
 
 
 
-
-
-
     class rvBSE* effect;
     int dynamicModelFrameCount;
     bool writeToDemo;
     rvRenderModelBSE *model;
-#ifdef _RAVEN_FX
-    int gameTime;
-    int serviceTime;
-    bool newEffect;
-    bool expired;
-    //cullLink_t* cullLinks;
-    bool remove;
-    int updateFramenum;
-    idLinkList<rvRenderEffectLocal> node;
-#endif
 };
 
-#ifdef _RAVEN_BSE
+#if !defined(_BSE_NULL)
 void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def);
 #endif
 #endif

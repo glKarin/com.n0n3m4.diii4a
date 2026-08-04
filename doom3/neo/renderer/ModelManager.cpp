@@ -380,7 +380,7 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 #endif
 
 #ifdef _RAVEN
-#if defined(_RAVEN_FX) || defined(_RAVEN_BSE)
+#if !defined(_BSE_NULL)
 	} else if (extension.Icmp("bse") == 0) {
 		model = new rvRenderModelBSE;
 		model->InitFromFile(modelName);

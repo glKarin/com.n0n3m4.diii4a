@@ -1308,7 +1308,7 @@ void R_RenderView(viewDef_t *parms)
 #endif
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#ifdef _RAVEN_BSE
+#if !defined(_BSE_NULL)
     R_AddEffectSurfaces();
 #endif
 #endif

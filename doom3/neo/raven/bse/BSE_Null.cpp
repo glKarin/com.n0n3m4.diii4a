@@ -5,7 +5,7 @@
 #pragma hdrstop
 
 
-#include "BSE.h"
+#include "../fx/BSE.h"
 
 rvBSEManagerLocal bseLocal;
 rvBSEManager* bse = &bseLocal;
@@ -24,10 +24,6 @@ idCVar bse_rateCost("bse_rateCost", "1", CVAR_FLOAT, "rate cost multiplier for s
 #endif
 
 float effectCosts[EC_MAX] = { 0, 2, 0.1 }; // dd 0.0, 2 dup(0.1)
-
-#ifdef _RAVEN_FX
-idBlockAlloc<rvBSE, 256/*, 0 //k*/>	rvBSEManagerLocal::effects;
-#endif
 
 // rvBSEManagerLocal
 /*
