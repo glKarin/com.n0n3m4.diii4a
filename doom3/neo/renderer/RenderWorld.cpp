@@ -2621,7 +2621,6 @@ rvRenderEffectLocal::~rvRenderEffectLocal()
 }
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#if !defined(_BSE_NULL)
 
 #define ASSERT_EFFECT_HANDLE(effectHandle) \
 	if (effectHandle < 0 || effectHandle > LUDICROUS_INDEX) { \
@@ -3308,7 +3307,6 @@ void idRenderWorldLocal::AddEffectRefToArea(rvRenderEffectLocal *reffect, portal
     area->effectRefs.areaNext = elef;
 }
 #endif
-#endif
 
 /*
 ===================
@@ -3316,7 +3314,6 @@ AddEffectDef
 ===================
 */
 qhandle_t idRenderWorldLocal::AddEffectDef(const renderEffect_t* reffect, int time) {
-#if !defined(_BSE_NULL)
     int v8; // edi
 
     if ( !bse_enabled.GetBool() )
@@ -3335,9 +3332,6 @@ qhandle_t idRenderWorldLocal::AddEffectDef(const renderEffect_t* reffect, int ti
     }
     FreeEffectDef(v8);
     return -1;
-#else
-	return -1; // if < 0, will remove rvClientEffect
-#endif
 }
 
 /*
@@ -3348,7 +3342,6 @@ remove if return true
 */
 bool idRenderWorldLocal::UpdateEffectDef(qhandle_t effectHandle, const renderEffect_t* reffect, int time) {
 	// return true will remove effect
-#if !defined(_BSE_NULL)
     int v6; // esi
     rvRenderEffectLocal *v15; // ebx
     float v19; // [esp+0h] [ebp-28h]
@@ -3411,13 +3404,9 @@ bool idRenderWorldLocal::UpdateEffectDef(qhandle_t effectHandle, const renderEff
     if ( push )
         idRenderWorldLocal::MarkEffectDef(effectHandle);
     return false;
-#else
-	return true;
-#endif
 }
 
 void idRenderWorldLocal::FreeEffectDef(qhandle_t effectHandle) {
-#if !defined(_BSE_NULL)
     int num = effectDefs.Num(); // eax
     rvRenderEffectLocal *v5; // esi
 
@@ -3460,11 +3449,9 @@ void idRenderWorldLocal::FreeEffectDef(qhandle_t effectHandle) {
                     num);
         }
     }
-#endif
 }
 
 void idRenderWorldLocal::StopEffectDef(qhandle_t effectHandle) { 
-#if !defined(_BSE_NULL)
     rvRenderEffectLocal *v2; // esi
 
     if ( effectHandle < 0 || effectHandle >= effectDefs.Num() )
@@ -3489,13 +3476,11 @@ void idRenderWorldLocal::StopEffectDef(qhandle_t effectHandle) {
             bse->StopEffect(v2);
         }
     }
-#endif
 }
 #endif
 
 #ifdef _RAVEN
 const class rvRenderEffectLocal* idRenderWorldLocal::GetEffectDef(qhandle_t effectHandle) const { 
-#if !defined(_BSE_NULL)
     int num; // esi
     const rvRenderEffectLocal *result; // eax
 
@@ -3521,17 +3506,10 @@ const class rvRenderEffectLocal* idRenderWorldLocal::GetEffectDef(qhandle_t effe
         }
     }
     return result;
-#else
-	return NULL;
-#endif
 }
 
 bool idRenderWorldLocal::EffectDefHasSound(const renderEffect_s* reffect) {
-#if !defined(_BSE_NULL)
 	return reffect && bse->CheckDefForSound(reffect);
-#else
-    return false;
-#endif
 }
 #endif
 

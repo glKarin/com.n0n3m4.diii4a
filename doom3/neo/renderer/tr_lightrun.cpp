@@ -1351,7 +1351,6 @@ void R_DeriveEntityData(idRenderEntityLocal* entity)
 #endif
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#if !defined(_BSE_NULL)
 void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def)
 {
     areaReference_s *effectRefs; // eax
@@ -1368,5 +1367,4 @@ void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def)
     }
     def->effectRefs = NULL;
 }
-#endif
 #endif

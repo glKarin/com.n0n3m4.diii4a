@@ -1238,9 +1238,7 @@ void idRenderWorldLocal::AddAreaRefs(int areaNum, const portalStack_t *ps)
 	AddAreaEntityRefs(areaNum, ps);
 	AddAreaLightRefs(areaNum, ps);
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#if !defined(_BSE_NULL)
     AddAreaEffectRefs(areaNum, ps);
-#endif
 #endif
 }
 
@@ -1321,9 +1319,7 @@ void idRenderWorldLocal::FindViewLightsAndEntities(void)
 	tr.viewDef->viewLights = NULL;
 	tr.viewDef->viewEntitys = NULL;
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#if !defined(_BSE_NULL)
     tr.viewDef->viewEffects = NULL;
-#endif
 #endif
 
 	// find the area to start the portal flooding in
@@ -1794,7 +1790,6 @@ void idRenderWorldLocal::FindVisibleAreas_r(const idVec3 &origin, int areaNum, c
 #endif
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#if !defined(_BSE_NULL)
 void idRenderWorldLocal::AddAreaEffectRefs(int areaNum, const portalStack_s *ps) {
     areaReference_s *p_effectRefs; // ebp
     areaReference_s *i; // edi
@@ -1847,7 +1842,6 @@ void idRenderWorldLocal::AddAreaEffectRefs(int areaNum, const portalStack_s *ps)
         }
     }
 }
-#endif
 #endif
 
 #ifdef _HUMANHEAD

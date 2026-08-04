@@ -250,9 +250,7 @@ typedef struct areaReference_s {
 	idRenderLightLocal 	*light;					// only one of entity / light will be non-NULL
 	struct portalArea_s		*area;					// so owners can find all the areas they are in
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
-#if !defined(_BSE_NULL)
     rvRenderEffectLocal	*effect;		// head/tail of doubly linked list, may change
-#endif
 #endif
 } areaReference_t;
 
@@ -1580,10 +1578,8 @@ void R_SetLightProject(idPlane lightProject[4], const idVec3 origin, const idVec
                        const idVec3 rightVector, const idVec3 upVector, const idVec3 start, const idVec3 stop);
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#if !defined(_BSE_NULL)
 void R_AddEffectSurfaces(void);
 viewEffect_s * R_SetEffectDefViewEntity(rvRenderEffectLocal *def);
-#endif
 #endif
 
 void R_AddLightSurfaces(void);
@@ -2355,9 +2351,8 @@ typedef struct viewEffect_s/* : viewEntity_s*/ // 164 bytes in 32bits
     float distanceToCamera;
 } viewEffect_t;
 
-#if !defined(_BSE_NULL)
 #include "../raven/bse/BSE.h"
-#endif
+
 class rvRenderModelBSE;
 class rvRenderEffectLocal : public rvRenderEffect
 {
@@ -2389,9 +2384,7 @@ public:
     rvRenderModelBSE *model;
 };
 
-#if !defined(_BSE_NULL)
 void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def);
-#endif
 #endif
 
 void GLSL_AddCommand(void);

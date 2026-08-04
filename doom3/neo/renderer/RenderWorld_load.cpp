@@ -74,11 +74,9 @@ void idRenderWorldLocal::FreeWorld()
 			common->Error("FreeWorld: unexpected remaining entityRefs");
 		}
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
-#if !defined(_BSE_NULL)
         if (area->effectRefs.areaNext != &area->effectRefs) {
             common->Error("FreeWorld: unexpected remaining effectRefs");
         }
-#endif
 #endif
 	}
 
@@ -375,11 +373,9 @@ void idRenderWorldLocal::SetupAreaRefs()
 		        portalAreas[i].entityRefs.areaPrev =
 		                &portalAreas[i].entityRefs;
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
-#if !defined(_BSE_NULL)
         portalAreas[i].effectRefs.areaNext =
                 portalAreas[i].effectRefs.areaPrev =
                         &portalAreas[i].effectRefs;
-#endif
 #endif
 	}
 }
@@ -638,7 +634,6 @@ void idRenderWorldLocal::FreeDefs()
 	}
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
-#if !defined(_BSE_NULL)
     // free all effectDefs
     for ( i = 0; i < effectDefs.Num(); ++i )
     {
@@ -650,7 +645,6 @@ void idRenderWorldLocal::FreeDefs()
             effectDefs[i] = NULL;
         }
     }
-#endif
 #endif
 }
 

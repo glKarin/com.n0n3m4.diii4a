@@ -578,9 +578,7 @@ class idRenderModelSprite : public idRenderModelStatic
 };
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE model
-#if !defined(_BSE_NULL)
 #include "../raven/renderer/Model_bse.h"
-#endif
 #endif
 
 #ifdef _HUMANHEAD

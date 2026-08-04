@@ -30,9 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
-#if !defined(_BSE_NULL)
 #include "../raven/bse/BSE.h"
-#endif
 #endif
 
 #ifdef _SPLASHDAMAGE //karin: binary data info

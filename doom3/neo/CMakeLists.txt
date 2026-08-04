@@ -185,8 +185,6 @@ endif()
 # Quake4
 if(BUILD_Q4)
 option(RAVEN								"Build the raven core" 														ON)
-option(RAVEN_BSE							"Raven BSE onQuake 4" 														ON)
-option(RAVEN_BSE_FX							"OpenBSE with Fx in Raven Quake 4" 											OFF)
 option(QUAKE4								"Build the quake4 game code" 												ON)
 option(Q4_MOD_FULL_BODY_AWARENESS			"Build quake4 full body awareness mod support" 								ON)
 option(Q4_MOD_BOTS							"Build quake4 bots mod support" 											ON)
@@ -1910,13 +1908,7 @@ if(RAVEN OR QUAKE4 OR BUILD_Q4_MOD)
 	if(NOT MSVC)
 		set_target_properties(idlib_raven PROPERTIES COMPILE_FLAGS "-fPIC")
 	endif()
-	set(bse_compile_definitions "")
-	if(RAVEN_BSE)
-		set(bse_compile_definitions "_RAVEN_BSE")
-	elseif(RAVEN_BSE_FX)
-		set(bse_compile_definitions "_RAVEN_FX")
-	endif()
-	set_target_properties(idlib_raven PROPERTIES COMPILE_DEFINITIONS "_RAVEN;${bse_compile_definitions}")
+	set_target_properties(idlib_raven PROPERTIES COMPILE_DEFINITIONS "_RAVEN")
 	target_include_directories(idlib_raven PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_raven})
@@ -1996,7 +1988,7 @@ if(SPLASHDAMAGE OR ETQW)
 	if(NOT MSVC)
 		set_target_properties(idlib_splashdamage PROPERTIES COMPILE_FLAGS "-fPIC")
 	endif()
-	set_target_properties(idlib_splashdamage PROPERTIES COMPILE_DEFINITIONS "_SPLASHDAMAGE;_RAVEN_BSE")
+	set_target_properties(idlib_splashdamage PROPERTIES COMPILE_DEFINITIONS "_SPLASHDAMAGE")
 	target_include_directories(idlib_splashdamage PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage" "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage/idlib")
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_idlib_splashdamage})
@@ -2695,7 +2687,6 @@ if(RAVEN)
 			${src_dmap}
 			)
 
-	if(RAVEN_BSE)
 		set(raven_bse_src
 				raven/bse/BSE_Effect.cpp
 				raven/bse/BSE_EffectTemplate.cpp
@@ -2714,25 +2705,7 @@ if(RAVEN)
 		list(APPEND src_core_raven ${raven_bse_src})
 		add_globbed_headers(src_core_raven "raven")
 		message(STATUS "Build Raven BSE")
-	elseif(RAVEN_BSE_FX)
-		set(raven_fx_bse_src
-				raven/fx/Model_bse.cpp
-				raven/fx/BSE_Fx.cpp
-				raven/fx/BSE_Manager.cpp
-				raven/fx/BSE_Decl.cpp
-				raven/fx/BSE_Particle.cpp
-				)
-		list(APPEND src_core_raven ${raven_fx_bse_src})
-		add_globbed_headers(raven_fx_bse_src "raven")
-		message(STATUS "Build Open Fx BSE")
-	else()
-		set(raven_null_bse_src
-				raven/fx/BSE_Null.cpp
-				)
-		list(APPEND src_core_raven ${raven_null_bse_src})
-		add_globbed_headers(raven_null_bse_src "raven")
-		message(STATUS "Build Null BSE")
-	endif()
+
 	add_globbed_headers(raven_renderer_src "raven")
 	add_globbed_headers(raven_framework_src "raven")
 
@@ -3266,7 +3239,7 @@ if(SPLASHDAMAGE)
 	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_splashdamage} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
-	set_target_properties(${ETQWBINARY} PROPERTIES COMPILE_DEFINITIONS "_SPLASHDAMAGE;_RAVEN_BSE;${CORE_DEFINES}")
+	set_target_properties(${ETQWBINARY} PROPERTIES COMPILE_DEFINITIONS "_SPLASHDAMAGE;${CORE_DEFINES}")
 	set_target_properties(${ETQWBINARY} PROPERTIES LINK_FLAGS "${ldflags}")
 	target_include_directories(${ETQWBINARY} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage" "${CMAKE_CURRENT_SOURCE_DIR}/raven" "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage/idlib" "${CMAKE_CURRENT_SOURCE_DIR}/splashdamage/idlib/sys")
 	#target_compile_options(${ETQWBINARY} PRIVATE -fno-inline) # allow check this is NULL

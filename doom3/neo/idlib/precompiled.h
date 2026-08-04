@@ -270,11 +270,7 @@ const float MAX_BOUND_SIZE = 65536.0f;
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 // RAVEN BEGIN
 // jscott: Effects system interface
-#ifdef _RAVEN_BSE
 #include "../raven/bse/BSEInterface.h"
-#else
-#include "../raven/fx/BSEInterface.h"
-#endif
 // RAVEN END
 #endif
 

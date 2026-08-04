@@ -72,9 +72,7 @@ typedef struct portalArea_s {
 	areaReference_t	entityRefs;		// head/tail of doubly linked list, may change
 	areaReference_t	lightRefs;		// head/tail of doubly linked list, may change
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#if !defined(_BSE_NULL)
     areaReference_t	effectRefs;		// head/tail of doubly linked list, may change
-#endif
 #endif
 #ifdef _SPLASHDAMAGE
 	int				portalFlags;
@@ -198,7 +196,6 @@ class idRenderWorldLocal : public idRenderWorld
 #endif
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#if !defined(_BSE_NULL)
         void                    MarkEffectDef(int effectHandle);
         void                    PushEffectDef(int effectHandle);
         void                    AddAreaEffectRefs(int areaNum, const struct portalStack_s *ps);
@@ -206,7 +203,6 @@ class idRenderWorldLocal : public idRenderWorld
         void					PushPolytopeIntoTree_r(idRenderEntityLocal *def, idRenderLightLocal *light, rvRenderEffectLocal *reffect, const idBox *box, const idVec3 *points, int numPoints, int nodeNum);
 
         void					PushPolytopeIntoTree(idRenderEntityLocal *def, idRenderLightLocal *light, rvRenderEffectLocal *reffect, const idBox *box, const idVec3 *points, int numPoints);
-#endif
 
 		// RAVEN BEGIN
 		// jscott: handling of effects

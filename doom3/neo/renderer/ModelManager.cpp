@@ -378,13 +378,11 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
         model = new idRenderModelStatic;
         model->InitFromFile(modelName);
 #endif
-
-#ifdef _RAVEN
-#if !defined(_BSE_NULL)
+// BSE
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 	} else if (extension.Icmp("bse") == 0) {
 		model = new rvRenderModelBSE;
 		model->InitFromFile(modelName);
-#endif
 #endif
 #ifdef _HUMANHEAD //k: beam model
 	} else if (extension.Icmp("beam") == 0) {
@@ -395,9 +393,6 @@ idRenderModel *idRenderModelManagerLocal::GetModel(const char *modelName, bool c
 	} else if (extension.Icmp("modelb") == 0) {
 		model = new idRenderModelStatic;
 		model->InitFromFile(modelName);
-    } else if (extension.Icmp("bse") == 0) {
-        model = new rvRenderModelBSE;
-    	model->InitFromFile(modelName);
     } else if (extension.Icmp("clust") == 0) {
     	model = new sdRenderModelClust;
     	model->InitFromFile(modelName);

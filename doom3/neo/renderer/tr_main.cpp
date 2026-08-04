@@ -1308,9 +1308,7 @@ void R_RenderView(viewDef_t *parms)
 #endif
 
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE)
-#if !defined(_BSE_NULL)
     R_AddEffectSurfaces();
-#endif
 #endif
 
 	// any viewLight that didn't have visible surfaces can have it's shadows removed
