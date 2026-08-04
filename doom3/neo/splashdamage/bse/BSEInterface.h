@@ -3,7 +3,7 @@
 
 #ifdef _SPLASHDAMAGE
 #include "raven/bse/BSEInterface.h"
-#include "raven/bse/bse_effecttemplate.h"
+#include "raven/bse/BSE_EffectTemplate.h"
 #else
 #ifndef _BSE_INTERFACE_H_INC_
 #define _BSE_INTERFACE_H_INC_
