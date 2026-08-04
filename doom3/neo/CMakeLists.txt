@@ -2690,14 +2690,14 @@ if(RAVEN)
 		set(raven_bse_src
 				raven/bse/BSE_Effect.cpp
 				raven/bse/BSE_EffectTemplate.cpp
-				raven/bse/bse_electricity.cpp
+				raven/bse/BSE_Electricity.cpp
 				raven/bse/BSE_Envelopes.cpp
 				raven/bse/BSE_Light.cpp
 				raven/bse/BSE_Manager.cpp
 				raven/bse/BSE_ParseParticle2.cpp
 				raven/bse/BSE_Particle.cpp
 				raven/bse/BSE_Segment.cpp
-				raven/bse/bse_render.cpp
+				raven/bse/BSE_Render.cpp
 				raven/bse/BSE_SegmentTemplate.cpp
 				raven/bse/BSE_SpawnDomains.cpp
 				raven/renderer/Model_bse.cpp
@@ -3176,14 +3176,14 @@ if(SPLASHDAMAGE)
 	set(splashdamage_bse_src
 			raven/bse/BSE_Effect.cpp
 			raven/bse/BSE_EffectTemplate.cpp
-			raven/bse/bse_electricity.cpp
+			raven/bse/BSE_Electricity.cpp
 			raven/bse/BSE_Envelopes.cpp
 			raven/bse/BSE_Light.cpp
 			raven/bse/BSE_Manager.cpp
 			raven/bse/BSE_ParseParticle2.cpp
 			raven/bse/BSE_Particle.cpp
 			raven/bse/BSE_Segment.cpp
-			raven/bse/bse_render.cpp
+			raven/bse/BSE_Render.cpp
 			raven/bse/BSE_SegmentTemplate.cpp
 			raven/bse/BSE_SpawnDomains.cpp
 			raven/renderer/Model_bse.cpp
