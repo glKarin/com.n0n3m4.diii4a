@@ -1474,6 +1474,7 @@ void idSessionLocal::MenuEvent(const sysEvent_t *event)
 	}
 
 	//karin: convert to gui event if key down, hardcode
+#if 0 //karin: now using sdBindContext
 	if(event->evType == SE_KEY && event->evValue2 == 1)
 	{
 		int value; //karin: see in guis/UIWindow.cpp
@@ -1487,6 +1488,7 @@ void idSessionLocal::MenuEvent(const sysEvent_t *event)
 			case K_KP_ENTER:
 				value = ULI_MENU_EVENT_ACCEPT;
 				break;
+#if 0
 			case K_RIGHTARROW: // right/down: nav to next
 			case K_DOWNARROW:
 				value = ULI_MENU_EVENT_NAV_FORWARD;
@@ -1495,6 +1497,7 @@ void idSessionLocal::MenuEvent(const sysEvent_t *event)
 			case K_UPARROW:
 				value = ULI_MENU_EVENT_NAV_BACKWARD;
 				break;
+#endif
 			case K_TAB: // tab: nav to next | shift+tab: nav to previous
 				value = idKeyInput::IsDown(K_SHIFT) ? ULI_MENU_EVENT_NAV_BACKWARD : ULI_MENU_EVENT_NAV_FORWARD;
 			break;
@@ -1512,6 +1515,7 @@ void idSessionLocal::MenuEvent(const sysEvent_t *event)
 				return;
 		}
 	}
+#endif
 
 	(void)game->HandleGuiEvent(event);
 #else

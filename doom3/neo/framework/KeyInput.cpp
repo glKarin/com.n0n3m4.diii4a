@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
+#ifdef _SPLASHDAMAGE
+#include "framework/KeyInputManager_Local.h"
+#endif
+
 typedef struct {
 	const char	*name;
 	int		keynum;
@@ -179,6 +183,8 @@ keyname_t keynames[] = {
 
 	{"SEMICOLON",		';',				"#str_00000112"},	// because a raw semicolon separates commands
 	{"APOSTROPHE",		'\'',				"#str_00000113"},	// because a raw apostrophe messes with parsing
+	{"RIGHTSHIFT",		K_RIGHT_SHIFT,		"#str_00000122"},
+	{"RIGHTCTRL",		K_RIGHT_CTRL,		"#str_00000123"},
 #else
 	{"TAB",				K_TAB,				"#str_07018"},
 	{"ENTER",			K_ENTER,			"#str_07019"},
@@ -648,7 +654,11 @@ void Key_Unbind_f(const idCmdArgs &args)
 	int		b;
 
 	if (args.Argc() != 2) {
+#ifdef _SPLASHDAMAGE //karin: unbind <key> [<modifier> <context>]
+		common->Printf("unbind <key> [<modifier> <context>] : remove commands from a key\n");
+#else
 		common->Printf("unbind <key> : remove commands from a key\n");
+#endif
 		return;
 	}
 
@@ -660,6 +670,31 @@ void Key_Unbind_f(const idCmdArgs &args)
 			common->Printf("\"%s\" isn't a valid key\n", args.Argv(1));
 		}
 	} else {
+#ifdef _SPLASHDAMAGE //karin: unbind <key> [<modifier> <context>]
+		const char *modifier = NULL;
+		const char *context = NULL;
+		const int c = args.Argc();
+		if(c >= 3)
+			modifier = args.Argv(2);
+		if(c >= 4)
+			context = args.Argv(3);
+
+		idKey *modifierKey;
+		if(modifier && modifier[0])
+		{
+			int mb = idKeyInput::StringToKeyNum(modifier);
+			modifierKey = mb < 0 ? NULL : &keys[mb];
+		}
+		else
+			modifierKey = NULL;
+		//if(!sdKeyInputManagerLocal::IsDefaultContext(context))
+		{
+			sdBindContext *bindContext = keyInputManagerLocal.GetBindContext(context);
+			if(bindContext)
+				keyInputManager->UnbindKey(bindContext, keys[b], modifierKey);
+		}
+		//else
+#endif
 		idKeyInput::SetBinding(b, "");
 	}
 }
@@ -673,6 +708,9 @@ void Key_Unbindall_f(const idCmdArgs &args)
 {
 	int		i;
 
+#ifdef _SPLASHDAMAGE //karin: unbindall in all bind contexts
+	keyInputManagerLocal.UnBindAll();
+#endif
 	for (i = 0; i < MAX_KEYS; i++) {
 		idKeyInput::SetBinding(i, "");
 	}
@@ -691,7 +729,11 @@ void Key_Bind_f(const idCmdArgs &args)
 	c = args.Argc();
 
 	if (c < 2) {
+#ifdef _SPLASHDAMAGE //karin: bind <key> [<command> [<modifier> <context>]]
+		common->Printf("bind <key> [<command> [<modifier> <context>]] : attach a command to a key\n");
+#else
 		common->Printf("bind <key> [command] : attach a command to a key\n");
+#endif
 		return;
 	}
 
@@ -715,6 +757,16 @@ void Key_Bind_f(const idCmdArgs &args)
 	// copy the rest of the command line
 	cmd[0] = 0;		// start out with a null string
 
+#ifdef _SPLASHDAMAGE //karin: bind <key> [<command> [<modifier> <context>]]
+	const char *modifier = NULL;
+	const char *context = NULL;
+	if(c >= 5)
+	{
+		modifier = args.Argv(c - 2);
+		context = args.Argv(c - 1);
+		c -= 2;
+	}
+#endif
 	for (i = 2; i < c; i++) {
 		strcat(cmd, args.Argv(i));
 
@@ -723,6 +775,24 @@ void Key_Bind_f(const idCmdArgs &args)
 		}
 	}
 
+#ifdef _SPLASHDAMAGE //karin: bind <key> [<command> [<modifier> <context>]]
+	if(!context || !context[0])
+		context = "default";
+	//if(!sdKeyInputManagerLocal::IsDefaultContext(context))
+	{
+		sdBindContext *bindContext = keyInputManager->AllocBindContext(context);
+		idKey *modifierKey;
+		if(modifier && modifier[0])
+		{
+			int mb = idKeyInput::StringToKeyNum(modifier);
+			modifierKey = mb < 0 ? NULL : &keys[mb];
+		}
+		else
+			modifierKey = NULL;
+		keyInputManager->SetBinding(bindContext, keys[b], cmd, modifierKey);
+	}
+	//else
+#endif
 	idKeyInput::SetBinding(b, cmd);
 }
 
@@ -773,12 +843,23 @@ void idKeyInput::WriteBindings(idFile *f)
 
 			// handle the escape character nicely
 			if (!strcmp(name, "\\")) {
+#ifdef _SPLASHDAMAGE //karin: write bind contexts
+				f->Printf("bind \"\\\" \"%s\" \"\" \"default\"\n", keys[i].binding.c_str());
+#else
 				f->Printf("bind \"\\\" \"%s\"\n", keys[i].binding.c_str());
+#endif
 			} else {
+#ifdef _SPLASHDAMAGE //karin: write bind contexts
+				f->Printf("bind \"%s\" \"%s\" \"\" \"default\"\n", KeyNumToString(i, false), keys[i].binding.c_str());
+#else
 				f->Printf("bind \"%s\" \"%s\"\n", KeyNumToString(i, false), keys[i].binding.c_str());
+#endif
 			}
 		}
 	}
+#ifdef _SPLASHDAMAGE //karin: write bind contexts
+	keyInputManagerLocal.Write(f, false);
+#endif
 }
 
 /*

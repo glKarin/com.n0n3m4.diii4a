@@ -391,8 +391,8 @@ typedef enum {
 
 	K_LAST_KEY  = 254	// this better be < 256!
 } keyNum_t;
-#define K_RIGHT_SHIFT K_SHIFT
-#define K_RIGHT_CTRL K_CTRL
+//#define K_RIGHT_SHIFT K_SHIFT
+//#define K_RIGHT_CTRL K_CTRL
 typedef keyNum_t keyNum_e; // original in sys/keynum.h
 #endif
 

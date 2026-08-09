@@ -7,8 +7,8 @@
 class sdKeyInputManagerLocal : public sdKeyInputManager
 {
 public:
-	sdKeyInputManagerLocal();
-	virtual ~sdKeyInputManagerLocal();
+							sdKeyInputManagerLocal(void);
+	virtual					~sdKeyInputManagerLocal(void);
 
 	virtual void			SetBinding( sdBindContext* context, idKey& key, const char* binding, idKey* modifierKey );
 	virtual const char*		GetBinding( sdBindContext* context, idKey& key, idKey* modifierKey );
@@ -35,10 +35,32 @@ public:
 	virtual bool			AnyKeysDown( void );
 
 	void					Init(void);
+	void					BindDefault(void);
     const idKey&			GetKeyByNum( int keynum ) const;
+	sdBindContext *			GetBindContext(const char *name);
+	void					Write(idFile *f, bool unbindall = false) const;
+	void					UnBindAll(void);
+
+	static bool				IsDefaultContext(const char *name) {
+		return !name || !name[0] || idStr::Icmp(name, "default") == 0;
+	}
+
+private:
+	enum bindContextFlag {
+		BCF_DEFAULT = 1,
+		BCF_MENU = 1 << 1,
+	};
+	bool					IsMenu(sdBindContext *context) const;
+	bool					IsDefault(sdBindContext *context) const {
+		return defaultContext == context || !context;
+	}
 
 private:
 	idList<sdBindContext *>	bindContexts;
+	//karin: add HACK: ignore key command in menu
+	idList<int>				contextFlags;
+	sdBindContext *			defaultContext;
+	sdBindContext *			currentContext;
 };
 
 extern sdKeyInputManagerLocal keyInputManagerLocal;
