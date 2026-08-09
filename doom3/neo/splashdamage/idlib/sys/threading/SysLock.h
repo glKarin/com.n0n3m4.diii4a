@@ -15,6 +15,8 @@ public:
 	static bool				Acquire( lockHandle_t& handle, bool blocking );
 	static void				Release( lockHandle_t& handle );
 
+	static void				Init( lockHandle_t& handle, bool recursive ); //karin: add recursive flag
+
 private:
 							sdSysLock() {}
 };

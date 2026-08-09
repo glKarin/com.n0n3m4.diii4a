@@ -47,3 +47,14 @@ sdSysLock::Release
 void sdSysLock::Release( lockHandle_t& handle ) {
 	::LeaveCriticalSection( &handle );
 }
+
+/*
+=============
+sdSysLock::Init
+//karin: add recursive flag
+=============
+*/
+void sdSysLock::Init( lockHandle_t& handle, bool recursive ) {
+	(void)recursive;
+	::InitializeCriticalSection( &handle );
+}

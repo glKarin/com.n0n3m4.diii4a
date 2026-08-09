@@ -51,3 +51,21 @@ sdSysLock::Release
 void sdSysLock::Release( lockHandle_t& handle ) {
 	pthread_mutex_unlock( &handle );
 }
+
+/*
+=============
+sdSysLock::Init
+//karin: add recursive flag
+=============
+*/
+void sdSysLock::Init( lockHandle_t& handle, bool recursive ) {
+	pthread_mutexattr_t	attr;
+
+	pthread_mutexattr_init( &attr );
+	if (recursive)
+		pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE );
+	else
+		pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_ERRORCHECK );
+	pthread_mutex_init( &handle, &attr );
+	pthread_mutexattr_destroy( &attr );
+}
