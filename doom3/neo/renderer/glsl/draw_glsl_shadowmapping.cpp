@@ -1349,6 +1349,10 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
         return;
     }
 
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+    RB_GLSL_CreateDrawMegaTextureInteractions(surf);
+#endif
+
     // bind the vertex and fragment shader
     shaderProgram_t *shadowInteractionShader = RB_SelectShadowMappingInteractionShader(backEnd.vLight);
     GL_UseProgram(shadowInteractionShader);
@@ -1626,7 +1630,7 @@ ID_INLINE static void RB_ShadowMappingInteraction_bindJitterTexture(void)
 }
 
 // Get clear color in interaction pass
-ID_INLINE static void RB_getClearColor(float clearColor[4])
+ID_INLINE static void RB_GetClearColor(float clearColor[4])
 {
 #if 1
 	if (r_clear.GetFloat() || idStr::Length(r_clear.GetString()) != 1 || r_lockSurfaces.GetBool() || r_singleArea.GetBool() || r_showOverDraw.GetBool()) {

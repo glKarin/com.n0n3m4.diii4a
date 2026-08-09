@@ -434,9 +434,71 @@ There is no way to specify explicit mip map levels
 
 #include "image/Image_load_compression.cpp"
 
+#ifdef _SPLASHDAMAGE
+
+/*
+==================
+R_BlendOverTexture
+
+ETQW variant with an independent blend amount for each channel.
+==================
+*/
+void R_BlendOverTexture( byte *data, int pixelCount, const byte blend[4], const byte amount[4] ) {
+	int inverseAmount[4];
+	int premult[4];
+	for ( int channel = 0; channel < 4; ++channel ) {
+		inverseAmount[channel] = 255 - amount[channel];
+		premult[channel] = blend[channel] * amount[channel];
+	}
+
+	for ( int i = 0; i < pixelCount; ++i, data += 4 ) {
+		for ( int channel = 0; channel < 4; ++channel ) {
+			data[channel] = (byte)( ( data[channel] * inverseAmount[channel] + premult[channel] ) / 255 );
+		}
+	}
+}
+
+void idImage::SetMipmapLevel( byte *pixels, int width, int height, int level, mipmapState_t &state ) {
+	if ( !pixels || width < 1 || height < 1 || state.colorType == mipmapState_t::MT_NONE ) {
+		return;
+	}
+
+	if ( state.colorType == mipmapState_t::MT_BLEND ) {
+		if ( level == 0 ) {
+			return;
+		}
+		byte color[4];
+		byte amount[4];
+		for ( int channel = 0; channel < 4; ++channel ) {
+			color[channel] = (byte)idMath::ClampInt( 0, 255, idMath::Ftoi( state.color[channel] * 255.0f ) );
+			amount[channel] = (byte)idMath::ClampInt( 0, 255, idMath::Ftoi( state.blend[channel] * 255.0f ) );
+		}
+		R_BlendOverTexture( pixels, width * height, color, amount );
+		return;
+	}
+
+	if ( state.colorType == mipmapState_t::MT_ALPHA ) {
+		const float alpha = level == 0 ? 50.0f : idMath::ClampFloat( 0.0f, 1.0f, ( 5.0f - level ) * 0.25f ) * 255.0f;
+		const byte alphaByte = (byte)idMath::ClampInt( 0, 255, idMath::Ftoi( alpha ) );
+		for ( int i = 0; i < width * height; ++i ) {
+			pixels[i * 4 + 3] = alphaByte;
+		}
+		return;
+	}
+
+	if ( state.colorType == mipmapState_t::MT_COLOR ) {
+		R_BlendOverTexture( pixels, width * height, mipBlendColors[idMath::ClampInt( 0, 15, level )] );
+	}
+}
+
 void idImage::GenerateImage(const byte *pic, int width, int height,
                             textureFilter_t filterParm, bool allowDownSizeParm,
-                            textureRepeat_t repeatParm, textureDepth_t depthParm)
+                            textureRepeat_t repeatParm, textureDepth_t depthParm, mipmapState_t mipmapState)
+#else
+void idImage::GenerateImage(const byte *pic, int width, int height,
+							textureFilter_t filterParm, bool allowDownSizeParm,
+							textureRepeat_t repeatParm, textureDepth_t depthParm)
+#endif
 {
 	bool	preserveBorder;
 	byte		*scaledBuffer;
@@ -663,6 +725,11 @@ void idImage::GenerateImage(const byte *pic, int width, int height,
 		}
 
 		miplevel++;
+
+#ifdef _SPLASHDAMAGE
+		if(mipmapState != defaultMipmapState)
+		SetMipmapLevel( scaledBuffer, scaled_width, scaled_height, miplevel, mipmapState );
+#endif
 
 		// this is a visualization tool that shades each mip map
 		// level with a different color so you can see the

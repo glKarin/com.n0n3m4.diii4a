@@ -1133,8 +1133,24 @@ void idInteraction::CreateInteraction(const idRenderModel *model)
 			continue;
 		}
 
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+		bool hasMegaTexture = false;
+		for(int ii = 0; ii < shader->GetNumStages(); ii++)
+		{
+			const shaderStage_t *surfaceStage = shader->GetStage(ii);
+			if (surfaceStage->newStage && surfaceStage->newStage->megaTexture)
+			{
+				hasMegaTexture = true;
+				break;
+			}
+		}
+#endif
 		// generate a lighted surface and add it
-		if (shader->ReceivesLighting()) {
+		if (shader->ReceivesLighting()
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+				|| hasMegaTexture
+#endif
+		) {
 			if (tri->ambientViewCount == tr.viewCount) {
 				sint->lightTris = R_CreateLightTris(entityDef, tri, lightDef, shader, sint->cullInfo);
 			} else {

@@ -2374,7 +2374,9 @@ R_InitCommands
 */
 void R_InitCommands(void)
 {
+#if !defined(_SPLASHDAMAGE)
 	cmdSystem->AddCommand("MakeMegaTexture", idMegaTexture::MakeMegaTexture_f, CMD_FL_RENDERER|CMD_FL_CHEAT, "processes giant images");
+#endif
 	cmdSystem->AddCommand("sizeUp", R_SizeUp_f, CMD_FL_RENDERER, "makes the rendered view larger");
 	cmdSystem->AddCommand("sizeDown", R_SizeDown_f, CMD_FL_RENDERER, "makes the rendered view smaller");
 	cmdSystem->AddCommand("reloadGuis", R_ReloadGuis_f, CMD_FL_RENDERER, "reloads guis");
@@ -2519,6 +2521,9 @@ void idRenderSystemLocal::Init(void)
 	R_InitTriSurfData();
 
 	globalImages->Init();
+#ifdef _SPLASHDAMAGE //karin: shutdown mega texture thread
+	R_InitMegaTextureSystem();
+#endif
 
 	idCinematic::InitCinematic();
 
@@ -2562,6 +2567,9 @@ void idRenderSystemLocal::Shutdown(void)
 #endif
 
 	R_DoneFreeType();
+#ifdef _SPLASHDAMAGE //karin: shutdown mega texture thread
+	R_ShutdownMegaTextureSystem();
+#endif
 
 	if (glConfig.isInitialized) {
 		globalImages->PurgeAllImages();

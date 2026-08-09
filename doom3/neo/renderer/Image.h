@@ -175,6 +175,33 @@ typedef enum {
 #define	MAX_IMAGE_NAME	256
 
 #ifdef _SPLASHDAMAGE
+
+struct mipmapState_t {
+	enum colorType_e {
+		MT_NONE,
+		MT_DEFAULT,
+		MT_WATER,
+		MT_COLORLEVELS
+#define MT_BLEND MT_DEFAULT // jmarshall23's DarklightNG
+#define MT_ALPHA MT_WATER // jmarshall23's DarklightNG
+#define MT_COLOR MT_COLORLEVELS // jmarshall23's DarklightNG
+	};
+
+	bool operator == ( const mipmapState_t &a ) {
+		return !memcmp( this, &a, sizeof( mipmapState_t ) );
+	}
+
+	bool operator != ( const mipmapState_t &a ) {
+		return !operator ==( a );
+	}
+
+	float		color[4];	// Color to blend to
+	float		blend[4];	// Blend factor for every channel
+	colorType_e	colorType;
+};
+
+static const mipmapState_t defaultMipmapState = { {0,0,0,0}, {0,0,0,0}, mipmapState_t::MT_NONE };
+
 class idImageGeneratorFunctorBase
 {
 public:
@@ -233,9 +260,15 @@ class idImage
 		// data goes from the bottom to the top line of the image, as OpenGL expects it
 		// These perform an implicit Bind() on the current texture unit
 		// FIXME: should we implement cinematics this way, instead of with explicit calls?
+#ifdef _SPLASHDAMAGE
+		void		GenerateImage(const byte *pic, int width, int height,
+									  textureFilter_t filter, bool allowDownSize,
+									  textureRepeat_t repeat, textureDepth_t depth, mipmapState_t mipmapState = defaultMipmapState);
+#else
 		void		GenerateImage(const byte *pic, int width, int height,
 		                              textureFilter_t filter, bool allowDownSize,
 		                              textureRepeat_t repeat, textureDepth_t depth);
+#endif
 
 		int		GenerateImageETC(int width, int height,
 		                              textureFilter_t filter, bool allowDownSize,
@@ -340,9 +373,16 @@ class idImage
 		int					classification;			// just for resource profiling
 
 #ifdef _SPLASHDAMAGE
+		mipmapState_t		mipmapState;			// Mipmap level coloring
+		int					numMipLevels;
+		float				minLod;
+		float				maxLod;
+
     	int					sourceWidth, sourceHeight;				// after power of two, before downsample
 		const idImageGeneratorFunctorBase *	generatorFunctor;	// NULL for files
+
 		bool				IsLoaded() const;
+		virtual void		SetMipmapLevel( byte *pixels, int width, int height, int level, mipmapState_t &state );
 #endif
 
 		// data for listImages
@@ -428,9 +468,15 @@ class idImageManager
 		// If the load fails for any reason, the image will be filled in with the default
 		// grid pattern.
 		// Will automatically resample non-power-of-two images and execute image programs if needed.
+#ifdef _SPLASHDAMAGE
+		idImage 			*ImageFromFile(const char *name,
+						textureFilter_t filter, bool allowDownSize,
+						textureRepeat_t repeat, textureDepth_t depth, cubeFiles_t cubeMap = CF_2D, mipmapState_t mipmapState = defaultMipmapState);
+#else
 		idImage 			*ImageFromFile(const char *name,
 		                textureFilter_t filter, bool allowDownSize,
 		                textureRepeat_t repeat, textureDepth_t depth, cubeFiles_t cubeMap = CF_2D);
+#endif
 
 		// look for a loaded image, whatever the parameters
 		idImage 			*GetImage(const char *name) const;
@@ -477,6 +523,15 @@ class idImageManager
 		void				AddDDSCommand(const char *cmd);
 
 		void				PrintMemInfo(MemInfo_t *mi);
+#ifdef _SPLASHDAMAGE //karin: mega texture of jmarshall23's DarklightNG
+		// ETQW MegaTextures are image-manager resources. Materials hold borrowed
+		// pointers so duplicate declarations share one streaming/cache object.
+		idMegaTexture *		MegaTextureFromFile( const char *name );
+		void				PurgeAllMegaTextures();
+		void				ReloadAllMegaTextures();
+
+		idList<idMegaTexture*> megaTextures;
+#endif
 
 		// cvars
 		static idCVar		image_roundDown;			// round bad sizes down to nearest power of two

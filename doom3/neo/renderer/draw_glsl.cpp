@@ -51,6 +51,10 @@ static idCVar harm_r_PBRRoughnessCorrection("harm_r_PBRRoughnessCorrection", "0.
 static idCVar harm_r_PBRMetallicCorrection("harm_r_PBRMetallicCorrection", "0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "min metallic for old specular texture in PBR. 0 = disable; else = metallic = texture(specularTexture, st).r + harm_r_PBRMetallicCorrection", -1, 1);
 static idCVar harm_r_ambientLightingBrightness("harm_r_ambientLightingBrightness", "1.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Lighting brightness in ambient lighting");
 
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+extern void RB_GLSL_CreateDrawMegaTextureInteractions(const drawSurf_t *surf);
+#endif
+
 #include "glsl/draw_glsl_backend.cpp"
 
 #ifdef _SHADOW_MAPPING

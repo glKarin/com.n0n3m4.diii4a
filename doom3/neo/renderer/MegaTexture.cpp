@@ -25,6 +25,7 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
+#if !defined(_SPLASHDAMAGE)
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
@@ -1024,5 +1025,6 @@ breakOut:
 
 #endif
 }
+#endif
 
 

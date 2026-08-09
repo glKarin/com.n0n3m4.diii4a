@@ -284,6 +284,9 @@ static const int        MAX_FRAGMENT_PARMS = 8;
 #elif defined(_HUMANHEAD)
 static const int	MAX_VERTEX_PARMS = 8;
 static const int	MAX_FRAGMENT_PARMS = 8;
+#elif defined(_SPLASHDAMAGE)
+static const int        MAX_VERTEX_PARMS = 16;
+static const int        MAX_FRAGMENT_PARMS = 8;
 #else
 static const int	MAX_VERTEX_PARMS = 4;
 static const int	MAX_FRAGMENT_PARMS = 4; // add for DOOM3

@@ -2217,10 +2217,33 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 		if (!token.Icmp("megaTexture")) {
 #ifdef _SPLASHDAMAGE //karin: TEMP TODO new megatexture
+
+#if 1
+			if (src.ReadTokenOnLine(&token)) {
+				newStage.megaTexture = globalImages->MegaTextureFromFile(token.c_str());
+
+				//spd.declRenderProgram = NULL; // only using built-in shader
+				if (!newStage.megaTexture) {
+					SetMaterialFlag(MF_DEFAULTED);
+					continue;
+				}
+
+				const shaderProgram_t *shaderProgram = shaderManager->Find("megaTexture");
+				NS_DEBUG(common->Printf("NS vertexProgram: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
+				if(shaderProgram && shaderProgram->program > 0)
+					newStage.glslProgram = shaderProgram->program;
+				else
+					newStage.glslProgram = SHADER_HANDLE_INVALID;
+
+				continue;
+			}
+#else
 			src.SkipRestOfLine();
 			SetMaterialFlag(MF_DEFAULTED);
 			continue;
 #endif
+
+#else
 			if (src.ReadTokenOnLine(&token)) {
 				newStage.megaTexture = new idMegaTexture;
 
@@ -2246,6 +2269,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 #endif
 				continue;
 			}
+#endif
 		}
 
 
@@ -2551,7 +2575,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 	if (newStage.fragmentProgram || newStage.vertexProgram)
 #else
 #ifdef _SPLASHDAMAGE //karin: check newStage
-	if ((newStage.fragmentProgram || newStage.vertexProgram || newStage.glslProgram) && !spd.declRenderProgram)
+	if ((newStage.fragmentProgram || newStage.vertexProgram || newStage.glslProgram)/* && !spd.declRenderProgram*/)
 #else
 	if (newStage.fragmentProgram || newStage.vertexProgram || newStage.glslProgram)
 #endif
@@ -2609,7 +2633,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 
 #ifdef _SPLASHDAMAGE
 	//karin: must have 1 image in ::textures(same as ::texture)
-	if(isInteractionProgram || (!spd.declRenderProgram && !imageName[0] && hasInteractionMap)) {
+	if((isInteractionProgram || (!spd.declRenderProgram && !imageName[0] && hasInteractionMap)) && !ss->newStage) {
 		CompleteInterationStage(ss, spd);
 		//if(ss->hasAlphaTest && !isInteractionProgram)
 			//coverage = MC_TRANSLUCENT;

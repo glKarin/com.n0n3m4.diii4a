@@ -3157,7 +3157,16 @@ if(SPLASHDAMAGE)
 			splashdamage/renderer/OcclusionTest.cpp
 			splashdamage/renderer/draw_ambient.cpp
 			splashdamage/renderer/draw_atmosphere.cpp
+			splashdamage/renderer/draw_blendLight.cpp
 			splashdamage/renderer/Model_decal.cpp
+	)
+	set(splashdamage_megatexture_src
+			splashdamage/renderer/megatexture/MegaTexture.cpp
+			splashdamage/renderer/megatexture/MegaTextureCodec.cpp
+			splashdamage/renderer/megatexture/MegaTextureTileDecompressor.cpp
+			splashdamage/renderer/megatexture/MegaTextureTileDecompressor.cpp
+			splashdamage/renderer/megatexture/MegaTextureTileLoader.cpp
+			splashdamage/renderer/megatexture/draw_megatexture.cpp
 	)
 	set(splashdamage_decl_src
 			splashdamage/decllib/declAmbientCubeMap.cpp
@@ -3206,6 +3215,7 @@ if(SPLASHDAMAGE)
 			${splashdamage_renderer_src}
 			${splashdamage_bse_src}
 			${splashdamage_decl_src}
+			${splashdamage_megatexture_src}
 	)
 
 	if(ANDROID)

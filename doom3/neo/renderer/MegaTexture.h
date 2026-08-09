@@ -26,6 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+#include "renderer/megatexture/MegaTexture.h"
+#else
 class idTextureTile
 {
 	public:
@@ -99,4 +102,5 @@ class idMegaTexture
 		static idCVar	r_skipMegaTexture;
 		static idCVar	r_terrainScale;
 };
+#endif
 

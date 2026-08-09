@@ -1862,8 +1862,13 @@ Finds or loads the given image, always returning a valid image pointer.
 Loading of the image may be deferred for dynamic loading.
 ==============
 */
+#ifdef _SPLASHDAMAGE
+idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter, bool allowDownSize,
+									   textureRepeat_t repeat, textureDepth_t depth, cubeFiles_t cubeMap, mipmapState_t mipmapState)
+#else
 idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter, bool allowDownSize,
                                        textureRepeat_t repeat, textureDepth_t depth, cubeFiles_t cubeMap)
+#endif
 {
 	idStr name;
 	idImage	*image;
@@ -1900,6 +1905,17 @@ idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter
 			if (image->cubeFiles != cubeMap) {
 				common->Error("Image '%s' has been referenced with conflicting cube map states", _name);
 			}
+#ifdef _SPLASHDAMAGE
+			if ( image->mipmapState != mipmapState ) {
+				common->Warning( "Image '%s' has been referenced with conflicting mipmap states", _name );
+				image->mipmapState = mipmapState;
+				image->PurgeImage();
+				if ( image->partialImage ) {
+					image->partialImage->mipmapState = mipmapState;
+					image->partialImage->PurgeImage();
+				}
+			}
+#endif
 
 			if (image->filter != filter || image->repeat != repeat) {
 				// we might want to have the system reset these parameters on every bind and
@@ -1984,6 +2000,9 @@ idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter
 	image->type = TT_2D;
 	image->cubeFiles = cubeMap;
 	image->filter = filter;
+#ifdef _SPLASHDAMAGE
+	image->mipmapState = mipmapState;
+#endif
 
 	image->levelLoadReferenced = true;
 
@@ -1998,6 +2017,9 @@ idImage	*idImageManager::ImageFromFile(const char *_name, textureFilter_t filter
 		image->partialImage->type = TT_2D;
 		image->partialImage->cubeFiles = cubeMap;
 		image->partialImage->filter = filter;
+#ifdef _SPLASHDAMAGE
+		image->partialImage->mipmapState = mipmapState;
+#endif
 
 		image->partialImage->levelLoadReferenced = true;
 
@@ -2094,6 +2116,9 @@ void idImageManager::PurgeAllImages()
 #endif
 				);
 	}
+#ifdef _SPLASHDAMAGE //karin: mega texture of jmarshall23's DarklightNG
+	PurgeAllMegaTextures();
+#endif
 }
 
 /*
@@ -2126,6 +2151,9 @@ void idImageManager::ReloadAllImages()
     else
 #endif
 	R_ReloadImages_f(args);
+#ifdef _SPLASHDAMAGE //karin: mega texture of jmarshall23's DarklightNG
+	ReloadAllMegaTextures();
+#endif
 }
 
 /*
@@ -2849,4 +2877,40 @@ idImage *idImageManager::ImageFromFunctor(const char *_name, const idImageGenera
 	return image;
 }
 
+/*
+===============
+MegaTextureFromFile
+===============
+*/
+idMegaTexture *idImageManager::MegaTextureFromFile( const char *fileName ) {
+	idStr canonical = fileName ? fileName : "";
+	/*canonical.BackSlashesToSlashes();
+	canonical.StripPath();*/ //k
+	canonical.StripFileExtension();
+	for ( int i = 0; i < megaTextures.Num(); ++i ) {
+		if ( !canonical.Icmp( megaTextures[i]->GetName() ) ) {
+			megaTextures[i]->Touch();
+			megaTextures[i]->SetLevelLoadReferenced( insideLevelLoad );
+			if ( !insideLevelLoad ) megaTextures[i]->SetReferencedOutsideLevelLoad( true );
+			return megaTextures[i];
+		}
+	}
+	idMegaTexture *megaTexture = new idMegaTexture;
+	if ( !megaTexture->InitFromMegaFile( canonical ) ) {
+		delete megaTexture;
+		return NULL;
+	}
+	megaTexture->SetLevelLoadReferenced( insideLevelLoad );
+	megaTexture->SetReferencedOutsideLevelLoad( !insideLevelLoad );
+	megaTextures.Append( megaTexture );
+	return megaTexture;
+}
+
+void idImageManager::PurgeAllMegaTextures() {
+	for ( int i = 0; i < megaTextures.Num(); ++i ) megaTextures[i]->Purge();
+}
+
+void idImageManager::ReloadAllMegaTextures() {
+	for ( int i = 0; i < megaTextures.Num(); ++i ) megaTextures[i]->Load();
+}
 #endif

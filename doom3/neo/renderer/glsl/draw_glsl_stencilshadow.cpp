@@ -12,13 +12,16 @@ static bool r_stencilShadowCombine = false;
 static bool r_stencilShadowTranslucent = false;
 static float r_stencilShadowAlpha = 1.0f;
 
-static void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *surf, bool noStencilTest);
-
-void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *surf, bool noStencilTest)
+static void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *surf, bool noStencilTest)
 {
 	if (!surf) {
 		return;
 	}
+
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+	if (!noStencilTest)
+		RB_GLSL_CreateDrawMegaTextureInteractions(surf);
+#endif
 
 	if(noStencilTest)
 		qglDisable(GL_STENCIL_TEST);
@@ -218,6 +221,11 @@ void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, in
 	if (!surf) {
 		return;
 	}
+
+#ifdef _SPLASHDAMAGExxx //karin: megatexture interaction
+	if ((mask & (1 | 2)) == 0)
+		RB_GLSL_CreateDrawMegaTextureInteractions(surf);
+#endif
 
 	if(mask & 1)
 		qglDisable(GL_STENCIL_TEST);
