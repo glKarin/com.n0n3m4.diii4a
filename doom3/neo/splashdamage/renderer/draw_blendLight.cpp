@@ -101,7 +101,7 @@ void RB_BlendLight_external(const shaderStage_t *pStage, const drawSurf_t *drawS
 	if(oldDrawBits)
 		GL_State(oldDrawBits);
 
-	blendLightProgram->Unbind(/*pStage*/);
+	blendLightProgram->Unbind(true);
 
 	blendLightProgram = NULL;
 

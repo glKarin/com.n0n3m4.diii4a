@@ -186,18 +186,7 @@ static void RB_CreateDrawAreaAmbient_external(const drawSurf_t *surf)
     RB_CreateSingleDrawAreaAmbient_external(surf, RB_DrawAreaAmbient_external);
 
     // disable features
-    ambientBasicShader->BindImage("bumpMap", NULL);
-
-    ambientBasicShader->BindImage("diffuseMap", NULL);
-
-    ambientBasicShader->BindImage("specularMap", NULL);
-
-    ambientBasicShader->BindImage("ambientCubeMap", NULL);
-
-    ambientBasicShader->BindImage("specularCubeMap", NULL);
-
-    backEnd.glState.currenttmu = -1;
-    GL_SelectTexture(0);
+    //ambientBasicShader->UnbindTexture();
 }
 
 static void RB_CreateDrawAreaAmbient_builtin(const drawSurf_t *surf)
@@ -327,7 +316,7 @@ static void RB_DrawAreaAmbients_external( drawSurf_t **drawSurfs, int numDrawSur
     GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));	// gl_Vertex
     GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
-    ambientBasicShader->Unbind();
+    ambientBasicShader->Unbind(true);
 
     backEnd.currentSpace = NULL;
 

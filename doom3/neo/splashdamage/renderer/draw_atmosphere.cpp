@@ -227,7 +227,7 @@ void RB_DrawAtmosphere( drawSurf_t **drawSurfs, int numDrawSurfs )
 
     GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
-    atmosphereShader->Unbind();
+    atmosphereShader->Unbind(true);
 
     backEnd.currentSpace = NULL;
 	

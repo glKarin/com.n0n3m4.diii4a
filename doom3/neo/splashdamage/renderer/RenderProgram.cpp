@@ -290,7 +290,7 @@ int sdRenderProgram::SetupState(void) const {
 	return 0;
 }
 
-void sdRenderProgram::UnbindUniform(const materialStage_t *stage) const
+void sdRenderProgram::UnbindTexture(void) const
 {
     // binding sampler uniform to null
 	for(int i = 0; i < numTextureUnits; i++)
@@ -298,6 +298,7 @@ void sdRenderProgram::UnbindUniform(const materialStage_t *stage) const
 		GL_SelectTexture( i );
 		globalImages->BindNull();
 	}
+    GL_SelectTextureForce(0);
 }
 
 void sdRenderProgram::Unbind(void) const
@@ -306,10 +307,17 @@ void sdRenderProgram::Unbind(void) const
     GL_UseProgram(NULL);
 }
 
-void sdRenderProgram::Unbind(const materialStage_t *stage) const
+void sdRenderProgram::Unbind(bool includeTexture) const
 {
-    UnbindUniform(stage);
-	Unbind();
+	if(includeTexture)
+	{
+		UnbindTexture();
+	}
+	else
+	{
+		GL_SelectTextureForce(0);
+	}
+	GL_UseProgram(NULL);
 }
 
 void sdRenderProgram::LoadSource(idStr &vsOut, idStr &fsOut) const

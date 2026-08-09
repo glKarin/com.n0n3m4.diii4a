@@ -1253,7 +1253,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 				RB_EndDrawPostprocess();
 			}
 
-			renderProgram->Unbind(/*pStage*/);
+			renderProgram->Unbind(true);
 
 			continue;
 		}
