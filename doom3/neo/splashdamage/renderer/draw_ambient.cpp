@@ -79,7 +79,7 @@ static void RB_DrawAreaAmbient_external(const drawInteraction_t *din)
 
     const sdDeclAmbientCubeMap *areaAmbient = din->surf->space->areaAmbient;
     ambientBasicShader->BindVector("ambientBrightness", areaAmbient->GetBrightness());
-    ambientBasicShader->BindVector("ambientScale", harm_r_areaAmbientScale.GetFloat(), harm_r_areaAmbientAlpha.GetFloat());
+    ambientBasicShader->BindVector("ambientScale", harm_r_areaAmbientScale.GetFloat() * backEnd.parms.ambientScale, harm_r_areaAmbientAlpha.GetFloat());
     ambientBasicShader->BindVector("diffuseMatrix_s", din->diffuseMatrix[0]);
     ambientBasicShader->BindVector("diffuseMatrix_t", din->diffuseMatrix[1]);
     ambientBasicShader->BindVector("bumpMatrix_s", din->bumpMatrix[0]);
