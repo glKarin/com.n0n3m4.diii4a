@@ -67,47 +67,30 @@ void sdRenderProgramManager::ReloadAll(void) {
 void sdRenderProgramManager::CheckCVars(void) {
 #if 1
 	const sdDeclRenderProgram *program;
-	idStrList changes(8);
 
-	if(r_shaderQuality.IsModified())
-	{
-		changes.Append(r_shaderQuality.GetName());
-		r_shaderQuality.ClearModified();
-	}
-	if(r_megaDrawMethod.IsModified())
-	{
-		changes.Append(r_megaDrawMethod.GetName());
-		r_megaDrawMethod.ClearModified();
-	}
-	if(r_normalizeNormalMaps.IsModified())
-	{
-		changes.Append(r_normalizeNormalMaps.GetName());
-		r_normalizeNormalMaps.ClearModified();
-	}
-	if(r_dxnNormalMaps.IsModified())
-	{
-		changes.Append(r_dxnNormalMaps.GetName());
-		r_dxnNormalMaps.ClearModified();
-	}
-	if(r_32ByteVtx.IsModified())
-	{
-		changes.Append(r_32ByteVtx.GetName());
-		r_32ByteVtx.ClearModified();
-	}
-	if(r_useDitherMask.IsModified())
-	{
-		changes.Append(r_useDitherMask.GetName());
-		r_useDitherMask.ClearModified();
-	}
-	if(r_shaderSkipSpecCubeMaps.IsModified())
-	{
-		changes.Append(r_shaderSkipSpecCubeMaps.GetName());
-		r_shaderSkipSpecCubeMaps.ClearModified();
-	}
-	if(alphatest_kill.IsModified())
-	{
-		changes.Append(alphatest_kill.GetName());
-		alphatest_kill.ClearModified();
+	static idCVar * const ShaderCVars[] = {
+		&r_shaderQuality,
+		&r_megaDrawMethod,
+		&r_normalizeNormalMaps,
+		&r_dxnNormalMaps,
+		&r_32ByteVtx,
+		&r_useDitherMask,
+		&r_shaderSkipSpecCubeMaps,
+		&alphatest_kill,
+		&r_detailTexture,
+		&r_megaMultiply,
+		&r_useARBPositionInvariant,
+		&r_skipDiffuse,
+		&r_skipBump,
+	};
+	static idStaticList<const idCVar *, sizeof(ShaderCVars) / sizeof(ShaderCVars[0])> changes;
+
+	for (int i = 0; i < sizeof(ShaderCVars) / sizeof(ShaderCVars[0]); i++) {
+		if(ShaderCVars[i]->IsModified())
+		{
+			changes.Append(ShaderCVars[i]);
+			ShaderCVars[i]->ClearModified();
+		}
 	}
 
 	if (changes.Num() == 0)
@@ -119,7 +102,7 @@ void sdRenderProgramManager::CheckCVars(void) {
     	program = programs[i]->GetDeclRenderProgram();
     	for (int m = 0; m < changes.Num(); m++)
     	{
-    		if(program->HasDefine(changes[m]))
+    		if(program->HasDefine(changes[m]->GetName()))
     		{
     			shaderNames.Append(program->GetName());
     			break;
@@ -129,6 +112,8 @@ void sdRenderProgramManager::CheckCVars(void) {
 
 	if(shaderNames.Num() > 0)
 		shaderManager->ReloadShaders(shaderNames);
+
+	changes.Clear();
 #else
 	bool changed = false;
 	if(r_shaderQuality.IsModified())
