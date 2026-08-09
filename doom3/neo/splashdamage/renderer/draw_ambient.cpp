@@ -14,6 +14,7 @@ idCVar harm_r_areaAmbientAlpha("harm_r_areaAmbientAlpha", "1.0", CVAR_FLOAT | CV
 
 extern void RB_CreateSingleDrawAreaAmbient_external(const drawSurf_t *drawSurf, void (*DrawInteraction)(const drawInteraction_t *));
 extern void RB_CreateSingleDrawAreaAmbient_builtin(const drawSurf_t *drawSurf, void (*DrawInteraction)(const drawInteraction_t *));
+extern void RB_GLSL_CreateDrawMegaTextureAmbients(const drawSurf_t *surf);
 
 static const sdRenderProgram *ambientBasicShader;
 
@@ -358,6 +359,13 @@ void RB_DrawAreaAmbient( drawSurf_t **drawSurfs, int numDrawSurfs )
     }
 
 	backEnd.vLight = NULL;
+
+    // draw megatexture ambients
+    for( int i = 0; i < numDrawSurfs; i++ )
+    {
+        RB_GLSL_CreateDrawMegaTextureAmbients(drawSurfs[i]);
+    }
+
     if (harm_r_builtinAreaAmbient.GetBool())
         RB_DrawAreaAmbients_builtin(drawSurfs, numDrawSurfs);
     else
