@@ -4033,6 +4033,26 @@ void idRenderWorldLocal::PushIntoConnectedOutsideAreas(const idVec3 &point, idRe
 		}
 	}
 }
+
+//karin: mega texture of jmarshall23's DarklightNG
+/*
+================
+idRenderWorldLocal::SetMegaTextureSTGrid
+================
+*/
+void idRenderWorldLocal::SetMegaTextureSTGrid( const idBounds &bounds, const idVec2 *grid, int width, int height ) {
+	megaTextureSTGrid.Clear();
+	megaTextureBounds.Clear();
+	megaTextureSTGridWidth = megaTextureSTGridHeight = 0;
+	if ( !grid || width < 2 || height < 2 || bounds.IsCleared() ) {
+		return;
+	}
+	megaTextureBounds = bounds;
+	megaTextureSTGridWidth = width;
+	megaTextureSTGridHeight = height;
+	megaTextureSTGrid.SetNum( width * height );
+	memcpy( megaTextureSTGrid.Ptr(), grid, width * height * sizeof( grid[0] ) );
+}
 #endif
 
 #ifdef _D3BFG_CULLING

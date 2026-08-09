@@ -998,6 +998,8 @@ class idRenderWorld
 
     	virtual void			SetupMatrices( const renderView_t* renderView, float* projectionMatrix, float* modelViewMatrix, const bool allowJitter ) = 0;
 
+		virtual void			SetMegaTextureSTGrid( const idBounds& bounds, const idVec2* grid, int width, int height ) = 0;
+
     	virtual struct atmosLightProjection_t *FindAtmosLightProjection( int lightID ) = 0;
 #endif
 

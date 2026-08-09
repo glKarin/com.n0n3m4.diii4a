@@ -115,6 +115,11 @@ void idRenderWorldLocal::FreeWorld()
 #ifdef _SPLASHDAMAGE //karin: only free imposter model
 	imposterGeometryManager->Clear();
 	atmosphere = NULL;
+	//karin: mega texture of jmarshall23's DarklightNG
+	megaTextureSTGrid.Clear();
+	megaTextureBounds.Clear();
+	megaTextureSTGridWidth = 0;
+	megaTextureSTGridHeight = 0;
 #endif
 
 	areaReferenceAllocator.Shutdown();
@@ -1470,6 +1475,101 @@ void idRenderWorldLocal::ParseInterAreaPortals_Binary(idFile *file) {
 	}
 }
 
+void idRenderWorldLocal::ParseMegatextureInfo_Binary(idFile *file)
+{
+	int w, h;
+	idBounds bounds;
+	int width, height;
+
+	file->Read1DFloatArray(bounds[0].ToFloatPtr());
+	file->Read1DFloatArray(bounds[1].ToFloatPtr());
+
+	file->ReadInt(width);
+	file->ReadInt(height);
+	idList<idVec2> list; // sizeof == 8
+	list.SetNum(width * height);
+
+	for (h = 0; h < height; ++h)
+	{
+		for (w = 0; w < width; ++w)
+		{
+			file->Read1DFloatArray(list[h * width + w].ToFloatPtr());
+		}
+	}
+
+#if 0
+	SetMegaTextureSTGrid(bounds, list.Ptr(), width, height);
+#else
+	megaTextureBounds = bounds;
+	megaTextureSTGridWidth = width;
+	megaTextureSTGridHeight = height;
+	megaTextureSTGrid.Swap(list);
+#endif
+}
+
+void idRenderWorldLocal::ParseAtmosLightProjection_Binary(idFile *file)
+{
+	int i, length;
+	idMat3 mat3;
+	idBounds bounds;
+
+	file->ReadInt(i);
+	file->ReadInt(length);
+	file->ReadMat3(mat3);
+	file->Read1DFloatArray(bounds.ToFloatPtr());
+	idList<byte> list;
+	list.SetNum(length * length);
+	file->Read(list.Ptr(), list.Num());
+
+#if 0
+	// TODO
+	atmosLightProjection_s atmosLightProjection;
+	atmosLightProjection.num = i;
+	atmosLightProjection.length = length;
+	atmosLightProjection.mat3 = mat3;
+	atmosLightProjection.bounds = bounds;
+	atmosLightProjection.list.Swap(list);
+#endif
+}
+
+void idRenderWorldLocal::ParseEnvBounds_Binary(idFile *file)
+{
+	idStr name;
+	int i, num, m, length;
+	idBounds bounds;
+	idList<envBounds_t> envBounds;
+
+	file->ReadString(name);
+	file->Read1DFloatArray(bounds[0].ToFloatPtr());
+	file->Read1DFloatArray(bounds[1].ToFloatPtr());
+	file->ReadInt(num);
+	envBounds.SetNum(num);
+
+	for (i = 0; i < num; ++i)
+	{
+		envBounds_t &eb = envBounds[i];
+		file->Read1DFloatArray(eb.bounds[0].ToFloatPtr());
+		file->Read1DFloatArray(eb.bounds[1].ToFloatPtr());
+		file->ReadInt(length);
+		eb.numPlanes = length;
+		eb.planes.SetNum(length);
+
+		for (m = 0; m < length; ++m)
+		{
+			file->Read1DFloatArray(eb.planes[m].ToFloatPtr());
+		}
+	}
+
+#if 0
+	// TODO
+	mapEnvBounds_t mapEnvBounds;
+	mapEnvBounds.name = name;
+	mapEnvBounds.bounds = bounds;
+	mapEnvBounds.numEnvBounds = num;
+	mapEnvBounds.envBounds.Swap(envBounds);
+#endif
+}
+
 bool idRenderWorldLocal::InitFromMap_Binary(const char *name) {
 	idStr fileName(name);
 	fileName.SetFileExtension(".procb");
@@ -1575,16 +1675,18 @@ bool idRenderWorldLocal::InitFromMap_Binary(const char *name) {
 			continue;
 		}
 
-		if (!idStr::Icmp(id, "atmosLightProjection")) {
-			file->Seek(chunkLength, FS_SEEK_CUR); //TODO: skip
-			continue;
-		}
 		if (!idStr::Icmp(id, "megaTextureInfo")) {
-			file->Seek(chunkLength, FS_SEEK_CUR); //TODO: skip
+			ParseMegatextureInfo_Binary(file);
 			continue;
 		}
+
+		if (!idStr::Icmp(id, "atmosLightProjection")) {
+			ParseAtmosLightProjection_Binary(file);
+			continue;
+		}
+
 		if (!idStr::Icmp(id, "mapEnvBounds")) {
-			file->Seek(chunkLength, FS_SEEK_CUR); //TODO: skip
+			ParseEnvBounds_Binary(file);
 			continue;
 		}
 

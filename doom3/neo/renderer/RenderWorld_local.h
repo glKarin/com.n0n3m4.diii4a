@@ -104,6 +104,30 @@ typedef struct gamePortalInfo_s
 #endif
 #endif
 
+#ifdef _SPLASHDAMAGE
+typedef struct envBounds_s
+{
+	idBounds bounds;
+	int numPlanes;
+	idList<idPlane> planes;
+} envBounds_t;
+typedef struct mapEnvBounds_s
+{
+	idStr name;
+	idBounds bounds;
+	int numEnvBounds;
+	idList<envBounds_t> envBounds;
+} mapEnvBounds_t;
+struct atmosLightProjection_s
+{
+	int num;
+	int length;
+	idMat3 mat3;
+	idBounds bounds;
+	idList<byte> list;
+};
+#endif
+
 class idRenderWorldLocal : public idRenderWorld
 {
 	public:
@@ -271,10 +295,21 @@ class idRenderWorldLocal : public idRenderWorld
 		void					ParseNodes_Binary(idFile *file);
 		idRenderModel 			*ParseModel_Binary(idFile *file, const idStrList &materialsTable);
 		void					ParseInterAreaPortals_Binary(idFile *file);
+		void					ParseMegatextureInfo_Binary(idFile *file);
+		void					ParseAtmosLightProjection_Binary(idFile *file);
+		void					ParseEnvBounds_Binary(idFile *file);
 		bool					InitFromMap_Binary(const char *name);
 
 		void					PushIntoOutsideAreas(idRenderEntityLocal *def, idRenderLightLocal *light);
 		void					PushIntoConnectedOutsideAreas(const idVec3 &point, idRenderEntityLocal *def, idRenderLightLocal *light);
+
+		virtual void			SetMegaTextureSTGrid( const idBounds &bounds, const idVec2 *grid, int width, int height );
+
+		//karin: mega texture of jmarshall23's DarklightNG
+		idBounds				megaTextureBounds;
+		idList<idVec2>			megaTextureSTGrid;
+		int						megaTextureSTGridWidth;
+		int						megaTextureSTGridHeight;
 #endif
 
 #ifdef _D3BFG_CULLING
