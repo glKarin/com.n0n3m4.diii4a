@@ -7,8 +7,6 @@
 
 #include "SDNetTask_local.h"
 
-static idCVar harm_com_autoLogin("harm_com_autoLogin", "", CVAR_SYSTEM | CVAR_ARCHIVE, "login username automatic when game start");
-
 //===============================================================
 //
 //	sdNetService
@@ -33,25 +31,18 @@ bool sdNetService_Local::Init() {
 	serviceState = SS_INITIALIZED;
 	dedicatedState = DS_ONLINE;
 	isInitialized = true;
-	if(harm_com_autoLogin.GetString() && harm_com_autoLogin.GetString()[0])
-	{
-		bool found = false;
-		for(int i = 0; i < userList.Num(); i++) {
-			sdNetUser *user = userList[i];
-			if(!idStr::Cmp(user->GetRawUsername(), harm_com_autoLogin.GetString()))
-			{
-				user->Activate();
-				found = true;
-				common->Printf("Login user '%s' automatic\n", user->GetRawUsername());
-				break;
-			}
-		}
-		if(!found)
+
+	for(int i = 0; i < userList.Num(); i++) {
+		sdNetUser *user = userList[i];
+		idDict &dict = user->GetProfile().GetProperties();
+		if(dict.GetBool("default", "0"))
 		{
-			common->Warning("Login user '%s' not found", harm_com_autoLogin.GetString());
-			harm_com_autoLogin.SetString("");
+			user->Activate();
+			common->Printf("Login user '%s' automatic\n", user->GetRawUsername());
+			break;
 		}
 	}
+
 	return isInitialized;
 }
 
