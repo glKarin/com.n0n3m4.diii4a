@@ -1113,9 +1113,19 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 
 		const sdRenderProgram *renderProgram = pStage->renderProgram;
 
-		if (renderProgram && renderProgram->IsValid() && (!pStage->newStage || !pStage->newStage->megaTexture)) {
+		if (renderProgram && renderProgram->IsValid())
+		{
 			if ( r_skipNewAmbient.GetBool() ) {
 				continue;
+			}
+
+			if (pStage->newStage && pStage->newStage->megaTexture) {
+				if (!harm_r_megatextureAmbient.GetBool())
+					continue; // render interaction
+				// find ambient version
+				renderProgram = renderProgram->GetDeclRenderProgram()->AmbientVersion();
+				if(!renderProgram || !renderProgram->IsValid())
+					continue;
 			}
 
 #if _TEST_RENDER_PROGRAM
@@ -1227,6 +1237,16 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 #endif
 				break;
 			}
+
+            // megaTextures bind a lot of images and set a lot of parameters
+            if ( pStage->newStage && pStage->newStage->megaTexture )
+            {
+				pStage->newStage->megaTexture->UpdateMapping( backEnd.viewDef->renderWorld );
+                pStage->newStage->megaTexture->SetMappingForSurface( tri );
+                idVec3	localViewer;
+                R_GlobalPointToLocal( surf->space->modelMatrix, backEnd.viewDef->renderView.vieworg, localViewer );
+                pStage->newStage->megaTexture->BindForViewOrigin( localViewer, renderProgram );
+            }
 
 			if((backEnd.glState.glStateBits & GLS_POLYMODE_LINE) == 0)
 				RB_DrawElementsWithCounters( tri );
