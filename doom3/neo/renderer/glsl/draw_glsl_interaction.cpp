@@ -164,7 +164,7 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 		return;
 	}
 
-#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+#ifdef _SPLASHDAMAGExxx //karin: megatexture interaction, move to if stage's lighting == SL_AMBIENT in RB_CreateSingleDrawInteractions
 	RB_GLSL_CreateDrawMegaTextureInteractions(surf);
 #endif
 

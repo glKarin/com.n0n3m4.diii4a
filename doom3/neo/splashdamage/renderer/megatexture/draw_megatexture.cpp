@@ -8,6 +8,9 @@ idCVar harm_r_megatextureAmbient("harm_r_megatextureAmbient", "0", CVAR_RENDERER
 extern idCVar harm_r_skipAreaAmbient;
 
 static const sdRenderProgram *megaTextureProgram = NULL;
+#ifdef _STENCIL_SHADOW_IMPROVE
+extern bool stencilShadowWithoutStencilTest;
+#endif
 
 ID_INLINE static void R_SetMetaTextureDrawInteraction(const shaderStage_t *surfaceStage, const float *surfaceRegs, float color[4])
 {
@@ -206,6 +209,11 @@ void RB_CreateSingleMegaTextureDrawInteractions(const drawSurf_t *surf, void (*D
 
 			R_SetMetaTextureDrawInteraction(surfaceStage, surfaceRegs, inter.diffuseColor.ToFloatPtr());
 			if (inter.diffuseColor[0] > 0 || inter.diffuseColor[1] > 0 || inter.diffuseColor[2] > 0) {
+				inter.diffuseColor[0] *= lightColor[0];
+				inter.diffuseColor[1] *= lightColor[1];
+				inter.diffuseColor[2] *= lightColor[2];
+				inter.diffuseColor[3] *= lightColor[3];
+
 #ifdef _NO_GAMMA //karin: r_brightness when unsupport gamma
 				if(RB_overbright > 1.0f)
 				{
@@ -226,7 +234,7 @@ void RB_CreateSingleMegaTextureDrawInteractions(const drawSurf_t *surf, void (*D
 
 				RB_SubmitMetaTextureInteraction(&inter, DrawInteraction);
 
-				megaTextureProgram->Unbind(/*pStage*/);
+				megaTextureProgram->Unbind(true);
 
 				//if(oldDrawBits)
 				GL_State(oldDrawBits);
@@ -271,6 +279,7 @@ RB_GLSL_CreateDrawMegaTextureInteractions
 */
 void RB_GLSL_CreateDrawMegaTextureInteractions(const drawSurf_t *surf)
 {
+	return;
 	if (!surf) {
 		return;
 	}
@@ -297,6 +306,101 @@ void RB_GLSL_CreateDrawMegaTextureInteractions(const drawSurf_t *surf)
 	backEnd.currentSpace = NULL; //k2023
 }
 
+/*
+=============
+RB_DrawMegaTextureInteraction
+
+=============
+*/
+bool RB_DrawMegaTextureInteraction(const drawInteraction_t *din, const shaderStage_t *lightStage, const shaderStage_t *surfaceStage)
+{
+	if (harm_r_megatextureAmbient.GetBool())
+		return false;
+
+#ifdef _STENCIL_SHADOW_IMPROVE //skip if fill transucent color first
+	if(stencilShadowWithoutStencilTest)
+		return false;
+#endif
+
+	if (!surfaceStage->newStage || !surfaceStage->newStage->megaTexture) {
+		return false;
+	}
+
+	if(!surfaceStage->renderProgram || !surfaceStage->renderProgram->IsValid())
+		return false;
+
+	const drawSurf_t *surf = din->surf;
+	const idMaterial	*surfaceShader = surf->material;
+	const float			*surfaceRegs = surf->shaderRegisters;
+	const viewLight_t	*vLight = backEnd.vLight;
+	const float			*lightRegs = vLight->shaderRegisters;
+
+	// ignore stages that fail the condition
+	if (!surfaceRegs[ surfaceStage->conditionRegister ]) {
+		return false;
+	}
+
+	drawInteraction_t inter = *din;
+	R_SetMetaTextureDrawInteraction(surfaceStage, surfaceRegs, inter.diffuseColor.ToFloatPtr());
+	float lightColor[4];
+
+	// backEnd.lightScale is calculated so that lightColor[] will never exceed
+	// tr.backEndRendererMaxLight
+	lightColor[0] = backEnd.lightScale * lightRegs[ lightStage->color.registers[0] ];
+	lightColor[1] = backEnd.lightScale * lightRegs[ lightStage->color.registers[1] ];
+	lightColor[2] = backEnd.lightScale * lightRegs[ lightStage->color.registers[2] ];
+	lightColor[3] = lightRegs[ lightStage->color.registers[3] ];
+	if (inter.diffuseColor[0] > 0 || inter.diffuseColor[1] > 0 || inter.diffuseColor[2] > 0) {
+		inter.diffuseColor[0] *= lightColor[0];
+		inter.diffuseColor[1] *= lightColor[1];
+		inter.diffuseColor[2] *= lightColor[2];
+		inter.diffuseColor[3] *= lightColor[3];
+
+#ifdef _NO_GAMMA //karin: r_brightness when unsupport gamma
+		if(RB_overbright > 1.0f)
+		{
+			inter.diffuseColor[0] *= RB_overbright;
+			inter.diffuseColor[1] *= RB_overbright;
+			inter.diffuseColor[2] *= RB_overbright;
+		}
+#endif
+	}
+	else
+		return false;
+
+	shaderProgram_t *lastProgram = backEnd.glState.currentProgram;
+	if(!surfaceStage->renderProgram->Bind(surfaceStage, surfaceShader, surfaceRegs))
+		return false;
+
+	megaTextureProgram = surfaceStage->renderProgram;
+
+	int oldDrawBits = backEnd.glState.glStateBits;
+
+	RB_MegaTexture_Update(surf, surfaceStage->newStage->megaTexture);
+
+	// perform setup here that will be constant for all interactions
+	GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE |
+			GLS_DEPTHMASK | //k: fix translucent interactions
+			backEnd.depthFunc);
+
+	RB_SetupDrawSurfMVP(surf);
+
+	megaTextureProgram->SetupState();
+
+	RB_MegaTexture_DrawInteraction(&inter);
+
+	megaTextureProgram->Unbind(true);
+
+	//if(oldDrawBits)
+	GL_State(oldDrawBits);
+
+	megaTextureProgram = NULL;
+
+	GL_UseProgram(lastProgram);
+
+	return true;
+}
+
 
 
 // ambient
@@ -317,8 +421,6 @@ static void RB_MegaTexture_DrawAmbient(const drawInteraction_t *din)
 	// draw it
 	RB_DrawElementsWithCounters(din->surf->geo);
 }
-
-
 
 ID_INLINE static int RB_MegaTexture_FilterAmbientStages(const drawSurf_t *surf, int drawStages[MAX_SHADER_STAGES]) {
 	const idMaterial	*surfaceShader = surf->material;
@@ -453,7 +555,7 @@ void RB_CreateSingleMegaTextureDrawAmbients(const drawSurf_t *surf, void (*DrawI
 
 			RB_SubmitMetaTextureInteraction(&inter, DrawInteraction);
 
-			megaTextureProgram->Unbind(/*pStage*/);
+			megaTextureProgram->Unbind(true);
 
 			//if(oldDrawBits)
 			GL_State(oldDrawBits);
@@ -499,4 +601,81 @@ void RB_GLSL_CreateDrawMegaTextureAmbients(const drawSurf_t *surf)
 	RB_CreateSingleMegaTextureDrawAmbients(surf, RB_MegaTexture_DrawAmbient);
 
 	backEnd.currentSpace = NULL; //k2023
+}
+
+/*
+=============
+RB_DrawMegaTextureAmbient
+
+=============
+*/
+bool RB_DrawMegaTextureAmbient(const drawSurf_t *surf, const shaderStage_t *surfaceStage)
+{
+	if (harm_r_megatextureAmbient.GetBool())
+		return false;
+
+	if (!surfaceStage->newStage || !surfaceStage->newStage->megaTexture) {
+		return false;
+	}
+
+	if(!surfaceStage->renderProgram || !surfaceStage->renderProgram->IsValid())
+		return false;
+
+	const idMaterial	*surfaceShader = surf->material;
+	const float			*surfaceRegs = surf->shaderRegisters;
+
+	// ignore stages that fail the condition
+	if (!surfaceRegs[ surfaceStage->conditionRegister ]) {
+		return false;
+	}
+
+	drawInteraction_t inter;
+	inter.surf = surf;
+	R_SetMetaTextureDrawInteraction(surfaceStage, surfaceRegs, inter.diffuseColor.ToFloatPtr());
+	if (inter.diffuseColor[0] > 0 || inter.diffuseColor[1] > 0 || inter.diffuseColor[2] > 0) {
+#ifdef _NO_GAMMA //karin: r_brightness when unsupport gamma
+		if(RB_overbright > 1.0f)
+		{
+			inter.diffuseColor[0] *= RB_overbright;
+			inter.diffuseColor[1] *= RB_overbright;
+			inter.diffuseColor[2] *= RB_overbright;
+		}
+#endif
+	}
+	else
+		return false;
+
+	const sdRenderProgram *ambientProgram = surfaceStage->renderProgram->GetDeclRenderProgram()->AmbientVersion();
+	if(!ambientProgram || !ambientProgram->IsValid())
+		return false;
+
+	shaderProgram_t *lastProgram = backEnd.glState.currentProgram;
+	if(!ambientProgram->Bind(surfaceStage, surfaceShader, surfaceRegs))
+		return false;
+
+	megaTextureProgram = ambientProgram;
+
+	int oldDrawBits = backEnd.glState.glStateBits;
+
+	RB_MegaTexture_Update(surf, surfaceStage->newStage->megaTexture);
+
+	// perform setup here that will be constant for all interactions
+    GL_State( GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE | GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL );
+
+	RB_SetupDrawSurfMVP(surf);
+
+	megaTextureProgram->SetupState();
+
+	RB_MegaTexture_DrawAmbient(&inter);
+
+	megaTextureProgram->Unbind(true);
+
+	//if(oldDrawBits)
+	GL_State(oldDrawBits);
+
+	megaTextureProgram = NULL;
+
+	GL_UseProgram(lastProgram);
+
+	return true;
 }

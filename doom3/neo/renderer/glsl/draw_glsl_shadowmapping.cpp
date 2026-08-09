@@ -1349,7 +1349,7 @@ void RB_GLSL_CreateDrawInteractions_shadowMapping(const drawSurf_t *surf)
         return;
     }
 
-#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+#ifdef _SPLASHDAMAGExxx //karin: megatexture interaction
     RB_GLSL_CreateDrawMegaTextureInteractions(surf);
 #endif
 

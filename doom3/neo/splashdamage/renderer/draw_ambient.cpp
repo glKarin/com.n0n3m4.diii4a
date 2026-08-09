@@ -349,11 +349,13 @@ void RB_DrawAreaAmbient( drawSurf_t **drawSurfs, int numDrawSurfs )
 
 	backEnd.vLight = NULL;
 
+#if 0 //karin: move to if stage's lighting == SL_AMBIENT
     // draw megatexture ambients
     for( int i = 0; i < numDrawSurfs; i++ )
     {
         RB_GLSL_CreateDrawMegaTextureAmbients(drawSurfs[i]);
     }
+#endif
 
     if (harm_r_builtinAreaAmbient.GetBool())
         RB_DrawAreaAmbients_builtin(drawSurfs, numDrawSurfs);

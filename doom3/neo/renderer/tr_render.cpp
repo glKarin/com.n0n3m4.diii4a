@@ -31,6 +31,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef _SPLASHDAMAGE //karin: megatexture in ambient material stage
+extern bool RB_DrawMegaTextureInteraction(const drawInteraction_t *din, const shaderStage_t *lightStage, const shaderStage_t *surfaceStage);
+extern bool RB_DrawMegaTextureAmbient(const drawSurf_t *surf, const shaderStage_t *surfaceStage);
+#endif
 /*
 
   back end scene + lights rendering functions
@@ -900,6 +904,15 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 
 			switch (surfaceStage->lighting) {
 				case SL_AMBIENT: {
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+									 if(RB_DrawMegaTextureInteraction(&inter, lightStage, surfaceStage))
+									 {
+										 // reset state
+										 // texture 5 is the specular lookup table
+										 GL_SelectTextureNoClient(5);
+										 globalImages->specularTableImage->Bind();
+									 }
+#endif
 					// ignore ambient stages while drawing interactions
 					break;
 				}
@@ -1346,6 +1359,9 @@ void RB_CreateSingleDrawAreaAmbient_builtin(const drawSurf_t *drawSurf, void (*D
         switch( surfaceStage->lighting )
         {
             case SL_AMBIENT: {
+#ifdef _SPLASHDAMAGE //karin: megatexture ambient
+								 RB_DrawMegaTextureAmbient(drawSurf, surfaceStage);
+#endif
                 // ignore ambient stages while drawing interactions
                 break;
             }
@@ -1561,6 +1577,9 @@ void RB_CreateSingleDrawAreaAmbient_external(const drawSurf_t *drawSurf, void (*
         switch( surfaceStage->lighting )
         {
             case SL_AMBIENT: {
+#ifdef _SPLASHDAMAGE //karin: megatexture ambient
+								 RB_DrawMegaTextureAmbient(drawSurf, surfaceStage);
+#endif
                 // ignore ambient stages while drawing interactions
                 break;
             }

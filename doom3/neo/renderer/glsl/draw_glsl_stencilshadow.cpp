@@ -12,13 +12,20 @@ static bool r_stencilShadowCombine = false;
 static bool r_stencilShadowTranslucent = false;
 static float r_stencilShadowAlpha = 1.0f;
 
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+bool stencilShadowWithoutStencilTest = false;
+#endif
+
 static void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *surf, bool noStencilTest)
 {
 	if (!surf) {
 		return;
 	}
 
-#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction, skip megatexture interaction rendering if fill transclucent color first
+	stencilShadowWithoutStencilTest = noStencilTest;
+#endif
+#ifdef _SPLASHDAMAGExxx //karin: megatexture interaction, move to if stage's lighting == SL_AMBIENT in RB_CreateSingleDrawInteractions
 	if (!noStencilTest)
 		RB_GLSL_CreateDrawMegaTextureInteractions(surf);
 #endif
@@ -129,6 +136,9 @@ static void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSu
 
 	if(noStencilTest)
 		qglEnable(GL_STENCIL_TEST);
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction, skip megatexture interaction rendering if fill transclucent color first
+	stencilShadowWithoutStencilTest = false;
+#endif
 }
 #endif
 
@@ -222,7 +232,7 @@ void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, in
 		return;
 	}
 
-#ifdef _SPLASHDAMAGExxx //karin: megatexture interaction
+#ifdef _SPLASHDAMAGExxx //karin: megatexture interaction, move to if stage's lighting == SL_AMBIENT in RB_CreateSingleDrawInteractions
 	if ((mask & (1 | 2)) == 0)
 		RB_GLSL_CreateDrawMegaTextureInteractions(surf);
 #endif
