@@ -18,7 +18,11 @@ Computes the light projection matrix for a point light.
 */
 float R_ComputePointLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject )
 {
+#ifdef _SPLASHDAMAGE
+    assert( light->parms.flags.pointLight );
+#else
     assert( light->parms.pointLight );
+#endif
 
     // A point light uses a box projection.
     // This projects into the 0.0 - 1.0 texture range instead of -1.0 to 1.0 clip space range.
@@ -109,7 +113,11 @@ Computes the light projection matrix for a parallel light.
 */
 float R_ComputeParallelLightProjectionMatrix( idRenderLightLocal* light, idRenderMatrix& localProject )
 {
+#ifdef _SPLASHDAMAGE
+    assert( light->parms.flags.pointLight );
+#else
     assert( light->parms.parallel );
+#endif
 
     // A parallel light uses a box projection.
     // This projects into the 0.0 - 1.0 texture range instead of -1.0 to 1.0 clip space range.

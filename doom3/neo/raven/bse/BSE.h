@@ -194,7 +194,7 @@ namespace {
 }
 #endif
 
-class rvBSEManagerLocal final : public rvBSEManager {
+class rvBSEManagerLocal : public rvBSEManager {
 public:
     //──────────────────────────────
     // Lifetime

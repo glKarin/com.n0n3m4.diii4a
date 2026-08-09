@@ -1017,7 +1017,7 @@ void idCollisionModelManagerLocal::ParsePolygons_Binary(idFile *file, cm_model_t
 
 	// end of polygons
 	file->ReadUnsignedShort(uh); // -1/65535
-	assert(i == -1)
+	assert(i == -1);
 }
 
 void idCollisionModelManagerLocal::ParseBrushes_Binary(idFile *file, cm_model_t *model) {
@@ -1071,7 +1071,7 @@ void idCollisionModelManagerLocal::ParseBrushes_Binary(idFile *file, cm_model_t 
 
 	// end of brushes
 	file->ReadInt(i); // -1/0xFFFFFFFF
-	assert(i == -1)
+	assert(i == -1);
 }
 
 bool idCollisionModelManagerLocal::ParseCollisionModel_Binary(idFile *file) {

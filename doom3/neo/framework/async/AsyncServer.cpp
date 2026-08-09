@@ -3299,7 +3299,7 @@ int idAsyncServer::AllocOpenClientSlotForAI(int maxPlayersOnServer) {
 }
 
 void idAsyncServer::InitBotClient(int clientNum) {
-	assert(ClientIsBot(clientNum))
+	assert(ClientIsBot(clientNum));
 
 	// clear the user info
 	sessLocal.mapSpawnData.userInfo[ clientNum ].Clear();	// always start with a clean base
