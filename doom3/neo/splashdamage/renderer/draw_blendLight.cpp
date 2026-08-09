@@ -77,7 +77,7 @@ void RB_BlendLight_external(const shaderStage_t *pStage, const drawSurf_t *drawS
 
 	blendLightProgram->SetupState();
 
-	GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
+	//GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 
 	// Texture 1 will get the falloff texture
 	blendLightProgram->BindImage("lightFalloffMap", vLight->falloffImage);
@@ -96,7 +96,7 @@ void RB_BlendLight_external(const shaderStage_t *pStage, const drawSurf_t *drawS
 	RB_RenderDrawSurfChainWithFunction(drawSurfs, RB_T_BlendLight_external);
 	RB_RenderDrawSurfChainWithFunction(drawSurfs2, RB_T_BlendLight_external);
 
-	GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
+	//GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 
 	if(oldDrawBits)
 		GL_State(oldDrawBits);

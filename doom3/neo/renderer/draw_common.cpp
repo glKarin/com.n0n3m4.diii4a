@@ -2088,6 +2088,14 @@ static void RB_BlendLight(const drawSurf_t *drawSurfs,  const drawSurf_t *drawSu
 		if(stage->renderProgram)
 		{
 			RB_BlendLight_external(stage, drawSurfs, drawSurfs2);
+
+			// restore state
+			// Texture 1 will get the falloff texture
+			GL_SelectTexture(1);
+			vLight->falloffImage->Bind();
+
+			// Texture 0 will get the projected texture
+			GL_SelectTexture(0);
 			continue;
 		}
 #endif
