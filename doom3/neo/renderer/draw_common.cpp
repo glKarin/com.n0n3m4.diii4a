@@ -946,11 +946,11 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
     memset(newStageUniformIsSet, 0, sizeof(newStageUniformIsSet));
 #if defined(_GLSL_PROGRAM) // || defined(_RAVEN)
     // Custom new stage state
-    idList<int> customNewStageAttrIsSet(SHADER_MAX_CUSTOM);
-    idList<int> customNewStageUniformIsSet(SHADER_MAX_CUSTOM);
+    idStaticList<int, SHADER_MAX_CUSTOM> customNewStageAttrIsSet;
+    idStaticList<int, SHADER_MAX_CUSTOM> customNewStageUniformIsSet;
 #endif
 #ifdef _SPLASHDAMAGE //karin: custom stage shader
-	idList<int> materialBuiltinVariablesLoaded(surf->material->GetNumStages());
+	idStaticList<int, MAX_SHADER_STAGES> materialBuiltinVariablesLoaded;
 #endif
 
 	tri = surf->geo;
