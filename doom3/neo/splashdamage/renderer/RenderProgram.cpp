@@ -28,12 +28,16 @@ idCVar r_32ByteVtx("r_32ByteVtx", "0", CVAR_RENDERER | CVAR_BOOL, "");
 idCVar r_useDitherMask("r_useDitherMask", "0", CVAR_RENDERER | CVAR_BOOL, "");
 idCVar r_shaderSkipSpecCubeMaps("r_shaderSkipSpecCubeMaps", "0", CVAR_RENDERER | CVAR_BOOL, "");
 idCVar alphatest_kill("alphatest_kill", "1", CVAR_RENDERER | CVAR_BOOL, "");
+idCVar r_detailTexture("r_detailTexture", "0", CVAR_BOOL | CVAR_RENDERER, "");
+idCVar r_megaMultiply("r_megaMultiply", "0", CVAR_BOOL | CVAR_RENDERER, "");
+idCVar r_useARBPositionInvariant("r_useARBPositionInvariant", "0", CVAR_BOOL | CVAR_RENDERER, "");
 
 idCVar r_useAlphaToCoverage("r_useAlphaToCoverage", "0", CVAR_BOOL | CVAR_RENDERER, "");
 idCVar r_softParticles("r_softParticles", "0", CVAR_BOOL | CVAR_RENDERER, "");
 idCVar image_diffusePicMip("image_diffusePicMip", "0", CVAR_BOOL | CVAR_RENDERER, "");
 idCVar image_bumpPicMip("image_bumpPicMip", "0", CVAR_BOOL | CVAR_RENDERER, "");
 idCVar image_specularPicMip("image_specularPicMip", "0", CVAR_BOOL | CVAR_RENDERER, "");
+idCVar r_megaTexturePreferConditional("r_megaTexturePreferConditional", "1", CVAR_BOOL | CVAR_RENDERER, ""); // 1 = using glsl
 
 static idCVar harm_r_printShaderSource("harm_r_printShaderSource", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "print external converted shader source");
 
@@ -427,6 +431,11 @@ void sdRenderProgram::InsertBuiltinMacros(sdStringBuilder_Heap &buf) const {
 		"r_useDitherMask",
 		"r_shaderSkipSpecCubeMaps",
 		"alphatest_kill",
+		"r_detailTexture",
+		"r_megaMultiply",
+		"r_useARBPositionInvariant",
+		"r_skipDiffuse",
+		"r_skipBump",
 	};
 	idCVar *cvar;
 	for(int i = 0; i < sizeof(CvarMacros) / sizeof(CvarMacros[0]); i++)

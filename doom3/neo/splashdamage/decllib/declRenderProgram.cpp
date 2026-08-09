@@ -4,6 +4,7 @@
 #include "idlib/precompiled.h"
 
 #include "declRenderProgram.h"
+#include "renderer/RenderProgramManager.h"
 #include "framework/DeclParseHelper.h"
 #include "renderer/tr_local.h"
 
@@ -17,7 +18,9 @@ sdDeclRenderProgram
 
 sdDeclRenderProgram::sdDeclRenderProgram()
 	: flags(0),
-	drawStateBits(0)
+	drawStateBits(0),
+	machineSpec(0),
+	imposterBrightness(1.0f)
 {
 }
 
@@ -60,68 +63,68 @@ bool sdDeclRenderProgram::Parse( const char* text, const int textLength ) {
 		}
 
 		if( !token.Icmp( "hwSkinningVersion" )) {
-			src.ReadToken(&token);
-			src.ReadToken(&token);
+			ParseVersion(src, token.c_str(), hwSkinningVersion);
+			ParseVersion(src, token.c_str(), hwSkinningHardVersion);
 			continue;
 		}
 
 		if( !token.Icmp( "instanceVersion" )) {
-			src.ReadToken(&token);
+			ParseVersion(src, token.c_str(), instanceVersion);
 			continue;
 		}
 
 		if( !token.Icmp( "alphaToCoverageVersion" )) {
-			src.ReadToken(&token);
+			ParseVersion(src, token.c_str(), alphaToCoverageVersion);
 			continue;
 		}
 
 		if( !token.Icmp( "notlitVersion" )) {
-			src.ReadToken(&token);
+			ParseVersion(src, token.c_str(), notlitVersion);
 			continue;
 		}
 
 		if( !token.Icmp( "depthVersion" )) {
-			src.ReadToken(&token);
+			ParseVersion(src, token.c_str(), depthVersion);
 			continue;
 		}
 
 		if( !token.Icmp( "earlyCullVersion" )) {
-			src.ReadToken(&token);
+			ParseVersion(src, token.c_str(), earlyCullVersion);
 			continue;
 		}
 
 		if( !token.Icmp( "coverageVersion" )) {
-			src.ReadToken(&token);
+			ParseVersion(src, token.c_str(), coverageVersion);
 			continue;
 		}
 
 		if( !token.Icmp( "amblitVersion" )) {
-			src.ReadToken(&token);
+			ParseVersion(src, token.c_str(), amblitVersion);
 			continue;
 		}
 
 		if( !token.Icmp( "ambientVersion" )) {
-			src.ReadToken(&token);
+			ParseVersion(src, token.c_str(), ambientVersion);
 			continue;
 		}
 
 		if( !token.Icmp( "machineSpec" )) {
-			src.ParseInt();
+			machineSpec = src.ParseInt();
 			continue;
 		}
 
 		if( !token.Icmp( "imposterBrightness" )) {
-			src.ParseFloat();
+			imposterBrightness = src.ParseFloat();
 			continue;
 		}
 
-		if( !token.Icmp( "fallBack" )) {
-			src.ReadToken(&token);
+		if( !token.Icmp( "fallback" )) {
+			ParseVersion(src, token.c_str(), fallback);
 			continue;
 		}
 
 		if( !token.Icmp( "lodVersion" )) {
-			src.ReadToken(&token);
+			ParseVersion(src, token.c_str(), lodVersion);
 			continue;
 		}
 
@@ -146,6 +149,344 @@ bool sdDeclRenderProgram::Parse( const char* text, const int textLength ) {
 void sdDeclRenderProgram::FreeData() {
 	Init();
 }
+
+void sdDeclRenderProgram::Init(void)
+{
+	flags = 0;
+	vertex.Init();
+	fragment.Init();
+	drawStateBits = 0;
+
+	amblitVersion.Clear();
+	ambientVersion.Clear();
+	coverageVersion.Clear();
+	earlyCullVersion.Clear();
+	depthVersion.Clear();
+	instanceVersion.Clear();
+	alphaToCoverageVersion.Clear();
+	notlitVersion.Clear();
+	lodVersion.Clear();
+	hwSkinningVersion.Clear();
+	hwSkinningHardVersion.Clear();
+	fallback.Clear();
+
+	machineSpec = 0;
+	imposterBrightness = 1.0f;
+}
+
+bool sdDeclRenderProgram::ParseShader(idParser &src)
+{
+	idToken	token;
+
+	if(!src.ReadToken(&token))
+	{
+		src.Warning( "sdDeclRenderProgram::ParseShader: unable parse shader type." );
+		return false;
+	}
+
+	sdRenderProgramShader::shaderType_t type;
+	if(!token.Icmp("vertex")) {
+		type = sdRenderProgramShader::ST_VERTEX;
+	}
+	else if(!token.Icmp("fragment")) {
+		type = sdRenderProgramShader::ST_FRAGMENT;
+	}
+	else {
+		src.Warning( "sdDeclRenderProgram::ParseShader: unknown shader type '%s'.", token.c_str() );
+		return false;
+	}
+
+	sdRenderProgramShader *shader;
+	if(type == sdRenderProgramShader::ST_VERTEX) {
+		shader = &vertex;
+	}
+	else {
+		shader = &fragment;
+	}
+
+	src.ReadToken(&token);
+	bool isRef = false;
+	if(!token.Icmp("reference")) {
+		if( !src.ReadToken( &token )) {
+			src.Warning( "sdDeclRenderProgram::ParseShader: expect reference shader program name." );
+			return false;
+		}
+		const idDecl *decl = declManager->FindType(DECL_RENDERPROGRAM, token, false);
+		if( !decl ) {
+			src.Warning( "sdDeclRenderProgram::ParseShader: could't find reference shader program '%s'.", token.c_str() );
+			return false;
+		}
+		const sdDeclRenderProgram *program = static_cast<const sdDeclRenderProgram *>(decl);
+		if(type == sdRenderProgramShader::ST_VERTEX)
+			*shader = program->vertex;
+		else
+			*shader = program->fragment;
+		shader->type = type;
+		isRef = true;
+	}
+	else
+	{
+		src.UnreadToken(&token);
+
+		shader->type = type;
+		if(!shader->Parse(src)) {
+			shader->Init();
+			return false;
+		}
+	}
+
+	if (!isRef)
+		shader->PostParse(this);
+
+	return true;
+}
+
+void sdDeclRenderProgram::ExportSource(const char *path, bool raw) const {
+	if (vertex.IsValid())
+		vertex.ExportSource(path, GetFileName(), GetName(), raw);
+	if (fragment.IsValid())
+		fragment.ExportSource(path, GetFileName(), GetName(), raw);
+}
+
+void sdDeclRenderProgram::ExportDeclRenderPrograms_f(const idCmdArgs &args)
+{
+	if (args.Argc() < 2) {
+		common->Printf("Usage: %s <path> [<raw>]\n", args.Argv(0));
+		return;
+	}
+	const char *outPath = args.Argv(1);
+	bool raw = args.Argc() > 2;
+	const idDecl *decl;
+	const sdDeclRenderProgram *program;
+
+	int numDecls = declManager->GetNumDecls(DECL_RENDERPROGRAM);
+	common->Printf("Export %d render programs\n", numDecls);
+	soundSystem->SetMute(true);
+
+	for(int m = 0; m < numDecls; m++) {
+		decl = declManager->DeclByIndex(DECL_RENDERPROGRAM, m, true);
+		if (!decl)
+			continue;
+		common->Printf("%3d: export: %s::%s\n", m, decl->GetFileName(), decl->GetName());
+		program = static_cast<const sdDeclRenderProgram *>(decl);
+		program->ExportSource(outPath, raw);
+	}
+
+	soundSystem->SetMute(false);
+}
+
+bool sdDeclRenderProgram::HasPostprocess(void) const {
+	return fragment.IsValid() && fragment.HasPostprocessTexture();
+}
+
+/*
+===============
+sdDeclRenderProgram::NameToSrcBlendMode
+===============
+*/
+int sdDeclRenderProgram::NameToSrcBlendMode(const idStr &name)
+{
+	if (!name.Icmp("GL_ONE")) {
+		return GLS_SRCBLEND_ONE;
+	} else if (!name.Icmp("GL_ZERO")) {
+		return GLS_SRCBLEND_ZERO;
+	} else if (!name.Icmp("GL_DST_COLOR")) {
+		return GLS_SRCBLEND_DST_COLOR;
+	} else if (!name.Icmp("GL_ONE_MINUS_DST_COLOR")) {
+		return GLS_SRCBLEND_ONE_MINUS_DST_COLOR;
+	} else if (!name.Icmp("GL_SRC_ALPHA")) {
+		return GLS_SRCBLEND_SRC_ALPHA;
+	} else if (!name.Icmp("GL_ONE_MINUS_SRC_ALPHA")) {
+		return GLS_SRCBLEND_ONE_MINUS_SRC_ALPHA;
+	} else if (!name.Icmp("GL_DST_ALPHA")) {
+		return GLS_SRCBLEND_DST_ALPHA;
+	} else if (!name.Icmp("GL_ONE_MINUS_DST_ALPHA")) {
+		return GLS_SRCBLEND_ONE_MINUS_DST_ALPHA;
+	} else if (!name.Icmp("GL_SRC_ALPHA_SATURATE")) {
+		return GLS_SRCBLEND_ALPHA_SATURATE;
+	}
+
+	common->Warning("unknown src blend mode '%s' in renderProg '%s' at '%s'", name.c_str(), GetName(), GetFileName());
+
+	return GLS_SRCBLEND_ONE;
+}
+
+/*
+===============
+sdDeclRenderProgram::NameToDstBlendMode
+===============
+*/
+int sdDeclRenderProgram::NameToDstBlendMode(const idStr &name)
+{
+	if (!name.Icmp("GL_ONE")) {
+		return GLS_DSTBLEND_ONE;
+	} else if (!name.Icmp("GL_ZERO")) {
+		return GLS_DSTBLEND_ZERO;
+	} else if (!name.Icmp("GL_SRC_ALPHA")) {
+		return GLS_DSTBLEND_SRC_ALPHA;
+	} else if (!name.Icmp("GL_ONE_MINUS_SRC_ALPHA")) {
+		return GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
+	} else if (!name.Icmp("GL_DST_ALPHA")) {
+		return GLS_DSTBLEND_DST_ALPHA;
+	} else if (!name.Icmp("GL_ONE_MINUS_DST_ALPHA")) {
+		return GLS_DSTBLEND_ONE_MINUS_DST_ALPHA;
+	} else if (!name.Icmp("GL_SRC_COLOR")) {
+		return GLS_DSTBLEND_SRC_COLOR;
+	} else if (!name.Icmp("GL_ONE_MINUS_SRC_COLOR")) {
+		return GLS_DSTBLEND_ONE_MINUS_SRC_COLOR;
+	}
+
+	common->Warning("unknown dst blend mode '%s' in renderProg '%s' at '%s'", name.c_str(), GetName(), GetFileName());
+
+	return GLS_DSTBLEND_ONE;
+}
+
+void sdDeclRenderProgram::ParseBlend(idParser &src)
+{
+	idToken token;
+	int		srcBlend, dstBlend;
+
+	if (!src.ReadToken(&token)) {
+		return;
+	}
+
+	// blending combinations
+	if (!token.Icmp("blend")) {
+		drawStateBits = GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
+		return;
+	}
+
+	if (!token.Icmp("add")) {
+		drawStateBits = GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE;
+		return;
+	}
+
+	if (!token.Icmp("filter") || !token.Icmp("modulate")) {
+		drawStateBits = GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO;
+		return;
+	}
+
+	if (!token.Icmp("none")) {
+		// none is used when defining an alpha mask that doesn't draw
+		drawStateBits = GLS_SRCBLEND_ZERO | GLS_DSTBLEND_ONE;
+		return;
+	}
+
+	srcBlend = NameToSrcBlendMode(token);
+
+	if (!src.ExpectTokenString(",")) {
+		src.UnreadToken(&token);
+		src.SkipRestOfLine();
+		return;
+	}
+
+	if (!src.ReadToken(&token)) {
+		return;
+	}
+
+	dstBlend = NameToDstBlendMode(token);
+
+	drawStateBits = srcBlend | dstBlend;
+}
+
+void sdDeclRenderProgram::ParseDepthFunc(idParser &src)
+{
+	idToken t;
+	src.ReadToken(&t);
+	if(!idStr::Icmp(t, "equal"))
+		drawStateBits |= GLS_DEPTHFUNC_EQUAL;
+	else if(!idStr::Icmp(t, "always"))
+		drawStateBits |= GLS_DEPTHFUNC_ALWAYS;
+	else if(!idStr::Icmp(t, "lequal"))
+		drawStateBits |= GLS_DEPTHFUNC_LESS;
+	else if(!idStr::Icmp(t, "less"))
+		drawStateBits |= GLS_DEPTHFUNC_LESS;
+	else
+		common->Warning("unknown depth func '%s' in renderProg '%s' at '%s'", t.c_str(), GetName(), GetFileName());
+}
+
+bool sdDeclRenderProgram::ParseState(idParser &src)
+{
+	idToken	token;
+
+	while(1)
+	{
+		if(!src.ReadToken(&token))
+		{
+			src.Warning( "sdDeclRenderProgram::ParseState: unable parse state." );
+			return false;
+		}
+
+		if(!token.Icmp("force"))
+			continue;
+
+		if(!token.Cmp("{"))
+			break;
+	}
+
+	while (1) {
+		if( !src.ReadToken( &token )) {
+			src.Error( "sdDeclRenderProgram::ParseState: unexpected end of file." );
+			break;
+		}
+
+		if (!token.Icmp("}")) {
+			break;
+		}
+
+		if( !token.Icmp( "blend" )) {
+			ParseBlend(src);
+			continue;
+		}
+
+		if( !token.Icmp( "depthFunc" )) {
+			ParseDepthFunc(src);
+			continue;
+		}
+
+		if (!token.Icmp("maskAlpha")) {
+			drawStateBits |= GLS_ALPHAMASK;
+			continue;
+		}
+
+		if (!token.Icmp("maskDepth")) {
+			drawStateBits |= GLS_DEPTHMASK;
+			continue;
+		}
+
+		src.Warning( "sdDeclRenderProgram::ParseState: unexpected token '%s'.", token.c_str() );
+		src.SkipBracedSection(false);
+		break;
+	}
+
+	return true;
+}
+
+bool sdDeclRenderProgram::HasDefine(const char *macro) const
+{
+	return (vertex.IsValid() && vertex.HasDefine(macro)) || (fragment.IsValid() && fragment.HasDefine(macro));
+}
+
+void sdDeclRenderProgram::ParseVersion(idParser &src, const char *name, idStr &version)
+{
+	idToken token;
+
+	if(src.ReadToken(&token))
+	{
+		version = token.c_str();
+	}
+	else
+	{
+		src.Warning( "sdDeclRenderProgram::ParseVersion: unexpected version shader program name for '%s'.", name );
+	}
+}
+
+const sdRenderProgram * sdDeclRenderProgram::AmbientVersion(void) const
+{
+	return renderProgramManager->LoadProgram(ambientVersion);
+}
+
+
 
 sdRenderProgramShader::sdRenderProgramShader(void)
 	: type(ST_INVALID),
@@ -394,81 +735,6 @@ void sdRenderProgramShader::HandleInclude(sdStringBuilder_Heap &buf, const char 
 	Mem_Free(text);
 }
 
-void sdDeclRenderProgram::Init(void)
-{
-	flags = 0;
-	vertex.Init();
-	fragment.Init();
-	drawStateBits = 0;
-}
-
-bool sdDeclRenderProgram::ParseShader(idParser &src)
-{
-	idToken	token;
-
-	if(!src.ReadToken(&token))
-	{
-		src.Warning( "sdDeclRenderProgram::ParseShader: unable parse shader type." );
-		return false;
-	}
-
-	sdRenderProgramShader::shaderType_t type;
-	if(!token.Icmp("vertex")) {
-		type = sdRenderProgramShader::ST_VERTEX;
-	}
-	else if(!token.Icmp("fragment")) {
-		type = sdRenderProgramShader::ST_FRAGMENT;
-	}
-	else {
-		src.Warning( "sdDeclRenderProgram::ParseShader: unknown shader type '%s'.", token.c_str() );
-		return false;
-	}
-
-	sdRenderProgramShader *shader;
-	if(type == sdRenderProgramShader::ST_VERTEX) {
-		shader = &vertex;
-	}
-	else {
-		shader = &fragment;
-	}
-
-	src.ReadToken(&token);
-	bool isRef = false;
-	if(!token.Icmp("reference")) {
-		if( !src.ReadToken( &token )) {
-			src.Warning( "sdDeclRenderProgram::ParseShader: expect reference shader program name." );
-			return false;
-		}
-		const idDecl *decl = declManager->FindType(DECL_RENDERPROGRAM, token, false);
-		if( !decl ) {
-			src.Warning( "sdDeclRenderProgram::ParseShader: could't find reference shader program '%s'.", token.c_str() );
-			return false;
-		}
-		const sdDeclRenderProgram *program = static_cast<const sdDeclRenderProgram *>(decl);
-		if(type == sdRenderProgramShader::ST_VERTEX)
-			*shader = program->vertex;
-		else
-			*shader = program->fragment;
-		shader->type = type;
-		isRef = true;
-	}
-	else
-	{
-		src.UnreadToken(&token);
-
-		shader->type = type;
-		if(!shader->Parse(src)) {
-			shader->Init();
-			return false;
-		}
-	}
-
-	if (!isRef)
-		shader->PostParse(this);
-
-	return true;
-}
-
 void sdRenderProgramShader::ExportSource(const char *path, const char *filename, const char *name, bool raw) const {
 	sdStringBuilder_Heap buf;
 
@@ -553,40 +819,6 @@ void sdRenderProgramShader::ExportSource(const char *path, const char *filename,
 	common->Printf("Export %s::%s %s %s shader to %s\n", filename, name, langName, typeName, filePath.c_str());
 }
 
-void sdDeclRenderProgram::ExportSource(const char *path, bool raw) const {
-	if (vertex.IsValid())
-		vertex.ExportSource(path, GetFileName(), GetName(), raw);
-	if (fragment.IsValid())
-		fragment.ExportSource(path, GetFileName(), GetName(), raw);
-}
-
-void sdDeclRenderProgram::ExportDeclRenderPrograms_f(const idCmdArgs &args)
-{
-	if (args.Argc() < 2) {
-		common->Printf("Usage: %s <path> [<raw>]\n", args.Argv(0));
-		return;
-	}
-	const char *outPath = args.Argv(1);
-	bool raw = args.Argc() > 2;
-	const idDecl *decl;
-	const sdDeclRenderProgram *program;
-
-	int numDecls = declManager->GetNumDecls(DECL_RENDERPROGRAM);
-	common->Printf("Export %d render programs\n", numDecls);
-	soundSystem->SetMute(true);
-
-	for(int m = 0; m < numDecls; m++) {
-		decl = declManager->DeclByIndex(DECL_RENDERPROGRAM, m, true);
-		if (!decl)
-			continue;
-		common->Printf("%3d: export: %s::%s\n", m, decl->GetFileName(), decl->GetName());
-		program = static_cast<const sdDeclRenderProgram *>(decl);
-		program->ExportSource(outPath, raw);
-	}
-
-	soundSystem->SetMute(false);
-}
-
 bool sdRenderProgramShader::HasPostprocessTexture(void) const {
 	const sdDeclRenderBinding *binding;
 
@@ -602,194 +834,3 @@ bool sdRenderProgramShader::HasPostprocessTexture(void) const {
 	return false;
 }
 
-bool sdDeclRenderProgram::HasPostprocess(void) const {
-	return fragment.IsValid() && fragment.HasPostprocessTexture();
-}
-
-/*
-===============
-sdDeclRenderProgram::NameToSrcBlendMode
-===============
-*/
-int sdDeclRenderProgram::NameToSrcBlendMode(const idStr &name)
-{
-	if (!name.Icmp("GL_ONE")) {
-		return GLS_SRCBLEND_ONE;
-	} else if (!name.Icmp("GL_ZERO")) {
-		return GLS_SRCBLEND_ZERO;
-	} else if (!name.Icmp("GL_DST_COLOR")) {
-		return GLS_SRCBLEND_DST_COLOR;
-	} else if (!name.Icmp("GL_ONE_MINUS_DST_COLOR")) {
-		return GLS_SRCBLEND_ONE_MINUS_DST_COLOR;
-	} else if (!name.Icmp("GL_SRC_ALPHA")) {
-		return GLS_SRCBLEND_SRC_ALPHA;
-	} else if (!name.Icmp("GL_ONE_MINUS_SRC_ALPHA")) {
-		return GLS_SRCBLEND_ONE_MINUS_SRC_ALPHA;
-	} else if (!name.Icmp("GL_DST_ALPHA")) {
-		return GLS_SRCBLEND_DST_ALPHA;
-	} else if (!name.Icmp("GL_ONE_MINUS_DST_ALPHA")) {
-		return GLS_SRCBLEND_ONE_MINUS_DST_ALPHA;
-	} else if (!name.Icmp("GL_SRC_ALPHA_SATURATE")) {
-		return GLS_SRCBLEND_ALPHA_SATURATE;
-	}
-
-	common->Warning("unknown src blend mode '%s' in renderProg '%s' at '%s'", name.c_str(), GetName(), GetFileName());
-
-	return GLS_SRCBLEND_ONE;
-}
-
-/*
-===============
-sdDeclRenderProgram::NameToDstBlendMode
-===============
-*/
-int sdDeclRenderProgram::NameToDstBlendMode(const idStr &name)
-{
-	if (!name.Icmp("GL_ONE")) {
-		return GLS_DSTBLEND_ONE;
-	} else if (!name.Icmp("GL_ZERO")) {
-		return GLS_DSTBLEND_ZERO;
-	} else if (!name.Icmp("GL_SRC_ALPHA")) {
-		return GLS_DSTBLEND_SRC_ALPHA;
-	} else if (!name.Icmp("GL_ONE_MINUS_SRC_ALPHA")) {
-		return GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
-	} else if (!name.Icmp("GL_DST_ALPHA")) {
-		return GLS_DSTBLEND_DST_ALPHA;
-	} else if (!name.Icmp("GL_ONE_MINUS_DST_ALPHA")) {
-		return GLS_DSTBLEND_ONE_MINUS_DST_ALPHA;
-	} else if (!name.Icmp("GL_SRC_COLOR")) {
-		return GLS_DSTBLEND_SRC_COLOR;
-	} else if (!name.Icmp("GL_ONE_MINUS_SRC_COLOR")) {
-		return GLS_DSTBLEND_ONE_MINUS_SRC_COLOR;
-	}
-
-	common->Warning("unknown dst blend mode '%s' in renderProg '%s' at '%s'", name.c_str(), GetName(), GetFileName());
-
-	return GLS_DSTBLEND_ONE;
-}
-
-void sdDeclRenderProgram::ParseBlend(idParser &src)
-{
-	idToken token;
-	int		srcBlend, dstBlend;
-
-	if (!src.ReadToken(&token)) {
-		return;
-	}
-
-	// blending combinations
-	if (!token.Icmp("blend")) {
-		drawStateBits = GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
-		return;
-	}
-
-	if (!token.Icmp("add")) {
-		drawStateBits = GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE;
-		return;
-	}
-
-	if (!token.Icmp("filter") || !token.Icmp("modulate")) {
-		drawStateBits = GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO;
-		return;
-	}
-
-	if (!token.Icmp("none")) {
-		// none is used when defining an alpha mask that doesn't draw
-		drawStateBits = GLS_SRCBLEND_ZERO | GLS_DSTBLEND_ONE;
-		return;
-	}
-
-	srcBlend = NameToSrcBlendMode(token);
-
-	if (!src.ExpectTokenString(",")) {
-		src.UnreadToken(&token);
-		src.SkipRestOfLine();
-		return;
-	}
-
-	if (!src.ReadToken(&token)) {
-		return;
-	}
-
-	dstBlend = NameToDstBlendMode(token);
-
-	drawStateBits = srcBlend | dstBlend;
-}
-
-void sdDeclRenderProgram::ParseDepthFunc(idParser &src)
-{
-	idToken t;
-	src.ReadToken(&t);
-	if(!idStr::Icmp(t, "equal"))
-		drawStateBits |= GLS_DEPTHFUNC_EQUAL;
-	else if(!idStr::Icmp(t, "always"))
-		drawStateBits |= GLS_DEPTHFUNC_ALWAYS;
-	else if(!idStr::Icmp(t, "lequal"))
-		drawStateBits |= GLS_DEPTHFUNC_LESS;
-	else if(!idStr::Icmp(t, "less"))
-		drawStateBits |= GLS_DEPTHFUNC_LESS;
-	else
-		common->Warning("unknown depth func '%s' in renderProg '%s' at '%s'", t.c_str(), GetName(), GetFileName());
-}
-
-bool sdDeclRenderProgram::ParseState(idParser &src)
-{
-	idToken	token;
-
-	while(1)
-	{
-		if(!src.ReadToken(&token))
-		{
-			src.Warning( "sdDeclRenderProgram::ParseState: unable parse state." );
-			return false;
-		}
-
-		if(!token.Icmp("force"))
-			continue;
-
-		if(!token.Cmp("{"))
-			break;
-	}
-
-	while (1) {
-		if( !src.ReadToken( &token )) {
-			src.Error( "sdDeclRenderProgram::ParseState: unexpected end of file." );
-			break;
-		}
-
-		if (!token.Icmp("}")) {
-			break;
-		}
-
-		if( !token.Icmp( "blend" )) {
-			ParseBlend(src);
-			continue;
-		}
-
-		if( !token.Icmp( "depthFunc" )) {
-			ParseDepthFunc(src);
-			continue;
-		}
-
-		if (!token.Icmp("maskAlpha")) {
-			drawStateBits |= GLS_ALPHAMASK;
-			continue;
-		}
-
-		if (!token.Icmp("maskDepth")) {
-			drawStateBits |= GLS_DEPTHMASK;
-			continue;
-		}
-
-		src.Warning( "sdDeclRenderProgram::ParseState: unexpected token '%s'.", token.c_str() );
-		src.SkipBracedSection(false);
-		break;
-	}
-
-	return true;
-}
-
-bool sdDeclRenderProgram::HasDefine(const char *macro) const
-{
-	return (vertex.IsValid() && vertex.HasDefine(macro)) || (fragment.IsValid() && fragment.HasDefine(macro));
-}

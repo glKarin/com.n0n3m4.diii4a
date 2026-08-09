@@ -113,6 +113,7 @@ public:
 		return drawStateBits;
 	}
 	bool							HasDefine(const char *macro) const;
+	const sdRenderProgram			*AmbientVersion(void) const;
 
 	void							ExportSource(const char *path, bool raw = false) const;
 	static void						ExportDeclRenderPrograms_f(const idCmdArgs &args);
@@ -123,6 +124,7 @@ private:
 	bool							ParseState(idParser &src);
 	void							ParseBlend(idParser &src);
 	void							ParseDepthFunc(idParser &src);
+	void							ParseVersion(idParser &src, const char *name, idStr &version);
 	int								NameToDstBlendMode(const idStr &name);
 	int								NameToSrcBlendMode(const idStr &name);
 
@@ -131,6 +133,22 @@ private:
 	sdRenderProgramShader			vertex;
 	sdRenderProgramShader			fragment;
 	int								drawStateBits;
+
+	idStr							amblitVersion;
+	idStr							ambientVersion;
+	idStr							coverageVersion;
+	idStr							earlyCullVersion;
+	idStr							depthVersion;
+	idStr							instanceVersion;
+	idStr							alphaToCoverageVersion;
+	idStr							notlitVersion;
+	idStr							lodVersion;
+	idStr							hwSkinningVersion;
+	idStr							hwSkinningHardVersion;
+	idStr							fallback;
+
+	int								machineSpec;
+	float							imposterBrightness;
 };
 
 #endif /* !__DECLRENDERPROGRAM_H__ */
