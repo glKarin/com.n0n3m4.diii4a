@@ -184,6 +184,11 @@ idRenderWorldLocal::idRenderWorldLocal()
 			occlusionTestDefs[i]->FreeOcclusionTest();
 	}
 	occlusionTestDefs.DeleteContents(true);
+	
+	megaTextureSTGrid.Clear();
+	megaTextureBounds.Clear();
+	megaTextureSTGridWidth = 0;
+	megaTextureSTGridHeight = 0;
 #endif
 }
 
