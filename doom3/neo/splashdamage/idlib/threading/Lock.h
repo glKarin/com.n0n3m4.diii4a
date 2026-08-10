@@ -12,9 +12,9 @@ public:
 	bool				Acquire( bool blocking = true );
 	void				Release();
 
-#ifndef _WIN32
+//#ifndef _WIN32
 	lockHandle_t*		GetHandle() const { return (lockHandle_t *)&handle; }
-#endif
+//#endif
 
 protected:
 	lockHandle_t		handle;

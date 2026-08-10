@@ -14,3 +14,7 @@
 	path = Q3E/src/main/jni/source
 	url = https://github.com/glKarin/source-engine
 	branch = diii4a
+[submodule "Q3E/src/main/jni/serioussam"]
+	path = Q3E/src/main/jni/serioussam
+	url = https://github.com/glKarin/SeriousSamClassic
+	branch = diii4a

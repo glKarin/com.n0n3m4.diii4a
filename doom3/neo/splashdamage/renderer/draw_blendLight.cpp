@@ -98,7 +98,7 @@ void RB_BlendLight_external(const shaderStage_t *pStage, const drawSurf_t *drawS
 
 	//GL_DisableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 
-	if(oldDrawBits)
+	//if(oldDrawBits)
 		GL_State(oldDrawBits);
 
 	blendLightProgram->Unbind(true);

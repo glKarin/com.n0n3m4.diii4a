@@ -11,7 +11,7 @@ public:
 
 ID_INLINE bool sdAtomic::CompareAndSwap( volatile int* dest, int comperand, int exchange ) {
 #if defined( _XENON ) || defined( _WIN32 )
-	return ( comperand == ::InterlockedCompareExchange( dest, exchange, comperand ) );
+	return ( comperand == ::InterlockedCompareExchange( (volatile LONG*)dest, exchange, comperand ) );
 #elif defined(__ANDROID__) // gcc/clang
 	return __sync_bool_compare_and_swap(dest, comperand, exchange);
 #elif defined( __linux__ )
