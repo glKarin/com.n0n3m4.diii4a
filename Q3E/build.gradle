@@ -6,10 +6,18 @@ String[] ABIFILTERS = [
         /*, "armeabi", "x86", "x86_64"*/
 ]
 
-String PRODUCT_FLAVOR = "github" // github fdroid
+String PRODUCT_FLAVOR = "github" // github fdroid test
+
+String productFlavor = PRODUCT_FLAVOR
+if(project.properties.productFlavor != null && !project.properties.productFlavor.isEmpty()) {
+    println "[Q3E]: Using gradle.properties product flavor = ${project.properties.productFlavor}"
+    productFlavor = project.properties.productFlavor;
+} else {
+    println "[Q3E]: Product flavor(default) = ${productFlavor}"
+}
 
 String[] CMAKE_ARGUMENTS = [
-        "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21", "-DDIII4A_PRODUCT_FLAVOR=" + PRODUCT_FLAVOR/*, "-DANDROID_STL=c++_shared"*/
+        "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21", "-DDIII4A_PRODUCT_FLAVOR=" + productFlavor/*, "-DANDROID_STL=c++_shared"*/
 ]
 
 // filter ABI
@@ -57,7 +65,7 @@ android {
         versionCode 131130411
         versionName '1.3.1.1304.13' // {DOOM3's ENGINE_VERSION}.{BUILD_NUMBER}.{Q3E's Version}
 
-        buildConfigField "String", "PRODUCT_FLAVOR", "\"" + PRODUCT_FLAVOR + "\""
+        buildConfigField "String", "PRODUCT_FLAVOR", "\"" + productFlavor + "\""
     }
 
     buildTypes {

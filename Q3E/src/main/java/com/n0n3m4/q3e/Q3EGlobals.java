@@ -250,7 +250,12 @@ public final class Q3EGlobals
 
     public static boolean IsGithubVersion()
     {
-        return !IsFDroidVersion();
+        return !IsFDroidVersion() && !IsIdTechVersion();
+    }
+
+    public static boolean IsIdTechVersion()
+    {
+        return "idtech".equalsIgnoreCase(BuildConfig.PRODUCT_FLAVOR);
     }
 
 

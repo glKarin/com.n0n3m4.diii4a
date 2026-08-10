@@ -573,6 +573,11 @@ public class Q3EMain extends Activity
             else if(Q3E.q3ei.isSource)
                 msg = "F-Droid version not support Source-Engine game, you can install Github version!";
         }
+        else if(Q3EGlobals.IsIdTechVersion())
+        {
+            if(Q3E.q3ei.GameInfo().CheckFeature(Q3EGameConstants.NOT_IDTECH))
+                msg = "idTech version only!";
+        }
 
         if(null != msg)
         {

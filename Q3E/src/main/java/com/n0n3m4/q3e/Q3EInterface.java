@@ -638,7 +638,12 @@ public class Q3EInterface
 		boolean res = g.CheckFeature(Q3EGameConstants.DISABLED);
 		if(res)
 			return true;
-		return(Q3EGlobals.IsFDroidVersion() && g.CheckFeature(Q3EGameConstants.NOT_FREE));
+		if(Q3EGlobals.IsFDroidVersion())
+			return g.CheckFeature(Q3EGameConstants.NOT_FREE);
+		else if(Q3EGlobals.IsIdTechVersion())
+			return g.CheckFeature(Q3EGameConstants.NOT_IDTECH);
+		else
+			return false;
 	}
 
 	public static boolean IsDisabled(String game)
@@ -647,7 +652,12 @@ public class Q3EInterface
 		boolean res = g.CheckFeature(Q3EGameConstants.DISABLED);
 		if(res)
 			return true;
-		return(Q3EGlobals.IsFDroidVersion() && g.CheckFeature(Q3EGameConstants.NOT_FREE));
+		if(Q3EGlobals.IsFDroidVersion())
+			return g.CheckFeature(Q3EGameConstants.NOT_FREE);
+		else if(Q3EGlobals.IsIdTechVersion())
+			return g.CheckFeature(Q3EGameConstants.NOT_IDTECH);
+		else
+			return false;
 	}
 
 	public boolean IsSupportSecondaryGameParam()
