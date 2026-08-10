@@ -442,9 +442,13 @@ unsigned int idMegaTextureTileDecompressor::Run( void *parameter ) {
 		signal.wait_for( waitLock, std::chrono::milliseconds( 5 ) );
 #else
 		sdUniqueLock<sdLock> waitLock( stateMutex );
+#if 1
+		signal.WaitForLock( stateMutex, 5 );
+#else
 		waitLock.Unlock();
 		signal.Wait( 5 );
 		waitLock.Lock();
+#endif
 #endif
 	}
 	return 0;

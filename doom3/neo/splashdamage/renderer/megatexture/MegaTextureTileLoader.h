@@ -79,9 +79,9 @@ private:
 	std::atomic<bool> terminate;
 	std::atomic<bool> forceUpdate;
 #else
-	sdAtomic<int> numProcessedTiles;
-	sdAtomic<bool> terminate;
-	sdAtomic<bool> forceUpdate;
+	sdAtomicValue<int> numProcessedTiles;
+	sdAtomicValue<bool> terminate;
+	sdAtomicValue<bool> forceUpdate;
 #endif
 };
 

@@ -62,3 +62,23 @@ sdSysSignal::SignalAndWait
 bool sdSysSignal::SignalAndWait( signalHandle_t& signal, signalHandle_t& handle, int timeout ) {
 	return ( ::SignalObjectAndWait( signal, handle, timeout == sdSignal::WAIT_INFINITE ? INFINITE : timeout, FALSE ) != WAIT_FAILED );
 }
+
+/*
+=============
+sdSysSignal::WaitForLock
+1. release lock
+2. wait on signal
+3. acquire lock
+=============
+*/
+bool sdSysSignal::WaitForLock( signalHandle_t& handle, lockHandle_t& lock, int timeout ) {
+	::LeaveCriticalSection( &lock );
+
+	DWORD result = ::WaitForSingleObject( handle, timeout == sdSignal::WAIT_INFINITE ? INFINITE : timeout );
+
+	::EnterCriticalSection( &lock );
+
+	assert( result != WAIT_FAILED && "WaitForSingleObject failed - invalid signal handle" );
+
+	return ( result == WAIT_OBJECT_0 );
+}

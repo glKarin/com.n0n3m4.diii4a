@@ -16,6 +16,8 @@ public:
 	void				Clear();
 	bool				Wait( int timeout = WAIT_INFINITE );
 	bool				SignalAndWait( sdSignal &signal, int timeout = WAIT_INFINITE );
+	bool				WaitForLock( class sdLock &lock, int timeout = WAIT_INFINITE );
+		
 protected:
 	signalHandle_t		handle;
 };

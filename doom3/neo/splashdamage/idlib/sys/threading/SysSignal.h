@@ -16,6 +16,7 @@ public:
 	static void				Clear( signalHandle_t& handle );
 	static bool				Wait( signalHandle_t& handle, int timeout );
 	static bool				SignalAndWait( signalHandle_t& signal, signalHandle_t& handle, int timeout );
+	static bool				WaitForLock( signalHandle_t& handle, lockHandle_t& lock, int timeout );
 };
 
 #endif /* !__SYSSIGNAL_H__ */

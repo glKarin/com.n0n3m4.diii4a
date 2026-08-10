@@ -39,7 +39,7 @@ static const int MEGA_LOAD_HISTORY = 2048;
 #ifdef _USING_STDCXX
 static std::atomic<int> megaLoadHistoryIndex( 0 );
 #else
-static sdAtomic<int> megaLoadHistoryIndex( 0 );
+static sdAtomicValue<int> megaLoadHistoryIndex( 0 );
 #endif
 static int megaLoadTimes[MEGA_LOAD_HISTORY];
 static int megaLoadBytes[MEGA_LOAD_HISTORY];
@@ -386,9 +386,13 @@ unsigned int idMegaTextureTileLoader::Run( void *parameter ) {
 		signal.wait_for( waitLock, std::chrono::milliseconds( 20 ) );
 #else
 		sdUniqueLock<sdLock> waitLock( stateMutex );
+#if 1
+		signal.WaitForLock( stateMutex, 20 );
+#else
 		waitLock.Unlock();
 		signal.Wait( 20 );
 		waitLock.Lock();
+#endif
 #endif
 	}
 	return 0;

@@ -65,7 +65,7 @@ jobs:
         du -ch | tail -n -1
         echo "<<< disk usage"
         arch=arm64-v8a
-        barch=-Pabifilters=${arch}
+        barch="-Pabifilters=${arch} -PproductFlavor=idtech"
         # remove 32-bit libraries
         echo "Remove 32-bit libraries"
         rm -rf Q3E/libs/armeabi-v7a
@@ -86,7 +86,7 @@ jobs:
         du -ch | tail -n -1
         echo "<<< disk usage"
         echo "Copy Source libraries to libs"
-        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libsource*so Q3E/libs/${arch}
+        cp -f Q3E/build/intermediates/library_jni/release/jni/${arch}/libsource*so Q3E/libs/${arch} || true
         ls Q3E/libs/${arch}
         # build idTech4 only
         echo "Clean builds"

@@ -59,3 +59,13 @@ sdSignal::Wait
 bool sdSignal::SignalAndWait( sdSignal &signal, int timeout ) {
 	return sdSysSignal::SignalAndWait( signal.handle, handle, timeout );
 }
+
+/*
+=============
+sdSignal::WaitForLock
+=============
+*/
+bool sdSignal::WaitForLock( sdLock &lock, int timeout )
+{
+	return sdSysSignal::WaitForLock( handle, *lock.GetHandle(), timeout );
+}

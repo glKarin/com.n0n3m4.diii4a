@@ -41,3 +41,42 @@ sdLock::Release
 void sdLock::Release() {
 	sdSysLock::Release( handle );
 }
+
+
+
+/*
+=============
+sdRecursiveLock::sdRecursiveLock
+=============
+*/
+sdRecursiveLock::sdRecursiveLock() {
+    //karin: add recursive flag
+    sdSysLock::Init( handle, true );
+}
+
+/*
+=============
+sdRecursiveLock::~sdRecursiveLock
+=============
+*/
+sdRecursiveLock::~sdRecursiveLock() {
+    sdSysLock::Destroy( handle );
+}
+
+/*
+=============
+sdRecursiveLock::Acquire
+=============
+*/
+bool sdRecursiveLock::Acquire( bool blocking ) {
+    return sdSysLock::Acquire( handle, blocking );
+}
+
+/*
+=============
+sdRecursiveLock::Release
+=============
+*/
+void sdRecursiveLock::Release() {
+    sdSysLock::Release( handle );
+}

@@ -145,3 +145,49 @@ bool sdSysSignal::SignalAndWait( signalHandle_t& signal, signalHandle_t& handle,
 	pthread_mutex_unlock( &handle.mutex );
 	return true;
 }
+
+/*
+=============
+sdSysSignal::WaitForLock
+1. release lock
+2. wait on signal
+3. acquire lock
+=============
+*/
+bool sdSysSignal::WaitForLock( signalHandle_t& handle, lockHandle_t& lock, int timeout ) {
+	int rc;
+	struct timespec ts;
+	struct timeval tp;
+
+	pthread_mutex_lock( &handle.mutex );
+	assert( !handle.waiting );	// Wait() from multiple threads?
+
+	pthread_mutex_unlock( &lock );
+
+	if ( handle.signaled ) {
+		// emulate windows behaviour: signal has been raised already. clear and keep going
+		handle.signaled = false;
+		rc = 0;
+	} else {
+		handle.waiting = true;
+		if ( timeout == sdSignal::WAIT_INFINITE ) {
+			pthread_cond_wait( &handle.cond, &handle.mutex );
+			rc = 0;
+		} else {
+			rc =  gettimeofday( &tp, NULL );
+			assert( rc == 0 );
+			ts.tv_sec = tp.tv_sec + timeout / 1000;
+			ts.tv_nsec = tp.tv_usec * 1000 + ( timeout % 1000 ) * 1000000;
+			rc = pthread_cond_timedwait( &handle.cond, &handle.mutex, &ts );
+		}
+		handle.waiting = false;
+	}
+
+	pthread_mutex_lock( &lock );
+
+	pthread_mutex_unlock( &handle.mutex );
+
+	// Match std::condition_variable::wait_for return semantics:
+	// false on timeout (ETIMEDOUT), true otherwise (signaled or spurious wakeup).
+	return ( rc != ETIMEDOUT );
+}
