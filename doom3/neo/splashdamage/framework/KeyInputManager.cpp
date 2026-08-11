@@ -48,7 +48,7 @@ ID_INLINE static int FindModifierBindCommand(idStaticList< sdKeyBind::pair_t, sd
 ID_INLINE static void DownsizeModifierBindCommand(idStaticList< sdKeyBind::pair_t, sdKeyBind::MAX_MODIFIERS > &list)
 {
 	int i;
-	for(i == list.Num() - 1; i >= 0; i--)
+	for(i = list.Num() - 1; i >= 0; i--)
 	{
 		if(list[i].first != K_INVALID)
 			break;
