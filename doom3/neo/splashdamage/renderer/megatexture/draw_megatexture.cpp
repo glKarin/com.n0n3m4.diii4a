@@ -645,11 +645,11 @@ bool RB_DrawMegaTextureAmbient(const drawSurf_t *surf, const shaderStage_t *surf
 	else
 		return false;
 
+	shaderProgram_t *lastProgram = backEnd.glState.currentProgram;
 	const sdRenderProgram *ambientProgram = surfaceStage->renderProgram->GetDeclRenderProgram()->AmbientVersion();
 	if(!ambientProgram || !ambientProgram->IsValid())
 		return false;
 
-	shaderProgram_t *lastProgram = backEnd.glState.currentProgram;
 	if(!ambientProgram->Bind(surfaceStage, surfaceShader, surfaceRegs))
 		return false;
 

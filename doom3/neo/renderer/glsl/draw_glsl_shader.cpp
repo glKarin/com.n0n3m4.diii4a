@@ -445,6 +445,8 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 	int	i;
 	char	buffer[32];
 
+	shaderProgram_t *lastProgram = backEnd.glState.currentProgram;
+
 	GL_UseProgram(shader);
 
 	// get uniform location
@@ -541,7 +543,8 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 
 	GL_CheckErrors();
 
-	GL_UseProgram(NULL);
+	//GL_UseProgram(NULL);
+	GL_UseProgram(lastProgram);
 }
 
 static const GLSLShaderProp * RB_GLSL_FindShaderProp(const idList<GLSLShaderProp> &Props, int type)
