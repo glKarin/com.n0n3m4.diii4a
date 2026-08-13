@@ -9,7 +9,7 @@ on:
       #- 'idTech4Amm/**'
       #- 'Q3E/**'
       - '.github/workflows/android_armv8_release.yml'
-      #- '.github/workflows/android.changelog'
+      # - '.github/workflows/android.changelog'
   pull_request:
     branches: [ "master" ]
     paths:

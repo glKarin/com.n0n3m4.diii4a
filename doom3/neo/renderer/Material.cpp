@@ -2228,6 +2228,7 @@ void idMaterial::ParseStage(idLexer &src, const textureRepeat_t trpDefault)
 					continue;
 				}
 
+				SetMaterialFlag(MF_HASMEGA);
 				const shaderProgram_t *shaderProgram = shaderManager->Find("megaTexture");
 				NS_DEBUG(common->Printf("NS vertexProgram: %s -> %s\n", GetName(), shaderProgram ? shaderProgram->name : "NULL"));
 				if(shaderProgram && shaderProgram->program > 0)
