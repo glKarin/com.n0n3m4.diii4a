@@ -60,7 +60,6 @@ static idCVar	harm_r_shaderProgramES3Dir("harm_r_shaderProgramES3Dir", _GL3PROGS
 #endif
 
 static bool glslInitialized = false;
-static bool reloadGLSLShaders = false;
 static bool shaderRequired = true;
 static bool RB_GLSL_SetupLoadError(bool b) {
 	bool last = shaderRequired;
@@ -73,7 +72,6 @@ static bool RB_GLSL_LoadNotAllowError(void) {
 static bool RB_GLSL_IgnoreLoadError(void) {
 	return RB_GLSL_SetupLoadError(false);
 }
-static idStrList reloadShaderNames;
 
 static idStr RB_GLSL_GetExternalShaderSourcePath(void);
 
@@ -126,17 +124,7 @@ void RB_GLSL_HandleShaders(void)
     if(!multithreadActive)
         return;
     shaderManager->ActuallyLoad();
-    if(reloadGLSLShaders)
-    {
-        shaderManager->ReloadShaders();
-        reloadGLSLShaders = false;
-    	reloadShaderNames.Clear();
-    }
-	else if (reloadShaderNames.Num() > 0)
-	{
-        shaderManager->ReloadShaders(reloadShaderNames);
-    	reloadShaderNames.Clear();
-	}
+    shaderManager->ActuallyReload();
 }
 #endif
 
@@ -745,14 +733,10 @@ void R_ReloadGLSLPrograms_f(const idCmdArgs &args)
     else
     {
 #ifdef _MULTITHREAD
-        if(multithreadActive)
-        {
-            reloadGLSLShaders = true;
-            common->Printf("Reload GLSL shader will run on next renderer thread!\n");
-        }
-        else
+		if(multithreadActive)
+			common->Printf("Reload GLSL shaders will run on next renderer thread!\n");
 #endif
-        shaderManager->ReloadShaders();
+		shaderManager->ReloadAll();
     }
 
 	common->Printf("-------------------------------\n");

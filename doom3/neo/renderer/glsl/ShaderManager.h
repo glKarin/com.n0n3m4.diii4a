@@ -105,11 +105,10 @@ public:
 	const shaderProgram_t * Find(GLuint openGLHandle) const; // handle is OpenGL shader program's handle
 	shaderHandle_t Load(const GLSLShaderProp &prop); // frontend: if in multi-threading, only add on queue, because current thread has not OpenGL context; else if not in multi-threading, actual load directly. however always return a shader program handle, if has loaded, return OpenGL program handle(> 0), else return -(shaderProps::index + 1), error return 0.
 	void ActuallyLoad(void); // backend: if in multi-threading, load actually from queue with OpenGL context
+	void ActuallyReload(void); // backend: if in multi-threading, load actually from queue with OpenGL context
 	const shaderProgram_t * Get(shaderHandle_t handle) const;
 	shaderHandle_t GetHandle(const char *name) const;
 	const GLSLShaderProp * FindProp(const char *name) const;
-	void ReloadShaders(void);
-	void ReloadShaders(const idStrList &names);
 	void Print(void);
 
 	static idGLSLShaderManager _shaderManager;
@@ -117,6 +116,9 @@ public:
 	static void R_ExportGLSLShaderSource_f(const idCmdArgs &args);
 	static void R_PrintGLSLShaderSource_f(const idCmdArgs &args);
 	static void ArgCompletion_Shaders(const idCmdArgs &args, void(*callback)(const char *s));
+	void Reload(const idStrList &names);
+	void Reload(const char *name);
+	void ReloadAll(void);
 
 private:
 	int AddPlaceholder(const GLSLShaderProp &prop); // return added shader's index
@@ -126,12 +128,18 @@ private:
     GLSLShaderProp * FindCustom(const char *name, int *index = NULL);
 	void Resize(int type);
 	void ReloadShader(int index);
+	void ReloadShaders(void);
+	void ReloadShaders(const idStrList &names);
+	void ReloadShader(const char *name);
 
 private:
 	idList<shaderProgram_t *> shaders; // available shaders, include internal shaders and loaded custom shaders
 	idList<GLSLShaderProp> shaderProps; // custom shaders load list. GLSLShaderProp::program == NULL: loading not start; GLSLShaderProp::program->program > 0: load success; GLSLShaderProp::program->program == 0: load failed
 	// idList<unsigned int> queue; // custom shaders load queue: index to shaderProps
 	unsigned int queueCurrentIndex; // current loaded index in shaderProps
+
+	bool reloadGLSLShaders;
+	idStrList reloadShaderNames;
 
 private:
 	idGLSLShaderManager(void);

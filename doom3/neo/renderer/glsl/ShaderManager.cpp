@@ -473,6 +473,71 @@ void idGLSLShaderManager::ReloadShaders(const idStrList &names)
 	GL_UseProgram(originShader);
 }
 
+void idGLSLShaderManager::ReloadShader(const char *name)
+{
+	if(!name || !name[0])
+		return;
+
+	shaderProgram_t *originShader = backEnd.glState.currentProgram;
+	GL_UseProgram(NULL);
+
+	for(int i = 0; i < shaderProps.Num(); i++)
+	{
+		if (idStr::Icmp(shaderProps[i].name, name) == 0)
+		{
+			ReloadShader(i);
+			break;
+		}
+	}
+
+	GL_UseProgram(originShader);
+}
+
+void idGLSLShaderManager::Reload(const idStrList &names)
+{
+#ifdef _MULTITHREAD // in multi-threading, push on queue and load on backend
+	if(multithreadActive)
+		reloadShaderNames.Append(names);
+	else
+#endif
+	ReloadShaders(names);
+}
+
+void idGLSLShaderManager::Reload(const char *name)
+{
+#ifdef _MULTITHREAD // in multi-threading, push on queue and load on backend
+	if(multithreadActive)
+		reloadShaderNames.Append(name);
+	else
+#endif
+	ReloadShader(name);
+}
+
+void idGLSLShaderManager::ReloadAll(void)
+{
+#ifdef _MULTITHREAD // in multi-threading, push on queue and load on backend
+	if(multithreadActive)
+		reloadGLSLShaders = true;
+	else
+#endif
+	ReloadShaders();
+}
+
+void idGLSLShaderManager::ActuallyReload(void)
+{
+    if(reloadGLSLShaders)
+    {
+        ReloadShaders();
+        reloadGLSLShaders = false;
+		reloadShaderNames.Clear();
+    }
+	else if (reloadShaderNames.Num() > 0)
+	{
+        ReloadShaders(reloadShaderNames);
+    	reloadShaderNames.Clear();
+	}
+}
+
 void idGLSLShaderManager::Print(void)
 {
 	common->Printf("----- %d GLSL shaders -----\n", shaders.Num());
@@ -532,7 +597,9 @@ void idGLSLShaderManager::Print(void)
 }
 
 idGLSLShaderManager::idGLSLShaderManager(void)
-: queueCurrentIndex(SHADER_CUSTOM) {
+: queueCurrentIndex(SHADER_CUSTOM),
+	reloadGLSLShaders(false)
+{
 }
 
 
@@ -678,17 +745,13 @@ void R_ReloadShader_f(const idCmdArgs &args)
 	if(!glslInitialized)
 		return;
 
-	reloadShaderNames.Clear();
+	idStrList names;
 	for (int i = 1; i < args.Argc(); i++)
-		reloadShaderNames.AddUnique(args.Argv(i));
+		names.AddUnique(args.Argv(i));
 
 #ifdef _MULTITHREAD
 	if(multithreadActive)
-		common->Printf("Reload GLSL shader will run on next renderer thread!\n");
-	else
+		common->Printf("Reload GLSL shaders will run on next renderer thread!\n");
 #endif
-	{
-		shaderManager->ReloadShaders(reloadShaderNames);
-		reloadShaderNames.Clear();
-	}
+	shaderManager->Reload(names);
 }

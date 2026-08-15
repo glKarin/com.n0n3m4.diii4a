@@ -94,10 +94,6 @@ ID_INLINE static void RB_OnlyRenderThreadRunningAndMainThreadWaiting(void)
 {
     // Load custom GLSL shader or reload GLSL shaders
     RB_GLSL_HandleShaders();
-#ifdef _SPLASHDAMAGE //karin: reload render programs
-    // reload render programs
-    RB_ReloadRenderPrograms();
-#endif
     // debug tools
     RB_SetupRenderTools();
 #ifdef _SPLASHDAMAGE //karin: occlusion testing

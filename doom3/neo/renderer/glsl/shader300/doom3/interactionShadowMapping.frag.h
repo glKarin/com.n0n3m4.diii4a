@@ -213,7 +213,7 @@ ES3_SHADOW_MAPPING_SAMPLE_POISSON_DISK
 "#else\n"
 "    highp vec4 shadowPosition = vec4(var_ShadowCoord.xyz / var_ShadowCoord.w, 0.0);\n"
 "#endif\n"
-"   // end light type\n"
+"    // end light type\n"
 "    highp float distance = JITTER_SCALE * SHADOW_MAP_SIZE_MULTIPLICATOR;\n"
 "    // highp float random = (gl_FragCoord.z + shadowPosition.z) * 0.5;\n"
 "    highp float random = texture( u_fragmentMap7, gl_FragCoord.xy * SCREEN_SIZE_MULTIPLICATOR ).r;\n"

@@ -11,10 +11,12 @@ public:
     									sdRenderProgramManager(void);
     									~sdRenderProgramManager();
 
-    // parse
+	void								Init(void);
+	void								Shutdown(void);
     const sdRenderProgram *				LoadProgram(const char *name);
 	void								ReloadAll(void);
 	void								CheckCVars(void);
+	void								CVarChanged(const char *name);
 
     static void							LoadRenderProgram_f(const idCmdArgs &args);
     static void							ListRenderPrograms_f(const idCmdArgs &args);

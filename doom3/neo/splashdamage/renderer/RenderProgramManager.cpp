@@ -4,14 +4,25 @@
 #include "../../renderer/tr_local.h"
 #include "RenderProgram.h"
 #include "RenderProgramManager.h"
-
-static bool reloadRenderPrograms = false;
+#include "framework/CmdSystemDeclCompletion.h"
 
 sdRenderProgramManager::sdRenderProgramManager(void)
 {
 }
 
 sdRenderProgramManager::~sdRenderProgramManager(void)
+{
+	Shutdown();
+}
+
+void sdRenderProgramManager::Init(void)
+{
+	cmdSystem->AddCommand("loadRenderProgram", sdRenderProgramManager::LoadRenderProgram_f, CMD_FL_RENDERER, "load shader program", idArgCompletionDecl_f<DECLTYPE_RENDERPROGRAM>);
+	cmdSystem->AddCommand("listRenderPrograms", sdRenderProgramManager::ListRenderPrograms_f, CMD_FL_RENDERER, "list shader programs");
+	cmdSystem->AddCommand("reloadRenderPrograms", sdRenderProgramManager::ReloadAllRenderPrograms_f, CMD_FL_RENDERER, "reload all shader programs");
+}
+
+void sdRenderProgramManager::Shutdown(void)
 {
     programs.DeleteContents(true);
 }
@@ -61,28 +72,18 @@ void sdRenderProgramManager::ReloadAll(void) {
     }
 
 	if(shaderNames.Num() > 0)
-		shaderManager->ReloadShaders(shaderNames);
+		shaderManager->Reload(shaderNames);
 }
 
 void sdRenderProgramManager::CheckCVars(void) {
 #if 1
 	const sdDeclRenderProgram *program;
 
-	static idCVar * const ShaderCVars[] = {
-		&r_shaderQuality,
-		&r_megaDrawMethod,
-		&r_normalizeNormalMaps,
-		&r_dxnNormalMaps,
-		&r_32ByteVtx,
-		&r_useDitherMask,
-		&r_shaderSkipSpecCubeMaps,
-		&alphatest_kill,
-		&r_detailTexture,
-		&r_megaMultiply,
-		&r_useARBPositionInvariant,
-		&r_skipDiffuse,
-		&r_skipBump,
-	};
+#define QSHADER_CVAR_PROC(x) &x
+#include "shader_cvars_proc.h"
+	SHADER_CVARS(static idCVar * const ShaderCVars);
+#undef QSHADER_CVAR_PROC
+
 	static idStaticList<const idCVar *, sizeof(ShaderCVars) / sizeof(ShaderCVars[0])> changes;
 
 	for (int i = 0; i < sizeof(ShaderCVars) / sizeof(ShaderCVars[0]); i++) {
@@ -111,7 +112,7 @@ void sdRenderProgramManager::CheckCVars(void) {
 	}
 
 	if(shaderNames.Num() > 0)
-		shaderManager->ReloadShaders(shaderNames);
+		shaderManager->Reload(shaderNames);
 
 	changes.Clear();
 #else
@@ -162,6 +163,23 @@ void sdRenderProgramManager::CheckCVars(void) {
 #endif
 }
 
+void sdRenderProgramManager::CVarChanged(const char *name) {
+	const sdDeclRenderProgram *program;
+
+	idStrList shaderNames;
+	shaderNames.Resize(programs.Num());
+	for (int i = 0; i < programs.Num(); i++) {
+		program = programs[i]->GetDeclRenderProgram();
+		if(program->HasDefine(name))
+		{
+			shaderNames.Append(program->GetName());
+		}
+	}
+
+	if(shaderNames.Num() > 0)
+		shaderManager->Reload(shaderNames);
+}
+
 static sdRenderProgramManager renderProgramManagerLocal;
 sdRenderProgramManager *renderProgramManager = &renderProgramManagerLocal;
 
@@ -177,8 +195,7 @@ void sdRenderProgramManager::LoadRenderProgram_f(const idCmdArgs &args) {
 void sdRenderProgramManager::ReloadAllRenderPrograms_f(const idCmdArgs &) {
 #ifdef _MULTITHREAD
 	if(multithreadActive)
-		reloadRenderPrograms = true;
-	else
+		common->Printf("Reload render programs will run on next renderer thread!\n");
 #endif
     renderProgramManagerLocal.ReloadAll();
 }
@@ -204,65 +221,6 @@ void sdRenderProgramManager::ListRenderPrograms_f(const idCmdArgs &args) {
 
 void R_CheckRenderProgramCVars(void)
 {
-	bool changed = false;
-	if(r_shaderQuality.IsModified())
-	{
-		changed = true;
-		r_shaderQuality.ClearModified();
-	}
-	if(r_megaDrawMethod.IsModified())
-	{
-		changed = true;
-		r_megaDrawMethod.ClearModified();
-	}
-	if(r_normalizeNormalMaps.IsModified())
-	{
-		changed = true;
-		r_normalizeNormalMaps.ClearModified();
-	}
-	if(r_dxnNormalMaps.IsModified())
-	{
-		changed = true;
-		r_dxnNormalMaps.ClearModified();
-	}
-	if(r_32ByteVtx.IsModified())
-	{
-		changed = true;
-		r_32ByteVtx.ClearModified();
-	}
-	if(r_useDitherMask.IsModified())
-	{
-		changed = true;
-		r_useDitherMask.ClearModified();
-	}
-	if(r_shaderSkipSpecCubeMaps.IsModified())
-	{
-		changed = true;
-		r_shaderSkipSpecCubeMaps.ClearModified();
-	}
-	if(alphatest_kill.IsModified())
-	{
-		changed = true;
-		alphatest_kill.ClearModified();
-	}
-	
-	if(!changed)
-		return;
-#ifdef _MULTITHREAD
-	if(multithreadActive)
-		reloadRenderPrograms = true;
-	else
-#endif
-	renderProgramManagerLocal.ReloadAll();
+	renderProgramManagerLocal.CheckCVars();
 }
 
-#ifdef _MULTITHREAD
-void RB_ReloadRenderPrograms(void)
-{
-	if(reloadRenderPrograms && multithreadActive)
-	{
-		renderProgramManagerLocal.ReloadAll();
-		reloadRenderPrograms = false;
-	}
-}
-#endif
