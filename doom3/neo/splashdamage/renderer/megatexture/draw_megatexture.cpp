@@ -10,7 +10,15 @@ extern idCVar harm_r_skipAreaAmbient;
 static const sdRenderProgram *megaTextureProgram = NULL;
 #ifdef _STENCIL_SHADOW_IMPROVE
 extern bool stencilShadowWithoutStencilTest;
+#ifdef _SOFT_STENCIL_SHADOW
+extern float RB_StencilShadowSoft_getBIAS(void);
+extern void RB_StencilShadowSoftInteraction_bindTexture(void);
 #endif
+#endif
+
+#define LIGHT_TYPE_PARALLEL 1
+#define LIGHT_TYPE_POINT 2
+#define LIGHT_TYPE_SPOT 3
 
 ID_INLINE static void R_SetMetaTextureDrawInteraction(const shaderStage_t *surfaceStage, const float *surfaceRegs, float color[4])
 {
@@ -252,6 +260,239 @@ void RB_CreateSingleMegaTextureDrawInteractions(const drawSurf_t *surf, void (*D
 	backEnd.currentSpace = surf->space; //k2023
 }
 
+#ifdef _SHADOW_MAPPING
+ID_INLINE static void RB_MegaTexture_ShadowMapping_SetupMVP(const drawInteraction_t *din)
+{
+	idRenderMatrix lightViewRenderMatrix;
+	idRenderMatrix lightProjectionRenderMatrix;
+
+	/*
+	 * parallel light not use `cascade`, so only 1 matrix
+	 * point light has 6 matrix, but unused in shader
+	 * spot light only 1 matrix
+	 */
+	if( backEnd.vLight->parallel )
+	{
+#ifdef GL_ES_VERSION_3_0
+        if(USING_GLES3 && r_shadowMapParallelSplitFrustums > 0)
+        {
+            float ms[6 * 16];
+            for( int i = 0; i < ( r_shadowMapParallelSplitFrustums + 1 ); i++ )
+            {
+                lightViewRenderMatrix << backEnd.shadowV[i];
+                lightProjectionRenderMatrix << backEnd.shadowP[i];
+
+                idRenderMatrix modelRenderMatrix;
+                idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX din->surf->space->modelMatrix, modelRenderMatrix );
+
+                idRenderMatrix modelToLightRenderMatrix;
+                idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+                idRenderMatrix clipMVP;
+                idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+                idRenderMatrix MVP;
+                idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+
+                MVP >> &ms[i * 16];
+            }
+
+        	megaTextureProgram->BindMat4Array("u_uniformMatrixArrayParm6", ms, 6);
+        }
+        else
+#endif
+		{
+			lightViewRenderMatrix << backEnd.shadowV[0];
+			lightProjectionRenderMatrix << backEnd.shadowP[0];
+
+			idRenderMatrix modelRenderMatrix;
+			idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX din->surf->space->modelMatrix, modelRenderMatrix );
+
+			idRenderMatrix modelToLightRenderMatrix;
+			idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+			idRenderMatrix clipMVP;
+			idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+			idRenderMatrix MVP;
+			idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+
+        	megaTextureProgram->BindMat4("u_uniformMatrixParm5", MVP.m);
+		}
+
+		megaTextureProgram->BindIVector("u_uniformIntParm7", LIGHT_TYPE_PARALLEL);
+	}
+	else if( backEnd.vLight->pointLight )
+	{
+		float ms[6 * 16];
+		for( int i = 0; i < 6; i++ )
+		{
+			lightViewRenderMatrix << backEnd.shadowV[i];
+			lightProjectionRenderMatrix << backEnd.shadowP[i];
+
+			idRenderMatrix modelRenderMatrix;
+			idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX din->surf->space->modelMatrix, modelRenderMatrix );
+
+			idRenderMatrix modelToLightRenderMatrix;
+			idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+			idRenderMatrix clipMVP;
+			idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+			idRenderMatrix MVP;
+			idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+
+			MVP >> &ms[i * 16];
+		}
+        megaTextureProgram->BindMat4Array("u_uniformMatrixArrayParm6", ms, 6);
+
+		megaTextureProgram->BindIVector("u_uniformIntParm7", LIGHT_TYPE_POINT);
+	}
+	else
+	{
+		// spot light
+
+		lightViewRenderMatrix << backEnd.shadowV[0];
+		lightProjectionRenderMatrix << backEnd.shadowP[0];
+
+		idRenderMatrix modelRenderMatrix;
+		idRenderMatrix::Transpose( ID_TO_RENDER_MATRIX din->surf->space->modelMatrix, modelRenderMatrix );
+
+		idRenderMatrix modelToLightRenderMatrix;
+		idRenderMatrix::Multiply( lightViewRenderMatrix, modelRenderMatrix, modelToLightRenderMatrix );
+
+		idRenderMatrix clipMVP;
+		idRenderMatrix::Multiply( lightProjectionRenderMatrix, modelToLightRenderMatrix, clipMVP );
+
+		idRenderMatrix MVP;
+		idRenderMatrix::Multiply(renderMatrix_clipSpaceToWindowSpace, clipMVP, MVP);
+        megaTextureProgram->BindMat4("u_uniformMatrixParm5", MVP.m);
+
+		megaTextureProgram->BindIVector("u_uniformIntParm7", LIGHT_TYPE_SPOT);
+	}
+}
+
+ID_INLINE static void RB_MegaTexture_ShadowMapping(const drawInteraction_t *din)
+{
+#ifdef GL_ES_VERSION_3_0
+	if(USING_GLES3)
+#endif
+	if( backEnd.vLight->parallel )
+	{
+		float cascadeDistances[4];
+		if(r_shadowMapParallelSplitFrustums > 0)
+		{
+			cascadeDistances[0] = backEnd.viewDef->frustumSplitDistances[0];
+			cascadeDistances[1] = backEnd.viewDef->frustumSplitDistances[1];
+			cascadeDistances[2] = backEnd.viewDef->frustumSplitDistances[2];
+			cascadeDistances[3] = backEnd.viewDef->frustumSplitDistances[3];
+		}
+		else
+		{
+			cascadeDistances[0] = cascadeDistances[1] = cascadeDistances[2] = cascadeDistances[3] = idMath::INFINITY; //karin: force using 0 texture layer and shadow matrix
+		}
+		megaTextureProgram->BindVector("u_uniformParm3", cascadeDistances); // rpCascadeDistances
+	}
+
+	//GL_Uniform1f(offsetof(shaderProgram_t, bias), harm_r_shadowMapBias.GetFloat());
+	megaTextureProgram->BindVector("u_uniformParm0", harm_r_shadowMapAlpha.GetFloat());
+	float globalViewOrigin[4] = {
+			backEnd.viewDef->renderView.vieworg[0],
+			backEnd.viewDef->renderView.vieworg[1],
+			backEnd.viewDef->renderView.vieworg[2],
+			1.0f,
+	};
+	megaTextureProgram->BindVector("viewOriginWorld", globalViewOrigin);
+
+	const float ShadowMapTexelSize[] = {
+			(float)shadowMapResolutions[backEnd.vLight->shadowLOD], // textureSize()
+			SampleFactors[backEnd.vLight->shadowLOD], // 1.0 / textureSize()
+			r_shadowMapJitterScale.GetFloat(), // sampler offset scale
+			0
+	};
+	megaTextureProgram->BindVector("u_uniformParm1", ShadowMapTexelSize);
+	const float ScreenSize[] = {
+			1.0f / (float)tr.GetScreenWidth(), // 1.0 / screen_width
+			1.0f / (float)tr.GetScreenHeight(), // 1.0 / screen_height
+			(float)globalImages->blueNoiseImage256->uploadWidth, // jitter.textureSize()
+			1.0f / (float)globalImages->blueNoiseImage256->uploadWidth, // 1.0 / jitter.textureSize()
+	};
+	megaTextureProgram->BindVector("u_uniformParm2", ScreenSize);
+
+	megaTextureProgram->BindMat4("u_modelMatrix", din->surf->space->modelMatrix);
+	megaTextureProgram->BindMat4("u_modelViewMatrix", din->surf->space->modelViewMatrix);
+
+	RB_MegaTexture_ShadowMapping_SetupMVP(din);
+
+	// shadow map
+	idImage *shadowTexture = RB_ShadowMappingInteraction_GetTexture();
+#ifdef _OPENGLES3
+	if(USING_GLES3)
+		megaTextureProgram->BindImage("u_fragment2DArrayShadowMap6", shadowTexture);
+	else
+#endif
+	{
+		if(backEnd.vLight->pointLight)
+			megaTextureProgram->BindImage("u_fragmentCubeMap6", shadowTexture);
+		else
+			megaTextureProgram->BindImage("u_fragmentMap5", shadowTexture);
+	}
+	// noise jitter map
+	megaTextureProgram->BindImage("u_fragmentMap7", globalImages->blueNoiseImage256);
+}
+#endif
+
+#ifdef _STENCIL_SHADOW_IMPROVE
+#ifdef _SOFT_STENCIL_SHADOW
+ID_INLINE static void RB_MegaTexture_StencilShadowSoft()
+{
+	int iw = stencilTexture.UploadWidth();
+	int ih = stencilTexture.UploadHeight();
+	float	parm[4];
+	int		pot;
+
+	// screen power of two correction factor, assuming the copy to _currentRender
+	// also copied an extra row and column for the bilerp
+	//int	 w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
+	int	 w = stencilTexture.Width();
+	pot = iw;
+	parm[0] = (float)w / pot;
+
+	//int	 h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
+	int	 h = stencilTexture.Height();
+	pot = ih;
+	parm[1] = (float)h / pot;
+
+	parm[2] = 1.0 / iw;
+	parm[3] = 1.0 / ih;
+
+	megaTextureProgram->BindVector("u_uniformParm3", parm);
+
+	// window coord to 0.0 to 1.0 conversion
+	parm[0] = 1.0 / w;
+	parm[1] = 1.0 / h;
+	parm[2] = 0;
+	parm[3] = 1;
+	megaTextureProgram->BindVector("u_uniformParm4", parm);
+
+	// alpha
+	megaTextureProgram->BindVector("u_uniformParm0", 1.0 - r_stencilShadowAlpha);
+
+	// bias
+	megaTextureProgram->BindVector("u_uniformParm1", RB_StencilShadowSoft_getBIAS());
+
+	megaTextureProgram->SelectImage("u_fragmentIntMap6");
+	RB_StencilShadowSoftInteraction_bindTexture();
+	megaTextureProgram->BindTexelSize("u_fragmentIntMap6", stencilTexture.GetTextureImage());
+}
+#endif
+
+ID_INLINE static void RB_MegaTexture_StencilShadowTranslucent(void)
+{
+	megaTextureProgram->BindVector("u_uniformParm0", stencilShadowWithoutStencilTest ? 1.0f - r_stencilShadowAlpha : r_stencilShadowAlpha);
+}
+#endif
+
 // interaction
 static void RB_MegaTexture_DrawInteraction(const drawInteraction_t *din)
 {
@@ -266,6 +507,30 @@ static void RB_MegaTexture_DrawInteraction(const drawInteraction_t *din)
 	megaTextureProgram->BindImage("lightFalloffMap", din->lightFalloffImage);
 	megaTextureProgram->BindImage("lightProjectionMap", din->lightImage);
 	megaTextureProgram->BindVector("diffuseColor", din->diffuseColor);
+
+	bool shadowed = false;
+#ifdef _SHADOW_MAPPING
+	if (r_shadowMapping)
+	{
+		RB_MegaTexture_ShadowMapping(din);
+		shadowed = true;
+	}
+#endif
+
+#ifdef _STENCIL_SHADOW_IMPROVE
+#ifdef _SOFT_STENCIL_SHADOW
+	if(r_stencilShadowSoft && !shadowed)
+	{
+		RB_MegaTexture_StencilShadowSoft();
+		shadowed = true;
+	}
+#endif
+
+	if(r_stencilShadowTranslucent && !shadowed)
+	{
+		RB_MegaTexture_StencilShadowTranslucent();
+	}
+#endif
 
 	// draw it
 	RB_DrawElementsWithCounters(din->surf->geo);
@@ -317,7 +582,7 @@ bool RB_DrawMegaTextureInteraction(const drawInteraction_t *din, const shaderSta
 	if (harm_r_megatextureAmbient.GetBool())
 		return false;
 
-#ifdef _STENCIL_SHADOW_IMPROVE //skip if fill transucent color first
+#ifdef _STENCIL_SHADOW_IMPROVExxx //skip if fill transucent color first
 	if(stencilShadowWithoutStencilTest)
 		return false;
 #endif

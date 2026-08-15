@@ -32,6 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 
 #include "glsl/draw_glsl_shader.cpp"
+#ifdef _SPLASHDAMAGE
+#include "renderer/RenderProgramManager.h"
+#endif
 
 #if 1
 #define ENABLE_STENCIL_TEST() qglEnable(GL_STENCIL_TEST);
@@ -184,6 +187,9 @@ void R_CheckBackEndCvars(void)
 	{
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
+#ifdef _SPLASHDAMAGE //karin: reload shaders if has cvar defines
+		renderProgramManager->CVarChanged(r_useShadowMapping.GetName());
+#endif
 	}
 	if(r_forceShadowMapsOnAlphaTestedSurfaces.IsModified())
 	{
@@ -207,6 +213,9 @@ void R_CheckBackEndCvars(void)
 	{
 		r_stencilShadowTranslucent = harm_r_stencilShadowTranslucent.GetBool();
 		harm_r_stencilShadowTranslucent.ClearModified();
+#ifdef _SPLASHDAMAGE //karin: reload shaders if has cvar defines
+		renderProgramManager->CVarChanged(harm_r_stencilShadowTranslucent.GetName());
+#endif
 	}
 	if(harm_r_stencilShadowAlpha.IsModified())
 	{
@@ -233,6 +242,9 @@ void R_CheckBackEndCvars(void)
 		{
 			r_stencilShadowSoft = harm_r_stencilShadowSoft.GetBool();
 			harm_r_stencilShadowSoft.ClearModified();
+#ifdef _SPLASHDAMAGE //karin: reload shaders if has cvar defines
+			renderProgramManager->CVarChanged(harm_r_stencilShadowSoft.GetName());
+#endif
 		}
 		if(harm_r_stencilShadowSoftCopyStencilBuffer.IsModified())
 		{

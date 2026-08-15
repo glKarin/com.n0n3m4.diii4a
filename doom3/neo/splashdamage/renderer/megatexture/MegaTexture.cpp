@@ -591,6 +591,7 @@ idMegaTexture::idMegaTexture() :
 	upscaleLevel( NULL ), stGridWidth( 0 ), stGridHeight( 0 ), stGrid( NULL ), tileIndexMap( NULL ),
 	tileIndexedDataSizes( NULL ), nullTileData( NULL ), gridTileData( NULL ),
 	tileRecompressionScratch( NULL ), lastShaderQuality( 0 ), currentTriMapping( NULL ) {
+	lastShaderQuality = r_shaderQuality.GetInteger();
 	currentViewOrigin.Set( 262144.0f, 262144.0f, 262144.0f );
 	memset( localViewToTextureCenter, 0, sizeof( localViewToTextureCenter ) );
 	for ( int i = 0; i < 7; ++i ) shaderLevelOpacity[i] = 1.0f;
@@ -733,6 +734,8 @@ void idMegaTexture::Load() {
 	}
 	if ( megaTextureTileLoader ) megaTextureTileLoader->SignalThread();
 	if ( megaTextureTileDecompressor ) megaTextureTileDecompressor->SignalThread();
+
+	ForceUpdate();
 }
 
 void idMegaTexture::Touch() {
@@ -870,7 +873,7 @@ void idMegaTexture::UpdateForViewOrigin( const idVec3 &origin, int time ) {
 #else
 	sdLockGuard<sdRecursiveLock> guard( lock );
 #endif
-	if ( lastUsedFrame != tr.frameCount ) {
+	if ( lastUsedFrame < tr.frameCount ) {
 		// Upload work completed for the previous center before requesting the next
 		// center.  This is the ordering used by the ETQW renderer and prevents a
 		// newly uploaded atlas offset from lagging one draw behind its image.
@@ -1035,14 +1038,13 @@ void idMegaTexture::LoadDetailTexture() {
 void idMegaTexture::ForceUpdate() {
 	if ( purged ) return;
 	forcedUpdate = true;
-	const int deadline = Sys_Milliseconds() + 10000;
-	while ( !UploadTiles( 0 ) && Sys_Milliseconds() < deadline ) {
+	while ( !UploadTiles( 0 ) ) {
 		if ( megaTextureTileLoader ) megaTextureTileLoader->SignalThread();
 		if ( megaTextureTileDecompressor ) megaTextureTileDecompressor->SignalThread();
 #ifdef _USING_STDCXX
-		std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+		std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
 #else
-		Sys_Sleep(1);
+		Sys_Sleep(10);
 #endif
 	}
 	forcedUpdate = false;

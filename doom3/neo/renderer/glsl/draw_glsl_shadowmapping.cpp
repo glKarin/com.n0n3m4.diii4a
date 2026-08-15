@@ -61,15 +61,15 @@
 #define SHADOW_MAPPING_VOLUME 1 // render shadow volume
 #define SHADOW_MAPPING_SURFACE 2 // render model surface
 
-static bool r_shadowMapping = false; // using shadow mapping(include prelight shadow)
+bool r_shadowMapping = false; // using shadow mapping(include prelight shadow)
 bool r_useDepthTexture = true;
 bool r_useCubeDepthTexture = true;
 bool r_usePackColorAsDepth = false; // Only OpenGLES2.0 and depth texture not supported
 static bool r_dumpShadowMap = false; // backend
 static bool r_dumpShadowMapFrontEnd = false; // frontend
-static bool r_shadowMapPerforated = true;
-static bool r_shadowMapCombine = true;
-static int r_shadowMapParallelSplitFrustums = 0;
+bool r_shadowMapPerforated = true;
+bool r_shadowMapCombine = true;
+int r_shadowMapParallelSplitFrustums = 0;
 
 static shaderProgram_t *depthShader_2d = &depthShader;
 static shaderProgram_t *depthShader_cube = &depthShader;
@@ -77,7 +77,7 @@ static shaderProgram_t *depthPerforatedShader_2d = &depthPerforatedShader;
 static shaderProgram_t *depthPerforatedShader_cube = &depthPerforatedShader;
 
 // see Framebuffer.h::shadowMapResolutions
-static float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = { 1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0 };
+const float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS] = { 1.0f / 2048.0, 1.0f / 1024.0, 1.0f / 512.0, 1.0f / 512.0, 1.0f / 256.0 };
 
 static idCVar harm_r_shadowMapLightType("harm_r_shadowMapLightType", "0", CVAR_INTEGER|CVAR_RENDERER, "debug light type mask in shadow mapping. 1 = parallel; 2 = point; 4 = spot");
 static idCVar harm_r_shadowMapDebug("harm_r_shadowMapDebug", "0", CVAR_INTEGER|CVAR_RENDERER, "debug shadow map frame buffer.");
@@ -1583,44 +1583,49 @@ ID_INLINE static void RB_ShadowMappingInteraction_setupMVP(const drawInteraction
 }
 
 // Bind shadow map texture in interaction pass
-ID_INLINE static void RB_ShadowMappingInteraction_bindTexture(void)
+/*ID_INLINE static */idImage * RB_ShadowMappingInteraction_GetTexture(void)
 {
 #ifdef GL_ES_VERSION_3_0
-	if(USING_GLES3)
-	{
-        globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-/*		if( backEnd.vLight->parallel )
-			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-		else if( backEnd.vLight->pointLight )
-            globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();
-		else
-			globalImages->shadowImage[backEnd.vLight->shadowLOD]->Bind();*/
-	}
-	else
+    if(USING_GLES3)
+    {
+        return globalImages->shadowImage[backEnd.vLight->shadowLOD];
+        /*		if( backEnd.vLight->parallel )
+                    return globalImages->shadowImage[backEnd.vLight->shadowLOD];
+                else if( backEnd.vLight->pointLight )
+                    return globalImages->shadowImage[backEnd.vLight->shadowLOD];
+                else
+                    return globalImages->shadowImage[backEnd.vLight->shadowLOD];*/
+    }
+    else
 #endif
-	{
-		if( backEnd.vLight->parallel )
-		{
-			if(r_useDepthTexture)
-				globalImages->shadowImage_2DDepth[backEnd.vLight->shadowLOD]->Bind();
-			else
-			    globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
-		}
-		else if( backEnd.vLight->pointLight )
-		{
-			if(r_useCubeDepthTexture)
-				globalImages->shadowImage_CubeDepth[backEnd.vLight->shadowLOD]->Bind();
-			else
-			    globalImages->shadowImage_CubeRGBA[backEnd.vLight->shadowLOD]->Bind();
-		}
-		else
-		{
-			if(r_useDepthTexture)
-				globalImages->shadowImage_2DDepth[backEnd.vLight->shadowLOD]->Bind();
-			else
-			    globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD]->Bind();
-		}
-	}
+    {
+        if( backEnd.vLight->parallel )
+        {
+            if(r_useDepthTexture)
+                return globalImages->shadowImage_2DDepth[backEnd.vLight->shadowLOD];
+            else
+                return globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD];
+        }
+        else if( backEnd.vLight->pointLight )
+        {
+            if(r_useCubeDepthTexture)
+                return globalImages->shadowImage_CubeDepth[backEnd.vLight->shadowLOD];
+            else
+                return globalImages->shadowImage_CubeRGBA[backEnd.vLight->shadowLOD];
+        }
+        else
+        {
+            if(r_useDepthTexture)
+                return globalImages->shadowImage_2DDepth[backEnd.vLight->shadowLOD];
+            else
+                return globalImages->shadowImage_2DRGBA[backEnd.vLight->shadowLOD];
+        }
+    }
+}
+
+ID_INLINE static void RB_ShadowMappingInteraction_bindTexture(void)
+{
+    RB_ShadowMappingInteraction_GetTexture()->Bind();
 }
 
 // Bind shadow map texture in interaction pass

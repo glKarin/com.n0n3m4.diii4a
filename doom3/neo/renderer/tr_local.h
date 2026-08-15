@@ -808,7 +808,11 @@ typedef struct {
 #endif
 } tmu_t;
 
+#ifdef _SPLASHDAMAGE //karin: for megatexture in shadow mapping
+const int MAX_MULTITEXTURE_UNITS =	16;
+#else
 const int MAX_MULTITEXTURE_UNITS =	8;
+#endif
 typedef struct {
 	tmu_t		tmu[MAX_MULTITEXTURE_UNITS];
 	int			currenttmu;
@@ -2452,8 +2456,16 @@ extern bool r_useDepthTexture;
 extern bool r_useCubeDepthTexture;
 extern bool r_usePackColorAsDepth;
 
+extern bool r_shadowMapping;
+extern bool r_shadowMapCombine;
+extern bool r_shadowMapPerforated;
+extern int r_shadowMapParallelSplitFrustums;
+
+extern const float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS];
+
 void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLight);
 void R_SetupShadowMappingProjectionMatrix(idRenderLightLocal *light);
+idImage * RB_ShadowMappingInteraction_GetTexture(void);
 #endif
 
 #if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
@@ -2464,12 +2476,20 @@ extern idBounds bounds_unitCube;
 #ifdef _STENCIL_SHADOW_IMPROVE
 extern idCVar harm_r_stencilShadowTranslucent;
 extern idCVar harm_r_stencilShadowAlpha;
+extern idCVar harm_r_stencilShadowCombine;
+
+extern bool r_stencilShadowCombine;
+extern bool r_stencilShadowTranslucent;
+extern float r_stencilShadowAlpha;
 
 #ifdef _SOFT_STENCIL_SHADOW
 extern idCVar harm_r_stencilShadowSoft;
 extern idCVar harm_r_stencilShadowSoftBias;
 extern idCVar harm_r_stencilShadowSoftCopyStencilBuffer;
+
+extern bool r_stencilShadowSoft;
 #endif
+
 #endif
 
 #ifdef _NO_GAMMA //karin: r_brightness when unsupport gamma
@@ -2548,6 +2568,7 @@ extern idCVar harm_r_globalIllumination;
 extern idCVar harm_r_globalIlluminationBrightness;
 #define HARM_RENDER_GLOBAL_ILLUMINATION() (harm_r_globalIllumination.GetBool() && harm_r_globalIlluminationBrightness.GetFloat() > 0.0f)
 
+void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*DrawInteraction)(const drawInteraction_t *));
 void RB_DrawGlobalIlluminations( drawSurf_t **drawSurfs, int numDrawSurfs );
 #endif
 

@@ -397,7 +397,7 @@ public final class Q3EGameConstants
     public static final String ETW_VERSION                    = GAME_VERSION_ETW + ".1"; // 1: init
     public static final String WOLF3D_VERSION                 = GAME_VERSION_WOLF3D + ".2"; // 1: unuse libretro
     public static final String SKINDEEP_GLSL_SHADER_VERSION   = GAME_VERSION_SKINDEEP + ".1"; // 1: init
-    public static final String ETQW_GLSL_SHADER_VERSION       = GAME_VERSION_ETQW + ".5"; // 3: megatexture
+    public static final String ETQW_GLSL_SHADER_VERSION       = GAME_VERSION_ETQW + ".6"; // 3: megatexture shadow
 
 
     // KARIN_NEW_GAME_BOOKMARK: add select options on launcher

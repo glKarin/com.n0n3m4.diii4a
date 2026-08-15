@@ -6,11 +6,11 @@
 
 #ifdef _STENCIL_SHADOW_IMPROVE
 
-static idCVar harm_r_stencilShadowCombine( "harm_r_stencilShadowCombine", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "combine local and global stencil shadow" );
-static bool r_stencilShadowCombine = false;
+idCVar harm_r_stencilShadowCombine( "harm_r_stencilShadowCombine", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "combine local and global stencil shadow" );
+bool r_stencilShadowCombine = false;
 
-static bool r_stencilShadowTranslucent = false;
-static float r_stencilShadowAlpha = 1.0f;
+bool r_stencilShadowTranslucent = false;
+float r_stencilShadowAlpha = 1.0f;
 
 #ifdef _SPLASHDAMAGE //karin: megatexture interaction
 bool stencilShadowWithoutStencilTest = false;
@@ -143,7 +143,7 @@ static void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSu
 #endif
 
 #ifdef _SOFT_STENCIL_SHADOW
-static bool r_stencilShadowSoft = false;
+bool r_stencilShadowSoft = false;
 static float r_stencilShadowSoftBias = -1.0f;
 // I don't sure any GPUs are allowed to copy stencil buffer directly.
 static bool r_stencilShadowSoftCopyStencilBuffer = false; // if false, copy depth buffer
@@ -179,7 +179,7 @@ ID_INLINE static float RB_StencilShadowSoft_calcBIAS(void)
 #undef STENCIL_SHADOW_SOFT_MIN_BIAS
 }
 
-ID_INLINE static float RB_StencilShadowSoft_getBIAS(void)
+/*ID_INLINE static*/ float RB_StencilShadowSoft_getBIAS(void)
 {
 	if(r_stencilShadowSoftBias < 0.0f)
 	{
@@ -374,7 +374,7 @@ ID_INLINE static void RB_StencilShadowSoft_unbindFramebuffer(void)
 	stencilTexture.End();
 }
 
-ID_INLINE static void RB_StencilShadowSoftInteraction_bindTexture(void)
+/*ID_INLINE static*/ void RB_StencilShadowSoftInteraction_bindTexture(void)
 {
 	stencilTexture.Bind();
 }
