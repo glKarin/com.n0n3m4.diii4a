@@ -119,7 +119,7 @@ const shaderProgram_t * idGLSLShaderManager::Find(const char *name) const
 		const shaderProgram_t *shader = shaders[i];
 		if(shader && !idStr::Icmp(name, shader->name))
         {
-            common->Printf("Find shader '%s': %d, type=%d %s.\n", shader->name, shader->program, shader->type, shader->type < SHADER_CUSTOM ? "built-in" : "custom");
+            common->Printf("Find shader '%s': %d %s(%d).\n", shader->name, shader->type, shader->type < SHADER_CUSTOM ? "built-in" : "custom", shader->program);
             return shader;
         }
 	}

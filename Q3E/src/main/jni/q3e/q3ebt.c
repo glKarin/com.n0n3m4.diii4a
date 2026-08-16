@@ -12,7 +12,6 @@
 #include <unistd.h>
 
 #include "q_xunwind.h"
-#include "q3edw.h"
 
 #define LOG_TAG        "Q3E::bt"
 
@@ -37,6 +36,9 @@ static void after_caught_signal(int signum)
 
 static void print_frames(int signum, int mask, const char *str)
 {
+    pid_t pid = getpid();
+    pid_t tid = gettid();
+    LOGI("Signal caught: %d, pid=%d, tid=%d", signum, pid, tid);
     if(mask == SAMPLE_SOLUTION_FP)
     {
         LOGI("Backtrace: FP (Frame Pointer)");
@@ -56,9 +58,6 @@ static void print_frames(int signum, int mask, const char *str)
 
 static void signal_caughted(int signum, int mask, char *cfi, char *fp, char *eh)
 {
-    if(cfi)
-        Q3E_DW_Addr2line(cfi, 1);
-
     if (g_signalCaughted)
     {
         pid_t pid = getpid();
@@ -76,9 +75,7 @@ static void sample_sigsegv_handler(int signum, siginfo_t *siginfo, void *context
 
     signal(signum, SIG_DFL); // forbidden double
 
-    pid_t pid = getpid();
-    pid_t tid = gettid();
-    LOGI("Caught signal: %d, pid=%d, tid=%d", signum, pid, tid);
+    LOGI("Caught signal: %d", signum);
 
     int mask = 0;
     char *fp = NULL;
