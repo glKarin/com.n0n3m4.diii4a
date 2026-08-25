@@ -48,13 +48,8 @@
 #include "doom3/texgen.vert.h"
 #include "doom3/texgen.frag.h"
 
-#ifdef _SPLASHDAMAGE
-#include "renderer/megatexture/shader/glsl100/megaTexture.vert.h"
-#include "renderer/megatexture/shader/glsl100/megaTexture.frag.h"
-#else
 #include "doom3/megaTexture.vert.h"
 #include "doom3/megaTexture.frag.h"
-#endif
 
 #ifdef _SHADOW_MAPPING
 

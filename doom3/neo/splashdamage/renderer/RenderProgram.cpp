@@ -483,30 +483,33 @@ SHADER_CVARS(const char *CvarMacros);
 	InsertMacro(buf, "VERTEX_BYTE_COLOR(x)", "BYTE_COLOR( VERTEX_COLOR( x ) )");
 #endif
 
-	const char *shadowMacros = NULL;
-#ifdef _SHADOW_MAPPING
-	if(r_shadowMapping)
+	if(r_shadows.GetBool())
 	{
-		shadowMacros = "r_useShadowMapping";
-#ifdef _OPENGLES3
-		if (!USING_GLES3)
-#endif
+		const char *shadowMacros = NULL;
+#ifdef _SHADOW_MAPPING
+		if(r_shadowMapping)
 		{
-			if (r_usePackColorAsDepth && (!r_useDepthTexture || !r_useCubeDepthTexture))
-				InsertMacro(buf, "r_usePackColorAsDepth", "1", true);
+			shadowMacros = "r_useShadowMapping";
+#ifdef _OPENGLES3
+			if (!USING_GLES3)
+#endif
+			{
+				if (r_usePackColorAsDepth && (!r_useDepthTexture || !r_useCubeDepthTexture))
+					InsertMacro(buf, "r_usePackColorAsDepth", "1", true);
+			}
 		}
-	}
 #endif
 #ifdef _SOFT_STENCIL_SHADOW
-	if(r_stencilShadowSoft && !shadowMacros)
-		shadowMacros = "harm_r_stencilShadowSoft";
+		if(r_stencilShadowSoft && !shadowMacros)
+			shadowMacros = "harm_r_stencilShadowSoft";
 #endif
 #ifdef _STENCIL_SHADOW_IMPROVE
-	if(r_stencilShadowTranslucent && !shadowMacros)
-		shadowMacros = "harm_r_stencilShadowTranslucent";
+		if(r_stencilShadowTranslucent && !shadowMacros)
+			shadowMacros = "harm_r_stencilShadowTranslucent";
 #endif
-	if (shadowMacros)
-		InsertMacro(buf, shadowMacros, "1", true);
+		if (shadowMacros)
+			InsertMacro(buf, shadowMacros, "1", true);
+	}
 }
 
 void sdRenderProgram::InsertTextureBinding(sdStringBuilder_Heap &buf, const sdDeclRenderBinding *binding, const char *rawName) const {

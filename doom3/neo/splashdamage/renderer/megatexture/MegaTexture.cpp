@@ -187,7 +187,9 @@ int idMegaTextureTile::GetTileNum() const {
 	if ( !level || globalX < 0 || globalY < 0 || globalX >= level->tilesPerAxis || globalY >= level->tilesPerAxis ) {
 		return -1;
 	}
-	return level->tileBase + globalY * level->tilesPerAxis + globalX;
+	// The .mega index table is row-major.  The retail expression is
+	// globalX + tileBase + globalY * tilesPerAxis.
+	return level->tileBase + globalX + globalY * level->tilesPerAxis;
 }
 
 bool idMegaTextureTile::IsLoaded() const {
@@ -419,15 +421,40 @@ void idMegaTextureLevel::EmptyLevelImage( idImage *target ) {
 	const int pixels = MEGA_TEXTURE_LEVEL_SIZE * MEGA_TEXTURE_LEVEL_SIZE;
 	byte *data = new byte[pixels * 4];
 	for ( int i = 0; i < pixels; ++i ) {
-		data[i * 4 + 0] = 0;
-		data[i * 4 + 1] = 0;
-		data[i * 4 + 2] = 0;
-		data[i * 4 + 3] = 0;
+		// Unpopulated moving-atlas texels can leak through mip filtering along
+		// tile boundaries while streaming catches up.  A neutral fallback avoids
+		// the bright red seams that made otherwise valid terrain look corrupt.
+		data[i * 4 + 0] = 112;
+		data[i * 4 + 1] = 112;
+		data[i * 4 + 2] = 112;
+		data[i * 4 + 3] = 255;
+	}
+	const imageCompressionFormat_t internalFormat = megaTexture != NULL ?
+		megaTexture->GetImageCompressionFormat() : IMAGE_COMPRESSION_NONE;
+	const int minimumMipSize = internalFormat == IMAGE_COMPRESSION_NONE ? 1 : 4;
+	int numMipLevels = 1;
+	for ( int size = MEGA_TEXTURE_TILE_SIZE; size > minimumMipSize; size >>= 1 ) {
+		++numMipLevels;
 	}
 	target->GenerateImage( data, MEGA_TEXTURE_LEVEL_SIZE, MEGA_TEXTURE_LEVEL_SIZE,
-		TF_DEFAULT, false, TR_REPEAT, TD_HIGH_QUALITY );
+		TF_DEFAULT, false, TR_REPEAT, TD_DEFAULT ); //, numMipLevels
 	delete[] data;
-	imageValid = false;
+	if ( target->internalFormat != internalFormat ) {
+		common->Error(
+			"idMegaTextureLevel::EmptyLevelImage: generated image has internal format 0x%x, expected 0x%x",
+			target->internalFormat, internalFormat );
+	}
+	if ( imageValid ) {
+		dirty = true;
+		for ( int y = 0; y < MEGA_TEXTURE_TILES_PER_LEVEL; ++y ) {
+			for ( int x = 0; x < MEGA_TEXTURE_TILES_PER_LEVEL; ++x ) {
+				tiles[y][x].dirty = true;
+			}
+		}
+		if ( megaTexture != NULL ) {
+			megaTexture->ForceUpdate();
+		}
+	}
 }
 
 #ifdef _MULTITHREAD //karin: add image allocate queue in non-OpenGL thread if multithreading-rendering, else call OpenGL directly
@@ -530,7 +557,7 @@ byte *idMegaTextureLevel::GetCompressedTileData( int x, int y ) const {
 	if ( !compressedTiles || compressedTilesPerAxis <= 0 || x < 0 || y < 0 ) {
 		return NULL;
 	}
-	byte *data = compressedTiles[( y % compressedTilesPerAxis ) * compressedTilesPerAxis + ( x % compressedTilesPerAxis )];
+	byte *data = compressedTiles[( x % compressedTilesPerAxis ) + compressedTilesPerAxis * ( y % compressedTilesPerAxis )];
 	if ( data ) return data;
 	const idMegaTextureTile *tile = &tiles[y & 15][x & 15];
 	if ( tile->globalX == x && tile->globalY == y && tile->loaded ) return tile->compressedTileData;
@@ -590,7 +617,7 @@ idMegaTexture::idMegaTexture() :
 	lastUsedFrame( -1 ), currentWorld( NULL ), tilesPerAxis( 0 ), numLevels( 0 ), levels( NULL ),
 	upscaleLevel( NULL ), stGridWidth( 0 ), stGridHeight( 0 ), stGrid( NULL ), tileIndexMap( NULL ),
 	tileIndexedDataSizes( NULL ), nullTileData( NULL ), gridTileData( NULL ),
-	tileRecompressionScratch( NULL ), lastShaderQuality( 0 ), currentTriMapping( NULL ) {
+	tileRecompressionScratch( NULL ), lastShaderQuality( 0 ), currentTriMapping( NULL ), renderProgram(NULL) {
 	lastShaderQuality = r_shaderQuality.GetInteger();
 	currentViewOrigin.Set( 262144.0f, 262144.0f, 262144.0f );
 	memset( localViewToTextureCenter, 0, sizeof( localViewToTextureCenter ) );
@@ -700,7 +727,7 @@ void idMegaTexture::Load() {
 		Purge();
 		return;
 	}
-	useImageCompression = r_useMegaTextureImageCompression.GetBool();
+	useImageCompression = r_useMegaTextureImageCompression.GetBool() && qglCompressedTexSubImage2DARB != NULL;
 	imageCompressionFormat = useImageCompression ?
 		( fileCompression == MEGA_COMPRESSION_RGB ? IMAGE_COMPRESSION_DXT1 : IMAGE_COMPRESSION_DXT5 ) : IMAGE_COMPRESSION_NONE;
 	AllocRecompressionScratch();
@@ -734,15 +761,17 @@ void idMegaTexture::Load() {
 	}
 	if ( megaTextureTileLoader ) megaTextureTileLoader->SignalThread();
 	if ( megaTextureTileDecompressor ) megaTextureTileDecompressor->SignalThread();
-
+	// Retail does not expose a red/empty moving atlas while the first coarse
+	// window is being decoded.  Finish that initial request before Load returns.
 	ForceUpdate();
 }
 
 void idMegaTexture::Touch() {
-	lastUsedFrame = tr.frameCount;
-	levelLoadReferenced = true;
-	if ( purged ) {
-		Load();
+	// Retail Touch refreshes the optional detail resources but does not mark the
+	// streaming frame as already processed.  Updating lastUsedFrame here can
+	// suppress the first UploadTiles/SetViewOrigin pass after a material lookup.
+	if ( !purged ) {
+		LoadDetailTexture();
 	}
 }
 
@@ -800,6 +829,12 @@ unsigned int idMegaTexture::GetPureServerChecksum( unsigned int offset ) {
 }
 
 void idMegaTexture::UpdateMapping( const idRenderWorldLocal *world ) {
+	if ( megaTextureTileLoader != NULL && megaTextureTileLoader->GetActiveMegaTexture() != this ) {
+		megaTextureTileLoader->SetActiveMegaTexture( this );
+	}
+	if ( megaTextureTileDecompressor != NULL && megaTextureTileDecompressor->GetActiveMegaTexture() != this ) {
+		megaTextureTileDecompressor->SetActiveMegaTexture( this );
+	}
 	currentWorld = world;
 	if ( world && world->megaTextureSTGridWidth > 1 && world->megaTextureSTGridHeight > 1 && world->megaTextureSTGrid.Num() > 0 ) {
 		stGridBounds = world->megaTextureBounds;
@@ -819,52 +854,99 @@ void idMegaTexture::SetMappingForSurface( const srfTriangles_t *tri ) {
 	idDrawVert axis[2] = { tri->verts[0], tri->verts[0] };
 	for ( int i = 0; i < tri->numVerts; ++i ) {
 		const idDrawVert &v = tri->verts[i];
-		if ( v.st[0] <= origin.st[0] && v.st[1] <= origin.st[1] ) origin = v;
-		if ( v.st[0] >= axis[0].st[0] && v.st[1] <= axis[0].st[1] ) axis[0] = v;
-		if ( v.st[0] <= axis[1].st[0] && v.st[1] >= axis[1].st[1] ) axis[1] = v;
+		const idVec2 st = v.GetST();
+		const idVec2 originST = origin.GetST();
+		const idVec2 axis0ST = axis[0].GetST();
+		const idVec2 axis1ST = axis[1].GetST();
+		if ( st[0] <= originST[0] && st[1] <= originST[1] ) origin = v;
+		if ( st[0] >= axis0ST[0] && st[1] <= axis0ST[1] ) axis[0] = v;
+		if ( st[0] <= axis1ST[0] && st[1] >= axis1ST[1] ) axis[1] = v;
 	}
 	for ( int i = 0; i < 2; ++i ) {
 		idVec3 direction = axis[i].xyz - origin.xyz;
 		const float lengthSqr = direction.LengthSqr();
 		if ( lengthSqr <= 0.0f ) continue;
-		direction *= ( axis[i].st[i] - origin.st[i] ) / lengthSqr;
+		direction *= ( axis[i].GetST()[i] - origin.GetST()[i] ) / lengthSqr;
 		localViewToTextureCenter[i][0] = direction[0];
 		localViewToTextureCenter[i][1] = direction[1];
 		localViewToTextureCenter[i][2] = direction[2];
-		localViewToTextureCenter[i][3] = origin.st[i] - origin.xyz * direction;
+		localViewToTextureCenter[i][3] = origin.GetST()[i] - origin.xyz * direction;
 	}
 }
 
 void idMegaTexture::SetViewOrigin( const idVec3 &origin ) {
-	if ( purged || r_skipMegaTexture.GetBool() || origin == currentViewOrigin ) return;
+	if ( purged || currentWorld == NULL || r_skipMegaTexture.GetBool() ) return;
+	const viewDef_s *view = backEnd.viewDef;
+	if ( view != NULL && view->isSubview ) return;
+	const int shaderQuality = r_shaderQuality.GetInteger();
+	if ( idMath::Fabs( origin[0] - currentViewOrigin[0] ) <= 4.0f &&
+		 idMath::Fabs( origin[1] - currentViewOrigin[1] ) <= 4.0f &&
+		 idMath::Fabs( origin[2] - currentViewOrigin[2] ) <= 4.0f &&
+		 shaderQuality == lastShaderQuality ) {
+		return;
+	}
 	currentViewOrigin = origin;
-	idVec2 center;
+	idVec2 center( 0.0f, 0.0f );
 	if ( stGrid && stGridWidth > 1 && stGridHeight > 1 &&
 		 stGridBounds[1][0] > stGridBounds[0][0] && stGridBounds[1][1] > stGridBounds[0][1] ) {
 		const float boundsWidth = stGridBounds[1][0] - stGridBounds[0][0];
 		const float boundsHeight = stGridBounds[1][1] - stGridBounds[0][1];
+		float localX = origin[0] - stGridBounds[0][0];
+		float localY = origin[1] - stGridBounds[0][1];
+		if ( localX < 0.0f ) {
+			localX = -localX;
+		} else if ( localX > boundsWidth ) {
+			localX = boundsWidth - ( localX - boundsWidth );
+		}
+		if ( localY < 0.0f ) {
+			localY = -localY;
+		} else if ( localY > boundsHeight ) {
+			localY = boundsHeight - ( localY - boundsHeight );
+		}
 		const float gridX = idMath::ClampFloat( 0.0f, (float)( stGridWidth - 1 ),
-			( origin[0] - stGridBounds[0][0] ) * ( stGridWidth - 1 ) / boundsWidth );
+			localX * ( stGridWidth - 1 ) / boundsWidth );
 		const float gridY = idMath::ClampFloat( 0.0f, (float)( stGridHeight - 1 ),
-			( origin[1] - stGridBounds[0][1] ) * ( stGridHeight - 1 ) / boundsHeight );
+			localY * ( stGridHeight - 1 ) / boundsHeight );
 		const int x0 = idMath::Ftoi( gridX );
 		const int y0 = idMath::Ftoi( gridY );
 		const int x1 = x0 + 1 < stGridWidth ? x0 + 1 : x0;
 		const int y1 = y0 + 1 < stGridHeight ? y0 + 1 : y0;
 		const float fx = gridX - x0;
 		const float fy = gridY - y0;
-		const idVec2 top = stGrid[y0 * stGridWidth + x0] * ( 1.0f - fx ) + stGrid[y0 * stGridWidth + x1] * fx;
-		const idVec2 bottom = stGrid[y1 * stGridWidth + x0] * ( 1.0f - fx ) + stGrid[y1 * stGridWidth + x1] * fx;
-		center = top * ( 1.0f - fy ) + bottom * fy;
+		const idVec2& p00 = stGrid[y0 * stGridWidth + x0];
+		const idVec2& p10 = stGrid[y0 * stGridWidth + x1];
+		const idVec2& p01 = stGrid[y1 * stGridWidth + x0];
+		const idVec2& p11 = stGrid[y1 * stGridWidth + x1];
+
+		// Retail treats the two grid components independently. S is interpolated
+		// across X and averaged between the adjacent rows; T is interpolated
+		// across Y and averaged between the adjacent columns. The final 0.5 is
+		// that two-sample average, not a scale of the normalized ST result.
+		center[0] = 0.5f * (
+			( p00[0] * ( 1.0f - fx ) + p10[0] * fx ) +
+			( p01[0] * ( 1.0f - fx ) + p11[0] * fx ) );
+		center[1] = 0.5f * (
+			( p00[1] * ( 1.0f - fy ) + p01[1] * fy ) +
+			( p10[1] * ( 1.0f - fy ) + p11[1] * fy ) );
 	} else {
 		for ( int i = 0; i < 2; ++i ) {
 			center[i] = origin[0] * localViewToTextureCenter[i][0] + origin[1] * localViewToTextureCenter[i][1] +
 				origin[2] * localViewToTextureCenter[i][2] + localViewToTextureCenter[i][3];
 		}
 	}
+	bool needsStreaming = false;
 	for ( int i = numLevels - 1; i >= 0; --i ) {
-		levels[i].UpdateForCenter( center, false );
+		const bool force = shaderQuality != lastShaderQuality && i != numLevels - 1;
+		needsStreaming |= levels[i].UpdateForCenter( center, force );
 	}
+	if ( upscaleLevel != NULL ) {
+		upscaleLevel->UpdateForCenter( center, shaderQuality != lastShaderQuality );
+	}
+	if ( needsStreaming ) {
+		if ( megaTextureTileLoader != NULL ) megaTextureTileLoader->SignalThread();
+		if ( megaTextureTileDecompressor != NULL ) megaTextureTileDecompressor->SignalThread();
+	}
+	lastShaderQuality = shaderQuality;
 }
 
 void idMegaTexture::UpdateForViewOrigin( const idVec3 &origin, int time ) {
@@ -881,64 +963,83 @@ void idMegaTexture::UpdateForViewOrigin( const idVec3 &origin, int time ) {
 		SetViewOrigin( origin );
 		lastUsedFrame = tr.frameCount;
 	}
-	for ( int shaderLevel = 0; shaderLevel < numLevels && shaderLevel < 7; ++shaderLevel ) {
+	for ( int shaderLevel = 0; shaderLevel < numLevels && shaderLevel < 6; ++shaderLevel ) {
 		UpdateLevelForViewOrigin( &levels[numLevels - shaderLevel - 1], shaderLevel, time );
 	}
+	if ( numLevels < 6 && upscaleLevel != NULL ) {
+		if ( r_megaUpscale.GetBool() ) {
+			UpdateLevelForViewOrigin( upscaleLevel, numLevels, time );
+		} else {
+			char parmName[32];
+			const float* parms = upscaleLevel->GetParms();
+			idStr::snPrintf(parmName, sizeof(parmName), "megaMaskParams_%d", numLevels);
+			renderProgram->BindVector( parmName, -1.0f, 0.0f, 0.0f, parms[ 3 ] );
+			const float scale = static_cast< float >( 1 << ( numLevels + 1 ) ) * 0.5f;
+			idStr::snPrintf(parmName, sizeof(parmName), "megaTextureParams_%d", numLevels);
+			renderProgram->BindVector( parmName, scale );
+#if 0
+			if ( numLevels >= 1 && numLevels <= 4 ) {
+				float opacity[ 4 ];
+				memcpy( opacity, rbinds->megaTextureOpacity15->GetVector(), sizeof( opacity ) );
+				opacity[ numLevels - 1 ] = 0.0f;
+				renderProgram->BindVector( "megaTextureLevelOpacity_1_5", opacity );
+			}
+#endif
+			idStr::snPrintf(parmName, sizeof(parmName), "megaTextureLevel_%d", numLevels);
+			renderProgram->BindImage(parmName, globalImages->blackImage );
+		}
+	}
+	idImage* activeDetail = detailTexture != NULL && !detailTexture->defaulted && detailTexture->IsLoaded() ?
+		detailTexture : globalImages->grayImage;
+	idImage* activeDetailMask = detailTextureMask != NULL && !detailTextureMask->defaulted && detailTextureMask->IsLoaded() ?
+		detailTextureMask : globalImages->blackImage/*defaultDetailMaskImage*/;
+	renderProgram->BindImage("megaDetailTexture", activeDetail );
+	renderProgram->BindImage("megaDetailTextureMask", activeDetailMask );
+	const float detailWidth = activeDetail != NULL && activeDetail->uploadWidth > 0 ? static_cast< float >( activeDetail->uploadWidth ) : 1.0f;
+	renderProgram->BindVector("megaDetailTextureParams",
+		( tilesPerAxis * MEGA_TEXTURE_TILE_SIZE / detailWidth ) * r_detailRatio.GetFloat(),
+		1.0f, 1.0f, 1.0f );
 }
 
 void idMegaTexture::UpdateLevelForViewOrigin( idMegaTextureLevel *level, int index, int time ) {
-	if ( !level || index < 0 || index >= 7 ) return;
-	const float hidden[4] = { -2.0f, -2.0f, 0.0f, 1.0f };
-	R_SetGLSLProgramEnvParameter( GL_VERTEX_SHADER, index,
-		level->ImageIsValid() ? level->GetParms() : hidden );
+	if ( !level || index < 0 || index >= 6 || renderProgram == NULL ) return;
+	char parmName[32];
+	if ( level->ImageIsValid() ) {
+		idStr::snPrintf(parmName, sizeof(parmName), "megaMaskParams_%d", index);
+		renderProgram->BindVector( parmName, level->GetParms() );
+		const float scale = static_cast< float >( 1 << ( index + 1 ) ) * 0.5f;
+		idStr::snPrintf(parmName, sizeof(parmName), "megaTextureParams_%d", index);
+		renderProgram->BindVector( parmName, scale );
+	}
+
 	const int fadeMilliseconds = r_megaFadeTime.GetInteger();
 	shaderLevelOpacity[index] = fadeMilliseconds > 0 ?
 		idMath::ClampFloat( 0.0f, 1.0f, ( time - level->GetFadeTime() ) / (float)fadeMilliseconds ) : 1.0f;
+#if 0
+	if ( index >= 1 && index <= 4 ) {
+		float opacity[ 4 ];
+		memcpy( opacity, rbinds->megaTextureOpacity15->GetVector(), sizeof( opacity ) );
+		opacity[ index - 1 ] = shaderLevelOpacity[ index ];
+		renderProgram->BindVector( "megaTextureLevelOpacity_1_5", opacity );
+	}
+#endif
+	idImage* image = level->GetImage();
+	if ( r_showMegaTextureLevels.GetBool() ) {
+		image = ( index & 1 ) != 0 ? globalImages->blackImage : globalImages->whiteImage;
+	}
+	char texName[32];
+	idStr::snPrintf(texName, sizeof(texName), "megaTextureLevel_%d", index);
+	renderProgram->BindImage( texName, image );
 }
 
 void idMegaTexture::BindForViewOrigin( const idVec3 origin ) {
 	if ( megaTextureTileLoader ) megaTextureTileLoader->SetActiveMegaTexture( this );
 	if ( megaTextureTileDecompressor ) megaTextureTileDecompressor->SetActiveMegaTexture( this );
-	const idVec3 &streamOrigin = stGrid && backEnd.viewDef ? backEnd.viewDef->renderView.vieworg : origin;
-	UpdateForViewOrigin( streamOrigin, Sys_Milliseconds() );
-	GL_SelectTexture( 0 );
-	globalImages->borderClampImage->Bind();
-	// ETQW's 32768 terrain layout uses five moving atlases, followed by the
-	// detail texture and detail mask.  All eight available Doom 3 units are used.
-	for ( int i = 0; i < 5; ++i ) {
-		GL_SelectTexture( 1 + i );
-		if ( i < numLevels ) {
-			idMegaTextureLevel &level = levels[numLevels - 1 - i];
-			if ( r_showMegaTextureLevels.GetBool() ) ( i & 1 ? globalImages->blackImage : globalImages->whiteImage )->Bind();
-			else level.GetImage()->Bind();
-		} else {
-			globalImages->whiteImage->Bind();
-		}
-	}
-	idImage *activeDetail = detailTexture && !detailTexture->defaulted ? detailTexture : globalImages->whiteImage;
-	idImage *activeDetailMask = r_detailTexture.GetBool() && detailTextureMask && !detailTextureMask->defaulted ?
-		detailTextureMask : globalImages->blackImage;
-	GL_SelectTexture( 6 );
-	activeDetail->Bind();
-	GL_SelectTexture( 7 );
-	activeDetailMask->Bind();
-	const float detailWidth = activeDetail->uploadWidth > 0 ? (float)activeDetail->uploadWidth : 1.0f;
-	const float detailParms[4] = {
-		( tilesPerAxis * MEGA_TEXTURE_TILE_SIZE / detailWidth ) * r_detailRatio.GetFloat(),
-		r_detailTexture.GetBool() ? 1.0f : 0.0f,
-		r_detailFade.GetFloat(),
-		0.0f
-	};
-	R_SetGLSLProgramEnvParameter( GL_VERTEX_SHADER, 7, shaderLevelOpacity + 1 );
-	R_SetGLSLProgramEnvParameter( GL_VERTEX_SHADER, 8, detailParms );
+	UpdateForViewOrigin( origin, Sys_Milliseconds() );
 }
 
 void idMegaTexture::Unbind() {
-	for ( int i = 1; i <= 7; ++i ) {
-		GL_SelectTexture( i );
-		globalImages->BindNull();
-	}
-	GL_SelectTexture( 0 );
+	// Program texture bindings replace these values for the next stage.
 }
 
 bool idMegaTexture::UploadTiles( int time ) {
@@ -1016,7 +1117,7 @@ void idMegaTexture::LoadDetailTexture() {
 	idStr detailMaskName = imageBase;
 	detailMaskName += "_detailmask.tga";
 	mipmapState_t detailMipmapState;
-	detailMipmapState.colorType = mipmapState_t::MT_BLEND;
+	detailMipmapState.colorType = mipmapState_t::MT_DEFAULT;
 	for ( int channel = 0; channel < 4; ++channel ) {
 		detailMipmapState.color[channel] = 0.5f;
 		detailMipmapState.blend[channel] = r_detailFade.GetFloat();
@@ -1037,6 +1138,8 @@ void idMegaTexture::LoadDetailTexture() {
 
 void idMegaTexture::ForceUpdate() {
 	if ( purged ) return;
+	const int savedShaderQuality = lastShaderQuality;
+	lastShaderQuality = r_shaderQuality.GetInteger();
 	forcedUpdate = true;
 	while ( !UploadTiles( 0 ) ) {
 		if ( megaTextureTileLoader ) megaTextureTileLoader->SignalThread();
@@ -1047,6 +1150,7 @@ void idMegaTexture::ForceUpdate() {
 		Sys_Sleep(10);
 #endif
 	}
+	lastShaderQuality = savedShaderQuality;
 	forcedUpdate = false;
 }
 
@@ -1099,12 +1203,51 @@ void idMegaTexture::ReloadImages() {
 }
 
 void idMegaTexture::PrintInfo() const {
+#ifdef _USING_STDCXX
+	std::lock_guard<std::recursive_mutex> guard( lock );
+#else
+	sdLockGuard<sdRecursiveLock> guard( lock );
+#endif
 	common->Printf( "%s: version %d, %dx%d, %d levels, %d stored tiles%s\n", fileName.c_str(), version,
 		resolution, resolution, numLevels, TotalStoredTileCount( resolution ), useImageCompression ? ", DXT runtime cache" : "" );
+	common->Printf( "  active: loader %s, decompressor %s, world %s, frame %d/%d\n",
+		megaTextureTileLoader != NULL && megaTextureTileLoader->GetActiveMegaTexture() == this ? "yes" : "no",
+		megaTextureTileDecompressor != NULL && megaTextureTileDecompressor->GetActiveMegaTexture() == this ? "yes" : "no",
+		currentWorld != NULL ? "yes" : "no", lastUsedFrame, tr.GetSyncNum() );
+	common->Printf( "  view: (%.1f %.1f %.1f), ST grid %dx%d, bounds (%.1f %.1f) to (%.1f %.1f)\n",
+		currentViewOrigin[ 0 ], currentViewOrigin[ 1 ], currentViewOrigin[ 2 ], stGridWidth, stGridHeight,
+		stGridBounds[ 0 ][ 0 ], stGridBounds[ 0 ][ 1 ], stGridBounds[ 1 ][ 0 ], stGridBounds[ 1 ][ 1 ] );
+	common->Printf( "  workers: %d loaded, %d decoded; recent: %d tiles/s, %d useful KiB/s\n",
+		megaTextureTileLoader != NULL ? megaTextureTileLoader->GetNumProcessedTiles() : 0,
+		megaTextureTileDecompressor != NULL ? megaTextureTileDecompressor->GetNumProcessedTiles() : 0,
+		GetMegaTilesPerSecond(), GetCompressedUsefulKiloBytesReadPerSecond() );
 	for ( int i = 0; i < numLevels; ++i ) {
-		common->Printf( "  level %d: %d tiles/axis, format %d, max compressed %d, %.2f MB runtime\n", i,
-			levels[i].tilesPerAxis, (int)levels[i].megaCompressionFormat, levels[i].maxCompressedTileSize,
-			levels[i].usedMemory / ( 1024.0f * 1024.0f ) );
+		int queued = 0;
+		int loaded = 0;
+		int decoded = 0;
+		int uploadDirty = 0;
+		int minX = INT_MAX;
+		int minY = INT_MAX;
+		int maxX = INT_MIN;
+		int maxY = INT_MIN;
+		for ( int x = 0; x < MEGA_TEXTURE_TILES_PER_LEVEL; ++x ) {
+			for ( int y = 0; y < MEGA_TEXTURE_TILES_PER_LEVEL; ++y ) {
+				idMegaTextureTile &tile = levels[ i ].tiles[ y ][ x ];
+				queued += tile.GetDirtyNode().InList() ? 1 : 0;
+				loaded += tile.IsLoaded() ? 1 : 0;
+				decoded += tile.GetTileData() != NULL ? 1 : 0;
+				uploadDirty += tile.IsDirty() ? 1 : 0;
+				minX = Min( minX, tile.GetGlobalX() );
+				minY = Min( minY, tile.GetGlobalY() );
+				maxX = Max( maxX, tile.GetGlobalX() );
+				maxY = Max( maxY, tile.GetGlobalY() );
+			}
+		}
+		common->Printf(
+			"  level %d: axis %d, valid %d dirty %d, queued %d loaded %d decoded %d upload %d, window (%d,%d)-(%d,%d), parms (%.3f %.3f %.3f)\n",
+			i, levels[ i ].tilesPerAxis, levels[ i ].imageValid ? 1 : 0, levels[ i ].dirty ? 1 : 0,
+			queued, loaded, decoded, uploadDirty, minX, minY, maxX, maxY,
+			levels[ i ].parms[ 0 ], levels[ i ].parms[ 1 ], levels[ i ].parms[ 3 ] );
 	}
 }
 
@@ -1178,82 +1321,6 @@ void idMegaTexture::MegaTextureDecodeTile_f( const idCmdArgs &args ) {
 	if ( !mega || !mega->DebugDecodeTile( atoi( args.Argv( 1 ) ), atoi( args.Argv( 2 ) ), atoi( args.Argv( 3 ) ), args.Argv( 4 ) ) ) {
 		common->Warning( "MegaTexture tile decode failed" );
 	}
-}
-
-void idMegaTexture::UpdateForViewOrigin( const idVec3 &origin, int time, const sdRenderProgram *renderProgram ) {
-#ifdef _USING_STDCXX
-	std::lock_guard<std::recursive_mutex> guard( lock );
-#else
-	sdLockGuard<sdRecursiveLock> guard( lock );
-#endif
-	if ( lastUsedFrame != tr.frameCount ) {
-		// Upload work completed for the previous center before requesting the next
-		// center.  This is the ordering used by the ETQW renderer and prevents a
-		// newly uploaded atlas offset from lagging one draw behind its image.
-		UploadTiles( time );
-		SetViewOrigin( origin );
-		lastUsedFrame = tr.frameCount;
-	}
-	for ( int shaderLevel = 0; shaderLevel < numLevels; ++shaderLevel ) {
-		UpdateLevelForViewOrigin( &levels[numLevels - shaderLevel - 1], shaderLevel, time, renderProgram );
-	}
-}
-
-void idMegaTexture::UpdateLevelForViewOrigin( idMegaTextureLevel *level, int index, int time, const sdRenderProgram *renderProgram ) {
-	if ( !level || index < 0 ) return;
-	const float hidden[4] = { -2.0f, -2.0f, 0.0f, 1.0f };
-	char parmName[32];
-
-	idStr::snPrintf(parmName, sizeof(parmName), "megaMaskParams_%d", index);
-	renderProgram->BindVector( parmName, level->ImageIsValid() ? level->GetParms() : hidden );
-
-	idStr::snPrintf(parmName, sizeof(parmName), "megaTextureParams_%d", index);
-    float opacitya = (float)(1 << (index + 1)) * 0.5f;
-	renderProgram->BindVector( parmName , opacitya );
-
-	const int fadeMilliseconds = r_megaFadeTime.GetInteger();
-	shaderLevelOpacity[index] = fadeMilliseconds > 0 ?
-		idMath::ClampFloat( 0.0f, 1.0f, ( time - level->GetFadeTime() ) / (float)fadeMilliseconds ) : 1.0f;
-}
-
-void idMegaTexture::BindForViewOrigin( const idVec3 origin, const sdRenderProgram *renderProgram ) {
-	if ( megaTextureTileLoader ) megaTextureTileLoader->SetActiveMegaTexture( this );
-	if ( megaTextureTileDecompressor ) megaTextureTileDecompressor->SetActiveMegaTexture( this );
-	const idVec3 &streamOrigin = stGrid && backEnd.viewDef ? backEnd.viewDef->renderView.vieworg : origin;
-	UpdateForViewOrigin( streamOrigin, Sys_Milliseconds(), renderProgram );
-
-	// ETQW's 32768 terrain layout uses five moving atlases, followed by the
-	// detail texture and detail mask.  All eight available Doom 3 units are used.
-	char texName[32];
-	for ( int i = 0; i < 5; ++i ) {
-		idStr::snPrintf(texName, sizeof(texName), "megaTextureLevel_%d", i);
-		if ( i < numLevels ) {
-			idMegaTextureLevel &level = levels[numLevels - 1 - i];
-			if ( r_showMegaTextureLevels.GetBool() )
-				renderProgram->BindImage(texName, ( i & 1 ? globalImages->blackImage : globalImages->whiteImage ));
-			else
-				renderProgram->BindImage(texName, level.GetImage());
-		} else {
-			renderProgram->BindImage(texName, globalImages->whiteImage);
-		}
-	}
-	renderProgram->BindImage("megaTextureLevel_5", globalImages->whiteImage); // unused
-
-	idImage *activeDetail = detailTexture && !detailTexture->defaulted ? detailTexture : globalImages->whiteImage;
-	idImage *activeDetailMask = r_detailTexture.GetBool() && detailTextureMask && !detailTextureMask->defaulted ?
-		detailTextureMask : globalImages->blackImage;
-	renderProgram->BindImage("megaDetailTexture", activeDetail);
-	renderProgram->BindImage("megaDetailTextureMask", activeDetailMask);
-
-	const float detailWidth = activeDetail->uploadWidth > 0 ? (float)activeDetail->uploadWidth : 1.0f;
-	const float detailParms[4] = {
-		( tilesPerAxis * MEGA_TEXTURE_TILE_SIZE / detailWidth ) * r_detailRatio.GetFloat(),
-		r_detailTexture.GetBool() ? 1.0f : 0.0f,
-		r_detailFade.GetFloat(),
-		0.0f
-	};
-	//R_SetGLSLProgramEnvParameter( GL_VERTEX_SHADER, 7, shaderLevelOpacity + 1 );
-	renderProgram->BindVector("megaDetailTextureParams", detailParms);
 }
 
 void R_InitMegaTextureSystem(void) {

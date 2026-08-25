@@ -222,7 +222,6 @@ public:
 	unsigned int	GetPureServerChecksum( unsigned int offset );
 	void			UpdateMapping( const idRenderWorldLocal *world );
 	void			UpdateForViewOrigin( const idVec3 &viewOrigin, int time );
-	void			UpdateForViewOrigin( const idVec3 &viewOrigin, int time, const sdRenderProgram *renderProgram );
 
 	const byte *	GetNullTileData() const { return nullTileData; }
 	const byte *	GetGridTileData() const { return gridTileData; }
@@ -254,10 +253,12 @@ public:
 	void			SetMappingForSurface( const srfTriangles_t *tri );
 	void			BindForViewOrigin( const idVec3 origin );
 	void			Unbind();
-	void			BindForViewOrigin( const idVec3 origin, const sdRenderProgram *renderProgram );
 	void			ReloadImages();
 	void			PrintInfo() const;
 	bool			DebugDecodeTile( int level, int x, int y, const char *outputName );
+	void			BindRenderProgram(const sdRenderProgram *program) {
+		renderProgram = program;
+	}
 
 	static void		MegaTestStreamingPerformance_f( const idCmdArgs &args );
 	static void		MegaShowMemoryUsage_f( const idCmdArgs &args );
@@ -290,7 +291,6 @@ private:
 	void			AllocRecompressionScratch();
 	void			LoadDetailTexture();
 	void			UpdateLevelForViewOrigin( idMegaTextureLevel *level, int index, int time );
-	void			UpdateLevelForViewOrigin( idMegaTextureLevel *level, int index, int time, const sdRenderProgram *renderProgram );
 	void			SetViewOrigin( const idVec3 &viewOrigin );
 	bool			UploadTiles( int time );
 	void			TestStreamingPerformance( const idCmdArgs &args );
@@ -329,14 +329,16 @@ private:
 	byte *			tileRecompressionScratch;
 	int				lastShaderQuality;
 #ifdef _USING_STDCXX
-	std::recursive_mutex lock;
+	mutable std::recursive_mutex lock;
 #else
-	sdRecursiveLock lock;
+	mutable sdRecursiveLock lock;
 #endif
 
 	const srfTriangles_t *currentTriMapping;
 	float			localViewToTextureCenter[2][4];
 	float			shaderLevelOpacity[7];
+
+	const sdRenderProgram *renderProgram;
 };
 
 extern idMegaTextureTileLoader *megaTextureTileLoader;

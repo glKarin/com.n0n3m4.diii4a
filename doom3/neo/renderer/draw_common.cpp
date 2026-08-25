@@ -1241,11 +1241,13 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
             // megaTextures bind a lot of images and set a lot of parameters
             if ( pStage->newStage && pStage->newStage->megaTexture )
             {
+            	pStage->newStage->megaTexture->BindRenderProgram(renderProgram);
 				pStage->newStage->megaTexture->UpdateMapping( backEnd.viewDef->renderWorld );
                 pStage->newStage->megaTexture->SetMappingForSurface( tri );
                 idVec3	localViewer;
                 R_GlobalPointToLocal( surf->space->modelMatrix, backEnd.viewDef->renderView.vieworg, localViewer );
-                pStage->newStage->megaTexture->BindForViewOrigin( localViewer, renderProgram );
+                pStage->newStage->megaTexture->BindForViewOrigin( localViewer );
+            	pStage->newStage->megaTexture->BindRenderProgram(NULL);
             }
 
 			if((backEnd.glState.glStateBits & GLS_POLYMODE_LINE) == 0)
@@ -1285,6 +1287,8 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 		if (newStage) {
 #ifdef _SPLASHDAMAGE //karin: render megatexture interaction
 			if (!harm_r_megatextureAmbient.GetBool())
+				continue;
+			if (newStage->megaTexture) // megatexture render in interaction
 				continue;
 #endif
 			//--------------------------
@@ -1354,9 +1358,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
             // megaTextures bind a lot of images and set a lot of parameters
             if ( newStage->megaTexture )
             {
-#ifdef _SPLASHDAMAGE //karin: jmarshall23: update from render world
-				newStage->megaTexture->UpdateMapping( backEnd.viewDef->renderWorld );
-#endif
                 newStage->megaTexture->SetMappingForSurface( tri );
                 idVec3	localViewer;
                 R_GlobalPointToLocal( surf->space->modelMatrix, backEnd.viewDef->renderView.vieworg, localViewer );

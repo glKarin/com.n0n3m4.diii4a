@@ -7,7 +7,7 @@
 idCVar harm_r_megatextureAmbient("harm_r_megatextureAmbient", "0", CVAR_RENDERER | CVAR_BOOL, "don't render meta texture interaction");
 extern idCVar harm_r_skipAreaAmbient;
 
-static const sdRenderProgram *megaTextureProgram = NULL;
+const sdRenderProgram *megaTextureProgram = NULL;
 #ifdef _STENCIL_SHADOW_IMPROVE
 extern bool stencilShadowWithoutStencilTest;
 #ifdef _SOFT_STENCIL_SHADOW
@@ -40,11 +40,13 @@ ID_INLINE static void R_SetMetaTextureDrawInteraction(const shaderStage_t *surfa
 
 // must bind render program first
 ID_INLINE static void RB_MegaTexture_Update(const drawSurf_t *surf, idMegaTexture *megaTexture) {
+    megaTexture->BindRenderProgram(megaTextureProgram);
 	megaTexture->UpdateMapping( backEnd.viewDef->renderWorld );
 	megaTexture->SetMappingForSurface( surf->geo );
 	idVec3	localViewer;
 	R_GlobalPointToLocal( surf->space->modelMatrix, backEnd.viewDef->renderView.vieworg, localViewer );
-	megaTexture->BindForViewOrigin( localViewer, megaTextureProgram );
+	megaTexture->BindForViewOrigin( localViewer );
+    megaTexture->BindRenderProgram(NULL);
 }
 
 ID_INLINE static void RB_SubmitMetaTextureInteraction(drawInteraction_t *din, void (*DrawInteraction)(const drawInteraction_t *))
@@ -508,29 +510,32 @@ static void RB_MegaTexture_DrawInteraction(const drawInteraction_t *din)
 	megaTextureProgram->BindImage("lightProjectionMap", din->lightImage);
 	megaTextureProgram->BindVector("diffuseColor", din->diffuseColor);
 
-	bool shadowed = false;
-#ifdef _SHADOW_MAPPING
-	if (r_shadowMapping)
+	if(r_shadows.GetBool())
 	{
-		RB_MegaTexture_ShadowMapping(din);
-		shadowed = true;
-	}
+		bool shadowed = false;
+#ifdef _SHADOW_MAPPING
+		if (r_shadowMapping)
+		{
+			RB_MegaTexture_ShadowMapping(din);
+			shadowed = true;
+		}
 #endif
 
 #ifdef _STENCIL_SHADOW_IMPROVE
 #ifdef _SOFT_STENCIL_SHADOW
-	if(r_stencilShadowSoft && !shadowed)
-	{
-		RB_MegaTexture_StencilShadowSoft();
-		shadowed = true;
-	}
+		if(r_stencilShadowSoft && !shadowed)
+		{
+			RB_MegaTexture_StencilShadowSoft();
+			shadowed = true;
+		}
 #endif
 
-	if(r_stencilShadowTranslucent && !shadowed)
-	{
-		RB_MegaTexture_StencilShadowTranslucent();
-	}
+		if(r_stencilShadowTranslucent && !shadowed)
+		{
+			RB_MegaTexture_StencilShadowTranslucent();
+		}
 #endif
+	}
 
 	// draw it
 	RB_DrawElementsWithCounters(din->surf->geo);
