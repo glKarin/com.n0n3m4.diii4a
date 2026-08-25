@@ -671,7 +671,7 @@ static bool R_ParseImageProgram_r(idLexer &src, byte **pic, int *width, int *hei
 		}
 
 		// process it
-		if (pic) {
+		if (pic && pic2) { //karin: 2026 add && pic2
 			R_AddNormalMaps(*pic, *width, *height, pic2, width2, height2);
 			R_StaticFree(pic2);
 
