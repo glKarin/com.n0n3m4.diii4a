@@ -9,6 +9,7 @@ import java.util.List;
 public enum GameResourceUrl
 {
     // KARIN_NEW_GAME_BOOKMARK: add game resource url
+    // KARIN_ADD_MOD_BOOKMARK: add game resource url
 
     // DOOM 3
     DOOM3_BASE(Q3EGameConstants.GAME_DOOM3, "base", "", "https://store.steampowered.com/app/208200/DOOM_3/", 2),
@@ -30,6 +31,7 @@ public enum GameResourceUrl
 
     // Quake 4
     QUAKE4_BASE(Q3EGameConstants.GAME_QUAKE4, "q4base", "", "https://store.steampowered.com/app/2210/Quake_4/", 2),
+    QUAKE4_AWAKENING(Q3EGameConstants.GAME_QUAKE4, "q4xbase", "", "https://www.moddb.com/mods/quake-4-the-awakening-complete-edition", 3),
     QUAKE4_HARDQORE(Q3EGameConstants.GAME_QUAKE4, "hardqore", "", "https://www.moddb.com/mods/quake-4-hardqore", 3),
 
     // Prey(2006)

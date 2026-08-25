@@ -14,6 +14,7 @@ import com.n0n3m4.q3e.Q3ELang;
 public enum Game
 {
     // KARIN_NEW_GAME_BOOKMARK: add game mod enum
+    // KARIN_ADD_MOD_BOOKMARK: add game mod enum
 
     // DOOM 3
     DOOM3_BASE(Q3EGameConstants.GAME_DOOM3, "base", "", "game", "", "base", false, R.string.doom_iii),
@@ -35,6 +36,7 @@ public enum Game
 
     // Quake 4
     QUAKE4_BASE(Q3EGameConstants.GAME_QUAKE4, "q4base", "", "q4game", "", "q4base", false, R.string.quake_iv_q4base),
+    QUAKE4_AWAKENING(Q3EGameConstants.GAME_QUAKE4, "q4xbase", "q4xbase", "q4xbase",  "", "q4xbase", true, R.string.awakening),
     QUAKE4_HARDQORE(Q3EGameConstants.GAME_QUAKE4, "hardqore", "hardqore", "hardqore",  "", "hardqore", true, R.string.hardqore),
 
     // Prey(2006)
