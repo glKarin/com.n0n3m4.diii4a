@@ -1041,7 +1041,7 @@ class idDeclManager
     	virtual void					AddDependencies( const idDecl* decl, const idParser& parser ) = 0;
 #endif
 
-        virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false) = 0;
+        virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false, const char *folder = NULL, const char *extension = NULL) = 0;
 		virtual bool					EntityDefSet(const char *name, const char *key, const char *value = NULL) = 0;
 };
 

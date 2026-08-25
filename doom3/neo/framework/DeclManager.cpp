@@ -417,7 +417,7 @@ class idDeclManagerLocal : public idDeclManager
 		virtual const idDeclSkin 		*SkinByIndex(int index, bool forceParse = true);
 		virtual const idSoundShader 	*SoundByIndex(int index, bool forceParse = true);
 
-        virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false);
+        virtual const idDecl 	        *AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force = false, const char *folder = NULL, const char *extension = NULL);
 		virtual bool					EntityDefSet(const char *name, const char *key, const char *value = NULL);
 
 public:
@@ -913,9 +913,8 @@ int idDeclFile::LoadAndParse()
     else
     {
         finalPreprocessedBuffer = PreprocessGuides(buffer, length);
+		// fileSystem->WriteFile(va("generated/%s", fileName.c_str()), finalPreprocessedBuffer.c_str(), finalPreprocessedBuffer.Length());
     }
-
-    //fileSystem->WriteFile(va("generated/%s", fileName.c_str()), finalPreprocessedBuffer.c_str(), finalPreprocessedBuffer.Length());
 
     //k Mem_Free(buffer);
 // jmarshall end
@@ -3190,7 +3189,7 @@ bool idDeclLocal::EverReferenced(void) const
 }
 
 
-const idDecl * idDeclManagerLocal::AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force)
+const idDecl * idDeclManagerLocal::AddDeclDef(const char *defname, declType_t type, const idDict &args, bool force, const char *folder, const char *extension)
 {
     const idDecl *decl;
     if(!force)
@@ -3228,14 +3227,20 @@ const idDecl * idDeclManagerLocal::AddDeclDef(const char *defname, declType_t ty
             break;
         }
     }
+
+	idStr fileName;
     if(!declFolderFound)
     {
-        common->Warning("Generate def '%s' folder '%d' not found", defname, type);
-        return NULL;
+    	common->Warning("Generate def '%s' folder '%d' not found", defname, type);
+    	fileName = va(DECL_PROGRAM_GENERATED_DIRECTORY "/%s/%s", folder, defname);
+    	fileName.SetFileExtension(extension);
+        //return NULL;
     }
-
-    idStr fileName = va(DECL_PROGRAM_GENERATED_DIRECTORY "/%s/%s", declFolderFound->folder.c_str(), defname);
-    fileName.SetFileExtension(declFolderFound->extension.c_str());
+	else
+	{
+		fileName = va(DECL_PROGRAM_GENERATED_DIRECTORY "/%s/%s", declFolderFound->folder.c_str(), defname);
+		fileName.SetFileExtension(declFolderFound->extension.c_str());
+	}
 
     idStr text;
     text.Append(typeInfoFound->typeName);
@@ -3456,8 +3461,19 @@ idStr idDeclFile::PreprocessGuides(const char* text, int textLength)
             src.ExpectTokenString("(");
             for (int i = 0; i < guide->parms.Num(); i++ )
             {
-                src.ReadToken(&token);
+                if(!src.ReadToken(&token))
+					break;
                 newDecl.Replace(guide->parms[i].c_str(), token);
+
+                if(!src.ReadToken(&token))
+					break;
+				if(token == ")")
+				{
+					src.UnreadToken(&token);
+					break;
+				}
+				else if(token == ",")
+					continue;
             }
             src.ExpectTokenString(")");
 
@@ -3524,8 +3540,19 @@ idStr idDeclFile::PreprocessInlineGuides(const char* text, int textLength)
             src.ExpectTokenString("(");
             for (int i = 0; i < guide->parms.Num(); i++ )
             {
-                src.ReadToken(&token);
+                if(!src.ReadToken(&token))
+					break;
                 newDecl.Replace(guide->parms[i].c_str(), token);
+				if(!src.ReadToken(&token))
+					break;
+
+				if(token == ")")
+				{
+					src.UnreadToken(&token);
+					break;
+				}
+				else if(token == ",")
+					continue;
             }
             src.ExpectTokenString(")");
 
@@ -3599,9 +3626,10 @@ void idDeclManagerLocal::ParseGuides(void) {
 
 		while (!src.EndOfFile())
 		{
-			src.ReadToken(&token);
+			if(!src.ReadToken(&token))
+				break;
 
-			if (token.Length() <= 0)
+			if (token.IsEmpty())
 				break;
 
 			if (token == "guide" || token == "inlineGuide")
@@ -3624,11 +3652,17 @@ void idDeclManagerLocal::ParseGuides(void) {
 
 				while (!src.EndOfFile())
 				{
-					src.ReadToken(&token);
+					if(!src.ReadToken(&token))
+						break;
 
 					if (token == ")")
 					{
 						break;
+					}
+
+					else if (token == ",")
+					{
+						continue;
 					}
 
 					guide.parms.Append(token);

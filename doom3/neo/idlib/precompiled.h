@@ -304,6 +304,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
 #else
     #ifdef _HARDQORE
         #include "../mod/quake4/hardqore/Game.h"
+    #elif defined(_Q4XBASE)
+        #include "../mod/quake4/q4xbase/Game.h"
     #else
         #include "../quake4/Game.h"
     #endif
@@ -370,6 +372,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
 #else
     #ifdef _HARDQORE
         #include "../mod/quake4/hardqore/Game_local.h"
+    #elif defined(_Q4XBASE)
+        #include "../mod/quake4/q4xbase/Game_local.h"
     #else
         #include "../quake4/Game_local.h"
     #endif

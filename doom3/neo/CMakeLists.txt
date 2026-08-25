@@ -150,7 +150,7 @@ option(SUPPORT_SMD							"Support Source engine smd animation/static model"					
 option(SUPPORT_GLTF							"Support Khronos gltf/glb animation/static model"							ON)
 option(SUPPORT_FBX							"Support Autodesk fbx animation/static model"								ON)
 option(ETC2_IMAGE							"Support ETC2 compression image"											ON)
-#option(FLAC_SUPPORT							"Add FLAC sound support(don't support realtime decoding)"					OFF)
+#option(FLAC_SUPPORT							"Add FLAC sound support(don't support realtime decoding)"				OFF)
 
 # DOOM3 cores
 if(BUILD_D3)
@@ -195,6 +195,7 @@ if(BUILD_Q4_MOD)
 include_directories("mod/quake4")
 
 option(HARDQORE								"Build the hardqore game code" 												ON)
+option(Q4XBASE								"Build the q4xbase game code" 												ON)
 endif()
 
 # Prey 2006
@@ -2053,6 +2054,9 @@ endif()
 if(HARDQORE)
 	message(STATUS "Build hardqore")
 endif()
+if(Q4XBASE)
+	message(STATUS "Build q4xbase")
+endif()
 # Prey
 if(HUMANHEAD)
 	message(STATUS "Build humanhead core")
@@ -2740,7 +2744,7 @@ if(RAVEN)
 	endif()
 
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core_raven} ${src_sys_base} ${src_sys_core} ${src_editor_tools})
-	set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "_RAVEN;${bse_compile_definitions};${CORE_DEFINES}")
+	set_target_properties(${QUAKE4BINARY} PROPERTIES COMPILE_DEFINITIONS "_RAVEN;${CORE_DEFINES}")
 	set_target_properties(${QUAKE4BINARY} PROPERTIES LINK_FLAGS "${ldflags}")
 	target_include_directories(${QUAKE4BINARY} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
 
@@ -2768,7 +2772,7 @@ if(QUAKE4)
 	add_library(q4game SHARED ${src_quake4})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_quake4})
 	#set_target_properties(quake4 PROPERTIES PREFIX "")
-	set(q4_compile_definitions "GAME_DLL;_RAVEN;${bse_compile_definitions};_QUAKE4")
+	set(q4_compile_definitions "GAME_DLL;_RAVEN;_QUAKE4")
 	if(Q4_MOD_FULL_BODY_AWARENESS)
 		set(q4_compile_definitions "${q4_compile_definitions};_MOD_FULL_BODY_AWARENESS")
 		set(q4_compile_definitions "${q4_compile_definitions};_MOD_VIEW_BODY")
@@ -2806,7 +2810,7 @@ if(HARDQORE)
 	add_library(hardqore SHARED ${src_hardqore})
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hardqore})
 	#set_target_properties(hardqore PROPERTIES PREFIX "")
-	set_target_properties(hardqore PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;${bse_compile_definitions};_QUAKE4;_HARDQORE")
+	set_target_properties(hardqore PROPERTIES COMPILE_DEFINITIONS "GAME_DLL;_RAVEN;_QUAKE4;_HARDQORE")
 	target_include_directories(hardqore PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${QUAKE4_MOD_DIR}/hardqore")
 	set_target_properties(hardqore PROPERTIES LINK_FLAGS "${ldflags}")
 	set_target_properties(hardqore PROPERTIES INSTALL_NAME_DIR "@executable_path")
@@ -2822,6 +2826,56 @@ if(HARDQORE)
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"
 				)
+	endif()
+endif()
+
+if(Q4XBASE)
+	# q4xbase game source
+	set(src_q4xbase ${base_q4game_src})
+	set(q4xbase_game_src
+			ai/Monster_PainLord.cpp
+			ai/Monster_Retch.cpp
+			ai/Monster_Tank.cpp
+			ai/Monster_Valkaryne.cpp
+			ai/Monster_Walker.cpp
+			vehicle/Vehicle_SpeederBike.cpp
+			weapon/WeaponFreezeGun.cpp
+			weapon/WeaponGoobGun.cpp
+			weapon/WeaponSpikeGun.cpp
+	)
+	list(APPEND src_q4xbase ${q4xbase_game_src})
+	set_src_dir(src_q4xbase "${QUAKE4_MOD_DIR}/q4xbase" ${src_q4xbase})
+	add_globbed_headers(src_q4xbase "${QUAKE4_MOD_DIR}/q4xbase")
+
+	add_library(q4xbase SHARED ${src_q4xbase})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_q4xbase})
+	#set_target_properties(q4xbase PROPERTIES PREFIX "")
+	set(q4xbase_compile_definitions "GAME_DLL;_RAVEN;_QUAKE4;_Q4XBASE")
+	if(Q4_MOD_FULL_BODY_AWARENESS)
+		set(q4xbase_compile_definitions "${q4xbase_compile_definitions};_MOD_FULL_BODY_AWARENESS")
+		set(q4xbase_compile_definitions "${q4xbase_compile_definitions};_MOD_VIEW_BODY")
+		message(STATUS "Build q4xbase full body awareness mod support")
+	endif()
+	if(Q4_MOD_BOTS)
+		set(q4xbase_compile_definitions "${q4xbase_compile_definitions};MOD_BOTS;_MOD_BOTS_ASSETS")
+		message(STATUS "Build q4xbase bots mod support")
+	endif()
+	set_target_properties(q4xbase PROPERTIES COMPILE_DEFINITIONS "${q4xbase_compile_definitions}")
+	target_include_directories(q4xbase PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${QUAKE4_MOD_DIR}/q4xbase")
+	set_target_properties(q4xbase PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(q4xbase PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(q4xbase idlib_raven)
+	target_include_directories(q4xbase PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
+	if(NOT MSVC)
+		target_compile_options(q4xbase PRIVATE -Wno-format-security)
+	endif()
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS q4xbase
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+		)
 	endif()
 endif()
 
