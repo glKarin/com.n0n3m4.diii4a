@@ -51,7 +51,6 @@ private:
 	float			fovIncreaseMax;
 	const idSoundShader *soundBoost;
 	const idSoundShader *soundBoostEnd;
-	bool			enabled;
 	int				state;
 	idInterpolate<float> fovLinear;
 	idInterpolate<float> forceLinear;
@@ -69,7 +68,6 @@ riVehiclePartBoost::riVehiclePartBoost ( void ) {
 	fovIncreaseMax = 0.0f;
 	soundBoost = NULL;
 	soundBoostEnd = NULL;
-	enabled = false;
 	state = ST_READY;
 }
 
@@ -85,7 +83,6 @@ void riVehiclePartBoost::Save ( idSaveGame* savefile ) const {
 	savefile->WriteFloat ( envelopeRefreshSeconds );
 	savefile->WriteFloat ( forwardForceMax );
 	savefile->WriteFloat ( fovIncreaseMax );
-	savefile->WriteBool ( enabled );
 	savefile->WriteInt ( state );
 }
 
@@ -101,7 +98,6 @@ void riVehiclePartBoost::Restore ( idRestoreGame* savefile ) {
 	savefile->ReadFloat ( envelopeRefreshSeconds );
 	savefile->ReadFloat ( forwardForceMax );
 	savefile->ReadFloat ( fovIncreaseMax );
-	savefile->ReadBool ( enabled );
 	savefile->ReadInt ( state );
 
 	soundBoost = declManager->FindSound ( spawnArgs.GetString ( "snd_boost" ), false );
@@ -126,7 +122,6 @@ void riVehiclePartBoost::Spawn ( void ) {
 	soundBoost = declManager->FindSound ( spawnArgs.GetString ( "snd_boost" ), false );
 	soundBoostEnd = declManager->FindSound ( spawnArgs.GetString ( "snd_boostEnd" ), false );
 
-	enabled = true;
 	state = ST_READY;
 }
 
@@ -139,11 +134,6 @@ void riVehiclePartBoost::RunPhysics ( void ) {
 	float mult;
 
 	if ( !IsActive ( ) ) {
-		return;
-	}
-
-	if (!enabled)
-	{
 		return;
 	}
 
@@ -179,31 +169,29 @@ ID_INLINE void riVehiclePartBoost::UpdateFov( bool on )
 
 ID_INLINE void riVehiclePartBoost::StartLinear( float duration, bool usingCurrent )
 {
-	float d = SEC2MS(duration);
 	if(usingCurrent)
 	{
-		fovLinear.Init(gameLocal.time, d, fovLinear.GetCurrentValue(gameLocal.time), fovIncreaseMax);
-		forceLinear.Init(gameLocal.time, d, forceLinear.GetCurrentValue(gameLocal.time), forwardForceMax);
+		fovLinear.Init(gameLocal.time, duration, fovLinear.GetCurrentValue(gameLocal.time), fovIncreaseMax);
+		forceLinear.Init(gameLocal.time, duration, forceLinear.GetCurrentValue(gameLocal.time), forwardForceMax);
 	}
 	else
 	{
-		fovLinear.Init(gameLocal.time, d, 0.0f, fovIncreaseMax);
-		forceLinear.Init(gameLocal.time, d, 0.0f, forwardForceMax);
+		fovLinear.Init(gameLocal.time, duration, 0.0f, fovIncreaseMax);
+		forceLinear.Init(gameLocal.time, duration, 0.0f, forwardForceMax);
 	}
 }
 
 ID_INLINE void riVehiclePartBoost::StopLinear( float duration, bool usingCurrent )
 {
-	float d = SEC2MS(duration);
 	if(usingCurrent)
 	{
-		fovLinear.Init(gameLocal.time, d, fovLinear.GetCurrentValue(gameLocal.time), 0.0f);
-		forceLinear.Init(gameLocal.time, d, forceLinear.GetCurrentValue(gameLocal.time), 0.0f);
+		fovLinear.Init(gameLocal.time, duration, fovLinear.GetCurrentValue(gameLocal.time), 0.0f);
+		forceLinear.Init(gameLocal.time, duration, forceLinear.GetCurrentValue(gameLocal.time), 0.0f);
 	}
 	else
 	{
-		fovLinear.Init(gameLocal.time, d, fovIncreaseMax, 0.0f);
-		forceLinear.Init(gameLocal.time, d, forwardForceMax, 0.0f);
+		fovLinear.Init(gameLocal.time, duration, fovIncreaseMax, 0.0f);
+		forceLinear.Init(gameLocal.time, duration, forwardForceMax, 0.0f);
 	}
 }
 
@@ -280,9 +268,8 @@ bool riVehiclePartBoost::UpdateState( bool enabled )
 
 void riVehiclePartBoost::SetEnabled( bool enabled )
 {
-	if (this->enabled != enabled)
+	if (this->IsActive() != enabled)
 	{
-		this->enabled = enabled;
 		if (!enabled)
 		{
 			StopSound();
@@ -487,7 +474,7 @@ void riVehicleSpeederBike::UpdateHUD ( int position, idUserInterface* gui ) {
 	gui->SetStateBool( "boost_active", IsBoostEnabled() );
 
 	// Update position specific information
-	positions[position].UpdateHUD ( gui );
+	//positions[position].UpdateHUD ( gui );
 
 	rvVehicleRigid::UpdateHUD(position, gui);
 }
