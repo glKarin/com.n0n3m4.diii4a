@@ -113,6 +113,8 @@ public:
 	static void				Append(idFramebuffer *fb);
 	static idFramebuffer *	Alloc(const char *name, int width, int height);
 	static idFramebuffer *	Find(const char *name);
+	static void				BindDraw(idFramebuffer *fb);
+	static void				UnbindDraw();
 
 	static idList<idFramebuffer*>	framebuffers;
 };

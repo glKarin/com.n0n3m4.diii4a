@@ -582,6 +582,16 @@ void Framebuffer::Default()
 	backEnd.glState.currentFramebuffer = NULL;
 }
 
+void Framebuffer::BindDraw(idFramebuffer *fb)
+{
+	qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->GetFramebuffer());
+}
+
+void Framebuffer::UnbindDraw()
+{
+	qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+}
+
 void Framebuffer::Append(idFramebuffer *fb)
 {
 	if(!fb)

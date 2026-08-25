@@ -149,7 +149,7 @@ void idDepthStencilRenderer::Blit(GLint mask)
     if(IsScissorTest)
         qglDisable(GL_SCISSOR_TEST);
 
-    qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->GetFramebuffer());
+	Framebuffer::BindDraw(fb);
 
     //qglReadBuffer(GL_BACK);
 #if 1 //karin: in shader, texcoord.xy = gl_FragCoord.xy * (vec2(1.0) / vec2(width, height)/* u_windowCoords.xy */ * (depthStencilTexture->uploadWidth / depthStencilTexture->uploadHeight) /* u_nonPowerOfTwo.xy */)
@@ -163,7 +163,8 @@ void idDepthStencilRenderer::Blit(GLint mask)
         qglEnable(GL_SCISSOR_TEST);
     //backEnd.glState.currentFramebuffer = NULL;
 
-    qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	Framebuffer::UnbindDraw();
+    //qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 #endif
 }
 
