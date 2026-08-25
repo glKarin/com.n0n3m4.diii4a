@@ -3586,6 +3586,10 @@ void idCommonLocal::InitGame(void)
 
 	PrintLoadingMessage(common->GetLanguageDict()->GetString("#str_04345"));
 
+#ifdef _SPLASHDAMAGE
+	keyInputManagerLocal.BindDefault();
+#endif
+
 	// exec the startup scripts
 	cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "exec editor.cfg\n");
 	cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "exec default.cfg\n");
