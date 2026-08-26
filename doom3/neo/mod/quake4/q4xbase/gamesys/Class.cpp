@@ -1440,16 +1440,16 @@ void idClass::RegisterClasses( void )
 #ifdef _MOD_VIEW_BODY
     REGISTER(idViewBody); // ..\..\code\game\ViewBody.cpp
 #endif
-	REGISTER(riFireFX); // ..\..\code\game\Effect.cpp
-	REGISTER(riVehiclePartSplineTether); // ..\..\code\game\vehicle\Vehicle_SpeederBike.cpp
-	REGISTER(riVehicleSpeederBike); // ..\..\code\game\vehicle\VehicleSpeederBike.cpp
-	REGISTER(riVehiclePartBoost); // ..\..\code\game\vehicle\VehicleSpeederBike.cpp
-	REGISTER(riProjectileSpaceRocket); // ..\..\code\game\Projectile.cpp
+	REGISTER(riFireFX); // ..\..\code\game\FireFX.cpp
 	REGISTER(riVCWMissileTurret); // ..\..\code\game\vehicle\VehicleParts.cpp
 	REGISTER(riVCWPulseCannon); // ..\..\code\game\vehicle\VehicleParts.cpp
+	REGISTER(riVehiclePartSplineTether); // ..\..\code\game\vehicle\VehicleParts.cpp
+	REGISTER(riVehiclePartBoost); // ..\..\code\game\vehicle\VehicleParts.cpp
+	REGISTER(riVehicleSpeederBike); // ..\..\code\game\vehicle\VehicleSpeederBike.cpp
 	REGISTER(rvWeaponFreezeGun); // ..\..\code\game\weapon\WeaponFreezeGun.cpp
 	REGISTER(WeaponGoobGun); // ..\..\code\game\weapon\WeaponGoobGun.cpp
 	REGISTER(WeaponSpikeGun); // ..\..\code\game\weapon\WeaponSpikeGun.cpp
+	REGISTER(riProjectileSpaceRocket); // ..\..\code\game\Projectile.cpp
 	REGISTER(idTarget_ObjectiveBeacon); // ..\..\code\game\Target.cpp
 #undef REGISTER
 }

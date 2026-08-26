@@ -7,6 +7,10 @@
 #ifndef __GAME_EFFECT_H__
 #define __GAME_EFFECT_H__
 
+// Awakening BEGIN
+extern const idEventDef EV_LookAtTarget;
+// Awakening END
+
 class rvEffect : public idEntity
 {
 public:

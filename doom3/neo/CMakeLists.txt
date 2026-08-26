@@ -2833,6 +2833,7 @@ if(Q4XBASE)
 	# q4xbase game source
 	set(src_q4xbase ${base_q4game_src})
 	set(q4xbase_game_src
+			FireFX.cpp
 			ai/Monster_PainLord.cpp
 			ai/Monster_Retch.cpp
 			ai/Monster_Tank.cpp

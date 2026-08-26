@@ -2415,6 +2415,250 @@ void rvVehicleUserAnimated::LateralMove( signed char input, int anim, int func )
 
 
 // Awakening BEGIN
+
+CLASS_DECLARATION( rvVehiclePart, riVehiclePartBoost )
+END_CLASS
+
+riVehiclePartBoost::riVehiclePartBoost ( void ) {
+	envelopeAttackSeconds = 1.0f;
+	envelopeSustainSeconds = 1.0f;
+	envelopeDecaySeconds = 1.0f;
+	envelopeRefreshSeconds = 1.0f;
+	forwardForceMax = 0.0f;
+	fovIncreaseMax = 0.0f;
+	soundBoost = NULL;
+	soundBoostEnd = NULL;
+	state = ST_READY;
+}
+
+/*
+=====================
+riVehiclePartBoost::Save
+=====================
+*/
+void riVehiclePartBoost::Save ( idSaveGame* savefile ) const {
+	savefile->WriteFloat ( envelopeAttackSeconds );
+	savefile->WriteFloat ( envelopeSustainSeconds );
+	savefile->WriteFloat ( envelopeDecaySeconds );
+	savefile->WriteFloat ( envelopeRefreshSeconds );
+	savefile->WriteFloat ( forwardForceMax );
+	savefile->WriteFloat ( fovIncreaseMax );
+	savefile->WriteInt ( state );
+}
+
+/*
+=====================
+riVehiclePartBoost::Restore
+=====================
+*/
+void riVehiclePartBoost::Restore ( idRestoreGame* savefile ) {
+	savefile->ReadFloat ( envelopeAttackSeconds );
+	savefile->ReadFloat ( envelopeSustainSeconds );
+	savefile->ReadFloat ( envelopeDecaySeconds );
+	savefile->ReadFloat ( envelopeRefreshSeconds );
+	savefile->ReadFloat ( forwardForceMax );
+	savefile->ReadFloat ( fovIncreaseMax );
+	savefile->ReadInt ( state );
+
+	soundBoost = declManager->FindSound ( spawnArgs.GetString ( "snd_boost" ), false );
+	soundBoostEnd = declManager->FindSound ( spawnArgs.GetString ( "snd_boostEnd" ), false );
+}
+
+/*
+================
+riVehiclePartBoost::Spawn
+================
+*/
+void riVehiclePartBoost::Spawn ( void ) {
+	idStr keyName;
+
+	envelopeAttackSeconds	= SEC2MS( spawnArgs.GetFloat ( "boostEnvelopeAttackSeconds", "1" ) );
+	envelopeSustainSeconds	= SEC2MS( spawnArgs.GetFloat ( "boostEnvelopeSustainSeconds", "1" ) );
+	envelopeDecaySeconds	= SEC2MS( spawnArgs.GetFloat ( "boostEnvelopeDecaySeconds", "1" ) );
+	envelopeRefreshSeconds	= SEC2MS( spawnArgs.GetFloat ( "boostEnvelopeRefreshSeconds", "1" ) );
+	forwardForceMax			= spawnArgs.GetFloat ( "boostForwardForceMax", "0" );
+	fovIncreaseMax			= spawnArgs.GetFloat ( "boostFovIncreaseMax", "0" );
+
+	soundBoost = declManager->FindSound ( spawnArgs.GetString ( "snd_boost" ), false );
+	soundBoostEnd = declManager->FindSound ( spawnArgs.GetString ( "snd_boostEnd" ), false );
+
+	state = ST_READY;
+}
+
+/*
+================
+riVehiclePartBoost::RunPhysics
+================
+*/
+void riVehiclePartBoost::RunPhysics ( void ) {
+	float mult;
+
+	if ( !IsActive ( ) ) {
+		return;
+	}
+
+	bool on = position->mInputCmd.upmove < 0.0f;
+	if(!UpdateState(on))
+		return;
+
+	// Determine the force multiplier from the key being pressed
+	mult = forceLinear.GetCurrentValue(gameLocal.time);
+	// No multiplier, no move
+	if ( mult == 0.0f ) {
+		return;
+	}
+
+	UpdateOrigin ( );
+
+	// Apply the force
+	parent->GetPhysics()->ApplyImpulse ( 0, worldOrigin, worldAxis[0] * mult );
+}
+
+ID_INLINE void riVehiclePartBoost::UpdateFov( bool on )
+{
+	idPlayer *player = gameLocal.GetLocalPlayer();
+
+	if(!player)
+		return;
+
+	if(on)
+		player->SetInfluenceFov(player->DefaultFov() + fovLinear.GetCurrentValue(gameLocal.time));
+	else
+		player->SetInfluenceFov(0);
+}
+
+ID_INLINE void riVehiclePartBoost::StartLinear( float duration, bool usingCurrent )
+{
+	if(usingCurrent)
+	{
+		fovLinear.Init(gameLocal.time, duration, fovLinear.GetCurrentValue(gameLocal.time), fovIncreaseMax);
+		forceLinear.Init(gameLocal.time, duration, forceLinear.GetCurrentValue(gameLocal.time), forwardForceMax);
+	}
+	else
+	{
+		fovLinear.Init(gameLocal.time, duration, 0.0f, fovIncreaseMax);
+		forceLinear.Init(gameLocal.time, duration, 0.0f, forwardForceMax);
+	}
+}
+
+ID_INLINE void riVehiclePartBoost::StopLinear( float duration, bool usingCurrent )
+{
+	if(usingCurrent)
+	{
+		fovLinear.Init(gameLocal.time, duration, fovLinear.GetCurrentValue(gameLocal.time), 0.0f);
+		forceLinear.Init(gameLocal.time, duration, forceLinear.GetCurrentValue(gameLocal.time), 0.0f);
+	}
+	else
+	{
+		fovLinear.Init(gameLocal.time, duration, fovIncreaseMax, 0.0f);
+		forceLinear.Init(gameLocal.time, duration, forwardForceMax, 0.0f);
+	}
+}
+
+ID_INLINE void riVehiclePartBoost::PlaySound( const idSoundShader *shader, bool looping )
+{
+	if(shader)
+		parent->StartSoundShader( shader, soundChannel, looping ? SSF_LOOPING : 0, false, NULL );
+}
+
+ID_INLINE void riVehiclePartBoost::StopSound( void )
+{
+	parent->StopSound(soundChannel, false);
+}
+
+bool riVehiclePartBoost::UpdateState( bool enabled )
+{
+	if(enabled)
+	{
+		switch (state)
+		{
+			case ST_READY:
+				PlaySound(soundBoost, true);
+				StartLinear(envelopeSustainSeconds);
+				state = ST_INCR;
+				return false;
+			case ST_INCR:
+				if(forceLinear.IsDone(gameLocal.time))
+				{
+					PlaySound(soundBoostEnd);
+					state = ST_MAX;
+				}
+				UpdateFov(true);
+				return true;
+			case ST_MAX:
+				return true;
+			case ST_DECR:
+				StartLinear(envelopeSustainSeconds, true);
+				state = ST_INCR;
+				return true;
+		}
+	}
+	else
+	{
+		switch (state)
+		{
+			case ST_READY:
+				return false;
+			case ST_INCR:
+				StopLinear(envelopeDecaySeconds, true);
+				state = ST_DECR;
+				return true;
+			case ST_MAX:
+				StopLinear(envelopeDecaySeconds);
+				state = ST_DECR;
+				return true;
+			case ST_DECR:
+				if(forceLinear.IsDone(gameLocal.time))
+				{
+					state = ST_READY;
+					StopSound();
+					UpdateFov(false);
+					return false;
+				}
+				else
+				{
+					UpdateFov(true);
+					return true;
+				}
+		}
+	}
+
+	return false;
+}
+
+void riVehiclePartBoost::SetEnabled( bool enabled )
+{
+	if (this->IsActive() != enabled)
+	{
+		if (!enabled)
+		{
+			StopSound();
+			UpdateFov(false);
+		}
+		state = ST_READY;
+		Activate(enabled);
+	}
+}
+
+bool riVehiclePartBoost::IsActived( void ) const
+{
+	return IsActive() && (state == ST_INCR || state == ST_MAX);
+}
+
+
+
+// unused
+class riVehiclePartSplineTether : public rvVehiclePart {
+public:
+
+	CLASS_PROTOTYPE( riVehiclePartSplineTether );
+};
+
+CLASS_DECLARATION( rvVehiclePart, riVehiclePartSplineTether )
+END_CLASS
+
+
+
 class riVCWMissileTurret : public rvVehicleWeapon {
 public:
 

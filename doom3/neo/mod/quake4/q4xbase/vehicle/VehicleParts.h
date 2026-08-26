@@ -441,6 +441,52 @@ protected:
 	void LateralMove( signed char input, int anim, int func );
 };
 
+// Awakening BEGIN
+class riVehiclePartBoost : public rvVehiclePart {
+public:
+
+	CLASS_PROTOTYPE( riVehiclePartBoost );
+
+	riVehiclePartBoost	( void );
+
+	void			Spawn				( void );
+	void			Save				( idSaveGame* saveFile ) const;
+	void			Restore				( idRestoreGame* saveFile );
+
+	virtual void	RunPhysics			( void );
+	void			SetEnabled			( bool enabled );
+	bool			IsActived			( void ) const;
+
+private:
+	bool			UpdateState			( bool on );
+	void			UpdateFov			( bool on );
+	void			StartLinear			( float duration, bool usingCurrent = false );
+	void			StopLinear			( float duration, bool usingCurrent = false );
+	void			PlaySound			( const idSoundShader *shader, bool looping = false );
+	void			StopSound			( void );
+
+private:
+	enum {
+		ST_READY = 0,
+		ST_INCR,
+		ST_MAX,
+		ST_DECR,
+	};
+
+	float			envelopeAttackSeconds;
+	float			envelopeSustainSeconds;
+	float			envelopeDecaySeconds;
+	float			envelopeRefreshSeconds;
+	float			forwardForceMax;
+	float			fovIncreaseMax;
+	const idSoundShader *soundBoost;
+	const idSoundShader *soundBoostEnd;
+	int				state;
+	idInterpolate<float> fovLinear;
+	idInterpolate<float> forceLinear;
+};
+// Awakening END
+
 typedef idList<rvVehiclePart*> rvVehiclePartList_t;
 
 #endif // __GAME_VEHICLEPARTS_H__
