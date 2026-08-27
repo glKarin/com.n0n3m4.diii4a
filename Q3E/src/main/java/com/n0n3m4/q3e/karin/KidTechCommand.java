@@ -114,6 +114,11 @@ public class KidTechCommand
         return new KidTechCommand(PLUS, str).HasParam(name, val);
     }
 
+    public static boolean HasProp(String PLUS, String str, String name, String...val)
+    {
+        return new KidTechCommand(PLUS, str).HasProp(name, val);
+    }
+
     public KidTechCommand SetProp(String name, Object val)
     {
         int i = 0;
@@ -313,6 +318,48 @@ public class KidTechCommand
             }
             i++;
         }
+        return false;
+    }
+
+    public boolean HasProp(String name, String...val)
+    {
+        int i = 0;
+        while(!IsEnd(i = FindNext(i, CMD_PART_SET)))
+        {
+            i++;
+
+            int blank1I = i;
+            if(!RequireType(blank1I, CMD_PART_BLANK))
+                continue;
+
+            if(!RequireNextType(blank1I, CMD_PART_NAME))
+                continue;
+
+            int nameI = blank1I + 1;
+            CmdPart part = cmdParts.get(nameI);
+            if(!name.equals(part.str))
+            {
+                i = nameI + 1;
+                continue;
+            }
+
+            if(null != val && val.length > 0 && null != val[0])
+            {
+                int blank2I = nameI + 1;
+                if(!RequireType(blank2I, CMD_PART_BLANK))
+                    continue;
+
+                int valueI = blank2I + 1;
+                if(!RequireType(valueI, CMD_PART_VALUE))
+                    continue;
+
+                if(val[0].equals(cmdParts.get(valueI).str))
+                    return true;
+            }
+            else
+                return true;
+        }
+
         return false;
     }
 

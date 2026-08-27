@@ -1802,7 +1802,7 @@ public class GameLauncher extends Activity
 		V.rg_harm_r_lightingModel.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		SelectRadioGroup(V.rg_s_driver, "OpenSLES".equalsIgnoreCase(mPrefs.getString(Q3EPreference.pref_harm_s_driver, "AudioTrack")) ? 1 : 0);
 		V.rg_s_driver.setOnCheckedChangeListener(m_groupCheckChangeListener);
-		SelectRadioGroup(V.rg_harm_r_shadow, mPrefs.getBoolean(Q3EPreference.pref_harm_r_useShadowMapping, false) ? 1 : 0);
+		SelectRadioGroup(V.rg_harm_r_shadow, mPrefs.getBoolean(Q3EPreference.pref_harm_r_useShadowMapping, true) ? 1 : 0);
 		V.rg_harm_r_shadow.setOnCheckedChangeListener(m_groupCheckChangeListener);
 		SelectRadioGroup(V.rg_opengl, mPrefs.getInt(Q3EPreference.pref_harm_opengl, Q3EGLConstants.GetPreferOpenGLESVersion()) == Q3EGLConstants.OPENGLES30 ? 1 : 0);
 		V.rg_opengl.setOnCheckedChangeListener(m_groupCheckChangeListener);
@@ -2072,7 +2072,7 @@ public class GameLauncher extends Activity
 		V.edt_harm_r_shadowMapAlpha.setText(Q3EPreference.GetStringFromFloat(mPrefs, Q3EPreference.pref_harm_r_shadowMapAlpha, 1.0f));
 		V.edt_harm_r_shadowMapAlpha.addTextChangedListener(new SaveFloatPreferenceTextWatcher("harm_r_shadowMapAlpha", Q3EPreference.pref_harm_r_shadowMapAlpha, 1.0f));
 
-		V.cb_stencilShadowSoft.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_stencilShadowSoft, false));
+		V.cb_stencilShadowSoft.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_stencilShadowSoft, true));
 		V.cb_stencilShadowSoft.setOnCheckedChangeListener(m_checkboxChangeListener);
 		V.cb_stencilShadowCombine.setChecked(mPrefs.getBoolean(Q3EPreference.pref_harm_r_stencilShadowCombine, false));
 		V.cb_stencilShadowCombine.setOnCheckedChangeListener(m_checkboxChangeListener);
