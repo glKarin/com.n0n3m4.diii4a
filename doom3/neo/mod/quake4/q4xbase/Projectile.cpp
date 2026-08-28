@@ -927,6 +927,13 @@ bool idProjectile::Collide( const trace_t &collision, const idVec3 &velocity, bo
 	}
 */
 
+#ifdef _Q4XBASE //karin: hard hack for destory ice wall by goob gun in maps/game/m08
+	if(collision.c.material && ent->IsType(idStaticEntity::GetClassType()) && !idStr::Icmpn(damageDefName, "damage_goob", 11) && !idStr::Icmp(collision.c.material->GetName(), "textures/hal9000/icegibs"))
+	{
+		ent->PostEventMS( &EV_Remove, 0 ); // remove ice wall
+		return true;
+	}
+#endif
 	// don't predict explosions on clients
 	if( gameLocal.isClient ) {
 		return true;

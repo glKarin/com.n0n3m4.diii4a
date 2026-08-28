@@ -38,6 +38,7 @@ private:
 	void					UpdateGUI				( void );
 	void					SetBoostEnabled( bool enabled );
 	bool					IsBoostEnabled( void ) const;
+	float					CalcSpeed( void );
 
 private:
 	float					speed;
@@ -176,7 +177,7 @@ riVehicleSpeederBike::UpdateHUD
 void riVehicleSpeederBike::UpdateHUD ( int position, idUserInterface* gui ) {
 	idVec3 velocity = GetPhysics()->GetLinearVelocity(0);
 	velocity.z = 0.0f;
-	float speed = velocity.Normalize();
+	float speed = CalcSpeed();
 	float speedf = idMath::Floor( speed );
 	int speedi = idMath::Ftoi(speedf);
 	int speedp = idMath::Ftoi(idMath::Floor( (speed - speedf) * 100.0f ));
@@ -192,6 +193,17 @@ void riVehicleSpeederBike::UpdateHUD ( int position, idUserInterface* gui ) {
 	rvVehicleRigid::UpdateHUD(position, gui);
 }
 
+float riVehicleSpeederBike::CalcSpeed( void )
+{
+	idVec3 velocity = GetPhysics()->GetLinearVelocity(0);
+	velocity.z = 0.0f;
+	float speed = velocity.Normalize();
+	//speed /= MS2SEC(gameLocal.msec); // length / second
+	speed *= 0.0254f/* DOOM_TO_METERS */; // meter / second
+	speed *= 3.6f; // meter / hour
+	return speed;
+}
+
 /*
 ================
 riVehicleSpeederBike::UpdateGUI
@@ -199,9 +211,7 @@ riVehicleSpeederBike::UpdateGUI
 */
 void riVehicleSpeederBike::UpdateGUI ( void ) {
 	if ( renderEntity.gui[ 0 ] ) {
-		idVec3 velocity = GetPhysics()->GetLinearVelocity(0);
-		velocity.z = 0.0f;
-		renderEntity.gui[ 0 ]->SetStateFloat( "vehicle_speed", velocity.Normalize() );
+		renderEntity.gui[ 0 ]->SetStateFloat( "vehicle_speed", CalcSpeed() );
 		renderEntity.gui[ 0 ]->StateChanged(gameLocal.time);
 	}
 }
