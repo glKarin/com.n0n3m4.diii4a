@@ -20,7 +20,11 @@ public:
 	virtual void			Think				( void );
 	
 	virtual	void			Damage				( idEntity *inflictor, idEntity *attacker, const idVec3 &dir, const char *damageDefName, const float damageScale, const int location );
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void			OnDeath				( idEntity *killer );
+#else
 	virtual void			OnDeath				( void );
+#endif
 	
 protected:
 
@@ -216,7 +220,12 @@ void rvMonsterHeavyHoverTank::Damage ( idEntity *inflictor, idEntity *attacker, 
 rvMonsterHeavyHoverTank::OnDeath
 ================
 */
-void rvMonsterHeavyHoverTank::OnDeath ( void ) {
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterHeavyHoverTank::OnDeath ( idEntity *killer ) 
+#else
+void rvMonsterHeavyHoverTank::OnDeath ( void ) 
+#endif
+{
 	// Stop the dust effect
 	if ( effectDust ) {
 		effectDust->Stop ( );
@@ -229,7 +238,11 @@ void rvMonsterHeavyHoverTank::OnDeath ( void ) {
 		effectHover = NULL;
 	}
 	
+#ifdef _Q4XBASE //karin: add killer entity parm
+	idAI::OnDeath ( killer );
+#else
 	idAI::OnDeath ( );
+#endif
 }
 
 /*

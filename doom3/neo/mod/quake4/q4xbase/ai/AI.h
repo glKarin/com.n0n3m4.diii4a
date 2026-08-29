@@ -827,6 +827,9 @@ public:
 	int						TestTrajectory					( const idVec3 &firePos, const idVec3 &target, const char *projectileName );
 	bool					TestAnimMove					( int animNum, idEntity *ignore = NULL, idVec3 *pMoveVec = NULL );
 	void					ExecScriptFunction				( rvScriptFuncUtility& func, idEntity* parm = NULL );
+#ifdef _Q4XBASE //karin: support more entity parms in script function
+	void					ExecScriptFunction				( rvScriptFuncUtility& func, idEntity** parm, int length );
+#endif
 	void					SetLeader						( idEntity *newLeader );
 
 	int						CheckMelee						( bool disableAttack );
@@ -942,7 +945,11 @@ private:
 
 protected:
 
+#ifdef _Q4XBASE //karin: `shipEntity.setScript( "death", "stroggKilledFeedback" );` in game/m03 script require killer entity parm
+	virtual void			OnDeath							( idEntity *killer );
+#else
 	virtual void			OnDeath							( void );
+#endif
 	virtual void			OnStateChange					( int channel );
 	virtual void			OnUpdatePlayback				( const rvDeclPlaybackData& pbd );
 	virtual void			OnEnemyChange					( idEntity* oldEnemy );

@@ -13,7 +13,11 @@ public:
 	
 	void				Spawn				( void );
 	
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void		OnDeath				( idEntity *killer );
+#else
 	virtual void		OnDeath				( void );
+#endif
 	
 	// Add some dynamic externals for debugging
 	virtual void		GetDebugInfo		( debugInfoProc_t proc, void* userData );
@@ -48,10 +52,19 @@ void rvMonsterScientist::Spawn ( void ) {
 rvMonsterScientist::OnDeath
 ================
 */
-void rvMonsterScientist::OnDeath ( void ) {
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterScientist::OnDeath ( idEntity *killer ) 
+#else
+void rvMonsterScientist::OnDeath ( void ) 
+#endif
+{
 	StopEffect ( "fx_fly" );
 	
+#ifdef _Q4XBASE //karin: add killer entity parm
+	idAI::OnDeath ( killer );
+#else
 	idAI::OnDeath ( );
+#endif
 }
 
 /*

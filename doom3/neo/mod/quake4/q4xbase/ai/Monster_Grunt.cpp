@@ -25,7 +25,11 @@ protected:
 	virtual bool		CheckActions		( void );
 
 	virtual void		OnTacticalChange	( aiTactical_t oldTactical );
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void		OnDeath				( idEntity *killer );
+#else
 	virtual void		OnDeath				( void );
+#endif
 
 private:
 
@@ -194,9 +198,18 @@ bool rvMonsterGrunt::CheckActions ( void ) {
 rvMonsterGrunt::OnDeath
 ================
 */
-void rvMonsterGrunt::OnDeath ( void ) {
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterGrunt::OnDeath ( idEntity *killer ) 
+#else
+void rvMonsterGrunt::OnDeath ( void ) 
+#endif
+{
 	RageStop ( );
+#ifdef _Q4XBASE //karin: add killer entity parm
+	return idAI::OnDeath ( killer );
+#else
 	return idAI::OnDeath ( );
+#endif
 }
 
 /*

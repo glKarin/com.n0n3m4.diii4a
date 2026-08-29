@@ -41,7 +41,11 @@ public:
 protected:
 	
 	virtual bool			CheckActions		( void );
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void			OnDeath				( idEntity *killer );
+#else
 	virtual void			OnDeath				( void );
+#endif
 
 	int						repairEndTime;
 	float					repairEffectDist;
@@ -102,11 +106,20 @@ bool rvMonsterRepairBot::CheckActions ( void ) {
 rvMonsterRepairBot::OnDeath
 ================
 */
-void rvMonsterRepairBot::OnDeath ( void ) {
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterRepairBot::OnDeath ( idEntity *killer ) 
+#else
+void rvMonsterRepairBot::OnDeath ( void ) 
+#endif
+{
 	StopRepairs ( armLeft );
 	StopRepairs ( armRight );
 	gameLocal.PlayEffect( spawnArgs, "fx_death", GetPhysics()->GetOrigin(), viewAxis );
+#ifdef _Q4XBASE //karin: add killer entity parm
+	idAI::OnDeath ( killer );
+#else
 	idAI::OnDeath ( );
+#endif
 }
 
 /*

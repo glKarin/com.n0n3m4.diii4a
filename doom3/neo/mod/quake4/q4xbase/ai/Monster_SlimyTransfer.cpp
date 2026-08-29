@@ -19,7 +19,11 @@ public:
 protected:
 
 	virtual bool		CheckActions					( void );
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void		OnDeath							( idEntity *killer );
+#else
 	virtual void		OnDeath							( void );
+#endif
 
 	jointHandle_t		jointVomitMuzzle;
 
@@ -110,9 +114,18 @@ bool rvMonsterSlimyTransfer::CheckActions ( void ) {
 rvMonsterSlimyTransfer::OnDeath
 ================
 */
-void rvMonsterSlimyTransfer::OnDeath ( void ) {
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterSlimyTransfer::OnDeath ( idEntity *killer ) 
+#else
+void rvMonsterSlimyTransfer::OnDeath ( void ) 
+#endif
+{
 	StopEffect ( "fx_vomit_muzzle" );
+#ifdef _Q4XBASE //karin: add killer entity parm
+	idAI::OnDeath ( killer );
+#else
 	idAI::OnDeath ( );
+#endif
 }
 
 

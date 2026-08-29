@@ -394,7 +394,7 @@ bool rvScriptFuncUtility::Valid() const {
 	for( int ix = 0; ix < NumParms(); ++ix ) {
 		type = GetParmType( ix );
 		if( !type->IsValid( GetParm(ix) ) ) {
-			gameLocal.Warning( "(Func: %s) Parm '%s' doesn't match expected type '%s'\n", GetFunc()->Name(), GetParm(ix), type->Name() );
+			gameLocal.Warning( "(Func: %s) Parm %d '%s' doesn't match expected type '%s'\n", GetFunc()->Name(), ix, GetParm(ix), type->Name() );
 			return false;
 		}
 	}

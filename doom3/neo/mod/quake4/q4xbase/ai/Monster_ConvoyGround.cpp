@@ -51,7 +51,11 @@ protected:
 
 	virtual const char*		GetIdleAnimName				( void );
 
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void			OnDeath						( idEntity *killer );
+#else
 	virtual void			OnDeath						( void );
+#endif
 
 private:
 
@@ -204,7 +208,12 @@ bool rvMonsterConvoyGround::CanTurn ( void ) const {
 rvMonsterConvoyGround::OnDeath
 ================
 */
-void rvMonsterConvoyGround::OnDeath	( void ) {
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterConvoyGround::OnDeath	( idEntity *killer )
+#else
+void rvMonsterConvoyGround::OnDeath	( void )
+#endif
+{
 	idVec3 fxOrg;
 	idVec3 up;
 	idMat3 fxAxis;
@@ -225,7 +234,11 @@ void rvMonsterConvoyGround::OnDeath	( void ) {
 	}
 
 	gameLocal.PlayEffect ( spawnArgs, "fx_death", fxOrg, fxAxis );
+#ifdef _Q4XBASE //karin: add killer entity parm
+	idAI::OnDeath ( killer );
+#else
 	idAI::OnDeath ( );
+#endif
 }
 
 /*

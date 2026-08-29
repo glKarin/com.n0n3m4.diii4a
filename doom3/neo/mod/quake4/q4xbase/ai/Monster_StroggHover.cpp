@@ -24,7 +24,11 @@ public:
 	
 	virtual bool			Collide				( const trace_t &collision, const idVec3 &velocity );
 	virtual	void			Damage				( idEntity *inflictor, idEntity *attacker, const idVec3 &dir, const char *damageDefName, const float damageScale, const int location );
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void			OnDeath				( idEntity *killer );
+#else
 	virtual void			OnDeath				( void );
+#endif
 	virtual	void			DeadMove			( void );
 
 	virtual bool			SkipImpulse			( idEntity *ent, int id );
@@ -736,7 +740,12 @@ void rvMonsterStroggHover::Damage( idEntity *inflictor, idEntity *attacker, cons
 rvMonsterStroggHover::OnDeath
 ================
 */
-void rvMonsterStroggHover::OnDeath ( void ) {
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterStroggHover::OnDeath ( idEntity *killer ) 
+#else
+void rvMonsterStroggHover::OnDeath ( void ) 
+#endif
+{
 	// Stop the dust effect
 	if ( effectDust ) {
 		effectDust->Stop ( );
@@ -751,7 +760,11 @@ void rvMonsterStroggHover::OnDeath ( void ) {
 		}
 	}
 
+#ifdef _Q4XBASE //karin: add killer entity parm
+	idAI::OnDeath ( killer );
+#else
 	idAI::OnDeath ( );
+#endif
 }
 
 /*

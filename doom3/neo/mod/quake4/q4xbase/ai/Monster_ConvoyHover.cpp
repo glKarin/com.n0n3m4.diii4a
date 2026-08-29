@@ -79,7 +79,11 @@ private:
 		bool				dead:1;
 	} myfl;
 
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void			OnDeath						( idEntity *killer );
+#else
 	virtual void			OnDeath						( void );
+#endif
 
 	CLASS_STATES_PROTOTYPE ( rvMonsterConvoyHover );
 };
@@ -461,7 +465,11 @@ void rvMonsterConvoyHover::AttackBomb ( void ) {
 rvMonsterConvoyHover::OnDeath
 ================
 */
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterConvoyHover::OnDeath ( idEntity *killer ) {
+#else
 void rvMonsterConvoyHover::OnDeath ( void ) {
+#endif
 	myfl.dead = true;
 	idVec3 angular = idVec3( rvRandom::flrand( 180.0f, 250.0f ), rvRandom::flrand( 180.0f, 250.0f ), rvRandom::flrand( 180.0f, 250.0f ) );
 

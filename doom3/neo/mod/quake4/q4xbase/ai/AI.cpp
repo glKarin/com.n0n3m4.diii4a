@@ -1676,7 +1676,11 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 	RemoveProjectile();
 	StopMove( MOVE_STATUS_DONE );
 
+#ifdef _Q4XBASE //karin: `shipEntity.setScript( "death", "stroggKilledFeedback" );` in game/m03 script require killer entity parm
+	OnDeath(attacker);
+#else
 	OnDeath();
+#endif
 	CheckDeathObjectives();
 
 	ClearEnemy();
@@ -3666,7 +3670,12 @@ idAI::
 ============
 */
 
-void idAI::OnDeath( void ){
+#ifdef _Q4XBASE //karin: `shipEntity.setScript( "death", "stroggKilledFeedback" );` in game/m03 script require killer entity parm
+void idAI::OnDeath( idEntity *killer )
+#else
+void idAI::OnDeath( void )
+#endif
+{
 	if( vehicleController.IsDriving() ){
 		usercmd_t				usercmd;
 
@@ -3682,6 +3691,17 @@ void idAI::OnDeath( void ){
 
 	aiManager.RemoveTeammate ( this );
 
+#ifdef _Q4XBASE //karin: `shipEntity.setScript( "death", "stroggKilledFeedback" );` in game/m03 script require 2 entity parms
+	if(funcs.death.NumParms() > 1)
+	{
+		idEntity *args[] = {
+			this,
+			killer,
+		};
+		ExecScriptFunction( funcs.death, args, sizeof(args) / sizeof(args[0]) );
+	}
+	else
+#endif
 	ExecScriptFunction( funcs.death );
 
 /* DONT DROP ANYTHING FOR NOW
@@ -5149,3 +5169,26 @@ bool idAI::CheckDeathCausesMissionFailure( void )
 	}
 	return false;
 }
+
+#ifdef _Q4XBASE //karin: support more entity parms in script function
+/*
+============
+idAI::ExecScriptFunction
+============
+*/
+void idAI::ExecScriptFunction ( rvScriptFuncUtility& func, idEntity** parm, int length ) {
+	if( parm && length > 0 ) {
+		for(int i = length - 1; i >= 0; i--)
+			func.InsertEntity( parm[i], 0 );
+	} else {
+		func.InsertEntity( this, 0 );
+	}
+
+	func.CallFunc( &spawnArgs );
+
+	if( parm && length > 0 ) {
+		for(int i = length - 1; i >= 0; i--)
+			func.RemoveIndex( 0 );
+	}
+}
+#endif

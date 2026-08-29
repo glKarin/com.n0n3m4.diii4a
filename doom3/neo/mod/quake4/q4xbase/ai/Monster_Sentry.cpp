@@ -39,7 +39,11 @@ protected:
 	virtual bool		CheckActions		( void );
 	virtual int			FilterTactical		( int availableTactical );
 
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void		OnDeath				( idEntity *killer );
+#else
 	virtual void		OnDeath				( void );
+#endif
 
 	void				Explode				( bool force = false );
 
@@ -243,8 +247,17 @@ int rvMonsterSentry::FilterTactical ( int availableTactical ) {
 rvMonsterSentry::OnDeath
 ================
 */
-void rvMonsterSentry::OnDeath ( void ) {
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterSentry::OnDeath ( idEntity *killer ) 
+#else
+void rvMonsterSentry::OnDeath ( void ) 
+#endif
+{
+#ifdef _Q4XBASE //karin: add killer entity parm
+	idAI::OnDeath ( killer );
+#else
 	idAI::OnDeath ( );
+#endif
 	
 	Explode ( true );
 }

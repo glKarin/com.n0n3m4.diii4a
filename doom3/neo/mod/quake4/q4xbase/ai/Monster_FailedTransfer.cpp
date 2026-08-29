@@ -21,7 +21,11 @@ protected:
 
 	bool				allowSplit;
 
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void		OnDeath			( idEntity *killer );
+#else
 	virtual void		OnDeath			( void );
+#endif
 
 private:
 
@@ -73,8 +77,17 @@ void rvMonsterFailedTransfer::Restore( idRestoreGame *savefile ) {
 rvMonsterFailedTransfer::OnDeath
 ================
 */
-void rvMonsterFailedTransfer::OnDeath ( void ) {
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterFailedTransfer::OnDeath ( idEntity *killer ) 
+#else
+void rvMonsterFailedTransfer::OnDeath ( void ) 
+#endif
+{
+#ifdef _Q4XBASE //karin: add killer entity parm
+	idAI::OnDeath ( killer );
+#else
 	idAI::OnDeath ( );
+#endif
 	
 	if ( allowSplit ) {
 		idEntity* torso;

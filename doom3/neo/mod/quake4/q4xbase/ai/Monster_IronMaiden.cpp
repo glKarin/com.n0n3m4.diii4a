@@ -34,7 +34,11 @@ protected:
 	void				PhaseOut			( void );
 	void				PhaseIn				( void );
 	
+#ifdef _Q4XBASE //karin: add killer entity parm
+	virtual void		OnDeath				( idEntity *killer );
+#else
 	virtual void		OnDeath				( void );
+#endif
 
 private:
 
@@ -282,14 +286,23 @@ void rvMonsterIronMaiden::PhaseIn ( void ) {
 rvMonsterIronMaiden::OnDeath
 ================
 */
-void rvMonsterIronMaiden::OnDeath ( void ) {
+#ifdef _Q4XBASE //karin: add killer entity parm
+void rvMonsterIronMaiden::OnDeath ( idEntity *killer ) 
+#else
+void rvMonsterIronMaiden::OnDeath ( void ) 
+#endif
+{
 	StopSound ( SND_CHANNEL_ITEM, false );
 
 	// Stop looping effects
 	StopEffect ( "fx_banshee" );
 	StopEffect ( "fx_dress" );
 	
+#ifdef _Q4XBASE //karin: add killer entity parm
+	idAI::OnDeath( killer );
+#else
 	idAI::OnDeath( );
+#endif
 }
 
 /*
