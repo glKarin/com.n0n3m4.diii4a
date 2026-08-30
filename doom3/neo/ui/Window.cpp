@@ -2177,8 +2177,7 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
 		retVar = &backColor;
 	}
 
-#ifdef _RAVEN // quake4 gui var
-// jmarshall
+#ifdef _RAVEN //jmarshall: quake4 gui var
     if (idStr::Icmp(_name, "backColor_r") == 0)
     {
         retVar = &backColor_r;
@@ -2195,15 +2194,25 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
     {
         retVar = &backColor_w;
     }
-// jmarshall end
+	if (idStr::Icmp(_name, "backColor_x") == 0)
+	{
+		retVar = &backColor_r;
+	}
+	if (idStr::Icmp(_name, "backColor_y") == 0)
+	{
+		retVar = &backColor_g;
+	}
+	if (idStr::Icmp(_name, "backColor_z") == 0)
+	{
+		retVar = &backColor_b;
+	}
 #endif
 
 	if (idStr::Icmp(_name, "matColor") == 0) {
 		retVar = &matColor;
 	}
 
-#ifdef _RAVEN // quake4 gui var
-// jmarshall
+#ifdef _RAVEN //jmarshall: quake4 gui var
     if (idStr::Icmp(_name, "matColor_r") == 0)
     {
         retVar = &matColor_r;
@@ -2220,15 +2229,25 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
     {
         retVar = &matColor_w;
     }
-// jmarshall end
+	if (idStr::Icmp(_name, "matColor_x") == 0)
+	{
+		retVar = &matColor_r;
+	}
+	if (idStr::Icmp(_name, "matColor_y") == 0)
+	{
+		retVar = &matColor_g;
+	}
+	if (idStr::Icmp(_name, "matColor_z") == 0)
+	{
+		retVar = &matColor_b;
+	}
 #endif
 
 	if (idStr::Icmp(_name, "foreColor") == 0) {
 		retVar = &foreColor;
 	}
 
-#ifdef _RAVEN // quake4 gui var
-// jmarshall
+#ifdef _RAVEN //jmarshall: quake4 gui var
     if (idStr::Icmp(_name, "foreColor_r") == 0)
     {
         retVar = &foreColor_r;
@@ -2245,15 +2264,25 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
     {
         retVar = &foreColor_w;
     }
-// jmarshall end
+	if (idStr::Icmp(_name, "foreColor_x") == 0)
+	{
+		retVar = &foreColor_r;
+	}
+	if (idStr::Icmp(_name, "foreColor_y") == 0)
+	{
+		retVar = &foreColor_g;
+	}
+	if (idStr::Icmp(_name, "foreColor_z") == 0)
+	{
+		retVar = &foreColor_b;
+	}
 #endif
 
 	if (idStr::Icmp(_name, "hoverColor") == 0) {
 		retVar = &hoverColor;
 	}
 
-#ifdef _RAVEN // quake4 gui var
-// jmarshall
+#ifdef _RAVEN //jmarshall: quake4 gui var
     if (idStr::Icmp(_name, "hoverColor_r") == 0)
     {
         retVar = &hoverColor_r;
@@ -2270,15 +2299,25 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
     {
         retVar = &hoverColor_w;
     }
-// jmarshall end
+	if (idStr::Icmp(_name, "hoverColor_x") == 0)
+	{
+		retVar = &hoverColor_r;
+	}
+	if (idStr::Icmp(_name, "hoverColor_y") == 0)
+	{
+		retVar = &hoverColor_g;
+	}
+	if (idStr::Icmp(_name, "hoverColor_z") == 0)
+	{
+		retVar = &hoverColor_b;
+	}
 #endif
 
 	if (idStr::Icmp(_name, "borderColor") == 0) {
 		retVar = &borderColor;
 	}
 
-#ifdef _RAVEN // quake4 gui var
-// jmarshall
+#ifdef _RAVEN //jmarshall: quake4 gui var
     if (idStr::Icmp(_name, "borderColor_r") == 0)
     {
         retVar = &borderColor_r;
@@ -2295,7 +2334,18 @@ idWinVar *idWindow::GetWinVarByName(const char *_name, bool fixup, drawWin_t **o
     {
         retVar = &borderColor_w;
     }
-// jmarshall end
+	if (idStr::Icmp(_name, "borderColor_x") == 0)
+	{
+		retVar = &borderColor_r;
+	}
+	if (idStr::Icmp(_name, "borderColor_y") == 0)
+	{
+		retVar = &borderColor_g;
+	}
+	if (idStr::Icmp(_name, "borderColor_z") == 0)
+	{
+		retVar = &borderColor_b;
+	}
 #endif
 
 	if (idStr::Icmp(_name, "textScale") == 0) {
