@@ -44,8 +44,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _RAVEN //karin: Quake4 cm file version
 #define CM_FILEVERSION		"3"
 #define CM_DOOM3_FILEVERSION		"1.00"
+#define CM_Q4X_FILEVERSION		"2"
 #define CM_IS_QUAKE4_VERSION() (cmVersion == CM_FILEVERSION)
+#define CM_IS_Q4X_VERSION() (cmVersion == CM_Q4X_FILEVERSION)
 #define CM_WRITE_IS_QUAKE4_VERSION() (cmVersion == CM_FILEVERSION)
+#define CM_WRITE_IS_Q4X_VERSION() (cmVersion == CM_Q4X_FILEVERSION)
 #elif defined(_SPLASHDAMAGE) //karin: ETQW cm file version
 #define CM_FILEVERSION		"2.70"
 #else
@@ -148,6 +151,13 @@ void idCollisionModelManagerLocal::WritePolygons(idFile *fp, cm_node_t *node)
         fp->WriteFloatString(" ( %f %f )", 0.0f, 0.0f); // TODO: export cm v3 file
         fp->WriteFloatString(" ( %f %f )", 0.0f, 0.0f); // TODO: export cm v3 file
         fp->WriteFloatString(" %d\n", 0); // TODO: export cm v3 file
+        }
+		else if(CM_WRITE_IS_Q4X_VERSION())
+        {
+        fp->WriteFloatString(" \"%s\"", p->material->GetName());
+        fp->WriteFloatString(" ( %f %f )", 0.0f, 0.0f); // TODO: export cm v2 file
+        fp->WriteFloatString(" ( %f %f )", 0.0f, 0.0f); // TODO: export cm v2 file
+        fp->WriteFloatString(" ( %f %f )", 0.0f, 0.0f); // TODO: export cm v2 file
         }
         else
 		fp->WriteFloatString(" \"%s\"\n", p->material->GetName());
@@ -574,6 +584,14 @@ void idCollisionModelManagerLocal::ParsePolygons(idLexer *src, cm_model_t *model
         src->Parse1DMatrix(2, unknownData);
         src->ParseInt();
         }
+		else if(CM_IS_Q4X_VERSION())
+        {
+        // other unknown (float, float) (float, float) (float, float)
+        float unknownData[2];
+        src->Parse1DMatrix(2, unknownData);
+        src->Parse1DMatrix(2, unknownData);
+        src->Parse1DMatrix(2, unknownData);
+        }
 #endif
 #ifdef _SPLASHDAMAGE //karin: ETQW cm file
 		// 0 0 0.0000305196 -0 0 -0.0000305157 32768 32768 // int int float float float float int int
@@ -823,8 +841,11 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile(const char *name, unsi
 
 #ifdef _RAVEN // quake4 cm file
 	if (!src->ReadToken(&token) || (token != CM_FILEVERSION
-#if 1
+#if 1 // for compat doom3 version
 				 && token != CM_DOOM3_FILEVERSION
+#endif
+#if 1 // for compat q4x version
+				 && token != CM_Q4X_FILEVERSION
 #endif
 				))
 #else
