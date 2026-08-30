@@ -1445,7 +1445,7 @@ void idClass::RegisterClasses( void )
 	REGISTER(riVCWPulseCannon); // ..\..\code\game\vehicle\VehicleParts.cpp
 	REGISTER(riVehiclePartSplineTether); // ..\..\code\game\vehicle\VehicleParts.cpp
 	REGISTER(riVehiclePartBoost); // ..\..\code\game\vehicle\VehicleParts.cpp
-	REGISTER(riVehicleSpeederBike); // ..\..\code\game\vehicle\VehicleSpeederBike.cpp
+	REGISTER(riVehicleSpeederBike); // ..\..\code\game\vehicle\Vehicle_SpeederBike.cpp
 	REGISTER(rvWeaponFreezeGun); // ..\..\code\game\weapon\WeaponFreezeGun.cpp
 	REGISTER(WeaponGoobGun); // ..\..\code\game\weapon\WeaponGoobGun.cpp
 	REGISTER(WeaponSpikeGun); // ..\..\code\game\weapon\WeaponSpikeGun.cpp

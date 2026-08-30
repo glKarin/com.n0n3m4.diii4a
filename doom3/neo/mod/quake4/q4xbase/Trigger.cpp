@@ -436,6 +436,9 @@ void idTrigger_Multi::TriggerAction( idEntity *activator ) {
 	}
 // RAVEN END
 	ActivateTargets( triggerWithSelf ? this : activator );
+#ifdef _Q4XBASE //karin: activator allow NULL entity
+	if(triggerWithSelf || activator)
+#endif
 	CallScript( triggerWithSelf ? this : activator );
 
 	if ( wait >= 0 ) {
