@@ -961,7 +961,6 @@ class idSoundSystemLocal : public idSoundSystem
 			GetSoundWorldFromId(worldId)->FadeSoundClasses(soundClass, to, over);
 		}
 		virtual	float			CurrentShakeAmplitudeForPosition(int worldId, const int time, const idVec3& listenerPosition) {
-			//return 0.0f;
 			return GetSoundWorldFromId(worldId)->CurrentShakeAmplitudeForPosition(time, listenerPosition);
 		}
 		virtual void			PlayShaderDirectly(int worldId, const char* name, int channel = -1) {

@@ -1161,10 +1161,15 @@ class idMaterial : public idDecl
 #ifdef _RAVEN // quake4 material
 // RAVEN BEGIN
 // dluetscher: added SURF_NO_T_FIX to merge surfaces (like decals), but skipping any T-junction fixing
-            bool				NoTFix( void ) const { return ( surfaceFlags & SURF_NO_T_FIX ) != 0; }
+        bool				NoTFix( void ) const { return ( surfaceFlags & SURF_NO_T_FIX ) != 0; }
 // RAVEN END
 
-            const rvDeclMatType* GetMaterialType(void) const { return(materialType); }
+        const rvDeclMatType* GetMaterialType(void) const { return(materialType); }
+
+	// AReis: New portal distance culling stuff.
+		float						GetPortalNear( void ) const { return( portalDistanceNear ); }
+		float						GetPortalFar( void ) const { return( portalDistanceFar ); }
+		const idImage *				GetPortalImage( void ) const { return( portalImage ); }
 // RAVEN BEGIN
 // rjohnson: added vertex randomizing
         // regs should point to a float array large enough to hold GetNumRegisters() floats
@@ -1284,7 +1289,7 @@ class idMaterial : public idDecl
 // AReis: New portal distance culling stuff.
         float				portalDistanceNear;
         float				portalDistanceFar;
-        idImage* portalImage;
+		idImage *			portalImage;
 // RAVEN END
 #endif
 #ifdef _HUMANHEAD

@@ -149,6 +149,9 @@ void idMaterial::CommonInit()
 	portalSky = false;
 #ifdef _RAVEN // quake4 for trace
 	materialType = NULL;
+	portalDistanceNear = 262144.0f;
+	portalDistanceFar = 262144.0f;
+	portalImage = NULL;
 #endif
 #ifdef _HUMANHEAD
 	subviewClass = SC_MIRROR;
@@ -874,18 +877,17 @@ int idMaterial::ParseTerm(idLexer &src)
 #endif
 	}
 	if (!token.Icmp("DecalLife")) {
-		return GetExpressionConstant(0.0f);
+		pd->registersAreConstant = false;
+		return EXP_REG_PARM4; //k: 2026 openQ4
+		//return GetExpressionConstant(0.0f);
 	}
 	if (!token.Icmp("IsMultiplayer")) {
 		return GetExpressionConstant(0.0f); // ((float)game->IsMultiplayer()); // constant???
 	}
 	if (!token.Icmp("VertexRandomizer")) {
-		return GetExpressionConstant(0.0f);
+		pd->registersAreConstant = false;
+		return EXP_REG_VERTEX_RANDOMIZER;
 	}
-/*    if (!token.Icmp("viewOrigin")) {
-        pd->registersAreConstant = false;
-        return GetExpressionConstant(0.0f);
-    }*/
 #endif
 
 #ifdef _HUMANHEAD
@@ -3024,16 +3026,9 @@ void idMaterial::ParseMaterial(idLexer &src)
 // jmarshall - possible legacy optimisations that aren't needed for current hardware.
         else if (!token.Icmp("notfix"))
         {
-            // Unknown what this is used for.
+			surfaceFlags |= SURF_NO_T_FIX;
             continue;
         }
-				/*
-        else if (!token.Icmp("sightClip"))
-        {
-            // Unknown what this is used for.
-            continue;
-        }
-				*/
         else if (!token.Icmp("sky"))
         {
             SetMaterialFlag(MF_SKY);
@@ -3056,11 +3051,11 @@ void idMaterial::ParseMaterial(idLexer &src)
             continue;
         }
 		else if (!token.Icmp("portalDistanceNear")) {
-			(void)src.ParseFloat(); // a number
+			portalDistanceNear = src.ParseFloat();
 			continue;
 		}
 		else if (!token.Icmp("portalDistanceFar")) {
-			(void)src.ParseFloat(); // a number
+			portalDistanceFar = src.ParseFloat(); // a number
 			continue;
 		}
 		else if (!token.Icmp("portalImage")) {
@@ -3976,6 +3971,7 @@ const char *opNames[] = {
 	// RAVEN BEGIN
 // rjohnson: new shader stage system
 	,
+	"OP_TYPE_SOUND",
 	"OP_TYPE_GLSL_ENABLED",
 	"OP_TYPE_POT_X",
 	"OP_TYPE_POT_Y",
@@ -4072,6 +4068,9 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 	registers[EXP_REG_PARM9] = shaderParms[9];
 	registers[EXP_REG_PARM10] = shaderParms[10];
 	registers[EXP_REG_PARM11] = shaderParms[11];
+#ifdef _RAVEN //k: 2026 openQ4
+	registers[EXP_REG_VERTEX_RANDOMIZER] = shaderParms[SHADERPARM_DIVERSITY];
+#endif
 #ifdef _HUMANHEAD
 	registers[EXP_REG_DISTANCE] = shaderParms[12];
 #endif
@@ -4185,6 +4184,7 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 					registers[op->c] = f;
 				}
 				break;
+#if 1 //karin: if dynamic get size
 			case OP_TYPE_POT_X: { //karin: screen width and power of two width
 #if 1
 					int w = glConfig.vidWidth;
@@ -4207,6 +4207,7 @@ void idMaterial::EvaluateRegisters(float *registers, const float shaderParms[MAX
 					registers[op->c] = (float) h / (float) poth;
 				}
 				break;
+#endif
 #endif
 #ifdef _HUMANHEAD //karin: calc dynamic variants on material stage
 			case OP_TYPE_FRAGMENTPROGRAMS: { //karin: check has ARB to GLSL shader stage is enabled current
