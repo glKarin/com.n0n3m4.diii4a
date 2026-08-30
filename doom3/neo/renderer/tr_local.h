@@ -588,6 +588,10 @@ typedef struct viewDef_s {
 	// crossing a closed door.  This is used to avoid drawing interactions
 	// when the light is behind a closed door.
 
+#ifdef _RAVEN //openQ4: fade portal view
+	bool *				areaVisible;	// in frame temporary memory, numPortalAreas entries
+#endif
+
 #if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
     struct viewEffect_s	*viewEffects;			// chain of all viewEffects effecting view
 #endif
@@ -1330,6 +1334,7 @@ extern idCVar r_useEntityPortalCulling;		// 0 = none, 1 = box
 #ifdef _RAVEN
 extern idCVar r_skipSky;
 extern idCVar r_forceAmbient;
+extern idCVar r_portalsDistanceCull;
 #endif
 
 /*

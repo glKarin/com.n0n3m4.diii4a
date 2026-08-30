@@ -43,6 +43,11 @@ typedef struct portal_s {
 	idPlane					plane;			// view must be on the positive side of the plane to cross
 	struct portal_s 		*next;			// next portal of the area
 	struct doublePortal_s 	*doublePortal;
+#ifdef _RAVEN //openQ4: fade portals
+	idImage *				image;			// optional fade image for distance-cull portal transitions
+	float					cullNear;		// near threshold for portal fade/cull
+	float					cullFar;		// far threshold for portal fade/cull
+#endif
 #ifdef _HUMANHEAD
 #if GAMEPORTAL_PVS
     bool                    isGamePortal;
@@ -89,7 +94,6 @@ typedef struct {
 	int				commonChildrenArea;	// if all children are either solid or a single area,
 	// this is the area number, else CHILDREN_HAVE_MULTIPLE_AREAS
 } areaNode_t;
-
 
 #ifdef _HUMANHEAD
 #if GAMEPORTAL_PVS
@@ -208,6 +212,8 @@ class idRenderWorldLocal : public idRenderWorld
         virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot, float nearDist, float alpha, int lifetime) { (void)color; (void)origin; (void)dir; (void)farDot; (void)farDist; (void)nearDot; (void)nearDist; (void)alpha; (void)lifetime; }
 
         virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas );
+
+		virtual void			RenderPortalFades( void );
 #if 1
         void					FindVisibleAreas_r(const idVec3 &origin, int areaNum, bool *visibleAreas);
 #else

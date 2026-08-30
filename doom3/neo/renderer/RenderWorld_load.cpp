@@ -450,25 +450,22 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 		}
 
 #ifdef _RAVEN //k: quake4 proc extras
+		float		cullNear = 262144.0f;
+		float		cullFar = 262144.0f;
+		idImage* portalImage = NULL;
+
         if(PROC_IS_QUAKE4_VERSION()) //karin: for compat doom3 proc
 		{
-		idToken nextToken;
-		if(src->ReadTokenOnLine(&nextToken))
+		if(src->PeekTokenString("("))
 		{
-			if(nextToken == "(")
-			{
-				//k: ("_black" 123.00 456.00)
-#if 0
-				src->ReadToken(&nextToken); // fadeImage
-				src->ParseFloat(); // distanceNear
-				src->ParseFloat(); // distanceFar
-				src->ExpectTokenString(")");
-#else
-				src->SkipUntilString(")");
-#endif
-			}
-			else
-				src->UnreadToken(&nextToken);
+			//k: ("_black" 123.00 456.00)
+			idToken imageToken;
+			src->ExpectTokenString( "(" );
+			src->ReadToken( &imageToken );
+			portalImage = globalImages->ImageFromFile( imageToken.c_str(), TF_DEFAULT, false, TR_REPEAT, TD_DEFAULT ); // fadeImage
+			cullNear = src->ParseFloat(); // distanceNear
+			cullFar = src->ParseFloat(); // distanceFar
+			src->ExpectTokenString( ")" );
 		}
 		}
 #endif
@@ -479,6 +476,11 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 		p->doublePortal = &doublePortals[i];
 		p->w = w;
 		p->w->GetPlane(p->plane);
+#ifdef _RAVEN //k: quake4 proc extras
+		p->image = portalImage;
+		p->cullNear = cullNear;
+		p->cullFar = cullFar;
+#endif
 
 		p->next = portalAreas[a1].portals;
 		portalAreas[a1].portals = p;
@@ -491,6 +493,11 @@ void idRenderWorldLocal::ParseInterAreaPortals(idLexer *src)
 		p->doublePortal = &doublePortals[i];
 		p->w = w->Reverse();
 		p->w->GetPlane(p->plane);
+#ifdef _RAVEN //k: quake4 proc extras
+		p->image = portalImage;
+		p->cullNear = cullNear;
+		p->cullFar = cullFar;
+#endif
 
 		p->next = portalAreas[a2].portals;
 		portalAreas[a2].portals = p;

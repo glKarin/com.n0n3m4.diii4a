@@ -261,6 +261,7 @@ idCVar r_aspectRatio("r_aspectRatio",			"-1",			CVAR_RENDERER | CVAR_INTEGER | C
 //k: for main menu gui
 idCVar r_forceAmbient("r_forceAmbient", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "Force a single ambient light throughout the level if > 0 (intensity 0..1)", -1, 1);
 idCVar r_useSmp("r_useSMP", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Turn SMP on and off");
+idCVar r_portalsDistanceCull( "r_portalsDistanceCull", "1", CVAR_RENDERER | CVAR_BOOL, "enable distance-cull checks using portal fade cull ranges" );
 #endif
 #ifdef _HUMANHEAD //k: for main menu gui
 idCVar r_shaderlevel("r_shaderlevel", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "level of shadersto use");

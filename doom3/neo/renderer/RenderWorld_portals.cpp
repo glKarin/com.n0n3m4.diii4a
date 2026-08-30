@@ -1367,6 +1367,18 @@ void idRenderWorldLocal::FindViewLightsAndEntities(void)
 		// may have the viewOrigin in a solid/invalid area
 		FlowViewThroughPortals(tr.viewDef->renderView.vieworg, 5, tr.viewDef->frustum);
 	}
+
+#ifdef _RAVENxxx //openQ4: fade portal views(UNUSED)
+	// snapshot the flooded areas for RenderPortalFades, which runs in the
+	// backend after later subview floods and entity updates have advanced
+	// tr.viewCount past the stamps made above
+	if ( !tr.viewDef->areaVisible ) {
+		tr.viewDef->areaVisible = (bool *)R_FrameAlloc( numPortalAreas * sizeof( tr.viewDef->areaVisible[0] ) );
+		for ( int i = 0; i < numPortalAreas; i++ ) {
+			tr.viewDef->areaVisible[i] = ( portalAreas[i].viewCount == tr.viewCount );
+		}
+	}
+#endif
 }
 
 /*
@@ -1647,6 +1659,156 @@ void idRenderWorldLocal::FindVisibleAreas( idVec3 origin, int areaNum, bool *vis
 	}
 	if(numSky > 0)
 	LOGI("Total visible: %d %d, skys: %d\n", areaNum, num, numSky);
+#endif
+}
+
+/*
+===================
+idRenderWorldLocal::RenderPortalFades
+===================
+*/
+void idRenderWorldLocal::RenderPortalFades( void ) {
+#if 0 // UNUSED
+	// use the visibility snapshot captured for this view at frontend time
+	if ( backEnd.viewDef->areaVisible == NULL ) {
+		return;
+	}
+
+    GLint bufferId;
+    qglGetIntegerv(GL_ARRAY_BUFFER_BINDING, &bufferId);
+	if(bufferId != 0)
+		qglBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	GL_UseProgram(&defaultShader);
+    GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+    GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+
+	GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), zero);
+	GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
+
+	RB_LoadProjectionMatrix();
+	backEnd.currentSpace = &backEnd.viewDef->worldSpace;
+	float	mvp[16];
+	myGlMultMatrix(backEnd.viewDef->worldSpace.modelViewMatrix, backEnd.viewDef->projectionMatrix, mvp);
+    GL_UniformMatrix4fv(SHADER_PARM_ADDR(modelViewProjectionMatrix), mvp);
+	float *vs = NULL;
+	int numVerts = 0;
+
+	backEnd.currentScissor = backEnd.viewDef->scissor;
+	qglScissor( backEnd.viewDef->viewport.x1 + backEnd.currentScissor.x1,
+		backEnd.viewDef->viewport.y1 + backEnd.currentScissor.y1,
+		backEnd.currentScissor.x2 + 1 - backEnd.currentScissor.x1,
+		backEnd.currentScissor.y2 + 1 - backEnd.currentScissor.y1 );
+
+    int glStateBits = backEnd.glState.glStateBits;
+	GL_State( GLS_DEPTHMASK | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );
+	GL_Cull( CT_TWO_SIDED );
+	GL_SelectTexture( 0 );
+
+	for ( int areaIndex = 0; areaIndex < numPortalAreas; areaIndex++ ) {
+		portalArea_t *area = &portalAreas[areaIndex];
+		if ( !backEnd.viewDef->areaVisible[areaIndex] ) {
+			continue;
+		}
+
+		for ( portal_t *portal = area->portals; portal; portal = portal->next ) {
+			const idWinding *w = portal->w;
+			if ( w == NULL || w->GetNumPoints() < 2 || portal->image == NULL ) {
+				continue;
+			}
+
+			const float d = portal->plane.Distance( backEnd.viewDef->renderView.vieworg );
+			if ( d <= portal->cullNear ) {
+				continue;
+			}
+
+			float alpha = 1.0f;
+			if ( d < portal->cullFar && portal->cullFar > portal->cullNear ) {
+				alpha = 1.0f - ( portal->cullFar - d ) / ( portal->cullFar - portal->cullNear );
+			}
+			alpha = idMath::ClampFloat( 0.0f, 1.0f, alpha );
+
+			const idVec3 &origin = ( *w )[0].ToVec3();
+			const idVec3 edge = ( *w )[1].ToVec3() - origin;
+			if ( edge.LengthSqr() <= idMath::FLOAT_EPSILON ) {
+				continue;
+			}
+			const idVec3 vAxis = portal->plane.Normal().Cross( edge );
+			if ( vAxis.LengthSqr() <= idMath::FLOAT_EPSILON ) {
+				continue;
+			}
+
+			float minU = idMath::INFINITY;
+			float maxU = -idMath::INFINITY;
+			float minV = idMath::INFINITY;
+			float maxV = -idMath::INFINITY;
+
+			const int windingPointCount = w->GetNumPoints();
+			for ( int pointIndex = 0; pointIndex < windingPointCount; pointIndex++ ) {
+				const idVec3 delta = ( *w )[pointIndex].ToVec3() - origin;
+				const float u = delta * edge;
+				const float v = delta * vAxis;
+
+				minU = Min( minU, u );
+				maxU = Max( maxU, u );
+				minV = Min( minV, v );
+				maxV = Max( maxV, v );
+			}
+
+			const float uRange = maxU - minU;
+			const float vRange = maxV - minV;
+			if ( uRange <= idMath::FLOAT_EPSILON || vRange <= idMath::FLOAT_EPSILON ) {
+				continue;
+			}
+
+			float color[] = {1.0f, 1.0f, 1.0f, alpha};
+			GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
+			portal->image->Bind();
+
+			bool reallocate = false;
+			int fs = windingPointCount * 5;
+			if(numVerts < fs)
+			{
+				free(vs);
+				vs = (float *)malloc(fs * sizeof(float));
+				numVerts = fs;
+				reallocate = true;
+			}
+			//glBegin( GL_POLYGON );
+			for ( int pointIndex = 0; pointIndex < windingPointCount; pointIndex++ ) {
+				const idVec3 &point = ( *w )[pointIndex].ToVec3();
+				const idVec3 delta = point - origin;
+				const float u = ( ( delta * edge ) - minU ) / uRange;
+				const float v = 1.0f - ( ( delta * vAxis ) - minV ) / vRange;
+
+				vs[pointIndex * 5] = u;
+				vs[pointIndex * 5 + 1] = v;
+				vs[pointIndex * 5 + 2] = point[0];
+				vs[pointIndex * 5 + 3] = point[1];
+				vs[pointIndex * 5 + 4] = point[2];
+			}
+			if(reallocate)
+			{
+				GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(float) * 5, (void *)(vs + 2));
+				GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(float) * 5, (void *)vs);
+			}
+			//glEnd();
+			qglDrawArrays(GL_TRIANGLE_FAN, 0, windingPointCount);
+		}
+	}
+
+	free(vs);
+	//float[] color = {1.0f, 1.0f, 1.0f, 1.0f};
+	//GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
+	globalImages->BindNull();
+
+    GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+    GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
+	GL_UseProgram(NULL);
+
+	if(bufferId != 0)
+		qglBindBuffer(GL_ARRAY_BUFFER, 0);
+    GL_State( glStateBits );
 #endif
 }
 

@@ -2587,6 +2587,12 @@ void	RB_STD_DrawView(void)
 	// uplight the entire screen to crutch up not having better blending range
 	RB_STD_LightScale();
 
+#ifdef _RAVENxxx //openQ4: fade portal views(UNUSED)
+	if ( r_portalsDistanceCull.GetBool() && backEnd.viewDef->viewEntitys && backEnd.viewDef->renderWorld != NULL ) {
+		backEnd.viewDef->renderWorld->RenderPortalFades();
+	}
+#endif
+
 	// now draw any non-light dependent shading passes
 	int	processed = RB_STD_DrawShaderPasses(drawSurfs, numDrawSurfs);
 

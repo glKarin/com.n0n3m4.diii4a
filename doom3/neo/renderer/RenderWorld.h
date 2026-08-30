@@ -854,6 +854,9 @@ class idRenderWorld
         virtual bool			HasSkybox( int areaNum ) = 0;
         virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas ) = 0;
 
+		// AReis: This is where we draw the portal fadeout polygon
+		virtual void			RenderPortalFades( void ) = 0;
+
         virtual void			DebugClear(int time) = 0;		// a time of 0 will clear all lines and text
     // jscott: want to be able to specify depth test
         virtual void			DebugBounds(const idVec4& color, const idBounds& bounds, const idVec3& org, const int lifetime, bool depthTest) = 0;
