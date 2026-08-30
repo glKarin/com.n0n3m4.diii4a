@@ -348,10 +348,18 @@ const glyphInfo_t * R_Font_GetGlyphInfo(const fontInfo_t *info, uint32_t charCod
 	return R_Font_GetGlyphInfo(info, charCode, DEFAULT_SHOW_CHAR);
 }
 
+#ifdef _RAVEN
+float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale, float adjust)
+#else
 float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale)
+#endif
 {
 	const glyphInfo_t *glyph = R_Font_GetGlyphInfo(info, charCode, DEFAULT_MEASURE_CHAR);
+#ifdef _RAVEN
+    return glyph ? ((float)glyph->xSkip + adjust) * info->glyphScale * scale : (0.0f + adjust/* require??? */);
+#else
     return glyph ? (float)glyph->xSkip * info->glyphScale * scale : 0.0f;
+#endif
 }
 
 float R_Font_GetCharHeight(const fontInfo_t *info, uint32_t charCode, float scale)
@@ -404,9 +412,9 @@ bool R_Font_ParseWideFont(fontInfo_t *outFont)
 #ifdef _RAVEN //k: quake4 font: 9 float32 per char
                 info->imageWidth	= (int)readFloat();
                 info->imageHeight	= (int)readFloat();
-                info->xSkip		    = (int)readFloat();
-                info->pitch		    = (int)readFloat();
-                info->top			= (int)readFloat(); // p_horiBearingY
+                info->xSkip		    = (int)readFloat(); // horiAdvance
+                info->pitch		    = (int)readFloat(); // horiBearingX
+                info->top			= (int)readFloat(); // horiBearingY
                 info->height		= info->top;
                 info->bottom		= 0;
                 info->s			    = readFloat();

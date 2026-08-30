@@ -75,8 +75,13 @@ class idDeviceContext
 		void				DrawMaterialRotated(float x, float y, float w, float h, const idMaterial *mat, const idVec4 &color, float scalex = 1.0, float scaley = 1.0, float angle = 0.0f);
 		void				DrawStretchPicRotated(float x, float y, float w, float h, float s0, float t0, float s1, float t1, const idMaterial *mat, float angle = 0.0f);
 
+#ifdef _RAVEN // add adjust spacing
+		int					CharWidth(const char c, float scale, int adjust = 0);
+		int					TextWidth(const char *text, float scale, int limit, int adjust = 0);
+#else
 		int					CharWidth(const char c, float scale);
 		int					TextWidth(const char *text, float scale, int limit);
+#endif
 		int					TextHeight(const char *text, float scale, int limit);
 		int					MaxCharHeight(float scale);
 		int					MaxCharWidth(float scale);

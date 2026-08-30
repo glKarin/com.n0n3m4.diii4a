@@ -156,7 +156,11 @@ typedef struct {
 #define HARM_NEW_FONT_VERSION 0x00010001
 
 const glyphInfo_t * R_Font_GetGlyphInfo(const fontInfo_t *info, uint32_t charIndex);
+#ifdef _RAVEN //karin: add spacing adjust
+float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale = 1.0f, float adjust = 0.0f);
+#else
 float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale = 1.0f);
+#endif
 float R_Font_GetCharHeight(const fontInfo_t *info, uint32_t charCode, float scale = 1.0f);
 
 void R_Font_FreeFontInfo(fontInfo_t *info);

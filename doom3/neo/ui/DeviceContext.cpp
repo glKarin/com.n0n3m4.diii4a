@@ -984,8 +984,8 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				continue;
 			} else {
 				float yadj = useScale * glyph->top;
-#ifdef _RAVENxxx //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
-                yadj = yadj + 1.0f;
+#ifdef _RAVENxxx //karin: 2025 Q4D y - (useScale * font->horiBearingY - 1.0)
+				yadj = yadj - 1.0f;
 #endif
 				PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
 
@@ -993,7 +993,11 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 					DrawEditCursor(x, y, scale);
 				}
 
+#ifdef _RAVEN // add adjust spacing
+				x += (glyph->xSkip + adjust) * useScale;
+#else
 				x += (glyph->xSkip * useScale) + adjust;
+#endif
 				s++;
 				count++;
 			}
@@ -1049,7 +1053,11 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
                         DrawEditCursor( x, y, scale );
                     }
 
+#ifdef _RAVEN // add adjust spacing
+                    x += (glyph->xSkip + adjust) * useScale;
+#else
                     x += (glyph->xSkip * useScale) + adjust;
+#endif
                 }
             }
         }
@@ -1075,7 +1083,11 @@ void idDeviceContext::SetSize(float width, float height)
 	}
 }
 
+#ifdef _RAVEN // add adjust spacing
+int idDeviceContext::CharWidth(const char c, float scale, int adjust)
+#else
 int idDeviceContext::CharWidth(const char c, float scale)
+#endif
 {
 	glyphInfo_t *glyph;
 	float		useScale;
@@ -1083,10 +1095,18 @@ int idDeviceContext::CharWidth(const char c, float scale)
 	fontInfo_t	*font = useFont;
 	useScale = scale * font->glyphScale;
 	glyph = &font->glyphs[(const unsigned char)c];
+#ifdef _RAVEN // add adjust spacing
+	return idMath::FtoiFast((adjust + glyph->xSkip) * useScale);
+#else
 	return idMath::FtoiFast(glyph->xSkip * useScale);
+#endif
 }
 
+#ifdef _RAVEN // add adjust spacing
+int idDeviceContext::TextWidth(const char *text, float scale, int limit, int adjust)
+#else
 int idDeviceContext::TextWidth(const char *text, float scale, int limit)
+#endif
 {
 	int i, width;
 
@@ -1109,7 +1129,11 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 			if (idStr::IsColor(text + i)) {
 				i++;
 			} else {
+#ifdef _RAVEN // add adjust spacing
+				width += glyphs[((const unsigned char *)text)[i]].xSkip + adjust;
+#else
 				width += glyphs[((const unsigned char *)text)[i]].xSkip;
+#endif
 			}
 		}
 	} else {
@@ -1117,7 +1141,11 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 			if (idStr::IsColor(text + i)) {
 				i++;
 			} else {
+#ifdef _RAVEN // add adjust spacing
+				width += glyphs[((const unsigned char *)text)[i]].xSkip + adjust;
+#else
 				width += glyphs[((const unsigned char *)text)[i]].xSkip;
+#endif
 			}
 		}
 	}
@@ -1140,7 +1168,11 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
                     charIndex += 2; //skip 2 characters, because color is ^x format
                 } else {
                     uint32_t textChar = drawText.UTF8Char( charIndex );
+#ifdef _RAVEN // add adjust spacing
+                    f += R_Font_GetCharWidth(useFont, textChar, scale, adjust);
+#else
                     f += R_Font_GetCharWidth(useFont, textChar, scale);
+#endif
                 }
             }
         } else {
@@ -1149,7 +1181,11 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
                     charIndex += 2; //skip 2 characters, because color is ^x format
                 } else {
                     uint32_t textChar = drawText.UTF8Char( charIndex );
+#ifdef _RAVEN // add adjust spacing
+                    f += R_Font_GetCharWidth(useFont, textChar, scale, adjust);
+#else
                     f += R_Font_GetCharWidth(useFont, textChar, scale);
+#endif
                 }
             }
         }
@@ -1395,6 +1431,9 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
     if(AsASCIICharLang(text, (int)strlen(text)))
     {
 #endif
+#ifdef _RAVEN // add adjust spacing
+	int iAdjust = idMath::Ceil(adjust);
+#endif
 	while (p) {
 
 		if (*p == '\n' || *p == '\r' || *p == '\0') {
@@ -1405,7 +1444,11 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 			}
 		}
 
+#ifdef _RAVEN // add adjust spacing
+		int nextCharWidth = (idStr::CharIsPrintable(*p) ? CharWidth(*p, textScale, iAdjust) : cursorSkip);
+#else
 		int nextCharWidth = (idStr::CharIsPrintable(*p) ? CharWidth(*p, textScale) : cursorSkip);
+#endif
 		// FIXME: this is a temp hack until the guis can be fixed not not overflow the bounding rectangles
 		//		  the side-effect is that list boxes and edit boxes will draw over their scroll bars
 		//	The following line and the !linebreak in the if statement below should be removed
@@ -1533,7 +1576,11 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 
             // If the character isn't a new line then add it to the text buffer.
             if( textChar != '\n' && textChar != '\r' ) {
+#ifdef _RAVEN // add adjust spacing
+                textWidth += R_Font_GetCharWidth( useFont, textChar, textScale, adjust );
+#else
                 textWidth += R_Font_GetCharWidth( useFont, textChar, textScale );
+#endif
                 textBuffer.AppendUTF8Char( textChar );
             }
 

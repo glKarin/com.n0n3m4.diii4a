@@ -2618,7 +2618,6 @@ bool idWindow::ParseInternalVar(const char *_name, idParser *src)
     if (idStr::Icmp(_name, "textSpacing") == 0)
     {
         textSpacing = src->ParseFloat();
-		//if(textSpacing < 0.0f) textSpacing = 0.0f;
         return true;
     }
     if (idStr::Icmp(_name, "textStyle") == 0)
