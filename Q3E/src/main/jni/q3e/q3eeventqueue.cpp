@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <list>
+#include <deque>
 #include <mutex>
 
 #include <android/log.h>
@@ -62,7 +62,7 @@ typedef union Event_s
     MouseEvent_t mouse;
 } Event_t;
 
-typedef std::list<Event_t> EventQueue_t;
+typedef std::deque<Event_t> EventQueue_t;
 
 
 #define LOCK() const std::lock_guard<std::mutex> _lock(lockMutex);

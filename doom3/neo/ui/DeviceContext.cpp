@@ -110,7 +110,7 @@ int idDeviceContext::FindFont(const char *name)
 		}
 	}
 
-	// If the font was not found, try to register it
+	// If the font not found, try to register it
 	idStr fileName = name;
 #ifdef _RAVEN //k: Quake4 default font
 	if(!idStr::Icmp(fileName, "fonts"))

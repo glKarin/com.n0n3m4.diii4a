@@ -57,9 +57,6 @@ void sdFontManagerLocal::Shutdown(void) {
 }
 
 qhandle_t sdFontManagerLocal::FindFont( const char* name ) {
-#if 0
-	name = "fonts";
-#endif
 	int c = fonts.Num();
 
 	for (int i = 0; i < c; i++) {
@@ -68,7 +65,7 @@ qhandle_t sdFontManagerLocal::FindFont( const char* name ) {
 		}
 	}
 
-	// If the font was not found, try to register it
+	// If the font not found, try to register it
 	idStr fileName;
 	if(!idStr::Icmpn(name, "fonts", 5))
 		fileName = name;

@@ -588,7 +588,7 @@ typedef struct viewDef_s {
 	// crossing a closed door.  This is used to avoid drawing interactions
 	// when the light is behind a closed door.
 
-#ifdef _RAVEN //openQ4: fade portal view
+#ifdef _RAVENxxx //openQ4: fade portal view
 	bool *				areaVisible;	// in frame temporary memory, numPortalAreas entries
 #endif
 
