@@ -2477,6 +2477,7 @@ void idRenderSystemLocal::Clear(void)
 #endif
 #ifdef _SPLASHDAMAGE //karin: sdGuiModel
 	gameGuiModel = NULL;
+	syncNum = 0;
 #endif
 }
 
@@ -2806,31 +2807,31 @@ void idRenderSystemLocal::UnlockThreads(void) {
 }
 
 int idRenderSystemLocal::GetSyncNum(void) {
-	return 0;
+	return syncNum;
 }
 
 int idRenderSystemLocal::RegisterPtr(void *ptr) {
 	if(!ptr)
-		return -1;
+		return 0;
 
 	int index = registerPtrs.FindNull();
 	if(index != -1)
 	{
 		registerPtrs[index] = ptr;
-		return index;
+		return index + 1;
 	}
-	return registerPtrs.Append(ptr);
+	return registerPtrs.Append(ptr) + 1;
 }
 
 void idRenderSystemLocal::UnregisterPtr(int uid) {
-	if(uid >= 0 && uid < registerPtrs.Num())
-		registerPtrs[uid] = NULL;
+	if(uid > 0 && uid <= registerPtrs.Num())
+		registerPtrs[uid - 1] = NULL;
 }
 
 void * idRenderSystemLocal::PtrForUID(int uid) {
-	if(uid < 0 || uid >= registerPtrs.Num())
+	if(uid <= 0 || uid > registerPtrs.Num())
 		return NULL;
-	return registerPtrs[uid];
+	return registerPtrs[uid - 1];
 }
 
 class idRenderModel * idRenderSystemLocal::InstantiateDynamicModel(class idRenderModel *model, struct renderEntity_s *ent) {

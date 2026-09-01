@@ -833,6 +833,9 @@ void idRenderSystemLocal::EndFrame(int *frontEndMsec, int *backEndMsec)
 	// add the swapbuffers command
 	cmd = (emptyCommand_t *)R_GetCommandBuffer(sizeof(*cmd));
 	cmd->commandId = RC_SWAP_BUFFERS;
+#ifdef _SPLASHDAMAGE
+	syncNum++;
+#endif
 
 	FPS_LIMIT();
 
@@ -1247,6 +1250,9 @@ void idRenderSystemLocal::EndFrame(byte *data, int *frontEndMsec, int *backEndMs
 	// add the swapbuffers command
 	cmd = (emptyCommand_t *)R_GetCommandBuffer(sizeof(*cmd));
 	cmd->commandId = RC_SWAP_BUFFERS;
+#ifdef _SPLASHDAMAGE
+	syncNum++;
+#endif
 
 	FPS_LIMIT();
 

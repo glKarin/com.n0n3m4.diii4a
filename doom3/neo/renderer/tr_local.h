@@ -1056,6 +1056,7 @@ class idRenderSystemLocal : public idRenderSystem
 
 		idList<void *>			registerPtrs;
 		class sdGuiModel 		*gameGuiModel;
+		int						syncNum;
 #endif
 
 	public:

@@ -1065,7 +1065,9 @@ void R_FreeEntityDefDerivedData(idRenderEntityLocal *def, bool keepDecals, bool 
 		}
 
 		if (def->parms.callbackData) {
+#if !defined(_SPLASHDAMAGE) //karin: callback data is register to render system in game , not pointer
 			Mem_Free(def->parms.callbackData);
+#endif
 			def->parms.callbackData = NULL;
 		}
 
