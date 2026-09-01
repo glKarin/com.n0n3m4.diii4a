@@ -331,10 +331,14 @@ void idAsyncNetwork::SpawnServer_f(const idCmdArgs &args)
 {
 
 	if (args.Argc() > 1) {
-#ifdef _SPLASHDAMAGE //karin: prepend `maps/` prefix, it caused crash if `levelshot/generic` material missing  when map loading start by `spawn xxx.entites` without `maps/` prefix
+#ifdef _SPLASHDAMAGE //karin: prepend `maps/` prefix, it caused crash if `levelshot/generic` material missing  when map loading start by `spawn xxx.entites` without `maps/` prefix, only not in campaign mode
 		idStr mapName = args.Argv(1);
-		if(idStr::Icmpn(mapName, "maps/", 5))
-			mapName.Insert("maps/", 0);
+		const char *gameRule = cvarSystem->GetCVarString("si_rules");
+		if (idStr::Icmp(gameRule, "sdGameRulesCampaign"))
+		{
+			if(idStr::Icmpn(mapName, "maps/", 5))
+				mapName.Insert("maps/", 0);
+		}
 		cvarSystem->SetCVarString("si_map", mapName.c_str());
 #else
 		cvarSystem->SetCVarString("si_map", args.Argv(1));

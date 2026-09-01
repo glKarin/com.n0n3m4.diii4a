@@ -3261,6 +3261,7 @@ void idSessionLocal::Draw()
 #ifdef _SPLASHDAMAGE //karin: tell game draw main menu if actived, must before next condition, because mapSpawned maybe true
 	} else if (game->IsMainMenuActive()) {
 		game->DrawMainMenu();
+		//game->DrawSystemUI();
 #endif
 	} else if (mapSpawned) {
 		bool gameDraw = false;
@@ -3272,7 +3273,10 @@ void idSessionLocal::Draw()
 #ifdef _SPLASHDAMAGE
 			gameDraw = game->Draw();
 			//if (!gameDraw)
+			{
 				gameDraw = game->Draw2D();
+				//game->DrawSystemUI();
+			}
 #else
 			gameDraw = game->Draw(GetLocalClientNum());
 #endif
