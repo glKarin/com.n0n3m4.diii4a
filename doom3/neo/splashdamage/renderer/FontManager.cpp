@@ -19,8 +19,6 @@
 #define DRAW_TEXT_LINE_SPACING 2 // 5 doom3
 
 extern idCVar harm_gui_useD3BFGFont;
-extern idCVar gui_smallFontLimit;
-extern idCVar gui_mediumFontLimit;
 static bool _hasWideCharFont = false;
 
 extern bool R_ExportTrueTypeFont(const char *fontPath, const char *fontType, const char *language, int width);
@@ -28,13 +26,14 @@ extern bool R_ExportTrueTypeFont(const char *fontPath, const char *fontType, con
 idList<fontInfoEx_t> sdFontManagerLocal::fonts;
 idList<sdLocFont_t> sdFontManagerLocal::fontConfigs;
 
-static idCVar harm_r_fontDefaultScale("harm_r_fontDefaultScale", "0.27", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "default font scale in GUIs");
-#define DC_DEFAULT_FONT_SCALE (harm_r_fontDefaultScale.GetFloat())
+#define DC_DEFAULT_FONT_SCALE(pt) (idMath::FtoiFast(pt) / 48.0f)
 
 sdFontManagerLocal::sdFontManagerLocal()
 	: activeFont(NULL),
 		useFont(NULL),
-		overStrikeMode(true)
+		overStrikeMode(true),
+		pointSize(48),
+		pointSizeScale(1.0f)
 {
 }
 
@@ -57,6 +56,9 @@ void sdFontManagerLocal::Shutdown(void) {
 }
 
 qhandle_t sdFontManagerLocal::FindFont( const char* name ) {
+#if 0
+	name = "fonts";
+#endif
 	int c = fonts.Num();
 
 	for (int i = 0; i < c; i++) {
@@ -65,7 +67,7 @@ qhandle_t sdFontManagerLocal::FindFont( const char* name ) {
 		}
 	}
 
-	// If the font not found, try to register it
+	// If the font was not found, try to register it
 	idStr fileName;
 	if(!idStr::Icmpn(name, "fonts", 5))
 		fileName = name;
@@ -168,19 +170,9 @@ const int sdFontManagerLocal::GetFontHeight( const qhandle_t font, const int poi
 	} else {
 		af = &fonts[0];
 	}
-	float scale = DC_DEFAULT_FONT_SCALE;
-	int maxHeight;
-	if (scale <= gui_smallFontLimit.GetFloat()) {
-		uf = &af->fontInfoSmall;
-		maxHeight = af->maxHeightSmall;
-	} else if (scale <= gui_mediumFontLimit.GetFloat()) {
-		uf = &af->fontInfoMedium;
-		maxHeight = af->maxHeightMedium;
-	} else {
-		uf = &af->fontInfoLarge;
-		maxHeight = af->maxHeightLarge;
-	}
-	float useScale = scale * uf->glyphScale;
+	uf = &af->fontInfoLarge;
+	int maxHeight = af->maxHeightLarge;
+	float useScale = uf->glyphScale * DC_DEFAULT_FONT_SCALE(pointSize);
 	return idMath::FtoiFast(maxHeight * useScale);
 }
 
@@ -190,25 +182,41 @@ void sdFontManagerLocal::SetFont( const qhandle_t num ) {
 	} else {
 		activeFont = &fonts[0];
 	}
+
+	useFont = &activeFont->fontInfoLarge;
+	activeFont->maxHeight = activeFont->maxHeightLarge;
+	activeFont->maxWidth = activeFont->maxWidthLarge;
 }
 
 void sdFontManagerLocal::SetFontSize( const int pointSize ) {
+	if(this->pointSize != pointSize)
+	{
+		this->pointSize = pointSize;
+		pointSizeScale = idMath::FtoiFast(this->pointSize) / 48.0f;
+	}
+}
+
+float sdFontManagerLocal::CalcScale(float scale) const
+{
+	return scale * useFont->glyphScale * pointSizeScale;
 }
 
 void sdFontManagerLocal::DrawText( const wchar_t* text, const sdBounds2D& rect, int textAlign, bool wrap, bool noclipping, const idVec4 &color ) {
-	DrawText(text, DC_DEFAULT_FONT_SCALE, textAlign, color, rect, wrap, noclipping, -1, false, NULL, 0);
+	DrawText(text, 1.0f, textAlign, color, rect, wrap, noclipping, -1, false, NULL, 0);
 }
 
 void sdFontManagerLocal::GetTextDimensions( const wchar_t* text, const sdBounds2D& rect, int textAlign, bool wrap, bool noclipping, const qhandle_t font, const int pointSize, int& width, int& height, float* scale, int** charAdvances, idList< int >* lineBreaks ) {
-	float fontScale = DC_DEFAULT_FONT_SCALE;
+	int lastPointSize = this->pointSize;
+	SetFontSize(pointSize);
 	SetFont(font);
 	int size[2] = {0};
-	DrawText(text, fontScale, textAlign, colorWhite, rect, wrap, noclipping, -1, true, lineBreaks, 0, charAdvances, size);
+	DrawText(text, 1.0f, textAlign, colorWhite, rect, wrap, noclipping, -1, true, lineBreaks, 0, charAdvances, size);
 	width = size[0];
 	height = size[1];
 
 	if (scale)
-		*scale = fontScale;
+		*scale = CalcScale(1.0f);
+	SetFontSize(lastPointSize);
 }
 
 void sdFontManagerLocal::SetupFonts() {
@@ -231,23 +239,6 @@ void sdFontManagerLocal::SetupFonts() {
 	common->Printf("%d font configs found.\n", fontConfigs.Num());
 }
 
-void sdFontManagerLocal::SetFontByScale(float scale)
-{
-	if (scale <= gui_smallFontLimit.GetFloat()) {
-		useFont = &activeFont->fontInfoSmall;
-		activeFont->maxHeight = activeFont->maxHeightSmall;
-		activeFont->maxWidth = activeFont->maxWidthSmall;
-	} else if (scale <= gui_mediumFontLimit.GetFloat()) {
-		useFont = &activeFont->fontInfoMedium;
-		activeFont->maxHeight = activeFont->maxHeightMedium;
-		activeFont->maxWidth = activeFont->maxWidthMedium;
-	} else {
-		useFont = &activeFont->fontInfoLarge;
-		activeFont->maxHeight = activeFont->maxHeightLarge;
-		activeFont->maxWidth = activeFont->maxWidthLarge;
-	}
-}
-
 void sdFontManagerLocal::PaintChar(float x,float y,float width,float height,float scale,float	s,float	t,float	s2,float t2,const idMaterial *hShader, const idVec4 *color)
 {
 	float	w, h;
@@ -268,8 +259,7 @@ void sdFontManagerLocal::DrawEditCursor(float x, float y, float scale, const idV
 		return;
 	}
 
-	SetFontByScale(scale);
-	float useScale = scale * useFont->glyphScale;
+	float useScale = CalcScale(scale);
 	const glyphInfo_t *glyph2 = &useFont->glyphs[(overStrikeMode) ? '_' : '|'];
 	float	yadj = useScale * glyph2->top;
 	PaintChar(x, y - yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph, color);
@@ -281,8 +271,7 @@ int sdFontManagerLocal::DrawText(float x, float y, float scale, idVec4 color, co
 	idVec4		newColor;
 	const glyphInfo_t *glyph;
 	float		useScale;
-	SetFontByScale(scale);
-	useScale = scale * useFont->glyphScale;
+	useScale = CalcScale(scale);
 	count = 0;
 	float start = x;
 
@@ -420,15 +409,13 @@ int sdFontManagerLocal::DrawText(float x, float y, float scale, idVec4 color, co
 
 int sdFontManagerLocal::MaxCharWidth(float scale)
 {
-	SetFontByScale(scale);
-	float useScale = scale * useFont->glyphScale;
+	float useScale = CalcScale(scale);
 	return idMath::FtoiFast(activeFont->maxWidth * useScale);
 }
 
 int sdFontManagerLocal::MaxCharHeight(float scale)
 {
-	SetFontByScale(scale);
-	float useScale = scale * useFont->glyphScale;
+	float useScale = CalcScale(scale);
 	return idMath::FtoiFast(activeFont->maxHeight * useScale);
 }
 
@@ -436,10 +423,8 @@ int sdFontManagerLocal::CharWidth(const char c, float scale)
 {
 	glyphInfo_t *glyph;
 	float		useScale;
-	SetFontByScale(scale);
-	fontInfo_t	*font = useFont;
-	useScale = scale * font->glyphScale;
-	glyph = &font->glyphs[(const unsigned char)c];
+	useScale = CalcScale(scale);
+	glyph = &useFont->glyphs[(const unsigned char)c];
 	return idMath::FtoiFast(glyph->xSkip * useScale);
 }
 
@@ -459,8 +444,6 @@ int sdFontManagerLocal::DrawText(const char *text, float textScale, int textAlig
 	bool		lineBreak, wordBreak;
 	int tWidth = CALC_SIZE(charSkip);
 	float tHeight = 0;
-
-	SetFontByScale(textScale);
 
 	y = lineSkip + rectDraw.GetTop();
 #if 0
@@ -627,7 +610,7 @@ int sdFontManagerLocal::DrawText(const char *text, float textScale, int textAlig
 
 			// update the width
 			if (*(buff + len - 1) != C_COLOR_ESCAPE && (len <= 1 || *(buff + len - 2) != C_COLOR_ESCAPE)) {
-				textWidth += textScale * useFont->glyphScale * useFont->glyphs[(const unsigned char)*(buff + len - 1)].xSkip;
+				textWidth += CalcScale(textScale) * useFont->glyphs[(const unsigned char)*(buff + len - 1)].xSkip;
 			}
 		}
 #ifdef _WCHAR_LANG
@@ -668,7 +651,7 @@ int sdFontManagerLocal::DrawText(const char *text, float textScale, int textAlig
 
             // If the character isn't a new line then add it to the text buffer.
             if( textChar != '\n' && textChar != '\r' ) {
-            	const int charWidth = R_Font_GetCharWidth( useFont, textChar, textScale );
+            	const int charWidth = R_Font_GetCharWidth( useFont, textChar, textScale * pointSizeScale );
             	textWidth += charWidth;
             	if (charAdvances)
             		(*charAdvances)[index - 1] = charWidth;
@@ -774,7 +757,7 @@ int sdFontManagerLocal::DrawText(const char *text, float textScale, int textAlig
                 // Reassess the remaining width
                 for( int i = 0; i < textBuffer.Length(); ) {
                     if( textChar != C_COLOR_ESCAPE ) {
-                        textWidth += R_Font_GetCharWidth( useFont, textBuffer.UTF8Char( i ), textScale );
+                        textWidth += R_Font_GetCharWidth( useFont, textBuffer.UTF8Char( i ), textScale * pointSizeScale );
                     }
                 }
 
@@ -889,9 +872,7 @@ int sdFontManagerLocal::DrawText(float x, float y, float scale, idVec4 color, co
 	int			len, count;
 	idVec4		newColor;
 	const glyphInfo_t *glyph;
-	float		useScale;
-	SetFontByScale(scale);
-	useScale = scale * useFont->glyphScale;
+	float		useScale = CalcScale(scale);
 	count = 0;
 	float start = x;
 
@@ -981,8 +962,6 @@ int sdFontManagerLocal::DrawText(const wchar_t *text, float textScale, int textA
 	int tWidth = CALC_SIZE(charSkip);
 	float tHeight = 0;
 
-	SetFontByScale(textScale);
-
 	y = lineSkip + rectDraw.GetTop();
 #if 0
 	if(!wrap) // single line only
@@ -1040,7 +1019,7 @@ int sdFontManagerLocal::DrawText(const wchar_t *text, float textScale, int textA
 			}
 		}
 
-		int nextCharWidth = (idStr::CharIsPrintable(*p) ? R_Font_GetCharWidth(useFont, *p, textScale) : cursorSkip);
+		int nextCharWidth = (idStr::CharIsPrintable(*p) ? R_Font_GetCharWidth(useFont, *p, textScale * pointSizeScale) : cursorSkip);
 		const int charWidth = nextCharWidth;
 		// FIXME: this is a temp hack until the guis can be fixed not not overflow the bounding rectangles
 		//		  the side-effect is that list boxes and edit boxes will draw over their scroll bars
@@ -1144,7 +1123,7 @@ int sdFontManagerLocal::DrawText(const wchar_t *text, float textScale, int textA
 
 		// update the width
 		if (*(buff + len - 1) != C_COLOR_ESCAPE && (len <= 1 || *(buff + len - 2) != C_COLOR_ESCAPE)) {
-            textWidth += R_Font_GetCharWidth( useFont, *(buff + len - 1), textScale );
+            textWidth += R_Font_GetCharWidth( useFont, *(buff + len - 1), textScale * pointSizeScale );
 		}
     }
 
@@ -1157,19 +1136,21 @@ int sdFontManagerLocal::DrawText(const wchar_t *text, float textScale, int textA
 }
 
 void sdFontManagerLocal::DrawText( const char* text, const sdBounds2D& rect, int textAlign, bool wrap, bool noclipping, const idVec4 &color ) {
-	DrawText(text, DC_DEFAULT_FONT_SCALE, textAlign, color, rect, wrap, noclipping, -1, false, NULL, 0);
+	DrawText(text, 1.0f, textAlign, color, rect, wrap, noclipping, -1, false, NULL, 0);
 }
 
 void sdFontManagerLocal::GetTextDimensions( const char* text, const sdBounds2D& rect, int textAlign, bool wrap, bool noclipping, const qhandle_t font, const int pointSize, int& width, int& height, float* scale, int** charAdvances, idList< int >* lineBreaks ) {
-	float fontScale = DC_DEFAULT_FONT_SCALE;
+	int lastPointSize = this->pointSize;
+	SetFontSize(pointSize);
 	SetFont(font);
 	int size[2] = {0};
-	DrawText(text, fontScale, textAlign, colorWhite, rect, wrap, noclipping, -1, true, lineBreaks, 0, charAdvances, size);
+	DrawText(text, 1.0f, textAlign, colorWhite, rect, wrap, noclipping, -1, true, lineBreaks, 0, charAdvances, size);
 	width = size[0];
 	height = size[1];
 
 	if (scale)
-		*scale = fontScale;
+		*scale = CalcScale(1.0f);
+	SetFontSize(lastPointSize);
 }
 
 bool sdFontManagerLocal::RegisterFont(int index, const char *fileName, unsigned int check)

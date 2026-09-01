@@ -1273,6 +1273,8 @@ void sdDeviceContextLocal::DrawText( const wchar_t* text, const sdBounds2D& rect
 
 	//const idMaterial* material = declManager->FindMaterial("commandmaps/area22");
 	//DrawCircleMaterial( rect.GetCenter().x, rect.GetCenter().y, idVec2(rect.GetWidth()/2,rect.GetWidth()/2), 90, idVec4(0,0,1,1), material, idVec4(1,1,1,1), 135 );
+	//DrawBox(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight(), 1, textAlign & DTF_RIGHT ? colorRed : (textAlign & DTF_CENTER ? colorGreen : colorBlue));
+	//DrawBox(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight(), 1, textAlign & DTF_BOTTOM ? colorRed : (textAlign & DTF_VCENTER ? colorGreen : colorBlue));
 }
 
 void sdDeviceContextLocal::GetTextDimensions( const wchar_t* text, const sdBounds2D& rect, unsigned int flags, const qhandle_t font, const int pointSize, int& width, int& height, float* scale, int** charAdvances, idList< int >* lineBreaks ) {

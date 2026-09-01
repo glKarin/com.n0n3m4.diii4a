@@ -65,7 +65,6 @@ private:
 	unsigned int			TrueTypeFontFileChecksum(const char *file) const;
 
 private:
-	void					SetFontByScale(float scale);
 	int						DrawText(float x, float y, float scale, idVec4 color, const char *text, float adjust, int limit, int style, int cursor = -1, bool calcOnly = false, int *rWidth = NULL);
 	void					PaintChar(float x,float y,float width,float height,float scale,float	s,float	t,float	s2,float t2,const idMaterial *hShader, const idVec4 *color = NULL);
 	void					DrawEditCursor(float x, float y, float scale, const idVec4 *color = NULL);
@@ -75,6 +74,7 @@ private:
 	int						CharWidth(const char c, float scale);
 	int						DrawText(float x, float y, float scale, idVec4 color, const wchar_t *text, float adjust, int limit, int style, int cursor, bool calcOnly = false, int *rWidth = NULL);
 	int						DrawText(const wchar_t *text, float textScale, int textAlign, idVec4 color, const sdBounds2D &rectDraw, bool wrap, bool noclipping, int cursor, bool calcOnly, idList<int> *breaks, int limit, int** charAdvances = NULL, int rSize[] = NULL);
+	float					CalcScale(float scale) const;
 
 private:
 	idStr					fontLang;
@@ -85,6 +85,8 @@ private:
 	static idList<fontInfoEx_t> fonts;
 	static idList<sdLocFont_t> fontConfigs;
 	bool					overStrikeMode;
+	int						pointSize;
+	float					pointSizeScale;
 };
 
 extern sdFontManagerLocal fontManagerLocal;
