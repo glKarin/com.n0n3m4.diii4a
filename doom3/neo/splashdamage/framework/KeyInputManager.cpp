@@ -284,81 +284,34 @@ bool sdKeyInputManagerLocal::AnyKeysDown( void ) {
 	return false;
 }
 
+bool sdKeyInputManagerLocal::DefaultBindsFilePath(idStr &ret, const char *lang) const
+{
+	ret = "localization";
+	if(!lang || !lang[0])
+	{
+		lang = cvarSystem->GetCVarString("sys_lang");
+		if(!lang || !lang[0])
+			lang = "english";
+	}
+	// western european languages can use the english font
+	if (!idStr::Icmp(lang, "french") || !idStr::Icmp(lang, "german") || !idStr::Icmp(lang, "spanish") || !idStr::Icmp(lang, "italian")) {
+		lang = "english";
+	}
+	ret.AppendPath(lang);
+	ret.AppendPath("defaultbinds.cfg");
+
+	int length = fileSystem->ReadFile(ret.c_str(), NULL, NULL);
+	return length > 0;
+}
+
 void sdKeyInputManagerLocal::BindDefault(void)
 {
-#define K_BINDING(key, cmd, mod, ctx) "bind \"" key "\" \"" cmd "\" \"" mod "\" \"" ctx "\";\n"
-	const char etqwbinds[] = "unbindall;\n"
-		K_BINDING("w", "_forward", "", "default")
-		K_BINDING("s", "_back", "", "default")
-		K_BINDING("a", "_moveleft", "", "default")
-		K_BINDING("d", "_moveright", "", "default")
-		K_BINDING("x", "_prone", "", "default")
-		K_BINDING("SPACE", "_moveup", "", "default")
-		K_BINDING("c", "_movedown", "", "default")
-		K_BINDING("q", "_leanleft", "", "default")
-		K_BINDING("e", "_leanright", "", "default")
-		K_BINDING("SHIFT", "_sprint", "", "default")
-		K_BINDING("CTRL", "_speed", "", "default")
-		K_BINDING("1", "_weapon0", "", "default")
-		K_BINDING("2", "_weapon1", "", "default")
-		K_BINDING("3", "_weapon2", "", "default")
-		K_BINDING("4", "_weapon3", "", "default")
-		K_BINDING("5", "_weapon4", "", "default")
-		K_BINDING("6", "_weapon5", "", "default")
-		K_BINDING("7", "useWeapon weapon_binocs", "", "default")
-		K_BINDING("MOUSE1", "_attack", "", "default")
-		K_BINDING("MOUSE2", "_altattack", "", "default")
-		K_BINDING("MWHEELDOWN", "_weapnext", "", "default")
-		K_BINDING("MWHEELUP", "_weapprev", "", "default")
-		K_BINDING("r", "_reload", "", "default")
-		K_BINDING("f", "_activate", "", "default")
-		K_BINDING("MOUSE4", "_activate", "", "default")
-		K_BINDING("b", "useWeapon weapon_binocs", "", "default")
-		K_BINDING("g", "_usevehicle", "", "default")
-		K_BINDING("HOME", "_vehicleCamera", "", "default")
-		K_BINDING("CAPSLOCK", "_tophat", "", "default")
-		K_BINDING("h", "_modeswitch", "", "default")
-		K_BINDING("-", "_stroyDown", "", "default")
-		K_BINDING("+", "_stroyUp", "", "default")
-		K_BINDING("F1", "vote y", "", "default")
-		K_BINDING("F2", "vote n", "", "default")
-		K_BINDING(",", "zoomOutCommandMap", "", "default")
-		K_BINDING(".", "zoomInCommandMap", "", "default")
-		K_BINDING("o", "_showWayPoints", "", "default")
-		K_BINDING("p", "toggle g_showWayPoints 0 1", "", "default")
-		K_BINDING("ALT", "_showFireTeam", "", "default")
-		K_BINDING("t", "clientMessageMode", "", "default")
-		K_BINDING("y", "clientMessageMode 1", "", "default")
-		K_BINDING("u", "clientMessageMode 2", "", "default")
-		K_BINDING("v", "_context", "", "default")
-		K_BINDING("MOUSE3", "_quickchat", "", "default")
-		K_BINDING("F3", "_ready", "", "default")
-		K_BINDING("F4", "_showScores", "", "default")
-		K_BINDING("TAB", "_showScores", "", "default")
-		K_BINDING("m", "_taskmenu", "", "default")
-		K_BINDING("n", "_commandmap", "", "default")
-		K_BINDING("l", "_limbomenu", "", "default")
-		K_BINDING("k", "_votemenu", "", "default")
-		K_BINDING("KP_ENTER", "_fireteam", "", "default")
-		K_BINDING("z", "_fireteamVoice", "", "default")
-		K_BINDING("i", "_fireteamVoice", "", "default")
-		K_BINDING("F5", "clientTeam gdf", "", "default")
-		K_BINDING("F6", "clientTeam strogg", "", "default")
-		K_BINDING("F7", "clientTeam spectator", "", "default")
-		K_BINDING("F11", "screenshot", "", "default")
-		K_BINDING("F12", "toggleNetDemo", "", "default")
-		K_BINDING("TAB", "_menuNavForward", "", "menu")
-		K_BINDING("TAB", "_menuNavBackward", "SHIFT", "menu")
-		K_BINDING("TAB", "_menuNavBackward", "RIGHTSHIFT", "menu")
-		K_BINDING("ESCAPE", "_menuCancel", "", "menu")
-		K_BINDING("ENTER", "_menuAccept", "", "menu")
-		K_BINDING("ENTER", "_menuNewline", "CTRL", "menu")
-		K_BINDING("ENTER", "_menuNewline", "RIGHTCTRL", "menu")
-		K_BINDING("KP_ENTER", "_menuAccept", "", "menu")
-		K_BINDING("ESCAPE", "_menuCancel", "", "bindmenu")
-		;
-#undef K_BINDING
-	cmdSystem->BufferCommandText(CMD_EXEC_APPEND, etqwbinds);
+	idStr etqwbinds;
+	if(!DefaultBindsFilePath(etqwbinds, NULL))
+		DefaultBindsFilePath(etqwbinds, "english");
+	etqwbinds.Insert("exec ", 0);
+	etqwbinds.Append("\n");
+	cmdSystem->BufferCommandText(CMD_EXEC_APPEND, etqwbinds.c_str());
 }
 
 //karin: must after idDeclManager::Init

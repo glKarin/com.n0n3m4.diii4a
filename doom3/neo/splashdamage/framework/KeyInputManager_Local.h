@@ -54,6 +54,7 @@ private:
 	bool					IsDefault(sdBindContext *context) const {
 		return defaultContext == context || !context;
 	}
+	bool					DefaultBindsFilePath(idStr &ret, const char *lang = NULL) const;
 
 private:
 	idList<sdBindContext *>	bindContexts;
