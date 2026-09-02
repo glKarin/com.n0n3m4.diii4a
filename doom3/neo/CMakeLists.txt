@@ -196,6 +196,7 @@ include_directories("mod/quake4")
 
 option(HARDQORE								"Build the hardqore game code" 												ON)
 option(Q4XBASE								"Build the q4xbase game code" 												ON)
+option(HAZZZZZY								"Build the chinese subtitle game code" 										ON)
 endif()
 
 # Prey 2006
@@ -2057,6 +2058,9 @@ endif()
 if(Q4XBASE)
 	message(STATUS "Build q4xbase")
 endif()
+if(HAZZZZZY)
+	message(STATUS "Build hazzzzzy")
+endif()
 # Prey
 if(HUMANHEAD)
 	message(STATUS "Build humanhead core")
@@ -2873,6 +2877,48 @@ if(Q4XBASE)
 
 	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
 		install(TARGETS q4xbase
+				RUNTIME DESTINATION "${bindir}"
+				LIBRARY DESTINATION "${libdir}"
+				ARCHIVE DESTINATION "${libdir}"
+		)
+	endif()
+endif()
+
+if(HAZZZZZY)
+	# hazzzzzy game source
+	set(src_hazzzzzy ${base_q4game_src})
+	set(hazzzzzy_game_src
+			Subtitles.cpp
+	)
+	list(APPEND src_hazzzzzy ${hazzzzzy_game_src})
+	set_src_dir(src_hazzzzzy "${QUAKE4_MOD_DIR}/hazzzzzy" ${src_hazzzzzy})
+	add_globbed_headers(src_hazzzzzy "${QUAKE4_MOD_DIR}/hazzzzzy")
+
+	add_library(hazzzzzy SHARED ${src_hazzzzzy})
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_hazzzzzy})
+	#set_target_properties(hazzzzzy PROPERTIES PREFIX "")
+	set(hazzzzzy_compile_definitions "GAME_DLL;_RAVEN;_QUAKE4;_HAZZZZZY")
+	if(Q4_MOD_FULL_BODY_AWARENESS)
+		set(hazzzzzy_compile_definitions "${hazzzzzy_compile_definitions};_MOD_FULL_BODY_AWARENESS")
+		set(hazzzzzy_compile_definitions "${hazzzzzy_compile_definitions};_MOD_VIEW_BODY")
+		message(STATUS "Build hazzzzzy full body awareness mod support")
+	endif()
+	if(Q4_MOD_BOTS)
+		set(hazzzzzy_compile_definitions "${hazzzzzy_compile_definitions};MOD_BOTS;_MOD_BOTS_ASSETS")
+		message(STATUS "Build hazzzzzy bots mod support")
+	endif()
+	set_target_properties(hazzzzzy PROPERTIES COMPILE_DEFINITIONS "${hazzzzzy_compile_definitions}")
+	target_include_directories(hazzzzzy PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/${QUAKE4_MOD_DIR}/hazzzzzy")
+	set_target_properties(hazzzzzy PROPERTIES LINK_FLAGS "${ldflags}")
+	set_target_properties(hazzzzzy PROPERTIES INSTALL_NAME_DIR "@executable_path")
+	target_link_libraries(hazzzzzy idlib_raven)
+	target_include_directories(hazzzzzy PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/raven")
+	if(NOT MSVC)
+		target_compile_options(hazzzzzy PRIVATE -Wno-format-security)
+	endif()
+
+	if(NOT APPLE AND NOT WIN32 AND NOT ANDROID)
+		install(TARGETS hazzzzzy
 				RUNTIME DESTINATION "${bindir}"
 				LIBRARY DESTINATION "${libdir}"
 				ARCHIVE DESTINATION "${libdir}"

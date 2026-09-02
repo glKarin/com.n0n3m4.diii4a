@@ -38,6 +38,7 @@ public enum Game
     QUAKE4_BASE(Q3EGameConstants.GAME_QUAKE4, "q4base", "", "q4game", "", "q4base", false, R.string.quake_iv_q4base),
     QUAKE4_AWAKENING(Q3EGameConstants.GAME_QUAKE4, "q4xbase", "q4xbase", "q4xbase",  "", "q4xbase", true, R.string.awakening),
     QUAKE4_HARDQORE(Q3EGameConstants.GAME_QUAKE4, "hardqore", "hardqore", "hardqore",  "", "hardqore", true, R.string.hardqore),
+    QUAKE4_HAZZZZZY(Q3EGameConstants.GAME_QUAKE4, "hazzzzzy", "hazzzzzy", "hazzzzzy",  "", "hazzzzzy", true, R.string.hazzzzzy),
 
     // Prey(2006)
     PREY_BASE(Q3EGameConstants.GAME_PREY, "preybase", "", "preygame", "", "preybase", false, R.string.prey_preybase),

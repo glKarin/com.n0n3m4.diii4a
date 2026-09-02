@@ -33,6 +33,7 @@ public enum GameResourceUrl
     QUAKE4_BASE(Q3EGameConstants.GAME_QUAKE4, "q4base", "", "https://store.steampowered.com/app/2210/Quake_4/", 2),
     QUAKE4_AWAKENING(Q3EGameConstants.GAME_QUAKE4, "q4xbase", "", "https://www.moddb.com/mods/quake-4-the-awakening-complete-edition", 3),
     QUAKE4_HARDQORE(Q3EGameConstants.GAME_QUAKE4, "hardqore", "", "https://www.moddb.com/mods/quake-4-hardqore", 3),
+    QUAKE4_HAZZZZZY(Q3EGameConstants.GAME_QUAKE4, "hazzzzzy", "", "https://github.com/hazzzzzy/Quake4-Translate-Subtitle", 1),
 
     // Prey(2006)
 
