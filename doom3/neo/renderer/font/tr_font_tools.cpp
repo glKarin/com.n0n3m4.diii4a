@@ -78,7 +78,7 @@ static void R_Font_ConvertToQ4Glyph(const glyphInfoExport_t &d3, q4_glyphInfoExp
     q4.imageWidth = (float)d3.imageWidth;
     q4.imageHeight = (float)d3.imageHeight;
     q4.xSkip = (float)d3.xSkip;
-    q4.pitch = (float)d3.pitch;
+    q4.pitch = 0.0f; //(float)d3.pitch;
     q4.top = (float)d3.top;
     q4.s = (float)d3.s;
     q4.t = (float)d3.t;
@@ -676,6 +676,8 @@ bool R_ExportTrueTypeFont(const char *fontPath, const char *fontType, const char
 {
     if(fontType && !fontType[0])
         fontType = NULL;
+    else if (!idStr::Icmpn(fontType, "fonts/", 6))
+        fontType += 6;
     if(!language || !language[0])
         language = "english";
     if(width <= 256)

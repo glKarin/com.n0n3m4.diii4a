@@ -89,17 +89,6 @@ idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_INIT |
 
 idList<fontInfoEx_t> idDeviceContext::fonts;
 
-#ifdef _RAVEN //k: I am not find Quake4 default font named "", so using cvar to control
-const char	*harm_gui_defaultFontArgs[]	= {
-	"chain", 
-	"lowpixel", 
-	"marine", 
-	"profont", 
-	"r_strogg", 
-	"strogg", 
-	NULL };
-static idCVar harm_gui_defaultFont("harm_gui_defaultFont", harm_gui_defaultFontArgs[0], CVAR_ARCHIVE | CVAR_GUI, "Setup default GUI font. It will be available in next running.", harm_gui_defaultFontArgs, idCmdSystem::ArgCompletion_String<harm_gui_defaultFontArgs>);
-#endif
 int idDeviceContext::FindFont(const char *name)
 {
 	int c = fonts.Num();
@@ -112,16 +101,6 @@ int idDeviceContext::FindFont(const char *name)
 
 	// If the font not found, try to register it
 	idStr fileName = name;
-#ifdef _RAVEN //k: Quake4 default font
-	if(!idStr::Icmp(fileName, "fonts"))
-	{
-		fileName = "fonts/";
-		const char *defFontName = harm_gui_defaultFont.GetString();
-		if(!defFontName || !defFontName[0])
-			defFontName = harm_gui_defaultFontArgs[0];
-		fileName += defFontName;
-	}
-#endif
 	fileName.Replace("fonts", va("fonts/%s", fontLang.c_str()));
 
 	fontInfoEx_t fontInfo;
@@ -205,7 +184,10 @@ int idDeviceContext::FindFont(const char *name)
 		{
 			const fontInfoEx_t *f = &fonts[index];
 			if(f->fontInfoSmall.numIndexes > 0 || f->fontInfoMedium.numIndexes > 0 || f->fontInfoLarge.numIndexes > 0)
+			{
 				_hasWideCharFont = true;
+				common->Printf("Wide character font found.\n");
+			}
 		}
 #endif
 		return index;
@@ -227,7 +209,11 @@ void idDeviceContext::SetupFonts()
 	}
 
 	// Default font has to be added first
+#ifdef _RAVEN //default font is chain in quake4
+	FindFont("fonts/chain");
+#else
 	FindFont("fonts");
+#endif
 }
 
 void idDeviceContext::SetFont(int num)
@@ -983,11 +969,37 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				count += 2;
 				continue;
 			} else {
+#ifdef _RAVEN //karin: 2025 Q4D yy = y - useScale * font->horiBearingY - 1.0f;
+				float yadj = y - useScale * glyph->top /*- 1.0f*/;
+				if ( style == 1 ) {
+					idVec4 shadowColor( 0.0f, 0.0f, 0.0f, newColor.w );
+					renderSystem->SetColor( shadowColor );
+					PaintChar(x + 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					renderSystem->SetColor( newColor );
+				}
+				else if ( style == 2 )
+				{
+					idVec4 shadowColor;
+					if ( newColor.x >= 0.2 || newColor.y >= 0.2 || newColor.z >= 0.2 )
+					{
+						shadowColor.Set(0.0f, 0.0f, 0.0f, newColor.w);
+					}
+					else
+					{
+						shadowColor.Set(1.0f, 1.0f, 1.0f, newColor.w);
+					}
+					renderSystem->SetColor( shadowColor );
+					PaintChar(x + 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(x - 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(x - 1.0f, yadj - 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(x + 1.0f, yadj - 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					renderSystem->SetColor( newColor );
+				}
+				PaintChar(x, yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+#else
 				float yadj = useScale * glyph->top;
-#ifdef _RAVENxxx //karin: 2025 Q4D y - (useScale * font->horiBearingY - 1.0)
-				yadj = yadj - 1.0f;
-#endif
 				PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+#endif
 
 				if (cursor == count) {
 					DrawEditCursor(x, y, scale);
@@ -1043,11 +1055,37 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
                     charIndex++; //karin: skip color value character
                     continue;
                 } else {
+#ifdef _RAVEN //karin: 2025 Q4D yy = y - useScale * font->horiBearingY - 1.0f;
+					float yadj = y - useScale * glyph->top /*- 1.0f*/;
+					if ( style == 1 ) {
+						idVec4 shadowColor( 0.0f, 0.0f, 0.0f, newColor.w );
+						renderSystem->SetColor( shadowColor );
+						PaintChar(x + 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						renderSystem->SetColor( newColor );
+					}
+					else if ( style == 2 )
+					{
+						idVec4 shadowColor;
+						if ( newColor.x >= 0.2 || newColor.y >= 0.2 || newColor.z >= 0.2 )
+						{
+							shadowColor.Set(0.0f, 0.0f, 0.0f, newColor.w);
+						}
+						else
+						{
+							shadowColor.Set(1.0f, 1.0f, 1.0f, newColor.w);
+						}
+						renderSystem->SetColor( shadowColor );
+						PaintChar(x + 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(x - 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(x - 1.0f, yadj - 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(x + 1.0f, yadj - 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						renderSystem->SetColor( newColor );
+					}
+					PaintChar(x,yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+#else
                     float yadj = useScale * glyph->top;
-#ifdef _RAVENxxx //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
-                    yadj = yadj + 1.0f;
-#endif
                     PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+#endif
 
                     if( cursor == charIndex - 1 ) {
                         DrawEditCursor( x, y, scale );
@@ -1369,11 +1407,13 @@ void idDeviceContext::DrawEditCursor(float x, float y, float scale)
 	SetFontByScale(scale);
 	float useScale = scale * useFont->glyphScale;
 	const glyphInfo_t *glyph2 = &useFont->glyphs[(overStrikeMode) ? '_' : '|'];
+#ifdef _RAVEN //karin: 2025 Q4D v7 = y - (scalea * horiBearingY - 1.0);
+	float	yadj = y - (useScale * glyph2->top /*- 1.0f*/);
+	PaintChar(x, yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
+#else
 	float	yadj = useScale * glyph2->top;
-#ifdef _RAVENxxx //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
-    yadj = yadj + 1.0f;
-#endif
 	PaintChar(x, y - yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
+#endif
 }
 
 #ifdef _RAVEN //karin: gui drawtext add spacing and style
