@@ -42,7 +42,6 @@ const float gaussian[R + 1] = float[](0.153170, 0.144893, 0.122649, 0.092902, 0.
 
 // (1, 0) or (0, 1)
 uniform vec2 u_axis;
-ivec2 axis = ivec2(u_axis);
 
 float unpackZ(vec2 packedZ) {
 	return packedZ.x * (256.0 / 257.0) + packedZ.y * (1.0 / 257.0);
@@ -51,6 +50,8 @@ float unpackZ(vec2 packedZ) {
 uniform float u_edgeSharpness;
 
 void main() {
+	ivec2 axis = ivec2(u_axis);
+
 	ivec2 ssC = ivec2(gl_FragCoord.xy);
 
 	vec4 temp = texelFetch(u_source, ssC, 0);

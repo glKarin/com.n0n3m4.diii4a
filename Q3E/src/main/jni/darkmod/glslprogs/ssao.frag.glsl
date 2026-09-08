@@ -1,8 +1,8 @@
 #version 320 es
+//#extension GL_ARB_gpu_shader5 : enable
 
 precision highp float;
 precision highp int;
-#extension GL_ARB_gpu_shader5 : enable
 
 /**
  Based on the SAO algorithm by Morgan McGuire and Michael Mara, NVIDIA Research
@@ -37,13 +37,10 @@ uniform block {
 	mat4 u_projectionMatrix;
 };
 
-float nearZ = -0.5 * u_projectionMatrix[3][2];
-vec2 minusTwohalfTanFov = -2.0 * vec2(1.0 / u_projectionMatrix[0][0], 1.0 / u_projectionMatrix[1][1]);
-vec2 invTextureSize = vec2(1.0, 1.0) / vec2(textureSize(u_depthTexture, 0));
+//float nearZ = -0.5 * u_projectionMatrix[3][2];
 
 // The height in pixels of an object of height 1 world unit at distance z = -1 world unit.
 // Used to scale the radius of the sampling disc appropriately
-float projectionScale = float(textureSize(u_depthTexture, 0).y) * (0.5 * u_projectionMatrix[1][1]);
 const float tdmToMetres = 0.02309;
 
 vec3 currentTexelViewPos() {
@@ -60,8 +57,8 @@ vec3 deriveViewSpaceNormal(vec3 viewPos) {
 /** Returns a unit vector and a screen-space radius for the tap on a unit disk (the caller should scale by the actual disk radius) */
 vec2 tapLocation(int sampleNumber, float spinAngle, out float ssR){
 	// Radius relative to ssR
-	float alpha = float(sampleNumber + 0.5) * (1.0 / u_numSamples);
-	float angle = alpha * (u_numSpiralTurns * 6.28) + spinAngle;
+	float alpha = float(float(sampleNumber) + 0.5) * (1.0 / float(u_numSamples));
+	float angle = alpha * (float(u_numSpiralTurns) * 6.28) + spinAngle;
 
 	ssR = alpha;
 	return vec2(cos(angle), sin(angle));
@@ -78,6 +75,9 @@ uniform int u_maxMipLevel;
 
 /** Read the camera-space position of the point at screen-space pixel ssP + unitOffset * ssR.  Assumes length(unitOffset) == 1 */
 vec3 getOffsetPosition(ivec2 ssC, vec2 unitOffset, float ssR) {
+	vec2 minusTwohalfTanFov = -2.0 * vec2(1.0 / u_projectionMatrix[0][0], 1.0 / u_projectionMatrix[1][1]);
+	vec2 invTextureSize = vec2(1.0, 1.0) / vec2(textureSize(u_depthTexture, 0));
+
 	// Derivation:
 	//  mipLevel = floor(log(ssR / MAX_OFFSET));
 	// #   ifdef GL_ARB_gpu_shader5
@@ -112,9 +112,10 @@ vec3 getOffsetPosition(ivec2 ssC, vec2 unitOffset, float ssR) {
 
     Four versions of the falloff function are implemented below
 */
-float radiusInMetres = u_sampleRadius * tdmToMetres;
-float radiusSqr = radiusInMetres * radiusInMetres;
 float sampleAO(in ivec2 ssC, in vec3 C, in vec3 n_C, in float ssDiskRadius, in int tapIndex, in float randomPatternRotationAngle) {
+	float radiusInMetres = u_sampleRadius * tdmToMetres;
+	float radiusSqr = radiusInMetres * radiusInMetres;
+
 	// Offset on the unit disk, spun for this pixel
 	float ssR;
 	vec2 unitOffset = tapLocation(tapIndex, randomPatternRotationAngle, ssR);
@@ -147,10 +148,10 @@ float sampleAO(in ivec2 ssC, in vec3 C, in vec3 n_C, in float ssDiskRadius, in i
 	// return 2.0 * float(vv < radiusSqr) * max(vn - u_depthBias, 0.0);
 }
 
-// we don't have an actual far Z, but this value is a "cutoff" used for packing the Z values for the edge-aware blur filter
-const float farZ = -1500.0 * tdmToMetres;
-
 vec2 packViewSpaceZ(float viewSpaceZ) {
+	// we don't have an actual far Z, but this value is a "cutoff" used for packing the Z values for the edge-aware blur filter
+	const float farZ = -1500.0 * tdmToMetres;
+
 	float compressedZ = clamp(viewSpaceZ * (1.0 / farZ), 0.0, 1.0);
 	float temp = floor(compressedZ * 256.0);
 	float integerPart = temp * (1.0 / 256.0);
@@ -159,6 +160,10 @@ vec2 packViewSpaceZ(float viewSpaceZ) {
 }
 
 void main() {
+	float projectionScale = float(textureSize(u_depthTexture, 0).y) * (0.5 * u_projectionMatrix[1][1]);
+	float radiusInMetres = u_sampleRadius * tdmToMetres;
+	float radiusSqr = radiusInMetres * radiusInMetres;
+
 	ivec2 screenPos = ivec2(gl_FragCoord.xy);
 	vec3 position = currentTexelViewPos();
 
@@ -169,7 +174,7 @@ void main() {
 
 	vec3 normal = deriveViewSpaceNormal(position);
 	// "random" rotation factor from a hash function proposed by the AlchemyAO HPG12 paper
-	float randomPatternRotationAngle = mod(3 * screenPos.x ^ screenPos.y + screenPos.x * screenPos.y, 3.14159);
+	float randomPatternRotationAngle = mod(float(3 * screenPos.x ^ screenPos.y + screenPos.x * screenPos.y), 3.14159);
 	// calculate screen-space sample radius from view space radius
 	// note: factor 0.5625 is just an adjustment to keep radius values consistent after a math change
 	float screenDiskRadius = -0.5625 * projectionScale * radiusInMetres / position.z;
@@ -179,15 +184,15 @@ void main() {
 		sum += sampleAO(screenPos, position, normal, screenDiskRadius, i, randomPatternRotationAngle);
 	}
 
-	float occlusion = max(u_baseValue, 1.0 - sum * u_intensityDivR6 * (2.5 / u_numSamples));
+	float occlusion = max(u_baseValue, 1.0 - sum * u_intensityDivR6 * (2.5 / float(u_numSamples)));
 
 	// Bilateral box-filter over a quad for free, respecting depth edges
 	// (the difference that this makes is subtle)
 	if (abs(dFdx(position.z)) < 0.02) {
-		occlusion -= dFdx(occlusion) * ((screenPos.x & 1) - 0.5);
+		occlusion -= dFdx(occlusion) * (float(screenPos.x & 1) - 0.5);
 	}
 	if (abs(dFdy(position.z)) < 0.02) {
-		occlusion -= dFdy(occlusion) * ((screenPos.y & 1) - 0.5);
+		occlusion -= dFdy(occlusion) * (float(screenPos.y & 1) - 0.5);
 	}
 
 	occlusionAndDepth.r = occlusion;
