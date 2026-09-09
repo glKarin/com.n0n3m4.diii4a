@@ -651,9 +651,15 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
                     mh = gi->height;
                 }
 
+#ifdef _RAVEN
                 if (mw < gi->horiAdvance) { // xSkip
                     mw = gi->horiAdvance; // xSkip
                 }
+#else
+                if (mw < gi->xSkip) {
+                    mw = gi->xSkip;
+                }
+#endif
             }
         }
 #endif
@@ -671,9 +677,15 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 				mh = outFont->glyphs[i].height;
 			}
 
+#ifdef _RAVEN
 			if (mw < outFont->glyphs[i].horiAdvance) { // xSkip
 				mw = outFont->glyphs[i].horiAdvance; // xSkip
 			}
+#else
+			if (mw < outFont->glyphs[i].xSkip) {
+				mw = outFont->glyphs[i].xSkip;
+			}
+#endif
 		}
 
 		if (fontCount == 0) {
