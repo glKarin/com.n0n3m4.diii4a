@@ -953,7 +953,11 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				}
 
 				if (cursor == count || cursor == count+1) {
+#ifdef _RAVEN
+					float partialSkip = ((glyph->horiAdvance * useScale) + adjust) / 5.0f; // xSkip
+#else
 					float partialSkip = ((glyph->xSkip * useScale) + adjust) / 5.0f;
+#endif
 
 					if (cursor == count) {
 						partialSkip *= 2.0f;
@@ -970,7 +974,7 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				continue;
 			} else {
 #ifdef _RAVEN //karin: 2025 Q4D yy = y - useScale * font->horiBearingY - 1.0f;
-				float yadj = y - useScale * glyph->top /*- 1.0f*/;
+				float yadj = y - useScale * glyph->horiBearingY /*- 1.0f*/; // top
 				if ( style == 1 ) {
 					idVec4 shadowColor( 0.0f, 0.0f, 0.0f, newColor.w );
 					renderSystem->SetColor( shadowColor );
@@ -1006,7 +1010,7 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				}
 
 #ifdef _RAVEN // add adjust spacing
-				x += (glyph->xSkip + adjust) * useScale;
+				x += (glyph->horiAdvance + adjust) * useScale; // xSkip
 #else
 				x += (glyph->xSkip * useScale) + adjust;
 #endif
@@ -1041,7 +1045,11 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
                         newColor[3] = color[3];
                     }
                     if( cursor == charIndex - 1 || cursor == charIndex ) {
+#ifdef _RAVEN
+                        float partialSkip = ((glyph->horiAdvance * useScale) + adjust) / 5.0f; // xSkip
+#else
                         float partialSkip = ((glyph->xSkip * useScale) + adjust) / 5.0f;
+#endif
 
                         if (cursor == count) {
                             partialSkip *= 2.0f;
@@ -1056,7 +1064,7 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
                     continue;
                 } else {
 #ifdef _RAVEN //karin: 2025 Q4D yy = y - useScale * font->horiBearingY - 1.0f;
-					float yadj = y - useScale * glyph->top /*- 1.0f*/;
+					float yadj = y - useScale * glyph->horiBearingY /*- 1.0f*/; // top
 					if ( style == 1 ) {
 						idVec4 shadowColor( 0.0f, 0.0f, 0.0f, newColor.w );
 						renderSystem->SetColor( shadowColor );
@@ -1092,7 +1100,7 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
                     }
 
 #ifdef _RAVEN // add adjust spacing
-                    x += (glyph->xSkip + adjust) * useScale;
+                    x += (glyph->horiAdvance + adjust) * useScale; // xSkip
 #else
                     x += (glyph->xSkip * useScale) + adjust;
 #endif
@@ -1134,7 +1142,7 @@ int idDeviceContext::CharWidth(const char c, float scale)
 	useScale = scale * font->glyphScale;
 	glyph = &font->glyphs[(const unsigned char)c];
 #ifdef _RAVEN // add adjust spacing
-	return idMath::FtoiFast((adjust + glyph->xSkip) * useScale);
+	return idMath::FtoiFast((adjust + glyph->horiAdvance) * useScale); // xSkip
 #else
 	return idMath::FtoiFast(glyph->xSkip * useScale);
 #endif
@@ -1168,7 +1176,7 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 				i++;
 			} else {
 #ifdef _RAVEN // add adjust spacing
-				width += glyphs[((const unsigned char *)text)[i]].xSkip + adjust;
+				width += glyphs[((const unsigned char *)text)[i]].horiAdvance + adjust; // xSkip
 #else
 				width += glyphs[((const unsigned char *)text)[i]].xSkip;
 #endif
@@ -1180,7 +1188,7 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 				i++;
 			} else {
 #ifdef _RAVEN // add adjust spacing
-				width += glyphs[((const unsigned char *)text)[i]].xSkip + adjust;
+				width += glyphs[((const unsigned char *)text)[i]].horiAdvance + adjust; // xSkip
 #else
 				width += glyphs[((const unsigned char *)text)[i]].xSkip;
 #endif
@@ -1408,7 +1416,7 @@ void idDeviceContext::DrawEditCursor(float x, float y, float scale)
 	float useScale = scale * useFont->glyphScale;
 	const glyphInfo_t *glyph2 = &useFont->glyphs[(overStrikeMode) ? '_' : '|'];
 #ifdef _RAVEN //karin: 2025 Q4D v7 = y - (scalea * horiBearingY - 1.0);
-	float	yadj = y - (useScale * glyph2->top /*- 1.0f*/);
+	float	yadj = y - (useScale * glyph2->horiBearingY /*- 1.0f*/); // top
 	PaintChar(x, yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
 #else
 	float	yadj = useScale * glyph2->top;
@@ -1579,7 +1587,11 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 
 		// update the width
 		if (*(buff + len - 1) != C_COLOR_ESCAPE && (len <= 1 || *(buff + len - 2) != C_COLOR_ESCAPE)) {
+#ifdef _RAVEN
+			textWidth += textScale * useFont->glyphScale * useFont->glyphs[(const unsigned char)*(buff + len - 1)].horiAdvance; // xSkip
+#else
 			textWidth += textScale * useFont->glyphScale * useFont->glyphs[(const unsigned char)*(buff + len - 1)].xSkip;
+#endif
 		}
 	}
 #ifdef _WCHAR_LANG

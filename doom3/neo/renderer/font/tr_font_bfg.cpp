@@ -1,7 +1,11 @@
 #include "../../idlib/precompiled.h"
 #pragma hdrstop
 
+#ifdef _RAVEN
+#define FONT_SCALE(x, scale) ((float)(x) * scale)
+#else
 #define FONT_SCALE(x, scale) (int)((float)(x) * scale)
+#endif
 
 ID_INLINE static void ReadBig(idFile *file, int &out)
 {
@@ -127,6 +131,15 @@ static void R_Font_FreeD3BFGFont(d3bfg_fontInfo_t &fontInfo)
 static void R_Font_ConvertD3BFGGlyph(const d3bfg_fontInfo_t &fontInfo, const d3bfg_glyphInfo_t *d3bfg_glyph, glyphInfo_t *glyph, int size, int imageWidth, int imageHeight)
 {
     float scale = 1.0f / (float)size;
+#ifdef _RAVEN
+	glyph->width = FONT_SCALE(d3bfg_glyph->width, scale);
+	glyph->height = FONT_SCALE(d3bfg_glyph->height, scale);
+	glyph->horiBearingY = FONT_SCALE(d3bfg_glyph->top, scale); // top
+	glyph->horiBearingX = FONT_SCALE(d3bfg_glyph->left, scale); // pitch
+	glyph->horiAdvance = FONT_SCALE(d3bfg_glyph->xSkip, scale); // xSkip
+	glyph->imageWidth = (int)glyph->width;
+	glyph->imageHeight = (int)glyph->height;
+#else
     glyph->height = FONT_SCALE(d3bfg_glyph->height, scale);
     glyph->top = FONT_SCALE(d3bfg_glyph->top, scale);
     glyph->bottom = glyph->top - glyph->height;
@@ -134,6 +147,7 @@ static void R_Font_ConvertD3BFGGlyph(const d3bfg_fontInfo_t &fontInfo, const d3b
     glyph->xSkip = FONT_SCALE(d3bfg_glyph->xSkip, scale);
     glyph->imageWidth = FONT_SCALE(d3bfg_glyph->width, scale);
     glyph->imageHeight = FONT_SCALE(d3bfg_glyph->height, scale);
+#endif
     glyph->glyph = fontInfo.material;
 
     float invMaterialWidth = 1.0f / (float)imageWidth; //fontInfo.material->GetImageWidth();
@@ -154,10 +168,17 @@ static void R_Font_ConvertD3BFGFont(const d3bfg_fontInfo_t &fontInfo, fontInfoEx
 
     memset(&font, 0, sizeof(font));
 
-    font.maxWidthSmall = int((float)fontInfo.oldInfo[0].maxWidth / 4.0f);
-    font.maxHeightSmall = int((float)fontInfo.oldInfo[0].maxHeight / 4.0f);
-    font.maxWidthMedium = int((float)fontInfo.oldInfo[1].maxWidth / 2.0f);
-    font.maxHeightMedium = int((float)fontInfo.oldInfo[1].maxHeight / 2.0f);
+#ifdef _RAVEN
+	font.maxWidthSmall = fontInfo.oldInfo[0].maxWidth / 4.0f;
+	font.maxHeightSmall = fontInfo.oldInfo[0].maxHeight / 4.0f;
+	font.maxWidthMedium = fontInfo.oldInfo[1].maxWidth / 2.0f;
+	font.maxHeightMedium = fontInfo.oldInfo[1].maxHeight / 2.0f;
+#else
+    font.maxWidthSmall = int(fontInfo.oldInfo[0].maxWidth / 4.0f);
+    font.maxHeightSmall = int(fontInfo.oldInfo[0].maxHeight / 4.0f);
+    font.maxWidthMedium = int((fontInfo.oldInfo[1].maxWidth / 2.0f);
+    font.maxHeightMedium = int(fontInfo.oldInfo[1].maxHeight / 2.0f);
+#endif
     font.maxWidthLarge = fontInfo.oldInfo[2].maxWidth;
     font.maxHeightLarge = fontInfo.oldInfo[2].maxHeight;
 
@@ -238,6 +259,20 @@ static void R_Font_ConvertD3BFGFont(const d3bfg_fontInfo_t &fontInfo, fontInfoEx
 		//printf("EEEEEEEEE %f %f %f\n",font.fontInfoSmall.glyphScale, font.fontInfoMedium.glyphScale, font.fontInfoLarge.glyphScale);
 	}
 
+#ifdef _RAVEN
+	font.fontInfoSmall.fontHeight = fontInfo.oldInfo[0].maxHeight / 4.0f;
+	font.fontInfoMedium.fontHeight = fontInfo.oldInfo[1].maxHeight / 2.0f;
+	font.fontInfoLarge.fontHeight = fontInfo.oldInfo[2].maxHeight;
+	font.fontInfoSmall.ascender = (float)fontInfo.ascender / 4.0f;
+	font.fontInfoMedium.ascender = (float)fontInfo.ascender / 2.0f;
+	font.fontInfoLarge.ascender = (float)fontInfo.ascender;
+	font.fontInfoSmall.descender = (float)fontInfo.descender / 4.0f;
+	font.fontInfoMedium.descender = (float)fontInfo.descender / 2.0f;
+	font.fontInfoLarge.descender = (float)fontInfo.descender;
+	font.fontInfoSmall.pointSize = (float)fontInfo.pointSize / 4.0f;
+	font.fontInfoMedium.pointSize = (float)fontInfo.pointSize / 2.0f;
+	font.fontInfoLarge.pointSize = (float)fontInfo.pointSize;
+#endif
 }
 
 static bool R_Font_LoadOldGlyphData( const char* filename, oldGlyphInfo_t glyphInfo[GLYPHS_PER_FONT] )

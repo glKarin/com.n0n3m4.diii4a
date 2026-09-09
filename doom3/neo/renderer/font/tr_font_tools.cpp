@@ -14,11 +14,19 @@
 typedef uint32_t fontChar_t;
 
 typedef struct {
+#ifdef _RAVEN
+    float			    width;					// number of pixels wide
+    float			    height;					// number of scan lines
+    float			    horiAdvance;			// number of pixels to advance to the next char // xSkip of DOOM3
+    float			    horiBearingX;			// x offset into space to render glyph // pitch of DOOM3
+    float			    horiBearingY;			// y offset // top of DOOM3
+#else
     int					height;			// number of scan lines
     int					top;			// top of glyph in buffer
     int					bottom;			// bottom of glyph in buffer
     int					pitch;			// width for copying
     int					xSkip;			// x adjustment
+#endif
     int					imageWidth;		// width of actual image
     int					imageHeight;	// height of actual image
     float				s;				// x offset in image where glyph starts
@@ -33,6 +41,12 @@ typedef struct {
     glyphInfoExport_t	glyphs[GLYPHS_PER_FONT];
     float				glyphScale;
     char				name[64];
+#ifdef _RAVEN
+    float			    pointSize;
+    float			    fontHeight;				// max height of font
+    float			    ascender;
+    float			    descender;
+#endif
 } fontInfoExport_t;
 
 typedef struct {
@@ -52,11 +66,11 @@ typedef struct {
 #ifdef _RAVEN //k: quake4 font
 #pragma pack( push, 1 )
 typedef struct {
-    float				imageWidth;		// width of actual image
-    float				imageHeight;	// height of actual image
-    float				xSkip;			// x adjustment
-    float				pitch;			// width for copying
-    float				top;			// top of glyph in buffer
+    float			    width;			// number of pixels wide
+    float			    height;			// number of scan lines
+    float			    horiAdvance;	// number of pixels to advance to the next char // xSkip of DOOM3
+    float			    horiBearingX;	// x offset into space to render glyph // pitch of DOOM3
+    float			    horiBearingY;	// y offset // top of DOOM3
     float				s;				// x offset in image where glyph starts
     float				t;				// y offset in image where glyph starts
     float				s2;
@@ -66,31 +80,31 @@ typedef struct {
 typedef struct { // sizeof == 9236, non-align
     q4_glyphInfoExport_t	glyphs[GLYPHS_PER_FONT];
     float                   pointSize;
-    float                   maxWidth;
-    float                   maxHeight;
-    float                   placeholder1; // unknown
-    float                   placeholder2; // unknown
+    float			        fontHeight;				// max height of font
+    float			        ascender;
+    float			        descender;
+    int			            placeholder;
 } q4_fontInfoExport_t;
 #pragma pack( pop )
 
 static void R_Font_ConvertToQ4Glyph(const glyphInfoExport_t &d3, q4_glyphInfoExport_t &q4)
 {
-    q4.imageWidth = (float)d3.imageWidth;
-    q4.imageHeight = (float)d3.imageHeight;
-    q4.xSkip = (float)d3.xSkip;
-    q4.pitch = 0.0f; //(float)d3.pitch;
-    q4.top = (float)d3.top;
-    q4.s = (float)d3.s;
-    q4.t = (float)d3.t;
-    q4.s2 = (float)d3.s2;
-    q4.t2 = (float)d3.t2;
+    q4.width = d3.width;
+    q4.height = d3.height;
+    q4.horiAdvance = d3.horiAdvance;
+    q4.horiBearingX = 0.0f; //d3.horiBearingX;
+    q4.horiBearingY = d3.horiBearingY;
+    q4.s = d3.s;
+    q4.t = d3.t;
+    q4.s2 = d3.s2;
+    q4.t2 = d3.t2;
 }
 
 static void R_Font_ConvertToQ4Info(const fontInfoExport_t &d3, q4_fontInfoExport_t &q4)
 {
     int i;
-    int mw = 0;
-    int mh = 0;
+    float mw = 0.0f;
+    float mh = 0.0f;
 
     for(i = 0; i < GLYPHS_PER_FONT; i++)
         R_Font_ConvertToQ4Glyph(d3.glyphs[i], q4.glyphs[i]);
@@ -100,14 +114,14 @@ static void R_Font_ConvertToQ4Info(const fontInfoExport_t &d3, q4_fontInfoExport
             mh = d3.glyphs[i].height;
         }
 
-        if (mw < d3.glyphs[i].xSkip) {
-            mw = d3.glyphs[i].xSkip;
+        if (mw < d3.glyphs[i].horiAdvance) { // xSkip
+            mw = d3.glyphs[i].horiAdvance; // xSkip
         }
     }
-    q4.maxWidth = (float)mw;
-    q4.maxHeight = (float)mh;
-    q4.placeholder1 = 0.0f;
-    q4.placeholder2 = 0.0f;
+    q4.fontHeight = mh;
+    q4.ascender = 0.0f;
+    q4.descender = 0.0f;
+    q4.placeholder = 0;
 }
 #endif
 
@@ -165,10 +179,18 @@ static FT_Bitmap *R_Font_RenderGlyph(FT_Library ftLibrary, FT_GlyphSlot glyph, g
 
         FT_Outline_Get_Bitmap(ftLibrary, &glyph->outline, bit2);
 
+#ifdef _RAVEN
+        glyphOut->width = pitch;
+        glyphOut->height = height;
+        glyphOut->imageHeight = height;
+        glyphOut->imageWidth = pitch;
+        glyphOut->horiBearingY = (glyph->metrics.horiBearingY >> 6) + 1;
+#else
         glyphOut->height = height;
         glyphOut->pitch = pitch;
         glyphOut->top = (glyph->metrics.horiBearingY >> 6) + 1;
         glyphOut->bottom = bottom;
+#endif
         return bit2;
     } else {
         //if (glyph->format != ft_glyph_format_bitmap)
@@ -191,10 +213,18 @@ static FT_Bitmap *R_Font_RenderGlyph(FT_Library ftLibrary, FT_GlyphSlot glyph, g
         bit2->num_grays = glyph->bitmap.num_grays;
         memcpy(bit2->buffer, glyph->bitmap.buffer, size);
 
+#ifdef _RAVEN
+        glyphOut->width = pitch;
+        glyphOut->height = height;
+        glyphOut->imageHeight = height;
+        glyphOut->imageWidth = pitch;
+        glyphOut->horiBearingY = (glyph->metrics.horiBearingY >> 6) + 1;
+#else
         glyphOut->height = height;
         glyphOut->pitch = pitch;
         glyphOut->top = (glyph->metrics.horiBearingY >> 6) + 1;
         glyphOut->bottom = bottom;
+#endif
 
         return bit2;
     }
@@ -224,14 +254,24 @@ static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsign
         bitmap = R_Font_RenderGlyph(ftLibrary, face->glyph, &glyph, width256);
 
         if (bitmap) {
+#ifdef _RAVEN
+            glyph.horiAdvance = (face->glyph->metrics.horiAdvance >> 6) + 1;
+#else
             glyph.xSkip = (face->glyph->metrics.horiAdvance >> 6) + 1;
+#endif
         } else {
             return NULL; // &glyph;
         }
 
+#ifdef _RAVEN
+        if (glyph.imageHeight > *maxHeight) {
+            *maxHeight = glyph.imageHeight;
+        }
+#else
         if (glyph.height > *maxHeight) {
             *maxHeight = glyph.height;
         }
+#endif
 
         if (calcHeight) {
             Mem_Free(bitmap->buffer);
@@ -248,8 +288,13 @@ static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsign
                     ;
         */
 
+#ifdef _RAVEN
+        scaled_width = glyph.width;
+        scaled_height = glyph.height;
+#else
         scaled_width = (float)glyph.pitch;
         scaled_height = (float)glyph.height;
+#endif
 
         // we need to make sure we fit
         if (*xOut + scaled_width + 1 >= width255) {
@@ -276,14 +321,24 @@ static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsign
         dst = imageOut + (*yOut * width256) + *xOut;
 
         if (bitmap->pixel_mode == ft_pixel_mode_mono) {
-            for (i = 0; i < glyph.height; i++) {
+#ifdef _RAVEN
+            for (i = 0; i < glyph.imageHeight; i++)
+#else
+            for (i = 0; i < glyph.height; i++)
+#endif
+            {
                 int j;
                 unsigned char *_src = src;
                 unsigned char *_dst = dst;
                 unsigned char mask = 0x80;
                 unsigned char val = *_src;
 
-                for (j = 0; j < glyph.pitch; j++) {
+#ifdef _RAVEN
+                for (j = 0; j < glyph.imageWidth; j++)
+#else
+                for (j = 0; j < glyph.pitch; j++)
+#endif
+                {
 
 #if 0
                     if (mask == 0x80) {
@@ -306,14 +361,28 @@ static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsign
                     _dst++;
                 }
 
+#ifdef _RAVEN
+                src += glyph.imageWidth;
+#else
                 src += glyph.pitch;
+#endif
                 dst += width256;
 
             }
         } else {
-            for (i = 0; i < glyph.height; i++) {
+#ifdef _RAVEN
+            for (i = 0; i < glyph.imageHeight; i++)
+#else
+            for (i = 0; i < glyph.height; i++)
+#endif
+            {
+#ifdef _RAVEN
+                memcpy(dst, src, glyph.imageWidth);
+                src += glyph.imageWidth;
+#else
                 memcpy(dst, src, glyph.pitch);
                 src += glyph.pitch;
+#endif
                 dst += width256;
             }
         }
@@ -323,6 +392,10 @@ static glyphInfoExport_t *R_Font_ConstructGlyphInfo(FT_Library ftLibrary, unsign
 
         glyph.imageHeight = scaled_height;
         glyph.imageWidth = scaled_width;
+#ifdef _RAVEN
+        glyph.height = scaled_height;
+        glyph.width = scaled_width;
+#endif
         glyph.s = (float)*xOut / width256;
         glyph.t = (float)*yOut / width256;
         glyph.s2 = glyph.s + (float)scaled_width / width256;

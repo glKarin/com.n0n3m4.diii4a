@@ -356,7 +356,7 @@ float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale
 {
 	const glyphInfo_t *glyph = R_Font_GetGlyphInfo(info, charCode, DEFAULT_MEASURE_CHAR);
 #ifdef _RAVEN
-    return glyph ? ((float)glyph->xSkip + adjust) * info->glyphScale * scale : (0.0f + adjust/* require??? */);
+    return glyph ? (/*(float)*/glyph->horiAdvance + adjust) * info->glyphScale * scale : (0.0f + adjust/* require??? */);
 #else
     return glyph ? (float)glyph->xSkip * info->glyphScale * scale : 0.0f;
 #endif
@@ -410,13 +410,14 @@ bool R_Font_ParseWideFont(fontInfo_t *outFont)
             {
                 glyphInfo_t *info = &outFont->glyphsTable[i];
 #ifdef _RAVEN //k: quake4 font: 9 float32 per char
-                info->imageWidth	= (int)readFloat();
-                info->imageHeight	= (int)readFloat();
-                info->xSkip		    = (int)readFloat(); // horiAdvance
-                info->pitch		    = (int)readFloat(); // horiBearingX
-                info->top			= (int)readFloat(); // horiBearingY
-                info->height		= info->top;
-                info->bottom		= 0;
+                info->width			= readFloat();
+                info->height		= readFloat();
+                info->horiAdvance	= readFloat(); // horiAdvance/xSkip
+                info->horiBearingX	= readFloat(); // horiBearingX/pitch
+                info->horiBearingY	= readFloat(); // horiBearingY/top
+                info->height		= info->horiBearingY; // top
+                info->imageWidth	= (int)info->width;
+                info->imageHeight	= (int)info->height;
                 info->s			    = readFloat();
                 info->t			    = readFloat();
                 info->s2			= readFloat();
@@ -551,13 +552,14 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 
 		for (i = 0; i < GLYPHS_PER_FONT; i++) {
 #ifdef _RAVEN //k: quake4 font: 9 float32 per char
-			outFont->glyphs[i].imageWidth	= (int)readFloat();
-			outFont->glyphs[i].imageHeight	= (int)readFloat();
-			outFont->glyphs[i].xSkip		= (int)readFloat();
-			outFont->glyphs[i].pitch		= (int)readFloat();
-			outFont->glyphs[i].top			= (int)readFloat(); // p_horiBearingY
-			outFont->glyphs[i].height		= outFont->glyphs[i].top;
-			outFont->glyphs[i].bottom		= 0;
+			outFont->glyphs[i].width		= readFloat();
+			outFont->glyphs[i].height		= readFloat();
+			outFont->glyphs[i].horiAdvance	= readFloat(); // horiAdvance/xSkip
+			outFont->glyphs[i].horiBearingX	= readFloat(); // horiBearingX/pitch
+			outFont->glyphs[i].horiBearingY	= readFloat(); // horiBearingY/top
+			outFont->glyphs[i].height		= outFont->glyphs[i].horiBearingY; // top
+			outFont->glyphs[i].imageWidth	= (int)outFont->glyphs[i].width;
+			outFont->glyphs[i].imageHeight	= (int)outFont->glyphs[i].height;
 			outFont->glyphs[i].s			= readFloat();
 			outFont->glyphs[i].t			= readFloat();
 			outFont->glyphs[i].s2			= readFloat();
@@ -583,12 +585,13 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 		}
 
 #ifdef _RAVEN //k: quake4 font remain 5 float32
-		readFloat(); //k: 12 / 24 / 48
-		int mw = (int)readFloat(); //k: max height?
-		int mh = (int)readFloat(); //k: max width?
-		readFloat(); //k: max width - max height
-		// readFloat(); //k: 0 last float number
+		outFont->pointSize = readFloat(); //k: 12 / 24 / 48
+		outFont->fontHeight = readFloat();
+		outFont->ascender = readFloat();
+		outFont->descender = readFloat(); //k: max width - max height
 		outFont->glyphScale = glyphScale;
+		float mh = 0.0f;
+		float mw = 0.0f;
 #else
 		outFont->glyphScale = readFloat();
 
@@ -648,8 +651,8 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
                     mh = gi->height;
                 }
 
-                if (mw < gi->xSkip) {
-                    mw = gi->xSkip;
+                if (mw < gi->horiAdvance) { // xSkip
+                    mw = gi->horiAdvance; // xSkip
                 }
             }
         }
@@ -668,8 +671,8 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 				mh = outFont->glyphs[i].height;
 			}
 
-			if (mw < outFont->glyphs[i].xSkip) {
-				mw = outFont->glyphs[i].xSkip;
+			if (mw < outFont->glyphs[i].horiAdvance) { // xSkip
+				mw = outFont->glyphs[i].horiAdvance; // xSkip
 			}
 		}
 

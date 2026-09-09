@@ -108,11 +108,19 @@ const int GLYPH_CHAREND			= 127;
 const int GLYPHS_PER_FONT		= GLYPH_END - GLYPH_START + 1;
 
 typedef struct {
+#ifdef _RAVEN
+	float				width;					// number of pixels wide
+	float				height;					// number of scan lines
+	float				horiAdvance;			// number of pixels to advance to the next char // xSkip of DOOM3
+	float				horiBearingX;			// x offset into space to render glyph // pitch of DOOM3
+	float				horiBearingY;			// y offset // top of DOOM3
+#else
 	int					height;			// number of scan lines
 	int					top;			// top of glyph in buffer
 	int					bottom;			// bottom of glyph in buffer
 	int					pitch;			// width for copying
 	int					xSkip;			// x adjustment
+#endif
 	int					imageWidth;		// width of actual image
 	int					imageHeight;	// height of actual image
 	float				s;				// x offset in image where glyph starts
@@ -127,6 +135,12 @@ typedef struct {
 	glyphInfo_t			glyphs [GLYPHS_PER_FONT];
 	float				glyphScale;
 	char				name[64];
+#ifdef _RAVEN
+	float				pointSize;
+	float				fontHeight;				// max height of font
+	float				ascender;
+	float				descender;
+#endif
 
 #ifdef _WCHAR_LANG
     int                 numIndexes;
@@ -140,6 +154,16 @@ typedef struct {
 	fontInfo_t			fontInfoSmall;
 	fontInfo_t			fontInfoMedium;
 	fontInfo_t			fontInfoLarge;
+#ifdef _RAVEN
+	float				maxHeight;
+	float				maxWidth;
+	float				maxHeightSmall;
+	float				maxWidthSmall;
+	float				maxHeightMedium;
+	float				maxWidthMedium;
+	float				maxHeightLarge;
+	float				maxWidthLarge;
+#else
 	int					maxHeight;
 	int					maxWidth;
 	int					maxHeightSmall;
@@ -148,6 +172,7 @@ typedef struct {
 	int					maxWidthMedium;
 	int					maxHeightLarge;
 	int					maxWidthLarge;
+#endif
 	char				name[64];
 } fontInfoEx_t;
 
