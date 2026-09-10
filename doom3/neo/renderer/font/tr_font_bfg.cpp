@@ -137,8 +137,6 @@ static void R_Font_ConvertD3BFGGlyph(const d3bfg_fontInfo_t &fontInfo, const d3b
 	glyph->horiBearingY = FONT_SCALE(d3bfg_glyph->top, scale); // top
 	glyph->horiBearingX = FONT_SCALE(d3bfg_glyph->left, scale); // pitch
 	glyph->horiAdvance = FONT_SCALE(d3bfg_glyph->xSkip, scale); // xSkip
-	glyph->imageWidth = (int)glyph->width;
-	glyph->imageHeight = (int)glyph->height;
 #else
     glyph->height = FONT_SCALE(d3bfg_glyph->height, scale);
     glyph->top = FONT_SCALE(d3bfg_glyph->top, scale);

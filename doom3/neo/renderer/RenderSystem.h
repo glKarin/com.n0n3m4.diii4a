@@ -109,20 +109,20 @@ const int GLYPHS_PER_FONT		= GLYPH_END - GLYPH_START + 1;
 
 typedef struct {
 #ifdef _RAVEN
-	float				width;					// number of pixels wide
-	float				height;					// number of scan lines
+	float				width;					// number of pixels wide // imageWidth of DOOM3
+	float				height;					// number of scan lines // imageHeight of DOOM3
 	float				horiAdvance;			// number of pixels to advance to the next char // xSkip of DOOM3
 	float				horiBearingX;			// x offset into space to render glyph // pitch of DOOM3
-	float				horiBearingY;			// y offset // top of DOOM3
+	float				horiBearingY;			// y offset // top/height of DOOM3
 #else
 	int					height;			// number of scan lines
 	int					top;			// top of glyph in buffer
 	int					bottom;			// bottom of glyph in buffer
 	int					pitch;			// width for copying
 	int					xSkip;			// x adjustment
-#endif
 	int					imageWidth;		// width of actual image
 	int					imageHeight;	// height of actual image
+#endif
 	float				s;				// x offset in image where glyph starts
 	float				t;				// y offset in image where glyph starts
 	float				s2;

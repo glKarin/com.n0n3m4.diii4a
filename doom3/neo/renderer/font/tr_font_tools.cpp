@@ -66,11 +66,11 @@ typedef struct {
 #ifdef _RAVEN //k: quake4 font
 #pragma pack( push, 1 )
 typedef struct {
-    float			    width;			// number of pixels wide
-    float			    height;			// number of scan lines
+    float			    width;			// number of pixels wide // imageWidth of DOOM3
+    float			    height;			// number of scan lines // imageHeight of DOOM3
     float			    horiAdvance;	// number of pixels to advance to the next char // xSkip of DOOM3
     float			    horiBearingX;	// x offset into space to render glyph // pitch of DOOM3
-    float			    horiBearingY;	// y offset // top of DOOM3
+    float			    horiBearingY;	// y offset // top/height of DOOM3
     float				s;				// x offset in image where glyph starts
     float				t;				// y offset in image where glyph starts
     float				s2;
@@ -110,8 +110,8 @@ static void R_Font_ConvertToQ4Info(const fontInfoExport_t &d3, q4_fontInfoExport
         R_Font_ConvertToQ4Glyph(d3.glyphs[i], q4.glyphs[i]);
     q4.pointSize = 0.0f;
     for (i = GLYPH_START; i < GLYPH_END; i++) {
-        if (mh < d3.glyphs[i].height) {
-            mh = d3.glyphs[i].height;
+        if (mh < d3.glyphs[i].horiBearingY) { // height
+            mh = d3.glyphs[i].horiBearingY; // height
         }
 
         if (mw < d3.glyphs[i].horiAdvance) { // xSkip

@@ -978,7 +978,7 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				if ( style == 1 ) {
 					idVec4 shadowColor( 0.0f, 0.0f, 0.0f, newColor.w );
 					renderSystem->SetColor( shadowColor );
-					PaintChar(x + 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(x + 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
 					renderSystem->SetColor( newColor );
 				}
 				else if ( style == 2 )
@@ -993,13 +993,13 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 						shadowColor.Set(1.0f, 1.0f, 1.0f, newColor.w);
 					}
 					renderSystem->SetColor( shadowColor );
-					PaintChar(x + 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
-					PaintChar(x - 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
-					PaintChar(x - 1.0f, yadj - 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
-					PaintChar(x + 1.0f, yadj - 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(x + 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(x - 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(x - 1.0f, yadj - 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(x + 1.0f, yadj - 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
 					renderSystem->SetColor( newColor );
 				}
-				PaintChar(x, yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+				PaintChar(x, yadj,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
 #else
 				float yadj = useScale * glyph->top;
 				PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
@@ -1068,7 +1068,7 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 					if ( style == 1 ) {
 						idVec4 shadowColor( 0.0f, 0.0f, 0.0f, newColor.w );
 						renderSystem->SetColor( shadowColor );
-						PaintChar(x + 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(x + 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
 						renderSystem->SetColor( newColor );
 					}
 					else if ( style == 2 )
@@ -1083,13 +1083,13 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 							shadowColor.Set(1.0f, 1.0f, 1.0f, newColor.w);
 						}
 						renderSystem->SetColor( shadowColor );
-						PaintChar(x + 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
-						PaintChar(x - 1.0f, yadj + 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
-						PaintChar(x - 1.0f, yadj - 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
-						PaintChar(x + 1.0f, yadj - 1.0f,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(x + 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(x - 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(x - 1.0f, yadj - 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(x + 1.0f, yadj - 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
 						renderSystem->SetColor( newColor );
 					}
-					PaintChar(x,yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(x,yadj,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
 #else
                     float yadj = useScale * glyph->top;
                     PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
@@ -1417,7 +1417,7 @@ void idDeviceContext::DrawEditCursor(float x, float y, float scale)
 	const glyphInfo_t *glyph2 = &useFont->glyphs[(overStrikeMode) ? '_' : '|'];
 #ifdef _RAVEN //karin: 2025 Q4D v7 = y - (scalea * horiBearingY - 1.0);
 	float	yadj = y - (useScale * glyph2->horiBearingY /*- 1.0f*/); // top
-	PaintChar(x, yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
+	PaintChar(x, yadj,glyph2->width,glyph2->height,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
 #else
 	float	yadj = useScale * glyph2->top;
 	PaintChar(x, y - yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
