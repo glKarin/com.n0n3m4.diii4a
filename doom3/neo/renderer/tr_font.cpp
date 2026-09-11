@@ -563,6 +563,7 @@ bool idRenderSystemLocal::RegisterFont(const char *fontName, fontInfoEx_t &font)
 			outFont->glyphs[i].s2			= readFloat();
 			outFont->glyphs[i].t2			= readFloat();
 			idStr::snPrintf(outFont->glyphs[i].shaderName, sizeof(outFont->glyphs[i].shaderName), "%s_%i.tga", fontName, pointSize);
+			//printf("%d|%c:%f %f %f %f %f\n",i,i, outFont->glyphs[i].width,		outFont->glyphs[i].height,		outFont->glyphs[i].horiAdvance, outFont->glyphs[i].horiBearingX, outFont->glyphs[i].horiBearingY);
 #else
 			outFont->glyphs[i].height		= readInt();
 			outFont->glyphs[i].top			= readInt();
