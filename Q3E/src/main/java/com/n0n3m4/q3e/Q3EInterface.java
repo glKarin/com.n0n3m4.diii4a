@@ -1227,7 +1227,7 @@ public class Q3EInterface
 
 		arg_table[Q3EGlobals.UI_CROUCH * 4] = KeyCodesGeneric.K_C; // BFG
 		arg_table[Q3EGlobals.UI_CROUCH * 4 + 1] = Q3EGlobals.ONSCRREN_BUTTON_CAN_HOLD;
-		arg_table[Q3EGlobals.UI_CROUCH * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM;
+		arg_table[Q3EGlobals.UI_CROUCH * 4 + 2] = Q3EGlobals.ONSCREEN_BUTTON_TYPE_FULL; // Q3EGlobals.ONSCREEN_BUTTON_TYPE_RIGHT_BOTTOM;
 		arg_table[Q3EGlobals.UI_CROUCH * 4 + 3] = 0;
 
 		arg_table[Q3EGlobals.UI_RELOADBAR * 4] = KeyCodesGeneric.K_RBRACKET; // 93

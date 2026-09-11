@@ -138,8 +138,8 @@ public class Q3EButtonLayoutManager
     {
         final int EndWidth = Width - End;
 
-        final int LargeButton_Width = Dip2px_s(60); //k 64 // button width/height // 75
-        final int MediumButton_Width = Dip2px_s(55); //k 60
+        final int LargeButton_Width = Dip2px_s(50); // 60 //k 64 // button width/height // 75
+        final int MediumButton_Width = Dip2px_s(50); // 55 //k 60
         final int SmallButton_Width = Dip2px_s(50); //k 56
         // int rightoffset = 0; // LargeButton_Width * 3 / 4;
         final int Horizontal_Sliders_Width = Dip2px_s(120); // reload bar slider width
@@ -147,7 +147,7 @@ public class Q3EButtonLayoutManager
         final int Joystick_Radius = Dip2px_s(75); // half width
         final int Attack_Width = Dip2px_s(80); //k 100
         final int Panel_Radius = Dip2px_s(25); //k 24
-        final int Crouch_Width = Dip2px_s(70); //k 80
+        final int Crouch_Width = Dip2px_s(60); // 70 //k 80
         final int Horizontal_Space = Dip2px_s(5); //k 4
         final int Vertical_Space = Dip2px_s(5); //k 2
         final int Attack_right_Margin = Dip2px_s(40); //k 20
@@ -195,8 +195,10 @@ public class Q3EButtonLayoutManager
         layouts[Q3EGlobals.UI_MINUS].Set(Start + SmallButton_Width / 2, plus_minus_y, SmallButton_Width, Alpha);
         layouts[Q3EGlobals.UI_PLUS].Set(Start + JoyStick_Left_Margin + Joystick_Radius + (JoyStick_Left_Margin + Joystick_Radius - SmallButton_Width / 2), plus_minus_y, SmallButton_Width, Alpha);
 
-        layouts[Q3EGlobals.UI_Y].Set(bottomLineRight - MediumButton_Width * 2 - MediumButton_Width / 2 - Horizontal_Space * 2 - (MediumButton_Width / 2 - SmallButton_Width / 2), Height - MediumButton_Width - SmallButton_Width / 2, SmallButton_Width, Alpha);
-        layouts[Q3EGlobals.UI_N].Set(bottomLineRight - MediumButton_Width * 2 + MediumButton_Width / 2 - Horizontal_Space * 2 + (MediumButton_Width / 2 - SmallButton_Width / 2), Height - MediumButton_Width - SmallButton_Width / 2, SmallButton_Width, Alpha);
+        layouts[Q3EGlobals.UI_Y].Set(bottomLineRight - MediumButton_Width * 2 - Horizontal_Space * 2 - Horizontal_Space / 2 - SmallButton_Width / 2, Height - MediumButton_Width - SmallButton_Width / 2, SmallButton_Width, Alpha);
+        layouts[Q3EGlobals.UI_N].Set(bottomLineRight - MediumButton_Width * 2 - Horizontal_Space * 2 + Horizontal_Space / 2 + SmallButton_Width / 2, Height - MediumButton_Width - SmallButton_Width / 2, SmallButton_Width, Alpha);
+//        layouts[Q3EGlobals.UI_Y].Set(bottomLineRight - MediumButton_Width * 2 - MediumButton_Width / 2 - Horizontal_Space * 2 - (MediumButton_Width / 2 - SmallButton_Width / 2), Height - MediumButton_Width - SmallButton_Width / 2, SmallButton_Width, Alpha);
+//        layouts[Q3EGlobals.UI_N].Set(bottomLineRight - MediumButton_Width * 2 + MediumButton_Width / 2 - Horizontal_Space * 2 + (MediumButton_Width / 2 - SmallButton_Width / 2), Height - MediumButton_Width - SmallButton_Width / 2, SmallButton_Width, Alpha);
 
         // hide default
         int extraX = Start;
