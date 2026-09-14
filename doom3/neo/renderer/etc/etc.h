@@ -11,12 +11,18 @@
 #endif
 
 #ifdef _OPENGLES3
+
 //#define USE_RG_ETC2
+//#define USE_ID_ETC2
+
 #ifdef USE_RG_ETC2
 unsigned char * etc2_encode_image_rgba(const unsigned char* image, int width, int height, int *size);
 unsigned char * etc2_encode_image_rgb(const unsigned char* image, int width, int height, int *size);
 unsigned int etc2_data_size_rgba(int width, int height);
 unsigned int etc2_data_size_rgb(int width, int height);
+#elif defined(USE_ID_ETC2)
+typedef unsigned char byte;
+#include "ETC2/ETCCodec.h"
 #else
 // #include "EtcLib/Etc/Etc.h"
 

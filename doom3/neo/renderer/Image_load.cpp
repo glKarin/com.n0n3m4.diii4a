@@ -695,11 +695,7 @@ void idImage::GenerateImage(const byte *pic, int width, int height,
 	} else
 #endif
 	{
-		char filename[MAX_IMAGE_NAME];
-		char *fptr = &filename[0];
-		ImageProgramStringToCompressedFileName(imgName, filename);
-        idStr glesCompressionName = R_GenerateCompressionFileName(fptr, scaled_width, scaled_height, "etc", 0);
-		myglTexImage2D(glesCompressionName.c_str(), GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
+		myglTexImage2D(this, GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
 	}
 
 	// create and upload the mip map levels, which we do in all cases, even if we don't think they are needed
@@ -746,11 +742,7 @@ void idImage::GenerateImage(const byte *pic, int width, int height,
 		} else
 #endif
 		{
-            char filename[MAX_IMAGE_NAME];
-            char *fptr = &filename[0];
-            ImageProgramStringToCompressedFileName(imgName, filename);
-            idStr glesCompressionMipmapName = R_GenerateCompressionFileName(fptr, scaled_width, scaled_height, "etc", miplevel);
-            myglTexImage2D(glesCompressionMipmapName.c_str(), GL_TEXTURE_2D, miplevel, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
+            myglTexImage2D(this, GL_TEXTURE_2D, miplevel, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
 		}
 	}
 
@@ -1983,23 +1975,21 @@ int idImage::GenerateImageETC(int width, int height,
 	bool	preserveBorder;
 	int	scaled_width, scaled_height;
 
-    if(!r_useETC1.GetBool())
+    if(!r_useETC1.GetBool() || (!imgName.IsEmpty() && imgName[0] == '_'))
         return 0;
 
-	{
-		char filename[MAX_IMAGE_NAME];
-		char *fptr = &filename[0];
-		int	sw = MakePowerOfTwo(width);
-		int sh = MakePowerOfTwo(height);
-		if (sw != width || sh != height) {
-			common->Error("R_CreateImage: not a power of 2 image");
-		}
-		GetDownsize(sw, sh);
-		ImageProgramStringToCompressedFileName(imgName, filename);
-		idStr glesCompressionName = R_GenerateCompressionFileName(fptr, sw, sh, "etc", 0);
-		if (!etcavail(glesCompressionName.c_str()))
-			return 0;
+	int	sw = MakePowerOfTwo(width);
+	int sh = MakePowerOfTwo(height);
+	if (sw != width || sh != height) {
+		common->Error("R_CreateImage: not a power of 2 image");
 	}
+	GetDownsize(sw, sh);
+	char filename[MAX_IMAGE_NAME];
+	const char *fptr = &filename[0];
+	ImageProgramStringToCompressedFileName(imgName, filename);
+	idStr glesCompressionName = R_GenerateCompressionFileName(fptr, sw, sh, "etc", 0);
+	if (!etcavail(glesCompressionName.c_str()))
+		return 0;
 
 	PurgeImage();
 
@@ -2077,17 +2067,11 @@ int idImage::GenerateImageETC(int width, int height,
 
 	int failed = 0;
 
-	{
-		char filename[MAX_IMAGE_NAME];
-		char *fptr = &filename[0];
-		ImageProgramStringToCompressedFileName(imgName, filename);
-        idStr glesCompressionName = R_GenerateCompressionFileName(fptr, scaled_width, scaled_height, "etc", 0);
-		failed += uploadetc(glesCompressionName.c_str(), GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0,
-							GL_RGBA, GL_UNSIGNED_BYTE);
+	glesCompressionName = R_GenerateCompressionFileName(fptr, scaled_width, scaled_height, "etc", 0);
+	failed += uploadetc(glesCompressionName.c_str(), GL_TEXTURE_2D, 0, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE);
 
-		if(failed > 0)
-			return false;
-	}
+	if(failed > 0)
+		return false;
 
 	// create and upload the mip map levels, which we do in all cases, even if we don't think they are needed
 	int		miplevel;
@@ -2108,17 +2092,12 @@ int idImage::GenerateImageETC(int width, int height,
 		}
 
 		miplevel++;
-		{
-			char filename[MAX_IMAGE_NAME];
-			char *fptr = &filename[0];
-			ImageProgramStringToCompressedFileName(imgName, filename);
-			idStr glesCompressionName = R_GenerateCompressionFileName(fptr, scaled_width, scaled_height, "etc", miplevel);
-			failed += uploadetc(glesCompressionName.c_str(), GL_TEXTURE_2D, miplevel, internalFormat, scaled_width,
-								scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE);
 
-			if(failed > 0)
-				return false;
-		}
+		glesCompressionName = R_GenerateCompressionFileName(fptr, scaled_width, scaled_height, "etc", miplevel);
+		failed += uploadetc(glesCompressionName.c_str(), GL_TEXTURE_2D, miplevel, internalFormat, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+
+		if(failed > 0)
+			return false;
 	}
 
 	SetImageFilterAndRepeat();

@@ -1,3 +1,5 @@
+#include "etc.h"
+
 // rg_etc1
 #ifdef USE_RG_ETC1
 #include "ETC1/etc_rg_etc1.cpp"
@@ -8,6 +10,7 @@
 #ifdef _COMPRESSION_IMAGE_ETC2
 #ifdef USE_RG_ETC2
 #include "ETC1/etc2_encoder.cpp"
+#include "ETC1/etc_rg_etc1.cpp"
 
 static uint32_t GetPixel(const uint8_t* data, int width, int components, int x, int y)
 {
@@ -102,6 +105,9 @@ unsigned char * etc2_encode_image_rgb(const unsigned char* image, int width, int
     rg_etc1::etc1_pack_params params;
     return CompressImage(image, width, height, 3, params, true, false, size);
 }
+
+#elif defined(USE_ID_ETC2)
+#include "ETC2/ETCEncoder.cpp"
 
 #else
 // ETCLib

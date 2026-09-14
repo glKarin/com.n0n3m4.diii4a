@@ -17,6 +17,9 @@
 #define IC_ERROR(x)
 #endif
 
+#define IMG_NAME_ALLOW_CACHE(cachefname) ((cachefname) && (cachefname)[0] && (cachefname)[0] != '_')
+#define IMG_NAME_NOT_ALLOW_CACHE(cachefname) (!(cachefname) || !(cachefname)[0] || (cachefname)[0] == '_')
+
 enum {
     IC_ETC1 = 1,
     IC_RGBA4444 = 2,
@@ -212,6 +215,13 @@ static void etc2_compress_tex_image(const char *cachefname, GLenum target, GLint
     uiEncodingBitsBytes = rsize;
     uiExtendedWidth = width;
     uiExtendedHeight = height;
+#elif defined(USE_ID_ETC2)
+    idEtcEncoder encoder;
+    uiEncodingBitsBytes = etc2_data_size(width, height);
+    paucEncodingBits = (unsigned char*)malloc(uiEncodingBitsBytes);
+   encoder.CompressImageETC2_RGBA8((const unsigned char*)pixels, paucEncodingBits, width, height);
+    uiExtendedWidth = width;
+    uiExtendedHeight = height;
 #else
     EncodeC((unsigned char *)pixels,
                 width, height,
@@ -233,7 +243,7 @@ static void etc2_compress_tex_image(const char *cachefname, GLenum target, GLint
             0,
             uiEncodingBitsBytes,
             paucEncodingBits);
-    if (cachefname != 0) {
+    if (IMG_NAME_ALLOW_CACHE(cachefname)) {
         imageCompression_t image;
         R_AllocCompression(&image, width, height, IC_ETC2_RGBA8, uiExtendedWidth, uiExtendedHeight, level, uiEncodingBitsBytes, (byte *)paucEncodingBits);
         IC_PRINT("Caching idTech4A++ compression texture ETC2: %dx%d %s.\n", image.header.width, image.header.height, cachefname);
@@ -259,7 +269,7 @@ void rgba4444_convert_tex_image(const char *cachefname, GLenum target, GLint lev
     }
     qglTexImage2D(target, level, format, width, height, border, format, GL_UNSIGNED_SHORT_4_4_4_4, rgba4444data);
     rgba4444data = (unsigned short *) ((unsigned char *) rgba4444data);
-    if (cachefname != 0) {
+    if (IMG_NAME_ALLOW_CACHE(cachefname)) {
         imageCompression_t image;
         R_AllocCompression(&image, width, height, IC_RGBA4444, level, size, (byte *)rgba4444data);
 		IC_PRINT("Caching idTech4A++ compression texture RGBA4444: %dx%d %s.\n", image.header.width, image.header.height, cachefname);
@@ -287,7 +297,7 @@ void etc1_compress_tex_image(const char *cachefname, GLenum target, GLint level,
             0,
             size,
             etc1data);
-    if (cachefname != 0) {
+    if (IMG_NAME_ALLOW_CACHE(cachefname)) {
         imageCompression_t image;
         R_AllocCompression(&image, width, height, IC_ETC1, level, size, (byte *)etc1data);
 		IC_PRINT("Caching idTech4A++ compression texture ETC1: %dx%d %s.\n", image.header.width, image.header.height, cachefname);
@@ -300,14 +310,16 @@ ID_INLINE static int etcavail(const char *cachefname) {
     return (
            r_useETC1Cache.GetBool())
            && (r_useETC1.GetBool())
-           && (cachefname != 0)
-           && (cachefname[0] != 0)
+           && IMG_NAME_ALLOW_CACHE(cachefname)
            && (fileSystem->ReadFile(cachefname, NULL, NULL) != -1
            );
 }
 
 int uploadetc(const char *cachefname, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type) {
     char *tmp;
+    if (IMG_NAME_NOT_ALLOW_CACHE(cachefname))
+        return 1;
+
     int failed = 0;
     int sz = fileSystem->ReadFile(cachefname, (void **)&tmp, NULL);
     if(sz)
@@ -381,12 +393,13 @@ int uploadetc(const char *cachefname, GLenum target, GLint level, GLint internal
     return failed;
 }
 
-void myglTexImage2D(const char *cachefname, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) {
+void myglTexImage2D(idImage *image, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) {
     static int opaque = 0;
 #ifdef _COMPRESSION_IMAGE_ETC2
     static int useETC2 = 0;
 #endif
-    if (r_useETC1.GetBool() && format == GL_RGBA && type == GL_UNSIGNED_BYTE) {
+    const bool isBuiltin = !image || image->imgName[0] == '_';
+    if (r_useETC1.GetBool() && format == GL_RGBA && type == GL_UNSIGNED_BYTE && !isBuiltin) {
 
         if (level == 0)
         {
@@ -396,8 +409,13 @@ void myglTexImage2D(const char *cachefname, GLenum target, GLint level, GLint in
 #endif
         }
 
-        if (!r_useETC1Cache.GetBool())
-            cachefname = 0;
+        char filename[MAX_IMAGE_NAME];
+        char *fptr = &filename[0];
+        image->ImageProgramStringToCompressedFileName(image->imgName, filename);
+
+        idStr cachefname;
+        if (r_useETC1Cache.GetBool())
+            cachefname = R_GenerateCompressionFileName(fptr, width, height, "etc", level);
 
         if (opaque)
             etc1_compress_tex_image(cachefname, target, level, format, width, height, border, format, type, pixels);
