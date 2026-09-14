@@ -32,6 +32,17 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef IMAGE_H_
 #define IMAGE_H_
 
+#if defined( USE_VULKAN )
+#ifdef __ANDROID__
+#define D3_VK_SHARED_SAMPLER 1 //karin: using shared samplers, don't allocate a sampler per image, else not enough on Android device
+#endif
+
+#ifdef D3_VK_SHARED_SAMPLER
+#define SHARED_SAMPLERS_INITIALIZE_SIZE 256 // 128
+#define SHARED_SAMPLERS_INITIALIZE_GRANULARITY 256 // 128
+#endif
+#endif
+
 enum textureType_t
 {
 	TT_DISABLED,
@@ -641,6 +652,18 @@ public:
 
 	bool				insideLevelLoad;			// don't actually load images now
 	bool				preloadingMapImages;		// unless this is set
+#if defined( USE_VULKAN )
+#ifdef D3_VK_SHARED_SAMPLER
+	idList<int>			samplerHash; // by GenSamplerKey
+	idList<VkSampler>	samplerList; // samplers
+
+	VkSampler			FindSampler(int key) const;
+	void				SetSampler(int key, VkSampler sampler);
+	void				DestroySamplers(void);
+	
+	static int			GenSamplerKey(idImage *image);
+#endif
+#endif
 };
 
 extern idImageManager*	globalImages;		// pointer to global list for the rest of the system

@@ -41,6 +41,179 @@ Contains the Image implementation for Vulkan
 #include "../RenderCommon.h"
 #include "Staging_VK.h"
 
+#ifdef D3_VK_SHARED_SAMPLER
+int idImageManager::GenSamplerKey(idImage *image)
+{
+	idStr createInfo;
+
+	createInfo.Append("compareEnable=");
+	createInfo.Append( image->opts.format == FMT_DEPTH ? "true" : "false" );
+	createInfo.Append("&");
+	createInfo.Append("compareOp=");
+	createInfo.Append( image->opts.format == FMT_DEPTH ? "VK_COMPARE_OP_LESS_OR_EQUAL" : "VK_COMPARE_OP_NEVER");
+	createInfo.Append("&");
+
+	createInfo.Append("maxLod=");
+	createInfo.Append(va("%d", image->opts.numLevels));
+	createInfo.Append("&");
+
+	switch( image->filter )
+	{
+		case TF_DEFAULT:
+			createInfo.Append("minFilter=");
+			createInfo.Append("VK_FILTER_LINEAR");
+			createInfo.Append("&");
+			createInfo.Append("magFilter=");
+			createInfo.Append("VK_FILTER_LINEAR");
+			createInfo.Append("&");
+			createInfo.Append("mipmapMode=");
+			createInfo.Append("VK_SAMPLER_MIPMAP_MODE_LINEAR");
+			createInfo.Append("&");
+
+			// RB: enable anisotropic filtering
+			if( r_maxAnisotropicFiltering.GetInteger() > 0 )
+			{
+				createInfo.Append("anisotropyEnable=");
+				createInfo.Append("VK_TRUE");
+				createInfo.Append("&");
+				createInfo.Append("maxAnisotropy=");
+				createInfo.Append(va("%f", Min( r_maxAnisotropicFiltering.GetFloat(), vkcontext.gpu->props.limits.maxSamplerAnisotropy )));
+				createInfo.Append("&");
+			}
+			break;
+
+		case TF_LINEAR:
+			createInfo.Append("minFilter=");
+			createInfo.Append("VK_FILTER_LINEAR");
+			createInfo.Append("&");
+			createInfo.Append("magFilter=");
+			createInfo.Append("VK_FILTER_LINEAR");
+			createInfo.Append("&");
+			createInfo.Append("mipmapMode=");
+			createInfo.Append("VK_SAMPLER_MIPMAP_MODE_LINEAR");
+			createInfo.Append("&");
+			break;
+
+		case TF_NEAREST:
+			createInfo.Append("minFilter=");
+			createInfo.Append("VK_FILTER_NEAREST");
+			createInfo.Append("&");
+			createInfo.Append("magFilter=");
+			createInfo.Append("VK_FILTER_NEAREST");
+			createInfo.Append("&");
+			createInfo.Append("mipmapMode=");
+			createInfo.Append("VK_SAMPLER_MIPMAP_MODE_NEAREST");
+			createInfo.Append("&");
+			break;
+
+		// RB:
+		case TF_NEAREST_MIPMAP:
+			createInfo.Append("minFilter=");
+			createInfo.Append("VK_FILTER_NEAREST");
+			createInfo.Append("&");
+			createInfo.Append("magFilter=");
+			createInfo.Append("VK_FILTER_NEAREST");
+			createInfo.Append("&");
+			createInfo.Append("mipmapMode=");
+			createInfo.Append("VK_SAMPLER_MIPMAP_MODE_LINEAR");
+			createInfo.Append("&");
+			break;
+
+		default:
+			idLib::FatalError( "idImage::GenSamplerKey: unrecognized texture filter %d", image->filter );
+	}
+
+	switch( image->repeat )
+	{
+		case TR_REPEAT:
+			createInfo.Append("addressModeU=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_REPEAT");
+			createInfo.Append("&");
+			createInfo.Append("addressModeV=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_REPEAT");
+			createInfo.Append("&");
+			createInfo.Append("addressModeW=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_REPEAT");
+			break;
+
+		case TR_CLAMP:
+			createInfo.Append("addressModeU=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE");
+			createInfo.Append("&");
+			createInfo.Append("addressModeV=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE");
+			createInfo.Append("&");
+			createInfo.Append("addressModeW=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE");
+			break;
+
+		case TR_CLAMP_TO_ZERO_ALPHA:
+			createInfo.Append("borderColor=");
+			createInfo.Append("VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK");
+			createInfo.Append("&");
+			createInfo.Append("addressModeU=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER");
+			createInfo.Append("&");
+			createInfo.Append("addressModeV=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER");
+			createInfo.Append("&");
+			createInfo.Append("addressModeW=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER");
+			break;
+
+		case TR_CLAMP_TO_ZERO:
+			createInfo.Append("borderColor=");
+			createInfo.Append("VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK");
+			createInfo.Append("&");
+			createInfo.Append("addressModeU=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER");
+			createInfo.Append("&");
+			createInfo.Append("addressModeV=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER");
+			createInfo.Append("&");
+			createInfo.Append("addressModeW=");
+			createInfo.Append("VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER");
+			break;
+		default:
+			idLib::FatalError( "idImage::GenSamplerKey: unrecognized texture repeat mode %d", image->repeat );
+	}
+
+	return idStr::IHash(createInfo.c_str());
+}
+
+VkSampler idImageManager::FindSampler(int key) const
+{
+	int index = samplerHash.FindIndex(key);
+	if(index != -1)
+		return samplerList[index];
+	else
+		return NULL;
+}
+
+void idImageManager::SetSampler(int key, VkSampler _sampler)
+{
+	int index = samplerHash.FindIndex(key);
+	if(index == -1)
+	{
+		index = samplerHash.Append(key);
+		samplerList.Append(_sampler);
+	}
+	else
+		samplerList[index] = _sampler;
+}
+
+void idImageManager::DestroySamplers(void)
+{
+	Sys_Printf("Destroy shared samplers: %d\n", samplerList.Num());
+	for( int i = 0; i < samplerList.Num(); ++i )
+	{
+		vkDestroySampler( vkcontext.device, samplerList[ i ], NULL );
+	}
+	samplerList.Clear();
+	samplerHash.Clear();
+}
+#endif
+
 int						idImage::garbageIndex = 0;
 #if defined( USE_AMD_ALLOCATOR )
 	idList< VmaAllocation > idImage::allocationGarbage[ NUM_FRAME_DATA ];
@@ -246,6 +419,15 @@ idImage::CreateSampler
 */
 void idImage::CreateSampler()
 {
+#ifdef D3_VK_SHARED_SAMPLER //karin: find shared sampler from global pool
+	int key = idImageManager::GenSamplerKey(this);
+	VkSampler cachedSampler = globalImages->FindSampler(key);
+	if(VK_NULL_HANDLE != cachedSampler)
+	{
+		this->sampler = cachedSampler;
+		return;
+	}
+#endif
 	VkSamplerCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 	createInfo.maxAnisotropy = 1.0f;
@@ -327,6 +509,9 @@ void idImage::CreateSampler()
 	}
 
 	ID_VK_CHECK( vkCreateSampler( vkcontext.device, &createInfo, NULL, &sampler ) );
+#ifdef D3_VK_SHARED_SAMPLER
+	globalImages->SetSampler(key, sampler);
+#endif
 }
 
 /*
@@ -611,7 +796,9 @@ void idImage::PurgeImage()
 {
 	if( sampler != VK_NULL_HANDLE )
 	{
+#if !defined(D3_VK_SHARED_SAMPLER) //karin: sampler is shared
 		samplerGarbage[ garbageIndex ].Append( sampler );
+#endif
 		sampler = VK_NULL_HANDLE;
 	}
 
