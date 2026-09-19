@@ -33,14 +33,22 @@ If you have questions concerning this license or the applicable additional terms
 #define IMAGE_H_
 
 #if defined( USE_VULKAN )
-#ifdef __ANDROID__
 #define D3_VK_SHARED_SAMPLER 1 //karin: using shared samplers, don't allocate a sampler per image, else not enough on Android device
-#endif
+#define SHARED_SAMPLERS_INITIALIZE_SIZE 128
+#define SHARED_SAMPLERS_INITIALIZE_GRANULARITY 128
 
-#ifdef D3_VK_SHARED_SAMPLER
-#define SHARED_SAMPLERS_INITIALIZE_SIZE 256 // 128
-#define SHARED_SAMPLERS_INITIALIZE_GRANULARITY 256 // 128
-#endif
+typedef struct samplerCache_s {
+	VkSampler sampler;
+	int filter;
+	int mipmapFilter;
+	int borderColor;
+	int addressMode;
+	int compareOp;
+	int maxLod;
+	float maxAnisotropy;
+	bool compareEnable;
+	bool anisotropyEnable;
+} samplerCache_t;
 #endif
 
 enum textureType_t
@@ -654,14 +662,12 @@ public:
 	bool				preloadingMapImages;		// unless this is set
 #if defined( USE_VULKAN )
 #ifdef D3_VK_SHARED_SAMPLER
-	idList<int>			samplerHash; // by GenSamplerKey
-	idList<VkSampler>	samplerList; // samplers
+	idList<samplerCache_t>	samplerList; // samplers
 
-	VkSampler			FindSampler(int key) const;
-	void				SetSampler(int key, VkSampler sampler);
+	bool			FindSampler(samplerCache_t &key) const;
+	void				SetSampler(samplerCache_t &sampler);
+	static void			GenSamplerKey(idImage *image, samplerCache_t &key);
 	void				DestroySamplers(void);
-	
-	static int			GenSamplerKey(idImage *image);
 #endif
 #endif
 };
