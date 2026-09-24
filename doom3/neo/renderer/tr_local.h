@@ -57,7 +57,6 @@ extern int GLES3_VERSION;
 #define USING_GLES32 (GLES3_VERSION > 1)
 #endif
 
-//#define INTERACTION_ALPHA_TEST 1
 #define COLOR_MODULATE_IS_NORMALIZED 1
 
 extern const float zero[];
@@ -631,7 +630,7 @@ typedef struct {
 	idVec4				bumpMatrix[2];
 	idVec4				diffuseMatrix[2];
 	idVec4				specularMatrix[2];
-#if defined(INTERACTION_ALPHA_TEST) || defined(_SPLASHDAMAGE) //karin: alpha test in interaction stage
+#if defined(_SPLASHDAMAGE) //karin: alpha test in interaction stage
 	float				alphaTest;
 #endif
 } drawInteraction_t;
@@ -1721,7 +1720,6 @@ typedef enum {
 	SHADER_DEFAULT,
 	SHADER_ZFILL,
 	SHADER_ZFILLCLIP,
-	SHADER_ZFILLNOALPHATEST,
 	SHADER_CUBEMAP,
 	SHADER_ENVIRONMENT,
     SHADER_BUMPY_ENVIRONMENT,

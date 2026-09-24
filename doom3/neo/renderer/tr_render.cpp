@@ -806,9 +806,6 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 	const idMaterial	*lightShader = vLight->lightShader;
 	const float			*lightRegs = vLight->shaderRegisters;
 	drawInteraction_t	inter;
-#ifdef INTERACTION_ALPHA_TEST //karin: alpha test in interaction stage
-	inter.alphaTest = 0.0f;
-#endif
 
 	if (r_skipInteractions.GetBool() || !surf->geo || !surf->geo->ambientCache) {
 		return;
@@ -965,11 +962,6 @@ void RB_CreateSingleDrawInteractions(const drawSurf_t *surf, void (*DrawInteract
 					inter.specularColor[2] *= lightColor[2];
 					inter.specularColor[3] *= lightColor[3];
 					inter.vertexColor = surfaceStage->vertexColor;
-#ifdef INTERACTION_ALPHA_TEST //karin: alpha test in interaction stage
-					if (surfaceStage->hasAlphaTest) {
-						inter.alphaTest = surfaceRegs[surfaceStage->alphaTestRegister];
-					}
-#endif
 					break;
 				}
 			}
@@ -1110,9 +1102,6 @@ void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*Dr
 
     drawInteraction_t inter;
     memset(&inter, 0, sizeof(inter));
-#ifdef INTERACTION_ALPHA_TEST //karin: alpha test in interaction stage
-	inter.alphaTest = 0.0f;
-#endif
     inter.surf = drawSurf;
 
     // tranform the view origin into model local space
@@ -1196,11 +1185,6 @@ void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*Dr
                 R_SetDrawInteraction(surfaceStage, surfaceRegs, &inter.diffuseImage,
                                      inter.diffuseMatrix, inter.diffuseColor.ToFloatPtr());
                 inter.vertexColor = surfaceStage->vertexColor;
-#ifdef INTERACTION_ALPHA_TEST //karin: alpha test in interaction stage
-				if (surfaceStage->hasAlphaTest) {
-					inter.alphaTest = surfaceRegs[surfaceStage->alphaTestRegister];
-				}
-#endif
                 break;
             }
 
