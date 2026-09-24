@@ -66,9 +66,6 @@ static void RB_DrawAreaAmbient_builtin(const drawInteraction_t *din)
     din->specularImage->Bind();
 
     GL_SelectTextureNoClient(0); //k2023
-#ifdef INTERACTION_ALPHA_TEST
-	GL_Uniform1f(offsetof(shaderProgram_t, alphaTest), din->alphaTest);
-#endif
 
     // draw it
     RB_DrawElementsWithCounters(din->surf->geo);
