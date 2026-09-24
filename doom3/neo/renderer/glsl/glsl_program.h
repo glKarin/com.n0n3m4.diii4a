@@ -8,7 +8,6 @@ GLSL_PROGRAM_PROC shaderProgram_t shadowShader; // stencil shadow shader
 GLSL_PROGRAM_PROC shaderProgram_t defaultShader; // default texture and color shader
 GLSL_PROGRAM_PROC shaderProgram_t depthFillShader; // z-fill shader
 GLSL_PROGRAM_PROC shaderProgram_t depthFillClipShader; //k: z-fill shader(clipped)
-GLSL_PROGRAM_PROC shaderProgram_t depthFillNoAlphaTestShader; // z-fill shader(no alpha test)
 GLSL_PROGRAM_PROC shaderProgram_t cubemapShader; //k: skybox shader
 GLSL_PROGRAM_PROC shaderProgram_t environmentShader; //k: reflection shader(environment)
 GLSL_PROGRAM_PROC shaderProgram_t bumpyEnvironmentShader; //k: reflection shader(Bumpy environment)
