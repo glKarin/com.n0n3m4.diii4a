@@ -2,6 +2,18 @@
 
 ----------------------------------------------------------------------------------
 
+> 1.1.0harmattan73 (2026-09-25)
+
+* Add `Enemy Territory: QUAKE Wars`(ver 1.5) support, game standalone directory named `etqw`, game data directory named `etqwbase`. More view in [Enemy Territory: QUAKE Wars](https://www.splashdamage.com/games/enemy-territory-quake-wars/).
+* Add `Quake 4: Awakening` mod of Quake4 support, game data directory named `q4xbase`. More view in [Quake 4: Awakening](https://www.moddb.com/mods/quake-4-the-awakening-complete-edition).
+* Add `Quake 4: Translate Subtitle` mod of Quake4 support, game data directory named `hazzzzzy`. More view in [Quake 4: Translate Subtitle](https://github.com/hazzzzzy/Quake4-Translate-Subtitle).
+* Update RealRTCW version to 5.4.
+* Update The Dark Mod version to 2.14.
+* Fix DOOM3-BFG vulkan.
+* Add gyroscope dead zone(rad/s) setting in launcher's controls tab panel.
+
+----------------------------------------------------------------------------------
+
 > 1.1.0harmattan72 (2026-03-08)
 
 * Add `Quadrilateral Cowboy`(ver 1.0.2602252) support, game standalone directory named `qc`, game data directory named `base`. More view in [Quadrilateral Cowboy](https://blendogames.com/qc/).

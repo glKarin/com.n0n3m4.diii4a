@@ -1,5 +1,4 @@
 
-/*
 		attribute vec4 $positionAttrib;
 		attribute vec3 $normalAttrib;
 		attribute vec4 $texCoordAttrib;
@@ -19,22 +18,24 @@
 		uniform vec4 $lightFalloff_s;
 
 		uniform vec4 $lightOrigin;
-*/
 		
 		varying	vec4 texcoord3;
 		varying	vec4 texcoord4;
 		varying	vec4 texcoord6;
 		varying	vec4 texcoord7;
 		varying	vec4 vertexColor;
-
-		$ifdef r_useShadowMapping
-		$include "megatexture/interaction_glsl_vertex_shadowmapping.inc"
-		$endif
 		
 
 		void main()
 		{
-			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+			$if r_useARBPositionInvariant
+			gl_Position = ftransform();
+			$else
+			gl_Position.x = dot( vec4(gl_ModelViewProjectionMatrix[0].x, gl_ModelViewProjectionMatrix[1].x, gl_ModelViewProjectionMatrix[2].x, gl_ModelViewProjectionMatrix[3].x ) , gl_Vertex );
+			gl_Position.y = dot( vec4(gl_ModelViewProjectionMatrix[0].y, gl_ModelViewProjectionMatrix[1].y, gl_ModelViewProjectionMatrix[2].y, gl_ModelViewProjectionMatrix[3].y ) , gl_Vertex );
+			gl_Position.z = dot( vec4(gl_ModelViewProjectionMatrix[0].z, gl_ModelViewProjectionMatrix[1].z, gl_ModelViewProjectionMatrix[2].z, gl_ModelViewProjectionMatrix[3].z ) , gl_Vertex );
+			gl_Position.w = dot( vec4(gl_ModelViewProjectionMatrix[0].w, gl_ModelViewProjectionMatrix[1].w, gl_ModelViewProjectionMatrix[2].w, gl_ModelViewProjectionMatrix[3].w ) , gl_Vertex );
+			$endif
 
 			// Pack for best efficiency (reduces number of fragment shader instructions)
 			// This could ideally be done before sending the constants (would eliminate the need for the 3 lines below)
@@ -52,17 +53,13 @@
 				texcoord7.zw = ($texCoordAttrib.xy - 0.5) * $megaDetailTextureParams.x;
 			$endif
 			
-			texcoord6.x = dot(attr_Vertex, $lightProject_s);
-			texcoord6.y = dot(attr_Vertex, $lightProject_t);
-			texcoord6.z = dot(attr_Vertex, $lightFalloff_s);
-			texcoord6.w = dot(attr_Vertex, $lightProject_q);
+			texcoord6.x = dot(gl_Vertex, $lightProject_s);
+			texcoord6.y = dot(gl_Vertex, $lightProject_t);
+			texcoord6.z = dot(gl_Vertex, $lightFalloff_s);
+			texcoord6.w = dot(gl_Vertex, $lightProject_q);
 
 			// calculate vector to light in R0 (object space)
-			float LightIntensity = max(0.0, dot($normalAttrib, normalize($lightOrigin.xyz - attr_Vertex.xyz)));
+			float LightIntensity = max(0.0, dot($normalAttrib, normalize($lightOrigin.xyz - gl_Vertex.xyz)));
 			
 			vertexColor = vec4(LightIntensity, LightIntensity, LightIntensity, 1.0);
-
-			$ifdef r_useShadowMapping
-			$include "megatexture/interaction_glsl_vertex_shadowmapping.inc"
-			$endif
 		}

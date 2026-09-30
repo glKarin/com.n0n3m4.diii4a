@@ -1,4 +1,3 @@
-/*
 		uniform sampler2D 	$megaTextureLevel_0;
 		uniform sampler2D 	$megaTextureLevel_1;
 		uniform sampler2D 	$megaTextureLevel_2;
@@ -19,7 +18,6 @@
 		uniform vec4 		$ambientScale;
 		uniform vec4		$sunDirectionWorld;
 		uniform vec4        $parameters;
-*/
 		
 		varying	vec4 		texcoord3;
 		varying	vec4 		texcoord4;

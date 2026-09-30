@@ -23,8 +23,8 @@
 		
 		if (mask1.w==1.0)
 		{
-			R5.xy = scaled * $megaTextureParams_4.xy;
-			combined = texture2D($megaTextureLevel_4, R5.xy);
+			R5.xy = scaled * megatextureparams_4.xy;
+			combined = texture2D(megatexturelevel_4, R5.xy);
 			//combined = vec4(0, 1, 0, 1);
 		}
 		else
@@ -33,8 +33,8 @@
 	
 	if (mask1.x==0.0)
 	{
-		R1.xy = scaled * $megaTextureParams_0.xy;
-		combined = texture2D($megaTextureLevel_0, R1.xy);
+		R1.xy = scaled * megatextureparams_0.xy;
+		combined = texture2D(megatexturelevel_0, R1.xy);
 	}
 	else
 	{

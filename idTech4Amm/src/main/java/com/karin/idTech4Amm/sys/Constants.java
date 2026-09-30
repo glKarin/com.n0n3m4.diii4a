@@ -9,8 +9,8 @@ import com.karin.idTech4Amm.misc.TextHelper;
  */
 public final class Constants
 {
-    public static final int    CONST_UPDATE_RELEASE = 72;
-    public static final String CONST_RELEASE = "2026-07-08"; // 02-12; 05-08
+    public static final int    CONST_UPDATE_RELEASE = 73;
+    public static final String CONST_RELEASE = "2026-09-25"; // 02-12; 05-08
     public static final String CONST_EMAIL = "beyondk2000@gmail.com";
     public static final String CONST_DEV = "Karin";
     public static final String CONST_CODE = "Harmattan";
@@ -35,6 +35,7 @@ public final class Constants
             "Add `Quake 4: Translate Subtitle` mod of Quake4 support, game data directory named `hazzzzzy`. More view in `" + TextHelper.GenLinkText("https://github.com/hazzzzzy/Quake4-Translate-Subtitle", "Quake 4: Translate Subtitle") + "`.",
             "Update RealRTCW version to 5.4.",
             "Update The Dark Mod version to 2.14.",
+            "Fix DOOM3-BFG vulkan.",
             "Add gyroscope dead zone(rad/s) setting in launcher's controls tab panel.",
         };
 	};

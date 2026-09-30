@@ -11,13 +11,13 @@
      height="80">](https://f-droid.org/packages/com.karin.idTech4Amm/)
 
 **idTech** engine games **For** **A**ndroid. An **idTech** games runtime libraries collection on Android  
-#### DOOM III/Quake 4/Prey(2006) OpenGLES on Android/Windows/Linux  
+#### DOOM III/Quake 4/Prey(2006)/Enemy Territory: QUAKE Wars OpenGLES on Android/Windows/Linux  
 ##### DOOM 3 BFG/The Dark Mod/Quake 1 2 3/RTCW/GZDOOM/ETW/RealRTCW/FTEQW/STAR WARS™ Jedi Knight/Serious Sam Classic/Urban Terror/OpenMOHAA/Skin Deep/Quadrilateral Cowboy/Icarus Starship Command Simulator on Android   
 ##### Original named DIII4A++, based on com.n0n3m4.diii4a's OpenGLES version.
 **Latest version:**
-1.1.0harmattan72(lindaiyu)  
+1.1.0harmattan73(lindaiyu)  
 **Latest update:**
-2026-03-08  
+2026-09-25  
 **Arch:**
 arm64 armv7-a  
 **Platform:**
@@ -53,8 +53,9 @@ GPLv3
 | Game | Engine | Version | OpenGL ES version | Vulkan version | Standalone folder<br/>(* means always enabled) | Mods/Plugins |
 |:-----|:-----:|:-----:|:-----:|:-----:|:-----:|:-----|
 | DOOM III | n0n3m4's dante | - | 2.0/3.0 |  | doom3 | [Resurrection of Evil]()<br/>[The Lost Mission](https://www.moddb.com/mods/the-lost-mission)<br/>[Classic DOOM3](https://www.moddb.com/mods/classic-doom-3)<br/>[Rivensin](https://www.moddb.com/mods/ruiner)<br/>[HardCorps](https://www.moddb.com/mods/hardcorps)<br/>[Overthinked Doom^3](https://www.moddb.com/mods/overthinked-doom3)<br/>[Sabot(a7x)](https://www.moddb.com/games/doom-3-resurrection-of-evil/downloads/sabot-alpha-7x)<br/>[HeXen:Edge of Chaos](https://www.moddb.com/mods/hexen-edge-of-chaos)<br/>[Fragging Free](https://www.moddb.com/mods/fragging-free)<br/>[LibreCoop](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[LibreCoop D3XP](https://www.moddb.com/mods/librecoop-dhewm3-coop)<br/>[Perfected Doom 3](https://www.moddb.com/mods/perfected-doom-3-version-500)<br/>[Perfected Doom 3:RoE](https://www.moddb.com/mods/perfected-doom-3-version-500)<br/>[Doom 3: Phobos](https://www.moddb.com/mods/phobos)([Dhewm3 compatibility patch](https://www.moddb.com/games/doom-iii/addons/doom-3-phobos-dhewm3-compatibility-patch)) |
-| Quake IV | n0n3m4's dante | - | 2.0/3.0 |  | quake4 | [Hardqore](https://www.moddb.com/mods/quake-4-hardqore) |
+| Quake IV | n0n3m4's dante | - | 2.0/3.0 |  | quake4 | [Hardqore](https://www.moddb.com/mods/quake-4-hardqore)<br/>[Awakening](https://www.moddb.com/mods/quake-4-the-awakening-complete-edition)<br/>[Translate Subtitle](https://github.com/hazzzzzy/Quake4-Translate-Subtitle) |
 | Prey(2006) | n0n3m4's dante | - | 2.0/3.0 |  | prey |  |
+| Enemy Territory: QUAKE Wars | n0n3m4's dante | - | 2.0/3.0 |  | etqw |  |
 | DOOM 3 BFG(Classic DOOM 1&2) | [RBDOOM-3-BFG](https://github.com/RobertBeckebans/RBDOOM-3-BFG) | 1.4.0<br/>(The last OpenGL renderer version) | 3.0 | 1.1 | doom3bfg |  |
 | The Dark Mod | [Dark Mod](https://www.thedarkmod.com) | 2.13 | 3.2<br/>(require geometry shader support) |  | darkmod * |  |
 | Return to Castle Wolfenstein | [iortcw](https://github.com/iortcw/iortcw) | 1.51d | 1.1 |  | rtcw |  |
@@ -77,11 +78,15 @@ GPLv3
 
 ----------------------------------------------------------------------------------
 
-> #### Update 1.1.0harmattan72 (2026-03-08)
+> #### Update 1.1.0harmattan73 (2026-09-25)
 
-* Add `Quadrilateral Cowboy`(ver 1.0.2602252) support, game standalone directory named `qc`, game data directory named `base`. More view in [Quadrilateral Cowboy](https://blendogames.com/qc/).
-* Add `Icarus Starship Command Simulator`(ver 1.0.9) support, game standalone directory named `icarus`, game data directory named `base`. More view in [Icarus Starship Command Simulator](https://store.steampowered.com/app/620170/Icarus_Starship_Command_Simulator/).
-* Add new game chooser on launcher.
+* Add `Enemy Territory: QUAKE Wars`(ver 1.5) support, game standalone directory named `etqw`, game data directory named `etqwbase`. More view in [Enemy Territory: QUAKE Wars](https://www.splashdamage.com/games/enemy-territory-quake-wars/).
+* Add `Quake 4: Awakening` mod of Quake4 support, game data directory named `q4xbase`. More view in [Quake 4: Awakening](https://www.moddb.com/mods/quake-4-the-awakening-complete-edition).
+* Add `Quake 4: Translate Subtitle` mod of Quake4 support, game data directory named `hazzzzzy`. More view in [Quake 4: Translate Subtitle](https://github.com/hazzzzzy/Quake4-Translate-Subtitle).
+* Update RealRTCW version to 5.4.
+* Update The Dark Mod version to 2.14.
+* Fix DOOM3-BFG vulkan.
+* Add gyroscope dead zone(rad/s) setting in launcher's controls tab panel.
 
 ----------------------------------------------------------------------------------
 
@@ -99,35 +104,36 @@ GPLv3
 ----------------------------------------------------------------------------------
 
 > #### About Quake IV
-##### For playing Quake 4([jmarshall](https://github.com/jmarshall23) 's [Quake4Doom](https://github.com/jmarshall23/Quake4Doom)). Now can play all levels, but some levels has bugs.  
-1. Putting PC Quake 4 game data file to `q4base` folder and START directly.
-2. *Effect system*: Quake4 new advanced `BSE` particle system is working now! Also see [Quake4BSE](https://github.com/jmarshall23/Quake4BSE), [Quake4Decompiled](https://github.com/jmarshall23/Quake4Decompiled), and OpenBSE with DOOM3 original FX/Particle system has been removed.
+1. *Effect system*: Quake4 new advanced `BSE` particle system is working now! Also see [Quake4BSE](https://github.com/jmarshall23/Quake4BSE), [Quake4Decompiled](https://github.com/jmarshall23/Quake4Decompiled).
 
 ----------------------------------------------------------------------------------
 
 > #### About Prey(2006)
-##### For playing Prey(2006)([jmarshall](https://github.com/jmarshall23) 's [PreyDoom](https://github.com/jmarshall23/PreyDoom)). Now can play all levels, but some levels has bugs.
-1. Putting PC Prey game data file to `base`(`preybase` on Android) folder and START directly.
-2. Some problems solution: e.g. using cvar `harm_ui_translateAlienFont` to translate Alien text on GUI.
-3. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).
-4. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.
+1. Some problems solution: e.g. using cvar `harm_ui_translateAlienFont` to translate Alien text on GUI.
+2. Exists bugs: e.g. some incorrect collision(using `noclip`), some GUIs not work(Music CD in RoadHouse).
+3. If settings UI is not work, can edit `preyconfig.cfg` for binding extras key.
 ```
 bind "Your key of spirit walk" "_impulse54"
 bind "Your key of second mode attack of weapons" "_attackAlt"
 bind "Your key of toggle lighter" "_impulse16"
 bind "Your key of drop" "_impulse25"
-```
+
+----------------------------------------------------------------------------------
+
+> #### About Enemy Territory: QUAKE Wars
+1. Only support play with bots, and has some bugs.
 
 ----------------------------------------------------------------------------------
 
 > #### Screenshot
 ##### Game
 
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_bathroom.png" width="33%" alt="Classic bathroom"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4.png" width="33%" alt="Quake IV on DOOM3"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey.png" width="33%" alt="Prey(2006) on DOOM3">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_bathroom.png" width="50%" alt="Classic bathroom"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4.png" width="50%" alt="Quake IV on DOOM3">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_prey.png" width="50%" alt="Prey(2006) on DOOM3"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_etqw.jpg" width="50%" alt="ETQW on DOOM3">
 
 ##### Mod
 
-<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_roe.png" width="33%" alt="Resurrection of Evil"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_the_lost_mission.png" width="33%" alt="The lost mission"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_classic_doom3.png" width="33%" alt="Classic DOOM">
+<img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_roe.png" width="25%" alt="Resurrection of Evil"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_doom3_the_lost_mission.png" width="25%" alt="The lost mission"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_classic_doom3.png" width="25%" alt="Classic DOOM"><img src="https://github.com/glKarin/com.n0n3m4.diii4a/raw/package/screenshot/Screenshot_quake4_awakening.jpg" width="25%" alt="Quake 4: Awakening">
 
 ##### Other
 
@@ -204,6 +210,11 @@ bind "Your key of drop" "_impulse25"
 2. **_PREY**: Enable Humanhead Prey patches in game source code.
 3. **_MOD_FULL_BODY_AWARENESS**: Build Full-body-awareness mod.
 
+#### * Enemy Territory: QUAKE Wars
+##### All new sources files put on `humanhead` folder.
+1. **_SPLASHDAMAGE**: Enable SplashDamage ETQW patches in engine and idlib source code.
+2. **_ETQW**: Enable SplashDamage ETQW patches in game source code.
+
 #### Android
 1. **_OPENSLES**: Add OpenSLES support for sound.
 
@@ -235,7 +246,7 @@ bind "Your key of drop" "_impulse25"
 ----------------------------------------------------------------------------------
 
 > #### Run idTech4A++ on other Android application with Android intent
-1. Setup game type with `game` key: also see Q3E/com.n0n3m4.q3e.Q3EGameConstants.java GAME_XXX constants. Valid value: `doom3` `quake4` `prey2006` `quake2` `quake3` `rtcw` `tdm` `quake1` `doom3bfg` `gzdoom` `etw` `realrtcw` `fteqw` `openja` `openjo` `samtfe` `samtse` `urt` `openmohaa` `skindeep` `qc` `icarus` `source`
+1. Setup game type with `game` key: also see Q3E/com.n0n3m4.q3e.Q3EGameConstants.java GAME_XXX constants. Valid value: `doom3` `quake4` `prey2006` `etqw` `quake2` `quake3` `rtcw` `tdm` `quake1` `doom3bfg` `gzdoom` `etw` `realrtcw` `fteqw` `openja` `openjo` `samtfe` `samtse` `urt` `openmohaa` `skindeep` `qc` `icarus` `source`
 2. Setup game command arguments with `command` key. Starts with `game.arm`
 
 ##### e.g. Run DOOM 3 with custom mod game dll
@@ -308,7 +319,7 @@ finish();
 
 | Feature                             | Github | F-Droid |
 |:------------------------------------|:------:|:-------:|
-| Android min version(for ffmpeg) |   4.4  |   7.0   |
+| Android min version(for ffmpeg)     |   4.4  |   7.0   |
 | Khronos Vulkan validation layer     |   Yes  |    No   |
 
 ---------------------------------------------------------------------------------- 
@@ -331,7 +342,7 @@ finish();
 ##### master:
 * /idTech4Amm: launcher source
 * /Q3E: frontend source
-* /doom3: DOOM 3/Quake 4/Prey(2006) source
+* /doom3: DOOM 3/Quake 4/Prey(2006)/Enemy Territory: QUAKE Wars source
 
 ##### free:
 * For F-Droid pure free version.
