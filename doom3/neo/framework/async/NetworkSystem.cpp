@@ -347,6 +347,7 @@ int idNetworkSystem::ServerSetBotUserCommand( int clientNum, int frameNum, const
 
 int idNetworkSystem::ServerSetBotUserName( int clientNum, const char* playerName ) {
 	sessLocal.mapSpawnData.userInfo[clientNum].Set("ui_name", playerName);
+	sessLocal.mapSpawnData.userInfo[clientNum].Set("ui_realname", playerName);
 	// must sync to game: else it maybe cause forever loop on sdBotThreadData::ChangeBotName
 	game->ValidateUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ]);
 	game->UserInfoChanged(clientNum);

@@ -873,6 +873,7 @@ void idAsyncServer::BeginLocalClient(void)
 	game->SetUserInfo(localClientNum, sessLocal.mapSpawnData.userInfo[localClientNum], false);
 #elif defined(_SPLASHDAMAGE)
 	game->ValidateUserInfo(localClientNum, sessLocal.mapSpawnData.userInfo[localClientNum]);
+	sessLocal.mapSpawnData.userInfo[localClientNum].Set("ui_realname", sessLocal.mapSpawnData.userInfo[localClientNum].GetString("ui_name"));
 	game->UserInfoChanged(localClientNum);
 #else
 	game->SetUserInfo(localClientNum, sessLocal.mapSpawnData.userInfo[localClientNum], false, false);
@@ -1082,6 +1083,9 @@ void idAsyncServer::SendUserInfoBroadcast(int userInfoNum, const idDict &info, b
 #elif defined(_SPLASHDAMAGE)
 	idDict tempInfo = info;
 	game->ValidateUserInfo(userInfoNum, tempInfo);
+	// There is no account service on the native LAN transport. Supply the
+	// display name that the ETQW SDK normally receives from that service.
+	tempInfo.Set("ui_realname", tempInfo.GetString("ui_name"));
 	gameInfo = &tempInfo;
 #else
 	gameInfo = game->SetUserInfo(userInfoNum, info, false, true);
