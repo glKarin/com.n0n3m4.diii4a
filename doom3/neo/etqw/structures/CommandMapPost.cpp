@@ -440,6 +440,8 @@ void sdCommandMapPost::DrawLocalPlayerCommandMapInfo_Icons( sdUserInterfaceLocal
 		sizeAdjustment = *prop->value.floatValue;
 	}
 
+	const sdBounds2D clipBounds(x, y, w, h);
+	deviceContext->SetClipShape(&clipBounds, !fullSize && !drawSquare);
 	sdCommandMapInfo* info;
 	for ( info = sdCommandMapInfoManager::GetInstance().GetIcons(); info; info = info->GetActiveNode().Next() ) {
 		bool known = true;
@@ -525,4 +527,5 @@ void sdCommandMapPost::DrawLocalPlayerCommandMapInfo_Icons( sdUserInterfaceLocal
 		}
 		info->Draw( player, coords, screenPos, screenExtents, inverseSize, known, sizeAdjustment, rotation, rotAngle, fullSize );
 	}
+	deviceContext->SetClipShape(NULL, false);
 }

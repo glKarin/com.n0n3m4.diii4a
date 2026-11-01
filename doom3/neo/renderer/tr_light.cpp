@@ -33,7 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef _SPLASHDAMAGE //karin: imposter
 #include "renderer/ImposterGeometry.h"
 
-static idCVar harm_r_skipImposter("harm_r_skipImposter", "0", CVAR_BOOL | CVAR_RENDERER, "skip imposter rendering for static model");
+// Keeping the real geometry is a persistent quality setting, including in
+// local bot matches where cheat/debug cvars are reset by the server.
+static idCVar harm_r_skipImposter("harm_r_skipImposter", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "retain static 3D models instead of distant imposters");
 #endif
 
 static const float CHECK_BOUNDS_EPSILON = 1.0f;

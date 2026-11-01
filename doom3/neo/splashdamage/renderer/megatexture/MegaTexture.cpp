@@ -521,7 +521,9 @@ bool idMegaTextureLevel::UploadTiles( int time ) {
 	parms[0] = newParms[0];
 	parms[1] = newParms[1];
 	if ( image ) {
-		image->BindFragment();
+		// Uploads share texture units with rendering. Keep the GL state cache in
+		// sync so a subsequent sampler bind cannot skip the required texture.
+		image->Bind();
 	}
 	for ( int y = 0; y < 16; ++y ) {
 		for ( int x = 0; x < 16; ++x ) {

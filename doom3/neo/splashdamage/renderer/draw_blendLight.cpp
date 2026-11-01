@@ -76,6 +76,11 @@ void RB_BlendLight_external(const shaderStage_t *pStage, const drawSurf_t *drawS
 	//GL_State( pStage->drawStateBits );
 
 	blendLightProgram->SetupState();
+	// Projected lights shade the visible depth prepass, including alpha-tested
+	// foliage. A program's blend state must not replace this with LEQUAL or
+	// write depth over the transparent part of a leaf card.
+	GL_State((backEnd.glState.glStateBits & ~(GLS_DEPTHFUNC_ALWAYS | GLS_DEPTHFUNC_EQUAL))
+		| GLS_DEPTHMASK | GLS_DEPTHFUNC_EQUAL);
 
 	//GL_EnableVertexAttribArray(SHADER_PARM_ADDR(attr_Vertex));
 

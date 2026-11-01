@@ -101,6 +101,7 @@ void sdDeviceContextLocal::BeginEmitFullScreen() {
 }
 
 void sdDeviceContextLocal::End() {
+	tr.gameGuiModel->SetClipShape(NULL, false);
 	tr.gameGuiModel->End();
 	tr.gameGuiModel->SetRegisters(NULL);
 	SetColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -138,6 +139,16 @@ void sdDeviceContextLocal::PopClipRect() {
     if (clipRects.Num()) {
         clipRects.RemoveIndex(clipRects.Num()-1);
     }
+}
+
+void sdDeviceContextLocal::SetClipShape( const sdBounds2D* bounds, bool ellipse ) {
+    if (!bounds) {
+        tr.gameGuiModel->SetClipShape(NULL, false);
+        return;
+    }
+    idVec4 rect(bounds->GetLeft(), bounds->GetTop(), bounds->GetWidth(), bounds->GetHeight());
+    AdjustCoords(&rect.x, &rect.y, &rect.z, &rect.w);
+    tr.gameGuiModel->SetClipShape(&rect, ellipse);
 }
 
 void sdDeviceContextLocal::DrawRect( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial* material, float angle ) {

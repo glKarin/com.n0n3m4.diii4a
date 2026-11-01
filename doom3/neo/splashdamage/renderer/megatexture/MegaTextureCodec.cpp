@@ -444,7 +444,10 @@ bool idBareDctDecoder::DecompressLuminanceEnhancement_Generic( const byte *in, b
 			for ( int y = 0; y < 8 && by + y < height; ++y ) {
 				for ( int x = 0; x < 8 && bx + x < width; ++x ) {
 					byte *pixel = out + 4 * ( ( by + y ) * width + bx + x );
-					pixel[0] = (byte)ClampByte( pixel[0] + block[y * 8 + x] );
+                    // The residual stream also uses JPEG's -128 level shift.
+                    // Restore it before adding the signed residual to the parent Y.
+                    // Omitting this subtracts 128 from every enhanced terrain tile.
+					pixel[0] = (byte)ClampByte( pixel[0] + block[y * 8 + x] + 128 );
 				}
 			}
 		}

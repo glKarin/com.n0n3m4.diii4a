@@ -741,6 +741,7 @@ void idGuiModel::DrawStretchTri(idVec2 p1, idVec2 p2, idVec2 p3, idVec2 t1, idVe
 sdGuiModel::sdGuiModel(void)
 	: idGuiModel()
 {
+	applyingClipShape = false;
 	((idMat4 *)emitModelMatrix)->Identity();
 	emitDepthHack = false;
 	usingCurrentView = 0;
@@ -854,6 +855,74 @@ void sdGuiModel::Flush(void)
 	Clear();
 }
 
+void sdGuiModel::SetClipShape(const idVec4 *rect, bool ellipse) {
+    clipShapePlanes.Clear();
+    if (!rect) return;
+    if (rect->z <= 0 || rect->w <= 0) {
+        clipShapePlanes.Append(idVec3(0, 0, -1)); // empty region
+        return;
+    }
+    if (!ellipse) {
+        clipShapePlanes.Append(idVec3(1, 0, -rect->x));
+        clipShapePlanes.Append(idVec3(-1, 0, rect->x + rect->z));
+        clipShapePlanes.Append(idVec3(0, 1, -rect->y));
+        clipShapePlanes.Append(idVec3(0, -1, rect->y + rect->w));
+        return;
+    }
+    // Inscribed polygon: every generated pixel stays inside the map ellipse.
+    // 64 edges are subpixel at the HUD's 4K size, including non-square UI scaling.
+    const int sides = 64;
+    const float rx = rect->z * .5f, ry = rect->w * .5f;
+    const float cx = rect->x + rx, cy = rect->y + ry;
+    const float inset = idMath::Cos(idMath::PI / sides);
+    for (int i = 0; i < sides; ++i) {
+        const float a = (i + .5f) * idMath::TWO_PI / sides;
+        const float nx = -idMath::Cos(a) / rx, ny = -idMath::Sin(a) / ry;
+        clipShapePlanes.Append(idVec3(nx, ny, inset - nx * cx - ny * cy));
+    }
+}
+
+void sdGuiModel::ClipShapeGeometry(const idDrawVert *input, const glIndex_t *inputIndexes, int indexCount,
+        idList<idDrawVert>& output, idList<glIndex_t>& outputIndexes, bool vertexColors) const {
+    idList<idDrawVert> polygon, next;
+    for (int triangle = 0; triangle + 2 < indexCount; triangle += 3) {
+        polygon.SetNum(3, false);
+        for (int i = 0; i < 3; ++i) polygon[i] = input[inputIndexes[triangle + i]];
+        for (int plane = 0; plane < clipShapePlanes.Num() && polygon.Num(); ++plane) {
+            const idVec3& p = clipShapePlanes[plane];
+            int inside = 0;
+            for (int i = 0; i < polygon.Num(); ++i)
+                inside += p.x * polygon[i].xyz.x + p.y * polygon[i].xyz.y + p.z >= 0;
+            if (inside == polygon.Num()) continue;
+            if (!inside) { polygon.SetNum(0, false); break; }
+            next.SetNum(0, false);
+            for (int i = 0; i < polygon.Num(); ++i) {
+                const idDrawVert& a = polygon[i];
+                const idDrawVert& b = polygon[(i + 1) % polygon.Num()];
+                const float da = p.x * a.xyz.x + p.y * a.xyz.y + p.z;
+                const float db = p.x * b.xyz.x + p.y * b.xyz.y + p.z;
+                if (da >= 0) next.Append(a);
+                if ((da >= 0) != (db >= 0)) {
+                    idDrawVert intersection = a;
+                    const float fraction = da / (da - db);
+                    if (vertexColors) intersection.LerpAll(a, b, fraction);
+                    else intersection.Lerp(a, b, fraction);
+                    next.Append(intersection);
+                }
+            }
+            polygon.Swap(next);
+        }
+        if (polygon.Num() < 3) continue;
+        const int base = output.Num();
+        for (int i = 0; i < polygon.Num(); ++i) output.Append(polygon[i]);
+        for (int i = 2; i < polygon.Num(); ++i) {
+            outputIndexes.Append(base);
+            outputIndexes.Append(base + i - 1);
+            outputIndexes.Append(base + i);
+        }
+    }
+}
+
 /*
 =============
 DrawStretchPic
@@ -868,6 +937,15 @@ void sdGuiModel::DrawStretchPic(const idDrawVert *dverts, const glIndex_t *dinde
 	}
 
 	if (!(dverts && dindexes && vertCount && indexCount && hShader)) {
+		return;
+	}
+	if (clipShapePlanes.Num() && !applyingClipShape) {
+		idList<idDrawVert> clipped;
+		idList<glIndex_t> clippedIndexes;
+		ClipShapeGeometry(dverts, dindexes, indexCount, clipped, clippedIndexes, true);
+		applyingClipShape = true;
+		DrawStretchPic(clipped.Ptr(), clippedIndexes.Ptr(), clipped.Num(), clippedIndexes.Num(), hShader, clip, min_x, min_y, max_x, max_y);
+		applyingClipShape = false;
 		return;
 	}
 
@@ -988,6 +1066,15 @@ void sdGuiModel::DrawStretchPicWithColor(const idDrawVert *dverts, const glIndex
 	}
 
 	if (!(dverts && dindexes && vertCount && indexCount && hShader)) {
+		return;
+	}
+	if (clipShapePlanes.Num() && !applyingClipShape) {
+		idList<idDrawVert> clipped;
+		idList<glIndex_t> clippedIndexes;
+		ClipShapeGeometry(dverts, dindexes, indexCount, clipped, clippedIndexes, false);
+		applyingClipShape = true;
+		DrawStretchPicWithColor(clipped.Ptr(), clippedIndexes.Ptr(), clipped.Num(), clippedIndexes.Num(), hShader, clip, color, min_x, min_y, max_x, max_y);
+		applyingClipShape = false;
 		return;
 	}
 

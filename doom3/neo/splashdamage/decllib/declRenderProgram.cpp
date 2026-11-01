@@ -345,6 +345,9 @@ void sdDeclRenderProgram::ParseBlend(idParser &src)
 {
 	idToken token;
 	int		srcBlend, dstBlend;
+	// A blend directive replaces only the blend factors. In particular,
+	// atmosphere programs declare depthfunc equal before their blend mode.
+	const int otherStateBits = drawStateBits & ~(GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS);
 
 	if (!src.ReadToken(&token)) {
 		return;
@@ -352,23 +355,23 @@ void sdDeclRenderProgram::ParseBlend(idParser &src)
 
 	// blending combinations
 	if (!token.Icmp("blend")) {
-		drawStateBits = GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
+		drawStateBits = otherStateBits | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
 		return;
 	}
 
 	if (!token.Icmp("add")) {
-		drawStateBits = GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE;
+		drawStateBits = otherStateBits | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE;
 		return;
 	}
 
 	if (!token.Icmp("filter") || !token.Icmp("modulate")) {
-		drawStateBits = GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO;
+		drawStateBits = otherStateBits | GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO;
 		return;
 	}
 
 	if (!token.Icmp("none")) {
 		// none is used when defining an alpha mask that doesn't draw
-		drawStateBits = GLS_SRCBLEND_ZERO | GLS_DSTBLEND_ONE;
+		drawStateBits = otherStateBits | GLS_SRCBLEND_ZERO | GLS_DSTBLEND_ONE;
 		return;
 	}
 
@@ -386,7 +389,7 @@ void sdDeclRenderProgram::ParseBlend(idParser &src)
 
 	dstBlend = NameToDstBlendMode(token);
 
-	drawStateBits = srcBlend | dstBlend;
+	drawStateBits = otherStateBits | srcBlend | dstBlend;
 }
 
 void sdDeclRenderProgram::ParseDepthFunc(idParser &src)

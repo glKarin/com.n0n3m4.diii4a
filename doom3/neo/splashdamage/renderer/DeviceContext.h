@@ -41,6 +41,9 @@ public:
     virtual void			EnableClipping( bool enable ) = 0;
     virtual void 			PushClipRect( const sdBounds2D& bounds ) = 0;
     virtual void 			PopClipRect() = 0;
+    // An explicit geometry mask, applied after rotation and coordinate scaling.
+    // Passing NULL ends the mask; ordinary window clipping remains independent.
+    virtual void            SetClipShape( const sdBounds2D* bounds, bool ellipse ) = 0;
 
     virtual void			DrawRect( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial* material, float angle = 0.0f ) = 0;
     virtual void			DrawClippedRect( float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial* material, float angle = 0.0f ) = 0;

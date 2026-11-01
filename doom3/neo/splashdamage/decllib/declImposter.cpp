@@ -109,7 +109,7 @@ bool sdDeclImposter::Parse( const char *text, const int textLength ) {
 				if (!token.Icmp("min")) {
 					idVec2 minValue;
 					minValue[0] = src.ParseFloat();
-					minValue[1] = src.ParseInt();
+					minValue[1] = src.ParseFloat();
 					item.SetMins(minValue);
 					continue;
 				}

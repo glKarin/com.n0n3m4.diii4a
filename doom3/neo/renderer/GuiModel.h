@@ -89,6 +89,7 @@ public:
 	void	SetRegister(int index, float value);
 	void	SetRegisters(const float *values);
 	void	Flush(void);
+	void    SetClipShape(const idVec4 *rect, bool ellipse);
 	// idDrawVert must setup color
 	void	DrawStretchPic(const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *hShader,
 			bool clip = true, float min_x = 0.0f, float min_y = 0.0f, float max_x = 640.0f, float max_y = 480.0f);
@@ -108,6 +109,10 @@ private:
 	};
 	void	EndCurrentView(void);
 	void	AddCurrentViewSurface(guiModelSurface_t *surf);
+	void    ClipShapeGeometry(const idDrawVert *input, const glIndex_t *inputIndexes, int indexCount,
+	            idList<idDrawVert>& output, idList<glIndex_t>& outputIndexes, bool vertexColors) const;
+	idList<idVec3> clipShapePlanes;
+	bool applyingClipShape;
 
 	//---------------------------
 private:
