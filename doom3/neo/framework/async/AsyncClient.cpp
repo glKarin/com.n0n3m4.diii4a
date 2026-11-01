@@ -221,9 +221,15 @@ void idAsyncClient::ConnectToServer(const netadr_t adr)
 
 	active = true;
 
+#ifdef _SPLASHDAMAGE
+	game->HideMainMenu();
+	common->Printf("Connecting to native ETQW server %s (protocol %d.%d)\n",
+		Sys_NetAdrToString(adr), ASYNC_PROTOCOL_MAJOR, ASYNC_PROTOCOL_MINOR);
+#else
 	guiNetMenu = uiManager->FindGui("guis/netmenu.gui", true, false, true);
 	guiNetMenu->SetStateString("status", va(common->GetLanguageDict()->GetString("#str_06749"), Sys_NetAdrToString(adr)));
 	session->SetGUI(guiNetMenu, HandleGuiCommand);
+#endif
 }
 
 /*
@@ -855,11 +861,27 @@ void idAsyncClient::ProcessUnreliableServerMessage(const idBitMsg &msg)
 
 			// read the game snapshot
 #ifdef _SPLASHDAMAGE
-			game->ClientReadSnapshot(snapshotSequence, snapshotGameFrame, snapshotGameTime, numDuplicatedUsercmds, aheadOfServer, msg, msg);
+			const int stateSize = msg.ReadUShort();
+			const int commandSize = msg.ReadUShort();
+			if (stateSize <= 0 || commandSize <= 0 || stateSize + commandSize > msg.GetRemaingData()) {
+				common->Error("Invalid native ETQW snapshot stream lengths");
+				return;
+			}
+			idBitMsg stateMsg, commandMsg;
+			stateMsg.Init(msg.GetData() + msg.GetReadCount(), stateSize);
+			stateMsg.SetSize(stateSize);
+			stateMsg.BeginReading();
+			msg.ReadData(NULL, stateSize);
+			commandMsg.Init(msg.GetData() + msg.GetReadCount(), commandSize);
+			commandMsg.SetSize(commandSize);
+			commandMsg.BeginReading();
+			msg.ReadData(NULL, commandSize);
+			game->ClientReadSnapshot(snapshotSequence, snapshotGameFrame, snapshotGameTime, numDuplicatedUsercmds, aheadOfServer, stateMsg, commandMsg);
 #else
 			game->ClientReadSnapshot(clientNum, snapshotSequence, snapshotGameFrame, snapshotGameTime, numDuplicatedUsercmds, aheadOfServer, msg);
 #endif
 
+#ifndef _SPLASHDAMAGE
 			// read user commands of other clients from the snapshot
 			for (last = NULL, i = msg.ReadByte(); i < MAX_ASYNC_CLIENTS; i = msg.ReadByte()) {
 				numUsercmds = msg.ReadByte();
@@ -885,6 +907,7 @@ void idAsyncClient::ProcessUnreliableServerMessage(const idBitMsg &msg)
 				}
 			}
 
+#endif
 			// if this is the first snapshot after a game init was received
 			if (clientState == CS_CONNECTED) {
 				gameTimeResidual = 0;
@@ -1236,6 +1259,9 @@ void idAsyncClient::ProcessConnectResponseMessage(const netadr_t from, const idB
 
 	channel.Init(from, clientId);
 	clientNum = msg.ReadLong();
+#ifdef _SPLASHDAMAGE
+	common->Printf("Assigned native client slot %d\n", clientNum);
+#endif
 	clientState = CS_CONNECTED;
 	lastPacketTime = -9999;
 

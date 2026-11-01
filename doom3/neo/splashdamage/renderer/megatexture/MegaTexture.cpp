@@ -418,6 +418,11 @@ void idMegaTextureLevel::ShutdownTileCache() {
 }
 
 void idMegaTextureLevel::EmptyLevelImage( idImage *target ) {
+	// Dedicated servers parse terrain materials without a graphics device.
+	// GenerateImage deliberately does nothing in this state.
+	if ( !glConfig.isInitialized ) {
+		return;
+	}
 	const int pixels = MEGA_TEXTURE_LEVEL_SIZE * MEGA_TEXTURE_LEVEL_SIZE;
 	byte *data = new byte[pixels * 4];
 	for ( int i = 0; i < pixels; ++i ) {
@@ -1045,6 +1050,7 @@ void idMegaTexture::Unbind() {
 }
 
 bool idMegaTexture::UploadTiles( int time ) {
+	if ( !glConfig.isInitialized ) return true;
 	bool complete = true;
 	for ( int i = numLevels - 1; i >= 0; --i ) complete &= levels[i].UploadTiles( time );
 	if ( upscaleLevel ) complete &= upscaleLevel->UploadTiles( time );
@@ -1139,7 +1145,7 @@ void idMegaTexture::LoadDetailTexture() {
 }
 
 void idMegaTexture::ForceUpdate() {
-	if ( purged ) return;
+	if ( purged || !glConfig.isInitialized ) return;
 	const int savedShaderQuality = lastShaderQuality;
 	lastShaderQuality = r_shaderQuality.GetInteger();
 	forcedUpdate = true;

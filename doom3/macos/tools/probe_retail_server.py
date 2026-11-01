@@ -140,6 +140,31 @@ def parse_pure(data):
     raise ProtocolError("Too many pure checksums")
 
 
+def parse_connect_response(data):
+    kind, r = envelope(data)
+    if kind != "connectResponse":
+        raise ProtocolError("Expected connectResponse")
+    result = dict(channel_ids=(r.number("H"), r.number("H")), client_num=r.number("I"),
+                  game_init_id=r.number("B"), game_frame=r.number("I"), game_time=r.number("I"))
+    pure_wait = r.number("B")  # one bit, then byte alignment before dictionary
+    if result["client_num"] >= 32 or pure_wait > 1:
+        raise ProtocolError("Invalid assigned slot or pure-wait flag")
+    result["pure_wait"] = bool(pure_wait)
+    values = {}
+    for _ in range(257):
+        key = r.string()
+        if not key:
+            break
+        if key in values or len(values) == 256:
+            raise ProtocolError("Duplicate or excessive server-info keys")
+        values[key] = r.string()
+    if r.string():
+        raise ProtocolError("Unexpected removed dictionary key")
+    r.finish()
+    result["server"] = values
+    return result
+
+
 def connect_packet(challenge, client_ids, declaration_checksum, os_id=1):
     if any(challenge["session_id"]):
         raise ProtocolError("Server requires an authentication session")
@@ -181,6 +206,13 @@ def pak_inventory(base):
 def reply_description(data):
     kind, r = envelope(data)
     result = {"response": kind}
+    if kind == "connectResponse":
+        result.update(parse_connect_response(data))
+    elif kind == "connectFailed":
+        result["code"] = r.number("I")
+        if result["code"] == 7:
+            result["reason"] = "game/errors/servernosync"
+            r.finish()
     if kind == "print":
         result["code"] = r.number("I")
         # Only the observed plain-text miscellaneous opcode is decoded here.

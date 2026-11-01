@@ -76,6 +76,12 @@ bool sdRenderProgram::LoadProgram(const sdDeclRenderProgram *decl)
     shaderHandle_t handle;
     declRenderProgram = decl;
 
+    // The dedicated server needs material declarations for collision/gameplay,
+    // but never has a GL/Metal device on which to compile their shaders.
+    if (cvarSystem->GetCVarInteger("net_serverDedicated") == 1) {
+        return true;
+    }
+
     if (!declRenderProgram->IsCompleted()) {
         common->Warning("sdRenderProgram::LoadProgram: render program decl '%s' not completed", decl->GetName());
         return false;

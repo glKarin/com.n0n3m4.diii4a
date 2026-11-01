@@ -37,7 +37,13 @@ DOOM III gold:	33
 1.3 patch:		40
 1.3.1:			41
 */
+#ifdef _SPLASHDAMAGE
+// Native port transport: separate SDK snapshot/usercmd streams and full buttons.
+// This is deliberately distinct from both retail 10.21 and the old 14.41 adapter.
+const int ASYNC_PROTOCOL_MINOR		= 42;
+#else
 const int ASYNC_PROTOCOL_MINOR		= 41;
+#endif
 const int ASYNC_PROTOCOL_VERSION	= (ASYNC_PROTOCOL_MAJOR << 16) + ASYNC_PROTOCOL_MINOR;
 #define MAJOR_VERSION(v) ( v >> 16 )
 

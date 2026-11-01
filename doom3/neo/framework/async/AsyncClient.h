@@ -79,6 +79,7 @@ class idAsyncClient
 	friend class idNetworkSystem;
 #endif
 	public:
+		int GetGameTime(void) const { return gameTime; }
 		idAsyncClient();
 
 		void				Shutdown(void);

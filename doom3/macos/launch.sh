@@ -10,7 +10,7 @@ if [[ $# -eq 0 || ! -d "$1/base" ]]; then
 fi
 DATA_ROOT="$(cd "$1" && pwd)"
 shift
-ENGINE="$BUILD_DIR/doom3/neo/ETQW"
+ENGINE="${ETQW_ENGINE:-$BUILD_DIR/doom3/neo/ETQW}"
 MODULE="$BUILD_DIR/doom3/neo/libetqwgame.dylib"
 AUDIO="$BUILD_DIR/openal/libopenal.1.dylib"
 COMPAT="$SOURCE_ROOT/Q3E/src/main/assets/pak/etqwbase/zzz_etqwbase.pk4"

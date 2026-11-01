@@ -1000,7 +1000,7 @@ void idAsyncServer::CheckClientTimeouts(void)
 		}
 #ifdef _SPLASHDAMAGE //karin: bot fake client
 		if (ClientIsBot(client))
-			return;
+			continue;
 #endif
 
 		if (client.lastPacketTime > serverTime) {
@@ -1398,11 +1398,21 @@ bool idAsyncServer::SendSnapshotToClient(int clientNum)
 #ifdef _RAVEN
 	game->ServerWriteSnapshot(clientNum, client.snapshotSequence, msg, clientInPVS, MAX_ASYNC_CLIENTS, 0);
 #elif defined(_SPLASHDAMAGE)
-	game->ServerWriteSnapshot(clientNum, client.snapshotSequence, msg, msg);
+	byte stateBuffer[MAX_MESSAGE_SIZE], commandBuffer[MAX_MESSAGE_SIZE];
+	idBitMsg stateMsg, commandMsg;
+	stateMsg.Init(stateBuffer, sizeof(stateBuffer));
+	commandMsg.Init(commandBuffer, sizeof(commandBuffer));
+	game->ServerWriteSnapshot(clientNum, client.snapshotSequence, stateMsg, commandMsg);
+	msg.WriteUShort(stateMsg.GetSize());
+	msg.WriteUShort(commandMsg.GetSize());
+	msg.WriteData(stateMsg.GetData(), stateMsg.GetSize());
+	msg.WriteData(commandMsg.GetData(), commandMsg.GetSize());
 #else
 	game->ServerWriteSnapshot(clientNum, client.snapshotSequence, msg, clientInPVS, MAX_ASYNC_CLIENTS);
 #endif
 
+#ifndef _SPLASHDAMAGE
+	// ETQW's SDK writes its own AoR-filtered user commands above.
 	// write the latest user commands from the other clients in the PVS to the snapshot
 	for (last = NULL, i = 0; i < MAX_ASYNC_CLIENTS; i++) {
 		serverClient_t &client = clients[i];
@@ -1431,6 +1441,7 @@ bool idAsyncServer::SendSnapshotToClient(int clientNum)
 	}
 
 	msg.WriteByte(MAX_ASYNC_CLIENTS);
+#endif
 
 	client.channel.SendMessage(serverPort, serverTime, msg);
 
@@ -2076,8 +2087,14 @@ void idAsyncServer::ProcessConnectMessage(const netadr_t from, const idBitMsg &m
 #elif defined(_SPLASHDAMAGE) //karin: TODO numBots
 	clientNetworkAddress_t address;
 	sdNetClientId netClientId;
+	memcpy(address.ip, from.ip, sizeof(address.ip));
+	address.port = from.port;
+	netClientId.id[0] = netClientId.id[1] = 0; // no online identity in the native LAN transport
 	allowFailureReason_t reasonValue;
 	allowReply_t reply = game->ServerAllowClient(numClients, NumBotClients(), address, netClientId, guid, password, reasonValue);
+	if (reply != ALLOW_YES) {
+		idStr::snPrintf(reason, sizeof(reason), "Connection refused by ETQW game rules (%d)", (int)reasonValue);
+	}
 #else
 	allowReply_t reply = game->ServerAllowClient(numClients, Sys_NetAdrToString(from), guid, password, reason);
 #endif

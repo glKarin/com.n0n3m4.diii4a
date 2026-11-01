@@ -905,6 +905,9 @@ GLExtension_t GLimp_ExtensionPointer(const char *name) {
 
 void GLimp_GrabInput(int flags) {
     if (!window) {
+        if (cvarSystem->GetCVarInteger("net_serverDedicated") == 1) {
+            return;
+        }
         common->Warning("GLimp_GrabInput called without window");
         return;
     }

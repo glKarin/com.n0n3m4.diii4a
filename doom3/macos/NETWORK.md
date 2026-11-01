@@ -1,8 +1,81 @@
-# Retail ETQW network interoperability investigation
+# Native local multiplayer and retail protocol investigation
 
-Status: **diagnostic handshake implemented; retail multiplayer is not implemented**.
-This work is on `codex/etqw-retail-network`, separate from the Metal port PR.
-The engine's `connect` command still uses the reconstructed Doom 3 transport.
+The native client and dedicated server use protocol **14.42**. Both must be
+built from this branch. This is a local transport adapted to the ETQW SDK;
+**retail 1.5 multiplayer (10.21) is not implemented**. The network work is on
+`codex/etqw-retail-network`, separate from the Metal port PR.
+
+## Play with the matching native server
+
+Build the client and game module using `macos/build.sh`, then run from the
+repository root (Python 3 is required):
+
+```sh
+python3 doom3/macos/tools/local_match.py --data /path/to/ETQW \
+  --build /path/to/build-macos --name Player
+```
+
+This starts a headless server on **127.0.0.1:27735**, waits for Valley to load,
+then connects the Metal client. The default population is eight, including the
+human player; `--bots 2` lowers it. Choose a team in the limbo menu (`L`), then
+press `F3` to ready up. The client uses a 3840×2160 render target and 4× font
+rasterization in a 1280×720-point window. Existing profile bindings are kept.
+
+Closing the client also stops its server. Ctrl-C stops both. The launcher never
+reuses or stops another process on an occupied port. No router, firewall or
+public-server configuration is changed. Game data stays in the supplied data
+folder. Writable profiles and logs default to
+`~/Library/Application Support/idtech4amm/etqw-local/{server,client}`; `--home`
+selects another location. An optional `--client-executable` selects a matching
+app-bundle launcher for macOS window ownership.
+
+For separate terminals, use `--server-only` and connect another **14.42** client
+with `+connect 127.0.0.1:27735`. The launcher binds loopback intentionally.
+It does not establish internet/LAN compatibility with other machines.
+
+### Native transport changes
+
+- Frame the SDK's snapshot and user-command streams separately. Its AoR command
+  stream replaces the legacy Doom 3 user-command trailer.
+- Carry all ETQW button bits, impulses and flags in user-command deltas.
+- Initialize the assigned local client and use the same simulation clock on the
+  SDK and transport sides, including reconnections. Prediction uses 16 ms steps.
+- Skip GPU program compilation and megatexture uploads on a headless dedicated
+  server. Preserve the graphical path for listen servers.
+- Populate display names without claiming authenticated account identities;
+  continue timeout processing past bot slots.
+
+The version bump rejects the previous incompatible 14.41 framing. It is not an
+assertion of retail compatibility. Validation on Apple Silicon covered separate
+server/client processes, Valley, snapshots, team selection, spawning, movement,
+firing and reconnecting. Longer sessions, multiple human clients, packet-loss
+stress and retail gameplay remain unvalidated.
+
+## Original 1.5 reference server for protocol work
+
+An optional OrbStack Docker lab runs the original 32-bit Linux dedicated server.
+It is a reference for developing 10.21, not the server used by `local_match.py`.
+
+```sh
+python3 doom3/macos/tools/local_retail_server.py start
+python3 doom3/macos/tools/local_retail_server.py status
+python3 doom3/macos/tools/local_retail_server.py logs
+python3 doom3/macos/tools/local_retail_server.py stop
+```
+
+The tool downloads the official Splash Damage distribution, checks its pinned
+SHA-256, and extracts files without executing the installer. It uses a pinned
+Debian image and a labelled, internal Docker network, without published ports.
+OrbStack exposes its container IP to the Mac; use the endpoint printed by the
+tool. The container has no externally routed network. `--home` selects storage.
+Stopping removes the owned container and retains the download, files and profile.
+
+This isolated lab explicitly uses `si_pure=0`, disables PunkBuster and allows a
+zero declaration checksum through `net_allowCheats=1` / `net_checkSync=0`.
+`--strict-sync` restores the declaration check (stop before changing mode).
+The relaxed mode returned a parsed `connectResponse` after a fresh startup;
+strict mode rejected the diagnostic checksum with `game/errors/servernosync`.
+Admission alone does not mean the native game can play on that server.
 
 ## Reproduce the admission check
 
@@ -101,9 +174,9 @@ disassembly, keys, player identities or commercial assets are included here.
 2. Implement the two retail message channels and validate fragmentation,
    reliability, compression, game initialization and reconnection against a
    controlled retail server. The existing channel is Doom 3-derived.
-3. Reconcile retail snapshot and user-command framing with the game SDK. The
-   current adapter passes the same message as both snapshot and user-command
-   streams; this has not been validated against the retail transport.
+3. Reconcile retail snapshot and user-command framing with the game SDK. The native adapter
+   now separates these streams, but their framing has not been validated against
+   the retail transport.
 4. Establish an accepted native game-module/data-package policy with the test
    server. Keep verification honest and exclude incompatible local overrides.
 5. Test map loading, spawning, movement, combat, map changes and disconnects
