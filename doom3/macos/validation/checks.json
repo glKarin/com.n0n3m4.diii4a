@@ -1,0 +1,21 @@
+{
+  "platform": "Apple M4 Max / macOS 27.0 (26A428)",
+  "build": "Clean RelWithDebInfo ARM64 build: ETQW, etqwgame and OpenAL Soft/CoreAudio",
+  "checks": {
+    "atomic_counter": "400000 expected and observed",
+    "blend_parser": "Six blend forms preserve depth equality and write masks",
+    "gui_clipping": "Rotated overlay stays in rectangle/ellipse; UVs and area preserved; empty/reset masks pass",
+    "native_metal_probe": "Metal validation enabled; culling, depth, alpha, indexed/interleaved geometry, texture binding, BC5, buffer lifetime and masked clears pass; unsupported calls 0",
+    "terrain_codec": "Twenty Valley tiles, largest luminance residual drift below 1/255",
+    "texture_sample": "Two ATI2 textures rebuilt 4x; hashes, dimensions and original mip chains checked",
+    "scripts": "Shell syntax and Python compilation pass; invalid game directory rejected",
+    "startup": "Valley loaded with a separate profile and loopback port, Retina drawable 1280x720, shader cache written under fs_savepath, unsupported Metal calls 0. Legacy multithread and MSAA requests disabled before renderer startup."
+  },
+  "not_run": [
+    "Windows/Linux/Android regression builds",
+    "Other Apple GPUs or macOS releases",
+    "All twelve maps and menus",
+    "Long play sessions and repeated video restarts"
+  ],
+  "game_data_included": false
+}

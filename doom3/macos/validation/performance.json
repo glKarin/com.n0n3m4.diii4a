@@ -1,0 +1,83 @@
+{
+  "machine": "Apple M4 Max, macOS 27.0 (26A428)",
+  "resolution": [
+    3840,
+    2160
+  ],
+  "camera": {
+    "position": [
+      0,
+      -6000,
+      6000
+    ],
+    "yaw_pitch_roll": [
+      90,
+      25,
+      0
+    ]
+  },
+  "texture_scale": 4,
+  "rt_mask": [
+    960,
+    540
+  ],
+  "sun_rays_per_pixel": 4,
+  "protocol": "benchmarkView: two 1-second warmups, three 1-second synchronized CPU+GPU samples. Fixed camera, no simulation advance during each sample. Scene effects may differ between runs. Metal validation disabled. Not gameplay FPS.",
+  "angle": {
+    "rt_off": {
+      "milliseconds": [
+        13.427,
+        13.622,
+        13.36
+      ],
+      "median_ms": 13.427,
+      "median_fps": 74.47680047665152
+    },
+    "rt_on": {
+      "milliseconds": [
+        14.414,
+        14.471,
+        13.972
+      ],
+      "median_ms": 14.414,
+      "median_fps": 69.37699458859443
+    }
+  },
+  "native": {
+    "rt_off": {
+      "milliseconds": [
+        12.072,
+        12.108,
+        12.108
+      ],
+      "median_ms": 12.108,
+      "median_fps": 82.59002312520647
+    },
+    "rt_on": {
+      "milliseconds": [
+        13.065,
+        13.117,
+        13.171
+      ],
+      "median_ms": 13.117,
+      "median_fps": 76.23694442326752
+    }
+  },
+  "native_fps_gain_percent": {
+    "rt_off": 10.893624050214745,
+    "rt_on": 9.887931691697794
+  },
+  "native_allocation_mib_with_rt": 4837.9,
+  "native_compressed_textures": 799,
+  "native_bc5_textures": 141,
+  "release_rt_verification": {
+    "milliseconds": [
+      13.052,
+      13.065,
+      13.197
+    ],
+    "median_fps": 76.54037504783774,
+    "note": "Final packaged application after grazing-sun RT correction and GUI clipping. Native Metal, 4K, validation disabled, local match with bots."
+  },
+  "provenance": "Local development build on Apple M4 Max; full gameplay performance and other hardware not measured."
+}
