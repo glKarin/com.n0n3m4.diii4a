@@ -1306,93 +1306,39 @@ float sdDeviceContextLocal::GetAspectRatioCorrection() const {
 
 bool sdDeviceContextLocal::ClippedCoords(float *x, float *y, float *w, float *h, float *s1, float *t1, float *s2, float *t2)
 {
-
-    if (enableClipping == false || clipRects.Num() == 0) {
+    if (*w <= 0.0f || *h <= 0.0f) {
+        return true;
+    }
+    if (!enableClipping) {
         return false;
     }
 
-    int c = clipRects.Num();
-
-    while (--c > 0) {
-        sdBounds2D *clipRect = &clipRects[c];
-
-#if 0 // for debug
-		{
-			idVec4 color = colorRed;
-			float x = clipRect->GetLeft();
-			float y = clipRect->GetTop();
-			float w = clipRect->GetWidth();
-			float h = clipRect->GetHeight();
-			float size = 2;
-			DrawStretchPic(x, y, size, h, 0, 0, 0, 0, whiteImage, &color);
-			DrawStretchPic(x + w - size, y, size, h, 0, 0, 0, 0, whiteImage, &color);
-			DrawStretchPic(x, y, w, size, 0, 0, 0, 0, whiteImage, &color);
-			DrawStretchPic(x, y + h - size, w, size, 0, 0, 0, 0, whiteImage, &color);
-		}
-#endif
-
-        float ox = *x;
-        float oy = *y;
-        float ow = *w;
-        float oh = *h;
-
-        if (ow <= 0.0f || oh <= 0.0f) {
-            break;
+    // Include entry zero: progress bars often have exactly one clip rectangle.
+    for (int c = clipRects.Num() - 1; c >= 0; --c) {
+        const sdBounds2D &clip = clipRects[c];
+        const float ox = *x, oy = *y, ow = *w, oh = *h;
+        const float left = Max(ox, clip.GetLeft());
+        const float top = Max(oy, clip.GetTop());
+        const float right = Min(ox + ow, clip.GetRight());
+        const float bottom = Min(oy + oh, clip.GetBottom());
+        if (right <= left || bottom <= top) {
+            *w = *h = 0.0f;
+            return true;
         }
-
-        if (*x < clipRect->GetLeft()) {
-            *w -= clipRect->GetLeft() - *x;
-            *x = clipRect->GetLeft();
-        } else if (*x > clipRect->GetRight()) {
-            *x = *w = *y = *h = 0;
+        if (s1 && t1 && s2 && t2) {
+            const float ds = *s2 - *s1, dt = *t2 - *t1;
+            const float us = *s1, vt = *t1;
+            *s1 = us + ds * (left - ox) / ow;
+            *s2 = us + ds * (right - ox) / ow;
+            *t1 = vt + dt * (top - oy) / oh;
+            *t2 = vt + dt * (bottom - oy) / oh;
         }
-
-        if (*y < clipRect->GetTop()) {
-            *h -= clipRect->GetTop() - *y;
-            *y = clipRect->GetTop();
-        } else if (*y > clipRect->GetBottom()) {
-            *x = *w = *y = *h = 0;
-        }
-
-        if (*w > clipRect->GetWidth()) {
-            *w = clipRect->GetRight() - *x;
-        } else if (*x + *w > clipRect->GetRight()) {
-            *w = clipRect->GetRight() - *x;
-        }
-
-        if (*h > clipRect->GetHeight()) {
-            *h = clipRect->GetBottom() - *y;
-        } else if (*y + *h > clipRect->GetBottom()) {
-            *h = clipRect->GetBottom() - *y;
-        }
-
-        if (s1 && s2 && t1 && t2 && ow > 0.0f) {
-            float ns1, ns2, nt1, nt2;
-            // upper left
-            float u = (*x - ox) / ow;
-            ns1 = *s1 * (1.0f - u) + *s2 * (u);
-
-            // upper right
-            u = (*x + *w - ox) / ow;
-            ns2 = *s1 * (1.0f - u) + *s2 * (u);
-
-            // lower left
-            u = (*y - oy) / oh;
-            nt1 = *t1 * (1.0f - u) + *t2 * (u);
-
-            // lower right
-            u = (*y + *h - oy) / oh;
-            nt2 = *t1 * (1.0f - u) + *t2 * (u);
-
-            // set values
-            *s1 = ns1;
-            *s2 = ns2;
-            *t1 = nt1;
-            *t2 = nt2;
-        }
+        *x = left;
+        *y = top;
+        *w = right - left;
+        *h = bottom - top;
     }
-
-    return (*w == 0 || *h == 0) ? true : false;
+    return false;
 }
 
 void sdDeviceContextLocal::DrawStretchPic(float x, float y, float w, float h, float s1, float t1, float s2, float t2, const idMaterial *shader, const idVec4 *color)
