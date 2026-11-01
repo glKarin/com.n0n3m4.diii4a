@@ -107,6 +107,9 @@ typedef idPlane frustum_t[FRUSTUM_PLANES];
 #endif
 
 #include "rb/Framebuffer.h"
+#if defined(__APPLE__) && defined(_SPLASHDAMAGE)
+#include "sys/sdl/metal_rt.h"
+#endif
 #include "rb/DepthStencilRenderer.h"
 #include "rb/StencilTexture.h"
 #include "Image.h"

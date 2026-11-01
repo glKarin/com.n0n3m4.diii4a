@@ -32,6 +32,16 @@ If you have questions concerning this license or the applicable additional terms
 #include "framework/Licensee.h"
 
 #include "renderer/tr_local.h"
+#ifdef __APPLE__
+#include "metal_backend.h"
+#ifdef _SPLASHDAMAGE
+#define DEFAULT_METAL_BACKEND "1"
+#else
+#define DEFAULT_METAL_BACKEND "0"
+#endif
+idCVar r_metalBackend("r_metalBackend", DEFAULT_METAL_BACKEND, CVAR_RENDERER | CVAR_INIT | CVAR_BOOL, "native Metal renderer (0 selects legacy ANGLE)");
+static void MetalInfo_f(const idCmdArgs &) { MetalBackend_Info(); }
+#endif
 
 #if defined(_WIN32) && defined(ID_ALLOW_TOOLS)
 #include "sys/win32/win_local.h"
@@ -110,6 +120,8 @@ static SDL_Surface *window = NULL;
 static idCVar r_fullscreenDesktop( "r_fullscreenDesktop", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "0: 'real' fullscreen mode 1: keep resolution 'desktop' fullscreen mode" );
 static idCVar win_xpos( "win_xpos", "-1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "horizontal position of window" );
 static idCVar win_ypos( "win_ypos", "-1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "vertical position of window" );
+idCVar r_renderWidth("r_renderWidth", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "offscreen render width, 0 uses drawable pixels (vid_restart)", 0, 8192);
+idCVar r_renderHeight("r_renderHeight", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "offscreen render height, 0 uses drawable pixels (vid_restart)", 0, 8192);
 
 const int GRAB_GRABMOUSE	= (1 << 0);
 const int GRAB_HIDECURSOR	= (1 << 1);
@@ -181,11 +193,40 @@ GLimp_Init
 ===================
 */
 bool GLimp_Init(glimpParms_t parms) {
+#ifdef __APPLE__
+    if (r_metalBackend.GetBool()) {
+        if (r_multiSamples.GetInteger() != 0) {
+            common->Warning("Native Metal MSAA is not implemented; disabling r_multiSamples");
+            r_multiSamples.SetInteger(0);
+        }
+        Uint32 flags=SDL_WINDOW_METAL | SDL_WINDOW_ALLOW_HIGHDPI;
+        if(parms.fullScreen)flags|=SDL_WINDOW_FULLSCREEN_DESKTOP;
+        window=SDL_CreateWindow(ENGINE_VERSION,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,parms.width,parms.height,flags);
+        if(!window)return false;
+        glConfig.vidWidth=r_renderWidth.GetInteger()>0?r_renderWidth.GetInteger():parms.width;
+        glConfig.vidHeight=r_renderHeight.GetInteger()>0?r_renderHeight.GetInteger():parms.height;
+        if(!MetalBackend_Init(window,glConfig.vidWidth,glConfig.vidHeight)){SDL_DestroyWindow(window);window=NULL;return false;}
+        int drawableWidth, drawableHeight;
+        MetalBackend_DrawableSize(&drawableWidth,&drawableHeight);
+        if(r_renderWidth.GetInteger()<=0)glConfig.vidWidth=drawableWidth;
+        if(r_renderHeight.GetInteger()<=0)glConfig.vidHeight=drawableHeight;
+        glConfig.colorBits=24;glConfig.depthBits=32;glConfig.stencilBits=8;glConfig.isFullscreen=parms.fullScreen!=0;
+        idStr cachePath = cvarSystem->GetCVarString("fs_savepath");
+        cachePath.AppendPath("metal-shaders");
+        MetalBackend_SetCacheDirectory(cachePath.c_str());
+        R_LoadOpenGLFunc();SetSDLIcon();
+        cmdSystem->AddCommand("metalInfo",MetalInfo_f,CMD_FL_RENDERER,"native Metal backend statistics");
+        return true;
+    }
+#endif
 	common->Printf("Initializing OpenGL subsystem\n");
 
 	assert(SDL_WasInit(SDL_INIT_VIDEO));
 
 	Uint32 flags = SDL_WINDOW_OPENGL;
+#if SDL_VERSION_ATLEAST(2, 0, 0) && defined(__APPLE__)
+    flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+#endif
 
 	if (parms.fullScreen == 1)
 	{
@@ -486,7 +527,14 @@ bool GLimp_Init(glimpParms_t parms) {
         if (SDL_GL_SetSwapInterval(r_swapInterval.GetInteger()) < 0)
             common->Warning("SDL_GL_SWAP_CONTROL not supported");
 
-        SDL_GetWindowSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
+        SDL_GL_GetDrawableSize(window, &glConfig.vidWidth, &glConfig.vidHeight);
+        common->Printf("Window: %d x %d points; drawable: %d x %d pixels\n",
+                       parms.width, parms.height, glConfig.vidWidth, glConfig.vidHeight);
+        if (r_renderWidth.GetInteger() > 0 && r_renderHeight.GetInteger() > 0) {
+            glConfig.vidWidth = r_renderWidth.GetInteger();
+            glConfig.vidHeight = r_renderHeight.GetInteger();
+            common->Printf("Offscreen render: %d x %d pixels\n", glConfig.vidWidth, glConfig.vidHeight);
+        }
 
         SetSDLIcon(); // for SDL2  this must be done after creating the window
 
@@ -697,6 +745,12 @@ GLimp_Shutdown
 ===================
 */
 void GLimp_Shutdown() {
+#ifdef __APPLE__
+    if(MetalBackend_Active()) {
+        common->Printf("Shutting down native Metal renderer\n");
+        MetalBackend_Shutdown();
+    } else
+#endif
     common->Printf("Shutting down OpenGL subsystem\n");
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
@@ -719,6 +773,12 @@ GLimp_SwapBuffers
 ===================
 */
 void GLimp_SwapBuffers() {
+#ifdef __APPLE__
+    if(MetalBackend_Active()){
+        int w,h;MetalBackend_DrawableSize(&w,&h);Framebuffer::Present(w,h);
+        MetalBackend_Present(r_swapInterval.GetInteger());r_swapInterval.ClearModified();return;
+    }
+#endif
     if(r_swapInterval.IsModified())
     {
         r_swapInterval.ClearModified();
@@ -727,6 +787,9 @@ void GLimp_SwapBuffers() {
     }
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
+    int drawableWidth, drawableHeight;
+    SDL_GL_GetDrawableSize(window, &drawableWidth, &drawableHeight);
+    Framebuffer::Present(drawableWidth, drawableHeight);
     SDL_GL_SwapWindow(window);
 #else
     SDL_GL_SwapBuffers();
@@ -801,6 +864,9 @@ GLimp_ActivateContext
 =================
 */
 void GLimp_ActivateContext() {
+#ifdef __APPLE__
+    if(MetalBackend_Active())return;
+#endif
     SDL_GL_MakeCurrent(window, context);
 }
 
@@ -810,6 +876,9 @@ GLimp_DeactivateContext
 =================
 */
 void GLimp_DeactivateContext() {
+#ifdef __APPLE__
+    if(MetalBackend_Active())return;
+#endif
     SDL_GL_MakeCurrent(window, NULL);
 }
 
@@ -826,6 +895,9 @@ GLimp_ExtensionPointer
 ===================
 */
 GLExtension_t GLimp_ExtensionPointer(const char *name) {
+#ifdef __APPLE__
+    if(MetalBackend_Active())return (GLExtension_t)MetalBackend_Proc(name);
+#endif
     assert(SDL_WasInit(SDL_INIT_VIDEO));
 
     return (GLExtension_t)SDL_GL_GetProcAddress(name);
@@ -861,6 +933,13 @@ void GLimp_Startup(void)
 #ifdef _MULTITHREAD
 #if !defined(__ANDROID__) //karin: enable multithreading-rendering from command cvar
     multithreadActive = cvarSystem->GetCVarBool("r_multithread");
+#ifdef __APPLE__
+    if (r_metalBackend.GetBool() && multithreadActive) {
+        common->Warning("Native Metal currently requires single-threaded rendering; disabling r_multithread");
+        cvarSystem->SetCVarBool("r_multithread", false);
+        multithreadActive = false;
+    }
+#endif
     if(multithreadActive)
         Sys_Printf("Enable multi-threading rendering\n");
     else

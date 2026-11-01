@@ -30,6 +30,11 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "tr_local.h"
+#ifdef __APPLE__
+#include "../sys/sdl/metal_backend.h"
+#endif
+
+static const int NATIVE_COMPRESSED_RG_RGTC2 = 0x8dbd;
 
 /*
 PROBLEM: compressed textures may break the zero clamp rule!
@@ -37,6 +42,7 @@ PROBLEM: compressed textures may break the zero clamp rule!
 
 static bool FormatIsDXT(int internalFormat)
 {
+	if (internalFormat == NATIVE_COMPRESSED_RG_RGTC2) return true;
 	if (internalFormat < GL_COMPRESSED_RGB_S3TC_DXT1_EXT
 	    || internalFormat > GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) {
 		return false;
@@ -97,6 +103,9 @@ int idImage::BitsForInternalFormat(int internalFormat) const
         case GL_RGBA:
 #ifdef GL_ES_VERSION_3_0
         case GL_RGBA8:
+        case GL_DEPTH_COMPONENT24:
+        case GL_DEPTH_COMPONENT32F:
+        case GL_DEPTH24_STENCIL8:
 #endif
             return 32;
         case GL_RGB:
@@ -111,6 +120,7 @@ int idImage::BitsForInternalFormat(int internalFormat) const
         case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
             return 8;
         case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+        case NATIVE_COMPRESSED_RG_RGTC2:
             return 8;
         case GL_RGBA4:
             return 16;
@@ -1794,6 +1804,14 @@ bool idImage::CheckPrecompressedImage(bool fullLoad)
 		R_StaticFree(data);
 		return false;
 	}
+	const unsigned fourCC = LittleLong(_header->ddspf.dwFourCC);
+	bool supported = fourCC == DDS_MAKEFOURCC('D','X','T','1') ||
+		fourCC == DDS_MAKEFOURCC('D','X','T','3') || fourCC == DDS_MAKEFOURCC('D','X','T','5') ||
+		fourCC == DDS_MAKEFOURCC('R','X','G','B');
+#ifdef __APPLE__
+	supported |= MetalBackend_Active() && fourCC == DDS_MAKEFOURCC('A','T','I','2');
+#endif
+	if (!supported) { R_StaticFree(data); return false; }
 
 	// upload all the levels
 	UploadPrecompressedImage(data, len);
@@ -1868,6 +1886,9 @@ void idImage::UploadPrecompressedImage(byte *data, int len)
 				break;
 			case DDS_MAKEFOURCC('R', 'X', 'G', 'B'):
 				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				break;
+			case DDS_MAKEFOURCC('A', 'T', 'I', '2'):
+				internalFormat = NATIVE_COMPRESSED_RG_RGTC2;
 				break;
 			default:
 				common->Warning("Invalid compressed internal format\n");

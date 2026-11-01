@@ -93,7 +93,9 @@ idCVar com_memoryMarker("com_memoryMarker", "-1", CVAR_INTEGER | CVAR_SYSTEM | C
 idCVar com_preciseTic("com_preciseTic", "1", CVAR_BOOL|CVAR_SYSTEM, "run one game tick every async thread update");
 idCVar com_asyncInput("com_asyncInput", "0", CVAR_BOOL|CVAR_SYSTEM, "sample input from the async thread");
 #define ASYNCSOUND_INFO "0: mix sound inline, 1: memory mapped async mix, 2: callback mixing, 3: write async mix"
-#if defined( MACOS_X )
+#if defined( MACOS_X ) && defined(_SDL)
+idCVar com_asyncSound("com_asyncSound", "3", CVAR_INTEGER|CVAR_SYSTEM|CVAR_ROM, ASYNCSOUND_INFO);
+#elif defined( MACOS_X )
 idCVar com_asyncSound("com_asyncSound", "2", CVAR_INTEGER|CVAR_SYSTEM|CVAR_ROM, ASYNCSOUND_INFO);
 #elif defined( __linux__ )
 idCVar com_asyncSound("com_asyncSound", "3", CVAR_INTEGER|CVAR_SYSTEM|CVAR_ROM, ASYNCSOUND_INFO);
@@ -1611,7 +1613,7 @@ void Com_SetMachineSpec_f(const idCmdArgs &args)
 Com_ExecMachineSpecs_f
 =================
 */
-#ifdef MACOS_X
+#if defined(MACOS_X) && !defined(_SDL)
 void OSX_GetVideoCard(int &outVendorId, int &outDeviceId);
 bool OSX_GetCPUIdentification(int &cpuId, bool &oldArchitecture);
 #endif
@@ -1730,7 +1732,7 @@ void Com_ExecMachineSpec_f(const idCmdArgs &args)
 	cvarSystem->SetCVarBool("g_doubleVision", true, CVAR_ARCHIVE);
 	cvarSystem->SetCVarBool("g_muzzleFlash", true, CVAR_ARCHIVE);
 
-#if MACOS_X
+#if defined(MACOS_X) && !defined(_SDL)
 	// On low settings, G4 systems & 64MB FX5200/NV34 Systems should default shadows off
 	bool oldArch;
 	int vendorId, deviceId, cpuId;
@@ -3000,6 +3002,9 @@ void idCommonLocal::Async(void)
 #define DLL_PREFIX "lib"
 #endif
 
+#elif defined(__APPLE__)
+#define DLL_SUFFIX ".dylib"
+#define DLL_PREFIX "lib"
 #else
 #define DLL_SUFFIX ".so"
 #define DLL_PREFIX "lib"
@@ -3489,6 +3494,10 @@ void idCommonLocal::Shutdown(void)
 {
 
 	com_shuttingDown = true;
+#if defined(__APPLE__) && defined(_SDL)
+	extern void Posix_StopAsyncThread();
+	Posix_StopAsyncThread();
+#endif
 
 	idAsyncNetwork::server.Kill();
 	idAsyncNetwork::client.Shutdown();

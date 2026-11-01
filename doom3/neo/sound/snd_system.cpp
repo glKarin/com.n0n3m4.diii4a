@@ -74,10 +74,12 @@ idCVar idSoundSystemLocal::s_skipHelltimeFX("s_skipHelltimeFX", "0", CVAR_SOUND 
 // off by default. OpenAL DLL gets loaded on-demand
 #ifdef _WIN32
 idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "openal32.dll", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL DLL name/path");
+#elif defined(__APPLE__)
+idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "libopenal.dylib", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL library name/path");
 #else
 idCVar idSoundSystemLocal::s_libOpenAL("s_libOpenAL", "./libopenal.so", CVAR_SOUND | CVAR_ARCHIVE, "OpenAL DLL name/path");
 #endif
-#ifdef _WIN32 //karin: enable OpenAL default on Windows
+#if defined(_WIN32) || defined(__APPLE__)
 idCVar idSoundSystemLocal::s_useOpenAL("s_useOpenAL", "1", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use OpenAL");
 idCVar idSoundSystemLocal::s_useEAXReverb("s_useEAXReverb", "1", CVAR_SOUND | CVAR_BOOL | CVAR_ARCHIVE, "use EAX reverb");
 #else

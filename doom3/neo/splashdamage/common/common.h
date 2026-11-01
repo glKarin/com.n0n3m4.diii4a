@@ -108,7 +108,19 @@ public:
 	#define CPU_EASYARGS				1
 #endif
 
-#if defined(__i386__)
+#if defined(__aarch64__) || defined(__arm64__)
+	#define BUILD_STRING "macOS-arm64"
+	#define BUILD_OS_ID 1
+	#define CPUSTRING "arm64"
+	#define CPU_EASYARGS 0
+#elif defined(__x86_64__)
+	#define BUILD_STRING "macOS-x86_64"
+	#define BUILD_OS_ID 1
+	#define CPUSTRING "x86_64"
+	#define CPU_EASYARGS 0
+#endif
+
+#if defined(__i386__) || defined(__x86_64__) || defined(__aarch64__) || defined(__arm64__)
 #define ALIGN16( x )					x __attribute__ ((aligned (16))) 
 #else
 #define ALIGN16( x )					x

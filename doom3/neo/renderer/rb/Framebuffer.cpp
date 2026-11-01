@@ -33,6 +33,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "Framebuffer.h"
 
 idList<idFramebuffer*>	Framebuffer::framebuffers;
+static idFramebuffer *presentationFramebuffer = NULL;
+#ifdef __APPLE__
+extern idCVar r_renderWidth, r_renderHeight;
+#endif
 
 #ifdef _SHADOW_MAPPING
 globalFramebuffers_t globalFramebuffers;
@@ -97,8 +101,7 @@ void idFramebuffer::Unbind()
 	
 	if( backEnd.glState.currentFramebuffer == this )
 	{
-		qglBindFramebuffer( GL_FRAMEBUFFER, 0 );
-		backEnd.glState.currentFramebuffer = NULL;
+        Framebuffer::Default();
 	}
 }
 
@@ -124,8 +127,7 @@ void idFramebuffer::UnbindDirectly()
 	}
 #endif
 
-	qglBindFramebuffer( GL_FRAMEBUFFER, 0 );
-	backEnd.glState.currentFramebuffer = NULL;
+    Framebuffer::Default();
 }
 
 void idFramebuffer::AddColorBuffer( int format, int index )
@@ -472,6 +474,15 @@ void Framebuffer::Init()
 	cmdSystem->AddCommand( "listFramebuffers", R_ListFramebuffers_f, CMD_FL_RENDERER, "lists framebuffers" );
 	
 	backEnd.glState.currentFramebuffer = NULL;
+#ifdef __APPLE__
+    if (r_renderWidth.GetInteger() > 0 && r_renderHeight.GetInteger() > 0) {
+        presentationFramebuffer = Alloc("_presentation", glConfig.vidWidth, glConfig.vidHeight);
+        presentationFramebuffer->Bind();
+        presentationFramebuffer->AddColorBuffer(GL_RGBA8, 0);
+        presentationFramebuffer->AddDepthStencilBuffer(GL_DEPTH24_STENCIL8);
+        presentationFramebuffer->Check();
+    }
+#endif
 	
 #ifdef _SHADOW_MAPPING
 	int width, height;
@@ -533,6 +544,10 @@ void Framebuffer::Init()
 
 void Framebuffer::Shutdown()
 {
+#if defined(__APPLE__) && defined(_SPLASHDAMAGE)
+    R_MetalRT_Shutdown();
+#endif
+    presentationFramebuffer = NULL;
     printf("Framebuffer shutdown: %d\n", framebuffers.Num());
 	for(int i = 0; i < framebuffers.Num(); i++)
 	{
@@ -570,7 +585,7 @@ void Framebuffer::Shutdown()
 void Framebuffer::BindNull()
 {
 	{
-		qglBindFramebuffer( GL_FRAMEBUFFER, 0 );
+        Default();
 		qglBindRenderbuffer( GL_RENDERBUFFER, 0 );
 		backEnd.glState.currentFramebuffer = NULL;
 	}
@@ -578,7 +593,7 @@ void Framebuffer::BindNull()
 
 void Framebuffer::Default()
 {
-	qglBindFramebuffer( GL_FRAMEBUFFER, 0 );
+	qglBindFramebuffer( GL_FRAMEBUFFER, presentationFramebuffer ? presentationFramebuffer->GetFramebuffer() : 0 );
 	backEnd.glState.currentFramebuffer = NULL;
 }
 
@@ -589,7 +604,22 @@ void Framebuffer::BindDraw(idFramebuffer *fb)
 
 void Framebuffer::UnbindDraw()
 {
-	qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, presentationFramebuffer ? presentationFramebuffer->GetFramebuffer() : 0);
+}
+
+void Framebuffer::Present(int width, int height)
+{
+#ifdef GL_ES_VERSION_3_0
+    if (!presentationFramebuffer || width <= 0 || height <= 0) return;
+    const GLboolean scissor = qglIsEnabled(GL_SCISSOR_TEST);
+    qglDisable(GL_SCISSOR_TEST);
+    qglBindFramebuffer(GL_READ_FRAMEBUFFER, presentationFramebuffer->GetFramebuffer());
+    qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    qglBlitFramebuffer(0, 0, presentationFramebuffer->Width(), presentationFramebuffer->Height(),
+                       0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    Default();
+    if (scissor) qglEnable(GL_SCISSOR_TEST);
+#endif
 }
 
 void Framebuffer::Append(idFramebuffer *fb)

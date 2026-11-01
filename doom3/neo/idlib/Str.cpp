@@ -49,18 +49,12 @@ static idDynamicBlockAlloc<char, 1<<18, 128>	stringDataAllocator;
 #ifdef _SPLASHDAMAGE
 stringDataAllocator_t*	idStr::stringDataAllocator;
 bool					idStr::stringAllocatorIsShared;
-#if defined( MACOS_X )
-#pragma GCC visibility pop
-#endif
 
 struct strColor_t {
     idVec4		color;
     const char* str;
 };
 
-#if defined( MACOS_X )
-#pragma GCC visibility push(hidden)
-#endif
 
 idStr::hmsFormat_t	idStr::defaultHMSFormat;
 strColor_t g_color_table[COLOR_BITS+1] = {

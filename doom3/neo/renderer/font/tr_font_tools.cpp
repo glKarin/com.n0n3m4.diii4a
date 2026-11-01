@@ -5,6 +5,9 @@
 #include FT_SYSTEM_H
 #include FT_IMAGE_H
 #include FT_OUTLINE_H
+
+idCVar harm_gui_fontRasterScale("harm_gui_fontRasterScale", "1", CVAR_GUI | CVAR_INIT | CVAR_ARCHIVE | CVAR_INTEGER,
+                              "TrueType raster resolution multiplier (restart required)", 1, 4);
 #include FT_GLYPH_H
 
 #define _FLOOR(x)  ((x) & -64)
@@ -470,14 +473,14 @@ static bool R_Font_Export(ftGlobalVars_t *exporter, int pointSize, wfontInfo_t *
     FT_UInt gindex;
     void *faceData = exporter->faceData;
     FT_Library ftLibrary = exporter->ftLibrary;
-	int width1024 = width256 * 4;
+	int width1024 = width256;
 
     if (ftLibrary == NULL) {
         common->Warning("Export font: FreeType not initialized.");
         return false;
     }
 
-    FT_UInt dpi = 72;
+    FT_UInt dpi = 72 * harm_gui_fontRasterScale.GetInteger();
     float glyphScale;
 
     // change the scale to be relative to 1 based on 72 dpi ( so dpi of 144 means a scale of .5 )

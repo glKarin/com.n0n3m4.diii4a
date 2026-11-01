@@ -30,6 +30,9 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "tr_local.h"
+#ifdef __APPLE__
+#include "sys/sdl/metal_backend.h"
+#endif
 
 #ifdef _SPLASHDAMAGE
 #include "renderer/RenderProgramManager.h"
@@ -371,7 +374,11 @@ static void R_CheckPortableExtensions(void)
 	{
 		if (R_CheckExtension("GL_EXT_texture_compression_s3tc") && r_useDXT.GetBool()
 #if !defined(__ANDROID__)
-        && USING_GL
+        && (USING_GL
+#ifdef __APPLE__
+            || MetalBackend_Active()
+#endif
+            )
 #endif
         )
 		    glConfig.textureCompressionAvailable = true;
@@ -1184,6 +1191,34 @@ void R_Benchmark_f(const idCmdArgs &args)
 	msec = 1000.0 / fps;
 	common->Printf("no context  msec:%5.1f fps:%5.1f\n", msec, fps);
 	r_skipRenderContext.SetBool(false);
+}
+
+// Fixed camera and fixed simulation time make backend comparisons repeatable.
+static void R_BenchmarkView_f(const idCmdArgs &args) {
+    if (!tr.primaryView || !tr.primaryWorld || args.Argc() != 8) {
+        common->Printf("usage: benchmarkView x y z yaw pitch roll captureName\n");
+        return;
+    }
+    renderView_t view = tr.primaryRenderView;
+    view.vieworg.Set(atof(args.Argv(1)), atof(args.Argv(2)), atof(args.Argv(3)));
+    view.viewaxis = idAngles(atof(args.Argv(5)), atof(args.Argv(4)), atof(args.Argv(6))).ToMat3();
+    view.viewID = 0;
+    view.fov_x = 90.0f;
+    view.fov_y = 2.0f * atan(float(glConfig.vidHeight) / glConfig.vidWidth) * idMath::M_RAD2DEG;
+    const int oldFraction = r_screenFraction.GetInteger();
+    r_screenFraction.SetInteger(100);
+    R_RenderingFPS(&view); // material compilation and streaming warmup
+    R_RenderingFPS(&view);
+    common->Printf("Fixed-view benchmark: %s, %dx%d, origin %s, angles %s\n", glConfig.renderer_string, glConfig.vidWidth, glConfig.vidHeight, view.vieworg.ToString(), view.viewaxis.ToAngles().ToString());
+    for (int sample = 0; sample < 3; ++sample) {
+        float fps = R_RenderingFPS(&view);
+        common->Printf("Fixed-view sample %d: %.3f ms, %.2f fps\n", sample + 1, 1000.0f / fps, fps);
+    }
+    idStr name = "screenshots/";
+    name += args.Argv(7);
+    name += ".png";
+    tr.TakeScreenshot(glConfig.vidWidth, glConfig.vidHeight, name.c_str(), 1, &view);
+    r_screenFraction.SetInteger(oldFraction);
 }
 
 void R_ShowglConfig_f(const idCmdArgs &args)
@@ -2375,8 +2410,14 @@ R_InitCommands
 */
 void R_InitCommands(void)
 {
+#if defined(__APPLE__) && defined(_SPLASHDAMAGE)
+    cmdSystem->AddCommand("metalRTInfo", R_MetalRT_Info_f, CMD_FL_RENDERER, "reports native Metal ray tracing status");
+#endif
 #if !defined(_SPLASHDAMAGE)
 	cmdSystem->AddCommand("MakeMegaTexture", idMegaTexture::MakeMegaTexture_f, CMD_FL_RENDERER|CMD_FL_CHEAT, "processes giant images");
+#else
+	cmdSystem->AddCommand("megaTextureInfo", idMegaTexture::MegaTextureInfo_f, CMD_FL_RENDERER, "reports terrain streaming state");
+	cmdSystem->AddCommand("megaTextureDecodeTile", idMegaTexture::MegaTextureDecodeTile_f, CMD_FL_RENDERER, "decodes one terrain tile for inspection");
 #endif
 	cmdSystem->AddCommand("sizeUp", R_SizeUp_f, CMD_FL_RENDERER, "makes the rendered view larger");
 	cmdSystem->AddCommand("sizeDown", R_SizeDown_f, CMD_FL_RENDERER, "makes the rendered view smaller");
@@ -2387,6 +2428,7 @@ void R_InitCommands(void)
 	cmdSystem->AddCommand("envshot", R_EnvShot_f, CMD_FL_RENDERER, "takes an environment shot");
 	cmdSystem->AddCommand("makeAmbientMap", R_MakeAmbientMap_f, CMD_FL_RENDERER|CMD_FL_CHEAT, "makes an ambient map");
 	cmdSystem->AddCommand("benchmark", R_Benchmark_f, CMD_FL_RENDERER, "benchmark");
+    cmdSystem->AddCommand("benchmarkView", R_BenchmarkView_f, CMD_FL_RENDERER, "benchmark a fixed camera and save its image");
 	cmdSystem->AddCommand("gfxInfo", GfxInfo_f, CMD_FL_RENDERER, "show graphics info");
 	cmdSystem->AddCommand("modulateLights", R_ModulateLights_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "modifies shader parms on all lights");
 	cmdSystem->AddCommand("testImage", R_TestImage_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "displays the given image centered on screen", idCmdSystem::ArgCompletion_ImageName);

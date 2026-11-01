@@ -443,6 +443,29 @@ void sdNetManager::OnConnect( sdNetTask* task, void* parm ) {
 sdNetManager::Shutdown
 ================
 */
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
+void sdNetManager::task_t::Cancel() {
+    if (!task) return;
+    if (allowCancel) {
+        task->Cancel(true);
+        return;
+    }
+    // The local reconstructed service progresses on this thread; spinning
+    // without pumping it deadlocks shutdown before its pending task completes.
+    while (task->GetState() != sdNetTask::TS_COMPLETING &&
+           task->GetState() != sdNetTask::TS_DONE) {
+        networkService->RunFrame();
+#ifdef _WIN32
+        ::Sleep(1);
+#else
+        usleep(1000);
+#endif
+    }
+}
+
 void sdNetManager::Shutdown() {
 
 	// Cancel any outstanding tasks
@@ -456,9 +479,10 @@ void sdNetManager::Shutdown() {
 	}
 
 	if ( activeTask.task != NULL ) {
+		sdNetTask* pendingTask = activeTask.task;
 		activeTask.Cancel();
 		activeTask.OnCompleted( this );
-		networkService->FreeTask( activeTask.task );
+		networkService->FreeTask( pendingTask );
 	}
 
 	activeMessage = NULL;

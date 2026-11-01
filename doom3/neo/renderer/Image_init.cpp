@@ -1462,9 +1462,10 @@ R_ListImages_f
 */
 void R_ListImages_f(const idCmdArgs &args)
 {
-	int		i, j, partialSize;
+	int		i, j;
+	long long partialSize;
 	idImage	*image;
-	int		totalSize;
+	long long totalSize;
 	int		count = 0;
 	int		matchTag = 0;
 	bool	uncompressedOnly = false;

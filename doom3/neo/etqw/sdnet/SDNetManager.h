@@ -255,16 +255,7 @@ private:
 
 						return true;
 					}
-		void		Cancel() {
-						if ( task == NULL ) {
-							return;
-						}
-						if ( allowCancel ) {
-							task->Cancel( true );
-						} else {
-							while ( task->GetState() != sdNetTask::TS_COMPLETING );
-						}
-					}
+		void		Cancel();
 		void		OnCompleted( sdNetManager* manager ) {
 						if ( completed != NULL ) {
 							CALL_MEMBER_FN_PTR( manager, completed )( task, parm );
