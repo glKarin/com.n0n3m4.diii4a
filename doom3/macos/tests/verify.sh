@@ -9,6 +9,7 @@ build-macos-tests/atomic_probe
 python3 doom3/macos/tests/verify_render_state.py
 python3 doom3/macos/tests/verify_gui_clip.py
 python3 doom3/macos/tests/verify_hud_bars.py
+python3 doom3/macos/tests/verify_startup_args.py
 clang++ -std=c++17 -O1 -fobjc-arc \
   $(pkg-config --cflags sdl2 shaderc spirv-cross-c) \
   -Idoom3/neo/sys/sdl -Idoom3/neo/externlibs/include \

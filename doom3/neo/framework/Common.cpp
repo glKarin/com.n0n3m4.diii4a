@@ -940,7 +940,7 @@ doom set test blah + map test
 ============================================================================
 */
 
-#define		MAX_CONSOLE_LINES	32
+#define		MAX_CONSOLE_LINES	128
 int			com_numConsoleLines;
 idCmdArgs	com_consoleLines[MAX_CONSOLE_LINES];
 
@@ -959,6 +959,10 @@ void idCommonLocal::ParseCommandLine(int argc, const char **argv)
 	// API says no program path
 	for (i = 0; i < argc; i++) {
 		if (argv[ i ][ 0 ] == '+') {
+			if (com_numConsoleLines >= MAX_CONSOLE_LINES) {
+				FatalError("Too many startup commands (maximum %d)", MAX_CONSOLE_LINES);
+				return;
+			}
 			com_numConsoleLines++;
 			com_consoleLines[ com_numConsoleLines-1 ].AppendArg(argv[ i ] + 1);
 		} else {
