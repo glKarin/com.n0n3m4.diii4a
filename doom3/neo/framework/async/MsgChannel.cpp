@@ -26,6 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+#include "RetailHuffman.h"
+#endif
+
 #include "../../idlib/precompiled.h"
 #pragma hdrstop
 
@@ -266,8 +270,10 @@ idMsgChannel::idMsgChannel
 idMsgChannel::idMsgChannel()
 {
 	id = -1;
+	compressor = NULL;
 #ifdef _SPLASHDAMAGE //karin: bot fake client
 	isBot = false;
+	retailProtocol = false;
 #endif
 }
 
@@ -306,6 +312,7 @@ void idMsgChannel::Init(const netadr_t adr, const int id)
 	reliableReceive.Init(0);
 #ifdef _SPLASHDAMAGE //karin: bot fake client
 	isBot = false;
+	retailProtocol = false;
 #endif
 }
 
@@ -375,6 +382,20 @@ void idMsgChannel::WriteMessageData(idBitMsg &out, const idBitMsg &msg)
 	// write reliable messages
 	reliableSend.CopyToBuffer(tmp.GetData() + tmp.GetSize());
 	tmp.SetSize(tmp.GetSize() + reliableSend.GetTotalSize());
+#ifdef _SPLASHDAMAGE
+	if (retailProtocol) {
+		byte compressed[MAX_MESSAGE_SIZE]; size_t size = 0;
+		if (!etqwRetail::ReliableCodec().Encode(tmp.GetData(), tmp.GetSize(), compressed, sizeof(compressed), size) ||
+			out.GetSize() + 2 + size + msg.GetSize() > out.GetMaxSize()) {
+			common->Error("Retail reliable message exceeds channel capacity");
+			return;
+		}
+		out.WriteShort(tmp.GetSize());
+		out.WriteData(compressed, size);
+		out.WriteData(msg.GetData(), msg.GetSize());
+		return;
+	}
+#endif
 	tmp.WriteShort(0);
 
 	// write data
@@ -400,6 +421,43 @@ bool idMsgChannel::ReadMessageData(idBitMsg &out, const idBitMsg &msg)
 {
 	int reliableAcknowledge, reliableMessageSize, reliableSequence;
 
+#ifdef _SPLASHDAMAGE
+	if (retailProtocol) {
+		if (msg.GetRemaingData() < 3) return false;
+		const int reliableSize = msg.ReadUShort();
+		if (reliableSize < 4 || reliableSize > MAX_MSG_QUEUE_SIZE) return false;
+		size_t consumed = 0;
+		if (!etqwRetail::ReliableCodec().Decode(msg.GetData() + msg.GetReadCount(), msg.GetRemaingData(),
+			out.GetData(), reliableSize, consumed)) return false;
+		const int tailSize = msg.GetRemaingData() - consumed;
+		if (reliableSize + tailSize > out.GetMaxSize()) return false;
+		// Validate the whole block before changing either reliable queue.
+		out.SetSize(reliableSize); out.BeginReading();
+		const int ack = out.ReadLong();
+		if (ack < 0 || ack >= reliableSend.GetLast()) return false;
+		int expected = reliableReceive.GetLast() + 1, required = 0;
+		while (out.GetRemaingData()) {
+			if (out.GetRemaingData() < 6) return false;
+			const int size = out.ReadUShort(); const int sequence = out.ReadLong();
+			if (size <= 0 || size > out.GetRemaingData()) return false;
+			if (sequence == expected) { ++expected; required += size + 8; }
+			out.ReadData(NULL, size);
+		}
+		if (required > reliableReceive.GetSpaceLeft()) return false;
+		while (reliableSend.GetFirst() <= ack) {
+			int ignored; if (!reliableSend.Get(NULL, ignored)) break;
+		}
+		out.BeginReading(); out.ReadLong();
+		while (out.GetRemaingData()) {
+			const int size = out.ReadUShort(); const int sequence = out.ReadLong();
+			if (sequence == reliableReceive.GetLast() + 1) reliableReceive.Add(out.GetData() + out.GetReadCount(), size);
+			out.ReadData(NULL, size);
+		}
+		memcpy(out.GetData() + reliableSize, msg.GetData() + msg.GetReadCount() + consumed, tailSize);
+		out.SetSize(reliableSize + tailSize);
+		return true;
+	}
+#endif
 	// read message size
 	out.SetSize(msg.ReadShort());
 

@@ -18,7 +18,26 @@ std::string preprocess(shaderc::Compiler &compiler, const std::string &input, sh
     auto r = compiler.PreprocessGlsl(s, kind, "material", options);
     if (r.GetCompilationStatus() != shaderc_compilation_status_success)
         throw std::runtime_error(r.GetErrorMessage());
-    return std::string(r.cbegin(), r.cend());
+    s.assign(r.cbegin(), r.cend());
+    // The stock conditional mega shader uses lower-case spellings in its
+    // coarsest-level branch, unlike the declared render bindings.
+    s = std::regex_replace(s, std::regex("\\bmegatextureparams_([0-9]+)\\b"), "megaTextureParams_$1");
+    s = std::regex_replace(s, std::regex("\\bmegatexturelevel_([0-9]+)\\b"), "megaTextureLevel_$1");
+    if (kind == shaderc_vertex_shader) {
+        // Retail GLSL declares the legacy attributes itself. The engine's
+        // GLES conversion also injects their modern declarations, so discard
+        // the duplicate after preprocessing has resolved the binding macros.
+        std::regex legacy("\\battribute\\s+(?:(?:lowp|mediump|highp)\\s+)?(\\w+)\\s+(\\w+)\\s*;");
+        std::smatch match;
+        while (std::regex_search(s, match, legacy)) {
+            std::regex modern("\\bin\\s+(?:(?:lowp|mediump|highp)\\s+)?\\w+\\s+" + match[2].str() + "\\s*;");
+            const std::string replacement = std::regex_search(s, modern) ? "" :
+                "in " + match[1].str() + " " + match[2].str() + ";";
+            s.replace(match.position(), match.length(), replacement);
+        }
+        s = std::regex_replace(s, std::regex("\\bgl_ModelViewProjectionMatrix\\b"), "u_modelViewProjectionMatrix");
+    }
+    return s;
 }
 std::vector<Declaration> declarations(const std::string &source, const std::string &qualifier) {
     std::vector<Declaration> result;

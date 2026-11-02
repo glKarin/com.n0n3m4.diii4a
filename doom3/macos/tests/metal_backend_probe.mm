@@ -20,10 +20,17 @@ int main() {
     auto w = SDL_CreateWindow("ETQW Metal regression", 0, 0, 64, 64, SDL_WINDOW_METAL | SDL_WINDOW_HIDDEN);
     if (!MetalBackend_Init(w, 64, 64))
         return 1;
-    const char *v = "#version 300 es\nprecision highp float;in vec3 attr_Vertex;void "
-                    "main(){gl_Position=vec4(attr_Vertex,1);}";
-    const char *f = "#version 300 es\nprecision highp float;uniform vec4 color;out vec4 result;void "
-                    "main(){if(color.a<.5)discard;result=color;}";
+    // Invalid lookups must not turn the unbound program into an existing object.
+    GLint unboundStatus = 0;
+    GL(GetProgramiv)(0, GL_LINK_STATUS, &unboundStatus);
+    if (GL(IsProgram)(0) || GL(GetUniformLocation)(0, "color") != -1 ||
+        GL(GetAttribLocation)(0, "attr_Vertex") != -1)
+        return 20;
+    const char *v = "#version 300 es\nprecision highp float;in vec3 attr_Vertex;"
+                    "attribute vec3 attr_Vertex;uniform mat4 u_modelViewProjectionMatrix;void "
+                    "main(){gl_Position=gl_ModelViewProjectionMatrix*vec4(attr_Vertex,1);}";
+    const char *f = "#version 300 es\nprecision highp float;uniform vec4 megaTextureParams_0;out vec4 result;void "
+                    "main(){if(megatextureparams_0.a<.5)discard;result=megatextureparams_0;}";
     GLuint vs = GL(CreateShader)(GL_VERTEX_SHADER), fs = GL(CreateShader)(GL_FRAGMENT_SHADER),
            p = GL(CreateProgram)();
     GL(ShaderSource)(vs, 1, &v, nullptr);
@@ -39,7 +46,9 @@ int main() {
     if (!linked)
         return 2;
     GL(UseProgram)(p);
-    auto color = GL(GetUniformLocation)(p, "color");
+    const float retailMatrix[] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    GL(UniformMatrix4fv)(GL(GetUniformLocation)(p, "u_modelViewProjectionMatrix"), 1, 0, retailMatrix);
+    auto color = GL(GetUniformLocation)(p, "megaTextureParams_0");
     GLuint buffer;
     GL(GenBuffers)(1, &buffer);
     GL(BindBuffer)(GL_ARRAY_BUFFER, buffer);

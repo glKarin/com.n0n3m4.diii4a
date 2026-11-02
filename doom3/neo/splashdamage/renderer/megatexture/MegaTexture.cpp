@@ -826,13 +826,28 @@ void idMegaTexture::Reset() {
 }
 
 unsigned int idMegaTexture::GetPureServerChecksum( unsigned int offset ) {
-	unsigned int hash = 2166136261u ^ offset;
-	for ( const char *p = fileName.c_str(); *p; ++p ) hash = ( hash ^ (byte)*p ) * 16777619u;
-	for ( int i = 0, count = TotalStoredTileCount( resolution ); i < count; ++i ) {
-		hash = ( hash ^ (unsigned int)tileIndexMap[i] ) * 16777619u;
-		hash = ( hash ^ (unsigned int)tileIndexedDataSizes[i] ) * 16777619u;
+	// Retail 1.5 samples 64 bytes of the installed mega file with an LCG.
+	// Open a separate handle so the streaming threads keep their file position.
+	idFile* source = fileSystem->OpenFileRead(fileName.c_str());
+	if (!source || source->Length() < 2) {
+		if (source) fileSystem->CloseFile(source);
+		return 0;
 	}
-	return hash;
+	unsigned int checksum = 0;
+	for (int group = 0; group < 16; ++group) {
+		unsigned int word = 0;
+		for (int octet = 0; octet < 4; ++octet) {
+			offset = offset * 69069U + 1;
+			const int position = (offset & 0x7fff) % (source->Length() - 1);
+			source->Seek(position, FS_SEEK_SET);
+			byte value = 0;
+			if (source->Read(&value, 1) != 1) { fileSystem->CloseFile(source); return 0; }
+			word |= (unsigned int)value << (octet * 8);
+		}
+		checksum ^= word;
+	}
+	fileSystem->CloseFile(source);
+	return checksum;
 }
 
 void idMegaTexture::UpdateMapping( const idRenderWorldLocal *world ) {

@@ -7,6 +7,26 @@
 #include "renderer/RenderProgramManager.h"
 #include "framework/DeclParseHelper.h"
 #include "renderer/tr_local.h"
+#include "DeclTemplate.h"
+
+#if defined(__APPLE__) && defined(_SPLASHDAMAGE)
+#include "metal_renderprogs.h"
+#endif
+
+const char* R_MetalRetailDeclSource(declType_t type, const char* name) {
+#if defined(__APPLE__) && defined(_SPLASHDAMAGE)
+	if ((type == DECL_RENDERPROGRAM || type == DECL_TEMPLATE) &&
+		cvarSystem->GetCVarBool("r_metalBackend") && cvarSystem->GetCVarBool("net_retailProtocol")) {
+		for (int i = 0; i < sizeof(metalRenderPrograms) / sizeof(metalRenderPrograms[0]); ++i) {
+			if (metalRenderPrograms[i].isTemplate == (type == DECL_TEMPLATE) &&
+				!idStr::Icmp(name, metalRenderPrograms[i].name)) {
+				return metalRenderPrograms[i].source;
+			}
+		}
+	}
+#endif
+	return NULL;
+}
 
 /*
 ===============================================================================
@@ -34,7 +54,20 @@ bool sdDeclRenderProgram::Parse( const char* text, const int textLength ) {
 
 	src.SetFlags(DECL_LEXER_FLAGS);
 	//src.LoadMemory( text, textLength, GetFileName(), GetLineNum() );
-	sdDeclParseHelper declHelper( this, text, textLength, src );
+	// Use the port's shader implementations as renderer code. Keep the original
+	// declaration text, binary tokens and network checksum untouched: pure
+	// servers still validate the player's installed retail archives.
+	const char* rendererSource = R_MetalRetailDeclSource(DECL_RENDERPROGRAM, GetName());
+	idStr expandedSource;
+	sdAutoPtr<sdDeclParseHelper> declHelper;
+	if (rendererSource) {
+		if (sdDeclTemplate::ExpandTemplate(expandedSource, rendererSource, strlen(rendererSource))) {
+			rendererSource = expandedSource.c_str();
+		}
+		src.LoadMemory(rendererSource, strlen(rendererSource), GetName());
+	} else {
+		declHelper.Reset(new sdDeclParseHelper(this, text, textLength, src));
+	}
 	src.SkipUntilString("{");
 
 	while (1) {

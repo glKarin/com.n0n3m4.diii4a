@@ -1023,12 +1023,18 @@ void mglBindAttribLocation(GLuint p, GLuint index, const GLchar *name) {
     programs[p].bindings[name] = index;
 }
 GLint mglGetAttribLocation(GLuint p, const GLchar *name) {
-    auto &b = programs[p].bindings;
+    auto program = programs.find(p);
+    if (!p || program == programs.end())
+        return -1;
+    auto &b = program->second.bindings;
     auto i = b.find(name);
     return i == b.end() ? -1 : i->second;
 }
 GLint mglGetUniformLocation(GLuint p, const GLchar *name) {
-    auto &m = programs[p].locations;
+    auto program = programs.find(p);
+    if (!p || program == programs.end())
+        return -1;
+    auto &m = program->second.locations;
     auto i = m.find(name);
     return i == m.end() ? -1 : i->second;
 }
@@ -1117,7 +1123,7 @@ void mglGetShaderPrecisionFormat(GLenum, GLenum, GLint *range, GLint *precision)
 }
 void uniform(GLint location, GLsizei count, const void *values, int components, bool integer = false,
              int matrix = 0) {
-    if (location < 0 || !values)
+    if (location < 0 || !values || !currentProgram)
         return;
     auto &p = programs[currentProgram];
     unsigned element = unsigned(location) >> 16, index = unsigned(location) & 65535u;
@@ -2130,7 +2136,8 @@ GLboolean mglIsShader(GLuint id) {
     return shaders.count(id);
 }
 GLboolean mglIsProgram(GLuint id) {
-    return programs.count(id);
+    // Zero is the unbound program, even if a compatibility query touched its map entry.
+    return id != 0 && programs.count(id);
 }
 void mglGenQueries(GLsizei n, GLuint *ids) {
     for (int i = 0; i < n; ++i) {

@@ -2915,3 +2915,15 @@ void idImageManager::ReloadAllMegaTextures() {
 	for ( int i = 0; i < megaTextures.Num(); ++i ) megaTextures[i]->Load();
 }
 #endif
+
+#ifdef _SPLASHDAMAGE
+unsigned int idImageManager::GetRetailMegaChecksum(unsigned int seed) {
+    unsigned int checksum = 0; int count = 0;
+    for (int i = 0; i < megaTextures.Num(); ++i) {
+        if (!megaTextures[i]->IsLoaded()) continue;
+        checksum |= megaTextures[i]->GetPureServerChecksum(seed); ++count;
+    }
+    return count ? checksum : 0x3e3e3e3e;
+}
+unsigned int R_RetailMegaTextureChecksum(unsigned int seed) { return globalImages->GetRetailMegaChecksum(seed); }
+#endif

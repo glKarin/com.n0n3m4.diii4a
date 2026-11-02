@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-02",
+  "platform": "Apple M4 Max / macOS 27.0 (26A428) / ARM64 native engine and game module",
+  "protocol": "ETQW retail 1.5, 10.21, opt-in net_retailProtocol",
+  "servers": [
+    {
+      "kind": "Owned stock Windows 1.5 dedicated server on loopback",
+      "observed": "Admission, reliable messages, snapshots and player state"
+    },
+    {
+      "kind": "Public Linux retail 1.5 dedicated server, pure mode enabled",
+      "observed": "Admission, snapshots, player names/teams/scores, team and class changes; first-person deployment, movement and firing on Refinery"
+    }
+  ],
+  "integrity": {
+    "declaration_checksum": "13acb36b",
+    "reference": "Matched an independently captured original-client handshake against the same installed stock archives",
+    "game_package": "Verified installed Mac 1.5 game001.pk4, a02f1c18, used as the stock SDK compatibility baseline; actual executing module remains the rebuilt ARM64 module",
+    "terrain": "Retail sampled checksum over resident original megatextures",
+    "pure_checks": "Original PK4 checks remain active; no compatibility or HD override archive in the retail profile",
+    "shaders": "Existing repository translations embedded as renderer implementations; original declaration source and checksums retained"
+  },
+  "runtime": {
+    "network_maps": ["Outskirts", "Area22", "Refinery"],
+    "final_visual_check": "Refinery: terrain, buildings, foliage alpha, sky/fog, effects, vehicles, weapon, player names and circular minimap displayed",
+    "hud": "125 health and full bar displayed; firing changed ammunition from 40/80 to 38/80 and reduced the ammunition bar",
+    "drawable_pixels": [2560, 1440],
+    "internal_render_pixels": [3840, 2160],
+    "font_raster_scale": 4,
+    "metal": "Native Metal active, no ANGLE/EGL context, zero unsupported calls in sampled runtime stats",
+    "ray_tracing": "Static sun-shadow attenuation active: 276616 triangles, 960x540 mask, four rays per pixel",
+    "compression": "736 BC textures observed resident; original precompressed textures enabled",
+    "performance": "No new gameplay FPS benchmark claimed; single metalInfo GPU-time samples are not sustained performance measurements"
+  },
+  "checks": [
+    "ARM64 RelWithDebInfo ETQW and etqwgame build",
+    "Retail Huffman captured-packet vector, all symbols, output capacity and truncated-input checks under AddressSanitizer and UndefinedBehaviorSanitizer",
+    "Embedded shader declarations/templates, comments, recursive includes, include bounds and C++98 generated-header compilation",
+    "Metal validation probe including invalid program 0 queries, legacy duplicate vertex attributes/MVP and megatexture uniform spelling, geometry/depth/alpha/BC5/readback",
+    "Atomic counter, six blend forms, rotated GUI clipping, HUD fills at 0/25/50/100%, startup argument bounds under AddressSanitizer"
+  ],
+  "unsupported": [
+    "Authentication-ticket servers and PunkBuster",
+    "Retail voice audio decoding (voice-channel reliable traffic is acknowledged only)",
+    "Mods or other protocol versions",
+    "Retail server browsing (use direct connect)"
+  ],
+  "not_established": [
+    "All maps, all objectives, all HUD states and complete matches",
+    "Long sessions and repeated map/video restarts",
+    "Other Apple hardware/macOS versions or Windows/Linux/Android regression builds",
+    "Absence of inherited game-script/effect warnings",
+    "User approval of image quality, input comfort or sustained performance"
+  ],
+  "retail_game_data_included": false
+}

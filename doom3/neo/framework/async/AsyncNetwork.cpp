@@ -646,3 +646,26 @@ void idAsyncNetwork::BuildInvalidKeyMsg(idStr &msg, bool valid[ 2 ])
 	msg += common->GetLanguageDict()->GetString("#str_04304");
 }
 
+#ifdef _SPLASHDAMAGE
+void idAsyncNetwork::WriteRetailUserCmdDelta(idBitMsg &msg, const usercmd_t &cmd, const usercmd_t *base) {
+    if (base) {
+        msg.WriteDeltaLongCounter(base->gameTime, cmd.gameTime);
+        const bool changed = base->buttons.btnValue != cmd.buttons.btnValue || base->forwardmove != cmd.forwardmove ||
+            base->rightmove != cmd.rightmove || base->upmove != cmd.upmove;
+        msg.WriteBits(changed, 1);
+        if (changed) {
+            msg.WriteDelta(base->buttons.btnValue, cmd.buttons.btnValue, 10);
+            msg.WriteDeltaChar(base->forwardmove, cmd.forwardmove);
+            msg.WriteDeltaChar(base->rightmove, cmd.rightmove);
+            msg.WriteDeltaChar(base->upmove, cmd.upmove);
+        }
+        msg.WriteDeltaShort(base->angles[0], cmd.angles[0]);
+        msg.WriteDeltaShort(base->angles[1], cmd.angles[1]);
+    } else {
+        msg.WriteLong(cmd.gameTime); msg.WriteBits(cmd.buttons.btnValue, 10);
+        msg.WriteDeltaChar(0, cmd.forwardmove); msg.WriteDeltaChar(0, cmd.rightmove); msg.WriteDeltaChar(0, cmd.upmove);
+        msg.WriteShort(cmd.angles[0]); msg.WriteShort(cmd.angles[1]);
+    }
+}
+
+#endif

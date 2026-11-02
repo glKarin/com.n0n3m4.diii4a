@@ -6,17 +6,18 @@ and renders the world, virtual terrain, effects and UI through Metal command
 encoders. The native backend creates no OpenGL or EGL context.
 
 **Status:** development build tested on an Apple M4 Max with macOS 27.0
-(`26A428`). Valley and Island were exercised with local bots. The other maps,
-all menus, Intel Macs, other Apple GPUs and older macOS releases have not been
-validated. Original ETQW multiplayer compatibility is not provided by this
-reconstructed engine. This is not an update to the commercial Aspyr executable.
+(`26A428`). Valley and Island were exercised with local bots; Refinery was
+played on a retail 1.5 pure server. Full map/menu coverage, Intel Macs, other
+Apple GPUs and older macOS releases have not been validated.
+Experimental retail 1.5 multiplayer interoperability is available
+with the separate launcher below. This is not an update to the commercial Aspyr executable.
 
 ## Build and run
 
 Install Xcode command line tools and the build dependencies:
 
 ```sh
-brew install cmake ninja pkg-config sdl2 freetype shaderc spirv-cross
+brew install cmake ninja pkg-config python sdl2 freetype shaderc spirv-cross
 doom3/macos/build.sh
 doom3/macos/launch.sh /path/to/your/ETQW
 ```
@@ -60,6 +61,46 @@ The window size is measured in points; render targets are measured in pixels.
 4K rendering is downsampled when the drawable is smaller. Fonts and HUD layout
 keep their logical size. Set `r_renderWidth` and `r_renderHeight` to zero to
 follow drawable pixels at initialization; resolution changes require `vid_restart`.
+
+## Retail 1.5 multiplayer
+
+Use original, updated game archives and a separate profile for retail servers:
+
+```sh
+doom3/macos/join-retail.sh /path/to/your/ETQW HOST:PORT
+```
+
+This enables protocol 10.21. The ARM64 engine and game module exchange retail
+Huffman reliable messages, compressed snapshots and 33 ms input commands.
+Declaration checksums follow retail loading order and text terminator rules;
+terrain files use the retail sampled checksum. PK4 content checks remain active.
+The verified, installed Mac 1.5 `game001.pk4` is used as the SDK compatibility
+baseline; the running module is the rebuilt ARM64 module, not the original binary.
+
+Native Metal was connected to a stock Windows 1.5 dedicated server on loopback
+and a public Linux 1.5 server with pure mode enabled. Outskirts and Area22 were
+used for network checks. Refinery was verified in first person with team/class
+selection, movement, firing, player names, health and changing ammunition bars.
+The declaration checksum matched an independently observed original-client handshake. See
+[`validation/retail-network.json`](validation/retail-network.json) for the exact scope.
+
+For this profile, the engine embeds the repository's translated render programs
+and their includes/templates at build time. Original declaration text, binary
+tokens and checksums stay intact. This restores the post-processing composite,
+foliage alpha and command map without installing a shader override archive on a
+pure server. Two incomplete upstream subsurface programs retain the existing
+fallback. The build requires Python 3.9 or newer to generate the embedded table.
+
+Authentication-ticket servers, PunkBuster, mods and voice audio are not supported
+by this path. A second voice channel is acknowledged, but audio is not decoded.
+Server browsing still uses the reconstructed protocol; connect by address through
+the retail launcher. The existing local launcher retains protocol 14.42.
+Keep compatibility and HD texture override archives in the local profile: pure
+retail servers require their original data. Retina, optional 4K rendering and
+larger font atlases do not require modified game archives. Keep the game data
+resident on disk; an evicted iCloud `.mega` file cannot be streamed reliably.
+The retail launcher keeps the original compressed textures resident on the GPU;
+it does not apply the optional local 4× texture pack.
 
 ## Renderer and limits
 

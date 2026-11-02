@@ -1,9 +1,18 @@
-# Native local multiplayer and retail protocol investigation
+# Native local multiplayer and retail 1.5 interoperability
 
-The native client and dedicated server use protocol **14.42**. Both must be
-built from this branch. This is a local transport adapted to the ETQW SDK;
-**retail 1.5 multiplayer (10.21) is not implemented**. The network work is on
-`codex/etqw-retail-network`, separate from the Metal port PR.
+The matching native client/server use protocol **14.42**. The client also has an
+opt-in **retail 1.5 (10.21)** path, tested against an original Windows dedicated
+server on loopback and a public Linux pure server. It is included with the Metal
+port. Use `doom3/macos/join-retail.sh /path/to/ETQW HOST:PORT` with original,
+updated game data and the installed Mac 1.5 `game001.pk4`.
+
+The retail implementation covers admission, reliable Huffman messages, compressed
+entity/command snapshots, 33 ms input commands and the terrain integrity exchange.
+The original Mac game package is verified as the stock SDK compatibility baseline;
+the executing game module is ARM64. Renderer translations are embedded without
+replacing the declaration sources or disabling PK4 checks. See
+[the retail setup](README.md#retail-15-multiplayer) and
+[dated validation](validation/retail-network.json).
 
 ## Play with the matching native server
 
@@ -48,8 +57,8 @@ It does not establish internet/LAN compatibility with other machines.
 The version bump rejects the previous incompatible 14.41 framing. It is not an
 assertion of retail compatibility. Validation on Apple Silicon covered separate
 server/client processes, Valley, snapshots, team selection, spawning, movement,
-firing and reconnecting. Longer sessions, multiple human clients, packet-loss
-stress and retail gameplay remain unvalidated.
+firing and reconnecting. Longer sessions, multiple human clients and packet-loss
+stress remain unvalidated for this local transport.
 
 ## Original 1.5 reference server for protocol work
 
@@ -105,7 +114,12 @@ unknown versions, excessive strings/checksum lists, duplicate player slots and
 trailing bytes. Unit tests include byte-level fixtures, every prefix truncation,
 MD4 reference vectors and a complete four-packet exchange with a loopback peer.
 
-## Observed admission result, 2026-11-01
+## Historical diagnostic result, 2026-11-01
+
+This records the earlier standalone probe, before the original Mac game archive
+was installed and before the retail transport was implemented. It does not
+describe the current client: on 2026-11-02 the native client entered the same
+server with pure mode enabled and was exercised in first person on Refinery.
 
 Target: `178.162.169.12:27733`, NEW EU Vanilla / Makron Horde.
 
@@ -131,12 +145,10 @@ Target: `178.162.169.12:27733`, NEW EU Vanilla / Makron Horde.
 | pak001.pk4 | 010e16e6 |
 | pak000.pk4 | 442eb08b |
 
-This is a concrete admission blocker for the current build on that server.
-Resolving the code-package check alone would **not** establish multiplayer
-compatibility: the transport and game-state work below is still required.
-Testing it needs a controlled server whose policy explicitly accepts the native
-module, or another supported arrangement with the server operator. Receiving a
-matching retail code archive would not make its x86 module executable on ARM64.
+The current client requires the installed archive with checksum `a02f1c18`,
+retains the actual ARM64 module identity separately, and implements the retail
+transport described above. It does not execute the archive's x86 module. The
+standalone admission probe remains a bounded diagnostic and does not join a game.
 
 ## Wire formats established so far
 
@@ -167,17 +179,11 @@ Handshake field order was inspected in the user's local Mac 1.5 update executabl
 and confirmed by bounded exchanges with the target server. No executable,
 disassembly, keys, player identities or commercial assets are included here.
 
-## Work still required before a playable retail connection
+## Remaining coverage
 
-1. Integrate an explicit retail connection state machine into the engine,
-   including admission errors and supported authentication/mod transitions.
-2. Implement the two retail message channels and validate fragmentation,
-   reliability, compression, game initialization and reconnection against a
-   controlled retail server. The existing channel is Doom 3-derived.
-3. Reconcile retail snapshot and user-command framing with the game SDK. The native adapter
-   now separates these streams, but their framing has not been validated against
-   the retail transport.
-4. Establish an accepted native game-module/data-package policy with the test
-   server. Keep verification honest and exclude incompatible local overrides.
-5. Test map loading, spawning, movement, combat, map changes and disconnects
-   before attempting a public gameplay session or claiming compatibility.
+Authentication-ticket servers, PunkBuster and mods are unsupported. The second
+voice channel acknowledges reliable traffic but does not decode audio. Retail
+server browsing is not implemented; use direct connect. Long sessions, packet-loss
+stress, all maps/objectives and repeated transitions need further validation.
+The current checks establish a working native gameplay connection on the tested
+server, not compatibility with every ETQW server or mod.

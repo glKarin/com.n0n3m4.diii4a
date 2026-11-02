@@ -3252,6 +3252,19 @@ endif()
 
 if(SPLASHDAMAGE)
 	# splashdamage engine source
+	if(APPLE)
+		find_package(Python3 3.9 REQUIRED COMPONENTS Interpreter)
+		file(GLOB_RECURSE ETQW_RENDERPROG_INPUTS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../etqwbase/renderprogs/*")
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${ETQW_RENDERPROG_INPUTS}
+			"${CMAKE_CURRENT_SOURCE_DIR}/../macos/tools/embed_renderprogs.py")
+		execute_process(COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../macos/tools/embed_renderprogs.py"
+			"${CMAKE_CURRENT_SOURCE_DIR}/../etqwbase/renderprogs" "${CMAKE_CURRENT_BINARY_DIR}/generated/metal_renderprogs.h"
+			RESULT_VARIABLE ETQW_RENDERPROG_RESULT)
+		if(NOT ETQW_RENDERPROG_RESULT EQUAL 0)
+			message(FATAL_ERROR "Could not embed ETQW renderer translations")
+		endif()
+		include_directories("${CMAKE_CURRENT_BINARY_DIR}/generated")
+	endif()
 	set(splashdamage_sdnet_src
 			splashdamage/sdnet/SDNet.cpp
 			splashdamage/sdnet/SDNetAccount.cpp

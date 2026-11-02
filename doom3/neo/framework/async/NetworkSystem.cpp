@@ -369,15 +369,34 @@ void idNetworkSystem::WriteClientUserCmds( int clientNum, idBitMsg& msg ) {
 
 void idNetworkSystem::ReadClientUserCmds( int clientNum, const idBitMsg& msg ) {
 	idAsyncClient &client = idAsyncNetwork::client;
-	const int count = msg.ReadByte();
-	if ( clientNum < 0 || clientNum >= MAX_ASYNC_CLIENTS || count < 1 || count > MAX_USERCMD_RELAY ) {
+	const int count = client.UsesRetailProtocol() ? msg.ReadBits(4) : msg.ReadByte();
+	if ( clientNum < 0 || clientNum >= MAX_ASYNC_CLIENTS || count < 0 || count > (client.UsesRetailProtocol() ? 15 : MAX_USERCMD_RELAY) ) {
 		common->Error( "Invalid ETQW user-command relay" );
 		return;
 	}
 	const usercmd_t *last = NULL;
 	for ( int i = 0; i < count; ++i ) {
 		usercmd_t &cmd = client.userCmds[(client.snapshotGameFrame + i) & (MAX_USERCMD_BACKUP - 1)][clientNum];
-		idAsyncNetwork::ReadUserCmdDelta( msg, cmd, last );
+		if (client.UsesRetailProtocol()) {
+            const bool delta = client.retailRelayValid;
+            usercmd_t &base = client.retailRelayBase;
+            memset(&cmd, 0, sizeof(cmd));
+            const int packed = delta ? msg.ReadDelta(client.retailRelayPacked, 16) : msg.ReadUShort();
+            client.retailRelayPacked = packed;
+            cmd.buttons.btnValue = packed & 1023;
+            signed char *moves[] = { &cmd.forwardmove, &cmd.rightmove, &cmd.upmove };
+            const signed char oldMoves[] = { base.forwardmove, base.rightmove, base.upmove };
+            for (int axis = 0; axis < 3; ++axis) {
+                const int mode = (packed >> (10 + axis * 2)) & 3;
+                *moves[axis] = mode == 0 ? 0 : mode == 1 ? 127 : mode == 2 ? -127 :
+                    delta ? msg.ReadDeltaChar(oldMoves[axis]) : msg.ReadChar();
+            }
+            cmd.angles[0] = delta ? msg.ReadDeltaShort(base.angles[0]) : msg.ReadShort();
+            cmd.angles[1] = delta ? msg.ReadDeltaShort(base.angles[1]) : msg.ReadShort();
+            cmd.gameTime = client.snapshotGameTime + i * 33;
+            base = cmd; client.retailRelayValid = true;
+        }
+        else idAsyncNetwork::ReadUserCmdDelta( msg, cmd, last );
 		cmd.gameFrame = client.snapshotGameFrame + i;
 		last = &cmd;
 	}
@@ -423,7 +442,7 @@ int idNetworkSystem::GetLastVoiceReceivedTime( int clientIndex ) {
 }
 
 int idNetworkSystem::ClientGetFrameTime( void ) {
-	return USERCMD_MSEC;
+	return idAsyncNetwork::client.GetUsercmdMsec();
 }
 
 int idNetworkSystem::GetDemoState( int& time, int& position, int& length, int& startPosition, int& endPosition, int &cutStartMarker, int &cutEndMarker ) {

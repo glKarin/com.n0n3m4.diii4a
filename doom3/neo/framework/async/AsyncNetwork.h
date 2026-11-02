@@ -160,6 +160,9 @@ class idAsyncNetwork
 		}
 		static void				RunFrame(void);
 
+#ifdef _SPLASHDAMAGE
+		static void WriteRetailUserCmdDelta(idBitMsg &msg, const usercmd_t &cmd, const usercmd_t *base);
+#endif
 		static void				WriteUserCmdDelta(idBitMsg &msg, const usercmd_t &cmd, const usercmd_t *base);
 		static void				ReadUserCmdDelta(const idBitMsg &msg, usercmd_t &cmd, const usercmd_t *base);
 

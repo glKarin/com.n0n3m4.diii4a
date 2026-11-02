@@ -80,6 +80,8 @@ class idAsyncClient
 #endif
 	public:
 		int GetGameTime(void) const { return gameTime; }
+		int GetUsercmdMsec() const { return retailProtocol ? 33 : USERCMD_MSEC; }
+		bool UsesRetailProtocol() const { return retailProtocol; }
 		idAsyncClient();
 
 		void				Shutdown(void);
@@ -130,6 +132,12 @@ class idAsyncClient
 		idServerScan		serverList;
 
 	private:
+		bool retailProtocol;
+		int retailClientVoiceId, retailServerVoiceId;
+		usercmd_t retailRelayBase;
+		int retailRelayPacked;
+		bool retailRelayValid;
+		idMsgChannel retailVoiceChannel;
 		bool				active;						// true if client is active
 		int					realTime;					// absolute time
 
@@ -200,7 +208,7 @@ class idAsyncClient
 		void				SendPingResponseToServer(int time);
 		void				SendUsercmdsToServer(void);
 		void				InitGame(int serverGameInitId, int serverGameFrame, int serverGameTime, const idDict &serverSI);
-		void				ProcessUnreliableServerMessage(const idBitMsg &msg);
+		void				ProcessUnreliableServerMessage(const idBitMsg &msg, bool retailDecoded = false);
 		void				ProcessReliableServerMessages(void);
 		void				ProcessChallengeResponseMessage(const netadr_t from, const idBitMsg &msg);
 		void				ProcessConnectResponseMessage(const netadr_t from, const idBitMsg &msg);

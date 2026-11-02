@@ -26,6 +26,10 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+#include "RetailHuffman.h"
+#endif
+
 #include "../../idlib/precompiled.h"
 #pragma hdrstop
 
@@ -37,6 +41,11 @@ const int SETUP_CONNECTION_RESEND_TIME	= 1000;
 const int EMPTY_RESEND_TIME				= 500;
 const int PREDICTION_FAST_ADJUST		= 4;
 
+
+#ifdef _SPLASHDAMAGE
+extern unsigned int R_RetailMegaTextureChecksum(unsigned int seed);
+idCVar net_retailProtocol("net_retailProtocol", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "ETQW 1.5 retail protocol interoperability");
+#endif
 
 /*
 ==================
@@ -57,6 +66,8 @@ idAsyncClient::Clear
 */
 void idAsyncClient::Clear(void)
 {
+	retailProtocol = false;
+	retailClientVoiceId = retailServerVoiceId = 0;
 	active = false;
 	realTime = 0;
 	clientTime = 0;
@@ -212,9 +223,14 @@ void idAsyncClient::ConnectToServer(const netadr_t adr)
 
 	// get a pseudo random client id, but don't use the id which is reserved for connectionless packets
 	clientId = Sys_Milliseconds() & CONNECTIONLESS_MESSAGE_ID_MASK;
+#ifdef _SPLASHDAMAGE
+	retailProtocol = net_retailProtocol.GetBool();
+	retailClientVoiceId = (clientId + 1) & CONNECTIONLESS_MESSAGE_ID_MASK;
+#endif
 
 	// calculate a checksum on some of the essential data used
 	clientDataChecksum = declManager->GetChecksum();
+	if (retailProtocol) common->Printf("Retail data checksum: %08x\n", clientDataChecksum);
 
 	// start challenging the server
 	clientState = CS_CHALLENGING;
@@ -224,7 +240,7 @@ void idAsyncClient::ConnectToServer(const netadr_t adr)
 #ifdef _SPLASHDAMAGE
 	game->HideMainMenu();
 	common->Printf("Connecting to native ETQW server %s (protocol %d.%d)\n",
-		Sys_NetAdrToString(adr), ASYNC_PROTOCOL_MAJOR, ASYNC_PROTOCOL_MINOR);
+		Sys_NetAdrToString(adr), retailProtocol ? 10 : ASYNC_PROTOCOL_MAJOR, retailProtocol ? 21 : ASYNC_PROTOCOL_MINOR);
 #else
 	guiNetMenu = uiManager->FindGui("guis/netmenu.gui", true, false, true);
 	guiNetMenu->SetStateString("status", va(common->GetLanguageDict()->GetString("#str_06749"), Sys_NetAdrToString(adr)));
@@ -307,6 +323,8 @@ void idAsyncClient::DisconnectFromServer(void)
 
 	if (clientState != CS_PURERESTART) {
 		channel.Shutdown();
+		retailVoiceChannel.Shutdown();
+		retailProtocol = false;
 		clientState = CS_DISCONNECTED;
 	}
 
@@ -630,7 +648,7 @@ void idAsyncClient::SendUserInfoToServer(void)
 
 	// send reliable client info to server
 	msg.Init(msgBuf, sizeof(msgBuf));
-	msg.WriteByte(CLIENT_RELIABLE_MESSAGE_CLIENTINFO);
+	msg.WriteByte(retailProtocol ? 2 : CLIENT_RELIABLE_MESSAGE_CLIENTINFO);
 	msg.WriteDeltaDict(info, &sessLocal.mapSpawnData.userInfo[ clientNum ]);
 
 	if (!channel.SendReliableMessage(msg)) {
@@ -664,9 +682,10 @@ void idAsyncClient::SendEmptyToServer(bool force, bool mapLoad)
 
 	msg.Init(msgBuf, sizeof(msgBuf));
 	msg.WriteLong(serverMessageSequence);
-	msg.WriteLong(mapLoad ? GAME_INIT_ID_MAP_LOAD : gameInitId);
+	if (retailProtocol) msg.WriteByte(mapLoad ? 255 : gameInitId);
+	else msg.WriteLong(mapLoad ? GAME_INIT_ID_MAP_LOAD : gameInitId);
 	msg.WriteLong(snapshotSequence);
-	msg.WriteByte(CLIENT_UNRELIABLE_MESSAGE_EMPTY);
+	msg.WriteBits(CLIENT_UNRELIABLE_MESSAGE_EMPTY, retailProtocol ? 3 : 8);
 
 	channel.SendMessage(clientPort, clientTime, msg);
 
@@ -693,9 +712,10 @@ void idAsyncClient::SendPingResponseToServer(int time)
 
 	msg.Init(msgBuf, sizeof(msgBuf));
 	msg.WriteLong(serverMessageSequence);
-	msg.WriteLong(gameInitId);
+	if (retailProtocol) msg.WriteByte(gameInitId);
+	else msg.WriteLong(gameInitId);
 	msg.WriteLong(snapshotSequence);
-	msg.WriteByte(CLIENT_UNRELIABLE_MESSAGE_PINGRESPONSE);
+	msg.WriteBits(CLIENT_UNRELIABLE_MESSAGE_PINGRESPONSE, retailProtocol ? 3 : 8);
 	msg.WriteLong(time);
 
 	channel.SendMessage(clientPort, clientTime, msg);
@@ -730,19 +750,25 @@ void idAsyncClient::SendUsercmdsToServer(void)
 	// send the user commands to the server
 	msg.Init(msgBuf, sizeof(msgBuf));
 	msg.WriteLong(serverMessageSequence);
-	msg.WriteLong(gameInitId);
+	if (retailProtocol) msg.WriteByte(gameInitId);
+	else msg.WriteLong(gameInitId);
 	msg.WriteLong(snapshotSequence);
-	msg.WriteByte(CLIENT_UNRELIABLE_MESSAGE_USERCMD);
+	msg.WriteBits(CLIENT_UNRELIABLE_MESSAGE_USERCMD, retailProtocol ? 3 : 8);
 	msg.WriteShort(clientPrediction);
 
 	numUsercmds = idMath::ClampInt(0, 10, idAsyncNetwork::clientUsercmdBackup.GetInteger()) + 1;
 
 	// write the user commands
 	msg.WriteLong(gameFrame);
-	msg.WriteByte(numUsercmds);
+	msg.WriteBits(numUsercmds, retailProtocol ? 4 : 8);
+	if (retailProtocol) msg.WriteBits(0, 4);
 
 	for (last = NULL, i = gameFrame - numUsercmds + 1; i <= gameFrame; i++) {
 		index = i & (MAX_USERCMD_BACKUP - 1);
+#ifdef _SPLASHDAMAGE
+		if (retailProtocol) idAsyncNetwork::WriteRetailUserCmdDelta(msg, userCmds[index][clientNum], last);
+		else
+#endif
 		idAsyncNetwork::WriteUserCmdDelta(msg, userCmds[index][clientNum], last);
 		last = &userCmds[index][clientNum];
 	}
@@ -779,7 +805,7 @@ void idAsyncClient::InitGame(int serverGameInitId, int serverGameFrame, int serv
 idAsyncClient::ProcessUnreliableServerMessage
 ==================
 */
-void idAsyncClient::ProcessUnreliableServerMessage(const idBitMsg &msg)
+void idAsyncClient::ProcessUnreliableServerMessage(const idBitMsg &msg, bool retailDecoded)
 {
 	int i, j, index, id, numDuplicatedUsercmds, aheadOfServer, numUsercmds, delta;
 	int serverGameInitId, serverGameFrame, serverGameTime;
@@ -787,9 +813,36 @@ void idAsyncClient::ProcessUnreliableServerMessage(const idBitMsg &msg)
 	usercmd_t *last;
 	bool pureWait;
 
-	serverGameInitId = msg.ReadLong();
-
+	serverGameInitId = retailProtocol && !retailDecoded ? msg.ReadByte() : msg.ReadLong();
 	id = msg.ReadByte();
+#ifdef _SPLASHDAMAGE
+	if (retailProtocol && !retailDecoded && id == SERVER_UNRELIABLE_MESSAGE_SNAPSHOT) {
+		if (msg.GetRemaingData() < 6) return;
+		const int entityOffset = msg.ReadUShort();
+		const int entityStart = msg.GetReadCount() + entityOffset;
+		const int commandOffset = msg.ReadUShort();
+		const int commandStart = msg.GetReadCount() + commandOffset;
+		if (entityStart < msg.GetReadCount() + 2 || entityStart >= msg.GetSize() ||
+			commandStart < entityStart + 2 || commandStart >= msg.GetSize()) {
+			common->Warning("Invalid retail snapshot offsets"); return;
+		}
+		const byte* data = msg.GetData();
+		const int entitySize = data[entityStart-2] | data[entityStart-1] << 8;
+		const int commandSize = data[commandStart-2] | data[commandStart-1] << 8;
+		if (entitySize < 1 || entitySize > 32767 || commandSize < 15 || commandSize > 32767) return;
+		byte entities[32768], commands[32768], converted[65568]; size_t used = 0;
+		if (!etqwRetail::EntityCodec().Decode(data + entityStart, commandStart - 2 - entityStart, entities, entitySize, used) ||
+			!etqwRetail::CommandCodec().Decode(data + commandStart, msg.GetSize() - commandStart, commands, commandSize, used)) {
+			common->Warning("Truncated retail snapshot"); return;
+		}
+		idBitMsg native; native.Init(converted, sizeof(converted));
+		native.WriteLong(serverGameInitId); native.WriteByte(id);
+		native.WriteData(commands, 15); // sequence, frame, time, duplicates, prediction delta
+		native.WriteShort(entitySize); native.WriteShort(commandSize - 15);
+		native.WriteData(entities, entitySize); native.WriteData(commands + 15, commandSize - 15);
+		native.BeginReading(); ProcessUnreliableServerMessage(native, true); return;
+	}
+#endif
 
 	switch (id) {
 		case SERVER_UNRELIABLE_MESSAGE_EMPTY: {
@@ -810,8 +863,9 @@ void idAsyncClient::ProcessUnreliableServerMessage(const idBitMsg &msg)
 		case SERVER_UNRELIABLE_MESSAGE_GAMEINIT: {
 			serverGameFrame = msg.ReadLong();
 			serverGameTime = msg.ReadLong();
+			pureWait = retailProtocol && msg.ReadBits(1) != 0;
 			msg.ReadDeltaDict(serverSI, NULL);
-			pureWait = serverSI.GetBool("si_pure");
+			if (!retailProtocol) pureWait = serverSI.GetBool("si_pure");
 
 			InitGame(serverGameInitId, serverGameFrame, serverGameTime, serverSI);
 
@@ -876,7 +930,8 @@ void idAsyncClient::ProcessUnreliableServerMessage(const idBitMsg &msg)
 			commandMsg.SetSize(commandSize);
 			commandMsg.BeginReading();
 			msg.ReadData(NULL, commandSize);
-			game->ClientReadSnapshot(snapshotSequence, snapshotGameFrame, snapshotGameTime, numDuplicatedUsercmds, aheadOfServer, stateMsg, commandMsg);
+			retailRelayValid = false; retailRelayPacked = 0; memset(&retailRelayBase, 0, sizeof(retailRelayBase));
+			if (!game->ClientReadSnapshot(snapshotSequence, snapshotGameFrame, snapshotGameTime, numDuplicatedUsercmds, aheadOfServer, stateMsg, commandMsg)) return;
 #else
 			game->ClientReadSnapshot(clientNum, snapshotSequence, snapshotGameFrame, snapshotGameTime, numDuplicatedUsercmds, aheadOfServer, msg);
 #endif
@@ -1007,6 +1062,12 @@ void idAsyncClient::ProcessReliableMessagePure(const idBitMsg &msg)
 	outMsg.WriteLong(0);
 	outMsg.WriteLong(gamePakChecksum);
 
+#ifdef _SPLASHDAMAGE
+	if (retailProtocol) {
+		outMsg.WriteLong(R_RetailMegaTextureChecksum(gameInitId));
+	}
+#endif
+
 	if (!channel.SendReliableMessage(outMsg)) {
 		common->Error("client->server reliable messages overflow\n");
 	}
@@ -1043,13 +1104,32 @@ void idAsyncClient::ProcessReliableServerMessages(void)
 
 	while (channel.GetReliableMessage(msg)) {
 		id = msg.ReadByte();
+#ifdef _SPLASHDAMAGE
+		if (retailProtocol) {
+			if (id == 3) {
+				char key[MAX_STRING_CHARS], value[MAX_STRING_CHARS];
+				msg.ReadString(key, sizeof(key));
+				msg.ReadString(value, sizeof(value));
+				sessLocal.mapSpawnData.serverInfo.Set(key, value);
+				cvarSystem->SetCVarString(key, value, CVAR_SERVERINFO);
+				game->SetServerInfo(sessLocal.mapSpawnData.serverInfo);
+				continue;
+			}
+			if (id >= 4 && id <= 9) --id;
+		}
+#endif
 
 		switch (id) {
 			case SERVER_RELIABLE_MESSAGE_CLIENTINFO: {
 				int clientNum;
 				clientNum = msg.ReadByte();
 
+				if (clientNum < 0 || clientNum >= MAX_ASYNC_CLIENTS) return;
 				idDict &info = sessLocal.mapSpawnData.userInfo[ clientNum ];
+#ifdef _SPLASHDAMAGE
+				if (retailProtocol) game->ReadUserInfo(msg, info);
+				else {
+#endif
 				bool haveBase = (msg.ReadBits(1) != 0);
 
 #if ID_CLIENTINFO_TAGS
@@ -1071,6 +1151,9 @@ void idAsyncClient::ProcessReliableServerMessages(void)
 					msg.ReadDeltaDict(info, NULL);
 				}
 
+#ifdef _SPLASHDAMAGE
+				}
+#endif
 				// server forces us to a different userinfo
 				if (clientNum == idAsyncClient::clientNum) {
 					common->DPrintf("local user info modified by server\n");
@@ -1109,6 +1192,7 @@ void idAsyncClient::ProcessReliableServerMessages(void)
 				int clientNum;
 				char string[MAX_STRING_CHARS];
 				clientNum = msg.ReadLong();
+				if (retailProtocol) msg.ReadBits(1);
 				ReadLocalizedServerString(msg, string, MAX_STRING_CHARS);
 
 				if (clientNum == idAsyncClient::clientNum) {
@@ -1193,7 +1277,12 @@ void idAsyncClient::ProcessChallengeResponseMessage(const netadr_t from, const i
 	}
 
 	serverChallenge = msg.ReadLong();
-	serverId = msg.ReadShort();
+	serverId = msg.ReadUShort();
+	if (retailProtocol) {
+		retailServerVoiceId = msg.ReadUShort();
+		const int sessionA = msg.ReadLong(), sessionB = msg.ReadLong();
+		if (sessionA || sessionB) { common->Warning("Retail server requires an authentication ticket"); DisconnectFromServer(); return; }
+	}
 	msg.ReadString(serverGameBase, MAX_STRING_CHARS);
 	msg.ReadString(serverGame, MAX_STRING_CHARS);
 
@@ -1257,17 +1346,26 @@ void idAsyncClient::ProcessConnectResponseMessage(const netadr_t from, const idB
 
 	common->Printf("received connect response from %s\n", Sys_NetAdrToString(from));
 
+	if (retailProtocol) {
+		clientId = msg.ReadUShort(); retailClientVoiceId = msg.ReadUShort();
+	}
 	channel.Init(from, clientId);
+#ifdef _SPLASHDAMAGE
+	channel.retailProtocol = retailProtocol;
+	if (retailProtocol) { retailVoiceChannel.Init(from, retailClientVoiceId); retailVoiceChannel.retailProtocol = true; }
+#endif
 	clientNum = msg.ReadLong();
 #ifdef _SPLASHDAMAGE
 	common->Printf("Assigned native client slot %d\n", clientNum);
 #endif
+	if (clientNum < 0 || clientNum >= MAX_ASYNC_CLIENTS) { DisconnectFromServer(); return; }
 	clientState = CS_CONNECTED;
-	lastPacketTime = -9999;
+	lastPacketTime = clientTime;
 
-	serverGameInitId = msg.ReadLong();
+	serverGameInitId = retailProtocol ? msg.ReadByte() : msg.ReadLong();
 	serverGameFrame = msg.ReadLong();
 	serverGameTime = msg.ReadLong();
+	if (retailProtocol) msg.ReadBits(1);
 	msg.ReadDeltaDict(serverSI, NULL);
 
 	InitGame(serverGameInitId, serverGameFrame, serverGameTime, serverSI);
@@ -1280,6 +1378,13 @@ void idAsyncClient::ProcessConnectResponseMessage(const netadr_t from, const idB
 #endif
 	sessLocal.ExecuteMapChange();
 
+#ifdef _SPLASHDAMAGE
+	if (retailProtocol && serverSI.GetBool("si_pure")) {
+		byte bytes[16]; idBitMsg sync; sync.Init(bytes, sizeof(bytes));
+		sync.WriteByte(1); sync.WriteLong(gameInitId); sync.WriteLong(R_RetailMegaTextureChecksum(gameInitId));
+		channel.SendReliableMessage(sync); SendEmptyToServer(true);
+	}
+#endif
 	clientPredictTime = clientPrediction = idMath::ClampInt(0, idAsyncNetwork::clientMaxPrediction.GetInteger(), clientTime - lastConnectTime);
 }
 
@@ -1770,6 +1875,13 @@ void idAsyncClient::ConnectionlessMessage(const netadr_t from, const idBitMsg &m
 	}
 
 	// connect response from the server we are connecting to
+	if (retailProtocol && idStr::Icmp(string, "connectFailed") == 0) {
+		const int reason = msg.ReadLong();
+		common->Warning("Retail server rejected connection (reason %d)", reason);
+		DisconnectFromServer();
+		return;
+	}
+
 	if (idStr::Icmp(string, "connectResponse") == 0) {
 		ProcessConnectResponseMessage(from, msg);
 		return;
@@ -1835,6 +1947,18 @@ void idAsyncClient::ProcessMessage(const netadr_t from, idBitMsg &msg)
 		return;
 	}
 
+#ifdef _SPLASHDAMAGE
+	if (retailProtocol && id == retailServerVoiceId && Sys_CompareNetAdrBase(from, serverAddress)) {
+		int voiceSequence;
+		if (retailVoiceChannel.Process(from, clientTime, msg, voiceSequence)) {
+			byte buffer[MAX_MESSAGE_SIZE]; idBitMsg ignored; ignored.Init(buffer, sizeof(buffer));
+			while (retailVoiceChannel.GetReliableMessage(ignored)) {}
+			idBitMsg reply; byte empty[4] = {}; reply.Init(empty, sizeof(empty)); reply.WriteLong(voiceSequence);
+			retailVoiceChannel.SendMessage(clientPort, clientTime, reply);
+		}
+		return;
+	}
+#endif
 	// is this a packet from the server
 	if (!Sys_CompareNetAdrBase(from, channel.GetRemoteAddress()) || id != serverId) {
 		common->DPrintf("%s: sequenced server packet without connection\n", Sys_NetAdrToString(from));
@@ -1864,6 +1988,21 @@ void idAsyncClient::SetupConnection(void)
 		return;
 	}
 
+#ifdef _SPLASHDAMAGE
+	if (retailProtocol) {
+		msg.Init(msgBuf, sizeof(msgBuf)); msg.WriteShort(CONNECTIONLESS_MESSAGE_ID);
+		if (clientState == CS_CHALLENGING) {
+			msg.WriteString("challenge"); msg.WriteShort(clientId); msg.WriteShort(retailClientVoiceId); msg.WriteBits(0, 1);
+		} else if (clientState == CS_CONNECTING) {
+			msg.WriteString("connect"); msg.WriteLong((10 << 16) | 21); msg.WriteShort(1);
+			msg.WriteLong(clientDataChecksum); msg.WriteLong(serverChallenge);
+			msg.WriteShort(clientId); msg.WriteShort(retailClientVoiceId); msg.WriteLong(25000);
+			msg.WriteBits(0, 1); msg.WriteString(cvarSystem->GetCVarString("password"), -1, false); msg.WriteBits(0, 1);
+		} else return;
+		common->Printf("Retail %s to %s\n", clientState == CS_CHALLENGING ? "challenge" : "connect", Sys_NetAdrToString(serverAddress));
+		clientPort.SendPacket(serverAddress, msg.GetData(), msg.GetSize()); lastConnectTime = clientTime; return;
+	}
+#endif
 	if (clientState == CS_CHALLENGING) {
 		common->Printf("sending challenge to %s\n", Sys_NetAdrToString(serverAddress));
 		msg.Init(msgBuf, sizeof(msgBuf));
@@ -2005,7 +2144,7 @@ void idAsyncClient::RunFrame(void)
 		do {
 
 			// blocking read with game time residual timeout
-			newPacket = clientPort.GetPacketBlocking(from, msgBuf, size, sizeof(msgBuf), USERCMD_MSEC - (gameTimeResidual + clientPredictTime) - 1);
+			newPacket = clientPort.GetPacketBlocking(from, msgBuf, size, sizeof(msgBuf), GetUsercmdMsec() - (gameTimeResidual + clientPredictTime) - 1);
 
 			if (newPacket) {
 				msg.Init(msgBuf, sizeof(msgBuf));
@@ -2019,14 +2158,14 @@ void idAsyncClient::RunFrame(void)
 
 		} while (newPacket);
 
-	} while (gameTimeResidual + clientPredictTime < USERCMD_MSEC);
+	} while (gameTimeResidual + clientPredictTime < GetUsercmdMsec());
 
 	// update server list
 	serverList.RunFrame();
 
 	if (clientState == CS_DISCONNECTED) {
 		usercmdGen->GetDirectUsercmd();
-		gameTimeResidual = USERCMD_MSEC - 1;
+		gameTimeResidual = GetUsercmdMsec() - 1;
 		clientPredictTime = 0;
 		return;
 	}
@@ -2034,7 +2173,7 @@ void idAsyncClient::RunFrame(void)
 	if (clientState == CS_PURERESTART) {
 		clientState = CS_DISCONNECTED;
 		Reconnect();
-		gameTimeResidual = USERCMD_MSEC - 1;
+		gameTimeResidual = GetUsercmdMsec() - 1;
 		clientPredictTime = 0;
 		return;
 	}
@@ -2044,7 +2183,7 @@ void idAsyncClient::RunFrame(void)
 		// also need to read mouse for the connecting guis
 		usercmdGen->GetDirectUsercmd();
 		SetupConnection();
-		gameTimeResidual = USERCMD_MSEC - 1;
+		gameTimeResidual = GetUsercmdMsec() - 1;
 		clientPredictTime = 0;
 		return;
 	}
@@ -2077,20 +2216,20 @@ void idAsyncClient::RunFrame(void)
 		cvarSystem->ClearModifiedFlags(CVAR_USERINFO);
 	}
 
-	if (gameTimeResidual + clientPredictTime >= USERCMD_MSEC) {
+	if (gameTimeResidual + clientPredictTime >= GetUsercmdMsec()) {
 		lastFrameDelta = 0;
 	}
 
 	// generate user commands for the predicted time
-	while (gameTimeResidual + clientPredictTime >= USERCMD_MSEC) {
+	while (gameTimeResidual + clientPredictTime >= GetUsercmdMsec()) {
 
 		// send the user commands of this client to the server
 		SendUsercmdsToServer();
 
 		// update time
 		gameFrame++;
-		gameTime += USERCMD_MSEC;
-		gameTimeResidual -= USERCMD_MSEC;
+		gameTime += GetUsercmdMsec();
+		gameTimeResidual -= GetUsercmdMsec();
 
 		// run from the snapshot up to the local game frame
 		while (snapshotGameFrame < gameFrame) {
@@ -2101,7 +2240,7 @@ void idAsyncClient::RunFrame(void)
 			DuplicateUsercmds(snapshotGameFrame, snapshotGameTime);
 
 			// indicate the last prediction frame before a render
-			bool lastPredictFrame = (snapshotGameFrame + 1 >= gameFrame && gameTimeResidual + clientPredictTime < USERCMD_MSEC);
+			bool lastPredictFrame = (snapshotGameFrame + 1 >= gameFrame && gameTimeResidual + clientPredictTime < GetUsercmdMsec());
 
 			// run client prediction
 #ifdef _HUMANHEAD
@@ -2117,7 +2256,7 @@ void idAsyncClient::RunFrame(void)
 #endif
 
 			snapshotGameFrame++;
-			snapshotGameTime += USERCMD_MSEC;
+			snapshotGameTime += GetUsercmdMsec();
 		}
 	}
 }

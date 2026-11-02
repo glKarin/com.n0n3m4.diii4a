@@ -4,6 +4,7 @@
 #include "idlib/precompiled.h"
 
 #include "DeclTemplate.h"
+#include "declRenderProgram.h"
 #include "framework/DeclParseHelper.h"
 
 /*
@@ -28,7 +29,13 @@ bool sdDeclTemplate::Parse( const char *text, const int textLength ) {
 
 	src.SetFlags(DECL_LEXER_FLAGS);
 	//src.LoadMemory( text, textLength, GetFileName(), GetLineNum() );
-	sdDeclParseHelper declHelper( this, text, textLength, src );
+	sdAutoPtr<sdDeclParseHelper> declHelper;
+	const char* rendererSource = R_MetalRetailDeclSource(DECL_TEMPLATE, GetName());
+	if (rendererSource) {
+		src.LoadMemory(rendererSource, strlen(rendererSource), GetName());
+	} else {
+		declHelper.Reset(new sdDeclParseHelper(this, text, textLength, src));
+	}
 	src.SkipUntilString("{");
 
 	while (1) {

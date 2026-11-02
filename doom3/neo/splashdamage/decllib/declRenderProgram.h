@@ -4,6 +4,9 @@
 #ifndef __DECLRENDERPROGRAM_H__
 #define __DECLRENDERPROGRAM_H__
 
+// Renderer-only implementations; never replace the retail declaration source.
+const char* R_MetalRetailDeclSource(declType_t type, const char* name);
+
 /*
 ===============================================================================
 
