@@ -29,8 +29,8 @@ public:
 	virtual void			DebugPrintf( const char *fmt, ... ) override id_attribute((format(printf,2,3)));
 	virtual void			DebugVPrintf( const char *fmt, va_list arg ) override;
 
-	virtual double			GetClockTicks( void ) override;
-	virtual double			ClockTicksPerSecond( void ) override;
+	virtual uint64			GetClockTicks( void ) override;
+	virtual uint64			ClockTicksPerSecond( void ) override;
 	virtual cpuid_t			GetProcessorId( void ) override;
 	virtual const char *	GetProcessorString( void ) override;
 

@@ -1,0 +1,6 @@
+2014-01-30  David Anderson
+      * simplereader.c: Removed dwarf_dealloc from call of string
+        returned by dwarf_diename().  The dwarf_diename() call
+        was incorrectly documented.
+2014-01-29  David Anderson
+      * frame1.c,simplereader.c: Remove trailing whitespace.

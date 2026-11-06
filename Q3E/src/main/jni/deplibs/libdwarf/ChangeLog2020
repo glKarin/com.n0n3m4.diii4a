@@ -1,0 +1,131 @@
+2020-12-26  David Anderson
+    * scripts/find_pdfpages.py, scripts/rebuildpdf.sh:
+      These rearrange pdf content so libdwarf2.1.mm
+      reads in a more normal order (table of contents
+      before content).
+2020-12-23  David Anderson
+    * configure.ac: Now version 20201223.
+    * configure: Regenerated.
+    * scripts/buildstandardsource.sh: Added a clarifying
+      comment.
+    * scripts/ddbuild.sh: Now builds the sourcefile
+      opstabcount.c for dwarfdump.
+2020-11-25  David Anderson
+    * configure.ac: Now version 20201201.
+    * configure: Regenerated.
+2020-11-25  David Anderson
+    * configure.ac: Modified to make build endianness visible
+      to dwarfexample 'make check' runtests.sh
+      so make check can pass building on a big-endian host.
+    * Makefile.in: Regenerated.
+    * configure: Regenerated.
+2020-11-25  David Anderson
+    * configure.ac: Now version 20201125.
+    * configure: Regenerated.
+2020-11-24  David Anderson
+    * CMakeLists.txt: now supports -DDWARF_WITH_LIBELF=OFF
+      (which it was supposed to do...)
+2020-11-23  David Anderson
+    * configure.ac: Now version 20201123.
+    * configure: Regenerated.
+2020-11-09  David Anderson
+    * configure.ac: Now version 20201100
+    * configure: Regenerated.
+2020-11-05  David Anderson
+    * CMakeLists.txt,configure.ac: Modified so we set both
+      HAVE_ZLIB and HAVE_ZLIB_H as we should have done
+      long ago.
+    * config.h.in,configure: Regenerated.
+2020-11-03  David Anderson
+    * configure.ac: Now version 20201103
+    * configure: Regenerated.
+2020-10-20  David Anderson
+    * configure.ac: Now version 20201029
+    * configure: Regenerated.
+2020-10-11  David Anderson
+    * configure.ac: Now version 20201011
+    * configure: Regenerated.
+2020-10-03  David Anderson
+    * Makefile.in,aclocal.m4,ar-lib,compile,configure,depcomp:
+      Running autoreconf on Ubuntu 20.04 caused some small
+      changes.
+    * COPYING: Corrected the references to the BSD copyright
+      to use "two-clause BSD license".
+2020-09-26  David Anderson
+    * configure.ac: Now version 20200926
+    * configure: Regenerated.
+2020-09-15  David Anderson
+    * configure.ac: Now version 20200915
+      Added -fno-omit-frame-pointer to the -fsanitize option set
+    * configure: Regenerated.
+2020-09-08  David Anderson
+    * configure.ac: Now version 20200908
+    * configure: Regenerated.
+2020-08-25  David Anderson
+    * configure.ac: Now version 20200825
+    * configure: Regenerated.
+2020-08-22  David Anderson
+    * configure.ac: Now version 20200822
+    * configure: Regenerated.
+2020-08-10  David Anderson
+    * configure.ac: Now version 20200810
+    * configure: Regenerated.
+2020-07-19  David Anderson
+    * configure.ac: Now version 20200719
+    * configure: Regenerated.
+2020-07-14  David Anderson
+    * configure.ac: Now version 20200714
+    * configure: Regenerated.
+2020-07-04  David Anderson
+    * configure.ac: Now version 20200703
+    * configure: Regenerated.
+2020-06-29  David Anderson
+    * configure.ac: Now version 20200629
+    * configure: Regenerated.
+2020-06-17  David Anderson
+    * configure.ac: Now version 20200617
+    * configure: Regenerated.
+2020-06-12  David Anderson
+    * configure.ac: Now version 20200612
+    * configure: Regenerated.
+2020-06-09  David Anderson
+    * configure.ac: Now version 20200601
+    * configure: Regenerated.
+2020-05-19  David Anderson
+    * configure.ac: Now version 20200519
+    * configure: Regenerated.
+2020-05-01  David Anderson
+    * configure.ac: Now version 20200501
+    * configure: Regenerated.
+2020-04-26  David Anderson
+    * configure.ac: Now version 20200426
+    * configure: Regenerated.
+2020-04-13  David Anderson
+    * configure.ac: Now version 20200423
+    * configure: Regenerated.
+2020-04-13  David Anderson
+    * configure.ac: Now version 20200412
+    * configure: Regenerated.
+2020-03-26  David Anderson
+    * configure.ac: Now version 20200327
+    * configure: Regenerated.
+2020-03-15  David Anderson
+    * configure.ac: Now version 20200315
+    * configure: Regenerated.
+2020-03-09  David Anderson
+    * configure.ac: Now version 20200307.
+    * configure: Regenerated.
+2020-02-25  David Anderson
+    * configure.ac: now 20200225
+    * configure: Regenerated.
+2020-02-15  David Anderson
+    * configure.ac: Version string now 20200215 as we now
+      deal with libelf-reading-relocation-sections.
+      (nolibelf code already did those as of 20200213
+    * configure: Regenerated.
+2020-02-13  David Anderson
+    * configure.ac: Version string now 20200213
+    * configure: Regenerated.
+2020-01-05  David Anderson
+    * configure.ac: Version string now 20200105
+    * configure: Regenerated.

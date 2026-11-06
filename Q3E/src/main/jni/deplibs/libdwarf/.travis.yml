@@ -1,0 +1,26 @@
+
+langage: c
+os: linux
+dist: bionic
+cache: false
+
+compiler:
+  - gcc
+  - clang
+os: linux
+
+arch:
+  - amd64
+  - arm64
+
+install:
+  - sudo apt-get -qq update
+  - sudo apt-get install build-essential zlib1g-dev dos2unix
+
+before_script:
+  - autoreconf -vif
+
+script: 
+  - ./configure --disable-dependency-tracking --enable-wall --enable-dwarfexample && make && make check
+  - ls src/bin/dwarfdump/.deps/
+  - cat test/test-suite.log

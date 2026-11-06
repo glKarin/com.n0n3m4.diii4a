@@ -562,11 +562,10 @@ bool idParticle_EmitParticle(
 	POUT(idParticleData) res, POUT(int) cycleNumber
 ) {
 	int stageAge = psys.viewTimeMs + psys.entityParmsTimeOffset * 1000 - stg.timeOffset * 1000;
-	int	stageCycle = stageAge / stg.cycleMsec;
 
 	res.index = index;
 
-	// calculate local age for this index 
+	// calculate local age for this index
 	int	bunchOffset = stg.particleLife * 1000 * stg.spawnBunching * index / psys.totalParticles;
 	int particleAge = stageAge - bunchOffset;
 	int	particleCycle = particleAge / stg.cycleMsec;
@@ -596,6 +595,7 @@ bool idParticle_EmitParticle(
 		// yet to be spawned or in the deadTime band
 		return false;
 	}
+	assert( particleAge >= 0 );
 
 	int cycleSeed = particleCycle;
 	if (stg.diversityPeriod > 0)

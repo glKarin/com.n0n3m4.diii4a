@@ -238,7 +238,7 @@ public:
 	CModInfoPtr GetModInfo(int index);
 
 	// returns the mod info by name (always non-NULL)
-	CModInfoPtr GetModInfo(const idStr& name);
+	CModInfoPtr GetModInfo(const idStr& name, bool skipCreate = false);
 
 	// Returns the info structure for the currently ongoing mod (or NULL if none)
 	CModInfoPtr GetCurrentModInfo();

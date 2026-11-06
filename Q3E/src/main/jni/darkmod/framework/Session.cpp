@@ -53,9 +53,6 @@ idCVar	idSessionLocal::com_aviDemoTics( "com_aviDemoTics", "2", CVAR_SYSTEM | CV
 idCVar	idSessionLocal::com_wipeSeconds( "com_wipeSeconds", "0.1", CVAR_SYSTEM, "" );
 idCVar	idSessionLocal::com_guid( "com_guid", "", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_ROM, "" );
 
-//Obsttorte
-idCVar	idSessionLocal::saveGameName( "saveGameName", "", CVAR_GAME | CVAR_ROM, "");
-
 // SteveL #4161: Support > 1 quicksave
 idCVar	idSessionLocal::com_numQuickSaves( "com_numQuickSaves", "2", CVAR_GAME | CVAR_NOCHEAT | CVAR_INTEGER | CVAR_ARCHIVE, 
 	"How many quicksaves to retain. Reducing the number won't delete any that you already have.", 1.0f, 100000.0f );
@@ -304,6 +301,8 @@ void idSessionLocal::Clear() {
 	modsList.Clear();
 
 	authMsg.Clear();
+
+	tonemapHappenedCounter = 0;
 }
 
 /*
@@ -426,6 +425,30 @@ void idSessionLocal::Shutdown() {
 	Clear();
 }
 
+void idSessionLocal::CaptureGameScreenshot( byte* &data, int &width, int &height ) {
+	game->Draw(0);
+	// need to make the changes to the vertex cache accessible to the backend
+	vertexCache.EndFrame();
+
+	// render image to buffer
+	renderSystem->GetCurrentRenderCropSize(width, height);
+	byte *imgData = (byte*)Mem_Alloc(height * width * 3);
+	renderSystem->CaptureRenderToBuffer(imgData);
+
+	// 1) convert to RGBA (all image routines use this)
+	// 2) flip vertically (to get y = 0 at top like in GUI and commodity images)
+	data = (byte*)Mem_Alloc(height * width * 4);
+#ifdef _GLES //karin: RGBA
+	renderSystem->CaptureRenderToBuffer(data);
+#else
+	for (int y = 0; y < height; y++) {
+		bool ok = SIMDProcessor->ConvertRowToRGBA8(imgData + 3 * (height - 1 - y) * width, width, 24, false, data + 4 * y * width);
+		assert(ok);
+	}
+	Mem_Free(imgData);
+#endif
+}
+
 /*
 ================
 idSessionLocal::StartWipe
@@ -448,8 +471,7 @@ void idSessionLocal::StartWipe( const char *_wipeMaterial, bool hold ) {
 	// stgatilov #6149: execute these commands now, including finishing SwapBuffers
 	// otherwise they get concatenated with CompleteWipe into a single backend commands sequence
 	// which causes broken rendering due to some kind of FBO state leak
-	extern void R_IssueRenderCommands( frameData_t *frameData );
-	R_IssueRenderCommands( backendFrameData );
+	R_IssueRenderCommands( backendFrameData, true );
 	R_ToggleSmpFrame();
 
 	wipeMaterial = declManager->FindMaterial( _wipeMaterial, false );
@@ -1371,7 +1393,7 @@ void idSessionLocal::LoadLoadingGui( const char *mapName ) {
 	stripped.StripPath();
 
 	char guiMap[ MAX_STRING_CHARS ];
-	strncpy( guiMap, va( "guis/map/%s.gui", stripped.c_str() ), MAX_STRING_CHARS );
+	idStr::Copynz( guiMap, va( "guis/map/%s.gui", stripped.c_str() ), MAX_STRING_CHARS );
 	// give the gamecode a chance to override
 	game->GetMapLoadingGUI( guiMap );
 
@@ -1723,12 +1745,15 @@ LoadGame_f
 */
 void LoadGame_f( const idCmdArgs &args ) {
 	console->Close();
+
+	idStr saveName;
 	if ( args.Argc() < 2 || idStr::Icmp(args.Argv(1), "quick" ) == 0 ) {
-		idStr saveName = GetMostRecentQuicksaveFilename();
-		sessLocal.LoadGame( saveName );
+		saveName = GetMostRecentQuicksaveFilename();
 	} else {
-		sessLocal.LoadGame( args.Argv(1) );
+		saveName = args.Argv(1);
 	}
+
+	sessLocal.LoadGame( saveName );
 }
 
 /*
@@ -1737,16 +1762,27 @@ SaveGame_f
 ===============
 */
 void SaveGame_f( const idCmdArgs &args ) {
-	if ( args.Argc() < 2 || idStr::Icmp( args.Argv(1), "quick" ) == 0 ) {
-		idStr saveName = GetNextQuicksaveFilename();
-		if ( sessLocal.SaveGame( saveName ) ) {
-			common->Printf( "%s\n", saveName.c_str() );
-		}
-	} else {
-		if ( sessLocal.SaveGame( args.Argv(1) ) ) {
-			common->Printf( "Saved %s\n", args.Argv(1) );
+	idStr saveName;
+	bool unrestricted = false;
+
+	for ( int i = 1; i < args.Argc(); i++) {
+		const char *arg = args.Argv(i);
+		if ( idStr::Icmp( arg, "quick" ) == 0 ) {
+			saveName = GetNextQuicksaveFilename();
+		} else if ( idStr::Icmp( arg, "unrestricted" ) == 0 ) {
+			unrestricted = true;
+		} else {
+			saveName = arg;
 		}
 	}
+	if ( saveName.IsEmpty() ) {
+		saveName = GetNextQuicksaveFilename();
+	}
+
+	if ( sessLocal.SaveGame( saveName, false, unrestricted ) ) {
+		common->Printf( "Saved %s\n", saveName.c_str() );
+	}
+
 	qglFinish();
 }
 
@@ -1982,28 +2018,11 @@ bool idSessionLocal::SaveGame( const char *saveName, bool autosave, bool skipChe
 	// Write screenshot
 	if ( !autosave ) {
 		qglFinish();
-		game->Draw( 0 );
-		// need to make the changes to the vertex cache accessible to the backend
-		vertexCache.EndFrame();
 
-		// stgatilov: render image to buffer
 		int width, height;
-		renderSystem->GetCurrentRenderCropSize(width, height);
-#ifdef _GLES //karin: RGBA
-		byte *imgData = (byte*)Mem_Alloc(height * width * 4);
-		renderSystem->CaptureRenderToBuffer(imgData);
-#else
-        byte *imgData = (byte*)Mem_Alloc(height * width * 3);
-		renderSystem->CaptureRenderToBuffer(imgData);
+		byte *imgData = nullptr;
+		CaptureGameScreenshot( imgData, width, height );
 
-		{ // convert to RGBA since image processing functions use that
-			byte *newImg = (byte*)Mem_Alloc(height * width * 4);
-			bool ok = SIMDProcessor->ConvertRowToRGBA8(imgData, width * height, 24, false, newImg);
-			assert(ok);
-			Mem_Free(imgData);
-			imgData = newImg;
-		}
-#endif
 		// downsample the image to reduce file size
 		while ( width > 480 && height > 270 ) {
 			imgData = R_MipMap( imgData, width, height );
@@ -2015,7 +2034,6 @@ bool idSessionLocal::SaveGame( const char *saveName, bool autosave, bool skipChe
 		idImageWriter wr;
 		wr.Source(imgData, width, height, 4);
 		wr.Dest(fileSystem->OpenFileWrite(previewFile.c_str(), "fs_modSavePath"));
-		wr.Flip();
 		wr.WriteExtension(previewExtension.c_str());
 		Mem_Free(imgData);
 
@@ -2564,7 +2582,7 @@ void idSessionLocal::UpdateLoadingProgressBar( progressStage_t stage, float rati
 		// only redraw when a) stage is exactly at start/end, b) predefined time has passed
 		int	time = eventLoop->Milliseconds();
 		if ( ratio > 0.0f && ratio < 1.0f && time - lastUpdateProgressBarTime < 200 )
-				return;
+			return;
 
 		lastUpdateProgressBarTime = time;
 		lastUpdateProgressBarStage = stage;
@@ -2586,13 +2604,10 @@ idSessionLocal::Draw
 */
 void idSessionLocal::Draw() {
 	bool fullConsole = false;
-	// disable when 3D game is not rendered (main menu, loading, etc.)
-	r_tonemapInternal.SetBool( r_tonemap.GetBool() && !r_tonemapOnlyGame3d.GetBool() );
+	tonemapHappenedCounter = 0;
 
 	if ( insideExecuteMapChange ) {
-		renderSystem->SetColor( colorBlack );
-		renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
-
+		ScheduleTonemap( true );
 		if ( guiLoading ) {
 			guiLoading->Redraw( com_frameTime );
 		}
@@ -2603,13 +2618,11 @@ void idSessionLocal::Draw() {
 		// if testing a gui, clear the screen and draw it
 		// clear the background, in case the tested gui is transparent
 		// NOTE that you can't use this for aviGame recording, it will tick at real com_frameTime between screenshots..
-		renderSystem->SetColor( colorBlack );
-		renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
+		ScheduleTonemap( true );
 		guiTest->Redraw( com_frameTime );
 	} else if ( guiActive && !guiActive->State().GetBool( "gameDraw" ) ) {
-		renderSystem->SetColor( colorBlack );
-		renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
-		
+		ScheduleTonemap( true );
+
 		// draw the frozen gui in the background
 		if ( guiActive == guiMsg && guiMsgRestore ) {
 			guiMsgRestore->Redraw( com_frameTime );
@@ -2621,7 +2634,6 @@ void idSessionLocal::Draw() {
 		rw->RenderScene( currentDemoRenderView );
 		renderSystem->DrawDemoPics();
 	} else if ( mapSpawned ) {
-		r_tonemapInternal.SetBool( r_tonemap.GetBool() );
 		bool gameDraw = false;
 		// normal drawing for both single and multi player
 		if ( !com_skipGameDraw.GetBool() && GetLocalClientNum() >= 0 ) {
@@ -2632,8 +2644,7 @@ void idSessionLocal::Draw() {
 			time_gameDraw += ( end - start );	// note time used for com_speeds
 		}
 		if ( !gameDraw ) {
-			renderSystem->SetColor( colorBlack );
-			renderSystem->DrawStretchPic( 0, 0, 640, 480, 0, 0, 1, 1, declManager->FindMaterial( "_white" ) );
+			ScheduleTonemap( true );
 		}
 
 		// save off the 2D drawing from the game
@@ -2641,6 +2652,7 @@ void idSessionLocal::Draw() {
 			renderSystem->WriteDemoPics();
 		}
 	} else {
+		ScheduleTonemap( true );
 #if ID_CONSOLE_LOCK
 		if ( com_allowConsole.GetBool() ) {
 			console->Draw( true );
@@ -2681,6 +2693,9 @@ void idSessionLocal::Draw() {
 	if ( !fullConsole ) {
 		console->Draw( false );
 	}
+
+	if ( tonemapHappenedCounter != 1 )
+		common->Warning( "idSessionLocal::Draw: tonemap called %d times", tonemapHappenedCounter );
 
 #ifdef __ANDROID__ //karin: sync session state to Q3E
     Sys_SyncState();
@@ -2985,23 +3000,6 @@ void idSessionLocal::RunGameTic(int timestepMs, bool minorTic) {
 		bool automationRules = Auto_GetUsercmd(cmd);
 	}
 
-	// Obsttorte - check if we should save the game
-
-	idStr saveGameName = game->triggeredSave();
-	if (!saveGameName.IsEmpty())
-	{
-		if (cvarSystem->GetCVarBool("tdm_nosave"))
-		{
-			cvarSystem->SetCVarBool("tdm_nosave",false);
-			SaveGame(saveGameName.c_str());
-			cvarSystem->SetCVarBool("tdm_nosave",true);
-		}
-		else
-		{
-			SaveGame(saveGameName.c_str(), true, true);
-		}
-	}
-
 	// run the game logic every player move
 	int	start = Sys_Milliseconds();
 	gameReturn_t	ret = game->RunFrame( &cmd, timestepMs, minorTic );
@@ -3065,12 +3063,23 @@ void idSessionLocal::DrawFrame() {
 
 	// render next frame
 	Draw();
+
 	// close any gui drawing
 	tr.guiModel->EmitFullScreen();
 	tr.guiModel->Clear();
+}
+
+void idSessionLocal::ScheduleTonemap( bool forceOutputToBlack ) {
+	// close any gui drawing
+	tr.guiModel->EmitFullScreen();
+	tr.guiModel->Clear();
+
 	// add the swapbuffers command
-	emptyCommand_t *cmd = (emptyCommand_t *)R_GetCommandBuffer( sizeof( *cmd ) );
+	tonemapCommand_t *cmd = (tonemapCommand_t *)R_GetCommandBuffer( sizeof( tonemapCommand_t ) );
 	cmd->commandId = RC_TONEMAP;
+	cmd->forceOutputToBlack = forceOutputToBlack;
+
+	tonemapHappenedCounter++;
 }
 
 /*
@@ -3288,7 +3297,7 @@ void idSessionLocal::Init() {
 
 	cmdSystem->AddCommand( "saveGame", SaveGame_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "saves a game" );
 	cmdSystem->AddCommand( "loadGame", LoadGame_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "loads a game", idCmdSystem::ArgCompletion_SaveGame );
-
+	
 	cmdSystem->AddCommand( "rescanSI", Session_RescanSI_f, CMD_FL_SYSTEM, "internal - rescan serverinfo cvars and tell game" );
 
 	cmdSystem->AddCommand( "hitch", Session_Hitch_f, CMD_FL_SYSTEM|CMD_FL_CHEAT, "hitches the game" );

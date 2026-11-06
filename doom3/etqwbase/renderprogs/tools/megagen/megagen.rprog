@@ -1,0 +1,258 @@
+renderProgram megagen/distributionToAlpha {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		PARAM	identityModelMatrix_0 = { 1, 0, 0, 0 };
+		PARAM	identityModelMatrix_1 = { 0, -1, 0, 0 };	# texture coordinates have a flipped y axis compared to world space
+		PARAM	identityModelMatrix_2 = { 0, 0, 1, 0 };
+		#PARAM	identityModelMatrix_3 = { 0, 0, 0, 1 };
+
+		TEMP colorTexCoordFinal;
+		TEMP tempTexCoord;
+		TEMP tempTexCoord2;
+		TEMP tangentSpaceMatrix_0, tangentSpaceMatrix_1, tangentSpaceMatrix_2;
+		TEMP R0, R1;
+
+		# Build tangent space matrix (rotated from identity model matrix) and transpose it
+
+		MOV tangentSpaceMatrix_0, { 1, 0, 0, 0 };		# tangents[ 0 ]
+		MOV tangentSpaceMatrix_1, { 0, 1, 0, 0 };		# tangents[ 1 ]
+		MOV tangentSpaceMatrix_2, { 0, 0, 1, 0 };		# normal
+
+		MOV R1, tangentSpaceMatrix_0;
+		MUL R0.x, R1.x, program.local[1].y;
+		MUL R0.y, R1.y, program.local[1].x;
+		SUB tangentSpaceMatrix_0.x, R0.x, R0.y;						# tangentSpaceMatrix_0.x, transpose to result.texcoord[5].x
+		MUL R0.x, R1.y, program.local[1].y;
+		MUL R0.y, R1.x, program.local[1].x;
+		SUB tangentSpaceMatrix_0.y, R0.x, R0.y;						# tangentSpaceMatrix_0.y, transpose to result.texcoord[6].x
+		MOV tangentSpaceMatrix_0.z, R1.z;							# tangentSpaceMatrix_0.z, transpose to result.texcoord[7].x
+
+		MOV R1, tangentSpaceMatrix_1;
+		MUL R0.x, R1.x, program.local[1].y;
+		MUL R0.y, R1.y, program.local[1].x;
+		SUB tangentSpaceMatrix_1.x, R0.x, R0.y;						# tangentSpaceMatrix_1.x, transpose to result.texcoord[5].y
+		MUL R0.x, R1.y, program.local[1].y;
+		MUL R0.y, R1.x, program.local[1].x;
+		SUB tangentSpaceMatrix_1.y, R0.x, R0.y;						# tangentSpaceMatrix_1.y, transpose to result.texcoord[6].y
+		MOV tangentSpaceMatrix_1.z, R1.z;							# tangentSpaceMatrix_1.z, transpose to result.texcoord[7].y
+
+		# transpose
+		MOV result.texcoord[5].x, tangentSpaceMatrix_0.x;
+		MOV result.texcoord[6].x, tangentSpaceMatrix_0.y;
+		MOV result.texcoord[7].x, tangentSpaceMatrix_0.z;
+
+		MUL result.texcoord[5].y, tangentSpaceMatrix_1.x, -1;
+		MOV result.texcoord[6].y, tangentSpaceMatrix_1.y;
+		MOV result.texcoord[7].y, tangentSpaceMatrix_1.z;
+
+		MOV result.texcoord[5].z, tangentSpaceMatrix_2.x;
+		MOV result.texcoord[6].z, tangentSpaceMatrix_2.y;
+		MOV result.texcoord[7].z, tangentSpaceMatrix_2.z;
+
+		#######################################################
+
+		# rotate the texture
+		SUB tempTexCoord, vertex.texcoord[1], 0.5;
+
+		MUL tempTexCoord2.x, tempTexCoord.x, program.local[1].y;
+		MUL tempTexCoord2.y, tempTexCoord.y, program.local[1].x;
+		SUB colorTexCoordFinal.x, tempTexCoord2.x, tempTexCoord2.y;
+
+		MUL tempTexCoord2.x, tempTexCoord.y, program.local[1].y;
+		MUL tempTexCoord2.y, tempTexCoord.x, program.local[1].x;
+		ADD colorTexCoordFinal.y, tempTexCoord2.x, tempTexCoord2.y;
+
+		ADD colorTexCoordFinal.xy, colorTexCoordFinal, 0.5;
+
+		# scale the texture
+		MUL result.texcoord[1].xy, colorTexCoordFinal, program.local[0];
+
+		#######################################################
+
+		# alpha texcoord
+		MOV result.texcoord[0], vertex.texcoord[0];
+
+		#######################################################
+
+		# transfer vertex color
+		MOV result.color, vertex.color;
+	%> }
+
+	program fragment arb { <%
+		TEMP R0, R1, R2;
+		TEMP colorSource, alphaSource;
+
+		TEX alphaSource, fragment.texcoord[0], texture[0], 2D;
+		TEX colorSource, fragment.texcoord[1], texture[1], 2D;
+
+		# modulate by color
+		MUL	R0.rgb, colorSource, fragment.color;
+
+		#-----------------
+		# Normalize if needed (program.local[0].x < -1)
+		MAD R2, R0, 2, -1;
+		DP3	R1, R2, R2;
+		RSQ	R1, R1.x;
+		MUL	R1, R1.x, R2;
+
+			#-----------------
+			# Rotate normal based on tangent space if needed (program.local[0].y < -1)
+			DP3 R2.x, fragment.texcoord[5], R1;
+			DP3 R2.y, fragment.texcoord[6], R1;
+			DP3 R2.z, fragment.texcoord[7], R1;
+			CMP R1, program.local[0].y, R2, R1;
+
+		MAD	R1, R1, .5, .5;
+		CMP result.color, program.local[0].x, R1, R0;
+
+		#-----------------
+		# stuff the alphaSource image into the alpha channel
+		MOV result.color.a, alphaSource.rrrr;
+	%> }
+}
+
+renderProgram megagen/surfaceTypeMaskToAlpha {
+	program vertex reference megagen/distributionToAlpha
+
+	program fragment arb { <%
+		TEMP R0;
+		TEMP alphaSource;
+
+		TEX alphaSource, fragment.texcoord[0], texture[0], 2D;
+
+		# check alphaSource against the threshold
+		SUB R0.a, alphaSource.r, program.local[1].x;
+
+		CMP R0.a, R0.a, 0, 1;
+
+		# if the surface type is invalid
+		CMP result.color.a, program.local[1].y, 0, R0.a;
+
+		MOV result.color.rgb, program.local[1].y;
+	%> }
+}
+
+renderProgram megagen/detailTextureMaskToAlpha {
+	program vertex reference megagen/distributionToAlpha
+
+	program fragment arb { <%
+		TEMP R0, R1, R2;
+		TEMP alphaSource;
+
+		TEX alphaSource, fragment.texcoord[0], texture[0], 2D;
+
+		# Move detail texture index into output color
+		MOV result.color.r, program.local[1].x;
+		MOV result.color.a, alphaSource.r;
+	%> }
+}
+
+renderProgram megagen/geometryBasedDistribution {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		MOV		result.texcoord[0], vertex.attrib[8];
+		MOV		result.texcoord[1], vertex.attrib[11];
+		MOV		result.texcoord[2], vertex.position;
+	%> }
+
+	program fragment arb { <%
+		PARAM	addOne = { 1, 1, 1, 1 };
+		PARAM	scaleHalf = { .5, .5, .5, .5 };
+		PARAM	upVector = { 0, 0, 1, 0 };
+
+		## used for acos
+		PARAM acos_c0 = {3.1415927, 1, 0, 1.5707288};
+		PARAM acos_c1 = {0.21211439, -0.018729299, 0.074261002, 2};
+		##
+
+		TEMP R0, R1, bounds, localNormal, slope;
+
+		#######################################
+		# height based distribution
+
+		ADD		R1.x, fragment.texcoord[2].z, -program.local[0].x;
+		ADD		R1.y, program.local[1].x, -fragment.texcoord[2].z;
+
+		# zMin
+		CMP		R0.x, R1.x, -1, R1.x;									# if lower than zMin, set to -1
+		CMP		R0.x, R1.y, -1, R0.x;									# if higher than zMax, set to -1
+
+		MUL		R0.y, R0.x, program.local[0].y;							# scale into zMin<>zMinHigher range
+		CMP		R0.z, R0.y, 0, 1;										# if < 0, set to 0, else set to 1
+		CMP_SAT	bounds.x, program.local[0].w, R0.z, R0.y;				# if no fuzziness or no minAltitude, use hard edge
+
+		# zMax
+		CMP		R0.x, R1.y, -1, R1.y;									# if higher than zMax, set to -1
+		CMP		R0.x, R1.x, -1, R0.x;									# if lower than zMin, set to -1
+
+		MUL		R0.y, R0.x, program.local[1].y;							# scale into zMax<>zMaxLower range
+		CMP		R0.z, R0.y, 0, 1;										# if < 0, set to 0, else set to 1
+		CMP_SAT	bounds.y, program.local[1].w, R0.z, R0.y;				# if no fuzziness or no minAltitude, use hard edge
+
+		# combine zMin and zMax
+		MUL		bounds.z, bounds.x, bounds.y;
+
+		#######################################
+		# slope based distribution
+
+		# calculate slope
+		DP3		localNormal, fragment.texcoord[1], fragment.texcoord[1];
+		RSQ		localNormal, localNormal.x;
+		MUL		localNormal, localNormal.x, fragment.texcoord[1];
+
+		DP3		slope.z, upVector, localNormal;
+
+		# get acos of slope.z - ripped this straight from some Cg output
+		ABS R0.x, slope.z;
+		ADD R0.y, acos_c0.y, -R0.x;
+		RSQ R0.y, R0.y;
+		RCP R0.y, R0.y;
+		MUL R0.y, acos_c0.y, R0.y;
+		MAD R0.z, acos_c1.y, R0.x, acos_c1.z;
+		MAD R0.z, R0.z, R0.x, -acos_c1.x;
+		MAD R0.x, R0.z, R0.x, acos_c0.w;
+		ADD R0.z, slope.z, -acos_c0.z;
+		CMP R1.x, R0.z, acos_c0.y, acos_c0.z;
+		MUL R0.z, acos_c1.w, R1.x;
+		MUL R0.w, R0.x, R0.y;
+		MUL R0.w, R0.z, R0.w;
+		MAD R0.w, R0.x, R0.y, -R0.w;
+		MAD R0.w, R1.x, acos_c0.x, R0.w;
+		MOV slope.z, R0.w;
+
+		# to degrees
+		# 180 / PI = 57.295779513082320876798154814105
+		MUL slope.z, slope.z, 57.295776;
+
+		##
+
+		ADD		R1.x, slope.z, -program.local[3].x;
+		ADD		R1.y, program.local[4].x, -slope.z;
+
+		# slopeMin
+		CMP		R0.x, R1.x, -1, R1.x;									# if lower than slopeMin, set to -1
+		CMP		R0.x, R1.y, -1, R0.x;									# if higher than slopeMax, set to -1
+
+		MUL		R0.y, R0.x, program.local[3].y;							# scale into slopeMin<>slopeMinHigher range
+		CMP		R0.z, R0.y, 0, 1;										# if < 0, set to 0, else set to 1
+		CMP_SAT	slope.x, program.local[3].w, R0.z, R0.y;				# if no fuzziness or no minSlope, use hard edge
+
+		# slopeMax
+		CMP		R0.x, R1.y, -1, R1.y;									# if higher than slopeMax, set to -1
+		CMP		R0.x, R1.x, -1, R0.x;									# if lower than slopeMin, set to -1
+
+		MUL		R0.y, R0.x, program.local[4].y;							# scale into slopeMax<>slopeMaxLower range
+		CMP		R0.z, R0.y, 0, 1;										# if < 0, set to 0, else set to 1
+		CMP_SAT	slope.y, program.local[4].w, R0.z, R0.y;				# if no fuzziness or no minAltitude, use hard edge
+
+		# combine slopeMin and slopeMax
+		MUL		slope.z, slope.x, slope.y;
+
+		# output
+		MOV	result.color.b, bounds.z;
+		MOV	result.color.g, slope.z;
+		MUL result.color.r, bounds.z, slope.z;
+	%> }
+}

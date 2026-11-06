@@ -75,6 +75,7 @@ idBrittleFracture::idBrittleFracture( void ) {
 	m_lossBasePlayer = 0;	// grayman #3042
 
 	m_lastCrackFrameNum = 0;	// SteveL #4180
+
 }
 
 /*
@@ -220,6 +221,8 @@ void idBrittleFracture::Restore( idRestoreGame *savefile ) {
 	shards.SetNum( num );
 	for ( i = 0; i < num; i++ ) {
 		shards[i] = new shard_t;
+
+		shards[i]->nextDecalTime = 0.0f; // Amadeus #6588: Restore default value on restore
 	}
 
 	for ( i = 0; i < num; i++ ) {
@@ -342,6 +345,9 @@ void idBrittleFracture::AddShard( idClipModel *clipModel, idFixedWinding &w ) {
 	shard->edgeHasNeighbour.AssureSize( w.GetNumPoints(), false );
 	shard->neighbours.Clear();
 	shard->atEdge = false;
+
+	shard->nextDecalTime = 0.0f; // Amadeus #6588: initialize 
+
 	shards.Append( shard );
 }
 
@@ -785,8 +791,30 @@ void idBrittleFracture::ProjectDecal( const idVec3 &point, const idVec3 &dir, co
 			continue;
 		}
 
-		idFixedWinding *decal = new idFixedWinding;
-		shards[i]->decals.Append( decal );
+		idFixedWinding* decal = new idFixedWinding;
+
+
+		// Amadeus: #6588 - Added a maximum decal limit to prevent infinite decals from spawning and tanking the framerate to 0
+		const int MAX_DECALS = 1;
+		idList<idFixedWinding*>& decalList = shards[i]->decals;
+
+		// Get time in seconds
+		float currentTime = MS2SEC(gameLocal.time);
+
+		// Don't spawn new decals until after time passes
+		if (currentTime < shards[i]->nextDecalTime) {
+			return; 
+		}
+
+		if (decalList.Num() >= MAX_DECALS) {
+			delete decalList[0];
+			decalList.RemoveIndex(0);
+		}
+
+		// Set time for when the next decal is allowed (3 seconds)
+		shards[i]->nextDecalTime = currentTime + 3.0f;
+
+		decalList.Append(decal);
 
 		decal->SetNumPoints( winding.GetNumPoints() );
 		for ( j = 0; j < winding.GetNumPoints(); j++ ) {

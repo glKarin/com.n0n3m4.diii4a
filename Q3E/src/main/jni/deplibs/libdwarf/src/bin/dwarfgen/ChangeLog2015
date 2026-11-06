@@ -1,0 +1,32 @@
+2015-12-31  David Anderson
+     * configure.in: Now allows --enable-shared and --disable-nonshared
+     * configure: regenerated.
+2015-11-26  David Anderson
+     * config.h.in, configure.in, Makefile.in: Deals with
+       zlib when present.
+     * configure: Generated.
+2015-09-15  Carlos Alberto Enciso
+     * createirepformfrombinary.cc: include the 'stdafx.h'
+       for Windows port.
+       Minor typo in the filename description.
+     * createirepfrombinary.cc: include the 'stdafx.h' for Windows port.
+       Use the Dwarfdump generic open_a_file() and close_a_file() calls.
+     * dwarfgen.cc: include the 'stdafx.h' for Windows port.
+       Include the Dwarfdump generic open_a_file(), close_a_file() and
+       create_a_file() calls.
+       Remove the 'extern "C"' around 'dwgetopt.h'.
+     * irepattrtodbg.cc: include the 'stdafx.h' for Windows port.
+     * ireptodbg.cc: include the 'stdafx.h' for Windows port.
+2015-07-12  David Anderson
+     * Now uses dwoptarg, dwoptind, not optarg, optind.
+2015-02-22  David Anderson
+     * Now uses dwgetopt.h, .c from dwarfdump.
+     * dwarfgen.cc: Now references dwgetopt.h and dwgetopt().
+     * Makefile.in: Reaches around to libdwarf for dwgetopt.
+     * configure.in: Removed getopt.h check
+     * configure: regenerated
+2015-01-06  David Anderson
+     * dwarfgen.cc: Fixed indents and removed trailing whitespace.
+2015-01-01  David Anderson
+     * A new year begins.
+

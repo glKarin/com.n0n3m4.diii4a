@@ -221,9 +221,9 @@ CModInfoPtr CMissionManager::GetModInfo(int index)
 	return GetModInfo(_availableMods[index]);
 }
 
-CModInfoPtr CMissionManager::GetModInfo(const idStr& name)
+CModInfoPtr CMissionManager::GetModInfo(const idStr& name, bool skipCreate /*= false*/)
 {
-	return _missionDB->GetModInfo(name);
+	return _missionDB->GetModInfo(name, skipCreate);
 }
 
 /*void CMissionManager::CleanupModFolder(const idStr& name)
@@ -872,7 +872,7 @@ void CMissionManager::InitMapSequence()
 
 				token.Clear();
 
-				lexer.ReadRestOfLine(token);
+				lexer.ReadRestOfLineUnp(&token);
 
 				idLexer mapLexer(token.c_str(), token.Length(), "mapnames");
 

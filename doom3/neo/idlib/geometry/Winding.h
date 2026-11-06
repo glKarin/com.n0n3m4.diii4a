@@ -44,6 +44,10 @@ class idWinding
 		idWinding(void);
 		explicit idWinding(const int n);								// allocate for n points
 		explicit idWinding(const idVec3 *verts, const int n);			// winding from points
+#ifdef _SPLASHDAMAGE
+	    explicit idWinding( const idVec3 &normal, const float dist, const float radius );	// base winding for plane
+	    explicit idWinding( const idPlane &plane, const float radius );						// base winding for plane
+#endif
 		explicit idWinding(const idVec3 &normal, const float dist);	// base winding for plane
 		explicit idWinding(const idPlane &plane);						// base winding for plane
 		explicit idWinding(const idWinding &winding);
@@ -65,6 +69,10 @@ class idWinding
 		virtual void	Clear(void);
 
 		// huge winding for plane, the points go counter clockwise when facing the front of the plane
+#ifdef _SPLASHDAMAGE
+	    void			BaseForPlane( const idVec3 &normal, const float dist, const float radius );
+	    void			BaseForPlane( const idPlane &plane, const float radius );
+#endif
 		void			BaseForPlane(const idVec3 &normal, const float dist);
 		void			BaseForPlane(const idPlane &plane);
 
@@ -86,7 +94,11 @@ class idWinding
 		void			RemoveColinearPoints(const idVec3 &normal, const float epsilon = ON_EPSILON);
 		void			RemovePoint(int point);
 		void			InsertPoint(const idVec3 &point, int spot);
+#ifdef _SPLASHDAMAGE
+    	bool			InsertPointIfOnEdge( const idVec3 &point, const idPlane &plane, const float epsilon = ON_EPSILON, int *index = NULL );
+#else
 		bool			InsertPointIfOnEdge(const idVec3 &point, const idPlane &plane, const float epsilon = ON_EPSILON);
+#endif
 		// add a winding to the convex hull
 		void			AddToConvexHull(const idWinding *winding, const idVec3 &normal, const float epsilon = ON_EPSILON);
 		// add a point to the convex hull
@@ -127,6 +139,39 @@ class idWinding
 		int				allocedSize;
 
 		bool			EnsureAlloced(int n, bool keep = false);
+#ifdef _SPLASHDAMAGE
+	public:
+	    void			Rotate( const idVec3& origin, const idMat3& axis );
+	    // idential to the above version, but avoids heap allocations
+	    int				Split( const idPlane &plane, const float epsilon, idWinding& front, idWinding& back ) const;
+	
+	    // chops of the part of the winding at the back of the plane
+	    // if there is nothing at the front the number of points is set to zero, returns a SIDE_?
+	    int				SplitInPlace( const idPlane &plane, const float epsilon, idWinding **back );
+	    // splits the winding into a front and back winding, the winding itself stays unchanged
+	    // returns a SIDE_?
+	    int				SplitWithEdgeNums( const int *edgeNums, const idPlane &plane, const int edgeNum, const float epsilon,
+	                                       idWinding **front, idWinding **back, int **frontEdgePlanes, int **backEdgePlanes ) const;
+	    // chops of the part of the winding at the back of the plane
+	    // if there is nothing at the front the number of points is set to zero, returns a SIDE_?
+	    int				SplitInPlaceWithEdgeNums( idList<int> &edgeNums, const idPlane &plane, const float epsilon,
+	            idWinding **back, int **backEdgePlanes );
+	    // cuts off the part at the back side of the plane, returns true if some part was at the front
+	    // if there is nothing at the front the number of points is set to zero
+	    int				ClipInPlaceWithEdgeNums( idList<int> &edgeNums, const idPlane &plane, const int edgeNum,
+	            const float epsilon = ON_EPSILON, const bool keepOn = false );
+	    // The parameter indices should point to an array with at least GetNumPoints() * 3 integers.
+	    // If no triangle fan could be created from one of the corners an assumed center of the
+	    // winding is used to create a fan and the indices referncing this additional vertex will
+	    // equal GetNumPoints() and indices[0] will always be equal to GetNumPoints().
+	    // Returns the number of indices written out.
+	    int				CreateTriangles( int *indices, const float epsilon ) const;
+	    idVec3			GetNormal( void ) const;
+	    idPlane			GetPlane() const;
+	    idBounds		GetBounds() const;
+	    bool			IsTiny( float epsilon ) const;
+	    bool			IsHuge( float radius ) const;
+#endif
 		virtual bool	ReAllocate(int n, bool keep = false);
 };
 
@@ -163,6 +208,21 @@ ID_INLINE idWinding::idWinding(const idVec3 *verts, const int n)
 	numPoints = n;
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE idWinding::idWinding( const idVec3 &normal, const float dist, const float radius ) {
+	numPoints = allocedSize = 0;
+	p = NULL;
+    BaseForPlane( normal, dist, radius );
+}
+
+ID_INLINE idWinding::idWinding( const idPlane &plane, const float radius )
+{
+	numPoints = allocedSize = 0;
+	p = NULL;
+	BaseForPlane( plane, radius );
+}
+#endif
+
 ID_INLINE idWinding::idWinding(const idVec3 &normal, const float dist)
 {
 	numPoints = allocedSize = 0;
@@ -179,6 +239,11 @@ ID_INLINE idWinding::idWinding(const idPlane &plane)
 
 ID_INLINE idWinding::idWinding(const idWinding &winding)
 {
+#ifdef _SPLASHDAMAGE
+    numPoints = allocedSize = 0;
+    p = NULL;
+
+#endif
 	int i;
 
 	if (!EnsureAlloced(winding.GetNumPoints())) {
@@ -277,10 +342,19 @@ ID_INLINE void idWinding::SetNumPoints(int n)
 ID_INLINE void idWinding::Clear(void)
 {
 	numPoints = 0;
+#ifdef _SPLASHDAMAGE
+    allocedSize = 0;
+#endif
 	delete[] p;
 	p = NULL;
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE void idWinding::BaseForPlane( const idPlane &plane, const float radius )
+{
+    BaseForPlane( plane.Normal(), plane.Dist(), radius );
+}
+#endif
 ID_INLINE void idWinding::BaseForPlane(const idPlane &plane)
 {
 	BaseForPlane(plane.Normal(), plane.Dist());
@@ -309,6 +383,81 @@ ID_INLINE bool idWinding::EnsureAlloced(int n, bool keep)
 */
 
 #define	MAX_POINTS_ON_WINDING	64
+#ifdef _SPLASHDAMAGE
+
+ID_INLINE void idWinding::Rotate( const idVec3& origin, const idMat3& axis )
+{
+    int i;
+    for( i = 0; i < numPoints; i++ ) {
+        p[ i ].ToVec3() -= origin;
+        p[ i ].ToVec3() *= axis;
+        p[ i ].ToVec3() += origin;
+    }
+}
+
+
+
+/*
+===============================================================================
+
+	idGrowingWinding
+
+===============================================================================
+*/
+
+class idGrowingWinding : public idWinding
+{
+public:
+
+    idGrowingWinding();
+    ~idGrowingWinding();
+
+    virtual void	Clear( void );
+    virtual bool	ReAllocate( int n, bool keep = false );
+
+private:
+
+    idVec5			data[MAX_POINTS_ON_WINDING];	// point data
+
+};
+
+ID_INLINE idGrowingWinding::idGrowingWinding()
+{
+    numPoints = 0;
+    p = data;
+    allocedSize = MAX_POINTS_ON_WINDING;
+}
+
+ID_INLINE idGrowingWinding::~idGrowingWinding()
+{
+    if ( p == data ) {
+        p = NULL;
+    }
+}
+
+ID_INLINE void idGrowingWinding::Clear( void )
+{
+    numPoints = 0;
+    allocedSize = MAX_POINTS_ON_WINDING;
+    if ( p != data ) {
+        delete[] p;
+    }
+    p = data;
+}
+
+
+/*
+===============================================================================
+
+	idFixedWinding is a fixed buffer size winding not using
+	memory allocations.
+
+	When an operation would overflow the fixed buffer a warning
+	is printed and the operation is safely cancelled.
+
+===============================================================================
+*/
+#endif
 
 class idFixedWinding : public idWinding
 {
@@ -317,8 +466,13 @@ class idFixedWinding : public idWinding
 		idFixedWinding(void);
 		explicit idFixedWinding(const int n);
 		explicit idFixedWinding(const idVec3 *verts, const int n);
+#ifdef _SPLASHDAMAGE
+	    explicit idFixedWinding( const idVec3 &normal, const float dist, const float radius );
+	    explicit idFixedWinding( const idPlane &plane, const float radius );
+#else
 		explicit idFixedWinding(const idVec3 &normal, const float dist);
 		explicit idFixedWinding(const idPlane &plane);
+#endif
 		explicit idFixedWinding(const idWinding &winding);
 		explicit idFixedWinding(const idFixedWinding &winding);
 		virtual			~idFixedWinding(void);
@@ -334,6 +488,12 @@ class idFixedWinding : public idWinding
 	protected:
 		idVec5			data[MAX_POINTS_ON_WINDING];	// point data
 
+#ifdef _SPLASHDAMAGE
+	public:
+	    // chops off the part of the winding at the back of the plane
+	    // if there is nothing at the front the number of points is set to zero, returns a SIDE_?
+	    int				SplitInPlace( const idPlane &plane, const float epsilon, idFixedWinding *back );
+#endif
 		virtual bool	ReAllocate(int n, bool keep = false);
 };
 
@@ -372,20 +532,36 @@ ID_INLINE idFixedWinding::idFixedWinding(const idVec3 *verts, const int n)
 	numPoints = n;
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE idFixedWinding::idFixedWinding( const idVec3 &normal, const float dist, const float radius )
+#else
 ID_INLINE idFixedWinding::idFixedWinding(const idVec3 &normal, const float dist)
+#endif
 {
 	numPoints = 0;
 	p = data;
 	allocedSize = MAX_POINTS_ON_WINDING;
+#ifdef _SPLASHDAMAGE
+    BaseForPlane( normal, dist, radius );
+#else
 	BaseForPlane(normal, dist);
+#endif
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE idFixedWinding::idFixedWinding( const idPlane &plane, const float radius )
+#else
 ID_INLINE idFixedWinding::idFixedWinding(const idPlane &plane)
+#endif
 {
 	numPoints = 0;
 	p = data;
 	allocedSize = MAX_POINTS_ON_WINDING;
+#ifdef _SPLASHDAMAGE
+    BaseForPlane( plane, radius );
+#else
 	BaseForPlane(plane);
+#endif
 }
 
 ID_INLINE idFixedWinding::idFixedWinding(const idWinding &winding)

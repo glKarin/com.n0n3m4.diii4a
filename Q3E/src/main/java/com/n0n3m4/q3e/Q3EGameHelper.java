@@ -222,6 +222,46 @@ class Q3EGameHelper
         }
     }
 
+    private String CompleteIdTech4NewFeatureCmd(String cmd)
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
+
+        KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
+
+        int glVersion = preferences.getInt(Q3EPreference.pref_harm_opengl, Q3EGLConstants.GetPreferOpenGLESVersion());
+        boolean multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, true);
+
+        // force enable soft shadow mapping
+        if(!command.HasProp("r_useShadowMapping"))
+            command.SetProp("r_useShadowMapping", "1");
+        // force enable perforated surface shadow mapping in DOOM3/ETQW
+        if(Q3E.q3ei.IS_D3() || Q3E.q3ei.isETQW)
+        {
+            if(!command.HasProp("r_forceShadowMapsOnAlphaTestedSurfaces"))
+                command.SetProp("r_forceShadowMapsOnAlphaTestedSurfaces", "1");
+        }
+        // force enable fake GI if not ETQW
+        if(!Q3E.q3ei.isETQW)
+        {
+            if(!command.HasProp("harm_r_globalIllumination"))
+                command.SetProp("harm_r_globalIllumination", "1");
+        }
+        // force enable soft stencil shadow in OpenGLES3
+        if(glVersion != Q3EGLConstants.OPENGLES20)
+        {
+            if(!command.HasProp("harm_r_stencilShadowSoft"))
+                command.SetProp("harm_r_stencilShadowSoft", "1");
+        }
+        // force enable debug rendertools in multithreading
+        if(multithread)
+        {
+            if(!command.HasProp("harm_r_renderToolsMultithread"))
+                command.SetProp("harm_r_renderToolsMultithread", "1");
+        }
+
+        return command.toString();
+    }
+
     private String GetOpenALDriverNames(String openalAudioDriverName)
     {
         if(KStr.IsEmpty(openalAudioDriverName))
@@ -324,6 +364,9 @@ class Q3EGameHelper
 
         if(Q3E.q3ei.IsIdTech4())
         {
+            // complete new feature cvars
+            cmd = CompleteIdTech4NewFeatureCmd(cmd);
+
             KidTechCommand command = Q3E.q3ei.GetGameCommandEngine(cmd);
             boolean multithread = preferences.getBoolean(Q3EPreference.pref_harm_multithreading, true);
             command.SetProp("r_multithread", multithread ? "1" : "0");
@@ -355,6 +398,9 @@ class Q3EGameHelper
                                 break;
                             case Q3EGameConstants.GAME_QUAKE4:
                                 fs_game = Q3EGameConstants.GAME_BASE_QUAKE4;
+                                break;
+                            case Q3EGameConstants.GAME_ETQW:
+                                fs_game = Q3EGameConstants.GAME_BASE_ETQW;
                                 break;
                             case Q3EGameConstants.GAME_DOOM3:
                             default:
@@ -696,6 +742,7 @@ class Q3EGameHelper
         Q3EUtils.mkdir(Q3EUtils.FileDir(systemVersionPath), true);
         Q3EUtils.file_put_contents(systemVersionPath, apkVersion);
         Log.i(Q3EGlobals.CONST_Q3E_LOG_TAG, "Write " + name + " file version is " + apkVersion);
+        ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_version, name, apkVersion));
     }
 
     void ExtractTDMGLSLShaderSource()
@@ -726,6 +773,27 @@ class Q3EGameHelper
         String version = Q3EGameConstants.SKINDEEP_GLSL_SHADER_VERSION;
         String name = Q3ELang.tr(m_context, R.string.skin_deep_glsl_shader);
         Q3EGameConstants.PatchResource patchResource = Q3EGameConstants.PatchResource.SKINDEEP_GLSL_SHADER;
+
+        boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
+
+        if(manager.Fetch(patchResource, overwrite) != null)
+        {
+            if (overwrite)
+            {
+                DumpExtractResourceVersion(versionFile, version, name);
+            }
+        }
+        else
+            ShowMessage(Q3ELang.tr(m_context, R.string.extract_files_fail, name));
+    }
+
+    void ExtractETQWGLSLShaderAndResource()
+    {
+        Q3EPatchResourceManager manager = new Q3EPatchResourceManager(m_context);
+        final String versionFile = KStr.AppendPath(Q3E.q3ei.datadir, Q3EGameConstants.GAME_SUBDIR_ETQW, "etqwbase/idtech4amm.version");
+        String version = Q3EGameConstants.ETQW_GLSL_SHADER_VERSION;
+        String name = Q3ELang.tr(m_context, R.string.etqw_glsl_shader_and_resource_patches);
+        Q3EGameConstants.PatchResource patchResource = Q3EGameConstants.PatchResource.ETQW_GLSL_SHADER_EXTRAS;
 
         boolean overwrite = CheckExtractResourceOverwrite(versionFile, version, name);
 
@@ -911,6 +979,8 @@ class Q3EGameHelper
             ExtractECWolfResource();
         else if(Q3E.q3ei.isSkinDeep) // GLSL shader
             ExtractSkinDeepGLSLShaderSource();
+        else if(Q3E.q3ei.isETQW) // GLSL shader and resource patches
+            ExtractETQWGLSLShaderAndResource();
     }
 
     private int GetMSAA()

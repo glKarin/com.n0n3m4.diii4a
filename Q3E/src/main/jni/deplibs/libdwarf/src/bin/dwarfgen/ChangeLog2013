@@ -1,0 +1,62 @@
+2013-10-31  David Anderson
+     * createirepformfrombinary.cc: Adding
+       support for some CLASS REFERENCE forms.
+     * createirepformfrombinary.cc, creatirepfrombinary.cc: Adding
+       support for some CLASS REFERENCE forms.
+       Fixed dealloc for dwarf_get_pubtypes to avoid duplicate free.
+     * dwarfgen.cc: Added #include so it compiles.
+     * irepattrtodbg.cc,irepattrtodbg.h: Added support for
+       some CLASS REFERENCE forms.
+     * irepdie.h,irepform.h: Added support for some CLASS REFERENCE forms.
+     * irepframe.h: Added 3 comment lines about fde_instrs_
+     * ireptodbg.cc: Added support for some CLASS REFERENCE forms.
+2013-10-17  David Anderson
+2013-10-17  David Anderson
+     * ireppubnames.h: deals with debug_pubnames and debug_pubtypes
+       data.
+     * irepdie.h: Remember the producer DIE offset so we
+       can access it for pubnames/pubtypes.
+     * createirepfrombinary.cc: Read in pubnames and pubtypes data.
+     * irepresentation.h: Add in pubnames and pubtypes data.
+     * ireptodbg.cc: Write out applicable pubnames/pubtype data.
+2013-10-14  David Anderson
+     * dwarfgen.cc: The declaration of CallbackFunc()
+       now has const char *name to match the corrected
+       declaration in libdwarf.h
+2013-08-13  David Anderson
+     * createirepformfrombinary.cc: IRFormReference now
+       allows DW_FORM_data4/8 as reference forms (applies
+       to DWARF2). Made two error outputs look just enough
+       different to tell which test cause the error string.
+     * dwarfgen.cc: Added the -h option to specify transformation
+       of DW_AT_high_pc from form address to form const to create
+       a specific  regression test case .
+     * general.h: Added the -h global flag variable transformHighpcToConst
+       as an extern.
+     * irepattrtodbg.cc: Now emits class constant attributes and values.
+     * irepform.h: Now has a new IRFormConstant constructor so we can
+       easily create an attribute on-the-fly internally.
+       Added accessor functions for IRFormConstant values.
+     * ireptodbg.cc: specialAttrTransformations() does the transformation
+       that -h requests: making DW_AT_high_pc be of form constant instead
+       of form address.
+2013-02-01  David Anderson
+     * createirepfrombinary.cc,createirepfrombinary.h,dwarfgen.cc,
+       general.h,irepattrtodbg.cc,irepattrtodbg.h,irepdie.h,
+       irepform.h,irepframe.h,irepline.h,irepmacro.h,irepresentation.h,
+       ireptodbg.cc,strtabdata.h: updated copyright year to 2013.
+     * createirepformfrombinary.cc: Added missing implemenation
+       detals for all FORMs and FormFlag.
+     * createirepfrombinary.cc: Rename some local variables
+       for readability
+       based on the realization that dwarf_whatform and
+       dwarf_whatform_direct() are misnamed.
+     * irepattrtodbg.cc: Fixed  instances of << cerr when
+       << endl was what was wanted.
+     * ireptodbg.cc: Fixed cast from pointer to int as int
+       is too small, causes build to error off.
+     * irepdie.h,irepform.h: Rename form fields
+       from indirectform_ directform_
+       to   initialform_ and finalform_ based on the realization
+       that dwarf_whatform and dwarf_whatform were misnamed.
+

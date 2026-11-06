@@ -1,0 +1,43 @@
+2016-11-24  David Anderson
+     * Makefile.in: Clean *~
+2016-11-04  David Anderson
+     * simplereader.c(printnamestrings): Remove C99-ism
+       in favor of C90 style.
+2016-09-30  David Anderson
+     * configure.in: Add additional -fsanitize tests to
+       --enable-sanitize
+     * configure: Regenerated.
+2016-09-21  David Anderson
+     * Makefile.in: Added dwfsanitize when
+       -fsanitize=address desired.
+     * configure.in: Added --enable-sanitize option.
+     * configure: Regenerated.
+     * simplereader.c: Added trivial static array for string pointers
+       so such can be freed at normal exit to avoid having
+       malloc space problem reports from valgrind.
+2016-09-05  David Anderson
+     * simplereader.c: Adding --dumpallnames option
+       so it becomes easy to analyze string usage in objects.
+       (The analysys to be carried out be other code, not part
+       of the libdwarf distribution.)
+2016-04-21  Carlos Alberto Enciso
+     * Use the _WIN32 macro to identify a WINDOWS specific code.
+2016-03-14  DavidAnderson <davea42@earthlink.net>
+      * frame1.c: Fixing various compiler warnings.
+      * simplereader.c: In case a badly spelled
+        argument given, exit with message, do not
+        ignore the mistake.
+2016-03-14  DavidAnderson <davea42@earthlink.net>
+      * simplereader.c: --simpleerrhand flag
+        lets us test an error handler
+        when combined with --passnullerror.
+        Fixed various warnings exposed by
+        configure --enable-wall.
+2016-03-13  DavidAnderson <davea42@earthlink.net>
+      * simplereader.c: --passnullerror flag
+        lets us test for libdwarf mistakes in
+        handling a NULL error argument.
+      * configure.in: Handle --enable-wall configure
+        choice.
+      * configure: Regenerated.
+      * Makefile.in:  Handle --enable-wall.

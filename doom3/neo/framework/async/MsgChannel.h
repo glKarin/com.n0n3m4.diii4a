@@ -167,6 +167,9 @@ class idMsgChannel
 
 		// Removes any pending outgoing or incoming reliable messages.
 		void			ClearReliableMessages(void);
+#ifdef _SPLASHDAMAGE //karin: bot fake client
+		bool			isBot;
+#endif
 
 	private:
 		netadr_t		remoteAddress;	// address of remote host

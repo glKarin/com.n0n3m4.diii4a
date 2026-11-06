@@ -154,12 +154,16 @@ typedef struct {
 
 	// dynamic image variables
 	dynamicImage_t		dynamic;
-	int					width, height;
+	bool				xrayInclusive;
+	float				mirrorResolutionFactor;		// #5485
+	float				remoteResolutionWorld;		// #5485
+	int					remoteWidth, remoteHeight;
 } textureStage_t;
 
 // the order BUMP / DIFFUSE / SPECULAR is necessary for interactions to draw correctly on low end cards
 typedef enum {
 	SL_AMBIENT,						// execute after lighting
+
 	SL_BUMP,
 	SL_DIFFUSE,
 	SL_SPECULAR,
@@ -178,8 +182,9 @@ typedef enum {
 
 static const int	MAX_FRAGMENT_IMAGES = 8;
 static const int	MAX_VERTEX_PARMS = 4;
+#define NEWSTAGE_PROGRAM_DELAYED ((GLSLProgram*)SIZE_MAX)
 
-typedef struct {
+typedef struct newShaderStage_s {
 	int					numVertexParms;
 	int					vertexParms[MAX_VERTEX_PARMS][4];	// evaluated register indexes
 
@@ -188,7 +193,11 @@ typedef struct {
 
 	//idMegaTexture		*megaTexture;		// handles all the binding and parameter setting 
 
+	char				programName[32];
 	GLSLProgram			*glslProgram;
+
+	// called from backend, can do program load if it was delayed
+	GLSLProgram *GetGlslProgram();
 } newShaderStage_t;
 
 // stgatilov #6571: special settings for parallax stage
@@ -281,7 +290,8 @@ typedef enum {
 	MF_FORCESHADOWS				= BIT(3),
 	MF_NOSELFSHADOW				= BIT(4),
 	MF_NOPORTALFOG				= BIT(5),	// this fog volume won't ever consider a portal fogged out
-	MF_EDITOR_VISIBLE			= BIT(6)	// in use (visible) per editor
+	MF_EDITOR_VISIBLE			= BIT(6),	// in use (visible) per editor
+	MF_FORCEINTERACTIONS		= BIT(7),	// #5867: force decal to use generic frontend processing
 } materialFlags_t;
 
 // contents flags, NOTE: make sure to keep the defines in script/tdm_defs.script up to date with these!
@@ -393,6 +403,8 @@ public:
 						// get the first stage of given kind, or NULL if not present.
 	const shaderStage_t *FindStageOfType( stageLighting_t type ) const;
 	const shaderStage_t *GetParallaxStage( void ) const { return FindStageOfType( SL_PARALLAX ); }
+
+	const shaderStage_t *FindXrayStage( void ) const;
 
 						// returns true if the material will draw anything at all.  Triggers, portals,
 						// etc, will not have anything to draw.  A not drawn surface can still castShadow,
@@ -717,15 +729,15 @@ private:
 
 	int					numOps;
 	expOp_t *			ops;				// evaluate to make expressionRegisters
-																										
-	int					numRegisters;																			//
+
+	int					numRegisters;
 	float *				expressionRegisters;
 
 	float *				constantRegisters;	// NULL if ops ever reference globalParms or entityParms
 
 	int					numStages;
 	int					numAmbientStages;
-																										
+
 	shaderStage_t *		stages;
 
 	// stgatilov: which subsegments of stages comprise interaction groups

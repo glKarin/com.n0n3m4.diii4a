@@ -1,5 +1,5 @@
-#ifndef _ANDROID_FFMPEG_H
-#define _ANDROID_FFMPEG_H
+#ifndef _DL_FFMPEG_H
+#define _DL_FFMPEG_H
 
 #if defined(USE_FFMPEG)
 #ifdef _DL_FFMPEG
@@ -50,4 +50,4 @@ extern bool ffmpeg_available;
 
 #endif
 
-#endif //_ANDROID_FFMPEG_H
+#endif //_DL_FFMPEG_H

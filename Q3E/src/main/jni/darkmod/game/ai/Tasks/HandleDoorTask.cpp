@@ -544,10 +544,10 @@ bool HandleDoorTask::Perform(Subsystem& subsystem)
 	int queuePos = frobDoor->GetUserManager().GetIndex(owner); // grayman #2345
 
 	const idVec3& frobDoorOrg = frobDoor->GetPhysics()->GetOrigin();
-	const idVec3& openPos = frobDoorOrg + frobDoor->GetOpenPos();
-	const idVec3& closedPos = frobDoorOrg + frobDoor->GetClosedPos();
-	const idVec3& centerPos = frobDoor->GetClosedBox().GetCenter(); // grayman #1327
-	const idVec3& currentPos = frobDoor->GetCurrentPos(); // grayman #3523
+	const idVec3 openPos = frobDoorOrg + frobDoor->GetOpenPos();
+	const idVec3 closedPos = frobDoorOrg + frobDoor->GetClosedPos();
+	const idVec3 centerPos = frobDoor->GetClosedBox().GetCenter(); // grayman #1327
+	const idVec3 currentPos = frobDoor->GetCurrentPos(); // grayman #3523
 	//gameRenderWorld->DebugArrow(colorCyan, currentPos, currentPos + idVec3(0, 0, 20), 2, 1000);
 
 	// if our current door is part of a double door, this is the other part.

@@ -1,0 +1,56 @@
+Speculative thoughts on using  a script to define what
+DWARF? to write out in an elf file:
+
+Syntax for dw tab entry
+# is comment
+levels by indentation like python
+attrs.   indent to the tag they apply to.
+
+;section  x
+;endsection x
+
+:label:
+ [<level>] tag
+	attr  [form name]  value
+
+any attr or tag may have a label.
+
+Various forms require specific value formats.
+values sometims require offsets such as a sibling ref
+or a fwd/rev ref or  a ref to the debug_loc sec
+
+
+DW_FORM_data 1,2 integer
+DW_FORM_data 4,8  integer or offset depends on context
+DW_FORM_sdata, udata integer
+DW_FORM_string  "string value"
+DW_FORM_strp    "string value"
+DW_FORM_block 1,2,4,8  blk-fmt
+
+     this is blk_fmt
+	hex number
+	decimal number
+	[ dw-expr]
+	
+
+sythetic forms:
+DW_FORM_loclist  [label | loclist-itself]
+
+loclist-itself
+	offset  offset  DW_FORM_block<n> [blk_fmt]
+	...
+
+DW_FORM_maclist   label
+DW_FORM_?
+
+Line table entries
+
+CIE entries
+
+FDE entries
+
+
+mac  sec entries
+
+
+

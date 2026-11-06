@@ -266,6 +266,9 @@ idMsgChannel::idMsgChannel
 idMsgChannel::idMsgChannel()
 {
 	id = -1;
+#ifdef _SPLASHDAMAGE //karin: bot fake client
+	isBot = false;
+#endif
 }
 
 /*
@@ -301,6 +304,9 @@ void idMsgChannel::Init(const netadr_t adr, const int id)
 	fragmentLength = 0;
 	reliableSend.Init(1);
 	reliableReceive.Init(0);
+#ifdef _SPLASHDAMAGE //karin: bot fake client
+	isBot = false;
+#endif
 }
 
 /*
@@ -721,6 +727,10 @@ bool idMsgChannel::SendReliableMessage(const idBitMsg &msg)
 {
 	bool result;
 
+#ifdef _SPLASHDAMAGE //karin: jmarshall's Quake4 bot
+	if (isBot)
+		return false;
+#endif
 	assert(remoteAddress.type != NA_BAD);
 
 	if (remoteAddress.type == NA_BAD) {

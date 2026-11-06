@@ -1,0 +1,332 @@
+2006-12-24 David Anderson <davea@sgi.com>
+     * DWARFDUMPCOPYRIGHT: Added GPL copyright text with
+       explanation of the intended content.
+     * COPYING: added text explaining confusion of GPL vs LGPL.
+       Thanks to Chris Quenelle for pointing out the disconnect
+       between DWARFDUMPCOPYRIGHT and the source files in dwarfdump.
+2006-12-21 David Anderson <davea@sgi.com>
+     * tag_tree.list: add tags to make allowed list more complete.
+       Omission noticed by Marcel Mettes.
+2006-06-14 David Anderson <davea@sgi.com>
+     * print_frames.c: Clean up printing of augmentation data  by
+       eliminating dangling 0x (for eh_frame).
+2006-04-28 David Anderson <davea@sgi.com>
+     * dwarfdump.conf: Now has x86_64 register names.
+       x86_64 with help from Tom Hughes (verified
+       from independent sources).
+       Added m68k register names and refined  x86 list
+       by looking at various information-sources.
+2006-04-18 David Anderson <davea@sgi.com>
+     * *.c: Ran indent so all now follow a standard look.
+     * dwconf.c: Added fclose(conf_stream).
+2006-04-18 David Anderson <davea@sgi.com>
+     * dwarfdump.c: Forgot to call key new functions for
+       handling variable-size frame data and different
+       frame rule initialization value.
+     * dwconf.c: Add a default print for CFA in case of
+       an omission in dwarfdump.conf.
+     * dwarfdump.conf: Move setup and rename the ABIs slightly.
+2006-04-17 David Anderson <davea@sgi.com>
+     * dwarfdump.conf: Correct typos. Remove some register names.
+     * dwarfdump.c: Fix compiler warnings, fix -x option usage message.
+     * dwconf.h: Fix compiler warnings by changing types.
+     * dwconf.c: Change error checking so we check all errors, do
+       not stop at first error. Ran indent.  Added code to check
+       for extra junk after operand(s).
+     * print_frames.c: Fix compiler warnings.
+     * Makefile.in: get <prefix> used in install rule and creating
+       places to search for dwarfdump.conf
+2006-04-16 David Anderson <davea@sgi.com>
+     * dwarfdump.conf: New dwarfdump configuration file. Makes using frame
+           information easy to read and correct for any ABI/ISA
+           without rebuilding dwarfdump.
+     * Makefile.in: Added new files dwconf.h dwconf.c
+     * dwconf.h dwconf.c: New files implement reading dwarfdump.conf
+       and help print_frames.c print frame information correctly
+       for ABIs specified at runtime.
+     * dwarfdump.1: document -x commands.
+     * globals.h: Minor changes to support dwarfdump.conf
+     * print_frames.c: Major changes to support a run-time description of
+       the frames info and dwarfdump.conf.
+     * print_frames.h: Changes  to support a run-time description of
+       the frames info and dwarfdump.conf.
+     * print_sections.c: Minor tweaks to support a run-time
+       description of the frames info and dwarfdump.conf.
+
+2006-03-31 David Anderson <davea@sgi.com>
+     * Makefile.in globals.h print_sections.c: Refer to new
+       print_frames.h print_frames.c.
+     * print_frames.h print_frames.c: Extract cie, fde printing
+       to separate file, separating loop logic from the printing
+       of an entry from the loop.
+2006-03-31 David Anderson <davea@sgi.com>
+     * dwarfdump.c global.h print_sections.c: Preparing for
+       dwarf3 frame interface.
+     * print_die.c: Corrects handling of DW_AT_encoding (etc) value.
+2006-03-29 David Anderson <davea@sgi.com>
+     * print_sections.c: define DWARFDUMP_TURN_OFF_MIPS_REG_NAMES
+       at compile time
+       to turn off the MIPS register names printing.  Instead
+       (aside from cfa) use a name like  r4 (where the DWARF
+       register number follows the letter 'r').
+       Indent. Initialize some local variables at declarations.
+2006-03-13 David Anderson <davea@sgi.com>
+     * print_sections.c: Now gets gnu eh_augmentation data by calling
+       dwarf_get_cie_augmentation_data() or dwarf_get_fde_augmentation_data()
+       and prints it (use -v to see cie data).
+       Now prints DWARF3 frame information.
+2006-03-08 David Anderson <davea@sgi.com>
+     * print_sections.c: Add 'break;' at line 710.
+       Thanks to Richard Stuckey for noticing.
+2005-12-01 David Anderson <davea@sgi.com>
+     * dwarf_names.awk: use snprintf instead of sprintf for safety.
+2005-12-01 David Anderson <davea@sgi.com>
+     * Makefile.in: Build attr/tag trees with
+       individual commands to catch build errors.
+     * tag_attr.c,tag_tree.c: Verify that
+       tables fit in the generated C code and check for
+       format errors in the *.list files.
+     * tag_attr.list, tag_tree.list: Added some valid entries.
+     * globals.h: add DWARF_ERROR3 macro for better diagnostics.
+     * print_die.c: Show both sides of questionable tag relation
+       in CHECK  -k diagnostic output.
+
+2005-11-25 David Anderson <davea@sgi.com>
+     * print_die.c: DW_AT_stride_size changed to DW_AT_bit_stride,
+                    added DW_AT_byte_stride.
+     * tag_attr.c,tag_tree.c: fixed array size now a #define for
+	readability.
+     * tag_attr.list: Added DWARF3  attributes, also new TAGs.
+     * tag_tree.list: Added DWARF3 TAGs.
+
+2005-11-08 David Anderson <davea@sgi.com>
+      * makename.c: remove non-standard malloc.h include,
+        stdlib.h suffices and is already included.
+
+2005-10-24 David Anderson <davea@sgi.com>
+      * tag_attr.c tag_tree.c: added DWARF3 TAGs to string array.
+
+2005-08-01 David Anderson <davea@sgi.com>
+      * Makefile.in: Add esb.o and test rule (test code for esb.c).
+      * dwarfdump.c:  Remove old static buffer initialization.
+      * print_die.c: Use esb now, avoid crash due to long loclist
+        overrunning static buffer. Uses snprintf now, not sprintf.
+        snprintf is for safety.
+      * esb.h esb.c: Adding extensible string buffer (esb) code.
+      * testesb.c: Test code for esb.c.
+      * print_reloc.c: size field is now Elf64_Xword for
+        Elf64  as Elf64_Word is only 32 bits.
+
+2005-07-15 David Anderson <davea@sgi.com>
+      * dwarfdump.c: Add print of .debug_pubtypes, remove
+        erroneous dealloc after dwarf_formstring() call.
+      * globals.h: Add declarations for .debug_pubtypes print.  Add
+        declaration for full dealloc.
+      * print_die.c: Remove erroneous dealloc after dwarf_formstring() call.
+      * print_exception_tables.c: Call dwarf_fde_cie_list_dealloc()
+        for complete dealloc.
+      * print_sections.c: Remove incorrect dealloc() call.
+        Add calls to new dealloc routines. Add support of .debug_pubtypes
+        print.
+2005-07-14 David Anderson <davea@sgi.com>
+      * print_sections.c (print_line_numbers_this_cu): Use new
+        dwarf_srclines_dealloc() for deallocation after
+        dwarf_srclines() called.
+
+2005-04-13 David Anderson <davea@sgi.com>
+      * print_sections.c: Factors out common print code into
+        a new routine. Avoid indexing past end of register names
+        array.  Adds checks and prints so that certain errors
+        in pubnames-like sections are printed usefully (and dwarfdump
+        then stops if libdwarf gave an error).
+
+2005-03-21 David Anderson <davea@sgi.com>
+      * dwarfdump.c: Add -F flag to
+        request .eh_frame section print. Changed -f flag meaning
+        to print .debug_frame only. -a flag no longer
+	prints .debug_frame by default.
+      * print_sections.c: avoid printing an eh_frame we don't understand.
+	Add new information per CU when printing line info: specifically
+        the line section offset.
+      * globals.h: Added arguments to print_frames() for -F flag.
+
+2005-03-18 David Anderson <davea@sgi.com>
+      * print_sections.c: Correct macro section printing.
+
+2004-10-28 David Anderson <davea@sgi.com>
+      * DWARFDUMPCOPYRIGHT config.h defs.h dwarfdump.c globals.h
+	makename.c makename.h print_die.c print_exception_tables.c
+	print_reloc.c print_sections.c tag_attr.c tag_attr.list
+	tag_tree.c tag_tree.list: Copyright update, SGI
+        corporate address change.
+
+2004-10-26 David Anderson <davea@sgi.com>
+      * acconfig.h: removed. Was old style autoconf usage.
+      * configure.in: Updated AC_DEFINE usage, adding args 2 & 3.
+      * config.guess: Updated. timestamp='2004-06-11'.
+      * config.sub: Updated.  timestamp='2004-03-12'.
+      * configure config.h.in: regenerated with autoconf 2.58.
+
+2004-05-14 David Anderson <davea@sgi.com>
+
+      * print_die.c (print_die_and_children): Change to iteration
+        on siblings (still recursing on children).
+
+	
+2004-03-30 David Anderson <davea@sgi.com>
+      * dwarfdump.c (main): getopt() string should contain k:g
+        not kg:    Thanks to Peter Seiderer for pointing this out.
+
+2003-12-31 David Anderson <davea@sgi.com>
+      * README: Added configure example.
+      * Makefile.in: Removed bogus LIBS line, updated copyright date.
+      * acconfig.h: Added LGPL copyright to match libdwarf
+	Silly, but it matches libdwarf version boilerplate.
+      * config.guess config.sub: new versions from automake-1.6.
+      * config.h.in configure: Regenerated.
+
+
+2003-10-06   David Anderson <davea@sgi.com>
+     * dwarfdump.c print_sections.c: applied indent(1).
+     * print_die.c: applied indent and added ; after
+       invocations of macros PUSH_DIE_STACK POP_DIE_STACK SPACE
+       as these were confusing indent a bit.
+       The indent control file .indent.pro contained:
+  	-bad -bap -nbbo -br -ce -brs
+  	-l72  -lc72  -hnl  -nprs
+  	-fca -i4  -lp -psl -npcs
+
+
+
+2003-10-02   David Anderson <davea@sgi.com>
+     * dwarfdump.c: Add -g to indicate use of older
+       location entry code in libdwarf.  So dwarf_loclist
+       and dwarf_loclist_n are testable.
+     * globals.h: Added use_old_dwarf_loclist flag so one
+       can choose the old dwarf_loclist() interface.
+       For testing.
+     * print_die.c: Rearranged to avoid code duplication.
+       Now supports .debug_loc fully.
+     * print_sections.c: Prints .debug_loc now.
+
+2003-09-29   David Anderson <davea@sgi.com>
+
+      * print_die.c: with -v, print 'loclist' start and
+	end addr and also a hint that DW_FORM_indirect is used.
+        No change for normal output (for now).
+
+2003-05-19   David Anderson <davea@sgi.com>
+      * dwarfdump.c call dwarf_srcfiles() to get file names
+        per cu and pass down to die print routines.
+	Removed incorrect tests for when to print ".debug_info",
+	leaving simpler test.
+      * print_die.c globals.h: print file name (from line info)
+	with DW_AT_decl_file, adding data from dwarf_srcfiles
+	to argument list of a few routines to make that possible.
+      * print_sections.c: moved "line number info" string print so
+	it prints for -v as well as normal  line output.
+
+2002-10-23   Amaury Le Leyzour amaury@sgi.com
+      * print_sections.c (print_weaknames): Changed
+        DW_DLA_TYPENAME to DW_DLA_WEAK at dwarf_dealloc().
+
+2002-10-22  Tom Hughes <thh@cyberscience.com>
+      * print_sections.c: macro printing now supported.
+      * dwarfdump.c: removed erroneous dwarf_dealloc()
+        of string returned by dwarf_errmsg().
+
+2002-11-22  David Anderson <davea@sgi.com>
+      * dwarf_names.awk at_list.awk: Allow an name to have two
+        spellings so the historical name preserved yet the dwarf3
+        version is supported. First name seen is used/reported
+        by dwarfdump.
+      * dwarf.h:   DW_TAG_template_type_param(eter)
+        DW_TAG_template_value_param(eter) DW_AT_namelist_itm(s)
+        are the ones with alternate spellings now.
+        Added Universal Parallel C TAGs/Attributes in
+	user namespace.
+      * tag_attr.c tag_attr.list tag_tree.c tag_tree.list:
+        Use the DW_TAG_template_* dwarf3 spellings.
+
+
+2002-05-08  David Anderson <davea@sgi.com>
+      * tag_attr.list dwarf.h: DW_AT_namelist_items is
+	wrong, changed to DW_AT_namelist_item
+
+2002-04-29  Stephen Clarke <stephen.clarke@superh.com>
+      * dwarfdump.c (main): #ifdef for __CYGWIN__ on open().
+
+2001-06-14  David Anderson <davea@sgi.com>
+
+      * print_sections.c: Calling the new libdwarf function
+	dwarf_get_arange_cu_header_offset() so we can print
+	the cu header offset for aranges.
+
+
+2000-07-14  Fred Fish  <fnf@ninemoons.com>
+
+      * configure.in (LOCATION_OF_LIBELFHEADER): Fix typo for configure
+      variable to be tested and enclose libelf/libelf.h in <>.
+      * configure: Regenerated.
+
+2000-07-10  Fred Fish  <fnf@ninemoons.com>
+
+      * Makefile.in (install): Install dwarfdump.1 from $(srcdir).
+
+2000 June 12   davea@sgi.com
+  print_sections.c the DW_CFA_offset_extended print
+	did not multiply by data-alignment factor in the
+	-v -v detailed output.
+	And the offsets used %2d when the values were
+	unsigned int, so now %2u.
+
+	And not all cfa prints of values had
+	necessarily a type to match
+	%llu or %lld where required. Depended on the size of Dwarf_Signed
+	and Dwarf_Unsigned.
+	So now explicitly use cast to the
+	right type to match the % format.
+2000 April 13 davea@sgi.com
+  print_sections.c - 1.56
+        - A single byte of zero is a perfectly legitimate null
+          abbreviation entry          (in .debug_abbrev)
+	 now we print those directly and avoid a warning
+          from dwarfdump
+
+  print_die.c - 1.42
+        - Explain what combo checker is doing and make it
+	  more maintainable (and fix bug which would
+	  not be hit, but was real enough (in combo checker),
+	  using too large a number as highest tag number).
+
+  tag_tree.list - 1.2
+        - Add valid parent/child relationships so checker
+	  does not report valid entries as bogus.
+
+
+
+
+2000 Feb 24
+  Jason Merrill <jason@cygnus.com> noticed that gcc did
+  not like   gcc -E foo.list, so  incorporated his fix so
+  now the Makefile.in makes a link and does gcc -E _tmp.c
+
+2000 Jan 26
+  elena.demikhovsky@intel.com noticed that 3 statements in
+  print_sections.c got warnings from the compiler
+  she was using. Simple casts  (provided by her) fixed these.
+
+1999 July 21
+  davea@sgi.com
+  print_sections changed to allow printing
+  of dwarf-ish egcs c++ .eh_frame data
+
+
+1999 June 14
+  Fred Fish fnf@ninemoons.com contributed
+  autoconf'ing of the libdwarf and dwarfdump source.
+
+
+
+1999 June 10
+ ChangeLog started. davea@sgi.com  David Anderson

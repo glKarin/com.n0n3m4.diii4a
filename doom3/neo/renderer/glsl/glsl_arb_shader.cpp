@@ -2,14 +2,14 @@
 #define _KARIN_GLSL_ARB_SHADER_H
 
 class idARBProgram;
-class idARBTokenList : public idStrList
+class idARBTokenList : public idList<idStr>
 {
 public:
     void ToSource(idStr &source);
 
     int AddToken(const char *token) {
         if(token && token[0])
-            return Append(token);
+            return this->Append(token);
         else
             return Num() - 1;
     }
@@ -80,6 +80,7 @@ public:
     bool Parse(const char *source, int length);
     void Write(const char *path, const char *name);
     void Print(void);
+	void SetShaderType(const char *type);
 
 private:
     void ParseValue(void);
@@ -117,11 +118,18 @@ private:
     void MAX(void);
     void LRP(void);
     void POW(void);
+    void ABS(void);
+    void FRC(void);
+    void CMP(void);
+    void SLT(void);
+    void XPD(void);
     void MAD_SAT(void);
     void ADD_SAT(void);
     void DP3_SAT(void);
     void DP4_SAT(void);
     void MUL_SAT(void);
+    void RCP_SAT(void);
+    void MOV_SAT(void);
     void OUTPUT(void);
     void ALIAS(void);
     void ATTRIB(void);
@@ -232,9 +240,17 @@ void idARBProgram::Command(const char *cmd)
     else ARB_HANDLE_CMD(DP4)
     else ARB_HANDLE_CMD(LRP)
     else ARB_HANDLE_CMD(POW)
+    else ARB_HANDLE_CMD(ABS)
+    else ARB_HANDLE_CMD(FRC)
+    else ARB_HANDLE_CMD(SLT)
+    else ARB_HANDLE_CMD(XPD)
+    else ARB_HANDLE_CMD(CMP)
+    else ARB_HANDLE_CMD(KIL)
     else ARB_HANDLE_CMD(DP3_SAT)
     else ARB_HANDLE_CMD(DP4_SAT)
     else ARB_HANDLE_CMD(MUL_SAT)
+    else ARB_HANDLE_CMD(RCP_SAT)
+    else ARB_HANDLE_CMD(MOV_SAT)
     else ARB_HANDLE_CMD(OUTPUT)
     else ARB_HANDLE_CMD(ATTRIB)
     else ARB_HANDLE_CMD(ADDRESS)
@@ -383,6 +399,36 @@ void idARBProgram::ADD_SAT(void)
     parser.ExpectTokenString(";");
 }
 
+// MOV_SAT T, A -> T = clamp(A, 0.0, 1.0)
+void idARBProgram::MOV_SAT(void)
+{
+    ExpectTokenString("MOV_SAT");
+
+    ParseValue();
+    parser.ExpectTokenString(",");
+    AddToken("=");
+    _SAT_Start();
+    ParseValue();
+    _SAT_End();
+    parser.ExpectTokenString(";");
+}
+
+// RCP_SAT T, A -> T = clamp(1.0 / A, 0.0, 1.0)
+void idARBProgram::RCP_SAT(void)
+{
+    ExpectTokenString("RCP_SAT");
+
+    ParseValue();
+    parser.ExpectTokenString(",");
+    AddToken("=");
+    _SAT_Start();
+    AddToken("1.0");
+    AddToken("/");
+    ParseValue();
+    _SAT_End();
+    parser.ExpectTokenString(";");
+}
+
 // MUL_SAT T, A, B -> T = clamp(A * B, 0.0, 1.0)
 void idARBProgram::MUL_SAT(void)
 {
@@ -415,6 +461,7 @@ void idARBProgram::DP4_SAT(void)
 void idARBProgram::Dot_SAT(const char *t)
 {
     ExpectTokenString(t);
+	bool isDp3 = !idStr::Icmpn(t, "dp3", 3);
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -423,9 +470,14 @@ void idARBProgram::Dot_SAT(const char *t)
     AddToken("dot");
     AddToken("(");
     ParseValue();
+	if(isDp3)
+		AddToken(".xyz");
     parser.ExpectTokenString(",");
     AddToken(",");
     ParseValue();
+	if(isDp3)
+		AddToken(".xyz");
+    AddToken(")");
     _SAT_End();
     parser.ExpectTokenString(";");
 }
@@ -532,6 +584,24 @@ void idARBProgram::ParseOption(void)
 	AddToken(str);
 }
 
+void idARBProgram::SetShaderType(const char *typeStr)
+{
+    if(!idStr::Icmpn(typeStr, "ARBvp", 5))
+    {
+        type = 1;
+        shader = &vertexShader;
+    }
+    else if(!idStr::Icmpn(typeStr, "ARBfp", 5))
+    {
+        type = 2;
+        shader = &fragmentShader;
+    }
+    else
+    {
+		common->Error("Unexpect ARB type '%s'", typeStr);
+    }
+}
+
 void idARBProgram::ParseType(void)
 {
     ExpectTokenString("!");
@@ -539,21 +609,7 @@ void idARBProgram::ParseType(void)
 
     idToken typeStr;
     parser.ExpectAnyToken(&typeStr);
-    if(!typeStr.Icmpn("ARBvp", 5))
-    {
-        type = 1;
-        shader = &vertexShader;
-    }
-    else if(!typeStr.Icmpn("ARBfp", 5))
-    {
-        type = 2;
-        shader = &fragmentShader;
-    }
-    else
-    {
-        parser.Error("Unexpect ARB type '%s'", typeStr.c_str());
-        return;
-    }
+	SetShaderType(typeStr.c_str());
 	AddToken("//");
 	AddToken(typeStr);
     float ver = parser.ParseFloat();
@@ -665,6 +721,11 @@ void idARBProgram::ParseValue(void)
 			neg = true;
 			continue;
 		}
+		else if(!token.Cmp("$")) // ETQW: placeholder
+		{
+		    str.Append("$");
+		    continue;
+		}
 		else
 		{
 			str.Append(token);
@@ -715,7 +776,7 @@ bool idARBProgram::ParseFile(const char *file)
 
 bool idARBProgram::Parse(const char *source, int length)
 {
-    parser.SetFlags(LEXFL_ALLOWFLOATEXCEPTIONS | LEXFL_NOBASEINCLUDES);
+    parser.SetFlags(LEXFL_ALLOWFLOATEXCEPTIONS | LEXFL_NOBASEINCLUDES | LEXFL_NODOLLARPRECOMPILE | LEXFL_NOFATALERRORS);
 	idStr text;
 	text.Append(source, length);
 	text.Replace("..", " \"..\" ");
@@ -1131,6 +1192,21 @@ void idARBProgram::ParseFragment(void)
     else if(!token.Icmp("color"))
     {
         name.Append("var_Color");
+		if(ExpectTokenString("."))
+		{
+			if(ExpectTokenString("secondary"))
+				name.Append("2");
+			else
+			{
+				AddIn(name);
+				if(parser.ReadTokenOnLine(&token))
+					name.Append(va(".%s", token.c_str()));
+				else
+					parser.Error("Missing component '%s'", name.c_str());
+				AddToken(name);
+				return;
+			}
+		}
     }
     else
     {
@@ -1185,6 +1261,21 @@ void idARBProgram::ParseResult(void)
             name.Append("var_Color");
         else
             name.Append("gl_FragColor");
+		if(ExpectTokenString("."))
+		{
+			if(ExpectTokenString("secondary"))
+				name.Append("2");
+			else
+			{
+				AddOut(name);
+				if(parser.ReadTokenOnLine(&token))
+					name.Append(va(".%s", token.c_str()));
+				else
+					parser.Error("Missing component '%s'", name.c_str());
+				AddToken(name);
+				return;
+			}
+		}
     }
     else
     {
@@ -1283,6 +1374,12 @@ void idARBProgram::KIL(void)
 {
     ExpectTokenString("KIL");
 
+    AddToken("if");
+    AddToken("(");
+    ParseValue();
+    AddToken("<");
+    AddToken("0.0");
+    AddToken(")");
     AddToken("discard");
     AddEnding();
     parser.ExpectTokenString(";");
@@ -1291,6 +1388,7 @@ void idARBProgram::KIL(void)
 void idARBProgram::Dot(const char *t)
 {
     ExpectTokenString(t);
+	bool isDp3 = !idStr::Icmpn(t, "dp3", 3);
 
     ParseValue();
     parser.ExpectTokenString(",");
@@ -1298,9 +1396,13 @@ void idARBProgram::Dot(const char *t)
     AddToken("dot");
     AddToken("(");
     ParseValue();
+	if(isDp3)
+		AddToken(".xyz");
     parser.ExpectTokenString(",");
     AddToken(",");
     ParseValue();
+	if(isDp3)
+		AddToken(".xyz");
     AddToken(")");
     AddEnding();
     parser.ExpectTokenString(";");
@@ -1365,6 +1467,96 @@ void idARBProgram::POW(void)
     parser.ExpectTokenString(",");
     AddToken("=");
     AddToken("pow");
+    AddToken("(");
+    ParseValue();
+    parser.ExpectTokenString(",");
+    AddToken(",");
+    ParseValue();
+    AddToken(")");
+    AddEnding();
+    parser.ExpectTokenString(";");
+}
+
+// ABS T, S -> T = abs(S)
+void idARBProgram::ABS(void)
+{
+    ExpectTokenString("ABS");
+
+    ParseValue();
+    parser.ExpectTokenString(",");
+    AddToken("=");
+    AddToken("abs");
+    AddToken("(");
+    ParseValue();
+    AddToken(")");
+    AddEnding();
+    parser.ExpectTokenString(";");
+}
+
+// FRC T, S -> T = fract(S)
+void idARBProgram::FRC(void)
+{
+    ExpectTokenString("FRC");
+
+    ParseValue();
+    parser.ExpectTokenString(",");
+    AddToken("=");
+    AddToken("fract");
+    AddToken("(");
+    ParseValue();
+    AddToken(")");
+    AddEnding();
+    parser.ExpectTokenString(";");
+}
+
+// CMP T, C, A, B -> T = C ? A : B
+void idARBProgram::CMP(void)
+{
+    ExpectTokenString("CMP");
+
+    ParseValue();
+    parser.ExpectTokenString(",");
+    AddToken("=");
+    ParseValue();
+    parser.ExpectTokenString(",");
+    AddToken("?");
+    ParseValue();
+    parser.ExpectTokenString(",");
+    AddToken(":");
+    ParseValue();
+    AddEnding();
+    parser.ExpectTokenString(";");
+}
+
+// SLT T, A, B -> T = fract(S)
+void idARBProgram::SLT(void)
+{
+    ExpectTokenString("SLT");
+
+    ParseValue();
+    parser.ExpectTokenString(",");
+    AddToken("=");
+    ParseValue();
+    AddToken("<");
+    parser.ExpectTokenString(",");
+    ParseValue();
+    AddToken("?");
+    AddToken("1.0");
+    AddToken(":");
+    AddToken("0.0");
+    AddEnding();
+    parser.ExpectTokenString(";");
+}
+
+// XPD T, A, B -> T = cross(A, B)
+void idARBProgram::XPD(void)
+{
+    ExpectTokenString("XPD");
+
+    ParseValue();
+    parser.ExpectTokenString(",");
+    AddToken("=");
+    AddToken("cross");
     AddToken("(");
     ParseValue();
     parser.ExpectTokenString(",");
@@ -1567,7 +1759,7 @@ idARBShader * idARBProgram::Shader(void)
 {
     if(!shader)
     {
-        parser.Error("No shader");
+        common->Error("No shader");
         return NULL;
     }
     return shader;
@@ -1666,13 +1858,13 @@ idStr idARBProgram::TextureFunc(const char *td, const char *d)
 
 static void GLSL_ArgCompletion_glprogs(const idCmdArgs &args, void(*callback)(const char *s))
 {
-	cmdSystem->ArgCompletion_FolderExtension(args, callback, "glprogs/", false, ".vfp", ".fp", ".vp", ".txt", NULL);
+	cmdSystem->ArgCompletion_FolderExtension(args, callback, "", false, ".vfp", ".fp", ".vp", ".txt", ".arb", NULL);
 }
 
 static void GLSL_ConvertARBShader_f(const idCmdArgs &args)
 {
     if (args.Argc() < 2) {
-        common->Printf("Usage: %s <ARB shader source file> [<version=100,300> <save path>].\n", args.Argv(0));
+        common->Printf("Usage: %s <ARB shader source file> [<version=100,300> <type=ARBvp,ARBfp> <save path>].\n", args.Argv(0));
         return;
     }
 
@@ -1687,9 +1879,11 @@ static void GLSL_ConvertARBShader_f(const idCmdArgs &args)
     if(args.Argc() > 2)
         version = atoi(args.Argv(2));
     idARBProgram arb(version);
-    idStr savePath;
     if(args.Argc() > 3)
-        savePath = args.Argv(3);
+        arb.SetShaderType(args.Argv(3));
+    idStr savePath;
+    if(args.Argc() > 4)
+        savePath = args.Argv(4);
     else
         path.ExtractFilePath(savePath);
 

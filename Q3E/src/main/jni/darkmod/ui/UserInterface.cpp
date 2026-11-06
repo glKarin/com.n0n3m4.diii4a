@@ -343,6 +343,8 @@ bool idUserInterfaceLocal::InitFromFile( const char *qpath, bool rebuild ) {
 		desktop->backColor = idVec4( 0.0f, 0.0f, 0.0f, 1.0f );
 		desktop->SetupFromState();
 		common->Warning( "Couldn't load gui: '%s'", qpath );
+		loading = false;
+		return false;
 	}
 
 	interactive = desktop->Interactive();
@@ -905,4 +907,23 @@ void idUserInterfaceLocal::UpdateSubtitles() {
 		}
 		SetStateString( debugVar, debugMessage.c_str() );
 	}
+}
+
+const textureStage_t *idUserInterfaceLocal::GetXrayMaterialStage() {
+	std::function<const textureStage_t*(idWindow *window)> traverser = [&](idWindow *window) -> const textureStage_t* {
+		if (!window)
+			return nullptr;
+
+		if (const idMaterial* material = window->GetBackground())
+			if (const shaderStage_t *stage = material->FindXrayStage())
+				return &stage->texture;
+
+		for (int i = 0; i < window->GetChildCount(); i++)
+			if (const textureStage_t* res = traverser(window->GetChild(i)))
+				return res;
+
+		return nullptr;
+	};
+
+	return traverser(desktop);
 }

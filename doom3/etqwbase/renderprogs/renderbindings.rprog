@@ -1,0 +1,222 @@
+renderBinding diffuseMap					{ texture { diffuse _black } }
+renderBinding bumpMap						{ texture { local _flat } }
+renderBinding specularMap					{ texture { specular _black } }
+renderBinding diffuseMap2					{ texture { diffuse _black } }
+renderBinding bumpMap2						{ texture { local _flat } }
+renderBinding specularMap2					{ texture { specular _black } }
+renderBinding map							{ texture { _white } }
+renderBinding environmentCubeMap			{ texture { cubemap _normalCubeMap } }
+renderBinding selfIllumMap					{ texture { _black } }
+renderBinding dithermask					{ texture { _white } }
+
+renderBinding imgSequenceCur				{ texture { _black } }
+renderBinding imgSequenceNext				{ texture { _black } }
+renderBinding imgSequenceBlend				{ vector { 0 } }
+
+renderBinding foliageHackDistance			{ vector { 0 } }
+renderBinding fogDepths						{ vector { 0 } }
+renderBinding fogColor						{ vector { 1 } }
+
+renderBinding detailMult 					{ vector { 0 } }
+renderBinding diffuseDetailMap				{ texture { diffuse _gray } }
+renderBinding bumpDetailMap					{ texture { local _flat } }
+renderBinding specDetailMap					{ texture { specular _gray } }
+renderBinding detailWeightMap				{ texture { _white } }
+renderBinding detailFade					{ vector { 22500 -0.0004 0 0 } }
+//renderBinding detailFade					{ vector { -200000 -0.0004 0 0 } }
+
+renderBinding cinematic						{ texture { _cinematic } }
+renderBinding cinematicY					{ texture { _cinematicY } }
+renderBinding cinematicU					{ texture { _cinematicU } }
+renderBinding cinematicV					{ texture { _cinematicV } }
+
+renderBinding normalCubeMap					{ texture { cubemap _normalCubeMap } }
+renderBinding specularTable					{ texture { _specularTable } }
+renderBinding noiseMap						{ texture { _diffusionMask } } //textures/noisey.tga } }
+
+renderBinding lightProjectionMap			{ texture { forceHighQuality zeroClamp lights/squarelight1.tga } }
+renderBinding lightFalloffMap				{ texture { makeIntensity( lights/squarelight1a.tga ) } }
+
+renderBinding fogMap						{ texture { _fog } }
+renderBinding fogEnterMap					{ texture { _fogEnter } }
+
+renderBinding borderClampMap				{ texture { _borderClamp } }
+renderBinding ambientCubeMap				{ texture { cubemap _normalCubeMap } }
+renderBinding ambientCubeMapSun				{ texture { cubemap _normalCubeMap } }
+renderBinding specularCubeMap				{ texture { cubemap _normalCubeMap } }
+renderBinding skyGradientCubeMap			{ texture { cubemap _normalCubeMap } }
+renderBinding gradientMap					{ texture { _white } }
+renderBinding ambientBrightness				{ vector { 1 } }
+renderBinding ambientAvgColor				{ vector { 0 } }
+
+renderBinding currentRender					{ texture { _currentRender } }
+renderBinding currentDepth					{ texture { _currentDepth } }
+renderBinding currentRenderTexelSize		{ vector { 640 480 0.0015625 0.0020833 } }	// SCREEN_WIDTH, SCREEN_HEIGHT, 1.0f / SCREEN_WIDTH, 1.0f / SCREEN_HEIGHT
+renderBinding aspectSize					{ vector { 1 } }
+
+renderBinding mask							{ texture { _white } }
+renderBinding parameters 					{ vector { 0 } } 			// Generic parameters to be used by various programs
+renderBinding parameters2 					{ vector { 0 } } 			// Generic parameters to be used by various programs
+
+renderBinding imageSize 					{ vector { 0 } }
+renderBinding positionAttrib				{ attrib 0 }
+renderBinding texCoordAttrib				{ attrib 8 }
+renderBinding tangentAttrib					{ attrib 9 }
+renderBinding normalAttrib					{ attrib 2 }
+renderBinding colorAttrib					{ attrib 3 }
+renderBinding signAttrib					{ attrib 12 }
+
+renderBinding weightIndexAttrib				{ attrib 10 }
+renderBinding weightValueAttrib				{ attrib 11 }
+
+renderBinding diffuseColor					{ vector { 1 } }
+renderBinding specularColor					{ vector { 1 } }
+
+renderBinding windWorld						{ vector { 0 } }
+renderBinding lightOrigin					{ vector { 0 } }			// In object space
+renderBinding lightDirection				{ vector { 0 } }			// In object space
+renderBinding viewUpWorld					{ vector { 0 } }			// In world space
+renderBinding viewRightWorld					{ vector { 0 } }			// In world space
+renderBinding viewDirectionWorld			{ vector { 0 } }			// In world space
+renderBinding viewOrigin					{ vector { 0 } }			// In object space
+renderBinding viewOriginWorld				{ /*infrequent*/ vector { 0 } }			// In world space
+renderBinding viewMovement				{ /*infrequent*/ vector { 0 } }			// In world space
+renderBinding lightProject_s				{ vector { 0 } }			// In object space
+renderBinding lightProject_t				{ vector { 0 } }			// In object space
+renderBinding lightProject_q				{ vector { 0 } }			// In object space
+renderBinding lightFalloff_s				{ vector { 0 } }			// In object space
+renderBinding bumpMatrix_s					{ vector { 1 0 0 0 } }
+renderBinding bumpMatrix_t					{ vector { 0 1 0 0 } }
+renderBinding diffuseMatrix_s				{ vector { 1 0 0 0 } }
+renderBinding diffuseMatrix_t				{ vector { 0 1 0 0 } }
+renderBinding specularMatrix_s				{ vector { 1 0 0 0 } }
+renderBinding specularMatrix_t				{ vector { 0 1 0 0 } }
+renderBinding colorModulate					{ vector { 0 } }
+renderBinding colorAdd						{ vector { 0 } }
+renderBinding specularPower					{ vector { 0 } }
+renderBinding maskMatrix_s					{ vector { 1 0 0 0 } }
+renderBinding maskMatrix_t					{ vector { 0 1 0 0 } }
+renderBinding maskMatrix2_s					{ vector { 1 0 0 0 } }
+renderBinding maskMatrix2_t					{ vector { 0 1 0 0 } }
+renderBinding alphaThresh					{ vector { 0 } }
+renderBinding fadeFraction					{ vector { 0 } }
+renderBinding coverage						{ vector { 1 } }
+
+renderBinding fogViewMatrix_x				{ vector { 0 } }
+renderBinding fogViewMatrix_y				{ vector { 0 } }
+renderBinding fogViewMatrix_z				{ vector { 0 } }
+
+renderBinding fogEyePrecalc					{ vector { 0 } }
+renderBinding fogUpInView					{ vector { 0 } }
+
+renderBinding transposedProjectionMatrix_x	{ vector { 0 } }
+renderBinding transposedProjectionMatrix_y	{ vector { 0 } }
+renderBinding transposedProjectionMatrix_z	{ vector { 0 } }
+renderBinding transposedProjectionMatrix_w	{ vector { 0 } }
+renderBinding transposedModelMatrix_x		{ vector { 0 } }
+renderBinding transposedModelMatrix_y		{ vector { 0 } }
+renderBinding transposedModelMatrix_z		{ vector { 0 } }
+renderBinding transposedModelMatrix_w		{ vector { 0 } }
+renderBinding mvptMatrix_x					{ vector { 0 } }			// not being set
+renderBinding mvptMatrix_y					{ vector { 0 } }			// not being set
+renderBinding mvptMatrix_z					{ vector { 0 } }			// not being set
+renderBinding mvptMatrix_w					{ vector { 0 } }			// not being set
+
+renderBinding waveAmplitude					{ vector { 0 } }			// not being set
+renderBinding wavePhase						{ vector { 0 } }			// not being set
+renderBinding waveFrequency					{ vector { 0 } }			// not being set
+renderBinding waveDirX						{ vector { 0 } }			// not being set
+renderBinding waveDirY						{ vector { 0 } }			// not being set
+renderBinding waveDirXQ						{ vector { 0 } }			// not being set
+renderBinding waveDirYQ						{ vector { 0 } }			// not being set
+renderBinding waveDirXW						{ vector { 0 } }			// not being set
+renderBinding waveDirYW						{ vector { 0 } }			// not being set
+renderBinding waveDirXYQW					{ vector { 0 } }			// not being set
+renderBinding waveDirYYQW					{ vector { 0 } }			// not being set
+renderBinding waveDirXXQW					{ vector { 0 } }			// not being set
+renderBinding waveQW						{ vector { 0 } }			// not being set
+
+renderBinding boxMins						{ vector { 0 } }			// not being set
+renderBinding boxMaxs						{ vector { 0 } }			// not being set
+renderBinding lightRadius					{ vector { 0 } }			// In object space
+renderBinding stuffParams					{ vector { 0 } }
+
+renderBinding proj2View						{ vector { 0 } }
+renderBinding pos2View						{ /*infrequent*/ vector { 0 } }
+
+renderBinding postTint						{ vector { 0 } }
+renderBinding postSaturationContrast		{ vector { 0 } }
+renderBinding postGlareParameters			{ vector { 0 } }
+renderBinding postScratch0Corr				{ vector { 0 } }			// not being set
+renderBinding postScratch1Corr				{ vector { 0 } }			// not being set
+renderBinding postScratch1TexelX			{ vector { 0 } }			// not being set
+renderBinding postScratch0TexelY			{ vector { 0 } }			// not being set
+renderBinding groundRadiosity				{ vector { 0 } }			// not being set
+renderBinding fogParams						{ vector { 0 } }
+renderBinding fogRotation_x					{ vector { 0 } }			
+renderBinding fogRotation_y					{ vector { 0 } }			
+renderBinding fogRotation_z					{ vector { 0 } }			
+renderBinding sunDirection					{ vector { 0 } }			// In object space		
+renderBinding sunDirectionWorld				{ vector { 0 } }			// In world space
+renderBinding sunColor						{ vector { 0 } }
+renderBinding sunHaloParameters				{ vector { 0 } }			// HaloScale, HaloBias
+renderBinding ambientScale					{ infrequent vector { 0 } }
+renderBinding stuffParameters				{ /*infrequent*/ vector { 0 } }
+
+// These can be used to convert the deptbuffer to view space
+renderBinding zProject						{ vector { 0 } }
+renderBinding positionToViewSpace			{ vector { 0 } }
+
+// megaTexture
+renderBinding megaMaskParams_0				{ vector { 0 } }
+renderBinding megaMaskParams_1				{ vector { 0 } }
+renderBinding megaMaskParams_2				{ vector { 0 } }
+renderBinding megaMaskParams_3				{ vector { 0 } }
+renderBinding megaMaskParams_4				{ vector { 0 } }
+renderBinding megaMaskParams_5				{ vector { 0 } }
+
+renderBinding megaTextureParams_0			{ vector { 0 } }
+renderBinding megaTextureParams_1			{ vector { 0 } }
+renderBinding megaTextureParams_2			{ vector { 0 } }
+renderBinding megaTextureParams_3			{ vector { 0 } }
+renderBinding megaTextureParams_4			{ vector { 0 } }
+renderBinding megaTextureParams_5			{ vector { 0 } }
+
+renderBinding megaTextureLevel_0			{ texture { _black } }
+renderBinding megaTextureLevel_1			{ texture { _black } }
+renderBinding megaTextureLevel_2			{ texture { _black } }
+renderBinding megaTextureLevel_3			{ texture { _black } }
+renderBinding megaTextureLevel_4			{ texture { _black } }
+renderBinding megaTextureLevel_5			{ texture { _black } }
+
+renderBinding megaTextureLevelOpacity_1_5	{ vector { 1 } }
+
+renderBinding megaDetailTextureMask			{ texture { _black } }
+renderBinding megaDetailTexture				{ texture { _black } }
+renderBinding megaDetailTextureParams		{ vector { 0 } }
+
+renderBinding megaBlendOutDotP				{ vector { 0 } }
+
+// manual lights
+renderBinding lightColor_0					{ vector { 0 } }			// not being set
+renderBinding lightColor_1					{ vector { 0 } }			// not being set
+renderBinding lightColor_2					{ vector { 0 } }			// not being set
+renderBinding lightColor_3					{ vector { 0 } }			// not being set
+
+renderBinding lightOrigin_0					{ vector { 0 } }			// not being set
+renderBinding lightOrigin_1					{ vector { 0 } }			// not being set
+renderBinding lightOrigin_2					{ vector { 0 } }			// not being set
+renderBinding lightOrigin_3					{ vector { 0 } }			// not being set
+
+renderBinding lightFalloff_0				{ vector { 0 } }			// not being set
+renderBinding lightFalloff_1				{ vector { 0 } }			// not being set
+renderBinding lightFalloff_2				{ vector { 0 } }			// not being set
+renderBinding lightFalloff_3				{ vector { 0 } }			// not being set
+
+
+renderBinding megaTexCoords					{ vector { 0 } }
+renderBinding megaTexHemi					{ texture { megatextures/ark_lit_hemi.tga } }
+
+renderBinding worldHeightMap				{ texture { _black } }
+renderBinding worldPntToHeightMapMult		{ vector { 0 } }			// move a world point into heightmap texture coords and alpha
+renderBinding worldPntToHeightMapAdd		{ vector { 0 } }			// move a world point into heightmap texture coords and alpha

@@ -1,0 +1,526 @@
+renderProgram ambient/basic {
+	hwSkinningVersion ambient/basic_skinning_matrix ambient/basic_hardskinning_matrix
+	instanceVersion ambient/basic_instance
+	coverageVersion ambient/basic_coverage
+	
+	machineSpec 1
+	fallBack ambient/basic_fallback
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex glsl { <%
+		$include "interaction/basic_ambient_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+renderProgram ambient/basic_fallback {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex arb { <%
+		$include "interaction/basic_ambient_vertex_fallback.inc"
+	%> }
+
+	program fragment arb { <%
+		$include "interaction/basic_ambient_fragment_fallback.inc"
+	%> }
+}
+
+renderProgram ambient/basic_coverage {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 1
+	fallBack ambient/basic_coverage_fallback
+
+	program vertex reference ambient/basic
+
+	program fragment arb { <%
+		$define r_useDitherMask
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+renderProgram ambient/basic_coverage_fallback {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_fallback
+
+	program fragment arb { <%
+		$define r_useDitherMask
+		$include "interaction/basic_ambient_fragment_fallback.inc"
+	%> }
+}
+
+
+renderProgram ambient/basic_instance {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+	
+	machineSpec 1
+	fallBack ambient/basic_instance_fallback
+
+	program vertex arb { <%
+		$define instance
+		$include "interaction/basic_ambient_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define enable_instdither
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+
+}
+
+renderProgram ambient/basic_instance_fallback {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex arb { <%
+		$define instance
+		$include "interaction/basic_ambient_vertex_fallback.inc"
+	%> }
+
+	program fragment arb { <%
+		$define enable_instdither
+		$include "interaction/basic_ambient_fragment_fallback.inc"
+	%> }
+}
+
+renderProgram ambient/basic_skinning_matrix {
+
+	state force {
+		depthFunc less
+	}
+
+	machineSpec 1
+	fallBack ambient/basic_skinning_matrix_fallback
+
+	program vertex arb { <%
+		$include "interaction/basic_ambient_skinning_matrix_vertex.inc"
+	%> }
+
+	program fragment reference ambient/basic
+}
+
+renderProgram ambient/basic_hardskinning_matrix {
+
+	state force {
+		depthFunc less
+	}
+
+	machineSpec 1
+	fallBack ambient/basic_hardskinning_matrix_fallback
+
+	program vertex arb { <%
+		$include "interaction/basic_ambient_hardskinning_matrix_vertex.inc"
+	%> }
+
+	program fragment reference ambient/basic
+}
+
+
+renderProgram ambient/basic_skinning_matrix_fallback {
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		$include "interaction/basic_ambient_skinning_matrix_vertex_fallback.inc"
+	%> }
+
+	program fragment reference ambient/basic_fallback
+}
+
+renderProgram ambient/basic_hardskinning_matrix_fallback {
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		$include "interaction/basic_ambient_hardskinning_matrix_vertex_fallback.inc"
+	%> }
+
+	program fragment reference ambient/basic_fallback
+}
+
+renderProgram interaction/basic {
+	interaction
+
+	amblitVersion interaction/basic_amblit
+	instanceVersion interaction/basic_instance
+	coverageVersion interaction/basic_coverage
+	ambientVersion ambient/basic
+	hwSkinningVersion interaction/basic_skinning_matrix interaction/basic_hardskinning_matrix
+
+	machineSpec 1
+	fallBack interaction/basic_fallback
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$include "interaction/basic_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_amblit {
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define  ambient	
+		$define amblit
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_fallback {
+	interaction
+	
+	amblitVersion interaction/basic_fallback_amblit
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$include "interaction/basic_vertex_fallback.inc"
+	%> }
+
+	program fragment arb { <%
+		$include "interaction/basic_fragment_fallback.inc"
+	%> }
+}
+renderProgram interaction/basic_fallback_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}
+	
+	program vertex reference interaction/basic_fallback
+
+	program fragment arb { <%
+		$define amblit
+		$define addambient
+		$include "interaction/basic_fragment_fallback.inc"
+	%> }
+}
+
+renderProgram interaction/basic_coverage {
+	interaction
+
+	amblitVersion interaction/basic_coverage_amblit
+	ambientVersion ambient/basic_coverage
+
+	machineSpec 1
+	fallBack interaction/basic_coverage_fallback
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define r_useDitherMask
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_coverage_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define r_useDitherMask
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_coverage_fallback {
+	interaction
+
+	amblitVersion interaction/basic_coverage_fallback_amblit
+	ambientVersion ambient/basic_coverage_fallback
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_fallback
+
+	program fragment arb { <%
+		$define r_useDitherMask
+		$include "interaction/basic_fragment_fallback.inc"
+	%> }
+}
+
+renderProgram interaction/basic_coverage_fallback_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_fallback
+
+	program fragment arb { <%
+		$define amblit
+		$define addambient
+		$define r_useDitherMask
+		$include "interaction/basic_fragment_fallback.inc"
+	%> }
+}
+
+
+renderProgram interaction/basic_skinning_matrix {
+	interaction
+
+	amblitVersion interaction/basic_skinning_matrix_amblit
+	ambientVersion ambient/basic_skinning_matrix
+
+	machineSpec 1
+	fallBack interaction/basic_skinning_matrix_fallback
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$include "interaction/basic_skinning_matrix_vertex.inc"
+	%> }
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/basic_skinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic_amblit
+}
+
+
+renderProgram interaction/basic_hardskinning_matrix {
+	interaction
+
+	amblitVersion interaction/basic_hardskinning_matrix_amblit
+	ambientVersion ambient/basic_hardskinning_matrix
+
+	machineSpec 1
+	fallBack interaction/basic_hardskinning_matrix_fallback
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$include "interaction/basic_hardskinning_matrix_vertex.inc"
+	%> }
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/basic_hardskinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic_amblit
+}
+
+renderProgram interaction/basic_skinning_matrix_fallback {
+	interaction
+
+	amblitVersion interaction/basic_skinning_matrix_fallback_amblit
+	ambientVersion ambient/basic_skinning_matrix_fallback
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$include "interaction/basic_skinning_matrix_vertex_fallback.inc"
+	%> }
+
+	program fragment reference interaction/basic_fallback
+}
+
+renderProgram interaction/basic_hardskinning_matrix_fallback {
+	interaction
+
+	amblitVersion interaction/basic_hardskinning_matrix_fallback_amblit
+	ambientVersion ambient/basic_hardskinning_matrix_fallback
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$include "interaction/basic_hardskinning_matrix_vertex_fallback.inc"
+	%> }
+
+	program fragment reference interaction/basic_fallback
+}
+
+renderProgram interaction/basic_skinning_matrix_fallback_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix_fallback
+
+	program fragment reference interaction/basic_fallback_amblit
+}
+
+renderProgram interaction/basic_hardskinning_matrix_fallback_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix_fallback
+
+	program fragment reference interaction/basic_fallback_amblit
+}
+
+renderProgram interaction/basic_instance {
+	interaction
+
+	amblitVersion interaction/basic_instance_amblit
+	ambientVersion ambient/basic_instance
+	
+	machineSpec 1
+	fallBack interaction/basic_instance_fallback
+
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$define instance
+		$include "interaction/basic_vertex.inc"
+	%> }
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/basic_instance_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_instance
+
+	program fragment arb { <%
+		$define amblit
+		$define enable_instdither
+		$define  ambient	
+		$include "interaction/basic_fragment.inc"
+	%> }
+
+//	program fragment reference interaction/basic_amblit
+}
+
+renderProgram interaction/basic_instance_fallback {
+	interaction
+	amblitVersion interaction/basic_instance_fallback_amblit
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		$define instance
+		$include "interaction/basic_vertex_fallback.inc"
+	%> }
+
+	program fragment reference interaction/basic_fallback
+}
+
+renderProgram interaction/basic_instance_fallback_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex arb { <%
+		$define instance
+		$include "interaction/basic_vertex_fallback.inc"
+	%> }
+
+	program fragment arb { <%
+		$define amblit
+		$define addambient
+		$define enable_instdither
+		$include "interaction/basic_fragment_fallback.inc"
+	%> }
+}
+

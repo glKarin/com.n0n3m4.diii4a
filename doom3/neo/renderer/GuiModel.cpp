@@ -31,6 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#ifdef _SPLASHDAMAGE //karin: idDrawVert::color converter
+#define COLOR_FTOUB(x) ((byte)((x) * 255.0f))
+#endif
 
 /*
 ================
@@ -199,6 +202,10 @@ void idGuiModel::EmitSurface(guiModelSurface_t *surf, float modelMatrix[16], flo
 
 	renderEntity_t renderEntity;
 	memset(&renderEntity, 0, sizeof(renderEntity));
+#ifdef _SPLASHDAMAGE //karin: register shaderParms from GUI
+	if(surf->registerShaderParms)
+		memcpy(renderEntity.shaderParms, surf->registers, sizeof(surf->registers));
+#endif
 	memcpy(renderEntity.shaderParms, surf->color, sizeof(surf->color));
 
 	viewEntity_t *guiSpace = (viewEntity_t *)R_ClearedFrameAlloc(sizeof(*guiSpace));
@@ -335,6 +342,10 @@ void idGuiModel::AdvanceSurf()
 	s.firstIndex = indexes.Num();
 	s.numVerts = 0;
 	s.firstVert = verts.Num();
+#ifdef _SPLASHDAMAGE //karin: register shaderParms from GUI
+	memset(&s.registers[0], 0, sizeof(s.registers));
+	s.registerShaderParms = false;
+#endif
 
 	surfaces.Append(s);
 	surf = &surfaces[ surfaces.Num() - 1 ];
@@ -393,6 +404,18 @@ void idGuiModel::DrawStretchPic(const idDrawVert *dverts, const glIndex_t *dinde
 
 		surf->material = hShader;
 	}
+#ifdef _SPLASHDAMAGE //karin: sync vertex color when has vertexColor flag of stage in GUI
+	bool usingVertexColor = false;
+	for(int m = 0; m < surf->material->GetNumStages(); m++)
+	{
+		const shaderStage_t *stage = surf->material->GetStage(m);
+		if(stage->vertexColor == SVC_MODULATE)
+		{
+			usingVertexColor = true;
+			break;
+		}
+	}
+#endif
 
 	// add the verts and indexes to the current surface
 
@@ -450,6 +473,15 @@ void idGuiModel::DrawStretchPic(const idDrawVert *dverts, const glIndex_t *dinde
 				dv->normal.Set(0, 0, 1);
 				dv->tangents[0].Set(1, 0, 0);
 				dv->tangents[1].Set(0, 1, 0);
+#ifdef _SPLASHDAMAGE //karin: sync vertex color when has vertexColor flag of stage in GUI
+				if(usingVertexColor)
+				{
+					dv->color[0] = COLOR_FTOUB(surf->color[0]);
+					dv->color[1] = COLOR_FTOUB(surf->color[1]);
+					dv->color[2] = COLOR_FTOUB(surf->color[2]);
+					dv->color[3] = COLOR_FTOUB(surf->color[3]);
+				}
+#endif
 			}
 
 			surf->numVerts += w.GetNumPoints();
@@ -478,6 +510,19 @@ void idGuiModel::DrawStretchPic(const idDrawVert *dverts, const glIndex_t *dinde
 		}
 
 		memcpy(&verts[numVerts], dverts, vertCount * sizeof(verts[0]));
+#ifdef _SPLASHDAMAGE //karin: sync vertex color when has vertexColor flag of stage in GUI
+		if(usingVertexColor)
+		{
+			for(int m = 0; m < vertCount; m++)
+			{
+				idDrawVert *dv = &verts[numVerts + m];
+				dv->color[0] = COLOR_FTOUB(surf->color[0]);
+				dv->color[1] = COLOR_FTOUB(surf->color[1]);
+				dv->color[2] = COLOR_FTOUB(surf->color[2]);
+				dv->color[3] = COLOR_FTOUB(surf->color[3]);
+			}
+		}
+#endif
 	}
 }
 
@@ -691,3 +736,501 @@ void idGuiModel::DrawStretchTri(idVec2 p1, idVec2 p2, idVec2 p3, idVec2 t1, idVe
 	memcpy(&verts[numVerts], tempVerts, vertCount * sizeof(verts[0]));
 }
 
+#ifdef _SPLASHDAMAGE //karin: using sdGuiModel on sdDeviceContext, so idGuiModel only used on renderer
+
+sdGuiModel::sdGuiModel(void)
+	: idGuiModel()
+{
+	((idMat4 *)emitModelMatrix)->Identity();
+	emitDepthHack = false;
+	usingCurrentView = 0;
+}
+
+void sdGuiModel::BeginEmitToCurrentView(const float modelMatrix[16], int allowInViewID, bool depthHack)
+{
+	End();
+
+	memcpy(&emitModelMatrix[0], &modelMatrix[0], sizeof(float) * 16);
+	emitDepthHack = depthHack;
+
+	usingCurrentView = EMIT_TO_CURRENTVIEW;
+}
+
+void sdGuiModel::BeginEmitFullScreen(void)
+{
+	End();
+
+	usingCurrentView = EMIT_TO_FULLSCREEN;
+
+	Clear();
+}
+
+void sdGuiModel::End(void)
+{
+	if(usingCurrentView == EMIT_TO_NONE) {
+		Clear();
+		return;
+	}
+
+	if (surfaces[0].numVerts == 0) {
+		usingCurrentView = EMIT_TO_NONE;
+		Clear();
+		return;
+	}
+
+	// add the surfaces to this view
+	if(usingCurrentView == EMIT_TO_CURRENTVIEW)
+	{
+		EndCurrentView();
+	}
+	else
+	{
+		EmitFullScreen();
+	}
+
+	usingCurrentView = EMIT_TO_NONE;
+	Clear();
+}
+
+idVec4 sdGuiModel::CurrentColor(void)
+{
+	if(!surf)
+		return vec4_one;
+	return *((idVec4 *)&surf->color[0]);
+}
+
+void sdGuiModel::SetRegister(int index, float value)
+{
+	if (!glConfig.isInitialized) {
+		return;
+	}
+	if(index >= MAX_ENTITY_SHADER_PARMS)
+		return;
+
+	if(surf->registers[index] == value && surf->registerShaderParms) {
+		return;	// no change
+	}
+
+	if (surf->numVerts) {
+		AdvanceSurf();
+	}
+
+	// change the parms
+	surf->registers[index] = value;
+	surf->registerShaderParms = true;
+}
+
+void sdGuiModel::SetRegisters(const float *values)
+{
+	if (!glConfig.isInitialized) {
+		return;
+	}
+
+	bool enable = NULL != values;
+
+	if(enable) {
+		if(surf->registerShaderParms && memcmp(values, surf->registers, sizeof(surf->registers)) == 0)
+			return;	// no change
+	}
+	else
+	{
+		if(!surf->registerShaderParms)
+			return;	// no change
+	}
+
+	if (surf->numVerts) {
+		AdvanceSurf();
+	}
+
+	// change the parms
+	surf->registerShaderParms = enable;
+	if(enable)
+		memcpy(&surf->registers[0], values, sizeof(surf->registers));
+}
+
+void sdGuiModel::Flush(void)
+{
+	EmitFullScreen();
+	Clear();
+}
+
+/*
+=============
+DrawStretchPic
+karin: idDrawVert must setup color
+=============
+*/
+void sdGuiModel::DrawStretchPic(const idDrawVert *dverts, const glIndex_t *dindexes, int vertCount, int indexCount, const idMaterial *hShader, 
+                                bool clip, float min_x, float min_y, float max_x, float max_y)
+{
+	if (!glConfig.isInitialized) {
+		return;
+	}
+
+	if (!(dverts && dindexes && vertCount && indexCount && hShader)) {
+		return;
+	}
+
+	// break the current surface if we are changing to a new material
+	if (hShader != surf->material) {
+		if (surf->numVerts) {
+			AdvanceSurf();
+		}
+
+		const_cast<idMaterial *>(hShader)->EnsureNotPurged();	// in case it was a gui item started before a level change
+
+		surf->material = hShader;
+	}
+
+	// add the verts and indexes to the current surface
+
+	if (clip) {
+		int i, j;
+
+		// FIXME:	this is grim stuff, and should be rewritten if we have any significant
+		//			number of guis asking for clipping
+		idFixedWinding w;
+		byte colors[4];
+		memcpy(&colors[0], &dverts[0].color[0], 4);
+
+		for (i = 0; i < indexCount; i += 3) {
+			w.Clear();
+			w.AddPoint(idVec5(dverts[dindexes[i]].xyz.x, dverts[dindexes[i]].xyz.y, dverts[dindexes[i]].xyz.z, dverts[dindexes[i]].st.x, dverts[dindexes[i]].st.y));
+			w.AddPoint(idVec5(dverts[dindexes[i+1]].xyz.x, dverts[dindexes[i+1]].xyz.y, dverts[dindexes[i+1]].xyz.z, dverts[dindexes[i+1]].st.x, dverts[dindexes[i+1]].st.y));
+			w.AddPoint(idVec5(dverts[dindexes[i+2]].xyz.x, dverts[dindexes[i+2]].xyz.y, dverts[dindexes[i+2]].xyz.z, dverts[dindexes[i+2]].st.x, dverts[dindexes[i+2]].st.y));
+
+			for (j = 0; j < 3; j++) {
+				if (w[j].x < min_x || w[j].x > max_x ||
+				    w[j].y < min_y || w[j].y > max_y) {
+					break;
+				}
+			}
+
+			if (j < 3) {
+				idPlane p;
+				p.Normal().y = p.Normal().z = 0.0f;
+				p.Normal().x = 1.0f;
+				p.SetDist(min_x);
+				w.ClipInPlace(p);
+				p.Normal().y = p.Normal().z = 0.0f;
+				p.Normal().x = -1.0f;
+				p.SetDist(-max_x);
+				w.ClipInPlace(p);
+				p.Normal().x = p.Normal().z = 0.0f;
+				p.Normal().y = 1.0f;
+				p.SetDist(min_y);
+				w.ClipInPlace(p);
+				p.Normal().x = p.Normal().z = 0.0f;
+				p.Normal().y = -1.0f;
+				p.SetDist(-max_y);
+				w.ClipInPlace(p);
+			}
+
+			int	numVerts = verts.Num();
+			verts.SetNum(numVerts + w.GetNumPoints(), false);
+
+			for (j = 0 ; j < w.GetNumPoints() ; j++) {
+				idDrawVert *dv = &verts[numVerts+j];
+
+				dv->xyz.x = w[j].x;
+				dv->xyz.y = w[j].y;
+				dv->xyz.z = w[j].z;
+				dv->st.x = w[j].s;
+				dv->st.y = w[j].t;
+				dv->normal.Set(0, 0, 1);
+				dv->tangents[0].Set(1, 0, 0);
+				dv->tangents[1].Set(0, 1, 0);
+				dv->color[0] = colors[0];
+				dv->color[1] = colors[1];
+				dv->color[2] = colors[2];
+				dv->color[3] = colors[3];
+			}
+
+			surf->numVerts += w.GetNumPoints();
+
+			for (j = 2; j < w.GetNumPoints(); j++) {
+				indexes.Append(numVerts - surf->firstVert);
+				indexes.Append(numVerts + j - 1 - surf->firstVert);
+				indexes.Append(numVerts + j - surf->firstVert);
+				surf->numIndexes += 3;
+			}
+		}
+
+	} else {
+
+		int numVerts = verts.Num();
+		int numIndexes = indexes.Num();
+
+		verts.AssureSize(numVerts + vertCount);
+		indexes.AssureSize(numIndexes + indexCount);
+
+		surf->numVerts += vertCount;
+		surf->numIndexes += indexCount;
+
+		for (int i = 0; i < indexCount; i++) {
+			indexes[numIndexes + i] = numVerts + dindexes[i] - surf->firstVert;
+		}
+
+		memcpy(&verts[numVerts], dverts, vertCount * sizeof(verts[0]));
+	}
+}
+
+/*
+=============
+DrawStretchPicWithColor
+=============
+*/
+void sdGuiModel::DrawStretchPicWithColor(const idDrawVert *dverts, const glIndex_t *dindexes, int vertCount, int indexCount, const idMaterial *hShader, 
+                                bool clip, const idVec4 *color, float min_x, float min_y, float max_x, float max_y)
+{
+	if (!glConfig.isInitialized) {
+		return;
+	}
+
+	if (!(dverts && dindexes && vertCount && indexCount && hShader)) {
+		return;
+	}
+
+	// break the current surface if we are changing to a new material
+	if (hShader != surf->material) {
+		if (surf->numVerts) {
+			AdvanceSurf();
+		}
+
+		const_cast<idMaterial *>(hShader)->EnsureNotPurged();	// in case it was a gui item started before a level change
+
+		surf->material = hShader;
+	}
+
+	// add the verts and indexes to the current surface
+	byte colors[4];
+	if(color)
+	{
+		colors[0] = COLOR_FTOUB((*color)[0]);
+		colors[1] = COLOR_FTOUB((*color)[1]);
+		colors[2] = COLOR_FTOUB((*color)[2]);
+		colors[3] = COLOR_FTOUB((*color)[3]);
+	}
+	else if(surf)
+	{
+		colors[0] = COLOR_FTOUB(surf->color[0]);
+		colors[1] = COLOR_FTOUB(surf->color[1]);
+		colors[2] = COLOR_FTOUB(surf->color[2]);
+		colors[3] = COLOR_FTOUB(surf->color[3]);
+	}
+	else
+	{
+		colors[0] = 255;
+		colors[1] = 255;
+		colors[2] = 255;
+		colors[3] = 255;
+	}
+
+	if (clip) {
+		int i, j;
+
+		// FIXME:	this is grim stuff, and should be rewritten if we have any significant
+		//			number of guis asking for clipping
+		idFixedWinding w;
+
+		for (i = 0; i < indexCount; i += 3) {
+			w.Clear();
+			w.AddPoint(idVec5(dverts[dindexes[i]].xyz.x, dverts[dindexes[i]].xyz.y, dverts[dindexes[i]].xyz.z, dverts[dindexes[i]].st.x, dverts[dindexes[i]].st.y));
+			w.AddPoint(idVec5(dverts[dindexes[i+1]].xyz.x, dverts[dindexes[i+1]].xyz.y, dverts[dindexes[i+1]].xyz.z, dverts[dindexes[i+1]].st.x, dverts[dindexes[i+1]].st.y));
+			w.AddPoint(idVec5(dverts[dindexes[i+2]].xyz.x, dverts[dindexes[i+2]].xyz.y, dverts[dindexes[i+2]].xyz.z, dverts[dindexes[i+2]].st.x, dverts[dindexes[i+2]].st.y));
+
+			for (j = 0; j < 3; j++) {
+				if (w[j].x < min_x || w[j].x > max_x ||
+				    w[j].y < min_y || w[j].y > max_y) {
+					break;
+				}
+			}
+
+			if (j < 3) {
+				idPlane p;
+				p.Normal().y = p.Normal().z = 0.0f;
+				p.Normal().x = 1.0f;
+				p.SetDist(min_x);
+				w.ClipInPlace(p);
+				p.Normal().y = p.Normal().z = 0.0f;
+				p.Normal().x = -1.0f;
+				p.SetDist(-max_x);
+				w.ClipInPlace(p);
+				p.Normal().x = p.Normal().z = 0.0f;
+				p.Normal().y = 1.0f;
+				p.SetDist(min_y);
+				w.ClipInPlace(p);
+				p.Normal().x = p.Normal().z = 0.0f;
+				p.Normal().y = -1.0f;
+				p.SetDist(-max_y);
+				w.ClipInPlace(p);
+			}
+
+			int	numVerts = verts.Num();
+			verts.SetNum(numVerts + w.GetNumPoints(), false);
+
+			for (j = 0 ; j < w.GetNumPoints() ; j++) {
+				idDrawVert *dv = &verts[numVerts+j];
+
+				dv->xyz.x = w[j].x;
+				dv->xyz.y = w[j].y;
+				dv->xyz.z = w[j].z;
+				dv->st.x = w[j].s;
+				dv->st.y = w[j].t;
+				dv->normal.Set(0, 0, 1);
+				dv->tangents[0].Set(1, 0, 0);
+				dv->tangents[1].Set(0, 1, 0);
+				dv->color[0] = colors[0];
+				dv->color[1] = colors[1];
+				dv->color[2] = colors[2];
+				dv->color[3] = colors[3];
+			}
+
+			surf->numVerts += w.GetNumPoints();
+
+			for (j = 2; j < w.GetNumPoints(); j++) {
+				indexes.Append(numVerts - surf->firstVert);
+				indexes.Append(numVerts + j - 1 - surf->firstVert);
+				indexes.Append(numVerts + j - surf->firstVert);
+				surf->numIndexes += 3;
+			}
+		}
+
+	} else {
+
+		int numVerts = verts.Num();
+		int numIndexes = indexes.Num();
+
+		verts.AssureSize(numVerts + vertCount);
+		indexes.AssureSize(numIndexes + indexCount);
+
+		surf->numVerts += vertCount;
+		surf->numIndexes += indexCount;
+
+		for (int i = 0; i < indexCount; i++) {
+			indexes[numIndexes + i] = numVerts + dindexes[i] - surf->firstVert;
+		}
+
+		memcpy(&verts[numVerts], dverts, vertCount * sizeof(verts[0]));
+		for(int m = 0; m < vertCount; m++)
+		{
+			idDrawVert *dv = &verts[numVerts + m];
+			dv->color[0] = colors[0];
+			dv->color[1] = colors[1];
+			dv->color[2] = colors[2];
+			dv->color[3] = colors[3];
+		}
+	}
+}
+
+void sdGuiModel::EndCurrentView(void)
+{
+	if (surfaces[0].numVerts == 0) {
+		return;
+	}
+
+	if (!tr.viewDef) {
+		for (int i = 0 ; i < surfaces.Num() ; i++) {
+			AddCurrentViewSurface(&surfaces[i]);
+		}
+	}
+	else
+	{
+		float	modelViewMatrix[16];
+
+		myGlMultMatrix(emitModelMatrix, tr.viewDef->worldSpace.modelViewMatrix, modelViewMatrix);
+
+		for (int i = 0 ; i < surfaces.Num() ; i++) {
+			EmitSurface(&surfaces[i], emitModelMatrix, modelViewMatrix, emitDepthHack);
+		}
+	}
+
+	((idMat4 *)emitModelMatrix)->Identity();
+	emitDepthHack = false;
+}
+
+void sdGuiModel::EmitCurrentView(void)
+{
+	if(currentViewSurfs.Num() == 0)
+		return;
+
+	float	modelViewMatrix[16];
+	srfTriangles_t	*tri;
+	srfTriangles_t *surf;
+
+	emitCurrentView_t *item = currentViewSurfs.Ptr();
+	for (int i = 0 ; i < currentViewSurfs.Num() ; i++, item++) {
+		myGlMultMatrix(item->modelMatrix, tr.viewDef->worldSpace.modelViewMatrix, modelViewMatrix);
+
+		surf = &item->tri;
+		tri = (srfTriangles_t *)R_ClearedFrameAlloc(sizeof(*tri));
+
+		tri->numIndexes = surf->numIndexes;
+		tri->numVerts = surf->numVerts;
+		tri->indexes = (glIndex_t *)R_FrameAlloc(tri->numIndexes * sizeof(tri->indexes[0]));
+		memcpy(tri->indexes, &surf->indexes[0], tri->numIndexes * sizeof(tri->indexes[0]));
+
+		// we might be able to avoid copying these and just let them reference the list vars
+		// but some things, like deforms and recursive
+		// guis, need to access the verts in cpu space, not just through the vertex range
+		tri->verts = (idDrawVert *)R_FrameAlloc(tri->numVerts * sizeof(tri->verts[0]));
+		memcpy(tri->verts, &surf->verts[0], tri->numVerts * sizeof(tri->verts[0]));
+
+		// move the verts to the vertex cache
+		tri->ambientCache = vertexCache.AllocFrameTemp(tri->verts, tri->numVerts * sizeof(tri->verts[0]));
+
+		// if we are out of vertex cache, don't create the surface
+		if (!tri->ambientCache) {
+			return;
+		}
+
+		renderEntity_t renderEntity;
+		memset(&renderEntity, 0, sizeof(renderEntity));
+		memcpy(renderEntity.shaderParms, item->shaderParms, sizeof(item->shaderParms));
+
+		viewEntity_t *guiSpace = (viewEntity_t *)R_ClearedFrameAlloc(sizeof(*guiSpace));
+		memcpy(guiSpace->modelMatrix, item->modelMatrix, sizeof(guiSpace->modelMatrix));
+		memcpy(guiSpace->modelViewMatrix, modelViewMatrix, sizeof(guiSpace->modelViewMatrix));
+		guiSpace->weaponDepthHack = item->weaponDepthHack;
+
+		// add the surface, which might recursively create another gui
+		R_AddDrawSurf(tri, guiSpace, &renderEntity, item->material, tr.viewDef->scissor);
+	}
+}
+
+void sdGuiModel::AddCurrentViewSurface(guiModelSurface_t *surf)
+{
+	if (surf->numVerts == 0) {
+		return;		// nothing in the surface
+	}
+
+	emitCurrentView_t &emit = currentViewSurfs.Alloc();
+	// copy verts and indexes
+	memset(&emit.tri, 0, sizeof(emit));
+
+	emit.tri.numIndexes = surf->numIndexes;
+	emit.tri.numVerts = surf->numVerts;
+	emit.tri.indexes = (glIndex_t *)R_FrameAlloc(emit.tri.numIndexes * sizeof(emit.tri.indexes[0]));
+	memcpy(emit.tri.indexes, &indexes[surf->firstIndex], emit.tri.numIndexes * sizeof(emit.tri.indexes[0]));
+
+	// we might be able to avoid copying these and just let them reference the list vars
+	// but some things, like deforms and recursive
+	// guis, need to access the verts in cpu space, not just through the vertex range
+	emit.tri.verts = (idDrawVert *)R_FrameAlloc(emit.tri.numVerts * sizeof(emit.tri.verts[0]));
+	memcpy(emit.tri.verts, &verts[surf->firstVert], emit.tri.numVerts * sizeof(emit.tri.verts[0]));
+
+	if(surf->registerShaderParms)
+		memcpy(emit.shaderParms, surf->registers, sizeof(surf->registers));
+	memcpy(emit.shaderParms, surf->color, sizeof(surf->color));
+
+	memcpy(emit.modelMatrix, emitModelMatrix, sizeof(emit.modelMatrix));
+	emit.weaponDepthHack = emitDepthHack;
+	
+	emit.material = surf->material;
+}
+
+void sdGuiModel::ClearCurrentView(void)
+{
+	currentViewSurfs.Clear();
+}
+#endif

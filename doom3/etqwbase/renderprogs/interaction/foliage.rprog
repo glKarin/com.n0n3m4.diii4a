@@ -1,0 +1,266 @@
+//
+//	Interaction shader which does some special lighting that looks good on foliage
+//
+
+renderProgram interaction/foliage {
+	interaction
+	
+	amblitVersion interaction/foliage_amblit
+	instanceVersion interaction/foliage_instance
+	ambientVersion ambient/basic_alphatest
+
+	machineSpec 3
+	fallBack interaction/foliage_fallback
+	
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	    
+	program vertex arb { <%
+	$include "interaction/foliage_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+	$include "interaction/foliage_fragment.inc"
+	%> }
+	
+	imposterBrightness 2
+}
+
+renderProgram interaction/foliage_amblit {
+	interaction
+	
+	alphatocoverageVersion interaction/foliage_amblit_a2c
+	
+	state force {
+		depthFunc less
+	}
+	    
+	program vertex reference interaction/foliage
+
+	program fragment arb { <%
+		$define amblit
+	$define ambient
+	$define alphatest_kill
+	$include "interaction/foliage_fragment.inc"
+	%> }
+	imposterBrightness 2
+}
+
+renderProgram interaction/foliage_amblit_a2c {
+	interaction
+	
+	state force {
+		depthFunc less
+	}
+	    
+	program vertex reference interaction/foliage
+
+	program fragment arb { <%
+		$define amblit
+	$define ambient
+	$define alphatocoverage
+	$include "interaction/foliage_fragment.inc"
+	%> }
+	imposterBrightness 2
+}
+
+renderProgram interaction/foliage_fallback {
+	interaction
+	amblitVersion interaction/foliage_fallback_amblit
+	ambientVersion ambient/basic_alphatest
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	    
+	program vertex arb { <%
+	$include "interaction/foliage_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+	$include "interaction/foliage_fragment_fallback.inc"
+	%> }
+	imposterBrightness 2
+}              
+
+renderProgram interaction/foliage_fallback_amblit {
+	interaction
+	
+	alphaToCoverageVersion interaction/foliage_fallback_amblit_a2c
+	
+	state force {
+		depthFunc less
+	}
+	    
+	program vertex arb { <%
+	$include "interaction/foliage_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define amblit
+	$define ambient
+	$define alphatest_kill
+	$include "interaction/foliage_fragment_fallback.inc"
+	%> }
+	imposterBrightness 2
+}              
+
+renderProgram interaction/foliage_fallback_amblit_a2c {
+	interaction
+	
+	
+	state force {
+		depthFunc less
+	}
+	    
+	program vertex arb { <%
+	$include "interaction/foliage_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define amblit
+	$define ambient
+	$define alphatocoverage
+	$include "interaction/foliage_fragment_fallback.inc"
+	%> }
+	imposterBrightness 2
+}              
+
+
+renderProgram interaction/foliage_instance {
+	interaction
+	
+	amblitVersion interaction/foliage_instance_amblit
+	ambientVersion ambient/basic_alphatest
+
+	machineSpec 3
+	fallBack interaction/foliage_instance_fallback
+	
+	
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	    
+	program vertex arb { <%
+	$define instance
+	$include "interaction/foliage_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+	$define enable_instdither
+	$include "interaction/foliage_fragment.inc"
+	%> }
+	imposterBrightness 2
+}              
+
+renderProgram interaction/foliage_instance_amblit {
+	interaction
+	
+	alphatocoverageVersion interaction/foliage_instance_amblit_a2c
+	
+	state force {
+		depthFunc less
+	}
+	    
+	program vertex reference interaction/foliage_instance
+
+	program fragment arb { <%
+		$define amblit
+	$define enable_instdither
+	$define ambient
+	$define alphatest_kill
+	$include "interaction/foliage_fragment.inc"
+	%> }
+}              
+
+renderProgram interaction/foliage_instance_amblit_a2c {
+	interaction
+	
+	state force {
+		depthFunc less
+	}
+	    
+	program vertex reference interaction/foliage_instance
+
+	program fragment arb { <%
+		$define amblit
+	$define enable_instdither
+	$define ambient
+	$define alphatocoverage
+	$include "interaction/foliage_fragment_fallback.inc"
+	%> }
+	imposterBrightness 2
+}              
+
+renderProgram interaction/foliage_instance_fallback {
+	interaction
+	amblitVersion interaction/foliage_instance_fallback_amblit
+	ambientVersion ambient/basic_alphatest
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+	    
+	program vertex arb { <%
+	$define instance
+	$include "interaction/foliage_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+	$define enable_instdither
+	$include "interaction/foliage_fragment_fallback.inc"
+	%> }
+	imposterBrightness 2
+}              
+
+renderProgram interaction/foliage_instance_fallback_amblit {
+	interaction
+	
+	alphaToCoverageVersion interaction/foliage_instance_fallback_amblit_a2c
+	
+	state force {
+		depthFunc less
+	}
+	    
+	program vertex arb { <%
+	$define instance
+	$include "interaction/foliage_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define amblit
+	$define enable_instdither
+	$define ambient
+	$define alphatest_kill
+	$include "interaction/foliage_fragment_fallback.inc"
+	%> }
+	imposterBrightness 2
+}              
+
+renderProgram interaction/foliage_instance_fallback_amblit_a2c {
+	interaction
+	
+	
+	state force {
+		depthFunc less
+	}
+	    
+	program vertex arb { <%
+	$define instance
+	$include "interaction/foliage_vertex.inc"
+	%> }
+
+	program fragment arb { <%
+		$define amblit
+	$define enable_instdither
+	$define ambient
+	$define alphatocoverage
+	$include "interaction/foliage_fragment_fallback.inc"
+	%> }
+	imposterBrightness 2
+}              

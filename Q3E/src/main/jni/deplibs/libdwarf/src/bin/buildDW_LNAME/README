@@ -1,0 +1,19 @@
+
+Created 25 October 2025
+The intent of this is to build a new
+sourcefile dwarf_lname_version.c 
+with function
+int dwarf_language_version_data(
+    Dwarf_Unsigned dw_lang_name,
+    int          *dw_default_lower_bound,
+    const char   **dw_version_scheme)
+in the libdwarf source.
+
+based on the content in dwarf_lname_data.h
+and we also verify that dwarf.h has the same
+base of LNAMEs as dwarf_lname_data.h
+
+
+After updating the libdwarf build for this
+we will remove that function from libdwarf/dwarf_query.c
+

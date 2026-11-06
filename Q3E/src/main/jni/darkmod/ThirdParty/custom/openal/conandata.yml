@@ -1,11 +1,50 @@
 sources:
-  1.21.0:
-    sha256: cd3650530866f3906058225f4bfbe0052be19e0a29dcc6df185a460f9948feec
-    url: https://github.com/kcat/openal-soft/archive/1.21.0.tar.gz
-  1.21.1:
-    sha256: 8ac17e4e3b32c1af3d5508acfffb838640669b4274606b7892aa796ca9d7467f
-    url: https://github.com/kcat/openal-soft/archive/1.21.1.tar.gz
+  "1.22.2":
+    url:
+      - "https://github.com/kcat/openal-soft/releases/download/1.22.2/openal-soft-1.22.2.tar.bz2"
+      - "https://openal-soft.org/openal-releases/openal-soft-1.22.2.tar.bz2"
+    sha256: "ae94cc95cda76b7cc6e92e38c2531af82148e76d3d88ce996e2928a1ea7c3d20"
+  "1.21.1":
+    url: "https://openal-soft.org/openal-releases/openal-soft-1.21.1.tar.bz2"
+    sha256: "c8ad767e9a3230df66756a21cc8ebf218a9d47288f2514014832204e666af5d8"
+  "1.21.0":
+    url: "https://openal-soft.org/openal-releases/openal-soft-1.21.0.tar.bz2"
+    sha256: "2916b4fc24e23b0271ce0b3468832ad8b6d8441b1830215b28cc4fee6cc89297"
+  "1.20.1":
+    url: "https://openal-soft.org/openal-releases/openal-soft-1.20.1.tar.bz2"
+    sha256: "b6ceb051325732c23f5c8b6d37dbd89534517e6439a87e970882b447c3025d6d"
+  "1.19.1":
+    url: "https://openal-soft.org/openal-releases/openal-soft-1.19.1.tar.bz2"
+    sha256: "5c2f87ff5188b95e0dc4769719a9d89ce435b8322b4478b95dd4b427fe84b2e9"
 patches:
-  1.21.1:
-    - patch_file: patches/1.21.1/mxcsr.patch      # stgatilov: for Elbrus2k
-      base_path: source_subfolder
+  "1.22.2":
+    - patch_file: "patches/1.22.2-0001-fix-al-optional-in-if-compile-error.patch"
+    - patch_file: "patches/1.22.2-0002-fix-pulseaudio-find-package-vars.patch"
+    - patch_file: "patches/1.22.2-tdm-mxcsr-availability.patch"
+      patch_description: "TDM: don't use mxcsr on Elbrus, where it is not available"
+      patch_type: "portability"
+    - patch_file: "patches/1.22.2-cmake-version-update.patch"
+      patch_description: "TDM: update minimum cmake version from 3.0 to 3.13 (for cmake 4)"
+      patch_type: "portability"
+  "1.21.1":
+    - patch_file: "patches/1.21.1-tdm-mxcsr-availability.patch"
+      patch_description: "TDM: don't use mxcsr on Elbrus, where it is not available"
+      patch_type: "portability"
+  "1.21.0":
+    - patch_file: "patches/1.21.0-0001-c++14-does-not-have-std-aligned_alloc.patch"
+    - patch_file: "patches/1.21.0-0002-fix-windows-sdk.patch"
+      patch_description: "Avoid explicitly searching for the WindowsSDK"
+      patch_type: "portability"
+      patch_source: "https://github.com/kcat/openal-soft/commit/13698362f1726326ab60180b04a86df79b518614"
+  "1.20.1":
+    - patch_file: "patches/1.20.1-0001-fix-windows-sdk.patch"
+      patch_description: "Avoid explicitly searching for the WindowsSDK"
+      patch_type: "portability"
+      patch_source: "https://github.com/kcat/openal-soft/commit/13698362f1726326ab60180b04a86df79b518614"
+  "1.19.1":
+    - patch_file: "patches/1.19.1-0001-aligned-alloc.patch"
+    - patch_file: "patches/1.19.1-0002-gcc-10-fnocommon.patch"
+    - patch_file: "patches/1.19.1-0003-fix-windows-sdk.patch"
+      patch_description: "Avoid explicitly searching for the WindowsSDK"
+      patch_type: "portability"
+      patch_source: "https://github.com/kcat/openal-soft/commit/13698362f1726326ab60180b04a86df79b518614"

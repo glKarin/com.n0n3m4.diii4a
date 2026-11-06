@@ -1406,25 +1406,25 @@ R_Radix
 */
 static ID_INLINE void R_Radix( int byte, int size, drawSurf_t *source, drawSurf_t *dest )
 {
-  int           count[ 256 ] = { 0 };
-  int           index[ 256 ];
-  int           i;
-  unsigned char *sortKey = NULL;
-  unsigned char *end = NULL;
+    int           count[256] = {0};
+    int           index[256];
+    int           i;
+    unsigned char *sortKey = NULL;
+    unsigned char *end = NULL;
 
     // Note: byte is the byte index within the 64-bit key.
-  sortKey = ( (unsigned char *)&source[ 0 ].sort ) + byte;
-  end = sortKey + ( size * sizeof( drawSurf_t ) );
-  for( ; sortKey < end; sortKey += sizeof( drawSurf_t ) )
-    ++count[ *sortKey ];
+    sortKey = ((unsigned char *)&source[0].sort) + byte;
+    end     = sortKey + (size * sizeof(drawSurf_t));
+    for (; sortKey < end; sortKey += sizeof(drawSurf_t))
+        ++count[*sortKey];
 
-  index[ 0 ] = 0;
-  for( i = 1; i < 256; ++i )
-    index[ i ] = index[ i - 1 ] + count[ i - 1 ];
+    index[0] = 0;
+    for (i = 1; i < 256; ++i)
+        index[i] = index[i - 1] + count[i - 1];
 
-  sortKey = ( (unsigned char *)&source[ 0 ].sort ) + byte;
-  for( i = 0; i < size; ++i, sortKey += sizeof( drawSurf_t ) )
-    dest[ index[ *sortKey ]++ ] = source[ i ];
+    sortKey = ((unsigned char *)&source[0].sort) + byte;
+    for (i = 0; i < size; ++i, sortKey += sizeof(drawSurf_t))
+        dest[index[*sortKey]++] = source[i];
 }
 
 /*
@@ -1434,15 +1434,15 @@ R_RadixSort
 Radix sort with 4 byte size buckets
 ===============
 */
-static void R_RadixSort( drawSurf_t *source, int size )
+static void R_RadixSort( drawSurf_t* source, int size )
 {
-  static drawSurf_t scratch[ MAX_DRAWSURFS ];
+    static drawSurf_t scratch[MAX_DRAWSURFS];
 
 #ifdef Q3_LITTLE_ENDIAN
-  R_Radix( 0, size, source, scratch );
-  R_Radix( 1, size, scratch, source );
-  R_Radix( 2, size, source, scratch );
-  R_Radix( 3, size, scratch, source );
+    R_Radix( 0, size, source, scratch );
+    R_Radix( 1, size, scratch, source );
+    R_Radix( 2, size, source, scratch );
+    R_Radix( 3, size, scratch, source );
     R_Radix( 4, size, source, scratch );
     R_Radix( 5, size, scratch, source );
     R_Radix( 6, size, source, scratch );
@@ -1452,10 +1452,10 @@ static void R_RadixSort( drawSurf_t *source, int size )
     R_Radix( 6, size, scratch, source );
     R_Radix( 5, size, source, scratch );
     R_Radix( 4, size, scratch, source );
-  R_Radix( 3, size, source, scratch );
-  R_Radix( 2, size, scratch, source );
+    R_Radix( 3, size, source, scratch );
+    R_Radix( 2, size, scratch, source );
     R_Radix( 1, size, scratch, source );
-  R_Radix( 0, size, scratch, source );
+    R_Radix( 0, size, scratch, source );
 #endif
 }
 
@@ -1481,8 +1481,8 @@ void R_AddDrawSurf( surfaceType_t* surface, shader_t* shader, int fogIndex, int 
     sort |= ((uint64_t)shader->sortedIndex & QSORT_SHADERNUM_MASK) << QSORT_SHADERNUM_SHIFT;
 
     tr.refdef.drawSurfs[index].sort    = sort;
-	tr.refdef.drawSurfs[index].surface = surface;
-	tr.refdef.numDrawSurfs++;
+    tr.refdef.drawSurfs[index].surface = surface;
+    tr.refdef.numDrawSurfs++;
 }
 
 /*

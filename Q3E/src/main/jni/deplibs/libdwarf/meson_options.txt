@@ -1,0 +1,64 @@
+
+option('dwarfgen',
+  type : 'boolean',
+  value : false,
+  description : 'enable dwarfgen compilation'
+)
+
+option('dwarfexample',
+  type : 'boolean',
+  value : false,
+  description : 'enable dwarf examples compilation'
+)
+
+option('doc',
+  type : 'boolean',
+  value : false,
+  description : 'build and install Doxygen documentation'
+)
+
+option('sanitize',
+  type : 'boolean',
+  value : false,
+  description : 'compile and link with -fsanitize options'
+)
+option('drmemory',
+  type : 'boolean',
+  value : false,
+  description : 'Build with options for DrMemory'
+)
+
+option('wall',
+  type : 'boolean',
+  value : false,
+  description : 'compile and link with compiler warning options'
+)
+
+option('decompression',
+  type : 'boolean',
+  value : true,
+  description : 'compile and link with zlib and zstd decompression libraries'
+)
+
+# Never use the following as it produces some printf from libdwarf
+# Unless debugging libdwarf malloc use
+option('libdwarfspecialmalloc',
+  type : 'boolean',
+  value : false,
+  description : 'Compile libdwarf (only) with special malloc code'
+)
+
+option('buildmmap',
+  type : 'boolean',
+  value : true,
+  description : 'Compile libdwarf with mmap support if possible'
+) 
+
+# This is crucial for testing on Windows msys2 so that
+# it works for all platforms.
+# It is required for all platforms.
+option('regressiontesting',
+  type : 'boolean',
+  value : false,
+  description : 'Compile libdwarf&dwarfdump for regression testing'
+)

@@ -663,7 +663,11 @@ void	FixGlobalTjunctions(uEntity_t *e)
 
 				mapTri_t	mapTri;
 				memset(&mapTri, 0, sizeof(mapTri));
+#ifdef _SPLASHDAMAGE
+				mapTri.material = surface->material;
+#else
 				mapTri.material = surface->shader;
+#endif
 
 				// don't let discretes (autosprites, etc) merge together
 				if (mapTri.material->IsDiscrete()) {

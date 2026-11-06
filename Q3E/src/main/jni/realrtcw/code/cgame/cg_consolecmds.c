@@ -363,7 +363,9 @@ static void CG_DumpCastAi_f( void ) {
 		 strcmp( "ai_priest", aitype ) &&
 		 strcmp( "ai_xshepherd", aitype ) &&
 		 strcmp( "ai_dog", aitype ) &&
-		 strcmp( "ai_russian", aitype ) ) {
+		 strcmp( "ai_russian", aitype ) &&
+		 strcmp( "ai_mercenary", aitype ) &&
+		 strcmp( "ai_trench", aitype ) ) {
 
 		CG_Printf( "Wrong type\n" );
 		CG_Printf( "Usage: dumpcastai <type> [name]\n" );

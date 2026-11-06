@@ -56,7 +56,8 @@ idBox box_zero(vec3_zero, vec3_zero, mat3_identity);
 
 */
 
-/*
+///*
+#ifdef _SPLASHDAMAGE
 static int boxVertPlanes[8] = {
 	( (1<<0) | (1<<2) | (1<<4) ),
 	( (1<<1) | (1<<2) | (1<<4) ),
@@ -116,7 +117,22 @@ static int boxEdgeVerts[12][2] = {
 	{ 2, 6 },
 	{ 3, 7 }
 };
-*/
+#endif
+//*/
+
+#ifdef _SPLASHDAMAGE
+#define POS_EDGE( e )	( e + 1 )
+#define NEG_EDGE( e )	-( e + 1 )
+
+static int boxPlaneEdges[6][4] = {
+    { NEG_EDGE( 3 ), POS_EDGE( 11 ), POS_EDGE(  7 ), NEG_EDGE(  8 ) },	// min x
+    { POS_EDGE( 9 ), POS_EDGE(  5 ), NEG_EDGE( 10 ), NEG_EDGE(  1 ) },	// max x
+    { NEG_EDGE( 0 ), POS_EDGE(  8 ), POS_EDGE(  4 ), NEG_EDGE(  9 ) },	// min y
+    { NEG_EDGE( 2 ), POS_EDGE( 10 ), POS_EDGE(  6 ), NEG_EDGE( 11 ) },	// max y
+    { POS_EDGE( 0 ), POS_EDGE(  1 ), POS_EDGE(  2 ), POS_EDGE(  3 ) },	// min z
+    { NEG_EDGE( 7 ), NEG_EDGE(  6 ), NEG_EDGE(  5 ), NEG_EDGE(  4 ) }	// max z
+};
+#endif
 
 static int boxPlaneBitsSilVerts[64][7] = {
 	{ 0, 0, 0, 0, 0, 0, 0 }, // 000000 = 0
@@ -209,7 +225,12 @@ bool idBox::AddPoint(const idVec3 &v)
 	bounds1[0] -= extents;
 	bounds1[1] += extents;
 
-	if (!bounds1.AddPoint(idVec3(v * axis[0], v * axis[1], v * axis[2]))) {
+#ifdef _SPLASHDAMAGE
+    if ( !bounds1.AddPointExpanded( idVec3( v * axis[0], v * axis[1], v * axis[2] ) ) ) 
+#else
+	if (!bounds1.AddPoint(idVec3(v * axis[0], v * axis[1], v * axis[2]))) 
+#endif
+	{
 		// point is contained in the box
 		return false;
 	}
@@ -272,7 +293,12 @@ bool idBox::AddBox(const idBox &a)
 	bounds[0][1] += extents;
 	a.AxisProjection(ax[0], b);
 
-	if (!bounds[0].AddBounds(b)) {
+#ifdef _SPLASHDAMAGE
+    if ( !bounds[0].AddBoundsExpanded( b ) )
+#else
+	if (!bounds[0].AddBounds(b)) 
+#endif
+	{
 		// the other box is contained in this box
 		return false;
 	}
@@ -286,7 +312,12 @@ bool idBox::AddBox(const idBox &a)
 	bounds[1][1] += a.extents;
 	AxisProjection(ax[1], b);
 
-	if (!bounds[1].AddBounds(b)) {
+#ifdef _SPLASHDAMAGE
+    if ( !bounds[1].AddBoundsExpanded( b ) )
+#else
+	if (!bounds[1].AddBounds(b)) 
+#endif
+	{
 		// this box is contained in the other box
 		center = a.center;
 		extents = a.extents;
@@ -342,7 +373,7 @@ float idBox::PlaneDistance(const idPlane &plane) const
 	float d1, d2;
 
 	d1 = plane.Distance(center);
-#ifdef _RAVEN // rvlib
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
     d2 = idMath::Fabs( extents[0] * ( plane.Normal() * axis[0] ) ) +
          idMath::Fabs( extents[1] * ( plane.Normal() * axis[1] ) ) +
          idMath::Fabs( extents[2] * ( plane.Normal() * axis[2] ) );
@@ -373,7 +404,7 @@ int idBox::PlaneSide(const idPlane &plane, const float epsilon) const
 	float d1, d2;
 
 	d1 = plane.Distance(center);
-#ifdef _RAVEN // rvlib
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
     d2 = idMath::Fabs( extents[0] * ( plane.Normal() * axis[0] ) ) +
          idMath::Fabs( extents[1] * ( plane.Normal() * axis[1] ) ) +
          idMath::Fabs( extents[2] * ( plane.Normal() * axis[2] ) );
@@ -745,6 +776,58 @@ void idBox::FromPoints(const idVec3 *points, const int numPoints)
 	eigenVectors.Eigen_SolveSymmetric(eigenValues);
 	eigenVectors.Eigen_SortIncreasing(eigenValues);
 
+#ifdef _SPLASHDAMAGE
+    axis[1][0] = eigenVectors[0][1];
+    axis[1][1] = eigenVectors[1][1];
+    axis[1][2] = eigenVectors[2][1];
+
+    axis[2][0] = eigenVectors[0][2];
+    axis[2][1] = eigenVectors[1][2];
+    axis[2][2] = eigenVectors[2][2];
+
+    axis[0].Cross( axis[1], axis[2] );
+
+    // if two eigenValues are the same then we need to search rotations to get the smallest volume box
+    const float epsilon = 0.1f;
+    int rotationAxis = -1;
+    if ( idMath::Fabs( eigenValues[0] - eigenValues[1] ) < epsilon ) {
+        rotationAxis = 2;
+    } else if ( idMath::Fabs( eigenValues[0] - eigenValues[2] ) < epsilon ) {
+        rotationAxis = 1;
+    } else if ( idMath::Fabs( eigenValues[1] - eigenValues[2] ) < epsilon ) {
+        rotationAxis = 0;
+    }
+    if ( rotationAxis >= 0 ) {
+        idRotation rot;
+        rot.SetVec( axis[rotationAxis] );
+        bounds.Clear();
+        for ( i = 0; i < numPoints; i++ ) {
+            bounds.AddPoint( idVec3( points[i] * axis[0], points[i] * axis[1], points[i] * axis[2] ) );
+        }
+        float bestVolume = bounds.GetVolume();
+        float bestAngle = 0.0f;
+        float angleStep = 30.0f;
+        for ( int iteration = 0; iteration < 8; iteration++ ) {
+            float startAngle = bestAngle;
+            for ( int a = -1; a <= 1; a += 2 ) {
+                rot.SetAngle( startAngle + ( a * angleStep ) );
+                idMat3 a2 = axis * rot.ToMat3();
+                bounds.Clear();
+                for ( i = 0; i < numPoints; i++ ) {
+                    bounds.AddPoint( idVec3( points[i] * a2[0], points[i] * a2[1], points[i] * a2[2] ) );
+                }
+                float volume = bounds.GetVolume();
+                if ( volume < bestVolume ) {
+                    bestVolume = volume;
+                    bestAngle = rot.GetAngle();
+                }
+            }
+            angleStep *= 0.5f;
+        }
+        rot.SetAngle( bestAngle );
+        axis *= rot.ToMat3();
+    }
+#else
 	axis[0][0] = eigenVectors[0][0];
 	axis[0][1] = eigenVectors[0][1];
 	axis[0][2] = eigenVectors[0][2];
@@ -758,6 +841,7 @@ void idBox::FromPoints(const idVec3 *points, const int numPoints)
 	extents[0] = eigenValues[0];
 	extents[1] = eigenValues[0];
 	extents[2] = eigenValues[0];
+#endif
 
 	// refine by calculating the bounds of the points projected onto the axis and adjusting the center and extents
 	bounds.Clear();

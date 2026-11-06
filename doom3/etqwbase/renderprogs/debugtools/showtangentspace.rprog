@@ -1,0 +1,61 @@
+renderProgram debugTools/showTangentSpace {
+	hwSkinningVersion debugTools/showTangentSpace_hwskinning debugTools/showTangentSpace_hardskinning
+	
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		TEMP bitangent;
+		TEMP R0;
+
+		# derive bitangent
+		XPD bitangent, $normalAttrib, $tangentAttrib;
+		MUL bitangent, bitangent, $tangentAttrib.w;
+		
+		MUL R0.xyz, $normalAttrib, $diffuseColor.x;
+		MAD R0.xyz, $tangentAttrib, $diffuseColor.y, R0;
+		MAD R0.xyz, bitangent, $diffuseColor.z, R0;
+		ADD result.color.xyz, R0, 0.5;
+		MOV result.color.w, 1;
+	%> }
+	
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+		
+		MOV result.color, fragment.color;
+	%> }
+	
+}
+
+renderProgram debugTools/showTangentSpace_hwskinning {
+	program vertex arb { <%
+		TEMP position, normal, tangent, bitangent;
+		TEMP R0;
+		
+		useTemplate skinningMatrix_ARB< "position", "normal", "tangent", "bitangent" >
+		
+		MUL R0.xyz, normal, $diffuseColor.x;
+		MAD R0.xyz, tangent, $diffuseColor.y, R0;
+		MAD R0.xyz, bitangent, $diffuseColor.z, R0;
+		ADD result.color.xyz, R0, 0.5;
+		MOV result.color.w, 1;
+	%> }
+	
+	program fragment reference debugTools/showTangentSpace
+}
+
+renderProgram debugTools/showTangentSpace_hardskinning {
+	program vertex arb { <%
+		TEMP position, normal, tangent, bitangent;
+		TEMP R0;
+		
+		useTemplate hardSkinningMatrix_ARB< "position", "normal", "tangent", "bitangent" >
+		
+		MUL R0.xyz, normal, $diffuseColor.x;
+		MAD R0.xyz, tangent, $diffuseColor.y, R0;
+		MAD R0.xyz, bitangent, $diffuseColor.z, R0;
+		ADD result.color.xyz, R0, 0.5;
+		MOV result.color.w, 1;
+	%> }
+	
+	program fragment reference debugTools/showTangentSpace
+}

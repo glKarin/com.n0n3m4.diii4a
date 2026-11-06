@@ -1,0 +1,6 @@
+26 February, 2015
+  Now uses dwgetopt() instead of getopt() so all environments
+  have a getopt-like functionality.  It reaches around to
+  libdwarf for the source to dwgetopt, but it could
+  equally well reach into dwarfdump for that source.
+

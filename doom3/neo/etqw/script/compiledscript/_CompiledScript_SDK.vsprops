@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="ETQW Game Script DLL"
+	CharacterSet="2"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		UsePrecompiledHeader="2"
+		PrecompiledHeaderThrough=""
+		WarningLevel="3"
+		Detect64BitPortabilityProblems="false"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		ModuleDefinitionFile="scripts.def"
+		SubSystem="2"
+		LargeAddressAware="2"
+		TargetMachine="1"
+	/>
+</VisualStudioPropertySheet>

@@ -14,6 +14,7 @@ import com.n0n3m4.q3e.Q3ELang;
 public enum Game
 {
     // KARIN_NEW_GAME_BOOKMARK: add game mod enum
+    // KARIN_ADD_MOD_BOOKMARK: add game mod enum
 
     // DOOM 3
     DOOM3_BASE(Q3EGameConstants.GAME_DOOM3, "base", "", "game", "", "base", false, R.string.doom_iii),
@@ -35,7 +36,9 @@ public enum Game
 
     // Quake 4
     QUAKE4_BASE(Q3EGameConstants.GAME_QUAKE4, "q4base", "", "q4game", "", "q4base", false, R.string.quake_iv_q4base),
+    QUAKE4_AWAKENING(Q3EGameConstants.GAME_QUAKE4, "q4xbase", "q4xbase", "q4xbase",  "", "q4xbase", true, R.string.awakening),
     QUAKE4_HARDQORE(Q3EGameConstants.GAME_QUAKE4, "hardqore", "hardqore", "hardqore",  "", "hardqore", true, R.string.hardqore),
+    QUAKE4_HAZZZZZY(Q3EGameConstants.GAME_QUAKE4, "hazzzzzy", "hazzzzzy", "hazzzzzy",  "", "hazzzzzy", true, R.string.hazzzzzy),
 
     // Prey(2006)
     PREY_BASE(Q3EGameConstants.GAME_PREY, "preybase", "", "preygame", "", "preybase", false, R.string.prey_preybase),
@@ -129,6 +132,9 @@ public enum Game
 
     // Icarus Starship Command Simulator
     ICARUS_BASE(Q3EGameConstants.GAME_ICARUS, "base", "", "ICARUS", "", "base", false, R.string.icarus_base),
+
+    // Enemy Territory: QUAKE Wars
+    ETQW_BASE(Q3EGameConstants.GAME_ETQW, "etqwbase", "", "etqwgame", "", "etqwbase", false, R.string.etqw_base),
     ;
 
     public final String  type; // game type: doom3/quake4/prey2006/......

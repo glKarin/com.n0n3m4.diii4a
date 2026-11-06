@@ -62,8 +62,8 @@ int weapBanks[MAX_WEAP_BANKS][MAX_WEAPS_IN_BANK] = {
 	{WP_MAUSER, WP_GARAND, WP_MOSIN, WP_DELISLE, 0, 0},														  //	4
 	{WP_G43, WP_M1GARAND, WP_M1941, 0, 0, 0},																  //	5
 	{WP_FG42, WP_MP44, WP_BAR, 0, 0, 0},																	  //	6
-	{WP_M97, WP_AUTO5, 0, 0, 0},																	  //	7
-	{WP_GRENADE_LAUNCHER, WP_GRENADE_PINEAPPLE, WP_DYNAMITE, WP_AIRSTRIKE, WP_POISONGAS, WP_POISONGAS_MEDIC, WP_DYNAMITE_ENG}, //	8
+	{WP_M97, WP_AUTO5, WP_M30, 0, 0},																	          //	7
+	{WP_GRENADE_LAUNCHER, WP_GRENADE_PINEAPPLE, WP_DYNAMITE, WP_AIRSTRIKE, WP_POISONGAS, WP_SMOKE_BOMB, WP_DYNAMITE_ENG }, //	8
 	{WP_PANZERFAUST, WP_FLAMETHROWER, WP_MG42M, WP_BROWNING, 0, 0},											  //	9
 	{WP_VENOM, WP_TESLA, 0, 0, 0, 0}																		  //	10
 };
@@ -2408,6 +2408,7 @@ qboolean CG_DrawRealWeapons( centity_t *cent ) {
 	case AICHAR_ZOMBIE_GHOST:
 	case AICHAR_HELGA:      //----(SA)	added	// boss1 is now helga-blob
 	case AICHAR_WARZOMBIE:
+	case AICHAR_FLESH:
 	case AICHAR_DOG:
 	case AICHAR_PRIEST:
 	case AICHAR_XSHEPHERD:
@@ -2423,58 +2424,95 @@ qboolean CG_DrawRealWeapons( centity_t *cent ) {
 CG_AddWeaponWithPowerups
 ========================
 */
+/*
+========================
+CG_AddWeaponWithPowerups
+========================
+*/
 static void CG_AddWeaponWithPowerups( refEntity_t *gun, int powerups, playerState_t *ps, centity_t *cent ) {
-    // If ps is NULL, then:
-    // - For the local client, use the predicted player state.
-    // - For other entities (including AI), cast the entity state to a playerState_t.
-    if ( !ps ) {
-        if ( cent->currentState.number == cg.snap->ps.clientNum ) {
-            ps = &cg.predictedPlayerState;
-        } else {
-            ps = (playerState_t *)&cent->currentState;
-        }
-    }
-    
-    // add powerup effects
-    if ( powerups & ( 1 << PW_INVIS ) ) {
-        gun->customShader = cgs.media.invisShader;
-        trap_R_AddRefEntityToScene( gun );
-    } else {
-        trap_R_AddRefEntityToScene( gun );
+	qhandle_t savedCustomShader;
 
-        // blink if time left < 5s, toggling every 200ms for battlesuit
-        if ( powerups & ( 1 << PW_BATTLESUIT_SURV ) ) {
-            int timeLeft = ps->powerups[PW_BATTLESUIT_SURV] - cg.time;
-            if ((timeLeft < 5000) && ((cg.time / 200) % 2)) {
-                // skip rendering to blink
-            } else {
-                gun->customShader = cgs.media.battleWeaponShader;
-                trap_R_AddRefEntityToScene( gun );
-            }
-        }
+	// If ps is NULL, then:
+	// - For the local client, use the predicted player state.
+	// - For other entities (including AI), cast the entity state to a playerState_t.
+	if ( !ps ) {
+		if ( cent->currentState.number == cg.snap->ps.clientNum ) {
+			ps = &cg.predictedPlayerState;
+		} else {
+			ps = (playerState_t *)&cent->currentState;
+		}
+	}
 
-        // blink for quad powerup
-        if ( powerups & ( 1 << PW_QUAD ) ) {
-            int timeLeft = ps->powerups[PW_QUAD] - cg.time;
-            if ((timeLeft < 5000) && ((cg.time / 200) % 2)) {
-                // skip rendering to blink
-            } else {
-                gun->customShader = cgs.media.quadWeaponShader;
-                trap_R_AddRefEntityToScene( gun );
-            }
-        }
+	// IMPORTANT: this function is called for weapon sub-parts (barrels/bolts/hands/etc.)
+	// in RTCW. Those refEntity_t structs are often re-used in a loop, so if we set
+	// customShader and don't restore it, the next part will inherit it and "lose" its base skin.
+	savedCustomShader = gun->customShader;
 
-        // blink for vampire powerup
-        if ( powerups & ( 1 << PW_VAMPIRE ) ) {
-            int timeLeft = ps->powerups[PW_VAMPIRE] - cg.time;
-            if ((timeLeft < 5000) && ((cg.time / 200) % 2)) {
-                // skip rendering to blink
-            } else {
-                gun->customShader = cgs.media.redQuadShader;
-                trap_R_AddRefEntityToScene( gun );
-            }
-        }
-    }
+	// add powerup effects
+	if ( powerups & ( 1 << PW_INVIS ) ) {
+
+		gun->customShader = cgs.media.invisShader;
+		trap_R_AddRefEntityToScene( gun );
+
+		// restore and bail (invis usually replaces base draw)
+		gun->customShader = savedCustomShader;
+
+	} else {
+
+		// always draw base weapon normally (no shader override)
+		gun->customShader = 0;
+		trap_R_AddRefEntityToScene( gun );
+
+		// blink if time left < 5s, toggling every 200ms for battlesuit
+		if ( powerups & ( 1 << PW_BATTLESUIT_SURV ) ) {
+			int timeLeft = ps->powerups[PW_BATTLESUIT_SURV] - cg.time;
+			if ( ( timeLeft < 5000 ) && ( ( cg.time / 200 ) % 2 ) ) {
+				// skip rendering to blink
+			} else {
+				gun->customShader = cgs.media.battleWeaponShader;
+				trap_R_AddRefEntityToScene( gun );
+				gun->customShader = 0;
+			}
+		}
+
+		// blink for quad powerup
+		if ( powerups & ( 1 << PW_QUAD ) ) {
+			int timeLeft = ps->powerups[PW_QUAD] - cg.time;
+			if ( ( timeLeft < 5000 ) && ( ( cg.time / 200 ) % 2 ) ) {
+				// skip rendering to blink
+			} else {
+				gun->customShader = cgs.media.quadWeaponShader;
+				trap_R_AddRefEntityToScene( gun );
+				gun->customShader = 0;
+			}
+		}
+
+		if ( powerups & ( 1 << PW_XSHIELD ) ) {
+			int timeLeft = ps->powerups[PW_XSHIELD] - cg.time;
+			if ( ( timeLeft < 5000 ) && ( ( cg.time / 200 ) % 2 ) ) {
+				// skip rendering to blink
+			} else {
+				gun->customShader = cgs.media.quadWeaponShader;
+				trap_R_AddRefEntityToScene( gun );
+				gun->customShader = 0;
+			}
+		}
+
+		// blink for vampire powerup
+		if ( powerups & ( 1 << PW_VAMPIRE ) ) {
+			int timeLeft = ps->powerups[PW_VAMPIRE] - cg.time;
+			if ( ( timeLeft < 5000 ) && ( ( cg.time / 200 ) % 2 ) ) {
+				// skip rendering to blink
+			} else {
+				gun->customShader = cgs.media.redQuadShader;
+				trap_R_AddRefEntityToScene( gun );
+				gun->customShader = 0;
+			}
+		}
+
+		// restore original state for caller safety
+		gun->customShader = savedCustomShader;
+	}
 }
 
 /*
@@ -3096,11 +3134,11 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 
 
 	if ( isPlayer ) {
-		akimboFire_colt = BG_AkimboFireSequence( weaponNum, cg.predictedPlayerState.ammoclip[WP_AKIMBO], cg.predictedPlayerState.ammoclip[WP_COLT] );
-        akimboFire_tt33 = BG_AkimboFireSequence( weaponNum, cg.predictedPlayerState.ammoclip[WP_DUAL_TT33], cg.predictedPlayerState.ammoclip[WP_TT33] );
+		akimboFire_colt = BG_AkimboFireSequence( weaponNum, cg.predictedPlayerState.ammoclip[WP_AKIMBO] );
+        akimboFire_tt33 = BG_AkimboFireSequence( weaponNum, cg.predictedPlayerState.ammoclip[WP_DUAL_TT33] );
 	} else if ( ps ) {
-		akimboFire_colt = BG_AkimboFireSequence( weaponNum, ps->ammoclip[WP_AKIMBO], ps->ammoclip[WP_AKIMBO] );
-        akimboFire_tt33 = BG_AkimboFireSequence( weaponNum, ps->ammoclip[WP_DUAL_TT33], ps->ammoclip[WP_DUAL_TT33] );
+		akimboFire_colt = BG_AkimboFireSequence( weaponNum, ps->ammoclip[WP_AKIMBO] );
+        akimboFire_tt33 = BG_AkimboFireSequence( weaponNum, ps->ammoclip[WP_DUAL_TT33] );
 	}
 
 	// add the weapon
@@ -3513,6 +3551,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	// weapons that don't need to go any further as they have no flash or light
 	if ( weaponNum == WP_GRENADE_LAUNCHER ||
 		 weaponNum == WP_GRENADE_PINEAPPLE ||
+		 weaponNum == WP_SMOKE_BOMB ||
 		 weaponNum == WP_KNIFE ||
 		 weaponNum == WP_DYNAMITE ||
 		 weaponNum == WP_DYNAMITE_ENG ||
@@ -3864,6 +3903,7 @@ void CG_DrawWeaponSelect( void ) {
 		case WP_G43:
 		case WP_M1GARAND:
 		case WP_BAR:
+		case WP_M30:
 		case WP_MP44:
 		case WP_MG42M:
 		case WP_M97:
@@ -4471,6 +4511,52 @@ void CG_FinishWeaponChange( int lastweap, int newweap ) {
 	cg.weaponSelect     = newweap;
 }
 
+qboolean CG_WeaponSupportsSimpleZoom( int weap ) {
+    switch ( weap ) {
+        // Disallow: already-scoped / special zoom weapons
+        case WP_SNIPERRIFLE:
+        case WP_SNOOPERSCOPE:
+        case WP_FG42SCOPE:
+        case WP_DELISLESCOPE:
+        case WP_M1941SCOPE:
+            return qfalse;
+
+        // Disallow: binocs / mounted / explosives / melee etc (adjust to your mod)
+        case WP_GRENADE_LAUNCHER:
+        case WP_GRENADE_PINEAPPLE:
+        case WP_SMOKE_BOMB:
+		case WP_AIRSTRIKE:
+        case WP_DYNAMITE:
+        case WP_DYNAMITE_ENG:
+        case WP_POISONGAS:
+        case WP_KNIFE:
+            return qfalse;
+
+        default:
+            break;
+    }
+
+    // Also don’t allow while on MG42
+    if ( cg.snap->ps.eFlags & EF_MG42_ACTIVE ) {
+        return qfalse;
+    }
+
+    return qtrue;
+}
+
+void CG_ToggleSimpleZoom( void ) {
+    cg.simpleZoomed = !cg.simpleZoomed;
+    cg.simpleZoomTime = cg.time;
+}
+
+
+void CG_ResetSimpleZoom( void ) {
+    if ( cg.simpleZoomed ) {
+        cg.simpleZoomed = qfalse;
+        cg.simpleZoomTime = cg.time;
+    }
+}
+
 /*
 ==============
 CG_AltfireWeapon_f
@@ -4481,7 +4567,12 @@ void CG_AltWeapon_f( void ) {
 	int original, num;
 	float spd = VectorLength( cg.snap->ps.velocity );
 
-	trap_S_StartSoundEx(NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF);
+	if (cg.snap && cg.snap->ps.weapon == WP_KNIFE)
+	{
+		// Dirty hack
+		trap_SendConsoleCommand(" +attack2; -attack2\n");
+		return;
+	}
 
 	if ( !cg.snap ) {
 		return;
@@ -4503,6 +4594,21 @@ void CG_AltWeapon_f( void ) {
 
 	num = getAltWeapon( original );
 
+	if (num == WP_NONE || num == original || !CG_WeaponSelectable(num))
+	{
+		if (CG_WeaponSupportsSimpleZoom(original))
+		{
+
+			if (cg.snap->ps.weaponstate == WEAPON_RELOADING || cg.snap->ps.weaponstate == WEAPON_DROPPING  || cg.snap->ps.weaponstate == WEAPON_RAISING 
+			|| cg.snap->ps.weaponstate == WEAPON_SPRINT_IN  || cg.snap->ps.weaponstate == WEAPON_SPRINT_OUT )
+			{
+				return;
+			}
+			CG_ToggleSimpleZoom();
+		}
+		return;
+	}
+
 	if ( CG_WeaponSelectable( num ) ) {   // new weapon is valid
 		
 		switch ( original ) {
@@ -4518,6 +4624,7 @@ void CG_AltWeapon_f( void ) {
 			break;
 		}
 
+		trap_S_StartSoundEx( NULL, cg.snap->ps.clientNum, CHAN_WEAPON, cgs.media.nullSound, SND_CUTOFF );
 		CG_FinishWeaponChange( original, num );
 	}
 
@@ -5335,6 +5442,7 @@ void CG_WeaponFireRecoil( int weapon ) {
 	break;
 	case WP_M97:
 	case WP_AUTO5:
+	case WP_M30:
 		pitchRecoilAdd = 1;
 		pitchAdd = 8 + rand() % 3;
 		yawRandom = 2;
@@ -5443,8 +5551,8 @@ void CG_FireWeapon( centity_t *cent, int event ) {
 				  ent->weapon == WP_GRENADE_PINEAPPLE ||
 				  ent->weapon == WP_DYNAMITE ||
 				  ent->weapon == WP_AIRSTRIKE ||
-				  ent->weapon == WP_POISONGAS || 
-				  ent->weapon == WP_POISONGAS_MEDIC ||
+				  ent->weapon == WP_POISONGAS ||
+				  ent->weapon == WP_SMOKE_BOMB ||
 				  ent->weapon == WP_DYNAMITE_ENG ) { 
 		if ( ent->apos.trBase[0] > 0 ) { // underhand
 			return;
@@ -5831,6 +5939,7 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, in
 	case WP_G43:
 	case WP_M1GARAND:
 	case WP_BAR:
+	case WP_M30:
 	case WP_MP44:
 	case WP_MG42M:
 	case WP_BROWNING:
@@ -6826,4 +6935,202 @@ void CG_ClientDamage( int entnum, int enemynum, int id ) {
 	}
 	trap_SendClientCommand( va( "cld %i %i %i", entnum, enemynum, id ) );
 }
+
+
+static qboolean CG_AA_ValidateTarget( int entNum ) {
+    if ( entNum == ENTITYNUM_WORLD || entNum < 0 ) {
+        return qfalse;
+    }
+
+    // Only characters
+    if ( cg_entities[ entNum ].currentState.eType != ET_PLAYER ) {
+        return qfalse;
+    }
+
+    // Reject invis
+    if ( cg_entities[ entNum ].currentState.powerups & ( 1 << PW_INVIS ) ) {
+        return qfalse;
+    }
+
+	{
+		int myTeam = cg.snap->ps.persistant[PERS_TEAM];
+		int hisTeam = cg_entities[entNum].currentState.teamNum;
+
+		// If hisTeam is known and equals ours -> friendly, reject
+		if (hisTeam != 0 && hisTeam == myTeam)
+		{
+			return qfalse;
+		}
+	}
+
+	// LOS check (prevents through-walls)
+    {
+        trace_t los;
+        vec3_t target;
+
+        VectorCopy( cg_entities[ entNum ].lerpOrigin, target );
+        target[2] += 35.0f; // chest-ish
+
+        CG_Trace( &los,
+                  cg.refdef.vieworg,
+                  vec3_origin, vec3_origin,
+                  target,
+                  cg.snap->ps.clientNum,
+                  CONTENTS_SOLID );
+
+        if ( los.fraction < 0.999f ) {
+            return qfalse;
+        }
+    }
+
+    return qtrue;
+}
+
+
+void CG_UpdateAimAssist( void ) {
+    cg.aaStrength = 0.0f;
+    cg.aaDYaw     = 0.0f;
+    cg.aaDPitch   = 0.0f;
+    cg.aaEntNum   = -1;
+
+    if ( !cg.snap ) {
+        return;
+    }
+    if ( cg.renderingThirdPerson ) {
+        return;
+    }
+    if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
+        return;
+    }
+
+
+	float coneDeg = 4.5f;
+	if (cg.zoomed)
+	{					
+		coneDeg = 6.0f; 
+	}
+
+	// Direction offset scalar for the cone
+    const float cone = tanf( coneDeg * ( M_PI / 180.0f ) );
+
+    vec3_t start;
+    VectorCopy( cg.refdef.vieworg, start );
+
+    // 9-sample: center + 4 cardinals + 4 diagonals
+    static const float samples[9][2] = {
+        { 0,  0 },   // center
+        { 1,  0 },   // right
+        { -1, 0 },   // left
+        { 0,  1 },   // up
+        { 0, -1 },   // down
+        { 1,  1 },   // up-right
+        { 1, -1 },   // down-right
+        { -1, 1 },   // up-left
+        { -1, -1 }   // down-left
+    };
+
+    int   bestEnt  = -1;
+    float bestFrac = 999.0f; // 0=center, 1=edge (normalized)
+
+    for ( int i = 0; i < 9; i++ ) {
+        vec3_t dir, end;
+
+        // dir = forward + right*(x*cone) + up*(y*cone)
+        VectorCopy( cg.refdef.viewaxis[0], dir );
+        VectorMA( dir, samples[i][0] * cone, cg.refdef.viewaxis[1], dir );
+        VectorMA( dir, samples[i][1] * cone, cg.refdef.viewaxis[2], dir );
+        VectorNormalize( dir );
+
+        VectorMA( start, 4096.0f, dir, end );
+
+        trace_t tr;
+        CG_Trace( &tr, start, vec3_origin, vec3_origin, end,
+                  cg.snap->ps.clientNum, CONTENTS_BODY );
+
+        if ( tr.entityNum == ENTITYNUM_WORLD ) {
+            continue;
+        }
+
+        if ( !CG_AA_ValidateTarget( tr.entityNum ) ) {
+            continue;
+        }
+
+        // Normalized distance from center:
+        // samples are in {0,1,sqrt(2)} so normalize by sqrt(2)
+        {
+            const float sx = samples[i][0];
+            const float sy = samples[i][1];
+            const float mag = sqrtf( sx*sx + sy*sy );            // 0, 1, 1.414
+            const float frac = mag / 1.41421356f;               // 0..1
+
+            // Prefer the closest-to-center hit. If tie, keep the earlier (center wins).
+            if ( frac < bestFrac ) {
+                bestFrac = frac;
+                bestEnt  = tr.entityNum;
+            }
+        }
+    }
+
+    if ( bestEnt < 0 ) {
+        return;
+    }
+
+    // Strength mapping:
+    // bestFrac: 0 (center) .. 1 (outer ring)
+    // Convert to strength in [0..1], with a floor so it engages near the target.
+    {
+		float s = 1.0f - bestFrac; // 0..1
+		s = s * s;				   // keep a curve (optional)
+		s = 0.20f + (s * 0.80f);   // floor 0.20 (tune 0.15..0.30)
+		if (s > 1.0f)
+			s = 1.0f;
+		cg.aaStrength = s;
+	}
+
+    cg.aaEntNum = bestEnt;
+
+    // Compute dyaw/dpitch in DEGREES using viewaxis directly (robust; no refdefViewAngles needed)
+    {
+        vec3_t target, to, toN;
+        float  yawErr, pitchErr;
+
+        VectorCopy( cg_entities[ bestEnt ].lerpOrigin, target );
+        target[2] += 35.0f; // chest-ish; tune later if you want head
+
+        VectorSubtract( target, cg.refdef.vieworg, to );
+        VectorCopy( to, toN );
+        VectorNormalize( toN );
+
+        // Forward/right/up axes
+        // viewaxis[0] = forward, [1] = right, [2] = up
+        // Compute angular error around yaw and pitch from dot products.
+        // yaw error: angle in the plane (forward/right)
+        // pitch error: angle in the plane (forward/up)
+        {
+            float f = DotProduct( toN, cg.refdef.viewaxis[0] );
+            float r = DotProduct( toN, cg.refdef.viewaxis[1] );
+            float u = DotProduct( toN, cg.refdef.viewaxis[2] );
+
+            // atan2 gives signed angle in radians; convert to degrees
+            yawErr   = atan2f( r, f ) * ( 180.0f / M_PI );
+            pitchErr = -atan2f( u, f ) * ( 180.0f / M_PI ); // minus so positive pitch means look up (typical)
+        }
+
+        cg.aaDYaw   = yawErr;    // degrees, signed
+        cg.aaDPitch = pitchErr;  // degrees, signed
+    }
+
+    // Smooth strength (prevents flicker)
+    {
+        float targetS = cg.aaStrength;
+        float rateUp  = 0.35f;   // faster lock
+        float rateDn  = 0.20f;   // slower release
+
+        float rate = ( targetS > cg.aaStrengthSmoothed ) ? rateUp : rateDn;
+        cg.aaStrengthSmoothed = cg.aaStrengthSmoothed + ( targetS - cg.aaStrengthSmoothed ) * rate;
+
+        cg.aaStrength = cg.aaStrengthSmoothed;
+    }
+}
+
 

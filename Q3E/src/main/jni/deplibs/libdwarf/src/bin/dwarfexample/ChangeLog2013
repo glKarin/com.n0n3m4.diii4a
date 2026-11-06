@@ -1,0 +1,9 @@
+2013-11-24  David Anderson
+      * Makefile: Some compilers (FreeBSD gcc, for example) do
+        not support -gdwarf-4, so changed the compile
+        to -g.
+2013-08-13  David Anderson <davea42@earthlink.net>
+      * Add the --check option to verify that dwarf_highpc()
+        and the new dwarf_highpc_b() work properly with
+        both form address and form constant instances of
+        attributes DW_AT_high_pc.

@@ -252,17 +252,25 @@ idBounds::FromTransformedBounds
 */
 void idBounds::FromTransformedBounds(const idBounds &bounds, const idVec3 &origin, const idMat3 &axis)
 {
+#if !defined(_SPLASHDAMAGE)
 	int i;
+#endif
 	idVec3 center, extents, rotatedExtents;
 
 	center = (bounds[0] + bounds[1]) * 0.5f;
 	extents = bounds[1] - center;
 
+#ifdef _SPLASHDAMAGE
+    rotatedExtents[ 0 ] = idMath::Fabs( extents[ 0 ] * axis[ 0 ][ 0 ] ) + idMath::Fabs( extents[ 1 ] * axis[ 1 ][ 0 ] ) + idMath::Fabs( extents[ 2 ] * axis[ 2 ][ 0 ] );
+    rotatedExtents[ 1 ] = idMath::Fabs( extents[ 0 ] * axis[ 0 ][ 1 ] ) + idMath::Fabs( extents[ 1 ] * axis[ 1 ][ 1 ] ) + idMath::Fabs( extents[ 2 ] * axis[ 2 ][ 1 ] );
+    rotatedExtents[ 2 ] = idMath::Fabs( extents[ 0 ] * axis[ 0 ][ 2 ] ) + idMath::Fabs( extents[ 1 ] * axis[ 1 ][ 2 ] ) + idMath::Fabs( extents[ 2 ] * axis[ 2 ][ 2 ] );
+#else
 	for (i = 0; i < 3; i++) {
 		rotatedExtents[i] = idMath::Fabs(extents[0] * axis[0][i]) +
 		                    idMath::Fabs(extents[1] * axis[1][i]) +
 		                    idMath::Fabs(extents[2] * axis[2][i]);
 	}
+#endif
 
 	center = origin + center * axis;
 	b[0] = center - rotatedExtents;
@@ -412,8 +420,13 @@ void idBounds::FromPointRotation(const idVec3 &point, const idRotation &rotation
 		radius = (point - rotation.GetOrigin()).Length();
 
 		// FIXME: these bounds are usually way larger
+#ifdef _SPLASHDAMAGE
+        b[ 0 ] = rotation.GetOrigin() + idVec3( -radius, -radius, -radius );
+        b[ 1 ]= rotation.GetOrigin() + idVec3( radius, radius, radius );
+#else
 		b[0].Set(-radius, -radius, -radius);
 		b[1].Set(radius, radius, radius);
+#endif
 	}
 }
 
@@ -444,11 +457,19 @@ void idBounds::FromBoundsRotation(const idBounds &bounds, const idVec3 &origin, 
 	} else {
 
 		point = (bounds[1] - bounds[0]) * 0.5f;
+#ifdef _SPLASHDAMAGE
+        radius = (bounds[1] - point).Length() + (origin + ( point * axis ) - rotation.GetOrigin()).Length();
+
+        // FIXME: these bounds are usually way larger
+        b[ 0 ] = rotation.GetOrigin() + idVec3( -radius, -radius, -radius );
+        b[ 1 ] = rotation.GetOrigin() + idVec3( radius, radius, radius );
+#else
 		radius = (bounds[1] - point).Length() + (point - rotation.GetOrigin()).Length();
 
 		// FIXME: these bounds are usually way larger
 		b[0].Set(-radius, -radius, -radius);
 		b[1].Set(radius, radius, radius);
+#endif
 	}
 }
 
@@ -489,40 +510,6 @@ void idBounds::ToPoints(idVec3 points[8]) const
 
 #ifdef _RAVEN
 
-// jscott: for BSE attenuation
-/*
-================
-idBounds::ShortestDistance
-================
-*/
-float idBounds::ShortestDistance( const idVec3 &point ) const {
-
-	int		i;
-	float	delta, distance;
-
-	if( ContainsPoint( point ) ) {
-
-		return( 0.0f );
-	}
-
-	distance = 0.0f;
-	for( i = 0; i < 3; i++ ) {
-
-		if( point[i] < b[0][i] ) {
-
-			delta = b[0][i] - point[i];
-			distance += delta * delta;
-
-		} else if ( point[i] > b[1][i] ) {
-
-			delta = point[i] - b[1][i];
-			distance += delta * delta;
-		}
-	}
-
-	return( idMath::Sqrt( distance ) );
-}
-
 // abahr:
 idVec3 idBounds::FindEdgePoint( const idVec3& dir ) const {
 	return FindEdgePoint( GetCenter(), dir );
@@ -546,5 +533,105 @@ idVec3 idBounds::FindVectorToEdge( const idVec3& dir ) const {
 
 idVec3 idBounds::FindVectorToEdge( const idVec3& start, const idVec3& dir ) const {
 	return idVec3( FindEdgePoint(start, dir) - start );
+}
+#endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+// RAVEN BEGIN
+// jscott: for BSE attenuation
+/*
+================
+idBounds::ShortestDistance
+================
+*/
+float idBounds::ShortestDistance( const idVec3 &point ) const
+{
+
+    int		i;
+    float	delta, distance;
+
+    if( ContainsPoint( point ) ) {
+
+        return( 0.0f );
+    }
+
+    distance = 0.0f;
+    for( i = 0; i < 3; i++ ) {
+
+        if( point[i] < b[0][i] ) {
+
+            delta = b[0][i] - point[i];
+            distance += delta * delta;
+
+        } else if ( point[i] > b[1][i] ) {
+
+            delta = point[i] - b[1][i];
+            distance += delta * delta;
+        }
+    }
+
+    return( idMath::Sqrt( distance ) );
+}
+// RAVEN END
+#endif
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idBounds::FromTransformedBounds
+============
+*/
+void idBounds::FromTransformedBounds( const idBounds &bounds, const float matrix[16] )
+{
+    idVec3 center, extents, rotatedExtents, rotatedCenter;
+
+    center = ( bounds[ 0 ] + bounds[ 1 ] ) * 0.5f;
+    extents = bounds[ 1 ] - center;
+
+    rotatedExtents[ 0 ] = idMath::Fabs( extents[ 0 ] * matrix[ 0 ] ) + idMath::Fabs( extents[ 1 ] * matrix[ 4 ] ) + idMath::Fabs( extents[ 2 ] * matrix[ 8 ] );
+    rotatedExtents[ 1 ] = idMath::Fabs( extents[ 0 ] * matrix[ 1 ] ) + idMath::Fabs( extents[ 1 ] * matrix[ 5 ] ) + idMath::Fabs( extents[ 2 ] * matrix[ 9 ] );
+    rotatedExtents[ 2 ] = idMath::Fabs( extents[ 0 ] * matrix[ 2 ] ) + idMath::Fabs( extents[ 1 ] * matrix[ 6 ] ) + idMath::Fabs( extents[ 2 ] * matrix[ 10 ] );
+
+    rotatedCenter[ 0 ] = center[ 0 ] * matrix[ 0 ] + center[ 1 ] * matrix[ 4 ] + center[ 2 ] * matrix[ 8 ];
+    rotatedCenter[ 1 ] = center[ 0 ] * matrix[ 1 ] + center[ 1 ] * matrix[ 5 ] + center[ 2 ] * matrix[ 9 ];
+    rotatedCenter[ 2 ] = center[ 0 ] * matrix[ 2 ] + center[ 1 ] * matrix[ 6 ] + center[ 2 ] * matrix[ 10 ];
+
+    idVec3 origin( matrix[12], matrix[13], matrix[14] );
+    center = origin + rotatedCenter;
+    b[ 0 ] = center - rotatedExtents;
+    b[ 1 ] = center + rotatedExtents;
+}
+
+/*
+============
+idBounds::ToString
+============
+*/
+const char *idBounds::ToString( int precision ) const
+{
+    return idStr::FloatArrayToString( ToFloatPtr(), GetDimension(), precision );
+}
+
+/*
+============
+idBounds::ToPlanes
+
+	planes point outwards
+============
+*/
+void idBounds::ToPlanes( idPlane planes[6] ) const
+{
+    planes[0].SetNormal( idVec3( 0.0f, 0.0f, 1.0f ) );
+    planes[0].FitThroughPoint( b[1] );
+    planes[1].SetNormal( idVec3( 0.0f, 0.0f, -1.0f ) );
+    planes[1].FitThroughPoint( b[0] );
+    planes[2].SetNormal( idVec3( 0.0f, 1.0f, 0.0f ) );
+    planes[2].FitThroughPoint( b[1] );
+    planes[3].SetNormal( idVec3( 0.0f, -1.0f, 0.0f ) );
+    planes[3].FitThroughPoint( b[0] );
+    planes[4].SetNormal( idVec3( 1.0f, 0.0f, 0.0f ) );
+    planes[4].FitThroughPoint( b[1] );
+    planes[5].SetNormal( idVec3( -1.0f, 0.0f, 0.0f ) );
+    planes[5].FitThroughPoint( b[0] );
 }
 #endif

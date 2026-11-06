@@ -36,7 +36,13 @@ idVec5 vec5_origin(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 idVec6 vec6_origin(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 idVec6 vec6_infinity(idMath::INFINITY, idMath::INFINITY, idMath::INFINITY, idMath::INFINITY, idMath::INFINITY, idMath::INFINITY);
 
-#ifdef _RAVEN
+#ifdef _SPLASHDAMAGE
+idVec2 vec2_one( 1.0f, 1.0f );
+idVec3 vec3_one( 1.0f, 1.0f, 1.0f );
+idVec5 vec5_one( 1.0f, 1.0f, 1.0f, 1.0f, 1.0f );
+idVec6 vec6_one( 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f );
+#endif
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 idVec4 vec4_one( 1.0f, 1.0f, 1.0f, 1.0f );
 #endif
 
@@ -261,6 +267,10 @@ void idVec3::Lerp(const idVec3 &v1, const idVec3 &v2, const float l)
 	} else {
 		(*this) = v1 + l * (v2 - v1);
 	}
+#ifdef _SPLASHDAMAGE
+
+    VEC_CHECK_BAD( *this );
+#endif
 }
 
 /*
@@ -298,6 +308,9 @@ void idVec3::SLerp(const idVec3 &v1, const idVec3 &v2, const float t)
 	}
 
 	(*this) = (v1 * scale0 + v2 * scale1);
+#ifdef _SPLASHDAMAGE
+    VEC_CHECK_BAD( *this );
+#endif
 }
 
 /*
@@ -317,6 +330,9 @@ void idVec3::ProjectSelfOntoSphere(const float radius)
 	} else {
 		z = rsqr / (2.0f * sqrt(len));
 	}
+#ifdef _SPLASHDAMAGE
+    VEC_CHECK_BAD( *this );
+#endif
 }
 
 
@@ -578,5 +594,64 @@ idVec3 idVec3::ToNormal() const {
 	return *this * invLength;
 }
 // HUMANHEAD END
+#endif
+
+#ifdef _SPLASHDAMAGE
+// RAVEN BEGIN
+/*
+=============
+idVec3::ToRadians
+=============
+*/
+rvAngles idVec3::ToRadians( void ) const
+{
+    float forward;
+    float yaw;
+    float pitch;
+
+    if( !x && !y ) {
+        yaw = 0.0f;
+        if( z > 0.0f ) {
+            pitch = idMath::HALF_PI;
+        } else {
+            pitch = idMath::THREEFOURTHS_PI;
+        }
+    } else {
+        yaw = atan2f( y, x );
+        if( yaw < 0.0f ) {
+            yaw += idMath::TWO_PI;
+        }
+
+        forward = ( float )idMath::Sqrt( x * x + y * y );
+        pitch = atan2f( z, forward );
+        if( pitch < 0.0f ) {
+            pitch += idMath::TWO_PI;
+        }
+    }
+
+    return( rvAngles( -pitch, yaw, 0.0f ) );
+}
+// RAVEN END
+
+// jscott: slightly quicker version without the copy
+idMat3 &idVec3::ToMat3( idMat3 &mat ) const
+{
+    float	d;
+
+    mat[0] = *this;
+    d = x * x + y * y;
+    if ( !d ) {
+        mat[1][0] = 1.0f;
+        mat[1][1] = 0.0f;
+        mat[1][2] = 0.0f;
+    } else {
+        d = idMath::InvSqrt( d );
+        mat[1][0] = -y * d;
+        mat[1][1] = x * d;
+        mat[1][2] = 0.0f;
+    }
+    mat[2] = Cross( mat[1] );
+    return( mat );
+}
 #endif
 

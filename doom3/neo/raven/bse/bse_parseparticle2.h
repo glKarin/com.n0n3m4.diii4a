@@ -112,6 +112,15 @@ public:
     // ---------------------------------------------------------------------
     //  Parsing helpers (return true on success)
     // ---------------------------------------------------------------------
+#ifdef _SPLASHDAMAGE //karin: using idParser instead of idLexer
+    bool        Parse(rvDeclEffect* effect, idParser* src);
+    bool        ParseSpawnDomains(rvDeclEffect* effect, idParser* src);
+    bool        ParseMotionDomains(rvDeclEffect* effect, idParser* src);
+    bool        ParseDeathDomains(rvDeclEffect* effect, idParser* src);
+    bool        ParseImpact(rvDeclEffect* effect, idParser* src);
+    bool        ParseTimeout(rvDeclEffect* effect, idParser* src);
+    bool        ParseBlendParms(rvDeclEffect* effect, idParser* src);
+#else
     bool        Parse(rvDeclEffect* effect, idLexer* src);
     bool        ParseSpawnDomains(rvDeclEffect* effect, idLexer* src);
     bool        ParseMotionDomains(rvDeclEffect* effect, idLexer* src);
@@ -119,14 +128,20 @@ public:
     bool        ParseImpact(rvDeclEffect* effect, idLexer* src);
     bool        ParseTimeout(rvDeclEffect* effect, idLexer* src);
     bool        ParseBlendParms(rvDeclEffect* effect, idLexer* src);
+#endif
 
     // ---------------------------------------------------------------------
     //  Comparisons / utilities
     // ---------------------------------------------------------------------
     bool        Compare(const rvParticleTemplate& rhs)   const;
     void        FixupParms(rvParticleParms& p);
+#ifdef _SPLASHDAMAGE //karin: using idParser instead of idLexer
+    static bool GetVector(idParser* src, int components, idVec3& out);
+    static bool CheckCommonParms(idParser* src, rvParticleParms& p);
+#else
     static bool GetVector(idLexer* src, int components, idVec3& out);
     static bool CheckCommonParms(idLexer* src, rvParticleParms& p);
+#endif
 
     float       GetMaxParmValue(const rvParticleParms* spawn,const rvParticleParms* death,const rvEnvParms* envelope) const;
 
@@ -136,8 +151,13 @@ public:
     }
 public:
     // ── sub-parsers (internal) ────────────────────────────────────────────
+#ifdef _SPLASHDAMAGE //karin: using idParser instead of idLexer
+    bool        ParseSpawnParms(rvDeclEffect*, idParser*, rvParticleParms&, int vecCount);
+    bool        ParseMotionParms(idParser*, int vecCount, rvEnvParms&);
+#else
     bool        ParseSpawnParms(rvDeclEffect*, idLexer*, rvParticleParms&, int vecCount);
     bool        ParseMotionParms(idLexer*, int vecCount, rvEnvParms&);
+#endif
     int         GetMaxTrailCount() const;                      // helper
 
     // ── generic flags bitfield (Init zeros it) ────────────────────────────
@@ -223,4 +243,13 @@ public:
 
     // ── optional entityDef attachment (for spawned rigid-bodys etc.) ──────
     idStr       mEntityDefName;
+#ifdef _SPLASHDAMAGE
+	int					mTrailRepeat;
+	float				mWindDeviationAngle;
+	float				mTrailScale;							// Width of the motion trails will be particleSize scaled by this
+	byte				mNumFrames;
+	float				mPhysicsDistance;
+	//rvParticleParms	*mpSpawnWindStrength;
+	//rvParticleParms	*mpSpawnFriction;
+#endif
 };

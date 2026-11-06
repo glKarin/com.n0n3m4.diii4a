@@ -183,7 +183,14 @@ int idModelTest::ListAnim(void) const
     for(int i = 0; i < numAnim; i++)
     {
         const char *name = gameEdit->ANIM_GetAnimNameFromEntityDef(&spawnArgs, i + 1);
+#ifdef _SPLASHDAMAGE
+        idDict args;
+        args.Set("model", modelName.c_str());
+        args.Set("anim", name);
+        const idMD5Anim *anim = gameEdit->ANIM_GetAnimFromEntityDef(&args);
+#else
         const idMD5Anim *anim = gameEdit->ANIM_GetAnimFromEntityDef(animClass, name);
+#endif
         if(anim)
             common->Printf("  %3d: %s (frames: %d, length: %d)\n", i, name, gameEdit->ANIM_GetNumFrames(anim), gameEdit->ANIM_GetLength(anim));
         else
@@ -203,7 +210,14 @@ int idModelTest::AnimationList(idList<md5animTestInfo_t> &list) const
     for(int i = 0; i < numAnim; i++)
     {
         const char *name = gameEdit->ANIM_GetAnimNameFromEntityDef(&spawnArgs, i + 1);
+#ifdef _SPLASHDAMAGE
+        idDict args;
+        args.Set("model", modelName.c_str());
+        args.Set("anim", name);
+        const idMD5Anim *anim = gameEdit->ANIM_GetAnimFromEntityDef(&args);
+#else
         const idMD5Anim *anim = gameEdit->ANIM_GetAnimFromEntityDef(animClass, name);
+#endif
         if(anim)
         {
             md5animTestInfo_t info;
@@ -292,7 +306,14 @@ void idModelTest::BuildAnimation(int time)
     if (animName.Length()) {
         worldEntity.numJoints = worldEntity.hModel->NumJoints();
         worldEntity.joints = (idJointMat *)Mem_Alloc16(worldEntity.numJoints * sizeof(*worldEntity.joints));
+#ifdef _SPLASHDAMAGE
+        idDict args;
+        args.Set("model", modelName.c_str());
+        args.Set("anim", animName.c_str());
+        modelAnim = gameEdit->ANIM_GetAnimFromEntityDef(&args);
+#else
         modelAnim = gameEdit->ANIM_GetAnimFromEntityDef(animClass, animName);
+#endif
 
         if (modelAnim) {
             numFrame = gameEdit->ANIM_GetNumFrames(modelAnim);
@@ -809,7 +830,11 @@ void idModelTest::CreateModel(const char *model, const char *classname, const ch
         spawnArgs.Set("cycle", "-1");
     }
 
+#ifdef _SPLASHDAMAGE
+    gameEdit->ParseSpawnArgsToRenderEntity(spawnArgs, worldEntity);
+#else
     gameEdit->ParseSpawnArgsToRenderEntity(&spawnArgs, &worldEntity);
+#endif
 
     if (worldEntity.hModel) {
         worldEntity.shaderParms[0] = 1;

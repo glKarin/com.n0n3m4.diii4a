@@ -168,7 +168,11 @@ void idSurface_SweptSpline::Tessellate(const int splineSubdivisions, const int s
 
 	// calculate the points and first derivatives for the swept spline
 	totalTime = sweptSpline->GetTime(sweptSpline->GetNumValues() - 1) - sweptSpline->GetTime(0) + sweptSpline->GetCloseTime();
+#ifdef _SPLASHDAMAGE
+    sweptSplineDiv = sweptSpline->GetBoundaryType() == idCurve_Spline<idVec3>::BT_CLOSED ? sweptSplineSubdivisions : sweptSplineSubdivisions - 1;
+#else
 	sweptSplineDiv = sweptSpline->GetBoundaryType() == idCurve_Spline<idVec4>::BT_CLOSED ? sweptSplineSubdivisions : sweptSplineSubdivisions - 1;
+#endif
 	baseOffset = (splineSubdivisions-1) * sweptSplineSubdivisions;
 
 	for (i = 0; i < sweptSplineSubdivisions; i++) {
@@ -176,13 +180,22 @@ void idSurface_SweptSpline::Tessellate(const int splineSubdivisions, const int s
 		splinePos = sweptSpline->GetCurrentValue(t);
 		splineD1 = sweptSpline->GetCurrentFirstDerivative(t);
 		verts[baseOffset+i].xyz = splinePos.ToVec3();
+#ifdef _SPLASHDAMAGE
+        verts[baseOffset+i].SetST( splinePos.w, 0 );	// FIXME: SD_USE_DRAWVERT_SIZE_32
+        verts[baseOffset+i].SetTangent( splineD1.ToVec3() );
+#else
 		verts[baseOffset+i].st[0] = splinePos.w;
 		verts[baseOffset+i].tangents[0] = splineD1.ToVec3();
+#endif
 	}
 
 	// sweep the spline
 	totalTime = spline->GetTime(spline->GetNumValues() - 1) - spline->GetTime(0) + spline->GetCloseTime();
+#ifdef _SPLASHDAMAGE
+    splineDiv = spline->GetBoundaryType() == idCurve_Spline<idVec3>::BT_CLOSED ? splineSubdivisions : splineSubdivisions - 1;
+#else
 	splineDiv = spline->GetBoundaryType() == idCurve_Spline<idVec4>::BT_CLOSED ? splineSubdivisions : splineSubdivisions - 1;
+#endif
 	splineMat.Identity();
 
 	for (i = 0; i < splineSubdivisions; i++) {
@@ -198,12 +211,23 @@ void idSurface_SweptSpline::Tessellate(const int splineSubdivisions, const int s
 		for (j = 0; j < sweptSplineSubdivisions; j++) {
 			idDrawVert *v = &verts[offset+j];
 			v->xyz = splinePos.ToVec3() + verts[baseOffset+j].xyz * splineMat;
+#ifdef _SPLASHDAMAGE
+            v->_st[0] = verts[baseOffset+j]._st[0];
+            v->SetSTIdx( 1, splinePos.w );
+
+            v->SetTangent( verts[baseOffset+j].GetTangent() * splineMat );
+
+            idVec3 norm = splineD1.ToVec3().Cross( v->GetTangent() );
+            norm.Normalize();
+            v->SetNormal( norm );
+#else
 			v->st[0] = verts[baseOffset+j].st[0];
 			v->st[1] = splinePos.w;
 			v->tangents[0] = verts[baseOffset+j].tangents[0] * splineMat;
 			v->tangents[1] = splineD1.ToVec3();
 			v->normal = v->tangents[1].Cross(v->tangents[0]);
 			v->normal.Normalize();
+#endif
 			v->color[0] = v->color[1] = v->color[2] = v->color[3] = 0;
 		}
 	}

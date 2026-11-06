@@ -90,6 +90,9 @@ cvar_t  *cl_forceavidemo;
 cvar_t  *cl_freelook;
 cvar_t  *cl_sensitivity;
 
+cvar_t  *cl_zoomSensitivity;
+cvar_t  *cl_zoomSensitivityFovScaled;
+
 cvar_t  *cl_mouseAccel;
 cvar_t	*cl_mouseAccelOffset;
 cvar_t	*cl_mouseAccelStyle;
@@ -111,6 +114,30 @@ cvar_t	*j_yaw_axis;
 cvar_t	*j_forward_axis;
 cvar_t	*j_side_axis;
 cvar_t	*j_up_axis;
+
+cvar_t  *j_lookSens;
+cvar_t  *j_moveSens;
+
+cvar_t  *j_walk_threshold;
+cvar_t  *j_walk_hysteresis;
+
+cvar_t  *j_aimassist;            
+cvar_t  *j_aimassist_slowdown;   
+cvar_t  *j_aimassist_magnet;    
+cvar_t  *j_aimassist_minstick;   
+cvar_t  *j_aimassist_maxangle;
+
+cvar_t *j_aimassist_strafemagnet;   
+cvar_t *j_aimassist_minstrength;    
+
+cvar_t *j_aimassist_turnrate;        
+cvar_t *j_aimassist_turnrate_ads;
+
+cvar_t *j_aimassist_recoil;
+
+cvar_t *j_uiSpeed;
+cvar_t *j_uiExpo;
+cvar_t *j_uiDeadzone;
 
 cvar_t  *cl_activeAction;
 
@@ -172,7 +199,6 @@ void CL_CheckForResend( void );
 void CL_ShowIP_f( void );
 void CL_ServerStatus_f( void );
 void CL_ServerStatusResponse( netadr_t from, msg_t *msg );
-
 
 /*
 ==============
@@ -3045,11 +3071,15 @@ void CL_Frame( int msec ) {
 	// send intentions now
 	CL_SendCmd();
 
+	CL_GamepadUIMouseMove();
+
 	// resend a connection request if necessary
 	CL_CheckForResend();
 
 	// decide on the serverTime to render
 	CL_SetCGameTime();
+
+	SCR_RunLevelCinematic();
 
 	// update the screen
 	SCR_UpdateScreen();
@@ -3693,6 +3723,9 @@ void CL_Init( void ) {
 	cl_mouseAccel = Cvar_Get( "cl_mouseAccel", "0", CVAR_ARCHIVE );
 	cl_freelook = Cvar_Get( "cl_freelook", "1", CVAR_ARCHIVE );
 
+	cl_zoomSensitivity = Cvar_Get( "cl_zoomSensitivity", "1", CVAR_ARCHIVE );
+	cl_zoomSensitivityFovScaled = Cvar_Get( "cl_zoomSensitivityFovScaled", "1", CVAR_ARCHIVE );
+
 	// 0: legacy mouse acceleration
 	// 1: new implementation
 	cl_mouseAccelStyle = Cvar_Get( "cl_mouseAccelStyle", "0", CVAR_ARCHIVE );
@@ -3732,17 +3765,42 @@ void CL_Init( void ) {
 	m_side = Cvar_Get( "m_side", "0.25", CVAR_ARCHIVE );
 	m_filter = Cvar_Get( "m_filter", "0", CVAR_ARCHIVE );
 
-	j_pitch =        Cvar_Get ("j_pitch",        "0.022", CVAR_ARCHIVE);
-	j_yaw =          Cvar_Get ("j_yaw",          "-0.022", CVAR_ARCHIVE);
-	j_forward =      Cvar_Get ("j_forward",      "-0.25", CVAR_ARCHIVE);
-	j_side =         Cvar_Get ("j_side",         "0.25", CVAR_ARCHIVE);
-	j_up =           Cvar_Get ("j_up",           "0", CVAR_ARCHIVE);
+	j_pitch =        Cvar_Get ("j_pitch",        "200", CVAR_ARCHIVE);
+	j_yaw =          Cvar_Get ("j_yaw",          "-200", CVAR_ARCHIVE);
+	j_forward =      Cvar_Get ("j_forward",      "-127", CVAR_ARCHIVE);
+	j_side =         Cvar_Get ("j_side",         "127", CVAR_ARCHIVE);
+	j_up =           Cvar_Get ("j_up",           "127", CVAR_ARCHIVE);
 
 	j_pitch_axis =   Cvar_Get ("j_pitch_axis",   "3", CVAR_ARCHIVE);
 	j_yaw_axis =     Cvar_Get ("j_yaw_axis",     "2", CVAR_ARCHIVE);
 	j_forward_axis = Cvar_Get ("j_forward_axis", "1", CVAR_ARCHIVE);
 	j_side_axis =    Cvar_Get ("j_side_axis",    "0", CVAR_ARCHIVE);
 	j_up_axis =      Cvar_Get ("j_up_axis",      "4", CVAR_ARCHIVE);
+
+	j_uiSpeed =     Cvar_Get ("j_uiSpeed",      "700", CVAR_ARCHIVE);
+	j_uiExpo =	    Cvar_Get ("j_uiExpo",      "1.6", CVAR_ARCHIVE);
+	j_uiDeadzone =	Cvar_Get ("j_uiDeadzone",   "0.18", CVAR_ARCHIVE);
+
+	j_lookSens = Cvar_Get ("j_lookSens", "1.0", CVAR_ARCHIVE);
+	j_moveSens = Cvar_Get ("j_moveSens", "1.0", CVAR_ARCHIVE);
+
+	j_walk_threshold = Cvar_Get("j_walk_threshold", "64", CVAR_ARCHIVE);
+	j_walk_hysteresis = Cvar_Get("j_walk_hysteresis", "8", CVAR_ARCHIVE);
+
+	j_aimassist = Cvar_Get("j_aimassist", "2", CVAR_ARCHIVE);
+
+	j_aimassist_slowdown = Cvar_Get("j_aimassist_slowdown", "0.60", CVAR_ARCHIVE);
+	j_aimassist_magnet = Cvar_Get("j_aimassist_magnet", "0.42", CVAR_ARCHIVE);
+	j_aimassist_minstick = Cvar_Get("j_aimassist_minstick", "0.10", CVAR_ARCHIVE);
+	j_aimassist_maxangle = Cvar_Get("j_aimassist_maxangle", "6", CVAR_ARCHIVE); // mostly legacy now
+
+	j_aimassist_strafemagnet = Cvar_Get("j_aimassist_strafemagnet", "0.24", CVAR_ARCHIVE);
+	j_aimassist_minstrength = Cvar_Get("j_aimassist_minstrength", "0.40", CVAR_ARCHIVE);
+
+	j_aimassist_turnrate = Cvar_Get("j_aimassist_turnrate", "175", CVAR_ARCHIVE); // deg/sec
+	j_aimassist_turnrate_ads = Cvar_Get("j_aimassist_turnrate_ads", "125", CVAR_ARCHIVE);
+
+	j_aimassist_recoil = Cvar_Get("j_aimassist_recoil", "0.22", CVAR_ARCHIVE);
 
 	Cvar_CheckRange(j_pitch_axis, 0, MAX_JOYSTICK_AXIS-1, qtrue);
 	Cvar_CheckRange(j_yaw_axis, 0, MAX_JOYSTICK_AXIS-1, qtrue);

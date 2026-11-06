@@ -1,0 +1,291 @@
+renderprogram game/scope {
+	program vertex glsl { <%
+		varying vec2 texCoord0;
+		varying vec2 center;
+		varying vec4 color;
+		
+		$define col VERTEX_BYTE_COLOR($colorAttrib)
+		$define screenSize $currentRenderTexelSize
+
+		void main() {
+			vec2 tex = $texCoordAttrib.xy;
+		$if r_32ByteVtx
+			indata.tex *= 1.0/4096.0;
+		$endif
+			
+			vec2 coord = tex.xy;
+			coord.y = 1.0 - coord.y;
+			
+			
+			center = ( 0.5 * screenSize.xy );
+			center.y += $parameters.w;
+			texCoord0 = ( coord * screenSize.xy ) - center;
+			
+			color = col;
+
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec2 texCoord0;
+		varying vec2 center;
+		varying vec4 color;
+
+		$define blurbuffer $map // rect
+		$define framebuffer $currentRender // rect
+		$define screenSize $currentRenderTexelSize
+
+		$define glareParameters $postGlareParameters
+
+		void main() {
+			float pi = 3.14159265358979323846;
+			float twopi = pi * 2.0;
+
+			float wpvPinch = $parameters.x;// - 0.4 * indata.color.x;	//-0.15;
+			//float wpvWhirl = /*indata.color.x*/ 3.0 * 360.0 * pi / 180.0;
+			//float wpvRadius = 1;
+			float lens_diameter = screenSize.y + 64.0;//+ 128 * indata.color.x;
+			float lens_radius = 0.5 * lens_diameter;
+
+			float dx = texCoord0.x * $parameters.y;
+			float dy = texCoord0.y * $parameters.z;
+			float d = dx * dx + dy * dy;
+
+			vec2 texcoord;
+
+			//if ( d < lens_radius * lens_radius /** wpvRadius*/ ) {
+				float dist = sqrt( d /*/ wpvRadius*/ ) / lens_diameter;
+
+				// pinch
+				float factor = pow( sin( twopi * /*0.5 **/ dist ), -wpvPinch );
+
+				dx *= factor;
+				dy *= factor;
+
+#if 0
+				// whirl
+				factor = 1.0 - dist;
+				float ang = wpvWhirl * factor * factor;
+
+				vec2 sincosa;
+				sincos( ang, sincosa.x, sincosa.y );
+
+				texcoord.x = sincosa.y * dx  - sincosa.x * dy;
+				texcoord.y = 1.0 - ( sincosa.x * dx  - sincosa.y * dy );
+#else
+				texcoord.x = dx / $parameters.y;
+				texcoord.y = dy / $parameters.z;
+#endif
+			//} else {
+			//	texcoord.x = indata.texCoord0.x;
+			//	texcoord.y = indata.texCoord0.y;
+			//}
+
+			texcoord += center;
+			
+			//return texRECT( framebuffer, texcoord );
+
+			// do post processing glare
+			vec4 clean = texture2D( framebuffer, texcoord / $currentRenderTexSize.xy ); // rect
+			vec4 blur = texture2D( blurbuffer, texcoord * 0.25 / $mapTexSize.xy ); // rect
+			
+			vec4 final = clean *  glareParameters.x + blur * glareParameters.y;
+			
+			vec4 grayscale = vec4( dot( final.rgb, vec3( 0.299, 0.587, 0.114 ) ) );
+			gl_FragColor = $diffuseColor * mix( vec4( 0.5, 0.5, 0.5, 0.5 ), mix( grayscale, final, $postSaturationContrast.x ) , $postSaturationContrast.y ) * $postTint;
+		}
+	%> }
+}
+
+renderprogram game/scopeModel {
+	program vertex glsl { <%
+		$define col VERTEX_BYTE_COLOR($colorAttrib)
+
+		varying vec2 texCoord0;
+		varying vec2 center;
+		varying vec4 color;
+		
+		$define screenSize $currentRenderTexelSize
+
+		void main() {
+			vec2 tex = $texCoordAttrib.xy;
+			$if r_32ByteVtx
+				indata.tex *= 1.0/4096.0;
+			$endif
+			
+			vec2 coord = tex.xy;
+			coord.y = 1.0 - coord.y;
+			
+			
+			center = ( 0.5 * screenSize.xy );
+			center.y += $parameters.w;
+			texCoord0 = ( coord * screenSize.xy ) - center;
+			
+			color = col;
+
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec2 texCoord0; // WPOS 
+		$define texCoord0 gl_FragCoord.xy // unuse original texCoord0
+		varying vec2 center;
+		varying vec4 color;
+
+		$define blurbuffer $map // rect
+		$define framebuffer $currentRender // rect
+		$define screenSize $currentRenderTexelSize
+
+		$define glareParameters $postGlareParameters
+
+		float luminance( vec3 c ){
+			return dot( c, vec3( 0.33, 0.33, 0.33 ) );
+		}
+
+
+		void main() {
+			float pi = 3.14159265358979323846;
+			float twopi = pi * 2.0;
+
+			vec2 _texCoord0 = texCoord0;
+			_texCoord0 -= screenSize.xy * 0.5;			
+
+			float wpvPinch = $parameters.x;// - 0.4 * color.x;	//-0.15;
+			float lens_diameter = screenSize.y + 64.0;//+ 128 * indata.color.x;
+			float lens_radius = 0.5 * lens_diameter;
+
+			float dx = _texCoord0.x * $parameters.y;
+			float dy = _texCoord0.y * $parameters.z;
+			float d = dx * dx + dy * dy;
+
+			vec2 texcoord;
+
+			//if ( d < lens_radius * lens_radius /** wpvRadius*/ ) {
+				float dist = sqrt( d /*/ wpvRadius*/ ) / lens_diameter;
+
+				// pinch
+				float factor = pow( sin( twopi /* 0.5*/ * dist ), -wpvPinch );
+				
+				dx *= factor;
+				dy *= factor;
+
+				texcoord.x = dx / $parameters.y;
+				texcoord.y = dy / $parameters.z;
+			//} else {
+			//	texcoord.x = indata.texCoord0.x;
+			//	texcoord.y = indata.texCoord0.y;
+			//}
+
+			texcoord += screenSize.xy * 0.5;			//indata.center;
+			
+			// do post processing glare
+			vec4 clean = texture2D( framebuffer, texcoord / $currentRenderTexSize.xy ); // rect
+			//vec4 blur = texture2D( blurbuffer, vec2( texcoord.x * 0.25, texcoord.y * 0.5 ) / $mapTexSize.xy ); // rect
+			float blur = 0.0;//lerp( 1, smoothstep( glareParameters.z, 1.0, luminance (clean.rgb ) ), glareParameters.w )*( clean.a * 0.25f );
+			
+			vec4 final = clean *  glareParameters.x + blur * glareParameters.y;
+			
+			//final = blur;
+			//return final;
+			vec4 grayscale = vec4( dot( final.rgb, vec3( 0.299, 0.587, 0.114 ) ) );
+			gl_FragColor = $diffuseColor * mix( vec4( 0.5, 0.5, 0.5, 0.5 ), mix( grayscale, final, $postSaturationContrast.x ) , $postSaturationContrast.y ) * $postTint;
+		}
+	%> }
+}
+
+renderprogram game/scopeStatix {
+	program vertex glsl { <%
+		$define col VERTEX_BYTE_COLOR($colorAttrib)
+
+		varying vec2 texCoord0;
+		varying vec2 center;
+		varying vec2 texCoord1;
+		varying vec4 color;
+		
+		$define screenSize $currentRenderTexelSize
+
+		void main() {
+			vec2 tex = $texCoordAttrib.xy;
+		$if r_32ByteVtx
+			indata.tex *= 1.0/4096.0;
+		$endif
+			
+			vec2 coord = tex.xy;
+			coord.y = 1.0 - coord.y;
+			
+			
+			center = ( 0.5 * screenSize.xy );
+			center.y += $parameters.w;
+			texCoord0 = ( coord * screenSize.xy ) - center;
+			texCoord1 = tex;
+			
+			color = col;
+
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		$define texCoord gl_FragCoord.xy
+		//varying vec2 texCoord0;
+		varying vec2 center;
+		varying vec2 texCoord1;
+		varying vec4 color;
+
+		$define noise $mask
+		$define blurbuffer $map // rect
+		$define framebuffer $currentRender // rect
+		$define screenSize $currentRenderTexelSize
+
+		$define glareParameters $postGlareParameters
+
+		void main() {
+			float pi = 3.14159265358979323846;
+			float twopi = pi * 2.0;
+
+			vec2 texCoord0 = texCoord - screenSize.xy * 0.5;			
+
+			float wpvPinch = $parameters.x;
+			float lens_diameter = screenSize.y + 128.0;//+ 128 * indata.color.x;
+			float lens_radius = 0.5 * lens_diameter;
+
+			float dx = texCoord0.x * $parameters.y;
+			float dy = texCoord0.y * $parameters.z;
+			float d = dx * dx + dy * dy;
+
+			vec2 texcoord;
+
+			float dist = sqrt( d /*/ wpvRadius*/ ) / lens_diameter;
+
+			// pinch
+			float factor = pow( sin( twopi * /*0.5 **/ dist ), -wpvPinch );
+				
+			dx *= factor;
+			dy *= factor;
+
+			texcoord.x = dx / $parameters.y;
+			texcoord.y = dy / $parameters.z;
+
+			texcoord += screenSize.xy * 0.5;
+			
+			// do post processing glare
+			vec4 clean = texture2D( framebuffer, texcoord / $currentRenderTexSize.xy ); // rect
+			vec4 blur = texture2D( blurbuffer, texcoord * 0.25 / $mapTexSize.xy ); // rect
+			
+			vec4 final = clean *  glareParameters.x + blur * glareParameters.y;
+			
+			vec4 grayscale = vec4( dot( final.rgb, vec3( 0.299, 0.587, 0.114 ) ) );
+			
+			vec4 outcol = $diffuseColor * mix( vec4( 0.5, 0.5, 0.5, 0.5 ), mix( grayscale, final, $postSaturationContrast.x ) , $postSaturationContrast.y ) * $postTint;
+			
+			vec4 c0 = texture2D( noise, (texCoord1.xy + vec2($parameters2.x,$parameters2.x)) * 2.0);
+			vec4 c1 = texture2D( noise, (texCoord1.xy + vec2($parameters2.x,-$parameters2.x)) * 2.0);
+			vec4 c = c0;//(c0 + c1) / 2;
+			outcol = mix( outcol, c, /*saturate*/clamp(c.w * $parameters2.y, 0.0, 1.0));
+
+			gl_FragColor = outcol;
+		}
+	%> }
+}

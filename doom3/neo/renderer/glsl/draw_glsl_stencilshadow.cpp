@@ -6,19 +6,29 @@
 
 #ifdef _STENCIL_SHADOW_IMPROVE
 
-static idCVar harm_r_stencilShadowCombine( "harm_r_stencilShadowCombine", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "combine local and global stencil shadow" );
-static bool r_stencilShadowCombine = false;
+idCVar harm_r_stencilShadowCombine( "harm_r_stencilShadowCombine", "0", CVAR_RENDERER | CVAR_BOOL | CVAR_ARCHIVE, "combine local and global stencil shadow" );
+bool r_stencilShadowCombine = false;
 
-static bool r_stencilShadowTranslucent = false;
-static float r_stencilShadowAlpha = 1.0f;
+bool r_stencilShadowTranslucent = false;
+float r_stencilShadowAlpha = 1.0f;
 
-static void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *surf, bool noStencilTest);
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+bool stencilShadowWithoutStencilTest = false;
+#endif
 
-void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *surf, bool noStencilTest)
+static void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *surf, bool noStencilTest)
 {
 	if (!surf) {
 		return;
 	}
+
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction, skip megatexture interaction rendering if fill transclucent color first
+	stencilShadowWithoutStencilTest = noStencilTest;
+#endif
+#ifdef _SPLASHDAMAGExxx //karin: megatexture interaction, move to if stage's lighting == SL_AMBIENT in RB_CreateSingleDrawInteractions
+	if (!noStencilTest)
+		RB_GLSL_CreateDrawMegaTextureInteractions(surf);
+#endif
 
 	if(noStencilTest)
 		qglDisable(GL_STENCIL_TEST);
@@ -126,11 +136,14 @@ void RB_GLSL_CreateDrawInteractions_translucentStencilShadow(const drawSurf_t *s
 
 	if(noStencilTest)
 		qglEnable(GL_STENCIL_TEST);
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction, skip megatexture interaction rendering if fill transclucent color first
+	stencilShadowWithoutStencilTest = false;
+#endif
 }
 #endif
 
 #ifdef _SOFT_STENCIL_SHADOW
-static bool r_stencilShadowSoft = false;
+bool r_stencilShadowSoft = false;
 static float r_stencilShadowSoftBias = -1.0f;
 // I don't sure any GPUs are allowed to copy stencil buffer directly.
 static bool r_stencilShadowSoftCopyStencilBuffer = false; // if false, copy depth buffer
@@ -166,7 +179,7 @@ ID_INLINE static float RB_StencilShadowSoft_calcBIAS(void)
 #undef STENCIL_SHADOW_SOFT_MIN_BIAS
 }
 
-ID_INLINE static float RB_StencilShadowSoft_getBIAS(void)
+/*ID_INLINE static*/ float RB_StencilShadowSoft_getBIAS(void)
 {
 	if(r_stencilShadowSoftBias < 0.0f)
 	{
@@ -218,6 +231,11 @@ void RB_GLSL_CreateDrawInteractions_softStencilShadow(const drawSurf_t *surf, in
 	if (!surf) {
 		return;
 	}
+
+#ifdef _SPLASHDAMAGExxx //karin: megatexture interaction, move to if stage's lighting == SL_AMBIENT in RB_CreateSingleDrawInteractions
+	if ((mask & (1 | 2)) == 0)
+		RB_GLSL_CreateDrawMegaTextureInteractions(surf);
+#endif
 
 	if(mask & 1)
 		qglDisable(GL_STENCIL_TEST);
@@ -356,7 +374,7 @@ ID_INLINE static void RB_StencilShadowSoft_unbindFramebuffer(void)
 	stencilTexture.End();
 }
 
-ID_INLINE static void RB_StencilShadowSoftInteraction_bindTexture(void)
+/*ID_INLINE static*/ void RB_StencilShadowSoftInteraction_bindTexture(void)
 {
 	stencilTexture.Bind();
 }

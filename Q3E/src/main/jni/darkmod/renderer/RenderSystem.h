@@ -222,7 +222,7 @@ public:
 	 */
 	virtual void			GetCurrentRenderCropSize(int& width, int& height) = 0;
 
-	virtual void			CaptureRenderToImage( idImageScratch &image ) = 0;
+	virtual void			CaptureRenderToImage( idImageScratch &image, const struct renderCrop_s *scissor = nullptr ) = 0;
 	
 	virtual void			PostProcess() = 0;
 
@@ -232,6 +232,7 @@ public:
 	 * size using 3 bytes per pixel (stored in order RGB). Use CropRenderSize(), then GetCurrentRenderCropSize() 
 	 * to receive the necessary size.
 	 * stgatilov: usePbo = true is set only for lightgem capturing! (see #4395)
+	 * stgatilov: unlike CaptureRenderToImage, this capture executes all backend commands straight away (including pre-buffered ones)
 	 */
 	virtual void			CaptureRenderToBuffer(unsigned char* buffer, bool usePbo = false) = 0;
 

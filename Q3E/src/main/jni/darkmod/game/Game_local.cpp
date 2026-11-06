@@ -462,17 +462,23 @@ void idGameLocal::Init( void ) {
 
 	Printf( "--------- Initializing Game ----------\n" );
 
-	// BluePill #4539 - show whether this is a 32-bit or 64-bit binary
+	int revision = RevisionTracker::Instance().GetHighestRevision();
 	Printf( "%s %d.%02d/%zu, %s, code revision %d\n", 
  		GAME_VERSION, 
 		TDM_VERSION_MAJOR,
 		TDM_VERSION_MINOR,
 		sizeof(void*) * 8,
 		BUILD_STRING,
-		RevisionTracker::Instance().GetHighestRevision() 
+		revision
 	);
 	Printf( "Build date: %s\n", __DATE__ );
-	
+
+	int fullVer = GAME_API_VERSION * 1000000 + revision;
+	idParser::RemoveAllGlobalDefines();
+	idParser::AddGlobalDefine( va("TDM_VERSION %d", GAME_API_VERSION ) );
+	idParser::AddGlobalDefine( va("TDM_REVISION %d", revision ) );
+	idParser::AddGlobalDefine( va("TDM_VERSION_FULL %d", fullVer ) );
+
 	// register game specific decl types
 	declManager->RegisterDeclType( "model",				DECL_MODELDEF,		idDeclAllocator<idDeclModelDef> );
 	declManager->RegisterDeclType( "export",			DECL_MODELEXPORT,	idDeclAllocator<idDecl> );
@@ -1125,19 +1131,6 @@ idGameLocal::SetPersistentPlayerInfo
 */
 void idGameLocal::SetPersistentPlayerInfo( int clientNum, const idDict &playerInfo ) {
 	persistentPlayerInfo = playerInfo;
-}
-
-/*
-===========
-idGameLocal::triggeredSave
-===========
-*/
-
-idStr idGameLocal::triggeredSave()
-{
-	idStr sgn = cvarSystem->GetCVarString("saveGameName");
-	cvarSystem->SetCVarString("saveGameName","");
-	return sgn;	
 }
 
 /*
@@ -1926,8 +1919,8 @@ void idGameLocal::InitFromNewMap( const char *mapName, idRenderWorld *renderWorl
 
 	gamestate = GAMESTATE_STARTUP;
 
-	// #5453: reset all mission overrides
-	cvarSystem->SetMissionOverrides();
+	// #5453: reset all mission overrides to what's written in mission.cfg
+	cvarSystem->SetMissionOverrides( cvarSystem->ReadMissionCvars() );
 
 	gameRenderWorld = renderWorld;
 	gameSoundWorld = soundWorld;
@@ -2543,8 +2536,8 @@ void idGameLocal::MapShutdown( void ) {
 	gameRenderWorld = NULL;
 	gameSoundWorld = NULL;
 
-	// #5453: reset all mission overrides
-	cvarSystem->SetMissionOverrides();
+	// #5453: reset all mission overrides to what's written in mission.cfg
+	cvarSystem->SetMissionOverrides( cvarSystem->ReadMissionCvars() );
 
 	gamestate = GAMESTATE_NOMAP;
 
@@ -3015,6 +3008,19 @@ bool idGameLocal::GetViewPos_Cmd(idVec3 &origin, idMat3 &axis) const {
 	return true;
 }
 
+bool idGameLocal::GetViewPos_Cmd(idStr &text) const {
+	text.Clear();
+
+	idVec3 origin;
+	idMat3 axis;
+	if (!gameLocal.GetViewPos_Cmd(origin, axis))
+		return false;
+
+	idAngles angles = axis.ToAngles();
+	text = va( "%s   %.1f %.1f %.1f", origin.ToString(), angles.pitch, angles.yaw, angles.roll );
+	return true;
+}
+
 /*
 ================
 idGameLocal::SetupClientPVS
@@ -3236,6 +3242,15 @@ idGameLocal::RunFrame
 ================
 */
 gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds, int timestepMs, bool minorTic ) {
+	TRACE_CPU_SCOPE( "RunFrame" );
+
+	if ( g_tracingEnabled )	{
+		idStr text;
+		if ( gameLocal.GetViewPos_Cmd(text) ) {
+			TRACE_ATTACH_FORMAT( "viewpos: %s", text.c_str() );
+		}
+	}
+
 	idEntity *	ent;
 	int			num(-1);
 	idTimer		timer_think, timer_events, timer_singlethink;
@@ -3301,6 +3316,8 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds, int timestepMs,
 			realClientTime = time;
 			this->minorTic = minorTic;
 
+			TRACE_ATTACH_FORMAT( "Time: %d .. %d (delta = %d ms) %s", previousTime, time, timestepMs, (minorTic ? "minor" : "major") );
+
 #ifdef GAME_DLL
 			// allow changing SIMD usage on the fly
 			if ( com_forceGenericSIMD.IsModified() ) {
@@ -3346,13 +3363,11 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds, int timestepMs,
 				LAS.updateLASState();
 			}
 
-			unsigned int ticks = static_cast<unsigned int>(sys->GetClockTicks());
-
 			// Tick the timers. Should be done before stim/response, just to be safe. :)
-			ProcessTimer(ticks);
+			ProcessTimer(this->time);
 
 			// TDM: Work through the active stims/responses
-			ProcessStimResponse(ticks);
+			ProcessStimResponse(this->time);
 
 			// TDM: Update objective system
 			m_MissionData->UpdateObjectives();
@@ -3488,7 +3503,7 @@ gameReturn_t idGameLocal::RunFrame( const usercmd_t *clientCmds, int timestepMs,
 
 			// see if a target_sessionCommand has forced a changelevel
 			if ( sessionCommand.Length() ) {
-				strncpy( ret.sessionCommand, sessionCommand, sizeof( ret.sessionCommand ) );
+				idStr::Copynz( ret.sessionCommand, sessionCommand, sizeof( ret.sessionCommand ) );
 				break;
 			}
 
@@ -4144,6 +4159,7 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 			{"START_GAME", NULL, NULL, NULL},
 			{"END_GAME", NULL, NULL, NULL},
 			{"FINISHED", NULL, NULL, NULL},
+			{"AFTER_SUCCESS", NULL, NULL, NULL},
 			{"FORWARD", NULL, NULL, NULL},
 			{"BACKWARD", NULL, NULL, NULL},
 			{"MAINMENU_INGAME", "MainMenuInGameState", "MAINMENU_INGAME", "MusicIngame"},
@@ -4177,7 +4193,7 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 			{"FINISHED", "FORWARD", "DEBRIEFING_VIDEO"},
 			{"DEBRIEFING_VIDEO", "FORWARD", "DEBRIEFING"},		{"DEBRIEFING", "BACKWARD", "DEBRIEFING_VIDEO"},
 			{"DEBRIEFING", "FORWARD", "SUCCESS"},				{"SUCCESS", "BACKWARD", "DEBRIEFING"},
-			{"SUCCESS", "FORWARD", "MAINMENU"},
+			{"SUCCESS", "FORWARD", "AFTER_SUCCESS"},
 		};
 
 		static const int STATENUM = sizeof(STATES) / sizeof(STATES[0]);
@@ -4283,6 +4299,16 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 				DM_LOG(LC_MAINMENU, LT_INFO)LOGSTRING("Ending game");
 				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, va("disconnect\n") );
 				Redirect("MAINMENU_NOTINGAME");
+			}
+			if (targetState->name == "AFTER_SUCCESS") {
+				DM_LOG(LC_MAINMENU, LT_INFO)LOGSTRING("Past success screen");
+				// schedule new transition to be done in delayed fashion
+				// too much stuff happens at this immediate moment...
+				gui->ResetWindowTime("SuccessContinueSelect");
+				// transition to SUCCESS state causes success music to start playing
+				// but it turns out we can trigger this transition even from NONE state
+				//Redirect("SUCCESS");
+				Redirect("NONE");
 			}
 
 			idStr modeMusicState = gui->GetStateString("MusicLastState");
@@ -4922,6 +4948,12 @@ void idGameLocal::HandleMainMenuCommands( const char *menuCommand, idUserInterfa
 		ClearPersistentInfo();
 		ClearPersistentInfoInGui(gui);
 		gameLocal.persistentLevelInfoLocation = PERSISTENT_LOCATION_MAINMENU;
+
+		// Recreate main menu GUI
+		// This is necessary to reset MM_CURRENTMISSION if player starts mission again
+		session->ResetMainMenu();
+		session->SetMainMenuStartAtBriefing();
+		session->StartMenu();
 	}
 	else if (cmd == "setlang")
 	{
@@ -6631,22 +6663,21 @@ void idGameLocal::RadiusPushClipModel( const idVec3 &origin, const float push, c
 idGameLocal::ProjectDecal
 ===============
 */
-void idGameLocal::ProjectDecal( const idVec3 &origin, const idVec3 &dir, float depth, bool parallel, float size, 
-								const char *material, float angle, idEntity* target, bool save, int starttime, bool allowRandomAngle )
+void idGameLocal::ProjectDecal( ProjectDecalParams params )
 {
 	float s, c;
 	idMat3 axis, axistemp;
 	idFixedWinding winding;
 	idVec3 windingOrigin, projectionOrigin;
 
-	if ( starttime == -1 )
+	if ( params.starttime == -1 )
 	{
-		starttime = time; // Optional param defaults to -1 => gameLocal.time -- SteveL #3817
+		params.starttime = time; // Optional param defaults to -1 => gameLocal.time -- SteveL #3817
 	}
 
-	if ( target && save )
+	if ( params.saveOnTarget )
 	{
-		target->SaveDecalInfo( origin, dir, depth, parallel, size, material, angle ); // Save for reapplication after LOD switches -- SteveL #3817
+		params.saveOnTarget->SaveDecalInfo( params ); // Save for reapplication after LOD switches -- SteveL #3817
 	}
 
 	static idVec3 decalWinding[4] = {
@@ -6660,36 +6691,36 @@ void idGameLocal::ProjectDecal( const idVec3 &origin, const idVec3 &dir, float d
 		return;
 	}
 
-	// randomly rotate the decal winding if angle = 0 and random angles are allowed
-	if( angle == 0 && allowRandomAngle )
+	// randomly rotate the decal winding random angle is requested
+	if( params.randomizeAngle )
 	{
-		angle = random.RandomFloat() * idMath::TWO_PI;
+		params.angle = random.RandomFloat() * idMath::TWO_PI;
 	}
 
-	idMath::SinCos16( angle, s, c );
+	idMath::SinCos16( params.angle, s, c );
 
 	// winding orientation
-	axis[2] = dir;
+	axis[2] = params.dir;
 	axis[2].Normalize();
 	axis[2].NormalVectors( axistemp[0], axistemp[1] );
 	axis[0] = axistemp[ 0 ] * c + axistemp[ 1 ] * -s;
 	axis[1] = axistemp[ 0 ] * -s + axistemp[ 1 ] * -c;
 
-	windingOrigin = origin + depth * axis[2];
-	if ( parallel ) {
-		projectionOrigin = origin - depth * axis[2];
+	windingOrigin = params.origin + params.depth * axis[2];
+	if ( params.parallel ) {
+		projectionOrigin = params.origin - params.depth * axis[2];
 	} else {
-		projectionOrigin = origin;
+		projectionOrigin = params.origin;
 	}
 
-	size *= 0.5f;
+	params.size *= 0.5f;
 
 	winding.Clear();
-	winding += idVec5( windingOrigin + ( axis * decalWinding[0] ) * size, idVec2( 1, 1 ) );
-	winding += idVec5( windingOrigin + ( axis * decalWinding[1] ) * size, idVec2( 0, 1 ) );
-	winding += idVec5( windingOrigin + ( axis * decalWinding[2] ) * size, idVec2( 0, 0 ) );
-	winding += idVec5( windingOrigin + ( axis * decalWinding[3] ) * size, idVec2( 1, 0 ) );
-	gameRenderWorld->ProjectDecalOntoWorld( winding, projectionOrigin, parallel, depth * 0.5f, declManager->FindMaterial( material ), starttime );
+	winding += idVec5( windingOrigin + ( axis * decalWinding[0] ) * params.size, idVec2( 1, 1 ) );
+	winding += idVec5( windingOrigin + ( axis * decalWinding[1] ) * params.size, idVec2( 0, 1 ) );
+	winding += idVec5( windingOrigin + ( axis * decalWinding[2] ) * params.size, idVec2( 0, 0 ) );
+	winding += idVec5( windingOrigin + ( axis * decalWinding[3] ) * params.size, idVec2( 1, 0 ) );
+	gameRenderWorld->ProjectDecalOntoWorld( winding, projectionOrigin, params.parallel, params.depth * 0.5f, declManager->FindMaterial( params.material ), params.starttime );
 }
 
 /*
@@ -6723,7 +6754,14 @@ void idGameLocal::BloodSplat( const idVec3 &origin, const idVec3 &dir, float siz
 
 	if ( clip.Translation( results, origin, origin + direction * 64.0f, &mdl, mat3_identity, CONTENTS_SOLID, NULL ) )
 	{
-		ProjectDecal( results.endpos, dir, 2.0f * size, true, size, material );
+		ProjectDecalParams params;
+		params.origin = results.endpos;
+		params.dir = dir;
+		params.depth = 2.0f * size;
+		params.parallel = true;
+		params.size = size;
+		params.material = material;
+		ProjectDecal( params );
 	}
 }
 
@@ -7110,7 +7148,7 @@ idGameLocal::GetBestGameType
 ============
 */
 void idGameLocal::GetBestGameType( const char* map, const char* gametype, char buf[ MAX_STRING_CHARS ] ) {
-	strncpy( buf, gametype, MAX_STRING_CHARS );
+	idStr::Copynz( buf, gametype, MAX_STRING_CHARS );
 	buf[ MAX_STRING_CHARS - 1 ] = '\0';
 }
 

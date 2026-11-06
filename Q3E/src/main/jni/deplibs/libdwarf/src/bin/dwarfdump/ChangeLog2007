@@ -1,0 +1,108 @@
+2007-12-09 DavidAnderson <davea42@earthlink.net>
+     * print_sections.c print_frames.c: Forgot to commit yesterday.
+       yesterday's commit includes renaming _dwarf_fde_section_offset
+       _dwarf_cie_section_offset, _dwarf_print_lines, _dwarf_ld_sort_lines
+       to dwarf_* form while retaining support for the now obsolete
+       _dwarf_* form.
+2007-12-08 DavidAnderson <davea42@earthlink.net>
+     * config.h.in, configure.in: Latest linux libelf.h requires
+       _GNU_SOURCE to get off64_t defined so dwarfdump compiles.
+       Only define _GNU_SOURCE  if libelf.h defines off64_t.
+       Regenerated configure.
+     * config.guess, config.sub: Updated to 2.61
+     * acconfig.h: Deleted, removing autoconf complaint.
+2007-10-15 DavidAnderson <davea42@earthlink.net>
+     * print_die.c (clean_up_die_esb): New function
+       cleans up malloc space.
+     * print_reloc.c (clean_up_syms_malloc_data): New function
+       cleans up malloc space.
+     * dwarfdump.c (main): Call new cleanup functions at end.
+     * globals.h: Declare new cleanup functions.
+
+2007-09-04 DavidAnderson <davea42@earthlink.net>
+     * print_die.c (print_attribute): For DWARF4: DW_AT_high_pc:
+       add qualifier to value when the value is an offset from
+       DW_AT_low_pc (thus not itself a address).
+       Update the address of the FSF.
+     * print_frames.h DWARFDUMPCOPYRIGHT print_sections.c
+       print_reloc.c dwarfdump.c tag_tree.c tag_attr.c
+       esb.c esb.h makename.c acconfig.h dwconf.c makename.h
+       dwconf.h globals.h print_frames.c:
+       Update the address of the FSF.
+
+2007-07-03 DavidAnderson <davea42@earthlink.net>
+     * print_sections.c (dump_block): Removed superfluous return byte from
+       printed characters. Removed unused variables.
+     * print_die.c: A little refactoring for clarity.
+     * globals.h: dwarfdump_print_one_locdesc() is now a
+       global-to-dwarfdump function.
+     * print_frames.c: Now (with -v) prints dwarf expression bytes
+       in frame expressions readably.
+2007-07-02 DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.c: Add new -R option for 'generic' register sets.
+     * dwarfdump.1: document -R, add new -x documentation.
+     * dwconf.c: Set up -R configuration. Slight revision of
+       register printing code.
+     * dwconf.h: Interface to register name printing simplified.
+     * print_frames.c: Use the simpler register name interface.
+     * dwarfdump.conf: Add new 'generic' abi for up to 1000 registers.
+
+2007-07-01 DavidAnderson <davea42@earthlink.net>
+     * print_frames.c: For DW_CFA_def_cfa_sf & DW_CFA_def_cfa_offset_sf
+       print a computed data alignment factor.
+2007-06-29 DavidAnderson <davea42@earthlink.net>
+     * dwarfdump.1: Corrected spelling error.
+2007-05-25 DavidAnderson <davea42@earthlink.net>
+     * dwconf.h dwconf.c: Changed field name to
+       cf_named_regs_table_size as old name was less than clear.
+     * dwarfdump.c: Call frame table setup with
+       cf_table_entry_count not cf_named_regs_table_size. The newly
+       renamed field makes it clearer the call was wrong.
+2007-05-04 DavidAnderson <davea42@earthlink.net>
+     * print_die.c: printing of global offset of DIEs
+       with -G is now more in the style of previous output.
+2007-04-18 Chris Quenelle <chris.quenelle@sun.com>
+     * Makefile.in:
+          - use $(srcdir) for files in source directory
+          - support running rules in parallel by
+          - use different tmp file names in different rules.
+          - use more accurate target for dwarf_names.{c,h}
+     * dwarf_names.awk: Enhance script to be able to generate either
+       #define-style headers or enum-style headers
+     * dwarfdump.c: dump most everything by default if no arguments
+       are given to dwarfdump.  This seems to be a more useful default
+       than showing nothing at all.  Also add a -G option to show
+       the (G)lobal section offset for each die within an a.out. If you
+       think you're seeing data corruption inside a .debug_info
+       section, this is a useful option to have.
+     * print_die.c: Support compressed integer blocks.  This is an
+       array (DW_FORM_block) of LEB numbers used as part of a Sun
+       extension, DW_AT_SUN_func_offsets.  Also add support for
+       a new dwarf enum DW_ATCF_xxxx. This is used in DW_AT_SUN_cf_kind.
+       Also, fix DW_AT_upper_bound so it can be a constant or a location
+       list.  DW_AT_count and DW_AT_data_member_location should also be
+       fixed eventually.
+     * print_sections.c: Changes to support zero-padding in the middle of
+       section data.  Change offset labels to be a little more clear.
+       Not sure about the get_str failure.
+     * tag_tree.list: DW_TAG_compile_unit can contain a DW_TAG_namespace
+2007-04-10 David Anderson <davea42@earthlink.net>
+     * print_reloc.c dwarfdump.c print_frames.c: Unified
+       copyright to the SGI form.  No copyright change.
+
+2007-04-06 David Anderson <davea42@earthlink.net>
+     * print_die.c (print_die_and_children): Increase static
+       depth of die stack.  Notice if it overflows and
+       print error.
+2007-02-23 David Anderson <davea42@earthlink.net>
+     * print_reloc.c: 2 lines added (long) cast in printf
+       and made %3ld instead of %3d to fix compiler warning.
+     * print_frames.c:  newline was missing from the output.
+       Thanks to Chris Quenelle for noticing.
+2007-02-20 David Anderson <davea42@earthlink.net>
+     * print_frame.c (print_frame_inst_bytes): Fixed
+       an off by one error  (several places)
+       when printing dwarf expressions and added commentary about it.
+       Thanks to Julian Seward for pointing out it was off by one.
+     * dwarfdump.c (print_error): added fflush of stdout, stderr
+       where we are going to exit right away anyway.

@@ -1,8 +1,6 @@
 idCVar harm_r_globalIllumination("harm_r_globalIllumination", "0", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Render global illumination before draw interactions");
 idCVar harm_r_globalIlluminationBrightness("harm_r_globalIlluminationBrightness", "0.3", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "Global illumination brightness");
 
-extern void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*DrawInteraction)(const drawInteraction_t *));
-
 static void RB_GLSL_DrawGlobalIllumination(const drawInteraction_t *din)
 {
     // load all the vertex program parameters
@@ -105,6 +103,8 @@ void RB_DrawGlobalIlluminations( drawSurf_t **drawSurfs, int numDrawSurfs )
     }
 
     RB_LogComment("---------- RB_DrawGlobalIlluminations ----------\n");
+
+	backEnd.vLight = NULL;
 
     // bind the vertex and fragment shader
     GL_UseProgram(&globalIlluminationShader);

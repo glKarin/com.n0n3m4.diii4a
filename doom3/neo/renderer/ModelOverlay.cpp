@@ -110,11 +110,13 @@ The material should be clamped, because entire triangles are added, some of whic
 may extend well past the 0.0 to 1.0 texture range
 =====================
 */
-void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *mtr
 #ifdef _RAVEN
-		, int suppressSurfaceMask
+void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *mtr, int suppressSurfaceMask)
+#elif defined(_SPLASHDAMAGE) //karin: hide surfaces
+void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *mtr, const renderEntity_t *parms)
+#else
+void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *mtr)
 #endif
-		)
 {
 	int i, maxVerts, maxIndexes, surfNum;
 	idRenderModelOverlay *overlay = NULL;
@@ -150,15 +152,29 @@ void idRenderModelOverlay::CreateOverlay(const idRenderModel *model, const idPla
 		if(SUPPRESS_SURFACE_MASK_CHECK(suppressSurfaceMask, surfNum))
 			continue;
 #endif
+#ifdef _SPLASHDAMAGE //karin: hide surfaces
+		if(parms && parms->hideSurfaceMask.Get(surfNum))
+			continue;
+#endif
 		const modelSurface_t *surf = model->Surface(surfNum);
 		float d;
 
-		if (!surf->geometry || !surf->shader) {
+#ifdef _SPLASHDAMAGE
+		if (!surf->geometry || !surf->material)
+#else
+		if (!surf->geometry || !surf->shader)
+#endif
+		{
 			continue;
 		}
 
 		// some surfaces can explicitly disallow overlays
-		if (!surf->shader->AllowOverlays()) {
+#ifdef _SPLASHDAMAGE
+		if (!surf->material->AllowOverlays())
+#else
+		if (!surf->shader->AllowOverlays())
+#endif
+		{
 			continue;
 		}
 
@@ -329,7 +345,11 @@ void idRenderModelOverlay::AddOverlaySurfacesToModel(idRenderModel *baseModel)
 		} else {
 			newSurf = &staticModel->surfaces.Alloc();
 			newSurf->geometry = NULL;
+#ifdef _SPLASHDAMAGE
+			newSurf->material = materials[k]->material;
+#else
 			newSurf->shader = materials[k]->material;
+#endif
 			newSurf->id = -1 - k;
 		}
 

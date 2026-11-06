@@ -47,6 +47,12 @@ public:
 	const type &		Last() const;
 	type &				Last();
 
+	//stgatilov: for "range-based for" from C++11
+	const type *		begin() const;
+	type *				begin();
+	const type *		end() const;
+	type *				end();
+
 	type *				Ptr( void );										// returns a pointer to the list
 	const type *		Ptr( void ) const;									// returns a pointer to the list
 	type *				Alloc( void );										// returns reference to a new data element at the end of the list.  returns NULL when full.
@@ -583,6 +589,23 @@ ID_INLINE void idStaticList<type,size>::Swap( idStaticList<type,size> &other ) {
 	idStaticList<type,size> temp = *this;
 	*this = other;
 	other = temp;
+}
+
+template< class type, int size >
+ID_FORCE_INLINE type * idStaticList<type,size>::begin() {
+	return list;
+}
+template< class type, int size >
+ID_FORCE_INLINE const type * idStaticList<type,size>::begin() const {
+	return list;
+}
+template< class type, int size >
+ID_FORCE_INLINE type * idStaticList<type,size>::end() {
+	return list + num;
+}
+template< class type, int size >
+ID_FORCE_INLINE const type * idStaticList<type,size>::end() const {
+	return list + num;
 }
 
 #endif /* !__STATICLIST_H__ */

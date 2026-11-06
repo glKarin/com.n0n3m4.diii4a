@@ -67,8 +67,13 @@ class idSysLocal : public idSys
 		virtual void			DLL_Unload(uintptr_t dllHandle);
 		virtual void			DLL_GetFileName(const char *baseName, char *dllName, int maxLength);
 
+#ifdef _SPLASHDAMAGE
+	    virtual const sdSysEvent*	GenerateMouseButtonEvent( int button, bool down );
+	    virtual const sdSysEvent*	GenerateMouseMoveEvent( int deltax, int deltay );
+#else
 		virtual sysEvent_t		GenerateMouseButtonEvent(int button, bool down);
 		virtual sysEvent_t		GenerateMouseMoveEvent(int deltax, int deltay);
+#endif
 
 		virtual void			OpenURL(const char *url, bool quit);
 		virtual void			StartProcess(const char *exeName, bool quit);
@@ -79,6 +84,46 @@ class idSysLocal : public idSys
         virtual bool			LGLCD_Valid(void) { return false; }
         virtual void			LGLCD_UploadImage(unsigned char *pixels, int w, int h, bool highPriority, bool flipColor) { (void)pixels; (void)w; (void)h; (void)highPriority; (void)flipColor; }
 #endif
+#ifdef _SPLASHDAMAGE
+		virtual void			GetCPUInfo( cpuInfo_t& info );
+		virtual int				Milliseconds();
+		virtual time_t			RealTime( sysTime_t* sysTime );
+		virtual const char*		TimeToSystemStr( const sysTime_t& sysTime );
+		virtual const char*		TimeAndDateToSystemStr( const sysTime_t& sysTime );
+		virtual time_t			TimeDiff( const sysTime_t& from, const sysTime_t& to );
+		virtual void			SecondsToTime( const time_t t, sysTime_t& out, bool localTime = false );
+
+		virtual const char *	GetCurCallStackStr( int depth );
+
+    	virtual void *			DLL_Load( const char *dllName, bool checkFullPathMatch );
+    	virtual void *			DLL_GetProcAddress( void* dllHandle, const char *procName );
+    	virtual void			DLL_Unload( void* dllHandle );
+
+		virtual void			ProcessOSEvents();
+
+		virtual const sdSysEvent*	GenerateGuiEvent( int value );
+		virtual void			FreeEvent( const sdSysEvent* event );
+
+		virtual idWStr			GetClipboardData( void );
+		virtual void			SetClipboardData( const wchar_t *string );
+
+		virtual void			SetServerInfo( const char* key, const char* value );
+		virtual void			FlushServerInfo( void );
+
+		virtual idKeyboard&		Keyboard();
+		virtual sdIME&			IME();
+
+		// switch to the user's locale
+		virtual void			SetSystemLocale();
+
+		// switch to the default C locale
+		virtual void			SetDefaultLocale();
+		virtual const char *	NetAdrToString( const netadr_t& a ) const;
+		virtual bool			StringToNetAdr( const char *s, netadr_t *a, bool doDNSResolve ) const;
+#endif
 };
+#ifdef _SPLASHDAMAGE
+#include "../framework/KeyInput.h"
+#endif
 
 #endif /* !__SYS_LOCAL__ */

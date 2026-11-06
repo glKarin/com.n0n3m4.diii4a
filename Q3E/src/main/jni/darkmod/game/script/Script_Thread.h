@@ -73,6 +73,7 @@ private:
 	void						Event_Assert( float value );
 	void						Event_Trigger( idEntity *ent );
 	void						Event_SetCvar( const char *name, const char *value ) const;
+	void						Event_UnsetCvar ( const char *name ) const;
 	void						Event_GetCvar( const char *name ) const;
 	void						Event_GetCvarF( const char *name ) const;
 	void						Event_Random( float range ) const;

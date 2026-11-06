@@ -522,6 +522,11 @@ void Framebuffer::Init()
         printf("Depth/Stencil to color framebuffer creating: %d x %d\n", glConfig.vidWidth, glConfig.vidHeight);
         depthStencilRenderer.Init(glConfig.vidWidth, glConfig.vidHeight);
     }
+#ifdef _SPLASHDAMAGE //karin: postprocess framebuffer, postprocess buffer width and height is 1/4
+	const float scale = 0.25f;
+	printf("Postprocess framebuffer creating: %d x %d x %f\n", glConfig.vidWidth, glConfig.vidHeight, scale);
+    postprocessBuffer.Init(glConfig.vidWidth, glConfig.vidHeight, scale);
+#endif
 
     BindNull();
 }
@@ -556,6 +561,10 @@ void Framebuffer::Shutdown()
         printf("Depth/Stencil to color framebuffer purged\n");
         depthStencilRenderer.Shutdown();
     }
+#ifdef _SPLASHDAMAGE //karin: postprocess framebuffer
+	printf("Postprocess framebuffer purged\n");
+    postprocessBuffer.Shutdown();
+#endif
 }
 
 void Framebuffer::BindNull()
@@ -571,6 +580,16 @@ void Framebuffer::Default()
 {
 	qglBindFramebuffer( GL_FRAMEBUFFER, 0 );
 	backEnd.glState.currentFramebuffer = NULL;
+}
+
+void Framebuffer::BindDraw(idFramebuffer *fb)
+{
+	qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->GetFramebuffer());
+}
+
+void Framebuffer::UnbindDraw()
+{
+	qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
 void Framebuffer::Append(idFramebuffer *fb)

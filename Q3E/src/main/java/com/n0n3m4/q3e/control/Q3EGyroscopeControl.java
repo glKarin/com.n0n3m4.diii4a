@@ -46,6 +46,7 @@ public final class Q3EGyroscopeControl
     private boolean m_enableGyro = false;
     private float m_xAxisGyroSens = Q3EGlobals.GYROSCOPE_X_AXIS_SENS;
     private float m_yAxisGyroSens = Q3EGlobals.GYROSCOPE_Y_AXIS_SENS;
+    private float m_deadZoneGyroSens = Q3EGlobals.GYROSCOPE_DEAD_ZONE;
     private Display m_display;
 
     public Q3EGyroscopeControl(Q3EControlView controlView)
@@ -73,10 +74,20 @@ public final class Q3EGyroscopeControl
         return m_yAxisGyroSens;
     }
 
+    public float DeadZoneGyroSens()
+    {
+        return m_deadZoneGyroSens;
+    }
+
     public void SetGyroscopeSens(float x, float y)
     {
         m_xAxisGyroSens = x;
         m_yAxisGyroSens = y;
+    }
+
+    public void SetDeadZoneGyroSens(float dz)
+    {
+        m_deadZoneGyroSens = dz;
     }
 
     private boolean InitGyroscopeSensor()
@@ -109,23 +120,34 @@ public final class Q3EGyroscopeControl
     {
         if (m_enableGyro && Q3E.callbackObj.notinmenu && !Q3E.callbackObj.inLoading)
         {
-            //if(event.values[0] != 0.0f || event.values[1] != 0.0f)
-            {
-                float x, y;
-                switch (m_display.getRotation()) {
-                    case Surface.ROTATION_270: // invert
-                        x = -event.values[0];
-                        y = -event.values[1];
-                        break;
-                    case Surface.ROTATION_90:
-                    default:
-                        x = event.values[0];
-                        y = event.values[1];
-                        break;
-                }
+            float x = event.values[0], y = event.values[1];
 
-                Q3E.sendMotionEvent(-x * m_xAxisGyroSens, y * m_yAxisGyroSens);
+            if(m_deadZoneGyroSens > 0.0f)
+            {
+                float dx = Math.abs(x);
+                float dy = Math.abs(y);
+                boolean bx = dx > m_deadZoneGyroSens;
+                boolean by = dy > m_deadZoneGyroSens;
+                if(!bx && !by)
+                    return;
+
+                if(bx)
+                    x = Math.signum(x) * (dx - m_deadZoneGyroSens);
+                else
+                    x = 0.0f;
+
+                if(by)
+                    y = Math.signum(y) * (dy - m_deadZoneGyroSens);
+                else
+                    y = 0.0f;
             }
+
+            if (m_display.getRotation() == Surface.ROTATION_270) { // invert
+                x = -x;
+                y = -y;
+            }
+
+            Q3E.sendMotionEvent(-x * m_xAxisGyroSens, y * m_yAxisGyroSens);
         }
     }
 

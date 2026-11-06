@@ -23,6 +23,17 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 ================================================================================================
 */
 
+// stgatilov: GetSystemTimePreciseAsFileTime has too much overhead
+// luckily, these time measurements are only used for computing thread-private deltas
+// and they are only used for diagnostics, so they can be a bit inexact...
+#if 1
+	#define JobTimer_Clock uint64( Sys_GetClockTicks() )
+	#define JobTimer_Frequency uint64( Sys_ClockTicksPerSecond() )
+#else
+	#define JobTimer_Clock Sys_GetTimeMicroseconds()
+	#define JobTimer_Frequency 1000000ull
+#endif
+
 const char * jobNames[] = {
 	ASSERT_ENUM_STRING( JOBLIST_RENDERER_FRONTEND,	0 ),
 //	ASSERT_ENUM_STRING( JOBLIST_RENDERER_BACKEND,	1 ),
@@ -166,14 +177,15 @@ public:
 
 	unsigned int			GetNumExecutedJobs() const { return threadStats.numExecutedJobs; }
 	unsigned int			GetNumSyncs() const { return threadStats.numExecutedSyncs; }
-	uint64					GetSubmitTimeMicroSec() const { return threadStats.submitTime; }
-	uint64					GetStartTimeMicroSec() const { return threadStats.startTime; }
-	uint64					GetFinishTimeMicroSec() const { return threadStats.endTime; }
-	uint64					GetWaitTimeMicroSec() const { return threadStats.waitTime; }
+	uint64					GetSubmitTimeMicroSec() const { return TimerClockToMicrosec( threadStats.submitTime ); }
+	uint64					GetStartTimeMicroSec() const { return TimerClockToMicrosec( threadStats.startTime ); }
+	uint64					GetFinishTimeMicroSec() const { return TimerClockToMicrosec( threadStats.endTime ); }
+	uint64					GetWaitTimeMicroSec() const { return TimerClockToMicrosec( threadStats.waitTime ); }
 	uint64					GetTotalProcessingTimeMicroSec() const;
 	uint64					GetTotalWastedTimeMicroSec() const;
 	uint64					GetUnitProcessingTimeMicroSec( int unit ) const;
 	uint64					GetUnitWastedTimeMicroSec( int unit ) const;
+	uint64					TimerClockToMicrosec( uint64 durationClocks ) const;
 
 	jobListId_t				GetId() const { return listId; }
 	jobListPriority_t		GetPriority() const { return listPriority; }
@@ -222,6 +234,7 @@ private:
 
 	threadStats_t						deferredThreadStats;
 	threadStats_t						threadStats;
+	uint64								timerFrequency;
 
 	int						RunJobsInternal( unsigned int threadNum, threadJobListState_t & state, bool singleJob );
 
@@ -264,6 +277,7 @@ idParallelJobList_Threads::idParallelJobList_Threads( jobListId_t id, jobListPri
 
 	memset( &deferredThreadStats, 0, sizeof( threadStats_t ) );
 	memset( &threadStats, 0, sizeof( threadStats_t ) );
+	timerFrequency = JobTimer_Frequency;
 }
 
 /*
@@ -385,7 +399,7 @@ void idParallelJobList_Threads::Submit( idParallelJobList_Threads * waitForJobLi
 	memset( &deferredThreadStats, 0, sizeof( deferredThreadStats ) );
 	deferredThreadStats.numExecutedJobs = jobList.Num() - numSyncs * 2;
 	deferredThreadStats.numExecutedSyncs = numSyncs;
-	deferredThreadStats.submitTime = Sys_Microseconds();
+	deferredThreadStats.submitTime = JobTimer_Clock;
 	deferredThreadStats.startTime = 0;
 	deferredThreadStats.endTime = 0;
 	deferredThreadStats.waitTime = 0;
@@ -434,7 +448,7 @@ void idParallelJobList_Threads::Wait() {
 		}
 
 		bool waited = false;
-		uint64 waitStart = Sys_Microseconds();
+		uint64 waitStart = JobTimer_Clock;
 
 		while ( signalJobCount[signalJobCount.Num() - 1].GetValue() > 0 ) {
 			Sys_Yield();
@@ -451,7 +465,7 @@ void idParallelJobList_Threads::Wait() {
 		numSyncs = 0;
 		lastSignalJob = 0;
 
-		uint64 waitEnd = Sys_Microseconds();
+		uint64 waitEnd = JobTimer_Clock;
 		deferredThreadStats.waitTime = waited ? ( waitEnd - waitStart ) : 0;
 	}
 	memcpy( & threadStats, & deferredThreadStats, sizeof( threadStats ) );
@@ -490,7 +504,7 @@ uint64 idParallelJobList_Threads::GetTotalProcessingTimeMicroSec() const {
 	for ( int unit = 0; unit < MAX_THREADS; unit++ ) {
 		total += threadStats.threadExecTime[unit];
 	}
-	return total;
+	return TimerClockToMicrosec( total );
 }
 
 /*
@@ -503,7 +517,7 @@ uint64 idParallelJobList_Threads::GetTotalWastedTimeMicroSec() const {
 	for ( int unit = 0; unit < MAX_THREADS; unit++ ) {
 		total += threadStats.threadTotalTime[unit] - threadStats.threadExecTime[unit];
 	}
-	return total;
+	return TimerClockToMicrosec( total );
 }
 
 /*
@@ -515,7 +529,7 @@ uint64 idParallelJobList_Threads::GetUnitProcessingTimeMicroSec( int unit ) cons
 	if ( unit < 0 || unit >= MAX_THREADS ) {
 		return 0;
 	}
-	return threadStats.threadExecTime[unit];
+	return TimerClockToMicrosec( threadStats.threadExecTime[unit] );
 }
 
 /*
@@ -527,7 +541,19 @@ uint64 idParallelJobList_Threads::GetUnitWastedTimeMicroSec( int unit ) const {
 	if ( unit < 0 || unit >= MAX_THREADS ) {
 		return 0;
 	}
-	return threadStats.threadTotalTime[unit] - threadStats.threadExecTime[unit];
+	return TimerClockToMicrosec( threadStats.threadTotalTime[unit] - threadStats.threadExecTime[unit] );
+}
+
+/*
+========================
+idParallelJobList_Threads::TimerClockToMicrosec
+========================
+*/
+uint64 idParallelJobList_Threads::TimerClockToMicrosec( uint64 durationClocks ) const {
+	// on 5 GHz CPU it overflows in > 1 hour
+	// more than enough for one joblist to finish
+	assert( durationClocks < UINT64_MAX / 1000000u );
+	return durationClocks * 1000000u / timerFrequency;
 }
 
 #ifndef _DEBUG
@@ -550,7 +576,7 @@ int idParallelJobList_Threads::RunJobsInternal( unsigned int threadNum, threadJo
 	assert( threadNum < MAX_THREADS );
 
 	if ( deferredThreadStats.startTime == 0 ) {
-		deferredThreadStats.startTime = Sys_Microseconds();	// first time any thread is running jobs from this list
+		deferredThreadStats.startTime = JobTimer_Clock;	// first time any thread is running jobs from this list
 	}
 
 	int result = RUN_OK;
@@ -627,19 +653,19 @@ int idParallelJobList_Threads::RunJobsInternal( unsigned int threadNum, threadJo
 
 		// execute the next job
 		{
-			uint64 jobStart = Sys_Microseconds();
+			uint64 jobStart = JobTimer_Clock;
 
 			jobList[state.nextJobIndex].function( jobList[state.nextJobIndex].data );
 			jobList[state.nextJobIndex].executed = 1;
 
-			uint64 jobEnd = Sys_Microseconds();
+			uint64 jobEnd = JobTimer_Clock;
 			deferredThreadStats.threadExecTime[threadNum] += jobEnd - jobStart;
 
 #ifndef _DEBUG
-			if ( jobs_longJobMicroSec.GetInteger() > 0 ) {
-				if ( jobEnd - jobStart > jobs_longJobMicroSec.GetInteger()
-					&& GetId() != JOBLIST_UTILITY ) {
-					longJobTime = ( jobEnd - jobStart ) * ( 1.0f / 1000.0f );
+			if ( jobs_longJobMicroSec.GetInteger() > 0 && GetId() != JOBLIST_UTILITY ) {
+				uint64 durationUs = TimerClockToMicrosec( jobEnd - jobStart );
+				if ( durationUs > jobs_longJobMicroSec.GetInteger() ) {
+					longJobTime = durationUs * ( 1.0f / 1000.0f );
 					longJobFunc = jobList[state.nextJobIndex].function;
 					longJobData = jobList[state.nextJobIndex].data;
 					const char * jobName = GetJobName( jobList[state.nextJobIndex].function );
@@ -656,7 +682,7 @@ int idParallelJobList_Threads::RunJobsInternal( unsigned int threadNum, threadJo
 		if ( signalJobCount[state.signalIndex].Decrement() == 0 ) {
 			// if this was the very last job of the job list
 			if ( state.signalIndex == signalJobCount.Num() - 1 ) {
-				deferredThreadStats.endTime = Sys_Microseconds();
+				deferredThreadStats.endTime = JobTimer_Clock;
 				return ( result | RUN_DONE );
 			}
 		}
@@ -672,7 +698,7 @@ idParallelJobList_Threads::RunJobs
 ========================
 */
 int idParallelJobList_Threads::RunJobs( unsigned int threadNum, threadJobListState_t & state, bool singleJob ) {
-	uint64 start = Sys_Microseconds();
+	uint64 start = JobTimer_Clock;
 
 	numThreadsExecuting.Increment();
 
@@ -680,7 +706,7 @@ int idParallelJobList_Threads::RunJobs( unsigned int threadNum, threadJobListSta
 
 	numThreadsExecuting.Decrement();
 
-	deferredThreadStats.threadTotalTime[threadNum] += Sys_Microseconds() - start;
+	deferredThreadStats.threadTotalTime[threadNum] += JobTimer_Clock - start;
 
 	return result;
 }
@@ -1138,7 +1164,7 @@ public:
 	virtual int					GetNumFreeJobLists() const override;
 	virtual idParallelJobList *	GetJobList( int index ) override;
 
-	virtual int					GetNumProcessingUnits() override;
+	virtual int					GetNumProcessingUnits( int parallelism = JOBLIST_PARALLELISM_REALTIME ) override;
 
 	virtual void				WaitForAllJobLists() override;
 
@@ -1287,15 +1313,6 @@ idParallelJobList * idParallelJobManagerLocal::GetJobList( int index ) {
 
 /*
 ========================
-idParallelJobManagerLocal::GetNumProcessingUnits
-========================
-*/
-int idParallelJobManagerLocal::GetNumProcessingUnits() {
-	return maxThreads;
-}
-
-/*
-========================
 idParallelJobManagerLocal::WaitForAllJobLists
 ========================
 */
@@ -1308,15 +1325,10 @@ void idParallelJobManagerLocal::WaitForAllJobLists() {
 
 /*
 ========================
-idParallelJobManagerLocal::Submit
+idParallelJobManagerLocal::GetNumProcessingUnits
 ========================
 */
-void idParallelJobManagerLocal::Submit( idParallelJobList_Threads * jobList, int parallelism ) {
-	/*if ( jobs_numThreads.IsModified() ) {
-		ChangePhysicalThreadsCount();
-		jobs_numThreads.ClearModified();
-	}*/
-
+int idParallelJobManagerLocal::GetNumProcessingUnits( int parallelism ) {
 	bool disk = (parallelism & JOBLIST_PARALLELISM_FLAG_DISK) != 0;
 	parallelism &= ~JOBLIST_PARALLELISM_FLAG_DISK;
 
@@ -1354,6 +1366,22 @@ void idParallelJobManagerLocal::Submit( idParallelJobList_Threads * jobList, int
 	if (disk && isRunningOnHdd) {
 		numThreads = idMath::Imin(numThreads, jobs_maxHddThreads.GetInteger());
 	}
+
+	return numThreads;
+}
+
+/*
+========================
+idParallelJobManagerLocal::Submit
+========================
+*/
+void idParallelJobManagerLocal::Submit( idParallelJobList_Threads * jobList, int parallelism ) {
+	/*if ( jobs_numThreads.IsModified() ) {
+		ChangePhysicalThreadsCount();
+		jobs_numThreads.ClearModified();
+	}*/
+
+	int numThreads = GetNumProcessingUnits( parallelism );
 
 	if ( numThreads <= 0 ) {
 		threadJobListState_t state( jobList->GetVersion() );

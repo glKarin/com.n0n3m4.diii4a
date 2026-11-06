@@ -1,0 +1,450 @@
+2019-11-07 David Anderson
+    * Makefile.am: Now set env vars so make check can
+      get the compiler options.
+    * Makefile.in: Regenerated.
+    * makename.c,makename_test.c: Refine the ifdef around the pragma
+      so it only appears with windows and when
+      the compile is not using gcc or clang to compile.
+    * runtests.sh: New the new env var to get the configure time
+      compiler options into the tests compilations.
+2019-11-05 David Anderson
+    * README.testcases: Documentation of the three binary
+      testcases in the dwarfdump source directory.
+    * testobjLE32PE.test.c: Original source for the
+      testobjLE32PE.exe testcase. Not compiled here, just
+      present as documentation.
+    * Makefile.am: Name README.testcases and testobjLE32PE.test.c
+      so the get into releases.
+    * Makefile.in: Regenerated.
+2019-11-05 David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+       dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+       dwarfdump-tt-table.h : new version string.
+2019-11-04 David Anderson
+    * Makefile.am: Fixed a trailing blank after a backslash.
+2019-10-28 David Anderson
+    * esb.c: Fixed a VSNPRINTF ifdef so it no longer
+      uses ifdef to separate parts of a va-arg.
+      Fixes a compiler warning.
+    * runtests.sh: Instead of assuming esb.o present
+      put $srcdir/esb.c in the test script.
+2019-10-24 David Anderson
+    * esb.h: Removed the bogus and unnecessary test
+      of _MIPS_SZLONG. Just go with long long.
+2019-10-22 David Anderson
+    * common.c: Now -V prints both the date/time string
+      and the PACKAGE_VERSION string from the top level
+      configure.ac/CMakeLists.txt.
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated.
+    * tag_attr.c: The #include ordering was a bit wrong
+      as it checkded HAVE_UNISTD_H before config.h was
+      included (from globals.h). Fixed.
+    * getopttest.c: Added #include of config.h so
+      the #ifdef around standard headers compiles.
+    * print_reloc_decls.h,print_reloc_test.c,testesb.c: With
+      full warnings this needed ifdefs to the simple
+      testcode will build. And removal of unused
+      variables.
+2019-10-21 David Anderson
+     * dwarfdump.c,dwgetopt.c,esb.c,esb.h,getopttest.c,
+       globals.h,makename.c,makename_test.c: Be much more
+       thorough in using config.h to check for headers before
+       including them.
+2019-10-18 David Anderson
+     * runtests.sh: Improving some message test so context makes sense.
+2019-10-17 David Anderson
+     * Makefile.am: A couple test files got left out of
+       the list of critical files, so doing dist
+       and then testing the result would fail 'make check'
+     * Makefile.in: Regenerated.
+     * runtests.sh: Small tweaks so 'make check'
+       from outside the source tree works now.
+2019-10-16 David Anderson
+     * CMakeLists.txt: Now sets -I so the ctest results pass.
+     * dwarfdump.c: Altered a spelling to make a distinction
+       between various places that say 'could not open the file'.
+     * globals.h: Now #include use "" not <> on dwarf.h and libdwarf.h
+       so they match everything else in dwarfdump and libdwarf.
+2019-10-14 David Anderson
+     * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+       dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+       dwarfdump-tt-table.h : new version string.
+2019-10-14 David Anderson
+     * command_options.c: Revised the settings of
+       glflags.gf_gnu_debuglink_flag.
+     * dwarfdump.c: Now we only print debuglink etc
+       on request via --print-gnu-debuglink.
+       Now call the latest, best version of
+       dwarf_gnu_debuglink() handling both .gnu_debuglink
+       and .note.gnu.build-id sections.
+2019-10-02 David Anderson
+     * runtests.sh: Added mach-o sanity test case.
+     * test-mach-o-32.base,testobjLE32PE.base,testuriLE64ELf.base:
+       each is limited to 500 lines to keep the space in use
+       with non-source a bit constrained.
+2019-10-02 David Anderson
+     * addrmap.c: The include of addrmap.h was in the wrong
+       line. Noved down 4 lines.
+     * globals.h: Refined the setup as the requirement for
+       _GNU_SOURCE to be set does not apply when
+       we have no libelf at all.
+     * helpertree.c: Removed pointless include of esb.h.
+     * helpertree_test.c: Added include of <stdint.h>
+       so we are guaranteed uintptr_t for TSEARCHASH.
+     * macrocheck.c: Removed a pointless include of esb.h.
+     * runtests.sh: Removed useless tests of the native
+       getopt as we never use it.
+       Ensure we get cc or gcc if at least one
+       of them exists.
+       Use rm -f and name with and without trailing .exe
+       for portability to Windows/Mingw.
+       Now verifies that dwarfdump on a PE file and
+       an Elf file worked correctly as a
+       sanity check.
+2019-10-02 David Anderson
+     * testobjPE.base -> testobjLE32PE.base
+     * testobjPE.exe ->  testobjLE32PE.exe
+     * testuriBE64ELf.base -> testuriLE64ELf.base
+     * testuriBE64ELf.obj ->  testuriLE64ELf.obj
+     * Makefile.am: Reflects the revised names.
+
+2019-10-02 David Anderson
+     * Makefile.am: New test data for make check (runtests.sh)
+     * dwarf_names.c,dwarf_names.h: new date string.
+     * dwarfdump-ta-ext-table.h,dwarfdump/dwarfdump-ta-table.h,
+       dwarfdump-tt-ext-table.h,dwarfdump-tt-table.h:
+       new date string.
+2019-10-02 David Anderson
+     * runtests.sh: Now runs dwarfdump on an elf and a PE
+       object to show things basically work.
+     * testobjPE.base,testobjPE.exe:  New
+     * testuriBE64ELf.base,testuriBE64ELf.obj  : New
+2019-09-19 David Anderson
+     * dwarfdump.c: Fix indents and remove trailing whitespace.
+     * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+       dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+       dwarfdump-tt-table.h: version string update, regenerated
+       these.
+     * print_frames.c: Small clarifications of the logic.
+2019-09-10 David Anderson
+     * dwarfdump.c: Now --print-gnu-debuglink prints
+       the  .note.gnu.build-id and .gnu_debuglink sections
+       (does both if both exist).
+2019-09-08 David Anderson
+     * command_options.c: Added --print-gnu-debuglink and set
+       gf_gnu_debuglink_flag as appropriate.
+     * dwarfdump.1: Document --print-gnu-debuglink.
+     * dwarfdump.c: Implement debuglink printing.
+     * glflags.h: Added boolean gf_gnu_debuglink_flag.
+     * globals.h: Added prototype of print_secname()
+       and now it is shared across dwarfdump.
+     * print_abbrevs.c,print_locs.c,print_strings.c: Deleted local
+       print_secname(), call
+       the shared one instead.
+     * print_die.c: Make this print_secname() the
+       single shared version.
+2019-09-03 David Anderson
+     * esb.h, esb.c: Reformat copyright for shorter lines.
+       No change in the text.
+     * print_abbrevs.c: Fix indents and remove trailing
+       whitespace.
+2019-09-02 David Anderson
+     * print_abbrevs.c: Improved .debug_abbrev error checking.
+       Now uses dwarf_get_abbrev_entry_b() which ensures
+       most (possibly all) corruptions can be detected.
+     * print_die.c: Reformatted a long comment.
+2019-08-29 David Anderson
+     * print_die.c: Minor corrections including printing
+       DW_AT_GNU_odr_signature more sensibly.
+       Corrected checks for signature consistency in
+       CU vs the .debug_[tc]u_ index section.
+       Some reformatting for consistency.
+     * print_lines.c: Remove a blank line.
+     * print_ranges.c: Remove some debugging-only code.
+2019-06-04 David Anderson
+     * print_die.c: Removed inttypes.h include as nothing in it
+       is referenced.
+2019-05-29 David Anderson
+     * makename-test.c: change DW_TSHASHTYPE char *
+       to DW_TSHASHTYPE uintptr_t to match the rest
+       DW_TSHASHTYPE.
+2019-05-29 David Anderson
+     * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+       dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+       dwarfdump-tt-table.h: Regenerated with latest version.
+2019-05-26 David Anderson
+     * addrmap.c, makename.c: Include stdint.h for tsearch.
+     * checkutil.c: Delete include inttypes.h. Fix
+       trailing whitespace, reformat comments for
+       line length.
+     * dwarf_tsearch.h: Make include idempotent with
+       #ifndef DWARF_TSEARCH_H.
+       DW_TSHASHTYPE is now uintptr_t.
+       Turn double-blank-lines to a single blank line.
+       Use DW_TSHASHTYPE.
+     * dwarf_tsearchbal.c:  Delete include inttypes.h. Fix
+       trailing whitespace.  Define DW_PR_DUx  and use
+       DW_PR_DUx so printf formats properly.
+       Remove const from keyptr: it's really wrong as
+       the user may actually free what it points to.
+       Use DW_TSHASHTYPE.  Correctly arrange const
+       in casts.
+     * helpertree.c,macrocheck.c,print_die.c: Include
+       stdint.h for tsearch.
+2019-05-24 David Anderson
+     * checkutil.c: Change %lx to instead use "%" DW_PR_DUx
+       so it adapts without compiler warnings.
+2019-05-24 David Anderson
+     * Makefile.am: Delete mention of config.h.in.cmake.
+     * Makefile.in: Regenerate.
+2019-05-20 David Anderson
+     * dwarf_tsearchbal.c: Add windows-only #define intended
+       to suppress warnings from particular compilers.
+2019-05-20 David Anderson
+     * CMakeLists.txt: No longer generates a local-build-dir
+       config.h
+     * config.h.in.cmake: Deleted.
+2019-05-20 David Anderson
+     * CMakeLists.txt: Added addrmap.h to the HEADERS list.
+       Reflects new names for the options and adds the
+       compiler warning options.
+     * config.h.in.cmake: Adding in the necessary HAVE_*
+       option defaults.
+     * dwarfdump.c: Adds part of the HAVE_CUSTOM_LIBELF
+       and DW_FTYPE_CUSTOM_ELF
+       support (for the one environment wanting that).
+       Drops the accidental print of date/time with -O <file>
+       option to dwarfdump.
+     * esb.c: Adding a Windows-specific define for Windows
+       builds.
+     * globals.h: Adding a comment.
+     * tag_attr.list, tag_attr_ext.list,tag_tree.list,
+       tag_tree_ext.list: Adding blank lines judiciously
+       makes the table easier for humans to read.
+2019-05-14 David Anderson
+     * command_options.c: Removed unneeded trailing ','
+       in initializer as it caused a warning in compile.
+2019-05-14 David Anderson
+     * print_reloc_test.c: Without libelf (in which case
+       dwarfdump is not interested in printing relocations)
+       we now compile a main program returning 0 (success).
+       With libelf we examine the relocation name tables
+       as usual to exit with success or failure.
+2019-05-07 David Anderson
+     * CMakeLists.txt: Now the code from configure.cmake
+       is here. Previously there were two includes of
+       configure.cmake, which was a mistake.
+     * Makefile.am: Added the *_test.c so tar distributions
+       can run 'make check'.
+     * scripts/buildandreleasetest.sh: Now adds in cmake
+       build of dwarfgen and dwarfexample and test
+       so those are tested.
+     * configure.cmake: Deleted. It's all in
+       CMakeLists.txt now.
+2019-05-05 David Anderson
+     * dwarf_names.c,dwarf_names.h, dwarfdump-ta-ext-table.h,
+       dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+       dwarfdump-tt-table.h: Regenerated with latest
+       libdwarf version string.
+2019-05-02 David Anderson
+     * dwarfdump-ta-ext-table.h: Regenerated.
+     * tag_common.h: 16-> 15. Deleted a duplicate extension
+       TAG->Attr combo recently added so need to regenerate.
+2019-05-02 David Anderson
+     * helpertree.c: Deleted trailing blank line.
+     * tag_attr_ext.list: Added gcc common extension
+       of DW_TAG_structure_type having a DW_AT_containing type.
+     * tag_common.h: Incremented EXT_ATTR_TABLE_ROWS to 16
+       for the change in tag_attr_ext.list.
+     * dwarfdump-ta-ext-table.h: Regenerated.
+     * dwarf_leb.c: Removed trailing whitespace on one line.
+     * dwarf_object_detector.c,dwarf_pe_descriptor.h,
+       dwarf_pe_read.c: Using the updated names
+       of some Windows types, adding _dw at the end to avoid
+       conflicts with Windows.
+     * dwarf_tied.c: Removed blank last line of the file.
+     * dwarf_tied_decls.h: Removed several blank lines
+       at the end of the file.
+     * dwarf_tied_test.c: Removed trailing whitespace.
+2019-05-01 David Anderson
+     * dwarfdump.1: A stray letter 'i' was
+       in the --format-extensions wording.
+2019-05-01 David Anderson
+     * configure.cmake: deleted.
+     * globals.h: Corrected typo in comment.
+     * CMakeLists.txt: Now does its configure_file on its own.
+2019-05-01 David Anderson
+     * configure.cmake: Removed some lines, placing them in
+       base directory configure.cmake.
+2019-04-30 David Anderson
+     * CMakeLists.txt: Added the new files. Revised the
+       testing area the tests can be run and pass.
+2019-04-30 David Anderson
+     * helpertree_test.c,makename_test.c,print_reloc_decls.h,
+       print_reloc_test.c,section_bitmaps_test.c: New
+       source which separates the internal-api test code
+       from the code dwarfdump actually uses.
+       Removing most need of -DSELFTEST.
+     * helpertree.c,makename.c,print_reloc.c,section_bitmaps.c,
+       section_bitmaps.h: Now with just the code needed for
+       dwarfdump itself.
+     * runtests.sh: Reflects the refactoring of the internal
+       api test code.
+2019-04-29 David Anderson
+     * dwarf_names.c,dwarf_names.h: Regenerated.
+       Version date update.
+     * dwarfdump_ta_ext_table.h,dwarfdump-ta-table.h,
+       dwarfdump-tt-ext-table.h,dwarfdump-tt-table.h:  Regenerated.
+     * tag_attr_ext.list. Added DW_TAG_class_type
+       with common GNU extension DW_AT_containing_type
+     * tag_common.h: Increased EXT_ATTR_TABLE_ROWS to 15.
+2019-04-28 David Anderson
+     * config.h.in.cmake, configure.cmake: Deleted all reference to
+       INT32 and INT64 as no longer needed.
+2019-04-26 David Anderson
+     * config.h.in.cmake,configure.cmake: Now deals
+       with DWARF_WITH_LIBELF and more for cmake.
+2019-04-25 David Anderson
+     * print_die.c: Removed trailing whitespace.
+2019-04-25 David Anderson
+     * common.c,dwconf.c: Tiny changes to
+       avoid compiler warnings.
+     * print_die.c: Refactored to avoid annoying
+       compiler warning about a fall-through.
+2019-04-24 David Anderson
+     * command_options.c: Remove trailing space, fold a long line
+     * dwarfdump.c: If init failed the message listed
+       the wrong function name.
+2019-04-22 David Anderson
+     * dwarfdump.c: Prevent the -a option from requesting
+       Elf section data printing (no section
+       data was printed anyway as the request was
+       incomplete).
+2019-04-22 David Anderson
+     * dwarfdump.c: Add test for _MSC_VER for Windows MSVC.
+     * print_die.c: Using uintptr_t to suppress a warning.
+2019-04-22 David Anderson
+     * checkutil.c: Now uses uintptr_t so we can avoid
+       compile-time warnings about converting pointer to
+       integer.
+     * command_options.h: Ifdef a couple of static
+       function prototypes so, when regex missing,
+       we do not get warnings of undefined static functions.
+     * dwarf_tsearchbal.c: Add ifdef-d stdint.h and
+       inttypes.h so we can avoid some conversion warnings
+       from printf calls.
+     * dwarf_alloc.c:  Add ifdef-d stdint.h and
+       inttypes.h so we can avoid some conversion warnings
+       from printf calls.
+2019-04-19 David Anderson
+     * Apology. This enhances pubnames-like printing
+       and uses non-libelf elf access as much as possible
+       (even if libelf present). With --disable-libelf
+       it allows all but printing Elf section headers
+       and relocation records.  It's excessively large
+       for one commit(mainly in libdwarf). Sorry.
+     * command_options.c: Conditionalize the help message
+       so the Elf section printing is not shown if
+       --disable-libelf chosen at configure time.
+     * dwarfdump.1: Mention that --disable-libelf removes
+       certain elf section header printing options.
+     * dwarfdump.c: Implements the elf reading changes.
+     * print_strings.c: Fixed a printf to use sanitized()
+       so we don't print non-ascii (we use uri form instead).
+2019-03-08 David Anderson
+     * print_pubnames.c: Remove trailing whitespace.
+2019-03-07 David Anderson
+     * print_pubnames.c(print_all_pubnames_style_records): A
+       struct esb_s was constructed and filled but then never
+       destructed, leading to a memory leak. Eliminated it
+       entirely.
+2019-03-04 David Anderson
+     * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+       dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+       dwarfdump-tt-table.h,dwarf_names_enum.h,
+       dwarf_names_new.h: Regenerated with latest date string
+       and version.
+     * dwarfdump.c: Corrected indent mistakes.
+     * glflags.h: Removed blank line.
+     * globals.h: Added print_all_pubnames_style_records() declaration
+       so all the pubnames-like sections are printed by just one
+       function.
+     * print_die.c: Fixed indents. Removed trailing whitespace.
+     * print_pubnames.c: Now has the print code for all the
+       pubnames-like sections. The pubnames-like section
+       names only print if there is some data.  We now
+       also (for those sections) print the section CU-headers
+       if dwarfdump -v.   Some error messages modified slightly
+       to show the correct section name (as opposed to leaving it
+       off). Now can do the coded checks instead of ignoring them.
+     * print_sections.c: Moved deal_with_name_offset_err() over
+       to print_pubnames.c, where it is now a static function.
+     * print_sections.h: Removed declarations of deal_with_name_offset_err()
+       and print_pubname_style_entry() as those are now static functions
+       in print_pubnames.c.
+     * print_static_funcs.c, print_static_vars.c: Now only print
+       section name if there
+       is content. Corrected a long-incorrect section name of this
+       SGI-extension section you most likely have never seen.
+       Deleted the old printing code, do it via call into
+       print_pubnames.c.
+     * print_types.c,print_weaknames.c: Now only prints
+       section name if there is content.
+       Deleted the old printing code, do it via call into
+       print_pubnames.c.
+
+2019-02-24 David Anderson
+     * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+       dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+       dwarfdump-tt-table.h,dwarf_names_enum.h,
+       dwarf_names_new.h: Regenerated with latest date string
+       and version.
+2019-02-19 David Anderson
+     * configure.cmake: Now defines DWARF_WITH_LIBELF
+       so builds work as always.
+     * dwarfdump.c,globals.h,print_reloc.c: Now uses
+       DWARF_WITH_LIBELF to determine how to build
+       with or without libelf.
+2019-02-12 David Anderson
+     * print_die.c: Delete _dwarf_memcpy_swap_bytes() as it
+       is no longer needed. Use the new
+       dwarf_uncompress_integer_block_a() interface as it
+       is easier to use.
+2019-02-07 David Anderson
+     * dwarf_names.c,dwarf_names.h,dwarfdump-ta-table.h,
+       dwarfdump-tt-ext-table.h, dwarfdump-tt-table.h:
+       Just a changed version string.
+2019-02-07 David Anderson
+     * dwarfdump.c: Use ifdef HAVE_ELF_H so non-elf
+       builds work.
+     * print_reloc.c: ifdef HAVE_ELF_H, eliminating
+       the entire file of elf-header printing if elf.h
+       missing.
+2019-01-31 David Anderson
+     * dwarfdump.c,dwconf.c,esb.c,print_abbrevs.c,
+       print_aranges.c,print_die.c,print_macro.c,
+       print_reloc.c,print_str_offsets.c: Fix warnings
+       emitted by llvm's scan-build tool.
+2019-01-20 David Anderson
+    * globals.h: Remove the code for *UINT* and
+      all the ifdefs involved. No longer needed.
+    * print_die.c(get_FLAG_BLOCK_string): Remove
+      the__int32_t from this function (associated with
+      DW_AT_SUN_func_offsets).  Simplify the printing
+      of these offsets.
+2019-01-14 David Anderson
+    * dwarf_names.c, dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated.
+    * print_lines.c: If missing a line number do not
+      supply a meaningless -1, supply 0.
+      If line table access gets an error, print the error
+      and attempt to continue.
+    * dwarfdump.c: We try to continue after major errors
+      in more places. If any major errors were seen
+      a final line of text is reported to standard-out.
+2019-01-02 David Anderson
+    * ChangeLog: renamed ChangeLog 2018.
+    * Makefile.am: Added ChangeLog2018 to distribution files.

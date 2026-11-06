@@ -443,7 +443,7 @@ void Dmap( const idCmdArgs &args ) {
 	bool region = false;
 	// if this isn't a regioned map, delete the last saved region map
 	if ( passedName.Right( 4 ) != ".reg" ) {
-		sprintf( path, "%s.reg", dmapGlobals.mapFileBase );
+		idStr::snPrintf( path, sizeof(path), "%s.reg", dmapGlobals.mapFileBase );
 		fileSystem->RemoveFile( path, "" );
 	} else {
 		region = true;
@@ -453,7 +453,7 @@ void Dmap( const idCmdArgs &args ) {
 	passedName = stripped;
 
 	// delete any old line leak files
-	sprintf( path, "%s.lin", dmapGlobals.mapFileBase );
+	idStr::snPrintf( path, sizeof(path), "%s.lin", dmapGlobals.mapFileBase );
 	fileSystem->RemoveFile( path, "" );
 	// stgatilov #5129: remove all portal leak files too
 	idStr mapFn = dmapGlobals.mapFileBase;
@@ -506,6 +506,9 @@ void Dmap( const idCmdArgs &args ) {
 
 			// create the collision map
 			start = Sys_Milliseconds();
+
+			// stgatilov: make sure we don't accidentally retain the old CM for the obsolete map
+			collisionModelManager->FreeMap();
 
 			collisionModelManager->LoadMap( dmapGlobals.dmapFile );
 			collisionModelManager->FreeMap();

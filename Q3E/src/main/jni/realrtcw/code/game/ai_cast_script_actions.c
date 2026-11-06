@@ -91,6 +91,33 @@ void AICast_NoAttackIfNotHurtSinceLastScriptAction( cast_state_t *cs ) {
 	}
 }
 
+// A few helpers for the prefix markers feature we're added for the gotomarker
+
+qboolean Q_StringStartsWith( const char *s, const char *prefix ) {
+    if ( !s || !prefix ) return qfalse;
+    while ( *prefix ) {
+        if ( tolower(*s) != tolower(*prefix) ) return qfalse;
+        s++; prefix++;
+    }
+    return qtrue;
+}
+
+int AICast_TravelTimeToPoint( cast_state_t *cs, const vec3_t goalOrg ) {
+    int fromArea = trap_AAS_PointAreaNum( cs->bs->origin );
+    int toArea   = trap_AAS_PointAreaNum( (float *)goalOrg );
+
+    if ( fromArea <= 0 || toArea <= 0 ) {
+        return 0;
+    }
+
+    return trap_AAS_AreaTravelTimeToGoalArea(
+        fromArea,
+        cs->bs->origin,
+        toArea,
+        cs->travelflags
+    );
+}
+
 /*
 ===============
 AICast_ScriptAction_GotoMarker
@@ -105,6 +132,9 @@ qboolean AICast_ScriptAction_GotoMarker( cast_state_t *cs, char *params ) {
 	vec3_t vec, org;
 	int i, diff;
 	qboolean slowApproach;
+	qboolean groupMode = qfalse;
+	char prefix[64];
+	int prefixLen;
 
 	ent = NULL;
 
@@ -126,7 +156,9 @@ qboolean AICast_ScriptAction_GotoMarker( cast_state_t *cs, char *params ) {
 	// if we already are going to the marker, just use that, and check if we're in range
 	if ( cs->castScriptStatus.scriptGotoEnt >= 0 && cs->castScriptStatus.scriptGotoId == cs->thinkFuncChangeTime ) {
 		ent = &g_entities[cs->castScriptStatus.scriptGotoEnt];
-		if ( ent->targetname && !Q_strcasecmp( ent->targetname, token ) ) {
+		if (cs->castScriptStatus.scriptGotoIsGroup ||
+			(ent->targetname && !Q_strcasecmp(ent->targetname, token)))
+		{
 			// if we're not slowing down, then check for passing the marker, otherwise check distance only
 			VectorSubtract( ent->r.currentOrigin, cs->bs->origin, vec );
 			//
@@ -188,24 +220,81 @@ qboolean AICast_ScriptAction_GotoMarker( cast_state_t *cs, char *params ) {
 				cs->followTime = level.time + 500;
 				return qfalse;
 			}
-		} else
+		}
+		else
 		{
 			ent = NULL;
 		}
 	}
 
-	// find the ai_marker with the given "targetname"
+    Q_strncpyz( prefix, token, sizeof(prefix) );
 
-	while ( ( ent = G_Find( ent, FOFS( classname ), "ai_marker" ) ) )
-	{
-		if ( ent->targetname && !Q_strcasecmp( ent->targetname, token ) ) {
-			break;
-		}
-	}
+    prefixLen = strlen(prefix);
+    if ( prefixLen > 0 && prefix[prefixLen - 1] == '*' ) {
+        groupMode = qtrue;
+        prefix[prefixLen - 1] = '\0'; // strip '*'
+    }
 
-	if ( !ent ) {
-		G_Error( "AI Scripting: gotomarker can't find ai_marker with \"targetname\" = \"%s\"\n", token );
-	}
+    ent = NULL;
+
+    if ( !groupMode ) {
+        // original exact match behavior
+        while ( ( ent = G_Find( ent, FOFS( classname ), "ai_marker" ) ) ) {
+            if ( ent->targetname && !Q_strcasecmp( ent->targetname, prefix ) ) {
+                break;
+            }
+        }
+    } else {
+        // group/prefix mode: pick best marker at runtime
+        gentity_t *best = NULL;
+        int bestTT = 0x7fffffff;
+        float bestDistSq = 0.0f;
+        qboolean haveTT = qfalse;
+
+        while ( ( ent = G_Find( ent, FOFS( classname ), "ai_marker" ) ) ) {
+            vec3_t org;
+            vec3_t d;
+            float distSq;
+            int tt;
+
+            if ( !ent->targetname ) continue;
+            if ( !Q_StringStartsWith( ent->targetname, prefix ) ) continue;
+
+            // Evaluate marker origin for cost
+            VectorCopy( ent->r.currentOrigin, org );
+
+            tt = AICast_TravelTimeToPoint( cs, org );
+            if ( tt > 0 ) {
+                // Prefer travel time (AAS)
+                if ( tt < bestTT ) {
+                    bestTT = tt;
+                    best = ent;
+                    haveTT = qtrue;
+                }
+            } else if ( !haveTT ) {
+                // Fallback: distance only if we have no travel time candidates
+                VectorSubtract( org, cs->bs->origin, d );
+                distSq = VectorLengthSquared( d );
+                if ( !best || distSq < bestDistSq ) {
+                    bestDistSq = distSq;
+                    best = ent;
+                }
+            }
+        }
+
+        ent = best;
+    }
+
+    if ( !ent ) {
+        if ( !groupMode ) {
+            G_Error( "AI Scripting: gotomarker can't find ai_marker with \"targetname\" = \"%s\"\n", prefix );
+        } else {
+            G_Error( "AI Scripting: gotomarker can't find ai_marker with prefix \"%s*\"\n", prefix );
+        }
+    }
+
+    // Remember which mode we used, so the cached section doesn't compare exact name
+    cs->castScriptStatus.scriptGotoIsGroup = groupMode;
 
 	if ( Distance( cs->bs->origin, ent->r.currentOrigin ) < SCRIPT_REACHGOAL_DIST ) { // we made it
 		return qtrue;
@@ -457,6 +546,171 @@ qboolean AICast_ScriptAction_CrouchToCast( cast_state_t *cs, char *params ) {
 	return qtrue;
 }
 
+// DEFENSE ACTIONS //
+
+static void AICast_Defend_ClearCombat( cast_state_t *cs ) {
+    cs->enemyNum = -1;
+    cs->lastEnemy = -1;
+
+    // kill any “go chase” intentions
+    cs->combatGoalTime = 0;
+    cs->battleHuntPauseTime = 0;
+    VectorClear( cs->takeCoverPos );
+}
+
+
+qboolean AICast_ScriptAction_Defend( cast_state_t *cs, char *params ) {
+    char *pString = params;
+    char *token;
+    gentity_t *marker = NULL;
+    float radius = 320.0f;
+    int timeout = 0;
+
+    if ( !params || !params[0] ) {
+        G_Error( "AI Scripting:defend without parameters\n" );
+    }
+
+    // markername
+    token = COM_ParseExt( &pString, qfalse );
+    if ( !token[0] ) {
+        G_Error( "AI Scripting: syntax: defend <markername> [radius] [timeout_ms]\n" );
+    }
+
+    marker = G_FindByTargetname( NULL, token );
+
+    if ( marker ) {
+        VectorCopy( marker->r.currentOrigin, cs->defendOrigin );
+    } else {
+        // fallback: current pos (still useful)
+        VectorCopy( cs->bs->origin, cs->defendOrigin );
+    }
+
+    // optional radius
+    token = COM_ParseExt( &pString, qfalse );
+    if ( token[0] ) radius = atof( token );
+
+    // optional timeout (ms)
+    token = COM_ParseExt( &pString, qfalse );
+    if ( token[0] ) timeout = atoi( token );
+
+    cs->defendActive = qtrue;
+    cs->defendRadius = radius;
+    cs->defendLeash  = radius + 128.0f; // slack so they can strafe/fight
+    cs->defendExpireTime = ( timeout > 0 ) ? ( level.time + timeout ) : 0;
+    cs->defendRepathTime = 0;
+
+	// if we're outside, explicitly enter return-to-defend mode
+	if (Distance(cs->bs->origin, cs->defendOrigin) > cs->defendRadius)
+	{
+		cs->defendReturning = qtrue;
+
+		// clear combat so he commits to returning smoothly
+		AICast_Defend_ClearCombat(cs);
+	}
+	else
+	{
+		cs->defendReturning = qfalse;
+	}
+
+	// IMPORTANT:
+    // Do NOT force some invented state. Just let the regular logic run.
+    AIFunc_DefaultStart( cs );
+
+    return qtrue;
+}
+
+qboolean AICast_ScriptAction_DefendStop( cast_state_t *cs, char *params ) {
+    cs->defendActive = qfalse;
+	cs->defendReturning = qfalse;
+    cs->defendExpireTime = 0;
+    cs->defendRepathTime = 0;
+    return qtrue;
+}
+
+qboolean AICast_Defend_Update( cast_state_t *cs ) {
+    float distFromHome;
+
+    if ( !cs->defendActive ) return qfalse;
+
+    // timeout
+    if ( cs->defendExpireTime && level.time >= cs->defendExpireTime ) {
+        cs->defendActive = qfalse;
+        cs->defendReturning = qfalse;
+        cs->defendExpireTime = 0;
+        return qfalse;
+    }
+
+    distFromHome = Distance( cs->bs->origin, cs->defendOrigin );
+
+    //
+    // 1) RETURNING MODE: stable navigation back home
+    //
+    if ( cs->defendReturning ) {
+
+        // Arrived?
+        if ( distFromHome <= ( cs->defendRadius * 0.75f ) ) {
+            cs->defendReturning = qfalse;
+            cs->defendRepathTime = 0;
+            return qfalse; // allow normal logic now
+        }
+
+        // While returning, don't chase enemies
+        if ( cs->enemyNum >= 0 ) {
+            if ( !AICast_CheckAttack( cs, cs->enemyNum, qfalse ) ) {
+                AICast_Defend_ClearCombat( cs );
+            }
+        }
+
+        // Drive movement smoothly
+        if ( cs->defendRepathTime < level.time ) {
+            cs->defendRepathTime = level.time + 300; // little tighter helps smoothness
+            AICast_MoveToPos( cs, cs->defendOrigin, -1 );
+        } else {
+            // still keep moving along existing move plan
+            AICast_MoveToPos( cs, cs->defendOrigin, -1 );
+        }
+
+        return qtrue; // handled
+    }
+
+    //
+    // 2) HARD LEASH: if pulled way out during combat, enter returning mode
+    //
+    if ( distFromHome > cs->defendLeash ) {
+        cs->defendReturning = qtrue;
+        AICast_Defend_ClearCombat( cs );
+        cs->defendRepathTime = 0;
+        return qtrue;
+    }
+
+    //
+    // 3) Enemy leash rule: don't chase targets outside leash
+    //
+    if ( cs->enemyNum >= 0 ) {
+        float enemyDistFromHome = Distance( g_entities[cs->enemyNum].r.currentOrigin, cs->defendOrigin );
+
+        if ( enemyDistFromHome > cs->defendLeash ) {
+            // If can't attack from here, drop and return to home logic
+            if ( !AICast_CheckAttack( cs, cs->enemyNum, qfalse ) ) {
+                AICast_Defend_ClearCombat( cs );
+            }
+        }
+    }
+
+    //
+    // 4) Soft radius: if idle and drifted out, enter returning mode (smoothly)
+    //
+    if ( cs->enemyNum < 0 && distFromHome > cs->defendRadius ) {
+        cs->defendReturning = qtrue;
+        cs->defendRepathTime = 0;
+        return qtrue;
+    }
+
+    return qfalse;
+}
+
+
+// DEFENSE ACTIONS END //
 
 /*
 ==============
@@ -625,16 +879,23 @@ qboolean AICast_ScriptAction_Trigger( cast_state_t *cs, char *params ) {
 		G_Error( "AI Scripting: trigger must have a name and an identifier\n" );
 	}
 
-	ent = AICast_FindEntityForName( token );
-	if ( !ent ) {
-		ent = G_Find( &g_entities[MAX_CLIENTS], FOFS( scriptName ), token );
+	// ---- self* support (minimal, safe, non-breaking)
+	// "self*" means: trigger this AI's own ainame
+	if ( !Q_stricmp( token, "self*" ) ) {
+		ent = &g_entities[ cs->entityNum ];
+	} else {
+		ent = AICast_FindEntityForName( token );
 		if ( !ent ) {
-			if ( trap_Cvar_VariableIntegerValue( "developer" ) ) {
-				G_Printf( "AI Scripting: trigger can't find AI cast with \"ainame\" = \"%s\"\n", params );
+			ent = G_Find( &g_entities[MAX_CLIENTS], FOFS( scriptName ), token );
+			if ( !ent ) {
+				if ( trap_Cvar_VariableIntegerValue( "developer" ) ) {
+					G_Printf( "AI Scripting: trigger can't find AI cast with \"ainame\" = \"%s\"\n", params );
+				}
+				return qtrue;
 			}
-			return qtrue;
 		}
 	}
+	// ---- end self* support
 
 	token = COM_ParseExt( &pString, qfalse );
 	if ( !token[0] ) {
@@ -661,6 +922,10 @@ AICast_ScriptAction_FollowCast
 */
 qboolean AICast_ScriptAction_FollowCast( cast_state_t *cs, char *params ) {
 	gentity_t *ent;
+
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: followcast requires ainame\n");
+	}
 
 	// find the cast/player with the given "name"
 	ent = AICast_FindEntityForName( params );
@@ -1156,12 +1421,18 @@ qboolean AICast_ScriptAction_SetClip( cast_state_t *cs, char *params ) {
 /*
 ==============
 AICast_ScriptAction_SuggestWeapon
+
+  syntax: suggestweapon <pickupname>
 ==============
 */
 qboolean AICast_ScriptAction_SuggestWeapon( cast_state_t *cs, char *params ) {
 	int weapon;
 	int i;
 	//int		suggestedweaps = 0; // TTimo: unused
+
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: suggestweapon requires pickupname\n");
+	}
 
 	weapon = WP_NONE;
 
@@ -1200,6 +1471,10 @@ AICast_ScriptAction_SelectWeapon
 qboolean AICast_ScriptAction_SelectWeapon( cast_state_t *cs, char *params ) {
 	int weapon;
 	int i;
+
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: selectweapon requires pickupname\n");
+	}
 
 	weapon = WP_NONE;
 
@@ -1348,6 +1623,10 @@ qboolean AICast_ScriptAction_GiveArmor( cast_state_t *cs, char *params ) {
 	int i;
 	gitem_t     *item = 0;
 
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: givearmor requires params\n");
+	}
+
 	for ( i = 1; bg_itemlist[i].classname; i++ ) {
 		//----(SA)	first try the name they see in the editor, then the pickup name
 		if ( !Q_strcasecmp( params, bg_itemlist[i].classname ) ) {
@@ -1385,6 +1664,10 @@ qboolean AICast_ScriptAction_GiveAmmo( cast_state_t *cs, char *params ) {
 	int i;
 	gitem_t     *item = 0;
 	int quantity;
+
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: giveammo requires pickupname\n");
+	}
 
 	for ( i = 1; bg_itemlist[i].classname; i++ ) {
 		//----(SA)	first try the name they see in the editor, then the pickup name
@@ -1482,6 +1765,10 @@ qboolean AICast_ScriptAction_GiveHealth( cast_state_t *cs, char *params ) {
 	int i;
 	gitem_t     *item = 0;
 
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: givehealth requires pickupname\n");
+	}
+
 	for ( i = 1; bg_itemlist[i].classname; i++ ) {
 		//----(SA)	first try the name they see in the editor, then the pickup name
 		if ( !Q_strcasecmp( params, bg_itemlist[i].classname ) ) {
@@ -1507,6 +1794,21 @@ qboolean AICast_ScriptAction_GiveHealth( cast_state_t *cs, char *params ) {
 
 }
 
+qboolean AICast_ScriptAction_ApplyLoadout( cast_state_t *cs, char *params ) {
+    gentity_t *player;
+
+    if ( !params || !params[0] ) {
+        G_Error( "AI Scripting: applyloadout requires loadout name\n" );
+    }
+
+    player = AICast_FindEntityForName( "player" );
+    if ( !player ) {
+        return qfalse;
+    }
+
+    return AICast_Loadouts_ApplyToEnt( cs, player, params );
+}
+
 /*
 =================
 AICast_ScriptAction_GiveWeapon
@@ -1519,6 +1821,10 @@ qboolean AICast_ScriptAction_GiveWeapon( cast_state_t *cs, char *params ) {
 	int i;
 	gentity_t   *ent = &g_entities[cs->entityNum];
 	int slotId = G_GetFreeWeaponSlot( ent );
+
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: giveweapon requires pickupname\n");
+	}
 
 	weapon = WP_NONE;
 
@@ -1574,7 +1880,7 @@ qboolean AICast_ScriptAction_GiveWeapon( cast_state_t *cs, char *params ) {
 		{
 			if (g_newinventory.integer > 0 || g_gametype.integer == GT_SURVIVAL)
 			{
-				if (weapon != WP_AIRSTRIKE && weapon != WP_ARTY && weapon != WP_POISONGAS_MEDIC && weapon != WP_DYNAMITE_ENG) // Skip WP_AIRSTRIKE and WP_ARTY	
+				if (weapon != WP_AIRSTRIKE && weapon != WP_ARTY && weapon != WP_POISONGAS && weapon != WP_DYNAMITE_ENG && weapon != WP_DYNAMITE && weapon != WP_SMOKE_BOMB) // Skip WP_AIRSTRIKE and WP_ARTY	
 				{
 					if (ent->client->ps.stats[STAT_PLAYER_CLASS] == PC_SOLDIER)
 					{
@@ -1659,6 +1965,10 @@ qboolean AICast_ScriptAction_GiveWeaponFull( cast_state_t *cs, char *params ) {
     int tCount = 0;
     char *chosenParam;
     char *token;
+
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: giveweaponfull requires pickupname\n");
+	}
 
 	Q_strncpyz(localParams, params, sizeof(localParams));
 
@@ -1955,6 +2265,10 @@ qboolean AICast_ScriptAction_TakeWeapon( cast_state_t *cs, char *params ) {
 	int weapon;
 	int i;
 
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: takeweapon requires pickupname\n");
+	}
+
 	weapon = WP_NONE;
 
 	if ( !Q_stricmp( params, "all" ) ) {
@@ -2036,6 +2350,74 @@ qboolean AICast_ScriptAction_TakeWeapon( cast_state_t *cs, char *params ) {
 		}
 	}
 
+	return qtrue;
+}
+
+
+/*
+==============
+AICast_ScriptAction_DropItem
+
+syntax:
+  dropitem <classnameOrPickupName>
+  dropitem <classnameOrPickupName> <lifetimeMs>
+  dropitem <classnameOrPickupName> <lifetimeMs> <dropChance>
+
+examples:
+  dropitem item_armor_head
+  dropitem weapon_mp40 30000
+  dropitem item_treasure 45000
+  dropitem weapon_colt 0 20
+==============
+*/
+qboolean AICast_ScriptAction_DropItem( cast_state_t *cs, char *params ) {
+	gentity_t *ent;
+	gitem_t *item;
+	char name[MAX_QPATH];
+	char lifeStr[32];
+	char probStr[4];
+	int lifetimeMs = 0;
+	int dropChance = 100;
+	int num;
+
+	if ( !cs ) {
+		return qfalse;
+	}
+
+	ent = &g_entities[cs->entityNum];
+	if ( !ent->inuse || !ent->client ) {
+		return qfalse;
+	}
+
+	// Parse: <name> [lifetimeMs] [dropChance]
+	name[0] = '\0';
+	lifeStr[0] = '\0';
+	probStr[0] = '\0';
+
+	num = sscanf( params, "%s %31s %3s", name, lifeStr, probStr );
+	if ( num < 1 || !name[0] ) {
+		G_Error( "AI Scripting: dropitem - missing item name" );
+		return qfalse;
+	}
+
+	if ( num == 2 && lifeStr[0] ) {
+		lifetimeMs = atoi( lifeStr );
+		if ( lifetimeMs < 0 ) lifetimeMs = 0;
+	}
+
+	if ( num >= 3 && probStr[0] ) {
+		dropChance = atoi( probStr );
+		if ( dropChance < 0 ) dropChance = 0;
+		if ( dropChance > 100 ) dropChance = 100;
+	}
+
+	item = BG_FindItem2( name );
+	if ( !item ) {
+		G_Error( "AI Scripting: dropitem %s, unknown item", name );
+		return qfalse;
+	}
+
+	G_DropSpecifiedItem( ent, item, lifetimeMs, dropChance );
 	return qtrue;
 }
 
@@ -2126,6 +2508,8 @@ qboolean AICast_ScriptAction_NoRespawn( cast_state_t *cs, char *params ) {
 /*
 ==============
 AICast_ScriptAction_GiveInventory
+
+ syntax: giveinventory <pickupname>
 ==============
 */
 qboolean AICast_ScriptAction_GiveInventory( cast_state_t *cs, char *params ) {
@@ -2164,6 +2548,8 @@ qboolean AICast_ScriptAction_GiveInventory( cast_state_t *cs, char *params ) {
 /*
 ==============
 AICast_ScriptAction_GivePerk
+
+ syntax: giveperk <pickupname>
 ==============
 */
 qboolean AICast_ScriptAction_GivePerk( cast_state_t *cs, char *params ) {
@@ -2172,6 +2558,10 @@ qboolean AICast_ScriptAction_GivePerk( cast_state_t *cs, char *params ) {
 
 	int clientNum;
 	clientNum = level.sortedClients[0];
+
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: giveperk requires pickupname\n");
+	}
 
 	for ( i = 1; bg_itemlist[i].classname; i++ ) {
 		if ( !Q_strcasecmp( params, bg_itemlist[i].classname ) ) {
@@ -2212,6 +2602,10 @@ AICast_ScriptAction_Movetype
 =================
 */
 qboolean AICast_ScriptAction_Movetype( cast_state_t *cs, char *params ) {
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: movetype requires params\n");
+	}
+
 	if ( !Q_strcasecmp( params, "walk" ) ) {
 		cs->movestate = MS_WALK;
 		cs->movestateType = MSTYPE_PERMANENT;
@@ -2350,7 +2744,7 @@ qboolean AICast_ScriptAction_SaveCheckpoint ( cast_state_t *cs, char *params ) {
 	saveName = COM_ParseExt( &pString, qfalse );
 	if ( !saveName[0] ) {
 		G_SaveGame( "lastcheckpoint" );	// save the default "current" savegame  
-		G_SaveGame( "current" );	   // save the default "current" savegame
+		G_SaveGame( "current_realrtcw" );	   // save the default "current" savegame
 	} else {
 		G_SaveGame( saveName );
 	}
@@ -2473,10 +2867,21 @@ qboolean AICast_ScriptAction_GodMode( cast_state_t *cs, char *params ) {
 	return qtrue;
 }
 
+/*
+=================
+AICast_ScriptAction_DropWeapon
+
+  syntax: drop_weapon <ainame>
+=================
+*/
 qboolean AICast_ScriptAction_DropWeapon(cast_state_t* cs, char* params) {
 	gentity_t* ent;
 	int weapon;
 	weapon = WP_NONE;
+
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: drop_weapon requires a ainame\n");
+	}
 
 	// find the cast/player with the given "name"
 	ent = AICast_FindEntityForName(params);
@@ -3631,6 +4036,10 @@ AICast_ScriptAction_SavePersistant
 ====================
 */
 qboolean AICast_ScriptAction_SavePersistant( cast_state_t *cs, char *params ) {
+	if (!params || !params[0]) {
+		G_Error("AI Scripting: savepersistant requires next_mapname\n");
+	}
+
 	G_SavePersistant( params );
 	return qtrue;
 }
@@ -3662,6 +4071,8 @@ extern void G_EndGame( void );
 /*
 ==============
 AICast_ScriptAction_EndGame
+
+ syntax: endgame
 ==============
 */
 qboolean AICast_ScriptAction_EndGame( cast_state_t *cs, char *params ) {
@@ -3825,1750 +4236,36 @@ qboolean AICast_ScriptAction_ChangeLevel( cast_state_t *cs, char *params ) {
 	return qtrue;
 }
 
-/*
-==================
-AICast_ScriptAction_AchievementMap_W3D
-==================
-*/
-qboolean AICast_ScriptAction_AchievementMap_W3D( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_W3D_1");
-	}
-	return qtrue;
+qboolean AICast_ScriptAction_AchievementGeneric( cast_state_t *cs, char *params )
+{
+    const cast_script_stack_action_t *a;
+    const cast_achievementDef_t *def;
+
+    if ( !cs ) {
+        return qtrue;
+    }
+
+    a = cs->castScriptStatus.currentAction;
+    if ( !a ) {
+        return qtrue;
+    }
+
+    def = (const cast_achievementDef_t *)a->userdata;
+    if ( !def || !def->steamId || !def->steamId[0] ) {
+        return qtrue;
+    }
+
+    if ( g_cheats.integer ) {
+        return qtrue;
+    }
+
+    if ( def->canAward && !def->canAward( cs ) ) {
+        return qtrue;
+    }
+
+    steamSetAchievement( def->steamId );
+    return qtrue;
 }
-
-/*
-==================
-AICast_ScriptAction_AchievementMap_W3DSEC
-==================
-*/
-qboolean AICast_ScriptAction_AchievementMap_W3DSEC( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_W3D_2");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_goldchest
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_goldchest( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_SECRET_CRYPT2");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_warcrime
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_warcrime( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_KILL_CIVILIAN");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_speedrun
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_speedrun( cast_state_t *cs, char *params ) {
-	gentity_t   *player;
-	int playtime = 0;
-	player = AICast_FindEntityForName( "player" );
-	
-	if ( player ) 
-	{
-	AICast_AgePlayTime( player->s.number );
-	playtime = AICast_PlayTime( player->s.number );
-	}
-
-    if ( playtime <= 90000 ) 
-	{
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ESCAPE_SPEEDRUN");
-	}
-	}
-
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_training
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_training( cast_state_t *cs, char *params ) {
-    steamSetAchievement("ACH_TRAINING");
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_strangelove
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_strangelove( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MAGIC");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_rocketstealth
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_rocketstealth( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ROCKET_STEALTH");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_crystal
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_crystal( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CRYSTALSKULL");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_stealth1
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_stealth1( cast_state_t *cs, char *params ) {
-	gentity_t   *player;
-	player = AICast_FindEntityForName( "player" );
-	int attempts = 0;
-
-	if ( player ) 
-	{
-	attempts = AICast_NumAttempts( player->s.number ) + 1;
-	}
-
-	if ( attempts <= 1 ) 
-	{
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_STEALTH_1");
-	}
-	}
-
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_stealth2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_stealth2( cast_state_t *cs, char *params ) {
-	gentity_t   *player;
-	player = AICast_FindEntityForName( "player" );
-	int attempts = 0;
-
-	if ( player ) 
-	{
-	attempts = AICast_NumAttempts( player->s.number ) + 1;
-	}
-
-	if ( attempts <= 1 ) 
-	{
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_STEALTH_2");
-	}
-	}
-
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter1
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter1( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_1");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter2( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_2");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter3
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter3( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_3");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter4
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter4( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_4");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter5
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter5( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_5");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter6
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter6( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_6");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter7
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter7( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_7");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter1_hard
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter1_hard( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_1_HARD");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter2_hard
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter2_hard( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_2_HARD");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter3_hard
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter3_hard( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_3_HARD");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter4_hard
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter4_hard( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_4_HARD");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter5_hard
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter5_hard( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_5_HARD");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter6_hard
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter6_hard( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_6_HARD");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_chapter7_hard
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_chapter7_hard( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHAPTER_7_HARD");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_boss1
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_boss1( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_BOSS1");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_boss2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_boss2( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_BOSS2");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_boss3
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_boss3( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_BOSS3");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_curse
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_curse( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CURSE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_stalingrad
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_stalingrad( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_STALINGRAD");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_timegate
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_timegate( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_TIMEGATE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_pro51
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_pro51( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_PRO51");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_sf
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_sf( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_SF");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ra
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ra( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_RA");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ic
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ic( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_IC");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_capuzzo
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_capuzzo( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CAPUZZO");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_saucers
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_saucers( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_SAUCERS");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_arkot
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_arkot( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ARKOT");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_darkm
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_darkm( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_DARKM");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_darkm_2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_darkm_2( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_DARKM_2");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_dm2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_dm2( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_DM2");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_dm2_2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_dm2_2( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_DM2_2");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_dm2_3
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_dm2_3( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_DM2_3");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_dm2_4
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_dm2_4( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_DM2_4");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_tda_day
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_tda_day( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_TDA_DAY");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_tda_night
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_tda_night( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_TDA_NIGHT");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_tda_dark
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_tda_dark( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_TDA_DARK");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_tda_plus
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_tda_plus( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_TDA_PLUS");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_tda_arena
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_tda_arena( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_TDA_ARENA");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_lion
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_lion( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_LION");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_parkour
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_parkour( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_PARKOUR");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_manor1
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_manor1( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MANOR1");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_manor1_2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_manor1_2( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MANOR1_2");
-	}
-	return qtrue;
-}
-
-
-/*
-==================
-AICast_ScriptAction_Achievement_walkinthepark
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_walkinthepark( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer && g_nohudchallenge.integer && !g_nopickupchallenge.integer && !g_ironchallenge.integer)
-	{
-    steamSetAchievement("ACH_WALKINTHEPARK");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ironman
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ironman( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer && g_ironchallenge.integer && !g_nohudchallenge.integer && !g_nopickupchallenge.integer)
-	{
-    steamSetAchievement("ACH_IRONMAN");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_hardcore
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_hardcore( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer && g_nopickupchallenge.integer && !g_nohudchallenge.integer && !g_ironchallenge.integer)
-	{
-    steamSetAchievement("ACH_HARDCORE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_999
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_999( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer && g_decaychallenge.integer)
-	{
-    steamSetAchievement("ACH_999");
-	}
-	return qtrue;
-}
-
-
-/*
-==================
-AICast_ScriptAction_Achievement_nightmare
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_nightmare( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer && g_nohudchallenge.integer && g_nopickupchallenge.integer && g_ironchallenge.integer)
-	{
-    steamSetAchievement("ACH_NIGHTMARE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_booze
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_booze( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_WINTERSTEIN_WINE");
-	}
-	return qtrue;
-}
-
-
-/*
-==================
-AICast_ScriptAction_Achievement_party
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_party( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_WINTERSTEIN_PARTY");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_winterstein
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_winterstein( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_WINTERSTEIN_COMPLETE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_speedrun_norway
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_speedrun_norway( cast_state_t *cs, char *params ) {
-	gentity_t   *player;
-	int playtime = 0;
-	player = AICast_FindEntityForName( "player" );
-	
-	if ( player ) 
-	{
-	AICast_AgePlayTime( player->s.number );
-	playtime = AICast_PlayTime( player->s.number );
-	}
-
-    if ( playtime <= 90000)
-	{
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_WINTERSTEIN_NORWAY");
-	}
-	}
-
-	return qtrue;
-}
-
-
-/*
-==================
-AICast_ScriptAction_AchievementMap_SIWA
-==================
-*/
-qboolean AICast_ScriptAction_AchievementMap_SIWA( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_SIWA");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_AchievementMap_SEAWALL
-==================
-*/
-qboolean AICast_ScriptAction_AchievementMap_SEAWALL( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_SEAWALL");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_GOLDRUSH
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_GOLDRUSH( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_GOLDRUSH");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_RADAR
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_RADAR( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_RADAR");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_RAILGUN
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_RAILGUN( cast_state_t *cs, char *params ) {
-    steamSetAchievement("ACH_RAILGUN");
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_FUEL
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_FUEL( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_FUEL");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ALLGOLDSIWA
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ALLGOLDSIWA( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ALLGOLDSIWA");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_CHESTSIWA
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_CHESTSIWA( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_CHESTSIWA");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_FUEL1
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_FUEL1( cast_state_t *cs, char *params ) {
-	gentity_t   *player;
-	player = AICast_FindEntityForName( "player" );
-	int attempts = 0;
-
-	if ( player ) 
-	{
-	attempts = AICast_NumAttempts( player->s.number ) + 1;
-	}
-
-	if ( attempts <= 1 ) 
-	{
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_FUEL1");
-	}
-	}
-
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_SPEEDBATTERY
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_SPEEDBATTERY( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_SPEEDBATTERY");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ROOMBATTERY
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ROOMBATTERY( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ROOMBATTERY");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_SAFE
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_SAFE( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_SAFE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_HEIST
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_HEIST( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_HEIST");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_KELLYS
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_KELLYS( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_KELLYS");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MANSIONGOLD
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MANSIONGOLD( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MANSIONGOLD");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_PANTHER
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_PANTHER( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_PANTHER");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_DEPOT
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_DEPOT( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_DEPOT");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_DORA
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_DORA( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_DORA");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ALLGOLDFUEL
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ALLGOLDFUEL( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ALLGOLDFUEL");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ETBONUS
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ETBONUS( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer && (g_decaychallenge.integer || g_ironchallenge.integer || g_nohudchallenge.integer || g_nopickupchallenge.integer ))
-	{
-    steamSetAchievement("ACH_ETBONUS");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_BINOCS
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_BINOCS( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_BINOCS");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_1
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_1( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_1");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_2( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_2");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_3
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_3( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_3");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_4
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_4( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_4");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_5
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_5( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_5");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_6
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_6( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_6");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_7
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_7( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_7");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_8
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_8( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_8");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_9
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_9( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_9");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_10
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_10( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_10");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA1_11
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA1_11( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA1_11");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA2_1
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_1( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA2_1");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA2_2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_2( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA2_2");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA2_3
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_3( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA2_3");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA2_4
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_4( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA2_4");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA2_5
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_5( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA2_5");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA2_6
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_6( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA2_6");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA2_7
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_7( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA2_7");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA2_8
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_8( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA2_8");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_VENDETTA2_9
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_VENDETTA2_9( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_VENDETTA2_9");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_WARBELL1
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_WARBELL1( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_WARBELL_MAP");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_WARBELL2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_WARBELL2( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_WARBELL_WATERS");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_WARBELL3
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_WARBELL3( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_WARBELL_BLAV");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_WARBELL4
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_WARBELL4( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_WARBELL_OLARIC");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_WARBELL5
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_WARBELL5( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_WARBELL_HEIN");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_NIGHTMARE
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_NIGHTMARE( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_NIGHTMARE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_LEAP
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_LEAP( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_LEAP");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_OSA
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_OSA( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_OSA");
-	}
-	return qtrue;
-}
-
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_GOAT
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_GOAT( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_GOAT");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_COURSE
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_COURSE( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_COURSE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_RADIO
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_RADIO( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_RADIO");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_EGYPT
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_EGYPT( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_EGYPT");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_WIDE
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_WIDE( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_WIDE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_FIREFLY
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_FIREFLY( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_FIREFLY");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_LAIR
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_LAIR( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_LAIR");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_HIDEOUT
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_HIDEOUT( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_HIDEOUT");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_BARTENDER
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_BARTENDER( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_BARTENDER");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_BETRAYER
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_BETRAYER( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_BETRAYER");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_MALTA_AGENT2
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_MALTA_AGENT2( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_MALTA_AGENT2");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ICE_BEAT
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ICE_BEAT( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ICE_BEAT");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ICE_DH
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ICE_DH( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ICE_DH");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ICE_STEALTH
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ICE_STEALTH( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ICE_STEALTH");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ICE_SECRET
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ICE_SECRET( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ICE_SECRET");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ICE_DEFENSE
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ICE_DEFENSE( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ICE_DEFENSE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_ICE_EE
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_ICE_EE( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_ICE_EE");
-	}
-	return qtrue;
-}
-
-/*
-==================
-AICast_ScriptAction_Achievement_6PERKS
-==================
-*/
-qboolean AICast_ScriptAction_Achievement_6PERKS( cast_state_t *cs, char *params ) {
-	if ( !g_cheats.integer ) 
-	{
-    steamSetAchievement("ACH_6PERKS");
-	}
-	return qtrue;
-}
-
-
 
 /*
 ==================
@@ -5690,14 +4387,28 @@ qboolean AICast_ScriptAction_DenyAction( cast_state_t *cs, char *params ) {
 /*
 =================
 AICast_ScriptAction_LightningDamage
+
+    syntax: lightningdamage <ON/OFF>
+
+  Note: this will change AIFL_ROLL_ANIM flag
 =================
 */
 qboolean AICast_ScriptAction_LightningDamage( cast_state_t *cs, char *params ) {
-	Q_strlwr( params );
-	if ( !Q_stricmp( params, "on" ) ) {
+	char    *pString, *token;
+
+	pString = params;
+	token = COM_ParseExt( &pString, qfalse );
+	if ( !token[0] ) {
+		G_Error( "AI_Scripting: syntax: lightningdamage <ON/OFF>" );
+	}
+	Q_strlwr( token );
+
+	if ( !Q_stricmp( token, "on" ) ) {
 		cs->aiFlags |= AIFL_ROLL_ANIM;  // hijacking this since the player doesn't use it
-	} else {
+	} else if ( !Q_stricmp( token, "off" ) ) {
 		cs->aiFlags &= ~AIFL_ROLL_ANIM;
+	} else {
+		G_Error( "AI_Scripting: syntax: lightningdamage <ON/OFF>" );
 	}
 	return qtrue;
 }
@@ -5705,6 +4416,8 @@ qboolean AICast_ScriptAction_LightningDamage( cast_state_t *cs, char *params ) {
 /*
 =================
 AICast_ScriptAction_Headlook
+
+  syntax: headlook <on/off>
 =================
 */
 qboolean AICast_ScriptAction_Headlook( cast_state_t *cs, char *params ) {
@@ -5768,10 +4481,15 @@ qboolean AICast_ScriptAction_RestoreScript( cast_state_t *cs, char *params ) {
 =================
 AICast_ScriptAction_StateType
 
+    syntax: statetype <alert/relaxed>
+
   set the current state for this character
 =================
 */
 qboolean AICast_ScriptAction_StateType( cast_state_t *cs, char *params ) {
+	if (!params || !params[0]) {
+		G_Error("AI_Scripting: syntax: statetype <alert/relaxed>\n");
+	}
 
 	if ( !Q_stricmp( params, "alert" ) ) {
 		cs->aiState = AISTATE_ALERT;
@@ -5786,7 +4504,7 @@ qboolean AICast_ScriptAction_StateType( cast_state_t *cs, char *params ) {
 ================
 AICast_ScriptAction_KnockBack
 
-  syntax: knockback [ON/OFF]
+  syntax: knockback <ON/OFF>
 ================
 */
 qboolean AICast_ScriptAction_KnockBack( cast_state_t *cs, char *params ) {
@@ -5816,7 +4534,7 @@ qboolean AICast_ScriptAction_KnockBack( cast_state_t *cs, char *params ) {
 ================
 AICast_ScriptAction_Zoom
 
-  syntax: zoom [ON/OFF]
+  syntax: zoom <ON/OFF>
 ================
 */
 qboolean AICast_ScriptAction_Zoom( cast_state_t *cs, char *params ) {
@@ -5891,6 +4609,13 @@ qboolean AICast_ScriptAction_StopCam( cast_state_t *cs, char *params ) {
 	return qtrue;
 }
 
+/*
+=================
+AICast_ScriptAction_Cigarette
+
+  syntax: cigarette <ON/OFF>
+=================
+*/
 qboolean AICast_ScriptAction_Cigarette( cast_state_t *cs, char *params ) {
 	char    *pString, *token;
 
@@ -5917,7 +4642,7 @@ qboolean AICast_ScriptAction_Cigarette( cast_state_t *cs, char *params ) {
 =================
 AICast_ScriptAction_Parachute
 
-  syntax: parachute [ON/OFF]
+  syntax: parachute <ON/OFF>
 =================
 */
 qboolean AICast_ScriptAction_Parachute( cast_state_t *cs, char *params ) {
@@ -5970,6 +4695,8 @@ qboolean AICast_ScriptAction_AIScriptName( cast_state_t *cs, char *params ) {
 /*
 =================
 AICast_ScriptAction_SetHealth
+
+  syntax: sethealth <value>
 =================
 */
 qboolean AICast_ScriptAction_SetHealth( cast_state_t *cs, char *params ) {
@@ -5987,7 +4714,7 @@ qboolean AICast_ScriptAction_SetHealth( cast_state_t *cs, char *params ) {
 =================
 AICast_ScriptAction_NoTarget
 
-  syntax: notarget ON/OFF
+  syntax: notarget <ON/OFF>
 =================
 */
 qboolean AICast_ScriptAction_NoTarget( cast_state_t *cs, char *params ) {
@@ -6009,6 +4736,8 @@ qboolean AICast_ScriptAction_NoTarget( cast_state_t *cs, char *params ) {
 /*
 ==================
 AICast_ScriptAction_Cvar
+
+  syntax: cvar <cvarName> <cvarValue>
 ==================
 */
 qboolean AICast_ScriptAction_Cvar( cast_state_t *cs, char *params ) {
@@ -6041,10 +4770,36 @@ qboolean AICast_ScriptAction_Cvar( cast_state_t *cs, char *params ) {
 
 /*
 ==================
+AICast_ScriptAction_CinPlay
+
+  syntax: cin_play <videoFileName>
+==================
+*/
+qboolean AICast_ScriptAction_CinPlay( cast_state_t *cs, char *params ) {
+	if ( !params || !params[0] ) {
+		G_Error( "AI_Scripting: syntax: cin_play <videoFileName>\n" );
+	}
+	trap_SendServerCommand( cs->entityNum, va( "cin_play %s", params ) );
+    return qtrue;
+}
+
+/*
+==================
+AICast_ScriptAction_CinStop
+
+  syntax: cin_stop
+==================
+*/
+qboolean AICast_ScriptAction_CinStop( cast_state_t *cs, char *params ) {
+    trap_SendServerCommand( cs->entityNum, "cin_stop" );
+    return qtrue;
+}
+
+/*
+==================
 AICast_ScriptAction_decoy
 ==================
 */
-
 qboolean AICast_ScriptAction_decoy( cast_state_t *cs, char *params ) {
     trap_SendServerCommand( -1, "mu_play sound/scenaric/general/decoy.wav 0\n" );
 	return qtrue;
@@ -6055,6 +4810,7 @@ qboolean AICast_ScriptAction_decoy( cast_state_t *cs, char *params ) {
 ==================
 AICast_ScriptAction_MusicStart
 
+  syntax: mu_start <musicfile> <fadeuptime>
 ==================
 */
 qboolean AICast_ScriptAction_MusicStart( cast_state_t *cs, char *params ) {
@@ -6083,6 +4839,7 @@ qboolean AICast_ScriptAction_MusicStart( cast_state_t *cs, char *params ) {
 ==================
 AICast_ScriptAction_MusicPlay
 
+  syntax: mu_play <musicfile> [fadeup time]
 ==================
 */
 qboolean AICast_ScriptAction_MusicPlay( cast_state_t *cs, char *params ) {
@@ -6106,6 +4863,8 @@ qboolean AICast_ScriptAction_MusicPlay( cast_state_t *cs, char *params ) {
 /*
 ==================
 AICast_ScriptAction_MusicStop
+
+  syntax: mu_stop [fadeout time]
 ==================
 */
 qboolean AICast_ScriptAction_MusicStop( cast_state_t *cs, char *params ) {
@@ -6127,6 +4886,8 @@ qboolean AICast_ScriptAction_MusicStop( cast_state_t *cs, char *params ) {
 /*
 ==================
 AICast_ScriptAction_MusicFade
+
+  syntax: mu_fade <targetvol> <fadetime>
 ==================
 */
 qboolean AICast_ScriptAction_MusicFade( cast_state_t *cs, char *params ) {
@@ -6156,6 +4917,8 @@ qboolean AICast_ScriptAction_MusicFade( cast_state_t *cs, char *params ) {
 /*
 ==================
 AICast_ScriptAction_MusicQueue
+
+  syntax: mu_queue <musicfile> [musicfile2] ...
 ==================
 */
 qboolean AICast_ScriptAction_MusicQueue( cast_state_t *cs, char *params ) {
@@ -6346,6 +5109,8 @@ qboolean AICast_ScriptAction_PushAway( cast_state_t *cs, char *params ) {
 /*
 ==================
 AICast_ScriptAction_CatchFire
+
+  syntax: catchfire
 ==================
 */
 qboolean AICast_ScriptAction_CatchFire( cast_state_t *cs, char *params ) {

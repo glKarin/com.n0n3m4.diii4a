@@ -97,6 +97,7 @@ public:
 	virtual void		UpdateLoadingProgressBar( progressStage_t key, float ratio ) override;
 
 	virtual void		Frame() override;
+	virtual void		ScheduleTonemap( bool forceOutputToBlack = false ) override;
 
 	virtual bool		ProcessEvent( const sysEvent_t *event ) override;
 
@@ -138,6 +139,8 @@ public:
 
 	void				LoadSession( const char *name );
 	void				SaveSession( const char *name );
+
+	void				CaptureGameScreenshot( byte* &data, int &width, int &height );
 
 	// called by Draw when the scene to scene wipe is still running
 	void				DrawWipeModel();
@@ -193,9 +196,6 @@ public:
 	static idCVar		com_guid;
 
 	static idCVar		gui_configServerRate;
-
-	//Obsttorte: cvar for disabling manual saves
-	static idCVar		saveGameName;
 
 	// SteveL #4161: Support > 1 quicksave
 	static idCVar		com_numQuickSaves;
@@ -296,6 +296,8 @@ public:
 	volatile bool		frontendActiveNow;
 	volatile bool		shutdownFrontend;
 	std::shared_ptr<ErrorReportedException> frontendException;
+
+	int					tonemapHappenedCounter;
 
 	void				FrontendThreadFunction();
 	virtual bool		IsFrontend() const override;

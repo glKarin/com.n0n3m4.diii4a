@@ -1,0 +1,133 @@
+2018-11-29 David Anderson
+    * createirepfrombinary.cc: Removed trailing whitespace.
+    * dwarfgen.cc: Added option --add-implicit-const to
+      create an object with DW_FORM_implicit_const.
+    * general.h: Added bool addimplicitconst flag for the
+      new option.
+    * irepattrtodbg.cc: For DW_FORM_implicit_const
+      add a call to new libdwarf function
+      dwarf_add_AT_implicit_const().
+    * ireptodbg.cc: New static function addImplicitConstItem()
+      deals with replacing parts of existing variables
+      with DW_FORM_implicit_const when the new option used.
+2018-10-03 David Anderson
+    * dwarfgen.cc: Now uses dwarf_init_b() instead
+      of the original dwarf_init().
+2018-09-21 David Anderson
+    * dwarfgen.cc: S_IRUSR was defined incorrectly
+      (when not provided by system headers). Fixed.
+    * CMakeLists.txt: Updated headers list to include all
+      the local headers.
+    * Makefile.am: Ensured config.h.in.cmake and
+      dwarfgen.1 get into releases.
+2018-09-11 David Anderson
+    * ireptodbg.cc: Removed pointless comment.
+2018-08-02 David Anderson
+    * irepattrtodbg.cc: Fixed a typo and removed/#if 0
+      some debugging code
+    * Makefile.am: Removed unused variables and references
+      to them.
+2018-07-31 David Anderson
+    * Makefile.am: Moved ChangeLog etc out of /usr/share
+      but have them in the distribution. Now make install
+      puts nothing of dwarfgen in /usr/local/share.
+2018-07-31 David Anderson
+    * createirepfrombinary.cc: Delete blank line.
+    * dwarfgen.cc: Adding new option --force-empty-dnames
+      to force out .debug_names section (even if empty).
+      Added dwarf_transform_to_disk_form_a() which
+      does the same as dwarf_transform_to_disk_form() but
+      has a status as the return value and returns its
+      value via a pointer arg.
+    * irepattrtodbg.cc: Removing some useless whitespace.
+2018-07-24 David Anderson
+    * dwarfgen.cc: CallbackFunc() was awkwardly declared
+      (now more sensibly declared as static function,
+      still extern "C" as it is called from C (libdwarf))
+      ErrorHandler() was unused (now deleted).
+2018-07-23 David Anderson
+    * createirepformfrombinary.cc: Removed unused local variable.
+      #define UNUSEDARG appropriately
+    * createirepfrombinary.cc: Removed extra ';'.
+      #define UNUSEDARG appropriately
+      mark static functions as such to avoid warnings.
+      Mark arguments UNUSEDARG where appropriate.
+      Test the correct libdwarf return value.
+      Delete unused local variables.
+    * dwarfgen.cc: Declared functions for C callbacks
+      as extern C.
+      #define UNUSEDARG appropriately
+    * general.h: Reformat the header comments to avoid
+      too-long lines.
+      Delete duplicative comments.
+    * irepattrtodbg.cc: Fixed reinterpret casts to be
+      the correct type which made the typedef myintptrt
+      unused (and now deleted).
+      #define UNUSEDARG appropriately
+      Mark arguments UNUSEDARG where appropriate.
+    * irepdie.h, irepform.h: Mark arguments
+      UNUSEDARG where appropriate.
+    * ireptodbg.cc:Fixed reinterpret casts to be
+      the correct type, fixing signed/unsigned
+      comparison warnings.  Removed some unused
+      local variables. Fixed a couple declarations
+      to avoid signed/unsigned comparison warnings.
+      #define UNUSEDARG appropriately
+      Mark arguments UNUSEDARG where appropriate.
+2018-07-22 David Anderson
+    * dwarfgen.cc: The relocations processing was assuming
+      alignment of 32bit and 64bit values. Now no longer
+      makes that incorrect assumption.
+2018-07-16 David Anderson
+    * createirepformfrombinary.cc: Refines ifdef of HAVE_STDAFX_H
+    * createirepfrombinary.cc: Refines ifdef of HAVE_STDAFX_H
+      Delete unused local variable.
+    * dwarfgen.cc: Refines ifdef of HAVE_STDAFX_H.
+      Changes certain function_argument names to avoid
+      shadowing a global. For example, elf -> elf_w
+    * general.h: Remove pointless trailing ; ending IToHex()
+    * irepattrtodbg.cc: Refines ifdef of HAVE_STDAFX_H.
+      Rename local vars to avoid shadowing. Example: form -> form_a
+    * ireptodbg.cc: Refines ifdef of HAVE_STDAFX_H.
+      Rename local vars to avoid shadowing. Example: error -> lerror
+2018-07-16 David Anderson
+    * Makefile.am: New, used by autotools to create configure.
+    * configure.ac, Makefile.in, config.h.in: Deleted.
+2018-06-19  David Anderson
+     * dwarfgen.cc: Now it's intended to build for Linux
+       or Windows and get usable file open modes automatically.
+2018-06-14  David Anderson
+     * Makefile.in
+     * config.h.in,configure.ac
+       Removed unnecessary defines and checks.
+     * configure: Regenerated
+     * createirepformfrombinary.cc,createirepfrombinary.cc,
+       irepattrtodbg.cc,ireptodbg.cc:
+       Removed unnecessary #includes
+     * dwarfgen.cc:  Removed unnecessary #includes.
+       Switch from gelf.h (GNU only) to libelf.h.
+2018-06-14  David Anderson
+     * Added #ifdef for Windows environment
+       builds. _O_WRONLY etc for creating a file.
+2018-06-13  David Anderson
+     * configure.ac: New option --enable-elf-open
+       setting HAVE_ELF_OPEN
+     * config.h.in: HAVE_ELF_OPEN
+     * configure.ac: Regenerated.
+     * dwarfgen.cc.c: Now uses open() unless HAVE_ELF_OPEN
+       is explicitly set.
+2018-06-05  David Anderson
+     * dwarfdump.c:  Change WIN32 to _WIN32.
+2018-06-05  David Anderson
+     * configure.ac: Now configure.in gone, using configure.ac.
+     * configure: regenerated.
+     * config.h.in: Regenerated, HAVE_LIBELF_LIBELF gone.
+2018-06-05  David Anderson
+     * dwarfgen.cc: Remove erroneous _MSC_VER
+       per Carlos Alberto Enciso.
+2018-05-28  David Anderson
+     * createirepformfrombinary.cc,createirepfrombinary.cc,
+       general.h,irepattrtodbg.cc,irepdie.h,
+       irepform.h,ireppubnames.h: Removed trailing
+       blank lines and updated copyright year.
+

@@ -976,6 +976,9 @@ void rvParticle::CheckTimeoutEffect(rvBSE* effect,
     // trigger the effect
     // ----------------------------------------------------------------------
     const idDecl* fxName = st->mParticleTemplate.mTimeoutEffects[BSE::RandIndex(numFx)];
+#ifdef _SPLASHDAMAGE
+	game->PlayEffect(fxName ? fxName->Index() : -1, vec3_one, posWorld, axis, false, vec3_origin, 0.0f);
+#else
     game->PlayEffect(fxName,
         posWorld,
         axis,
@@ -985,6 +988,7 @@ void rvParticle::CheckTimeoutEffect(rvBSE* effect,
         /* predictBit = */false,
         EC_IGNORE,
         vec4_one);
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -1107,7 +1111,11 @@ bool rvParticle::RunPhysics(rvBSE* effect,
     idTraceModel* trm = pt.GetTraceModel();
 
     trace_t tr;
+#ifdef _SPLASHDAMAGE
+    game->Translation(tr, fromWorld, toWorld, *trm, CONTENTS_SOLID | CONTENTS_OPAQUE);
+#else
     game->Translation(tr, fromWorld, toWorld, trm, CONTENTS_SOLID | CONTENTS_OPAQUE);
+#endif
 
     if (tr.fraction >= 1.0f) {                         // no hit
         return false;
@@ -1126,7 +1134,11 @@ bool rvParticle::RunPhysics(rvBSE* effect,
         const rvDeclEffect *fxName = pt.mImpactEffects[BSE::RandIndex(pt.mNumImpactEffects)];
         idMat3 axis = tr.c.normal.ToMat3();
 
-        game->PlayEffect(fxName,impactPos,axis,NULL,vec3_origin,NULL,EC_IGNORE);
+#ifdef _SPLASHDAMAGE
+        game->PlayEffect(fxName ? fxName->Index() : -1, vec3_one, impactPos, axis, false, vec3_origin, 0.0f);
+#else
+        game->PlayEffect(fxName, impactPos, axis, NULL, vec3_origin, NULL, EC_IGNORE);
+#endif
     }
 
     //---------------------------------------------------- bounce?

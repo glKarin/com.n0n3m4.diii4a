@@ -3032,9 +3032,15 @@ cm_model_t *idCollisionModelManagerLocal::LoadRenderModel( const char *fileName,
 	bool collisionSurface;
 	idStr extension;
 
-	// only load ASE and LWO models
+	// only load limited subset of models?...
 	idStr( fileName ).ExtractFileExtension( extension );
-	if ( ( extension.Icmp( "ase" ) != 0 ) && ( extension.Icmp( "lwo" ) != 0 ) && ( extension.Icmp( "ma" ) != 0 ) && ( extension.Icmp( "proxy" ) != 0 ) ) {
+	if (
+		( extension.Icmp( "ase" ) != 0 ) &&
+		( extension.Icmp( "lwo" ) != 0 ) &&
+		( extension.Icmp( "obj" ) != 0 ) &&
+		( extension.Icmp( "ma" ) != 0 ) &&
+		( extension.Icmp( "proxy" ) != 0 )
+	) {
 		return NULL;
 	}
 
@@ -3385,7 +3391,8 @@ void idCollisionModelManagerLocal::BuildModels( const idMapFile *mapFile ) {
 	idTimer timer;
 	timer.Start();
 
-	if ( !LoadCollisionModelFile( mapFile->GetName(), mapFile->GetGeometryCRC() ) ) {
+	//if ( !LoadCollisionModelFile( mapFile->GetName(), mapFile->GetGeometryCRC() ) )
+	{
 
 		if ( !mapFile->GetNumEntities() ) {
 			return;
@@ -3442,6 +3449,7 @@ void idCollisionModelManagerLocal::LoadMap( const idMapFile *mapFile ) {
 	session->UpdateLoadingProgressBar(PROGRESS_STAGE_COLLISION, 0.0f);
 
 	// check whether we can keep the current collision map based on the mapName and mapFileTime
+	// stgatilov: this skip is especially important on quickload
 	if ( loaded ) {
 		if ( mapName.Icmp( mapFile->GetName() ) == 0 ) {
 			if ( mapFile->GetFileTime() == mapFileTime ) {
@@ -3576,13 +3584,23 @@ idCollisionModelManagerLocal::GetModelPolygon
 ===================
 */
 bool idCollisionModelManagerLocal::GetModelPolygon( cmHandle_t model, int polygonNum, idFixedWinding &winding ) const {
-	int i, edgeNum;
+	
+	assert(0 && "if this is ever called, it must be fixed first!"); // DG: see below
+	return false;
+
+#if 0
+  
+  int i, edgeNum;
 	cm_polygon_t *poly;
 
 	if ( model < 0 || model > MAX_SUBMODELS || model >= numModels || !models[model] ) {
 		common->Printf( "idCollisionModelManagerLocal::GetModelPolygon: invalid model handle\n" );
 		return false;
 	}
+
+	// FIXME: DG: WTF is this, casting an int to a pointer?! we're lucky this is unused..
+	//   (it's called by idClip::GetModelContactFeature() which is called by
+	//    idClip()::DrawModelContactFeature(), but that is never called)
 
 	poly = *reinterpret_cast<cm_polygon_t **>(&polygonNum);
 	winding.Clear();
@@ -3592,6 +3610,8 @@ bool idCollisionModelManagerLocal::GetModelPolygon( cmHandle_t model, int polygo
 	}
 
 	return true;
+
+#endif // 0
 }
 
 /*

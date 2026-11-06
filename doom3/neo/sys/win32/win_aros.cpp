@@ -7,6 +7,7 @@ Sys_SetFatalError
 ==================
 */
 void Sys_SetFatalError( const char *error ) {
+    Sys_Printf( "[Fatal error]: %s\n", error );
     // idStr::Copynz( fatalError, error, sizeof( fatalError ) );
 }
 

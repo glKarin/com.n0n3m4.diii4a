@@ -1,0 +1,40 @@
+environment:
+  global:
+    LIBELF_INSTALL_PREFIX: "C:/libelf"
+  matrix:
+    - platform: Win32
+      CMAKE_GENERATOR_NAME: "Visual Studio 14 2015"
+      CMAKE_OPTIONS: ""
+    - platform: Win32
+      CMAKE_GENERATOR_NAME: "Visual Studio 14 2015"
+      CMAKE_OPTIONS: "-DBUILD_SHARED=ON"
+    - platform: Win32
+      CMAKE_GENERATOR_NAME: "Visual Studio 14 2015"
+      CMAKE_OPTIONS: "-DBUILD_SHARED=ON -DBUILD_NON_SHARED=OFF"
+    - platform: x64
+      CMAKE_GENERATOR_NAME: "Visual Studio 14 2015 Win64"
+      CMAKE_OPTIONS: ""
+    - platform: x64
+      CMAKE_GENERATOR_NAME: "Visual Studio 14 2015 Win64"
+      CMAKE_OPTIONS: "-DBUILD_SHARED=ON"
+    - platform: x64
+      CMAKE_GENERATOR_NAME: "Visual Studio 14 2015 Win64"
+      CMAKE_OPTIONS: "-DBUILD_SHARED=ON -DBUILD_NON_SHARED=OFF"
+
+configuration: Release
+
+install:
+  - git clone https://github.com/dvirtz/libelf.git
+  - cd libelf
+  - git checkout cmake
+  - cmake . -B_build -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_INSTALL_PREFIX=%LIBELF_INSTALL_PREFIX%
+  - cmake --build _build --config %CONFIGURATION%
+  - cmake --build _build --config %CONFIGURATION% --target INSTALL
+  - cd ..
+
+build_script:
+  - cmake . -B_build -G "%CMAKE_GENERATOR_NAME%" -DLIBELF_ROOT=%LIBELF_INSTALL_PREFIX% %OPTIONS%
+  - cmake --build _build --config %CONFIGURATION%
+
+test_script:
+  - cmake --build _build --config %CONFIGURATION% --target RUN_TESTS

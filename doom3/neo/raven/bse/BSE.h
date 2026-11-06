@@ -173,16 +173,16 @@ namespace BSE
     const char * ParticleTypeName(int pType);
 };
 
-#include "bse_effect.h"
+#include "BSE_Effect.h"
 #include "BSE_Envelope.h"
 #include "BSE_Particle.h"
-#include "bse_parseparticle2.h"
-#include "bse_effecttemplate.h"
-#include "bse_segment.h"
-#include "bse_light.h"
-#include "bse_segmenttemplate.h"
+#include "BSE_ParseParticle2.h"
+#include "BSE_EffectTemplate.h"
+#include "BSE_Segment.h"
+#include "BSE_Light.h"
+#include "BSE_SegmentTemplate.h"
 #include "BSE_SpawnDomains.h"
-#include "bse_electricity.h"
+#include "BSE_Electricity.h"
 
 //──────────────────────────────────────────────────────────────────────────────
 //  Constants & helpers
@@ -194,7 +194,7 @@ namespace {
 }
 #endif
 
-class rvBSEManagerLocal final : public rvBSEManager {
+class rvBSEManagerLocal : public rvBSEManager {
 public:
     //──────────────────────────────
     // Lifetime
@@ -249,7 +249,11 @@ public:
     //──────────────────────────────
     bool DebugHudActive() const { return com_debugHudActive; }
 
-    idBlockAlloc<rvBSE, 256, 26>          effects_;             // effect pool
+#ifdef _SPLASHDAMAGE
+    idBlockAlloc<rvBSE, 256, false>          effects_;
+#else
+    idBlockAlloc<rvBSE, 256, 26>          effects_;
+#endif            // effect pool
     static idMat3                          mModelToBSE;
     idList<idTraceModel*>          traceModels;         // loose heap-allocated models
     static		const char* mSegmentNames[SEG_COUNT];

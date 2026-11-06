@@ -305,12 +305,19 @@ idRotation idMat3::ToRotation(void) const
 
 	r.angle = idMath::ACos(r.angle);
 
-	if (idMath::Fabs(r.angle) < 1e-10f) {
+#ifdef _SPLASHDAMAGE
+    if ( ( idMath::Fabs( r.angle ) < 1e-10f ) || !( r.vec.Normalize() > 0.0f ) ) 
+#else
+	if (idMath::Fabs(r.angle) < 1e-10f) 
+#endif
+	{
 		r.vec.Set(0.0f, 0.0f, 1.0f);
 		r.angle = 0.0f;
 	} else {
 		//vec *= (1.0f / sin( angle ));
+#if !defined(_SPLASHDAMAGE)
 		r.vec.Normalize();
+#endif
 		r.vec.FixDegenerateNormal();
 		r.angle *= 2.0f * idMath::M_RAD2DEG;
 	}
@@ -3004,7 +3011,11 @@ void idMatX::ChangeSize(int rows, int columns, bool makeZero)
 
 	if (alloc > alloced && alloced != -1) {
 		float *oldMat = mat;
+#ifdef _SPLASHDAMAGE
+        mat = (float *) Mem_AllocAligned( alloc * sizeof( float ), ALIGN_16 );
+#else
 		mat = (float *) Mem_Alloc16(alloc * sizeof(float));
+#endif
 
 		if (makeZero) {
 			memset(mat, 0, alloc * sizeof(float));
@@ -3022,7 +3033,11 @@ void idMatX::ChangeSize(int rows, int columns, bool makeZero)
 				}
 			}
 
+#ifdef _SPLASHDAMAGE
+            Mem_FreeAligned( oldMat );
+#else
 			Mem_Free16(oldMat);
+#endif
 		}
 	} else {
 		if (columns < numColumns) {
@@ -5727,10 +5742,26 @@ bool idMatX::Cholesky_UpdateRowColumn(const idVecX &v, int r)
 	if (r == 0) {
 
 		if (numColumns == 1) {
+#ifdef _SPLASHDAMAGE
+            sum = (*this)[0][0];
+// work around for compiler crash in .NET 2003 release builds
+// fatal error C1001: INTERNAL COMPILER ERROR  (compiler file 'f:\vs70builds\3077\vc\Compiler\Utc\src\P2\x86\fppeeps.c', line 1368)
+#if defined( _MSC_VER )
+#if _MSC_VER == 1310
+            double sum2 = sum * sum;
+            sum = sum2 + v[0];
+#else
+            sum = sum * sum + v[0];
+#endif	// _MSC_VER has value
+#else	// _MSC_VER undefined	 
+            sum = sum * sum + v[0];
+#endif
+#else
 			double v0 = v[0];
 			sum = (*this)[0][0];
 			sum = sum * sum;
 			sum = sum + v0;
+#endif
 
 			if (sum <= 0.0f) {
 				return false;
@@ -8814,4 +8845,45 @@ void idMat3::RotateArbitrary(const idVec3 &rotAxis, float howManyDegrees)
 
 // RAVEN END
 
+#endif
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idMat3::ToAnglesMaya
+
+	See idAngles::ToMat3Maya for specification of rotation matrices and order
+
+============
+*/
+idAngles idMat3::ToAnglesMaya( void ) const
+{
+    idAngles	angles;
+    double		theta;
+    double		cp;
+    float		sp;
+
+    sp = mat[ 0 ][ 2 ];
+
+    // cap off our sin value so that we don't get any NANs
+    if ( sp > 1.0f ) {
+        sp = 1.0f;
+    } else if ( sp < -1.0f ) {
+        sp = -1.0f;
+    }
+
+    theta = -asin( sp );
+    cp = cos( theta );
+
+    if ( cp > 8192.0f * idMath::FLT_EPSILON ) {
+        angles.yaw		= RAD2DEG( theta );
+        angles.roll		= RAD2DEG( atan2( mat[ 0 ][ 1 ], mat[ 0 ][ 0 ] ) );
+        angles.pitch	= RAD2DEG( atan2( mat[ 1 ][ 2 ], mat[ 2 ][ 2 ] ) );
+    } else {
+        angles.yaw		= RAD2DEG( theta );
+        angles.roll		= RAD2DEG( atan2( mat[ 1 ][ 0 ], mat[ 1 ][ 1 ] ) );
+        angles.pitch	= 0;
+    }
+    return angles;
+}
 #endif

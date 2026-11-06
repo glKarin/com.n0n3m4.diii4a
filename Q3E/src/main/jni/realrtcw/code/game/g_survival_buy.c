@@ -155,19 +155,6 @@ qboolean Survival_HandleRandomWeaponBox(gentity_t *ent, gentity_t *activator, ch
 		Add_Ammo(activator, chosen, maxAmmo, qtrue);  // fill clip
 		Add_Ammo(activator, chosen, maxAmmo, qfalse); // top off reserve
 
-		// Also refill base pistol ammo if akimbo weapon
-		if (chosen == WP_AKIMBO)
-		{
-			int coltMax = BG_GetMaxAmmo(&activator->client->ps, WP_COLT, svParams.ltAmmoBonus);
-			Add_Ammo(activator, WP_COLT, coltMax, qtrue);
-			Add_Ammo(activator, WP_COLT, coltMax, qfalse);
-		}
-		else if (chosen == WP_DUAL_TT33)
-		{
-			int tt33Max = BG_GetMaxAmmo(&activator->client->ps, WP_TT33, svParams.ltAmmoBonus);
-			Add_Ammo(activator, WP_TT33, tt33Max, qtrue);
-			Add_Ammo(activator, WP_TT33, tt33Max, qfalse);
-		}
 
 		// Bonus: give M7 for Garand
 		if (chosen == WP_M1GARAND)
@@ -210,45 +197,64 @@ qboolean Survival_HandleRandomPerkBox(gentity_t *ent, gentity_t *activator, char
 	int price = (ent->price > 0) ? ent->price : svParams.randomPerkPrice;
 	const int numPerks = sizeof(random_perks) / sizeof(random_perks[0]);
 
-	// Perk count limit
+	// Perk count limit (only matters for NEW perks, upgrades do not consume a slot)
 	int perkCount = 0;
 	for (int i = 0; i < MAX_PERKS; i++) {
 		if (activator->client->ps.perks[i] > 0)
 			perkCount++;
 	}
 	int maxPerks = (activator->client->ps.stats[STAT_PLAYER_CLASS] == PC_ENGINEER) ? svParams.maxPerksEng : svParams.maxPerks;
-	if (perkCount >= maxPerks) {
+
+	// Not enough score?
+	if (activator->client->ps.persistant[PERS_SCORE] < price) {
 		G_AddEvent(activator, EV_GENERAL_SOUND, G_SoundIndex("sound/items/use_nothing.wav"));
 		return qfalse;
 	}
 
-	int randomIndex = rand() % numPerks;
-	*itemName = random_perks[randomIndex];
+	// Find a valid outcome (reroll a few times to avoid wasting money on PRO-owned perks)
+	for (int tries = 0; tries < 16; tries++) {
 
-	for (int i = 1; bg_itemlist[i].classname; i++) {
-		if (!Q_strcasecmp(*itemName, bg_itemlist[i].classname)) {
-			*itemIndex = i;
-			gitem_t *perkItem = &bg_itemlist[i];
+		int randomIndex = rand() % numPerks;
+		*itemName = random_perks[randomIndex];
 
-			if (activator->client->ps.perks[perkItem->giTag] > 0 || 
-				activator->client->ps.persistant[PERS_SCORE] < price) {
-				G_AddEvent(activator, EV_GENERAL_SOUND, G_SoundIndex("sound/items/use_nothing.wav"));
-				return qfalse;
+		for (int i = 1; bg_itemlist[i].classname; i++) {
+			if (!Q_strcasecmp(*itemName, bg_itemlist[i].classname)) {
+				*itemIndex = i;
+				gitem_t *perkItem = &bg_itemlist[i];
+
+				int perk = perkItem->giTag;
+				int level = activator->client->ps.perks[perk];
+
+				// Already PRO? reroll
+				if (level >= 2) {
+					break;
+				}
+
+				// New perk but no free slots? reroll (upgrades are still allowed)
+				if (level <= 0 && perkCount >= maxPerks) {
+					break;
+				}
+
+				// Apply: base (0->1) or pro (1->2)
+				if (level <= 0) {
+					activator->client->ps.perks[perk] = 1;
+				} else {
+					activator->client->ps.perks[perk] = 2;
+				}
+
+				activator->client->ps.stats[STAT_PERK] |= (1 << perk);
+				activator->client->ps.persistant[PERS_SCORE] -= price;
+
+				G_AddPredictableEvent(activator, EV_ITEM_PICKUP, perkItem - bg_itemlist);
+				trap_SendServerCommand(-1, "mu_play sound/misc/buy_perk.wav 0\n");
+				return qtrue;
 			}
-
-			activator->client->ps.perks[perkItem->giTag]++;
-			activator->client->ps.stats[STAT_PERK] |= (1 << perkItem->giTag);
-			activator->client->ps.persistant[PERS_SCORE] -= price;
-
-			G_AddPredictableEvent(activator, EV_ITEM_PICKUP, perkItem - bg_itemlist);
-			trap_SendServerCommand(-1, "mu_play sound/misc/buy_perk.wav 0\n");
-			return qtrue;
 		}
 	}
 
+	G_AddEvent(activator, EV_GENERAL_SOUND, G_SoundIndex("sound/items/use_nothing.wav"));
 	return qfalse;
 }
-
 /*
 ============
 Survival_HandleAmmoPurchase
@@ -263,7 +269,7 @@ qboolean Survival_HandleAmmoPurchase(gentity_t *ent, gentity_t *activator, int p
 		return qfalse;
 
 	// Skip utility weapons
-	if (heldWeap == WP_DYNAMITE_ENG || heldWeap == WP_AIRSTRIKE || heldWeap == WP_POISONGAS_MEDIC)
+	if (heldWeap == WP_DYNAMITE_ENG || heldWeap == WP_AIRSTRIKE || heldWeap == WP_POISONGAS || heldWeap == WP_SMOKE_BOMB)
 		return qfalse;
 
 	int ammoIndex = BG_FindAmmoForWeapon(heldWeap);
@@ -301,19 +307,6 @@ qboolean Survival_HandleAmmoPurchase(gentity_t *ent, gentity_t *activator, int p
 	Add_Ammo(activator, heldWeap, maxAmmo, qtrue);
 	Add_Ammo(activator, heldWeap, maxAmmo, qfalse);
 
-	// Also refill ammo for base pistol if akimbo
-	if (heldWeap== WP_AKIMBO)
-	{
-		Add_Ammo(activator, WP_COLT, BG_GetMaxAmmo(&activator->client->ps, WP_COLT, svParams.ltAmmoBonus), qtrue);
-		Add_Ammo(activator, WP_COLT, BG_GetMaxAmmo(&activator->client->ps, WP_COLT, svParams.ltAmmoBonus), qfalse);
-	}
-	else if (heldWeap == WP_DUAL_TT33)
-	{
-		Add_Ammo(activator, WP_TT33, BG_GetMaxAmmo(&activator->client->ps, WP_TT33, svParams.ltAmmoBonus), qtrue);
-		Add_Ammo(activator, WP_TT33, BG_GetMaxAmmo(&activator->client->ps, WP_TT33, svParams.ltAmmoBonus), qfalse);
-	}
-
-
 	// Deduct score
 	activator->client->ps.persistant[PERS_SCORE] -= ammoPrice;
 
@@ -335,7 +328,7 @@ qboolean Survival_HandleWeaponUpgrade(gentity_t *ent, gentity_t *activator, int 
 		return qfalse;
 
 	// Weapons that cannot be upgraded
-	if (weap == WP_KNIFE || weap == WP_SNIPERRIFLE || weap == WP_M1941SCOPE || weap == WP_FG42SCOPE || weap== WP_SNOOPERSCOPE || weap == WP_DELISLESCOPE || weap == WP_DYNAMITE || weap == WP_M7 || weap == WP_AIRSTRIKE || weap == WP_POISONGAS_MEDIC || weap == WP_DYNAMITE_ENG || weap == WP_GRENADE_LAUNCHER || weap == WP_GRENADE_PINEAPPLE) 
+	if (weap == WP_KNIFE || weap == WP_SNIPERRIFLE || weap == WP_M1941SCOPE || weap == WP_FG42SCOPE || weap== WP_SNOOPERSCOPE || weap == WP_DELISLESCOPE || weap == WP_DYNAMITE || weap == WP_M7 || weap == WP_AIRSTRIKE || weap == WP_POISONGAS || weap == WP_DYNAMITE_ENG || weap == WP_GRENADE_LAUNCHER || weap == WP_GRENADE_PINEAPPLE || weap == WP_SMOKE_BOMB) 
 	{
 		G_AddEvent(activator, EV_GENERAL_SOUND, G_SoundIndex("sound/items/use_nothing.wav"));
 		return qfalse;
@@ -385,16 +378,6 @@ qboolean Survival_HandleWeaponUpgrade(gentity_t *ent, gentity_t *activator, int 
 	if (weap == WP_M1941)
 		ps->weaponUpgraded[WP_M1941SCOPE] = 1;
 
-    // Handle akimbo dual weapon logic
-	if (weap == WP_AKIMBO)
-		ps->weaponUpgraded[WP_COLT] = 1;
-	else if (weap == WP_DUAL_TT33)
-		ps->weaponUpgraded[WP_TT33] = 1;
-	else if (weap == WP_COLT && ps->weaponUpgraded[WP_AKIMBO])
-		ps->weaponUpgraded[WP_COLT] = 1;
-	else if (weap == WP_TT33 && ps->weaponUpgraded[WP_DUAL_TT33])
-		ps->weaponUpgraded[WP_TT33] = 1;
-
 	activator->client->ps.persistant[PERS_SCORE] -= upgradePrice;
 
 	// Refill ammo
@@ -409,18 +392,6 @@ qboolean Survival_HandleWeaponUpgrade(gentity_t *ent, gentity_t *activator, int 
 	{
 		Add_Ammo(activator, WP_M7, BG_GetMaxAmmo(&activator->client->ps, WP_M7, svParams.ltAmmoBonus), qtrue);
 		Add_Ammo(activator, WP_M7, BG_GetMaxAmmo(&activator->client->ps, WP_M7, svParams.ltAmmoBonus), qfalse);
-	}
-
-	// Also refill ammo for base pistol if upgrading akimbo
-	if (weap == WP_AKIMBO)
-	{
-		Add_Ammo(activator, WP_COLT, BG_GetMaxAmmo(&activator->client->ps, WP_COLT, svParams.ltAmmoBonus), qtrue);
-		Add_Ammo(activator, WP_COLT, BG_GetMaxAmmo(&activator->client->ps, WP_COLT, svParams.ltAmmoBonus), qfalse);
-	}
-	else if (weap == WP_DUAL_TT33)
-	{
-		Add_Ammo(activator, WP_TT33, BG_GetMaxAmmo(&activator->client->ps, WP_TT33, svParams.ltAmmoBonus), qtrue);
-		Add_Ammo(activator, WP_TT33, BG_GetMaxAmmo(&activator->client->ps, WP_TT33, svParams.ltAmmoBonus), qfalse);
 	}
 
 	trap_SendServerCommand(-1, "mu_play sound/misc/wpn_upgrade.wav 0\n");
@@ -501,18 +472,6 @@ qboolean Survival_HandleWeaponOrGrenade(gentity_t *ent, gentity_t *activator, gi
 		}
 
 		activator->client->ps.persistant[PERS_SCORE] -= price;
-
-	    // Also refill ammo for base pistol if akimbo
-		if (weapon == WP_AKIMBO)
-		{
-			Add_Ammo(activator, WP_COLT, BG_GetMaxAmmo(&activator->client->ps, WP_COLT, svParams.ltAmmoBonus), qtrue);
-			Add_Ammo(activator, WP_COLT, BG_GetMaxAmmo(&activator->client->ps, WP_COLT, svParams.ltAmmoBonus), qfalse);
-		}
-		else if (weapon == WP_DUAL_TT33)
-		{
-			Add_Ammo(activator, WP_TT33, BG_GetMaxAmmo(&activator->client->ps, WP_TT33, svParams.ltAmmoBonus), qtrue);
-			Add_Ammo(activator, WP_TT33, BG_GetMaxAmmo(&activator->client->ps, WP_TT33, svParams.ltAmmoBonus), qfalse);
-		}
 
 		Add_Ammo(activator, weapon, maxAmmo, qtrue);
 		Add_Ammo(activator, weapon, maxAmmo, qfalse);
@@ -598,6 +557,9 @@ int Survival_GetDefaultPerkPrice(int perk) {
 	}
 }
 
+#define PERK_LEVEL_NONE  0
+#define PERK_LEVEL_BASE  1
+#define PERK_LEVEL_PRO   2
 
 /*
 ============
@@ -605,45 +567,62 @@ Survival_HandlePerkPurchase
 ============
 */
 qboolean Survival_HandlePerkPurchase(gentity_t *activator, gitem_t *item, int price) {
-	if (!activator || !item || item->giType != IT_PERK)
-		return qfalse;
+    if (!activator || !item || item->giType != IT_PERK)
+        return qfalse;
 
-	// Count how many perks player has
-	int perkCount = 0;
-	for (int i = 0; i < MAX_PERKS; i++) {
-		if (activator->client->ps.perks[i] > 0)
-			perkCount++;
-	}
+    int perk = item->giTag;
+    int curLevel = activator->client->ps.perks[perk];
 
-	// Max perks check
-	int maxPerks = (activator->client->ps.stats[STAT_PLAYER_CLASS] == PC_ENGINEER) ?  svParams.maxPerksEng : svParams.maxPerks;
-	if (perkCount >= maxPerks)
-		return qfalse;
+    // Determine what we're buying: base (0->1) or pro (1->2)
+    int targetLevel = 0;
+    if (curLevel <= 0) {
+        targetLevel = 1;          // buy base
+    } else if (curLevel == 1) {
+        targetLevel = 2;          // upgrade to pro
+    } else {
+        return qfalse;            // already pro (or higher)
+    }
 
-	// Already owns this perk?
-	if (activator->client->ps.perks[item->giTag] > 0)
-		return qfalse;
+    // Only enforce max perks when buying a NEW perk (0->1).
+    if (targetLevel == 1) {
+        int perkCount = 0;
+        for (int i = 0; i < MAX_PERKS; i++) {
+            if (activator->client->ps.perks[i] > 0)
+                perkCount++;
+        }
 
-	// Fallback to default price if mapper didn't define it
-	if (price <= 0) {
-		price = Survival_GetDefaultPerkPrice(item->giTag);
-	}
+        int maxPerks = (activator->client->ps.stats[STAT_PLAYER_CLASS] == PC_ENGINEER) ?
+            svParams.maxPerksEng : svParams.maxPerks;
 
-	// Not enough score?
-	if (activator->client->ps.persistant[PERS_SCORE] < price) {
-		G_AddEvent(activator, EV_GENERAL_SOUND, G_SoundIndex("sound/items/use_nothing.wav"));
-		return qfalse;
-	}
+        if (perkCount >= maxPerks)
+            return qfalse;
+    }
 
-	// Grant perk
-	activator->client->ps.perks[item->giTag]++;
-	activator->client->ps.stats[STAT_PERK] |= (1 << item->giTag);
-	activator->client->ps.persistant[PERS_SCORE] -= price;
+    // Base price: entity override if >0, otherwise from .surv (svParams.*)
+    if (price <= 0) {
+        price = Survival_GetDefaultPerkPrice(perk);
+    }
 
-	G_AddPredictableEvent(activator, EV_ITEM_PICKUP, item - bg_itemlist);
-	trap_SendServerCommand(-1, "mu_play sound/misc/buy_perk.wav 0\n");
+    // PRO costs double base price
+    if (targetLevel == 2) {
+        price *= 2;
+    }
 
-	return qtrue;
+    // Not enough score?
+    if (activator->client->ps.persistant[PERS_SCORE] < price) {
+        G_AddEvent(activator, EV_GENERAL_SOUND, G_SoundIndex("sound/items/use_nothing.wav"));
+        return qfalse;
+    }
+
+    // Grant / upgrade perk
+    activator->client->ps.perks[perk] = targetLevel;
+    activator->client->ps.stats[STAT_PERK] |= (1 << perk);
+    activator->client->ps.persistant[PERS_SCORE] -= price;
+
+    G_AddPredictableEvent(activator, EV_ITEM_PICKUP, item - bg_itemlist);
+    trap_SendServerCommand(-1, "mu_play sound/misc/buy_perk.wav 0\n");
+
+    return qtrue;
 }
 
 
@@ -797,7 +776,7 @@ void Touch_objective_info(gentity_t *ent, gentity_t *other, trace_t *trace) {
 		if (!Q_stricmp(techName, "ammo")) {
 
 		// Do not show price if holding dynamite
-		if (other->client->ps.weapon == WP_DYNAMITE_ENG || other->client->ps.weapon == WP_POISONGAS_MEDIC || other->client->ps.weapon == WP_AIRSTRIKE ) {
+		if (other->client->ps.weapon == WP_DYNAMITE_ENG || other->client->ps.weapon == WP_POISONGAS || other->client->ps.weapon == WP_AIRSTRIKE ||  other->client->ps.weapon == WP_SMOKE_BOMB ) {
 			return;
 		}
 			price = (price > 0) ? price : Survival_GetDefaultWeaponPrice(other->client->ps.weapon) / 2;
@@ -869,6 +848,29 @@ void Touch_objective_info(gentity_t *ent, gentity_t *other, trace_t *trace) {
 	if (other->client->ps.weaponUpgraded[other->client->ps.weapon])
 	{
 		ammoPrice = svParams.upgradedAmmoPrice;
+	}
+
+	// Perk PRO tip override (dynamic string + dynamic price)
+	if (item && item->giType == IT_PERK && weaponName) {
+		int perkLevel = other->client->ps.perks[item->giTag];
+
+		if (perkLevel <= 0) {
+			if (price > 0) {
+				trap_SendServerCommand(other - g_entities, va(
+					"cpbuy \"%s\nprice: %d\"",
+					weaponName, price));
+				return;
+			}
+		} else if (perkLevel == 1) {
+			if (price > 0) {
+				trap_SendServerCommand(other - g_entities, va(
+					"cpbuy \"%s ^PRO\nprice: %d\"",
+					weaponName, price * 2));
+				return;
+			}
+		} else {
+			return;
+		}
 	}
 
 	// Display custom tip if price and name are known

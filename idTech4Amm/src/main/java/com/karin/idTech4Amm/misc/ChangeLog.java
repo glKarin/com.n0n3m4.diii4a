@@ -77,6 +77,12 @@ public class ChangeLog
         final ChangeLog[] CHANGES = {
                 ChangeLog.Create(Constants.CONST_RELEASE, Constants.CONST_UPDATE_RELEASE, Constants.CONST_CHANGES()),
 
+                ChangeLog.Create("2026-03-08", 72,
+                        "Add `Quadrilateral Cowboy`(ver 1.0.2602252) support, game standalone directory named `qc`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://blendogames.com/qc/", "Quadrilateral Cowboy") + "`.",
+                        "Add `Icarus Starship Command Simulator`(ver 1.0.9) support, game standalone directory named `icarus`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://store.steampowered.com/app/620170/Icarus_Starship_Command_Simulator/", "Icarus Starship Command Simulator") + "`.",
+                        "Add new game chooser on launcher."
+                ),
+
                 ChangeLog.Create("2026-02-10", 71,
                         "Add `Skin Deep`(ver 1.0.4) support, game standalone directory named `skindeep`, game data directory named `base`. More view in `" + TextHelper.GenLinkText("https://blendogames.com/skindeep/", "Skin Deep") + "`.",
                         "Support edit on-screen buttons layout in gaming.",

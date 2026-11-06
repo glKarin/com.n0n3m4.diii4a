@@ -10,25 +10,48 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.TextView;
+
+import com.n0n3m4.q3e.Q3EPreference;
+import com.n0n3m4.q3e.R;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class KDebugTextView extends TextView {
-    private MemDumpFunc m_memFunc = null;
+    // hold duration before dragging is allowed
+    private static final long DRAG_HOLD_DELAY_MS = 1000;
 
-    @SuppressLint("ResourceType")
+    private MemDumpFunc m_memFunc = null;
+    private int         m_lastX;
+    private int         m_lastY;
+    private int         m_downX;
+    private int         m_downY;
+    private boolean     m_pressed = false;
+    private boolean     m_dragging = false;
+    private final int   m_touchThreshold;
+    private boolean     m_showBackground = false;
+
     public KDebugTextView(Context context)
     {
         super(context);
+        m_touchThreshold = ViewConfiguration.get(context).getScaledTouchSlop();
+        Setup();
+    }
+
+    @SuppressLint("ResourceType")
+    private void Setup()
+    {
         setFocusable(false);
         setFocusableInTouchMode(false);
         setTextColor(Color.WHITE);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) // 23
             setTextAppearance(android.R.attr.textAppearanceSmall);
-        else
-            setTextSize(12);
+        //else
+            setTextSize(10);
         setPadding(10, 5, 10, 5);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             setAlpha(0.75f);
@@ -38,6 +61,7 @@ public class KDebugTextView extends TextView {
                 MemDumpFunc_timer
                 //MemDumpFunc_handler
                 (this);
+        setOnTouchListener(m_onTouchEvent);
     }
 
     public void Start(int interval)
@@ -52,6 +76,133 @@ public class KDebugTextView extends TextView {
             m_memFunc.Stop();
     }
 
+    public void ShowBackground()
+    {
+        m_showBackground = true;
+        //setBackgroundColor(Color.argb(128, 0, 0, 0));
+        setBackgroundResource(R.drawable.debug_text_background);
+    }
+
+    public void ShowMovingBackground()
+    {
+        setBackgroundResource(R.drawable.debug_text_background_highlight);
+    }
+
+    private final View.OnTouchListener m_onTouchEvent = new OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent ev) {
+            int x = (int)ev.getRawX();
+            int y = (int)ev.getRawY();
+            //Log.e("TAGID_TAG", String.format("%d %d|%d", x, y, ev.getAction()));
+            switch (ev.getAction())
+            {
+                case MotionEvent.ACTION_DOWN:
+                    if(!m_pressed)
+                    {
+                        m_pressed = true;
+                        m_lastX = x;
+                        m_lastY = y;
+                        m_downX = x;
+                        m_downY = y;
+                        return true;
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if(m_pressed)
+                    {
+                        if(!m_dragging)
+                        {
+                            if(ev.getEventTime() - ev.getDownTime() < DRAG_HOLD_DELAY_MS)
+                            {
+                                // moved beyond touch slop during the hold delay: cancel the whole gesture
+                                if(Math.abs(x - m_downX) > m_touchThreshold || Math.abs(y - m_downY) > m_touchThreshold)
+                                {
+                                    ResetTouch();
+                                    return true;
+                                }
+                                // keep tracking position, avoid jumping when dragging starts
+                                m_lastX = x;
+                                m_lastY = y;
+                                return true;
+                            }
+                            m_dragging = true;
+                        }
+                        int lastDeltaX = x - m_lastX;
+                        int lastDeltaY = y - m_lastY;
+                        boolean update = false;
+                        // parent is the activity's content view(RelativeLayout), keep this view fully inside it
+                        View parent = (View)getParent();
+                        int maxX = Math.max(0, parent.getWidth() - getWidth());
+                        int maxY = Math.max(0, parent.getHeight() - getHeight());
+                        if(lastDeltaX != 0)
+                        {
+                            int curx = (int) getX();
+                            int posx = curx + lastDeltaX;
+                            if(posx < 0)
+                                posx = 0;
+                            else if(posx > maxX)
+                                posx = maxX;
+                            if(curx != posx)
+                            {
+                                setX(posx);
+                                Q3EPreference.SetStringFromInt(getContext(), Q3EPreference.pref_harm_debug_text_x, posx);
+                                update = true;
+                            }
+                        }
+                        if(lastDeltaY != 0)
+                        {
+                            int cury = (int) getY();
+                            int posy = cury + lastDeltaY;
+                            if(posy < 0)
+                                posy = 0;
+                            else if(posy > maxY)
+                                posy = maxY;
+                            if(cury != posy)
+                            {
+                                setY(posy);
+                                Q3EPreference.SetStringFromInt(getContext(), Q3EPreference.pref_harm_debug_text_y, posy);
+                                update = true;
+                            }
+                        }
+                        if(update)
+                            getParent().requestLayout();
+                        m_lastX = x;
+                        m_lastY = y;
+                        ShowMovingBackground();
+                        return true;
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if(m_pressed)
+                    {
+                        ResetTouch();
+                        return true;
+                    }
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    ResetTouch();
+                    return true;
+                default:
+                    break;
+            }
+            return false;
+        }
+    };
+
+    private void ResetTouch()
+    {
+        m_lastX = 0;
+        m_lastY = 0;
+        m_downX = 0;
+        m_downY = 0;
+        m_pressed = false;
+        m_dragging = false;
+        if(m_showBackground)
+            setBackgroundResource(R.drawable.debug_text_background);
+        else
+            setBackground(null);
+    }
+
     private abstract class MemDumpFunc
     {
         private boolean  m_lock = false;
@@ -60,6 +211,7 @@ public class KDebugTextView extends TextView {
         private final ActivityManager.MemoryInfo m_outInfo = new ActivityManager.MemoryInfo();
         private final KMemoryInfo m_memoryInfo = new KMemoryInfo();
         private final TextView m_memoryUsageText;
+        private final KCPUInfo m_cpuInfo = new KCPUInfo();
         protected Runnable m_runnable = new Runnable() {
             @Override
             public void run()
@@ -117,6 +269,15 @@ public class KDebugTextView extends TextView {
             int percent = (int)Math.round(((double) m_memoryInfo.used_memory / (double)m_memoryInfo.total_memory) * 100);
             long availMem = m_memoryInfo.total_memory - m_memoryInfo.used_memory;
 
+            int cpu = m_cpuInfo.Get();
+            int[] cpus = m_cpuInfo.GetPerCPU();
+            StringBuilder buf = new StringBuilder();
+            for(int i = 0; i < cpus.length; i++)
+            {
+                buf.append("|");
+                buf.append(i + 1).append("=").append(cpus[i]).append("%");
+            }
+
             String sb = "App:"
                     + "Dalvik(" + m_memoryInfo.java_memory + ")+"
                     + "Native(" + m_memoryInfo.native_memory + ")+"
@@ -126,7 +287,8 @@ public class KDebugTextView extends TextView {
                     + "Used(" + m_memoryInfo.used_memory + ")/"
                     + "Total(" + m_memoryInfo.total_memory + ")"
                     + "≈" + percent + "%"
-                    + "-=" + availMem
+                    + "-=" + availMem + "\n"
+                    + "CPU:" + cpu + "%" + buf
                     ;
             return sb;
         }

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.4.1)
 
+add_subdirectory(../deplibs/libdwarf ${CMAKE_CURRENT_BINARY_DIR}/libdwarf) # -2.3.2
+
 project(q3e_jni)
 
 # Creates and names a library, sets it as either STATIC
@@ -32,12 +34,14 @@ set(q3e_src
         q3emisc.c
         q3eutility.c
         q3eenv.c
+        q3edw.c
         )
 
 set(q3e_lib
         log
         android
         q3e_bt
+        dwarf # libdwarf::dwarf-static
         )
 if(Q3E_SDL)
         set(q3e_src ${q3e_src} q3esdl2.c)
@@ -65,4 +69,4 @@ if(Q3E_SDL)
 set_target_properties(q3eloader PROPERTIES COMPILE_DEFINITIONS "_Q3E_SDL")
 endif()
 target_compile_options(q3eloader PRIVATE -O3 -pipe -fPIC)
-target_include_directories(q3eloader PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/../common/bt)
+target_include_directories(q3eloader PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/../common/bt ${CMAKE_CURRENT_SOURCE_DIR}/../deplibs/libdwarf/src/lib)

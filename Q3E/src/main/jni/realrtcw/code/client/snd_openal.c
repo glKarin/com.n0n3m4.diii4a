@@ -1728,7 +1728,7 @@ static void S_AL_MainStartSound( vec3_t origin, int entnum, int entchannel, sfxH
 
   if ( entnum >= 0 && entnum < MAX_GENTITIES ) 
   {
-  	s_entityTalkAmplitude[entnum] = 0;
+    s_entityTalkAmplitude[entnum] = 0;
   }
 
   if(origin)
@@ -1744,13 +1744,13 @@ static void S_AL_MainStartSound( vec3_t origin, int entnum, int entchannel, sfxH
       return;
 
     // Only do the "local sound optimization" if no flags are used
-    if(S_AL_HearingThroughEntity(entnum))
+    if (S_AL_HearingThroughEntity(entnum))
     {
       if (!(flags & (SND_CUTOFF | SND_CUTOFF_ALL | SND_OKTOCUT | SND_REQUESTCUT)))
       {
-      S_AL_StartLocalSound(sfx, entchannel);
-      return;
-    }
+        S_AL_StartLocalSound(sfx, entchannel);
+        return;
+      }
     }
 
     VectorCopy(entityList[entnum].origin, sorigin);
@@ -2574,11 +2574,11 @@ static void S_AL_StopBackgroundTrack(void)
 {
     ALint queued;
 
-  if(!musicPlaying)
-    return;
+    if (!musicPlaying)
+        return;
 
     // Stop playback
-  qalSourceStop(musicSource);
+    qalSourceStop(musicSource);
 
     // Unqueue ALL buffers before trying to delete or detach
     qalGetSourcei(musicSource, AL_BUFFERS_QUEUED, &queued);
@@ -2589,18 +2589,18 @@ static void S_AL_StopBackgroundTrack(void)
     }
 
     // Detach any remaining buffer just in case
-  qalSourcei(musicSource, AL_BUFFER, 0);
+    qalSourcei(musicSource, AL_BUFFER, 0);
 
     // Now it's safe to delete
-  qalDeleteBuffers(NUM_MUSIC_BUFFERS, musicBuffers);
+    qalDeleteBuffers(NUM_MUSIC_BUFFERS, musicBuffers);
 
     // Free the music source handle (e.g. from pool)
    //S_AL_MusicSourceFree();
 
     // Close streams
-  S_AL_CloseMusicFiles();
+    S_AL_CloseMusicFiles();
 
-  musicPlaying = qfalse;
+    musicPlaying = qfalse;
 }
 
 /*
@@ -2679,18 +2679,18 @@ void S_AL_MusicProcess(ALuint b)
    */
 static void S_AL_StartBackgroundTrack(const char *intro, const char *loop)
 {
-  int i;
-  qboolean issame;
+    int i;
+    qboolean issame;
 
-  Com_DPrintf( "S_AL_StartBackgroundTrack( %s, %s )\n", intro, loop );
+    Com_DPrintf("S_AL_StartBackgroundTrack( %s, %s )\n", intro, loop);
 
     // Stop any existing music and clean state
-  S_AL_StopBackgroundTrack();
+    S_AL_StopBackgroundTrack();
 
     Cvar_Set("s_currentMusic", "");
 
-  if((!intro || !*intro) && (!loop || !*loop))
-    return;
+    if ((!intro || !*intro) && (!loop || !*loop))
+        return;
 
     // ?? Generate a new OpenAL source every time
     qalGenSources(1, &musicSource);
@@ -2702,50 +2702,50 @@ static void S_AL_StartBackgroundTrack(const char *intro, const char *loop)
 
     musicSourceHandle = 1; // Set to anything valid
 
-  if (!loop || !*loop)
-  {
-    loop = intro;
-    issame = qtrue;
-  }
-  else if(intro && *intro && !strcmp(intro, loop))
-    issame = qtrue;
-  else
-    issame = qfalse;
+    if (!loop || !*loop)
+    {
+        loop = intro;
+        issame = qtrue;
+    }
+    else if (intro && *intro && !strcmp(intro, loop))
+        issame = qtrue;
+    else
+        issame = qfalse;
 
-  Q_strncpyz( s_backgroundLoop, loop, sizeof( s_backgroundLoop ) );
+    Q_strncpyz(s_backgroundLoop, loop, sizeof(s_backgroundLoop));
 
-  if(!issame)
-    intro_stream = S_CodecOpenStream(intro);
-  else
-    intro_stream = NULL;
+    if (!issame)
+        intro_stream = S_CodecOpenStream(intro);
+    else
+        intro_stream = NULL;
 
     Cvar_Set("s_currentMusic", s_backgroundLoop);
 
-  mus_stream = S_CodecOpenStream(s_backgroundLoop);
-  if(!mus_stream)
-  {
-    S_AL_CloseMusicFiles();
+    mus_stream = S_CodecOpenStream(s_backgroundLoop);
+    if (!mus_stream)
+    {
+        S_AL_CloseMusicFiles();
         qalDeleteSources(1, &musicSource);
         musicSource = 0;
         musicSourceHandle = -1;
-    return;
-  }
+        return;
+    }
 
-  if (!S_AL_GenBuffers(NUM_MUSIC_BUFFERS, musicBuffers, "music"))
-    return;
+    if (!S_AL_GenBuffers(NUM_MUSIC_BUFFERS, musicBuffers, "music"))
+        return;
 
-  for(i = 0; i < NUM_MUSIC_BUFFERS; i++)
-  {
-    S_AL_MusicProcess(musicBuffers[i]);
-  }
+    for (i = 0; i < NUM_MUSIC_BUFFERS; i++)
+    {
+        S_AL_MusicProcess(musicBuffers[i]);
+    }
 
-  qalSourceQueueBuffers(musicSource, NUM_MUSIC_BUFFERS, musicBuffers);
+    qalSourceQueueBuffers(musicSource, NUM_MUSIC_BUFFERS, musicBuffers);
 
-  S_AL_Gain(musicSource, s_alGain->value * s_musicVolume->value);
+    S_AL_Gain(musicSource, s_alGain->value * s_musicVolume->value);
 
-  qalSourcePlay(musicSource);
+    qalSourcePlay(musicSource);
 
-  musicPlaying = qtrue;
+    musicPlaying = qtrue;
 }
 
 /*

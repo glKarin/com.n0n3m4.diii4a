@@ -40,10 +40,137 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 #endif
 
+#if !defined(_SPLASHDAMAGE)
 #ifdef USE_STRING_DATA_ALLOCATOR
 static idDynamicBlockAlloc<char, 1<<18, 128>	stringDataAllocator;
 #endif
+#endif
 
+#ifdef _SPLASHDAMAGE
+stringDataAllocator_t*	idStr::stringDataAllocator;
+bool					idStr::stringAllocatorIsShared;
+#if defined( MACOS_X )
+#pragma GCC visibility pop
+#endif
+
+struct strColor_t {
+    idVec4		color;
+    const char* str;
+};
+
+#if defined( MACOS_X )
+#pragma GCC visibility push(hidden)
+#endif
+
+idStr::hmsFormat_t	idStr::defaultHMSFormat;
+strColor_t g_color_table[COLOR_BITS+1] = {
+    {	idVec4( 0.0f,  0.0f,  0.0f,  1.0f ), "^0" },			// 0 - S_COLOR_DEFAULT			0
+    {	idVec4( 1.0f,  0.0f,  0.0f,  1.0f ), "^1" }, 			// 1 - S_COLOR_RED				1
+    {	idVec4( 0.0f,  1.0f,  0.0f,  1.0f ), "^2" }, 			// 2 - S_COLOR_GREEN			2
+    {	idVec4( 1.0f,  1.0f,  0.0f,  1.0f ), "^3" }, 			// 3 - S_COLOR_YELLOW			3
+    {	idVec4( 0.0f,  0.0f,  1.0f,  1.0f ), "^4" }, 			// 4 - S_COLOR_BLUE				4
+    {	idVec4( 0.0f,  1.0f,  1.0f,  1.0f ), "^5" }, 			// 5 - S_COLOR_CYAN				5
+    {	idVec4( 1.0f,  0.0f,  1.0f,  1.0f ), "^6" }, 			// 6 - S_COLOR_MAGENTA			6
+    {	idVec4( 1.0f,  1.0f,  1.0f,  1.0f ), "^7" }, 			// 7 - S_COLOR_WHITE			7
+    {	idVec4( 0.5f,  0.5f,  0.5f,  1.0f ), "^8" }, 			// 8 - S_COLOR_GRAY				8
+    {	idVec4( 0.15f, 0.15f, 0.15f, 1.0f ), "^9" }, 			// 9 - S_COLOR_BLACK			9
+    {	idVec4( 0.75f, 0.75f, 0.75f, 1.0f ), "^:" }, 			// : - lt.grey					10
+    {	idVec4( 0.25f, 0.25f, 0.25f, 1.0f ), "^;" }, 			// ; - dk.grey					11
+    {	idVec4( 0.0f,  0.5f,  0.0f,  1.0f ), "^<" }, 			// < - md.green					12
+    {	idVec4( 0.5f,  0.5f,  0.0f,  1.0f ), "^=" }, 			// = - md.yellow				13
+    {	idVec4( 0.0f,  0.0f,  0.5f,  1.0f ), "^>" }, 			// > - md.blue					14
+    {	idVec4( 0.5f,  0.0f,  0.0f,  1.0f ), "^?" }, 			// ? - md.red					15
+    {	idVec4( 0.5f,  0.25f, 0.0f,  1.0f ), "^@" }, 			// @ - md.orange				16
+    {	idVec4( 1.0f,  0.6f,  0.1f,  1.0f ), "^A" }, 			// A - lt.orange				17
+    {	idVec4( 0.0f,  0.5f,  0.5f,  1.0f ), "^B" }, 			// B - md.cyan					18
+    {	idVec4( 0.5f,  0.0f,  0.5f,  1.0f ), "^C" }, 			// C - md.purple				19
+    {	idVec4( 1.0f,  0.5f,  0.0f,  1.0f ), "^D" }, 			// D - orange					20
+    {	idVec4( 0.5f,  0.0f,  1.0f,  1.0f ), "^E" }, 			// E							21
+    {	idVec4( 0.2f,  0.6f,  0.8f,  1.0f ), "^F" }, 			// F							22
+    {	idVec4( 0.8f,  1.0f,  0.8f,  1.0f ), "^G" }, 			// G							23
+    {	idVec4( 0.0f,  0.4f,  0.2f,  1.0f ), "^H" }, 			// H							24
+    {	idVec4( 1.0f,  0.0f,  0.2f,  1.0f ), "^I" }, 			// I							25
+    {	idVec4( 0.7f,  0.1f,  0.1f,  1.0f ), "^J" }, 			// J							26
+    {	idVec4( 0.6f,  0.2f,  0.0f,  1.0f ), "^K" }, 			// K							27
+    {	idVec4( 0.8f,  0.6f,  0.2f,  1.0f ), "^L" }, 			// L							28
+    {	idVec4( 0.6f,  0.6f,  0.2f,  1.0f ), "^M" }, 			// M							29
+    {	idVec4( 1.0f,  1.0f,  0.75f, 1.0f ), "^N" }, 			// N							30
+    {	idVec4( 1.0f,  1.0f,  0.5f,  1.0f ), "^O" }, 			// O							31
+};
+
+dword g_dword_color_table[COLOR_BITS+1] = {
+#if defined( _XENON ) || ( defined( MACOS_X ) && defined( __ppc__ ) )
+    0x000000FF, // S_COLOR_DEFAULT
+    0xFF0000FF, // S_COLOR_RED
+    0x00FF00FF, // S_COLOR_GREEN
+    0xFFFF00FF, // S_COLOR_YELLOW
+    0x0000FFFF, // S_COLOR_BLUE
+    0x00FFFFFF, // S_COLOR_CYAN
+    0xFF00FFFF, // S_COLOR_MAGENT
+    0xFFFFFFFF, // S_COLOR_WHITE
+    0x7F7F7FFF, // S_COLOR_GRAY
+    0x121212FF, // S_COLOR_BLACK
+    0xBFBFBFFF,
+    0x404040FF,
+    0x007F00FF,
+    0x7F7F00FF,
+    0x00007FFF,
+    0x7F0000FF,
+    0x7F3F00FF,
+    0xFF9919FF,
+    0x007F7FFF,
+    0x7F007FFF,
+    0xFF7F00FF,
+    0x7F00FFFF,
+    0x3399CCFF,
+    0xCCFFCCFF,
+    0x006633FF,
+    0xFF0033FF,
+    0xB21919FF,
+    0x993300FF,
+    0xCC9933FF,
+    0x999933FF,
+    0xFFFFBFFF,
+    0xFFFF7FFF
+#elif defined( _WIN32 ) || defined( __linux__ ) || ( defined( MACOS_X ) && !defined( __ppc__ ) )
+    0xFF000000, // S_COLOR_DEFAULT
+    0xFF0000FF, // S_COLOR_RED
+    0xFF00FF00, // S_COLOR_GREEN
+    0xFF00FFFF, // S_COLOR_YELLOW
+    0xFFFF0000, // S_COLOR_BLUE
+    0xFFFFFF00, // S_COLOR_CYAN
+    0xFFFF00FF, // S_COLOR_MAGENT
+    0xFFFFFFFF, // S_COLOR_WHITE
+    0xFF7F7F7F, // S_COLOR_GRAY
+    0xFF212121, // S_COLOR_BLACK
+    0xFFBFBFBF,
+    0xFF040404,
+    0xFF007F00,
+    0xFF007F7F,
+    0xFF7F0000,
+    0xFF00007F,
+    0xFF003F7F,
+    0xFF1999FF,
+    0xFF7F7F00,
+    0xFF7F007F,
+    0xFF007FFF,
+    0xFFFF007F,
+    0xFFCC9933,
+    0xFFCCFFCC,
+    0xFF336600,
+    0xFF3300FF,
+    0xFF1919B2,
+    0xFF003399,
+    0xFF3399CC,
+    0xFF339999,
+    0xFFBFFFFF,
+    0xFF7FFFFF
+#else
+#error OS define is required!
+#endif
+};
+
+#else
 idVec4	g_color_table[16] = {
 	idVec4(0.0f, 0.0f, 0.0f, 1.0f),
 	idVec4(1.0f, 0.0f, 0.0f, 1.0f), // S_COLOR_RED
@@ -69,6 +196,7 @@ idVec4	g_color_table[16] = {
 	idVec4(0.0f, 0.0f, 0.0f, 1.0f),
 	idVec4(0.0f, 0.0f, 0.0f, 1.0f),
 };
+#endif
 
 const char *units[2][4] = {
 	{ "B", "KB", "MB", "GB" },
@@ -82,8 +210,33 @@ idStr::ColorForIndex
 */
 idVec4 &idStr::ColorForIndex(int i)
 {
+#ifdef _SPLASHDAMAGE
+    return g_color_table[ i & COLOR_BITS ].color;
+#else
 	return g_color_table[ i & 15 ];
+#endif
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idStr::ColorForChar
+============
+*/
+const idVec4& idStr::ColorForChar( int c ) {
+	return g_color_table[ ColorIndex( c ) ].color;
+}
+
+/*
+============
+idStr::StrForColorIndex
+============
+*/
+const char* idStr::StrForColorIndex( int i )
+{
+    return g_color_table[ i & COLOR_BITS ].str;
+}
+#endif
 
 /*
 ============
@@ -95,6 +248,9 @@ void idStr::ReAllocate(int amount, bool keepold)
 	char	*newbuffer;
 	int		newsize;
 	int		mod;
+#ifdef _SPLASHDAMAGE
+ 	bool	staticBuffer = alloced < 0;
+#endif
 
 	//assert( data );
 	assert(amount > 0);
@@ -120,7 +276,12 @@ void idStr::ReAllocate(int amount, bool keepold)
 		strcpy(newbuffer, data);
 	}
 
-	if (data && data != baseBuffer) {
+#ifdef _SPLASHDAMAGE
+	if ( data && !staticBuffer /*data != baseBuffer*/ )
+#else
+	if (data && data != baseBuffer)
+#endif
+	{
 #ifdef USE_STRING_DATA_ALLOCATOR
 		stringDataAllocator.Free(data);
 #else
@@ -138,15 +299,43 @@ idStr::FreeData
 */
 void idStr::FreeData(void)
 {
-	if (data && data != baseBuffer) {
+#ifdef _SPLASHDAMAGE
+	bool	staticBuffer = alloced < 0;
+	if ( data && !staticBuffer )
+#else
+	if (data && data != baseBuffer)
+#endif
+	{
 #ifdef USE_STRING_DATA_ALLOCATOR
 		stringDataAllocator.Free(data);
 #else
 		delete[] data;
 #endif
 		data = baseBuffer;
+#ifdef _SPLASHDAMAGE
+		alloced = -STR_ALLOC_BASE;
+		len = 0;
+#endif
 	}
 }
+
+#ifdef _SPLASHDAMAGE
+void idStr::SetStaticBuffer( char *buffer, int length )
+{
+    bool	staticBuffer = alloced < 0;
+	if ( data && !staticBuffer ) {
+#ifdef USE_STRING_DATA_ALLOCATOR
+        stringDataAllocator->Free( data );
+#else
+		delete[] data;
+#endif
+    }
+    data = buffer;
+    alloced = -length;
+    len = 0;
+}
+
+#endif
 
 /*
 ============
@@ -621,6 +810,25 @@ bool idStr::StripTrailingOnce(const char *string)
 	return false;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+============
+idStr::ReplaceChar
+============
+*/
+void idStr::ReplaceChar( char oldChar, char newChar )
+{
+    int i;
+    for ( i = 0; i < len; i++ ) {
+        if ( data[ i ] != oldChar ) {
+            continue;
+        }
+
+        data[ i ] = newChar;
+    }
+}
+#endif
+
 /*
 ============
 idStr::Replace
@@ -663,6 +871,59 @@ void idStr::Replace(const char *old, const char *nw)
 		len = strlen(data);
 	}
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idStr::ReplaceFirst
+============
+*/
+void idStr::ReplaceFirst( const char *old, const char *nw )
+{
+    if( Length( old ) == 0 ) {
+        return;
+    }
+
+    int		oldLen, newLen, i;
+    bool	present;
+
+    oldLen = Length( old );
+    newLen = Length( nw );
+
+    // Work out how big the new string will be
+    present = false;
+    for ( i = 0; i < len; i++ ) {
+        if ( !Cmpn( &data[i], old, oldLen ) ) {
+            present = true;
+            i += oldLen - 1;
+            break;
+        }
+    }
+
+    if ( present ) {
+        idStr	oldString( data );
+        int		j;
+
+        EnsureAlloced( len + ( newLen - oldLen ) + 2, false );
+
+        // Replace the old data with the new data
+        for ( i = 0, j = 0; i < oldString.Length(); i++ ) {
+            if ( !Cmpn( &oldString[i], old, oldLen ) ) {
+                memcpy( data + j, nw, newLen );
+                i += oldLen;
+                j += newLen;
+                break;
+            } else {
+                data[j] = oldString[i];
+                j++;
+            }
+        }
+        memcpy( data + j, &oldString[i], oldString.Length() - i );
+        data[j + oldString.Length() - i] = '\0';
+        len = Length( data );
+    }
+}
+#endif
 
 /*
 ============
@@ -728,6 +989,42 @@ void idStr::StripTrailingWhitespace(void)
 		len--;
 	}
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idStr::StripLeadingWhiteSpace
+============
+*/
+void idStr::StripLeadingWhiteSpace( void )
+{
+    int i;
+
+    // cast to unsigned char to prevent stripping off high-ASCII characters
+    for ( i = 0; i < Length() && (unsigned char)(data[ i ]) <= ' '; i++ );
+
+    if ( i > 0 && i != Length() ) {
+        memmove( data, data + i, len - i + 1 );
+        len -= i;
+    }
+}
+
+/*
+============
+idStr::StripTrailingWhiteSpace
+============
+*/
+void idStr::StripTrailingWhiteSpace( void )
+{
+    int i;
+
+    // cast to unsigned char to prevent stripping off high-ASCII characters
+    for ( i = Length(); i > 0 && (unsigned char)(data[ i - 1 ]) <= ' '; i-- ) {
+        data[ i - 1 ] = '\0';
+        len--;
+    }
+}
+#endif
 
 /*
 ============
@@ -814,6 +1111,72 @@ idStr &idStr::BackSlashesToSlashes(void)
 
 	return *this;
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idStr::SlashesToBackSlashes
+============
+*/
+idStr &idStr::SlashesToBackSlashes( void )
+{
+    int i;
+
+    for ( i = 0; i < len; i++ ) {
+        if ( data[ i ] == '/' ) {
+            data[ i ] = '\\';
+        }
+    }
+    return *this;
+}
+
+/*
+============
+idStr::CollapsePath
+
+Removes '..' from path and changes backslashes to slashes.
+
+Example:
+W:/ETQW/base/../code/game/../idlib/../game/Game_local.h
+
+Becomes:
+W:/ETQW/code/game/Game_local.h
+============
+*/
+idStr &idStr::CollapsePath( void )
+{
+    int i, length = 0;
+
+    for ( i = 0; i < len; i++ ) {
+        if ( data[i] == '.' ) {
+            if ( data[i+1] == '.' && ( data[i+2] == '/' || data[i+2] == '\\' ) ) {		//   ../
+                if ( length >= 2 && ( data[length-1] == '/' || data[length-1] == '\\' ) ) {
+                    if ( length == 2 || data[length-2] != '.' || data[length-3] != '.' ) {
+                        length--;
+                        while( length > 0 && data[length-1] != '/' && data[length-1] != '\\' ) {
+                            length--;
+                        }
+                        i += 2;
+                        continue;
+                    }
+                }
+                data[length++] = data[i++];
+                data[length++] = data[i++];
+                data[length++] = data[i];
+            } else if ( data[i+1] == '/' || data[i+1] == '\\' ) {							//	./
+                i++;
+            } else {
+                data[length++] = data[i];
+            }
+        } else {
+            data[length++] = data[i];
+        }
+    }
+    data[length] = '\0';
+    len = length;
+    return *this;
+}
+#endif
 
 /*
 ============
@@ -1635,6 +1998,55 @@ char *idStr::RemoveColors(char *string)
 	return string;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+================
+idStr::IsBadFilenameChar
+================
+*/
+bool idStr::IsBadFilenameChar( char c )
+{
+    static char badFilenameChars[] = { ':', ';', '&', '(', ')', '|', '<', '>', '*', '?', '[', ']', '~', '+', '@', '!', '\\', '/', ' ', '\t', '\'', '"', '\0' };
+
+    for ( int i = 0; badFilenameChars[i] != '\0'; i++ ) {
+        if ( c == badFilenameChars[i] ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*
+================
+idStr::CleanFilename
+================
+*/
+char* idStr::CleanFilename( char* string )
+{
+    char* d;
+    char* s;
+
+    s = string;
+    d = string;
+
+    // clear leading .'s
+    while ( *s == '.' ) {
+        s++;
+    }
+
+    while ( *s != '\0' ) {
+        if ( !IsBadFilenameChar( *s ) ) {
+            *d++ = *s;
+        }
+        s++;
+    }
+    *d = '\0';
+
+    return string;
+}
+#endif
+
 /*
 ================
 idStr::snPrintf
@@ -1769,6 +2181,168 @@ char *va(const char *fmt, ...)
 	return buf;
 }
 
+#ifdef _SPLASHDAMAGE
+/*
+=================
+va_floatstring
+=================
+*/
+char* va_floatstring( const char *fmt, ... )
+{
+    va_list argPtr;
+    static int bufferIndex = 0;
+    static char string[4][16384];	// in case called by nested functions
+    char *buf;
+
+    buf = string[bufferIndex];
+    bufferIndex = (bufferIndex + 1) & 3;
+
+    /* 64long */int i;
+    unsigned /* 64long */int u;
+    double f;
+    char *str;
+    int index;
+    idStr tmp, format;
+
+    index = 0;
+
+    va_start( argPtr, fmt );
+    while( *fmt ) {
+        switch( *fmt ) {
+        case '%':
+            format = "";
+            format += *fmt++;
+            while ( (*fmt >= '0' && *fmt <= '9') ||
+                    *fmt == '.' || *fmt == '-' || *fmt == '+' || *fmt == '#') {
+                format += *fmt++;
+            }
+            format += *fmt;
+            switch( *fmt ) {
+            case 'f':
+            case 'e':
+            case 'E':
+            case 'g':
+            case 'G':
+                f = va_arg( argPtr, double );
+                if ( format.Length() <= 2 ) {
+                    // high precision floating point number without trailing zeros
+                    sprintf( tmp, "%1.10f", f );
+                    tmp.StripTrailing( '0' );
+                    tmp.StripTrailing( '.' );
+                    index += sprintf( buf+index, "%s", tmp.c_str() );
+                } else {
+                    index += sprintf( buf+index, format.c_str(), f );
+                }
+                break;
+            case 'd':
+            case 'i':
+                i = va_arg( argPtr, /* 64long */int );
+                index += sprintf( buf+index, format.c_str(), i );
+                break;
+            case 'u':
+                u = va_arg( argPtr, unsigned /* 64long */int );
+                index += sprintf( buf+index, format.c_str(), u );
+                break;
+            case 'o':
+                u = va_arg( argPtr, unsigned /* 64long */int );
+                index += sprintf( buf+index, format.c_str(), u );
+                break;
+            case 'x':
+                u = va_arg( argPtr, unsigned /* 64long */int );
+                index += sprintf( buf+index, format.c_str(), u );
+                break;
+            case 'X':
+                u = va_arg( argPtr, unsigned /* 64long */int );
+                index += sprintf( buf+index, format.c_str(), u );
+                break;
+            case 'c':
+                i = va_arg( argPtr, /* 64long */int );
+                index += sprintf( buf+index, format.c_str(), (char) i );
+                break;
+            case 's':
+                str = va_arg( argPtr, char * );
+                index += sprintf( buf+index, format.c_str(), str );
+                break;
+            case '%':
+                index += sprintf( buf+index, format.c_str() );
+                break;
+            default:
+                common->Error( "FS_WriteFloatString: invalid format %s", format.c_str() );
+                break;
+            }
+            fmt++;
+            break;
+        case '\\':
+            fmt++;
+            switch( *fmt ) {
+            case 't':
+                index += sprintf( buf+index, "\t" );
+                break;
+            case 'v':
+                index += sprintf( buf+index, "\v" );
+                break;
+            case 'n':
+                index += sprintf( buf+index, "\n" );
+                break;
+            case '\\':
+                index += sprintf( buf+index, "\\" );
+                break;
+            default:
+                common->Error( "FS_WriteFloatString: unknown escape character \'%c\'", *fmt );
+                break;
+            }
+            fmt++;
+            break;
+        default:
+            index += sprintf( buf+index, "%c", *fmt );
+            fmt++;
+            break;
+        }
+    }
+    va_end( argPtr );
+
+    return buf;
+}
+
+/*
+============
+idStr::EraseRange
+============
+*/
+void idStr::EraseRange( int start, int len )
+{
+    if( IsEmpty() || len == 0 ) {
+        return;
+    }
+
+    if( start < 0 ) {
+        start = 0;
+    }
+
+    if( start >= this->len ) {
+        return;
+    }
+
+    int totalLength = Length();
+    if( len == INVALID_POSITION ) {
+        len = totalLength - start;
+    }
+
+    if( len == totalLength ) {
+        // erase the whole thing
+        Empty();
+        return;
+    }
+
+
+    if( totalLength - start - len ) {
+        memmove( &data[ start ], &data[ start + len ], totalLength - start - len );
+    }
+
+    data[ totalLength - len ] = '\0';
+    this->len -= len;
+}
+#endif
 
 
 /*
@@ -1813,7 +2387,15 @@ idStr::InitMemory
 void idStr::InitMemory(void)
 {
 #ifdef USE_STRING_DATA_ALLOCATOR
+#ifdef _SPLASHDAMAGE
+	if( !stringDataAllocator ) {
+		stringDataAllocator = new stringDataAllocator_t;
+		stringDataAllocator->Init();
+		stringAllocatorIsShared = false;
+	}
+#else
 	stringDataAllocator.Init();
+#endif
 #endif
 }
 
@@ -1854,6 +2436,99 @@ void idStr::ShowMemoryUsage_f(const idCmdArgs &args)
 	                      stringDataAllocator.GetNumFreeBlocks(), stringDataAllocator.GetNumEmptyBaseBlocks());
 #endif
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idStr::SetStringAllocator
+============
+*/
+void idStr::SetStringAllocator( stringDataAllocator_t* allocator )
+{
+#ifdef USE_STRING_DATA_ALLOCATOR //karin: using new/delete
+    if( !stringAllocatorIsShared ) {
+        delete stringDataAllocator;
+    }
+    stringDataAllocator = allocator;
+    stringAllocatorIsShared = true;
+#endif
+}
+
+/*
+============
+idStr::IsValidEmailAddress
+============
+*/
+bool idStr::IsValidEmailAddress( const char* address )
+{
+    int count = 0;
+    const char* c;
+    const char* domain;
+    static const char* rfc822 = "()<>@,;:\\\"[]";
+
+    // validate name
+    for ( c = address; *c != '\0'; c++ ) {
+        if ( *c == '\"' && ( c == address || *(c - 1) == '.' || *(c - 1) == '\"' ) ) {
+            while ( *++c ) {
+                if ( *c == '\"' ) {
+                    break;
+                }
+                if ( *c == '\\' && ( *++c == ' ' ) ) {
+                    continue;
+                }
+                if ( *c <= ' ' || *c >= 127 ) {
+                    return 0;
+                }
+            }
+            if ( *c++ == '\0' ) {
+                return false;
+            }
+            if ( *c == '@' ) {
+                break;
+            }
+            if ( *c == '.' ) {
+                return false;
+            }
+            continue;
+        }
+        if ( *c == '@' ) {
+            break;
+        }
+        if ( *c <= ' ' || *c >= 127 ) {
+            return false;
+        }
+        if ( FindChar( rfc822, *c ) != INVALID_POSITION ) {
+            return false;
+        }
+    }
+
+    if ( c == address || *(c - 1 ) == '.' ) {
+        return false;
+    }
+
+    // validate domain
+    if ( *( domain = ++c ) == '\0' ) {
+        return false;
+    }
+
+    do {
+        if ( *c == '.' ) {
+            if ( c == domain || *(c - 1) == '.' ) {
+                return false;
+            }
+            count++;
+        }
+        if ( *c <= ' ' || *c >= 127 ) {
+            return false;
+        }
+        if ( FindChar( rfc822, *c ) != INVALID_POSITION ) {
+            return false;
+        }
+    } while ( *++c );
+
+    return ( count >= 1 );
+}
+#endif
 
 /*
 ================
@@ -2361,7 +3036,6 @@ char *idStr::RemoveEscapes( char *string, int escapes ) {
 	return string;
 }
 
-
 /*
 ============
 idStr::ReplaceChar
@@ -2378,9 +3052,7 @@ idStr &idStr::ReplaceChar( const char from, const char to ) {
 	}
 	return *this;
 }
-#endif
 
-#ifdef _RAVEN
 /*
 ===================
 idStr::StripDoubleQuotes
@@ -2403,6 +3075,99 @@ void idStr::StripDoubleQuotes(void)
 
 	*this = string;
 }
+#endif
+
+#ifdef _SPLASHDAMAGE
+/*
+============
+idStr::MS2HMS
+============
+*/
+const char*	idStr::MS2HMS( double ms, const hmsFormat_t& formatSpec )
+{
+	if ( ms < 0.0 ) {
+		ms = 0.0;
+	}
+
+	int sec = idMath::Ftoi( MS2SEC( ms ) );
+
+	if( sec == 0 && formatSpec.showZeroSeconds == false ) {
+		return "";
+	}
+
+	int min = sec / 60;
+	int hour = min / 60;
+
+	sec -= min * 60;
+	min -= hour * 60;
+
+	// don't show minutes if they're zeroed
+	if( min == 0 && hour == 0 && formatSpec.showZeroMinutes == false && formatSpec.showZeroHours == false ) {
+		return va( "%02i", sec );
+	}
+
+	// don't show hours if they're zeroed
+	if( hour == 0 && formatSpec.showZeroHours == false ) {
+		return va( "%02i:%02i", min, sec );
+	}
+	return va( "%02i:%02i:%02i", hour, min, sec );
+}
+
+
+/*
+============
+idStr::CollapseColors
+============
+*/
+idStr& idStr::CollapseColors( void )
+{
+	int colorBegin = -1;
+	int lastColor = -1;
+	for( int i = 0; i < len; i++ ) {
+		while( idStr::IsColor( &data[ i ] ) && i < len ) {
+			if( colorBegin == -1 ) {
+				colorBegin = i;
+			}
+			lastColor = i;
+			i += 2;
+		}
+		if( colorBegin != -1 && lastColor != colorBegin ) {
+			EraseRange( colorBegin, lastColor - colorBegin );
+			i -= lastColor - colorBegin;
+		}
+		colorBegin = -1;
+		lastColor = -1;
+	}
+	return *this;
+}
+
+/*
+============
+idStr::FileNameHash
+============
+*/
+int idStr::FileNameHash( const char *string, const int hashSize ) {
+	int		i;
+	/* 64long */int	hash;
+	char	letter;
+
+	hash = 0;
+	i = 0;
+	while( string[i] != '\0' ) {
+		letter = idStr::ToLower( string[i] );
+		if ( letter == '.' ) {
+			break;				// don't include extension
+		}
+		if ( letter =='\\' ) {
+			letter = '/';
+		}
+		hash += (/* 64long */int)letter * ( i + 119 );
+		i++;
+	}
+	hash &= ( hashSize - 1 );
+	return hash;
+}
+
 #endif
 
 int idStr::SplitUnique(idList<idStr> &ret, const char *macros, char ch)
@@ -2507,3 +3272,10 @@ void idStr::StripWhitespace(idStr &str)
 	str.StripTrailingWhitespace();
 	str.StripLeading(' ');
 }
+
+#ifdef _SPLASHDAMAGE //karin: for convert from vchar string
+void idStr::operator=(const wchar_t *text) {
+	idStr tmp = WStrToStr(text);
+	operator=(tmp.c_str());
+}
+#endif

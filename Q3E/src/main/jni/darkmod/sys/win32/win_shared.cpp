@@ -13,10 +13,12 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 ******************************************************************************/
 
-#include "precompiled.h"
-#pragma hdrstop
+//#include "precompiled.h"
+//#pragma hdrstop
 
-#include "win_local.h"
+// stgatilov: can't use PCH here due to MFC headers removing necessary bits of windows.h!
+#include "windows.h"
+
 #include <lmerr.h>
 #include <lmcons.h>
 #include <lmwksta.h>
@@ -57,14 +59,23 @@ Sys_GetTimeMicroseconds
 ================
 */
 uint64_t Sys_GetTimeMicroseconds( void ) {
+	static HMODULE hKernel32Dll = LoadLibrary("Kernel32.dll");
+	static auto GetSystemTimePreciseAsFileTime = (void(WINAPI *)(LPFILETIME))GetProcAddress(hKernel32Dll, "GetSystemTimePreciseAsFileTime");
+
 	FILETIME ft = {0};
-	//note: returns number of 100-nanosec intervals since January 1, 1601 (UTC)
-	GetSystemTimeAsFileTime(&ft);
+	// note: both functions return number of 100-nanosec intervals since January 1, 1601 (UTC)
+	if (GetSystemTimePreciseAsFileTime) {
+		// < 1 us precision, but requires Windows 8+
+		GetSystemTimePreciseAsFileTime(&ft);
+	} else {
+		// seems to provide 1 ms precision only
+		GetSystemTimeAsFileTime(&ft);
+	}
 	ULARGE_INTEGER num;
 	num.HighPart = ft.dwHighDateTime;
 	num.LowPart = ft.dwLowDateTime;
 
-	//difference between 1970-Jan-01 & 1601-Jan-01 in 100-nanosecond intervals
+	// difference between 1970-Jan-01 & 1601-Jan-01 in 100-nanosecond intervals
 	const uint64_t shift = 116444736000000000ULL; // (27111902 << 32) + 3577643008
 	uint64_t res = (num.QuadPart - shift) / 10;
 	return res;	//in microsecs now
@@ -84,13 +95,71 @@ int Sys_GetDriveFreeSpace( const char *path ) {
 	//FIXME: see why this is failing on some machines
 	//CANNOTFIX: uses reduntdant code needs total rewrite for modern windows archs, hack used to return positive numbers on win7 but breaks completely on any arch above that.
 	if ( ::GetDiskFreeSpaceEx( path, (PULARGE_INTEGER)&lpFreeBytesAvailable, (PULARGE_INTEGER)&lpTotalNumberOfBytes, (PULARGE_INTEGER)&lpTotalNumberOfFreeBytes ) ) {
-		ret = ( double )( lpFreeBytesAvailable ) / ( 1024.0 * 1024.0 );
+		ret = int( lpFreeBytesAvailable / ( 1024.0 * 1024.0 ) );
 	}
 	// force it to output positive numbers
 	if (ret < 0)	{
 		ret = -ret;
 	}
 	return abs(ret);
+}
+
+/*
+================
+Sys_IsFileOnHdd
+
+Checks whether the disk containing the file incurs seeking penalty.
+Taken from Raymond Chen blog: https://devblogs.microsoft.com/oldnewthing/20201023-00/?p=104395
+================
+*/
+HANDLE GetVolumeHandleForFile(const char *filePath) {
+	char volumePath[MAX_PATH];
+	if (!GetVolumePathName(filePath, volumePath, ARRAYSIZE(volumePath))) {
+		return INVALID_HANDLE_VALUE;
+	}
+
+	char volumeName[MAX_PATH];
+	if (!GetVolumeNameForVolumeMountPoint(volumePath, volumeName, ARRAYSIZE(volumeName))) {
+		return INVALID_HANDLE_VALUE;
+	}
+
+	size_t length = strlen(volumeName);
+	if (length && volumeName[length - 1] == '\\') {
+		volumeName[length - 1] = '\0';
+	}
+
+	return CreateFile(
+		volumeName, 0,
+		FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+		nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr
+	);
+}
+bool Sys_IsFileOnHdd(const char *filePath) {
+	HANDLE volume = GetVolumeHandleForFile(filePath);
+	if (volume == INVALID_HANDLE_VALUE) {
+		return false;	// supposedly happens for files on network
+	}
+
+	// note: if you get compile error here, make sure windows.h is included without WIN32_LEAN_AND_MEAN
+	// Note that MFC headers define and require this define, so we can't use PCH in this cpp file
+	STORAGE_PROPERTY_QUERY query{};
+	query.PropertyId = StorageDeviceSeekPenaltyProperty;
+	query.QueryType = PropertyStandardQuery;
+	DWORD bytesWritten;
+	DEVICE_SEEK_PENALTY_DESCRIPTOR result{};
+
+	BOOL ok = DeviceIoControl(
+		volume, IOCTL_STORAGE_QUERY_PROPERTY,
+		&query, sizeof(query),
+		&result, sizeof(result),
+		&bytesWritten, nullptr
+	);
+	CloseHandle(volume);
+
+	if (ok) {
+		return result.IncursSeekPenalty;
+	}
+	return true;	// supposedly happens for multi-disk volumes
 }
 
 /*

@@ -32,6 +32,8 @@ if you remove the 'return NULL;' after Error(), it only happens at -O3 / release
 see dmap.gcc.zip test map and .proc outputs
 */
 
+#if !defined(_MSC_VER)
+
 #include "../../../idlib/precompiled.h"
 #pragma hdrstop
 
@@ -83,3 +85,5 @@ optVertex_t *FindOptVertex(idDrawVert *v, optimizeGroup_t *opt)
 
 	return vert;
 }
+
+#endif

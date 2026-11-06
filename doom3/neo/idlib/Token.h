@@ -72,7 +72,14 @@ If you have questions concerning this license or the applicable additional terms
 class Lexer;
 #endif
 
+#ifdef _SPLASHDAMAGE
+extern const char sdPoolAllocator_idToken[];
+class idToken :
+    public idStr,
+    public sdPoolAllocator< idToken, sdPoolAllocator_idToken, 128 >
+#else
 class idToken : public idStr
+#endif
 {
 
 		friend class idParser;
@@ -82,6 +89,10 @@ class idToken : public idStr
 // jsinger: added to allow Lexer direct access to token internals as well
 	    friend class Lexer;
 // RAVEN END
+#endif
+#ifdef _SPLASHDAMAGE
+	    friend class idLexerBinary;
+	    friend class idTokenCache;
 #endif
 
 	public:
@@ -108,17 +119,44 @@ class idToken : public idStr
 
 		void			NumberValue(void);				// calculate values for a TT_NUMBER
 
+#ifdef _SPLASHDAMAGE
+    	idToken( const idToken &token );
+    	unsigned short	GetBinaryIndex( void ) const;			// token index in a binary stream
+	    void			SetIntValue( unsigned /* 64long */int intvalue );
+	    void			SetFloatValue( double floatvalue );
+
+		//karin: compat for DOOM3
+		void			operator=(const wchar_t *text);
+#endif
+
 	private:
 		unsigned/* 64long */ int	intvalue;							// integer value
 		double			floatvalue;							// floating point value
 		const char 	*whiteSpaceStart_p;					// start of white space before token, only used by idLexer
 		const char 	*whiteSpaceEnd_p;					// end of white space before token, only used by idLexer
 		idToken 		*next;								// next token in chain, only used by idParser
-
+#ifdef _SPLASHDAMAGE
+    	unsigned short	binaryIndex;						// token index in a binary stream
+    // only to be used by parsers
+    public:
+#endif
 		void			AppendDirty(const char a);		// append character without adding trailing zero
 };
 
 ID_INLINE idToken::idToken(void)
+#ifdef _SPLASHDAMAGE
+    : intvalue( 0 ),
+    floatvalue( 0.0 ),
+    whiteSpaceStart_p( NULL ),
+    whiteSpaceEnd_p( NULL ),
+    next( NULL ),
+    type( 0 ),
+    subtype( 0 ),
+    line( 0 ),
+    linesCrossed( 0 ),
+    flags( 0 ),
+    binaryIndex( 0 )
+#endif
 {
 }
 
@@ -195,5 +233,31 @@ ID_INLINE void idToken::AppendDirty(const char a)
 #endif
 	data[len++] = a;
 }
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE idToken::idToken( const idToken &token )
+{
+    *this = token;
+}
+
+ID_INLINE void idToken::SetIntValue( unsigned /* 64long */int intvalue )
+{
+    this->intvalue = intvalue;
+}
+
+ID_INLINE void idToken::SetFloatValue( double floatvalue )
+{
+    this->floatvalue = floatvalue;
+}
+
+ID_INLINE unsigned short idToken::GetBinaryIndex( void ) const
+{
+    return binaryIndex;
+}
+
+ID_INLINE void idToken::operator=(const wchar_t *text) {
+	*static_cast<idStr *>(this) = text;
+}
+#endif
 
 #endif /* !__TOKEN_H__ */

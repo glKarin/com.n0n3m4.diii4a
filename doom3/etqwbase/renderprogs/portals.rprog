@@ -1,0 +1,59 @@
+
+renderprogram portaltest {
+	program vertex reference trivial
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		MOV result.color, fragment.color.a;
+
+		PARAM red = { 1, 0, 0, 1 };
+		PARAM blue = { 0, 0, 1, 1 };
+
+		LRP result.color.rgb, fragment.color.a, red, blue;
+	%> }
+}
+
+renderProgram culledPortal {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+		
+		MOV result.color.xyz, $colorAttrib;
+		MOV result.color.w, $ambientScale.y;
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		MOV result.color, fragment.color;
+	%> }
+}
+
+renderProgram fadedPortal {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+		
+		MOV result.color.xyzw, $colorAttrib;#, $ambientScale.y;
+		#MOV result.color.w, 0.75; #$ambientScale.y;
+
+		$if ( r_megaDrawMethod != 0 )
+		TEMP _F1, _F2;
+		SUB		_F2, $positionAttrib, $viewOrigin;
+		DP3		_F1.x, _F2, _F2;
+		RSQ		_F1.y, _F1.x;
+		MUL		_F1.x, _F1.y, _F1.x;
+		MUL		_F2.x, $fogDepths.z, 1;
+		MAD		result.color.secondary, _F1.x, _F2.x, $fogDepths.w; 
+		$endif
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		MOV result.color, fragment.color;
+
+		$if ( r_megaDrawMethod != 0 )
+		LRP result.color.rgb, fragment.color.secondary.x, $fogColor, fragment.color;
+		$endif
+	%> }
+}

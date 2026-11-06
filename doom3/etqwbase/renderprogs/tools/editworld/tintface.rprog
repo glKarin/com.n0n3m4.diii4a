@@ -1,0 +1,37 @@
+
+renderProgram tools/editWorld/tintFaceByNormal {
+	program vertex cg { <%
+		struct VsInputs {
+			float3 pos	: $positionAttrib;
+			float2 tex	: $texCoordAttrib;
+			float4 tang 	: $tangentAttrib;
+			float3 norm	: $normalAttrib;
+			float4 color	: $colorAttrib;
+		};
+
+		struct VsOutputs {
+			float4 color	: COLOR0;
+			float3 texcoord	: TEXCOORD0;
+		};
+		
+		float ShadeForNormal( float3 inNormal ) {		
+			float	normal[ 3 ] = { inNormal.x, inNormal.y, inNormal.z };
+			float 	ret = ( ( dot( normalize( float3( 0.6f, 0.8f, 1.0f ) ), inNormal ) + 1.f ) * 0.4f ) + 0.1f;
+			return ret;	
+		}
+		
+		VsOutputs vertex(VsInputs indata) {
+			VsOutputs outdata;
+			float3x3 tmv = (float3x3)glstate.matrix.invtrans.modelview[0];
+			float shade = ShadeForNormal( indata.norm );
+			indata.color = 1;
+			outdata.color.rgb = indata.color.rgb * shade;
+			outdata.color.a = indata.color.a;
+			return outdata;
+		}		
+	%> }
+
+	program fragment arb { <%
+		MOV result.color, fragment.color;
+	%> }
+}

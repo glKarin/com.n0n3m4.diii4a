@@ -60,9 +60,15 @@ class idPoolStr : public idStr
 			return sizeof(*this) + Allocated();
 		}
 		// returns a pointer to the pool this string was allocated from
+#ifdef _SPLASHDAMAGE
+	    idStrPool*			GetPool( void ) const {
+	        return pool;
+	    }
+#else
 		const idStrPool 	*GetPool(void) const {
 			return pool;
 		}
+#endif
 
 	private:
 		idStrPool 			*pool;
@@ -72,9 +78,16 @@ class idPoolStr : public idStr
 class idStrPool
 {
 	public:
+#ifdef _SPLASHDAMAGE
+    	idStrPool( int newgranularity = 16 ) {
+			caseSensitive = true;
+        	pool.SetGranularity( newgranularity );
+		}
+#else
 		idStrPool() {
 			caseSensitive = true;
 		}
+#endif
 
 		void				SetCaseSensitive(bool caseSensitive);
 
@@ -122,14 +135,24 @@ ID_INLINE const idPoolStr *idStrPool::AllocString(const char *string)
 	hash = poolHash.GenerateKey(string, caseSensitive);
 
 	if (caseSensitive) {
-		for (i = poolHash.First(hash); i != -1; i = poolHash.Next(i)) {
+#ifdef _SPLASHDAMAGE
+        for ( i = poolHash.GetFirst( hash ); i != idHashIndex::NULL_INDEX; i = poolHash.GetNext( i ) ) 
+#else
+		for (i = poolHash.First(hash); i != -1; i = poolHash.Next(i)) 
+#endif
+		{
 			if (pool[i]->Cmp(string) == 0) {
 				pool[i]->numUsers++;
 				return pool[i];
 			}
 		}
 	} else {
-		for (i = poolHash.First(hash); i != -1; i = poolHash.Next(i)) {
+#ifdef _SPLASHDAMAGE
+        for ( i = poolHash.GetFirst( hash ); i != idHashIndex::NULL_INDEX; i = poolHash.GetNext( i ) ) 
+#else
+		for (i = poolHash.First(hash); i != -1; i = poolHash.Next(i)) 
+#endif
+		{
 			if (pool[i]->Icmp(string) == 0) {
 				pool[i]->numUsers++;
 				return pool[i];
@@ -163,13 +186,23 @@ ID_INLINE void idStrPool::FreeString(const idPoolStr *poolStr)
 		hash = poolHash.GenerateKey(poolStr->c_str(), caseSensitive);
 
 		if (caseSensitive) {
-			for (i = poolHash.First(hash); i != -1; i = poolHash.Next(i)) {
+#ifdef _SPLASHDAMAGE
+            for ( i = poolHash.GetFirst( hash ); i != idHashIndex::NULL_INDEX; i = poolHash.GetNext( i ) ) 
+#else
+			for (i = poolHash.First(hash); i != -1; i = poolHash.Next(i)) 
+#endif
+			{
 				if (pool[i]->Cmp(poolStr->c_str()) == 0) {
 					break;
 				}
 			}
 		} else {
-			for (i = poolHash.First(hash); i != -1; i = poolHash.Next(i)) {
+#ifdef _SPLASHDAMAGE
+            for ( i = poolHash.GetFirst( hash ); i != idHashIndex::NULL_INDEX; i = poolHash.GetNext( i ) ) 
+#else
+			for (i = poolHash.First(hash); i != -1; i = poolHash.Next(i)) 
+#endif
+			{
 				if (pool[i]->Icmp(poolStr->c_str()) == 0) {
 					break;
 				}

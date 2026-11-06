@@ -63,6 +63,10 @@ class idDeclSkin : public idDecl
 		// model associations are just for the preview dialog in the editor
 		const int				GetNumModelAssociations() const;
 		const char 			*GetAssociatedModel(int index) const;
+		
+#ifdef _SPLASHDAMAGE
+    	static void				CacheFromDict( const idDict& dict );
+#endif
 
 	private:
 		idList<skinMapping_t>	mappings;

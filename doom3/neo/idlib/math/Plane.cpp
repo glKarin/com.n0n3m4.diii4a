@@ -107,6 +107,12 @@ bool idPlane::HeightFit(const idVec3 *points, const int numPoints)
 	idMat2 m(sumXX, sumXY, sumXY, sumYY);
 
 	if (!m.InverseSelf()) {
+#ifdef _SPLASHDAMAGE
+        a = 0.0f;
+        b = 0.0f;
+        c = 1.0f;
+        d = -points[0].z;
+#endif
 		return false;
 	}
 

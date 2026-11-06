@@ -315,6 +315,8 @@ idRenderModelDecal::CreateDecal
 */
 #ifdef _RAVEN
 void idRenderModelDecal::CreateDecal(const idRenderModel *model, const decalProjectionInfo_t &localInfo, int suppressSurfaceMask)
+#elif defined(_SPLASHDAMAGE) //karin: hide surfaces
+void idRenderModelDecal::CreateDecal(const idRenderModel *model, const decalProjectionInfo_t &localInfo, const renderEntity_t *parms)
 #else
 void idRenderModelDecal::CreateDecal(const idRenderModel *model, const decalProjectionInfo_t &localInfo)
 #endif
@@ -326,15 +328,29 @@ void idRenderModelDecal::CreateDecal(const idRenderModel *model, const decalProj
 		if(SUPPRESS_SURFACE_MASK_CHECK(suppressSurfaceMask, surfNum))
 			continue;
 #endif
+#ifdef _SPLASHDAMAGE //karin: hide surfaces
+		if(parms && parms->hideSurfaceMask.Get(surfNum))
+			continue;
+#endif
 		const modelSurface_t *surf = model->Surface(surfNum);
 
 		// if no geometry or no shader
-		if (!surf->geometry || !surf->shader) {
+#ifdef _SPLASHDAMAGE
+		if (!surf->geometry || !surf->material)
+#else
+		if (!surf->geometry || !surf->shader)
+#endif
+		{
 			continue;
 		}
 
 		// decals and overlays use the same rules
-		if (!localInfo.force && !surf->shader->AllowOverlays()) {
+#ifdef _SPLASHDAMAGE
+		if (!localInfo.force && !surf->material->AllowOverlays())
+#else
+		if (!localInfo.force && !surf->shader->AllowOverlays())
+#endif
+		{
 			continue;
 		}
 

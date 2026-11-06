@@ -1288,7 +1288,7 @@ idCommonLocal::WriteConfigToFile
 ==================
 */
 void idCommonLocal::WriteConfigToFile( 
-	const char*						filename, 
+	const char*		filename,
 	eConfigExport	configexport,
 	const char*		basePath
 ) {
@@ -2602,8 +2602,8 @@ void idCommonLocal::Async( void ) {
 		return;
 	}
 
-	//stgatilov #4514: game tics happen even X microseconds (in cumulative sense)
-	//to see how often this function is called, see Sys_StartAsyncThread
+	// stgatilov #4514: game tics happen even X microseconds (in cumulative sense)
+	// to see how often this function is called, see Sys_StartAsyncThread
 	//static const int USERCMD_USEC = 16650;		// ~60.06 Hz --- a bit higher than vsync
 	
 	// stgatilov #5575: reverted back to Doom 3 time to ensure game & gui time is synchronized with sound time
@@ -2806,6 +2806,8 @@ void idCommonLocal::Init( int argc, const char **argv, const char *cmdline )
 		// get architecture info
 		Sys_Init();
 
+		RenderDoc_Init();
+
 		// initialize networking
 		Sys_InitNetworking();
 
@@ -2958,17 +2960,18 @@ void idCommonLocal::InitGame( void )
 		if (fileSystem->FindFile(PADBINDS_FILE) != FIND_NO) {
 			cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "exec " PADBINDS_FILE "\n");
 		}
+
+		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec autoexec.cfg\n" );
 	}
-
-	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec mission.cfg\n" );
-
-	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec autoexec.cfg\n" );
 
 	// reload the language dictionary now that we've loaded config files
 	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "reloadLanguage\n" );
 
 	// run cfg execution
 	cmdSystem->ExecuteCommandBuffer();
+
+	// set static mission overrides: they take effect even before game starts
+	cvarSystem->SetMissionOverrides( cvarSystem->ReadMissionCvars() );
 
 	// re-override anything from the config files with command line args
 	StartupVariable( NULL, false );
@@ -3007,9 +3010,11 @@ void idCommonLocal::InitGame( void )
 	// init the session
 	session->Init();
 
-	// tels: #3199: now that the game DLL is loaded, we can execute another config, this
-	// enables it to run f.i. dmap (dmap before DLL load produces no AAS):
-	cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec autocommands.cfg\n" );
+	if (fileSystem->FindFile("autocommands.cfg") != FIND_NO) {
+		// tels: #3199: now that the game DLL is loaded, we can execute another config, this
+		// enables it to run f.i. dmap (dmap before DLL load produces no AAS):
+		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec autocommands.cfg\n" );
+	}
 }
 
 /*

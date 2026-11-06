@@ -58,10 +58,19 @@ ID_INLINE int idPlaneSet::FindPlane(const idPlane &plane, const float normalEps,
 
 	assert(distEps <= 0.125f);
 
+#ifdef _SPLASHDAMAGE
+    hashKey = idMath::Ftoi( idMath::Fabs( plane.Dist() ) * 0.125f );
+#else
 	hashKey = (int)(idMath::Fabs(plane.Dist()) * 0.125f);
+#endif
 
 	for (border = -1; border <= 1; border++) {
-		for (i = hash.First(hashKey + border); i >= 0; i = hash.Next(i)) {
+#ifdef _SPLASHDAMAGE
+        for ( i = hash.GetFirst( hashKey + border ); i != idHashIndex::NULL_INDEX; i = hash.GetNext( i ) ) 
+#else
+		for (i = hash.First(hashKey + border); i >= 0; i = hash.Next(i)) 
+#endif
+		{
 			if ((*this)[i].Compare(plane, normalEps, distEps)) {
 				return i;
 			}

@@ -1,0 +1,902 @@
+//
+//	Interaction shader with self ilumination and strogg "insect shell" 
+//	effect.
+//
+
+renderBinding stroggShellMap { texture { "textures/effects/stroggshell2.tga" } }
+
+renderProgram ambient/strogg {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	hwSkinningVersion ambient/strogg_skinning_matrix ambient/strogg_hardskinning_matrix
+	instanceVersion ambient/strogg_instance
+	coverageVersion ambient/strogg_coverage
+	
+	machineSpec 2
+	fallBack ambient/selfillum
+
+	program vertex reference ambient/basic
+	
+	program fragment arb { <%
+		$define self_illum
+		$define strogg_effects	
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+renderProgram ambient/strogg_coverage {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 2
+	fallBack ambient/selfillum_coverage
+
+	program vertex reference ambient/basic
+	
+	program fragment arb { <%
+		$define r_useDitherMask
+		$define self_illum
+		$define strogg_effects	
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+renderProgram ambient/strogg_instance {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 2
+	fallBack ambient/selfillum_instance
+
+	program vertex reference ambient/basic_instance
+
+	program fragment reference ambient/strogg
+}
+
+
+renderProgram ambient/strogg_skinning_matrix {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 2
+	fallBack ambient/selfillum_skinning_matrix
+
+	program vertex reference ambient/basic_skinning_matrix
+
+	program fragment reference ambient/strogg
+}
+
+renderProgram ambient/strogg_hardskinning_matrix {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 2
+	fallBack ambient/selfillum_hardskinning_matrix
+
+	program vertex reference ambient/basic_hardskinning_matrix
+
+	program fragment reference ambient/strogg
+}
+
+//
+//	This basically just changes the ambient shader do do some extra work.
+//	so all the per light interaction passes are just referencing the normal
+//	ones.
+//
+renderProgram interaction/strogg {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	amblitVersion interaction/strogg_amblit
+	ambientVersion ambient/strogg
+	instanceVersion interaction/strogg_instance
+	coverageVersion interaction/strogg_coverage
+	hwSkinningVersion interaction/strogg_skinning_matrix interaction/strogg_hardskinning_matrix
+	
+	machineSpec 2
+	fallBack interaction/selfillum
+	
+	program vertex reference interaction/basic
+
+	program fragment reference interaction/basic
+}      
+
+renderProgram interaction/strogg_skinning_matrix {
+	interaction
+
+	amblitVersion interaction/strogg_skinning_matrix_amblit
+
+	machineSpec 2
+	fallBack interaction/selfillum_skinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_skinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/strogg_amblit
+}
+
+
+renderProgram interaction/strogg_hardskinning_matrix {
+	interaction
+
+	amblitVersion interaction/strogg_hardskinning_matrix_amblit
+
+	machineSpec 2
+	fallBack interaction/selfillum_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_hardskinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/strogg_amblit
+}
+        
+
+renderProgram interaction/strogg_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define self_illum
+		$define strogg_effects	
+		$include "interaction/basic_fragment.inc"	
+	%> }
+}              
+
+renderProgram interaction/strogg_coverage {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+
+	machineSpec 2
+	fallBack interaction/selfillum_coverage
+
+	amblitVersion interaction/strogg_coverage_amblit
+	ambientVersion ambient/strogg_coverage
+	program vertex reference interaction/basic
+
+	program fragment reference interaction/basic_coverage
+}              
+
+renderProgram interaction/strogg_coverage_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define self_illum
+		$define strogg_effects	
+		$define r_useDitherMask
+		$include "interaction/basic_fragment.inc"	
+	%> }
+}              
+
+renderProgram interaction/strogg_instance {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+
+	machineSpec 2
+	fallBack interaction/selfillum_instance
+	
+	amblitVersion interaction/strogg_instance_amblit
+	ambientVersion ambient/strogg_instance
+	
+	program vertex reference interaction/basic_instance
+	program fragment reference interaction/basic
+}              
+
+renderProgram interaction/strogg_instance_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+
+	program vertex reference interaction/basic_instance
+	program fragment reference interaction/strogg_amblit
+}              
+
+// Self illumnation versions with colour modulation
+
+renderProgram ambient/strogg_modulate {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	hwSkinningVersion ambient/strogg_modulate_skinning_matrix ambient/strogg_modulate_hardskinning_matrix
+
+	program vertex reference ambient/basic
+	
+	program fragment arb { <%
+		$define self_illum
+		$define self_illum_modulate
+		$define strogg_effects	
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+
+renderProgram ambient/strogg_modulate_skinning_matrix {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_skinning_matrix
+
+	program fragment reference ambient/strogg_modulate
+}
+
+renderProgram ambient/strogg_modulate_hardskinning_matrix {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_hardskinning_matrix
+
+	program fragment reference ambient/strogg_modulate
+}
+
+renderProgram interaction/strogg_modulate {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	amblitVersion interaction/strogg_modulate_amblit
+	ambientVersion ambient/strogg_modulate
+	hwSkinningVersion interaction/strogg_modulate_skinning_matrix interaction/strogg_modulate_hardskinning_matrix
+	
+	program vertex reference interaction/basic
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_modulate_skinning_matrix {
+	interaction
+
+	amblitVersion interaction/strogg_skinning_matrix_amblit
+
+	machineSpec 2
+	fallBack interaction/selfillum_skinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_modulate_skinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/strogg_modulate_amblit
+}
+
+
+renderProgram interaction/strogg_modulate_hardskinning_matrix {
+	interaction
+
+	amblitVersion interaction/strogg_hardskinning_matrix_amblit
+
+	machineSpec 2
+	fallBack interaction/selfillum_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_modulate_hardskinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/strogg_modulate_amblit
+}
+ 
+
+renderProgram interaction/strogg_modulate_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define self_illum
+		$define self_illum_modulate
+		$define strogg_effects	
+		$include "interaction/basic_fragment.inc"	
+	%> }
+}
+
+/*********************************************************/
+
+renderProgram ambient/strogg_detail {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	hwSkinningVersion ambient/strogg_skinning_matrix_detail ambient/strogg_hardskinning_matrix_detail
+	instanceVersion ambient/strogg_instance
+	lodVersion ambient/strogg
+
+	program vertex reference ambient/basic_detail
+	
+	machineSpec 3
+	fallBack ambient/strogg
+	
+	
+	program fragment arb { <%
+		$define self_illum
+		$define strogg_effects	
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+renderProgram ambient/strogg_skinning_matrix_detail {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_skinning_matrix_detail
+
+	program fragment reference ambient/strogg_detail
+}
+
+renderProgram ambient/strogg_hardskinning_matrix_detail {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_hardskinning_matrix_detail
+
+	program fragment reference ambient/strogg_detail
+}
+
+renderProgram interaction/strogg_detail {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	amblitVersion interaction/strogg_detail_amblit
+	ambientVersion ambient/strogg_detail
+	lodVersion interaction/strogg
+	hwSkinningVersion interaction/strogg_skinning_matrix_detail interaction/strogg_hardskinning_matrix_detail
+	instanceVersion interaction/strogg_instance
+	
+	machineSpec 3
+	fallBack interaction/strogg
+	
+	program vertex reference interaction/basic_detail
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram interaction/strogg_skinning_matrix_detail {
+	interaction
+
+	amblitVersion interaction/strogg_skinning_matrix_detail_amblit
+
+	machineSpec 3
+	fallBack interaction/strogg_skinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_skinning_matrix_detail_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/strogg_detail_amblit
+}
+
+
+renderProgram interaction/strogg_hardskinning_matrix_detail {
+	interaction
+
+	amblitVersion interaction/strogg_hardskinning_matrix_detail_amblit
+
+	machineSpec 3
+	fallBack interaction/strogg_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_hardskinning_matrix_detail_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/strogg_detail_amblit
+}
+
+
+renderProgram interaction/strogg_detail_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic_detail
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define self_illum
+		$define strogg_effects	
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_fragment.inc"	
+	%> }
+}              
+
+/*********************************************************/
+
+renderProgram ambient/strogg_detailwm {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	hwSkinningVersion ambient/strogg_skinning_matrix_detailwm ambient/strogg_hardskinning_matrix_detailwm
+	lodVersion ambient/strogg
+	instanceVersion ambient/strogg_instance
+
+	machineSpec 3
+	fallBack ambient/strogg
+
+	program vertex reference ambient/basic_detail
+	
+	program fragment arb { <%
+		$define self_illum
+		$define strogg_effects	
+		$define enable_detail
+		$define enable_detailweight_tex
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+renderProgram ambient/strogg_skinning_matrix_detailwm {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+	
+	machineSpec 3
+	fallBack ambient/strogg_skinning_matrix
+
+	program vertex reference ambient/basic_skinning_matrix_detail
+
+	program fragment reference ambient/strogg_detailwm
+}
+
+renderProgram ambient/strogg_hardskinning_matrix_detailwm {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+	
+	machineSpec 3
+	fallBack ambient/strogg_hardskinning_matrix
+
+	program vertex reference ambient/basic_hardskinning_matrix_detail
+
+	program fragment reference ambient/strogg_detailwm
+}
+
+renderProgram interaction/strogg_detailwm {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	amblitVersion interaction/strogg_detailwm_amblit
+	ambientVersion ambient/strogg_detailwm
+	lodVersion interaction/strogg
+	hwSkinningVersion interaction/strogg_skinning_matrix_detailwm interaction/strogg_hardskinning_matrix_detailwm
+	instanceVersion interaction/strogg_instance
+
+	machineSpec 3
+	fallBack interaction/strogg
+	
+	program vertex reference interaction/basic_detail
+
+	program fragment reference interaction/basic_detailwm
+}              
+
+renderProgram interaction/strogg_skinning_matrix_detailwm {
+	interaction
+
+	amblitVersion interaction/strogg_skinning_matrix_detailwm_amblit
+
+	machineSpec 3
+	fallBack interaction/strogg_skinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_skinning_matrix_detailwm_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/strogg_detailwm_amblit
+}
+
+
+renderProgram interaction/strogg_hardskinning_matrix_detailwm {
+	interaction
+
+	amblitVersion interaction/strogg_hardskinning_matrix_detailwm_amblit
+
+	machineSpec 3
+	fallBack interaction/strogg_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_hardskinning_matrix_detailwm_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/strogg_detailwm_amblit
+}
+
+
+renderProgram interaction/strogg_detailwm_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic_detail
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define self_illum
+		$define strogg_effects	
+		$define enable_detail
+		$define enable_detailweight_tex
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_fragment.inc"	
+	%> }
+}              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*********************************************************/
+
+renderProgram ambient/strogg_detail_glow {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	hwSkinningVersion ambient/strogg_skinning_matrix_detail_glow ambient/strogg_hardskinning_matrix_detail_glow
+
+	program vertex reference ambient/basic_detail
+	
+	program fragment arb { <%
+		$define self_illum_glow
+		$define self_illum
+		$define strogg_effects	
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+renderProgram ambient/strogg_skinning_matrix_detail_glow {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_skinning_matrix_detail
+
+	program fragment reference ambient/strogg_detail_glow
+}
+
+renderProgram ambient/strogg_hardskinning_matrix_detail_glow {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_hardskinning_matrix_detail
+
+	program fragment reference ambient/strogg_detail_glow
+}
+
+renderProgram interaction/strogg_detail_glow {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	ambientVersion ambient/strogg_detail_glow
+	hwSkinningVersion interaction/strogg_skinning_matrix_detail_glow interaction/strogg_hardskinning_matrix_detail_glow
+	
+	program vertex reference interaction/basic_detail
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram interaction/strogg_skinning_matrix_detail_glow {
+	interaction
+
+	amblitVersion interaction/strogg_skinning_matrix_detail_glow_amblit
+
+	machineSpec 3
+	fallBack interaction/strogg_skinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_skinning_matrix_detail_glow_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/strogg_detail_glow_amblit
+}
+
+
+renderProgram interaction/strogg_hardskinning_matrix_detail_glow {
+	interaction
+
+	amblitVersion interaction/strogg_hardskinning_matrix_detail_glow_amblit
+
+	machineSpec 3
+	fallBack interaction/strogg_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/strogg_hardskinning_matrix_detail_glow_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/strogg_detail_amblit
+}
+
+
+renderProgram interaction/strogg_detail_glow_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic_detail
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define self_illum_glow
+		$define self_illum
+		$define strogg_effects	
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_fragment.inc"	
+	%> }
+}              

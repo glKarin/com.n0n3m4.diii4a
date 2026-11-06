@@ -90,17 +90,23 @@ If the start position is targeting an entity, the players camera will start out 
 void SP_info_ai_respawn( gentity_t *ent ) {
     int i;
     vec3_t dir;
-    char *s;  // <-- not const
+    char *s;
+
+    if ( !ent ) return;
 
     G_SpawnInt( "nobots", "0", &i );    if ( i ) ent->flags |= FL_NO_BOTS;
     G_SpawnInt( "nohumans", "0", &i );  if ( i ) ent->flags |= FL_NO_HUMANS;
 
-    // Parse optional name filter into existing ent->aiName
-    G_SpawnString( "ainame", "", &s );  // returns qtrue/false, but s is set either way
+    // IMPORTANT: store team restriction on the SPAWN SPOT entity
+    // Default 0. With strict matching below, 0 means "team 0 only", not wildcard.
+    G_SpawnInt( "aiteam", "0", &ent->aiTeam );
+
+    // Optional name restriction
+    G_SpawnString( "ainame", "", &s );
     if ( s && s[0] ) {
         ent->aiName = G_NewString( s );
     } else {
-        ent->aiName = NULL;             // no restriction
+        ent->aiName = NULL;
     }
 
     ent->enemy = G_PickTarget( ent->target );
@@ -936,57 +942,58 @@ void ClientUserinfoChanged( int clientNum ) {
 	// Set max health based on user info
 	client->pers.maxHealth = atoi(Info_ValueForKey(userinfo, "handicap"));
 
-	if (g_gametype.integer == GT_SURVIVAL)
-	{
+// --- SURVIVAL maxHealth rules ---
+if ( g_gametype.integer == GT_SURVIVAL ) {
 
-		if (client->ps.perks[PERK_RESILIENCE])
-		{
-			if (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC)
-			{
-				client->pers.maxHealth = 250;
-			}
-			else
-			{
-				client->pers.maxHealth = 200;
-			}
-		} else {
-            if (client->ps.stats[STAT_PLAYER_CLASS] == PC_MEDIC) {
-				client->pers.maxHealth = 150;
-			} else {
-				client->pers.maxHealth = 100;
-			}
+    if ( client->ps.perks[ PERK_RESILIENCE ] ) {
+        if ( client->ps.stats[ STAT_PLAYER_CLASS ] == PC_MEDIC ) {
+            client->pers.maxHealth = 250;
+        } else {
+            client->pers.maxHealth = 200;
+        }
+    } else {
+        if ( client->ps.stats[ STAT_PLAYER_CLASS ] == PC_MEDIC ) {
+            client->pers.maxHealth = 150;
+        } else {
+            client->pers.maxHealth = 100;
+        }
+    }
 
-		}
-	}
+} else {
+    // --- NON-SURVIVAL (SP) base clamp by skill ---
+    switch ( g_gameskill.integer ) {
+    case GSKILL_EASY:
+    case GSKILL_MEDIUM:
+    case GSKILL_HARD:
+        if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
+            client->pers.maxHealth = 100;
+        }
+        break;
 
-		// Set max health based on game skill level
-		if (g_gametype.integer != GT_SURVIVAL) {
-		switch (g_gameskill.integer)
-		{
-		case GSKILL_EASY:
-		case GSKILL_MEDIUM:
-		case GSKILL_HARD:
-			if (client->pers.maxHealth < 1 || client->pers.maxHealth > 100)
-			{
-				client->pers.maxHealth = 100;
-			}
-			break;
-		case GSKILL_MAX:
-			if (client->pers.maxHealth < 1 || client->pers.maxHealth > 50)
-			{
-				client->pers.maxHealth = 50;
-			}
-			break;
-		case GSKILL_REALISM:
-			if (client->pers.maxHealth < 1 || client->pers.maxHealth > 25)
-			{
-				client->pers.maxHealth = 25;
-			}
-			break;
-		default:
-			break;
-		}
-	}
+    case GSKILL_MAX:
+        if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 50 ) {
+            client->pers.maxHealth = 50;
+        }
+        break;
+
+    case GSKILL_REALISM:
+        if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 25 ) {
+            client->pers.maxHealth = 25;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    if ( client->ps.perks[ PERK_RESILIENCE ] ) {
+        if ( g_gameskill.integer == GSKILL_REALISM ) {
+            client->pers.maxHealth = 100;
+        } else {
+            client->pers.maxHealth = 200;
+        }
+    }
+}
 
 	for ( weapon_t weaponNum = 0; weaponNum < WP_NUM_WEAPONS; weaponNum++ )
 		BG_SetWeaponForSkill( weaponNum, g_gameskill.integer );
@@ -1423,6 +1430,9 @@ void ClientSpawn( gentity_t *ent ) {
 
 	if ( !( ent->r.svFlags & SVF_CASTAI ) && ( g_gametype.integer == GT_SURVIVAL ) ) {  
          client->sess.playerType = g_playerSurvivalClass.integer;
+	}
+
+	if ( !( ent->r.svFlags & SVF_CASTAI ) ) {  
 		 ClientUserinfoChanged( index );
 	}
 

@@ -108,6 +108,13 @@ const int GLYPH_CHAREND			= 127;
 const int GLYPHS_PER_FONT		= GLYPH_END - GLYPH_START + 1;
 
 typedef struct {
+#ifdef _RAVEN
+	float				width;					// number of pixels wide // imageWidth of DOOM3
+	float				height;					// number of scan lines // imageHeight of DOOM3
+	float				horiAdvance;			// number of pixels to advance to the next char // xSkip of DOOM3
+	float				horiBearingX;			// x offset into space to render glyph // pitch of DOOM3
+	float				horiBearingY;			// y offset // top/height of DOOM3
+#else
 	int					height;			// number of scan lines
 	int					top;			// top of glyph in buffer
 	int					bottom;			// bottom of glyph in buffer
@@ -115,6 +122,7 @@ typedef struct {
 	int					xSkip;			// x adjustment
 	int					imageWidth;		// width of actual image
 	int					imageHeight;	// height of actual image
+#endif
 	float				s;				// x offset in image where glyph starts
 	float				t;				// y offset in image where glyph starts
 	float				s2;
@@ -127,6 +135,12 @@ typedef struct {
 	glyphInfo_t			glyphs [GLYPHS_PER_FONT];
 	float				glyphScale;
 	char				name[64];
+#ifdef _RAVEN
+	float				pointSize;
+	float				fontHeight;				// max height of font
+	float				ascender;
+	float				descender;
+#endif
 
 #ifdef _WCHAR_LANG
     int                 numIndexes;
@@ -140,6 +154,16 @@ typedef struct {
 	fontInfo_t			fontInfoSmall;
 	fontInfo_t			fontInfoMedium;
 	fontInfo_t			fontInfoLarge;
+#ifdef _RAVEN
+	float				maxHeight;
+	float				maxWidth;
+	float				maxHeightSmall;
+	float				maxWidthSmall;
+	float				maxHeightMedium;
+	float				maxWidthMedium;
+	float				maxHeightLarge;
+	float				maxWidthLarge;
+#else
 	int					maxHeight;
 	int					maxWidth;
 	int					maxHeightSmall;
@@ -148,6 +172,7 @@ typedef struct {
 	int					maxWidthMedium;
 	int					maxHeightLarge;
 	int					maxWidthLarge;
+#endif
 	char				name[64];
 } fontInfoEx_t;
 
@@ -156,7 +181,11 @@ typedef struct {
 #define HARM_NEW_FONT_VERSION 0x00010001
 
 const glyphInfo_t * R_Font_GetGlyphInfo(const fontInfo_t *info, uint32_t charIndex);
+#ifdef _RAVEN //karin: add spacing adjust
+float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale = 1.0f, float adjust = 0.0f);
+#else
 float R_Font_GetCharWidth(const fontInfo_t *info, uint32_t charCode, float scale = 1.0f);
+#endif
 float R_Font_GetCharHeight(const fontInfo_t *info, uint32_t charCode, float scale = 1.0f);
 
 void R_Font_FreeFontInfo(fontInfo_t *info);
@@ -329,6 +358,24 @@ class idRenderSystem
 #endif
 #ifdef _MULTITHREAD
 		virtual void EndFrame(byte *data, int *frontEndMsec, int *backEndMsec) = 0;
+#endif
+#ifdef _SPLASHDAMAGE
+    	virtual bool			UploadImage( const char* imageName, const byte* data, int width, int height, bool generateMipMaps/* = false*/, bool copy = true ) = 0;
+    	
+    	virtual void			SyncRenderSystem( void )  = 0;
+    	
+    	virtual int				GetNumMSAAModes( void ) const = 0;
+    	virtual const char *	GetMSAAMode( int idx, int &val ) const = 0;
+	    virtual void			LockThreads( void ) = 0;
+	    virtual void			UnlockThreads( void ) = 0;
+    	virtual int				GetSyncNum( void ) = 0;
+	    
+	    virtual int				RegisterPtr( void *ptr ) = 0;
+	    virtual void			UnregisterPtr( int uid ) = 0;
+    	virtual void*			PtrForUID( int uid ) = 0;
+    	
+    	virtual class idRenderModel*		InstantiateDynamicModel( class idRenderModel* model, struct renderEntity_s* ent ) = 0;
+    	virtual bool			IsSMPEnabled( void ) = 0;
 #endif
 };
 

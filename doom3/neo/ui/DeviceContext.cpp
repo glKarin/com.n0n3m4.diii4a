@@ -89,17 +89,6 @@ idCVar harm_gui_useD3BFGFont("harm_gui_useD3BFGFont", "", CVAR_GUI | CVAR_INIT |
 
 idList<fontInfoEx_t> idDeviceContext::fonts;
 
-#ifdef _RAVEN //k: I am not find Quake4 default font named "", so using cvar to control
-const char	*harm_gui_defaultFontArgs[]	= {
-	"chain", 
-	"lowpixel", 
-	"marine", 
-	"profont", 
-	"r_strogg", 
-	"strogg", 
-	NULL };
-static idCVar harm_gui_defaultFont("harm_gui_defaultFont", harm_gui_defaultFontArgs[0], CVAR_ARCHIVE | CVAR_GUI, "Setup default GUI font. It will be available in next running.", harm_gui_defaultFontArgs, idCmdSystem::ArgCompletion_String<harm_gui_defaultFontArgs>);
-#endif
 int idDeviceContext::FindFont(const char *name)
 {
 	int c = fonts.Num();
@@ -110,22 +99,12 @@ int idDeviceContext::FindFont(const char *name)
 		}
 	}
 
-	// If the font was not found, try to register it
+	// If the font not found, try to register it
 	idStr fileName = name;
-#ifdef _RAVEN //k: Quake4 default font
-	if(!idStr::Icmp(fileName, "fonts"))
-	{
-		fileName = "fonts/";
-		const char *defFontName = harm_gui_defaultFont.GetString();
-		if(!defFontName || !defFontName[0])
-			defFontName = harm_gui_defaultFontArgs[0];
-		fileName += defFontName;
-	}
-#endif
 	fileName.Replace("fonts", va("fonts/%s", fontLang.c_str()));
 
 	fontInfoEx_t fontInfo;
-    memset(&fontInfo, 0, sizeof(fontInfoEx_t)); // DG: initialize this //k 2025
+    memset(&fontInfo, 0, sizeof(fontInfoEx_t)); // DG: initialize this
 	int index = fonts.Append(fontInfo);
 
 	bool fontLoaded = false;
@@ -205,7 +184,10 @@ int idDeviceContext::FindFont(const char *name)
 		{
 			const fontInfoEx_t *f = &fonts[index];
 			if(f->fontInfoSmall.numIndexes > 0 || f->fontInfoMedium.numIndexes > 0 || f->fontInfoLarge.numIndexes > 0)
+			{
 				_hasWideCharFont = true;
+				common->Printf("Wide character font found.\n");
+			}
 		}
 #endif
 		return index;
@@ -227,7 +209,11 @@ void idDeviceContext::SetupFonts()
 	}
 
 	// Default font has to be added first
+#ifdef _RAVEN //default font is chain in quake4
+	FindFont("fonts/chain");
+#else
 	FindFont("fonts");
+#endif
 }
 
 void idDeviceContext::SetFont(int num)
@@ -967,7 +953,11 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				}
 
 				if (cursor == count || cursor == count+1) {
+#ifdef _RAVEN
+					float partialSkip = ((glyph->horiAdvance * useScale) + adjust) / 5.0f; // xSkip
+#else
 					float partialSkip = ((glyph->xSkip * useScale) + adjust) / 5.0f;
+#endif
 
 					if (cursor == count) {
 						partialSkip *= 2.0f;
@@ -983,17 +973,48 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
 				count += 2;
 				continue;
 			} else {
+#ifdef _RAVEN //karin: 2025 Q4D yy = y - useScale * font->horiBearingY - 1.0f;
+				float xadj = x + useScale * glyph->horiBearingX;
+				float yadj = y - useScale * glyph->horiBearingY /*- 1.0f*/; // top
+				if ( style == 1 ) {
+					idVec4 shadowColor( 0.0f, 0.0f, 0.0f, newColor.w );
+					renderSystem->SetColor( shadowColor );
+					PaintChar(xadj + 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					renderSystem->SetColor( newColor );
+				}
+				else if ( style == 2 )
+				{
+					idVec4 shadowColor;
+					if ( newColor.x >= 0.2 || newColor.y >= 0.2 || newColor.z >= 0.2 )
+					{
+						shadowColor.Set(0.0f, 0.0f, 0.0f, newColor.w);
+					}
+					else
+					{
+						shadowColor.Set(1.0f, 1.0f, 1.0f, newColor.w);
+					}
+					renderSystem->SetColor( shadowColor );
+					PaintChar(xadj + 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(xadj - 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(xadj - 1.0f, yadj - 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					PaintChar(xadj + 1.0f, yadj - 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+					renderSystem->SetColor( newColor );
+				}
+				PaintChar(xadj, yadj,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+#else
 				float yadj = useScale * glyph->top;
-#ifdef _RAVENxxx //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
-                yadj = yadj + 1.0f;
-#endif
 				PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+#endif
 
 				if (cursor == count) {
 					DrawEditCursor(x, y, scale);
 				}
 
+#ifdef _RAVEN // add adjust spacing
+				x += (glyph->horiAdvance + adjust) * useScale; // xSkip
+#else
 				x += (glyph->xSkip * useScale) + adjust;
+#endif
 				s++;
 				count++;
 			}
@@ -1025,7 +1046,11 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
                         newColor[3] = color[3];
                     }
                     if( cursor == charIndex - 1 || cursor == charIndex ) {
+#ifdef _RAVEN
+                        float partialSkip = ((glyph->horiAdvance * useScale) + adjust) / 5.0f; // xSkip
+#else
                         float partialSkip = ((glyph->xSkip * useScale) + adjust) / 5.0f;
+#endif
 
                         if (cursor == count) {
                             partialSkip *= 2.0f;
@@ -1039,17 +1064,48 @@ int idDeviceContext::DrawText(float x, float y, float scale, idVec4 color, const
                     charIndex++; //karin: skip color value character
                     continue;
                 } else {
+#ifdef _RAVEN //karin: 2025 Q4D yy = y - useScale * font->horiBearingY - 1.0f;
+					float xadj = x + useScale * glyph->horiBearingX;
+					float yadj = y - useScale * glyph->horiBearingY /*- 1.0f*/; // top
+					if ( style == 1 ) {
+						idVec4 shadowColor( 0.0f, 0.0f, 0.0f, newColor.w );
+						renderSystem->SetColor( shadowColor );
+						PaintChar(xadj + 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						renderSystem->SetColor( newColor );
+					}
+					else if ( style == 2 )
+					{
+						idVec4 shadowColor;
+						if ( newColor.x >= 0.2 || newColor.y >= 0.2 || newColor.z >= 0.2 )
+						{
+							shadowColor.Set(0.0f, 0.0f, 0.0f, newColor.w);
+						}
+						else
+						{
+							shadowColor.Set(1.0f, 1.0f, 1.0f, newColor.w);
+						}
+						renderSystem->SetColor( shadowColor );
+						PaintChar(xadj + 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(xadj - 1.0f, yadj + 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(xadj - 1.0f, yadj - 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						PaintChar(xadj + 1.0f, yadj - 1.0f,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+						renderSystem->SetColor( newColor );
+					}
+					PaintChar(xadj,yadj,glyph->width,glyph->height,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+#else
                     float yadj = useScale * glyph->top;
-#ifdef _RAVENxxx //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
-                    yadj = yadj + 1.0f;
-#endif
                     PaintChar(x,y - yadj,glyph->imageWidth,glyph->imageHeight,useScale,glyph->s,glyph->t,glyph->s2,glyph->t2,glyph->glyph);
+#endif
 
                     if( cursor == charIndex - 1 ) {
                         DrawEditCursor( x, y, scale );
                     }
 
+#ifdef _RAVEN // add adjust spacing
+                    x += (glyph->horiAdvance + adjust) * useScale; // xSkip
+#else
                     x += (glyph->xSkip * useScale) + adjust;
+#endif
                 }
             }
         }
@@ -1075,7 +1131,11 @@ void idDeviceContext::SetSize(float width, float height)
 	}
 }
 
+#ifdef _RAVEN // add adjust spacing
+int idDeviceContext::CharWidth(const char c, float scale, int adjust)
+#else
 int idDeviceContext::CharWidth(const char c, float scale)
+#endif
 {
 	glyphInfo_t *glyph;
 	float		useScale;
@@ -1083,10 +1143,18 @@ int idDeviceContext::CharWidth(const char c, float scale)
 	fontInfo_t	*font = useFont;
 	useScale = scale * font->glyphScale;
 	glyph = &font->glyphs[(const unsigned char)c];
+#ifdef _RAVEN // add adjust spacing
+	return idMath::FtoiFast((adjust + glyph->horiAdvance) * useScale); // xSkip
+#else
 	return idMath::FtoiFast(glyph->xSkip * useScale);
+#endif
 }
 
+#ifdef _RAVEN // add adjust spacing
+int idDeviceContext::TextWidth(const char *text, float scale, int limit, int adjust)
+#else
 int idDeviceContext::TextWidth(const char *text, float scale, int limit)
+#endif
 {
 	int i, width;
 
@@ -1109,7 +1177,11 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 			if (idStr::IsColor(text + i)) {
 				i++;
 			} else {
+#ifdef _RAVEN // add adjust spacing
+				width += glyphs[((const unsigned char *)text)[i]].horiAdvance + adjust; // xSkip
+#else
 				width += glyphs[((const unsigned char *)text)[i]].xSkip;
+#endif
 			}
 		}
 	} else {
@@ -1117,7 +1189,11 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
 			if (idStr::IsColor(text + i)) {
 				i++;
 			} else {
+#ifdef _RAVEN // add adjust spacing
+				width += glyphs[((const unsigned char *)text)[i]].horiAdvance + adjust; // xSkip
+#else
 				width += glyphs[((const unsigned char *)text)[i]].xSkip;
+#endif
 			}
 		}
 	}
@@ -1140,7 +1216,11 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
                     charIndex += 2; //skip 2 characters, because color is ^x format
                 } else {
                     uint32_t textChar = drawText.UTF8Char( charIndex );
+#ifdef _RAVEN // add adjust spacing
+                    f += R_Font_GetCharWidth(useFont, textChar, scale, adjust);
+#else
                     f += R_Font_GetCharWidth(useFont, textChar, scale);
+#endif
                 }
             }
         } else {
@@ -1149,7 +1229,11 @@ int idDeviceContext::TextWidth(const char *text, float scale, int limit)
                     charIndex += 2; //skip 2 characters, because color is ^x format
                 } else {
                     uint32_t textChar = drawText.UTF8Char( charIndex );
+#ifdef _RAVEN // add adjust spacing
+                    f += R_Font_GetCharWidth(useFont, textChar, scale, adjust);
+#else
                     f += R_Font_GetCharWidth(useFont, textChar, scale);
+#endif
                 }
             }
         }
@@ -1333,11 +1417,13 @@ void idDeviceContext::DrawEditCursor(float x, float y, float scale)
 	SetFontByScale(scale);
 	float useScale = scale * useFont->glyphScale;
 	const glyphInfo_t *glyph2 = &useFont->glyphs[(overStrikeMode) ? '_' : '|'];
+#ifdef _RAVEN //karin: 2025 Q4D v7 = y - (scalea * horiBearingY - 1.0);
+	float	yadj = y - (useScale * glyph2->horiBearingY /*- 1.0f*/); // top
+	PaintChar(x, yadj,glyph2->width,glyph2->height,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
+#else
 	float	yadj = useScale * glyph2->top;
-#ifdef _RAVENxxx //karin: 2025 Q4D y - useScale * font->horiBearingY - 1.0
-    yadj = yadj + 1.0f;
-#endif
 	PaintChar(x, y - yadj,glyph2->imageWidth,glyph2->imageHeight,useScale,glyph2->s,glyph2->t,glyph2->s2,glyph2->t2,glyph2->glyph);
+#endif
 }
 
 #ifdef _RAVEN //karin: gui drawtext add spacing and style
@@ -1395,6 +1481,9 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
     if(AsASCIICharLang(text, (int)strlen(text)))
     {
 #endif
+#ifdef _RAVEN // add adjust spacing
+	int iAdjust = idMath::Ceil(adjust);
+#endif
 	while (p) {
 
 		if (*p == '\n' || *p == '\r' || *p == '\0') {
@@ -1405,7 +1494,11 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 			}
 		}
 
+#ifdef _RAVEN // add adjust spacing
+		int nextCharWidth = (idStr::CharIsPrintable(*p) ? CharWidth(*p, textScale, iAdjust) : cursorSkip);
+#else
 		int nextCharWidth = (idStr::CharIsPrintable(*p) ? CharWidth(*p, textScale) : cursorSkip);
+#endif
 		// FIXME: this is a temp hack until the guis can be fixed not not overflow the bounding rectangles
 		//		  the side-effect is that list boxes and edit boxes will draw over their scroll bars
 		//	The following line and the !linebreak in the if statement below should be removed
@@ -1496,7 +1589,11 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 
 		// update the width
 		if (*(buff + len - 1) != C_COLOR_ESCAPE && (len <= 1 || *(buff + len - 2) != C_COLOR_ESCAPE)) {
+#ifdef _RAVEN
+			textWidth += textScale * useFont->glyphScale * useFont->glyphs[(const unsigned char)*(buff + len - 1)].horiAdvance; // xSkip
+#else
 			textWidth += textScale * useFont->glyphScale * useFont->glyphs[(const unsigned char)*(buff + len - 1)].xSkip;
+#endif
 		}
 	}
 #ifdef _WCHAR_LANG
@@ -1533,7 +1630,11 @@ int idDeviceContext::DrawText(const char *text, float textScale, int textAlign, 
 
             // If the character isn't a new line then add it to the text buffer.
             if( textChar != '\n' && textChar != '\r' ) {
+#ifdef _RAVEN // add adjust spacing
+                textWidth += R_Font_GetCharWidth( useFont, textChar, textScale, adjust );
+#else
                 textWidth += R_Font_GetCharWidth( useFont, textChar, textScale );
+#endif
                 textBuffer.AppendUTF8Char( textChar );
             }
 

@@ -11,7 +11,7 @@ void R_CreateStencilTextureDepthStencilTexture(idImage *image)
 	int h = stencilTexture.height;
 	w = MakePowerOfTwo(w);
 	h = MakePowerOfTwo(h);
-	image->GenerateDepthStencilImage(w, h, false, TF_NEAREST, TR_CLAMP_TO_BORDER, 24, 8, false);
+	image->GenerateDepthStencilImage(w, h, false, TF_NEAREST, TR_CLAMP, 24, 8, false);
 }
 
 idStencilTexture::idStencilTexture()
@@ -129,7 +129,7 @@ void idStencilTexture::BlitStencil(void)
 	if(IsScissorTest)
 		qglDisable(GL_SCISSOR_TEST);
 
-	qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->GetFramebuffer());
+	Framebuffer::BindDraw(fb);
 
 	//qglReadBuffer(GL_BACK);
 #if 1 //karin: in shader, texcoord.xy = gl_FragCoord.xy * (vec2(1.0) / vec2(width, height)/* u_windowCoords.xy */ * (depthStencilTexture->uploadWidth / depthStencilTexture->uploadHeight) /* u_nonPowerOfTwo.xy */)
@@ -162,7 +162,7 @@ void idStencilTexture::BlitDepth(void)
 	if(IsScissorTest)
 		qglDisable(GL_SCISSOR_TEST);
 
-	qglBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->GetFramebuffer());
+	Framebuffer::BindDraw(fb);
 
 	//qglReadBuffer(GL_BACK);
 #if 1 //karin: in shader, texcoord.xy = gl_FragCoord.xy * (vec2(1.0) / vec2(width, height)/* u_windowCoords.xy */ * (depthStencilTexture->uploadWidth / depthStencilTexture->uploadHeight) /* u_nonPowerOfTwo.xy */)

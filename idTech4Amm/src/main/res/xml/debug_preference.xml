@@ -20,6 +20,29 @@
             android:title="@string/render_memory_status_0_is_disable"
             android:defaultValue="0"
         />
+        <EditTextPreference
+            android:title="@string/debug_overlay_x_offset"
+            android:key="harm_harm_debug_text_x"
+            android:persistent="true"
+            android:defaultValue="0"
+            android:inputType="number"
+            android:summary="@string/setup_debug_text_x_offset"
+            />
+        <EditTextPreference
+            android:title="@string/debug_overlay_y_offset"
+            android:key="harm_harm_debug_text_y"
+            android:persistent="true"
+            android:defaultValue="0"
+            android:inputType="number"
+            android:summary="@string/setup_debug_text_y_offset"
+            />
+        <CheckBoxPreference
+            android:title="@string/debug_overlay_background"
+            android:key="harm_harm_debug_text_background"
+            android:persistent="true"
+            android:defaultValue="false"
+            android:summary="@string/show_debug_text_background"
+            />
 <!--        <CheckBoxPreference
             android:title="@string/no_handle_signals"
             android:key="harm_no_handle_signals"

@@ -1,0 +1,69 @@
+renderProgram tools/maskGen {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+		
+		MOV	result.texcoord[1], vertex.normal;
+		MOV	result.texcoord[2], vertex.position;
+	%> }
+
+	program fragment arb { <%
+		TEMP	R0;
+
+		ADD		R0, fragment.texcoord[1].z, -program.local[0].x;
+
+		CMP		R0.r, R0.r, 0, 1;
+		MOV		R0.g, R0.r;
+		MOV		R0.b, R0.r;
+		MOV		R0.a, 1;
+
+		MOV		result.color, R0;
+	%> }
+}
+
+renderProgram tools/maskGenHeightMap {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+		
+		MOV	result.texcoord[0], vertex.position;
+	%> }
+
+	program fragment arb { <%
+		TEMP	R0;
+
+		# move to min and scale
+		ADD		R0.x, fragment.texcoord[0].z, -program.local[0].x;
+		MUL		R0.x, R0.x, program.local[0].y;
+		ADD		R0.x, R0.x, 0.0019140625;
+		#MUL		R0.x, R0.x, 255;
+		#FRAC	R0.y, R0.x;
+		#SUB		R0.x, R0.x, R0.y;
+		#ADD		R0.x, R0.x, 1;
+		#MUL		R0.x, R0.x, 0.003921568627450980392156862745098;
+		
+		
+		# output
+		MOV		result.color, R0.x;
+	%> }
+}
+
+renderProgram tools/maskGenHeightMap/alt {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+		
+		MOV	result.texcoord[0], vertex.position;
+	%> }
+
+	program fragment arb { <%
+		TEMP	R0;
+
+		# move to min and scale
+		ADD		R0.x, fragment.texcoord[0].z, -program.local[0].x;
+		MUL		R0.x, R0.x, program.local[0].y;
+		
+		ADD		R0.y, 1, -R0.x;
+		KIL		R0.y;
+
+		# output
+		MOV		result.color, R0.x;
+	%> }
+}

@@ -1190,7 +1190,7 @@ bool RepackPK4(unzFile uf, const char *srcZipfile) {
 	for (int i = 0; i < gi.number_entry; i++) {
 		SAFECALL(unzGetCurrentFileInfo64( uf, &unz_file_info, filename_inzip, sizeof(filename_inzip), NULL, 0, NULL, 0 ), "Failed to read info of file in %s", srcZipfile);
 		//copy necessary file info
-        zip_file_info.dosDate = unz_file_info.dosDate;
+		zip_file_info.dosDate = unz_file_info.dosDate;
 		zip_file_info.external_fa = unz_file_info.external_fa;
 		zip_file_info.internal_fa = unz_file_info.internal_fa;
 		zip_file_info.tmz_date = reinterpret_cast<tm_zip&>(unz_file_info.tmu_date);
@@ -2736,6 +2736,10 @@ void idFileSystemLocal::Shutdown( bool reloading ) {
 	cmdSystem->RemoveCommand( "touchFile" );
 
 	mapDict.ClearFree();
+
+	// if this fails, then we got a file handle leak =(
+	assert(filesOpenNowInZip.GetValue() == 0);
+	assert(filesOpenNowPermanent.GetValue() == 0);
 }
 
 /*
@@ -3697,6 +3701,7 @@ idFileSystemLocal::FindFile
 	}
 	else if ( !pak ) {
 		// found in FS, not even in paks
+		delete f;
 		return FIND_YES;
 	}
 	// marking addons for inclusion on reload - may need to do that even when already in the search path

@@ -1,0 +1,509 @@
+2016-11-24 David Anderson
+    * common.c,dwarfdump.c,tag_attr.c,tag_tree.c:
+      Update version strings.
+2016-11-24 David Anderson
+    * Makefile.in: Clean *~
+2016-11-22  David Anderson
+    * print_abbrevs.c: Some -k abbrev warnings did not make it clear that
+      they were checking against a heuristic sanity-check value
+      for the maximum number of attributes, not a genuine
+      maximum.
+2016-11-22  David Anderson
+    * tag_attr.c: Remove bogus blank line with trailing spaces.
+2016-11-11  David Anderson
+    * print_frames.c: Apply fix to local_dwarf_decode_s_leb128_chk so
+      it matches libdwarf dwarf_leb.c.  A fix for certain bit
+      pattern provoking undefined behavior in C..
+2016-11-01  David Anderson
+    * tag_attr.c,tag_common.h,tag_attr_ext.list: Adding
+      Ada GNAT gcc attributes DW_AT_GNU_numerator,
+      DW_AT_GNU_denominator, DW_AT_GNU_bias in the extended
+      table for checking.
+2016-10-21  David Anderson
+    * common.c,dwarfdump.c,tag_attr.c,tag_tree.c: Update
+      version strings.
+2016-09-30  David Anderson
+    * configure.in: Add additional -fsanitize tests to
+      --enable-sanitize option.
+    * configure: Regenerated.
+    * print_die.c: Ensure << applied to unsigned
+      to avoid undefined operation. We were getting
+      officially undefined behavior.
+    * tag_attr_ext.list: Removed trailing whitespace from
+      two lines.
+2016-09-30  David Anderson
+    * makename.c: The unused static function value_hashfunc()
+      has been removed.
+    * tag_attr.c, tag_tree.c: Changed (1<<bit) to
+      (((unsigned)1)<<bit) to avoid a runtime error
+      (during dwardump build) about the left shift.
+2016-09-27  David Anderson
+    * esb.c: Deleted file-static variable that was only
+      used for a test. No longer needed.
+2016-09-27  David Anderson
+    * print_die.c: Changed the name of experimental
+      loclist operators from LLE to LLEX
+      as these are in use for certain DWARF4 loclist
+      providers.  The DWARF5 LLE don't use the same
+      numeric values as the experimental ones.
+2016-09-23  David Anderson
+    * Makefile.in: A mistake here meant every compile
+      rebuilds all of dwarfdump even with a trivial change.
+      Fixed so now trivial changes just rebuild a minimum.
+      The dependencies here remain incomplete: if you change
+      a data structure you must 'make clean' and recompile
+      everything in dwarfdump.
+2016-09-22  David Anderson
+    * dwarfdump.c,print_die.c,print_frames.c,print_gdbindex.c:
+      In case of error, dwarf_dealloc the error once it
+      has been printed. Avoiding a small memory leak.
+2016-09-21  David Anderson
+    * configure.in: Supports --enable-sanitize which
+      sets dwfsanitize so build uses -fsanitize=address .
+    * configure: Regenerated.
+    * Makefile.in: Now uses dwfsanitize (when set)
+      during builds. Added dwarf_tsearchbal.c to the makename
+      build so dwarf_tsearchbal.o is available for tag_tree_build
+      and tag_attr _buildprograms at build time.
+    * dwarfdump.c: Moved all static struct esb_s variables
+      to the top level and ensure they are destructed on
+      normal exit. Destruct all static makename strings, abbrev
+      data, sanitized strings, and ranges strings.
+      Now all allocated memory is freed before a normal exit.
+    * esb.c: Added {} and commentary for clarity.
+      esb_destructor now a bit more careful (redundantly but
+      helpful for a reader).
+    * globals.h: Declared destructors allowing access to
+      static data allocated in certain source files.
+      Fixed the selftest code.
+    * macrocheck.c: Correct selftest code.
+    * makename.c: Now uses dwarf_tsearch to keep a record of
+      strings it allocates and avoids duplicating strings.
+      A destructor gives a way to free the allocated memory.
+    * makename.h: Added declaration of makename_destructor().
+    * print_abbrevs.c: Implemented destruct_abbrev_array() to
+      clean up a static array.
+    * print_die.c: Tidied up declaration/constructor pairs
+      so it's easier to see that all declarations have a constructor
+      call.
+    * print_lines.c: Tidied up declaration/constructor pair
+      so it's easier to see that the constructor is called.
+    * print_locs.c: Tidied up declaration/constructor pair
+      so it's easier to see that the constructor is called.
+    * print_ranges.c: Implemented ranges_esb_string_destructor()
+      to destruct local static esb string at normal dwarfdump exit.
+    * sanitized.c: Implemented sanitized_string_destructor()
+      to destruct local static esb string at normal dwarfdump exit.
+    * strstrnocase.c: Code could do *ct past end of string.
+      Fixed to avoid that.
+2016-09-15  David Anderson
+    * configure.in: Added check for unistd.h.
+    * configure: regenerated.
+    * dwarfdump.c,tag_attr.c,tag_tree.c:  Add #ifdef HAVE_UNISTD_H
+      for unistd.h include.
+2016-09-15  David Anderson
+    * tag_tree.c: Two local variables had no initializer.
+      Though adding the initializers is logically unnecessary
+      it is the standard way to code in libdwarf/dwarfdump.
+2016-09-13  David Anderson
+    * print_die.c: Shortened the printing of DW_AT_discr_list
+      to improve readability.
+2016-09-09  David Anderson
+    * tag_attr.c,tag_tree.c: Further improvements to ensure we do not run
+      off the ends of rows or columns.
+      New commentary on array contents of generated arrays.
+    * tag_tree.c: Further improvements to ensure we do not run
+      off the ends of rows or columns.
+    * tag_attr_ext.list: Removed accidental extra characters.
+      Added DW_AT_GNU_dwo_id to dW_TAG_compile_unit.
+    * tag_common.c: The static declaration of the internal tables
+      used to build table source code was not checked so there
+      were some array entries stepped on. fixed.
+    * tag_common.h: Added commentary.  Made the build-time-only
+      static array declaration size macros more explicit.
+2016-09-09  David Anderson
+    * print_die.c: Fixed compiler warnings introduced
+      in previous commit.
+2016-09-08  David Anderson
+    * print_die.c:  Now we use the new dwarf_discr_list()
+      to read DW_AT_discr_list correctly and print it.
+    * tag_attr.c,tag_tree.c: Now we check for too-small and too-large
+      array sizes and stop the build in case of error.
+    * tag_common.h: Now the static array sizes match
+      the lists.
+2016-06-13  David Anderson
+    * sanitized.c: Added static keyword to declaration of
+      no_questionable_chars().
+    * print_frames.c: Added a warning about a useless
+      frame operator (if such appears, only checkedwith -f -vvv).
+      Ensure we print rows generated even if a pointless last row
+      (a break becomes continue).
+    * common.c,dwarfdump.c,tag_attr.c,tag_tree.c,gennames.c:
+      Update version string.
+2016-06-12  David Anderson
+    * common.c,dwarfdump.c,tag_attr.c,tag_tree.c,gennames.c:
+      Update version string.
+2016-06-12  David Anderson
+    * print_frames.c: Using a new frame interface to reduce
+      dwarfdump runtime on frame printing by 10 percent.
+2016-06-10  David Anderson
+    * print_frames.c: Added commentary as the previous comment
+      about printing CFA and other registers having a 'duplicate row'
+      was a bit terse.
+2016-06-08  David Anderson
+    * sanitized.c: Remove trailing whitespace.
+2016-06-08  David Anderson
+    * common.c,dwarfdump.c,tag_attr.c,tag_tree.c:
+      Update version string.
+    * sanitized.c: Only fix strings that have bad
+      characters in them. This improves dwarfdump performance.
+2016-06-01  David Anderson
+    * dwarfdump.c, common.c: Update version string.
+      Use DW_VERSION_DATE_STR instead of DWARFDUMP_VERSION
+    * tag_attr.c, tag_tree.c: Use DW_VERSION_DATE_STR instead
+      of __DATE__ __TIME__
+    * Makefile.in: Tweaked for debian build compatibility.
+2016-05-22  David Anderson
+    * dwarfdump.c, common.c: Update version string.
+2016-05-20  David Anderson
+    * print_frames.c: One test for erroneous length was
+      incorrectly coded, leading to possible crash when encountering
+      erroneous frame information.
+2016-05-19  David Anderson
+    * configure.in: Does a better job reporting configure actions.
+    * configure: Regenerated
+    * dwarfdump.1: Fixed spelling errors and moved ./dwarfdump.conf
+      right one space to get the dot off column 1.
+2016-05-18  David Anderson
+    * print_die.c: Fix typo in error message.
+    * print_frames.c: Do additional checks for incorrect data
+      when printing frame instructions to avoid dwarfdump crash..
+2016-05-12  David Anderson
+    * print_abbrevs.c,print_aranges.c,print_frames.c,print_sections.c:
+      Removed trailing whitespace. Fixed indentation.
+    * tag_attr.c,tag_tree.c: Ensure calls to libdwarf interfaces
+      in these build-time tools check the status returned.
+2016-05-10  David Anderson
+    * print_aranges.c: Minor commentary change and
+      rearranging lines for clarity.
+    * print_die.c: formwith->form with
+      in an error message.
+    * print_frames.c: Now checks for bogus expression block
+      lengths and bogus LEB values. LEB reading functions
+      now here and static functions.
+    * print_sections.c: Moved leb reading functions to print_frames.c
+2016-05-07  David Anderson
+    * dwarfdump.c, common.c: Update version string.
+    * print_frames.c: For local variable added
+      initialization-at-definition.
+2016-05-06  David Anderson
+    * sanitized.c: Fixed trailing whitespace and
+      added 'static' to local function definition.
+2016-05-05  David Anderson
+    * Makefile.in: Added sanitized.o to objects to build.
+    * dwarfdump.1: Document '-x nosanitizestrings'.
+    * dwarfdump.c: Set internal flag based on '-x nosanitizestrings'.
+    * globals.h: add extern for the flag no_sanitize_string_garbage
+      and the sanitized() interface.
+    * print_die.c,print_frames.c,print_lines.c,
+      print_macro.c, print_macros.c : Call sanitized() on some strings.
+    * sanitized.c: Changes control characters int output to %xx
+      uri-style (by default). See '-x nosanitizestrings'.
+2016-05-03  David Anderson
+    * dwarfdump.c: revise print_error_maybe_continue() to
+      print additional useful data.
+    * print_die.c: If dwarf_srcfiles() gets DW_DLV_NO_ENTRY
+      do not print a warning. Normal to have no DW_AT_stmt_list.
+    * print_lines.c: Fix column header 'row' changed to 'lno'.
+      Refine a CHECK message to say a DW_LNE_end_sequence
+      does not exactly match function high address. It is not
+      an error, just something about how the code was emitted.
+2016-04-30  David Anderson
+    * dwarfdump.c, common.c: Update version string.
+2016-04-27  David Anderson
+    * dwarfdump.c, common.c: Update version string.
+2016-04-27  David Anderson
+    * dwarfdump.c: Update version string.
+      Remove a field from printf on error as that duplicates
+      the error number in the error string.
+2016-04-25  David Anderson
+    * esb.c, dwarfdump.c: Fix a couple indent mistakes.
+2016-04-25  David Anderson
+    * esb.h, esb.c: The typedef for 'string' is now gone, it
+      was never helpful..
+    * dwarfdump.c: Remove 'string' use.
+    * dwgetopt.c: Moved test-only function to getopttest.c.
+      Added (void) argument to a the functions with no arguments.
+    * getopttest.c: Repaired failures to to renaming
+      to dwoptind etc and added the test-only
+      function from dwgetopt.c
+    * globals.h: Removed 'string' typedef.
+    * print_die.c,print_frames.c, print_lines.c, print_strings.c,
+      tag_attr.c, tag_tree.c: Removed use of 'string' type, use
+      plain old char*.
+2016-04-21  Carlos Alberto Enciso
+    Printing using the 'esb' module was broken. It seems to work
+    because the default internal buffer size (240), was big enough
+    to receive the resulting output.
+
+    * esb.c, esb.h: Missing prefix 'esb' for 'allocate_more'.
+      Initial buffer size reduced to 16.
+      New function 'esb_open_null_device': open 'null' device.
+      New function 'esb_close_null_device': close 'null' device.
+      New function 'esb_allocate_more_if_needed': allocate more
+      space if required, leaving the contents unchanged, so the
+      caller, does not need to worry about it.
+      There are 2 cases:
+        Windows: use the 'null' device to get the required space
+        UNIX: use a big buffer (512). But if the result is bigger,
+        the original problem will be shown.
+      The function 'esb_append_printf_ap', now takes care of
+      increasing the buffer if needed.
+
+    * dwarfdump.c: In the case of windows, open and close the 'null'
+      device, in order to setup the esb module.
+2016-04-21  Carlos Alberto Enciso
+    * globals.h: Do not define 'string' for a C++ build; it clashes with
+      the 'std::string'.
+    * print_die.c: Minor typo error.
+2016-04-21  Carlos Alberto Enciso
+    * For a WINDOWS version, display the 32/64 bits configuration.
+2016-04-21  Carlos Alberto Enciso
+    * Use the _WIN32 macro to identify a WINDOWS specific code.
+2016-03-17  David Anderson
+    * print_die.c(print_one_die_section): One dieprint_cu_goffset
+      Dwarf_Unsigned->Dwarf_Off.
+2016-03-12  David Anderson
+    * print_abbrevs.c(print_abbrevs): Printed output of an abbrev with code
+      and tag but no attributes was simply wrong. Now fixed.
+      Now avoids printing children flag on a null abbrev (a NUL byte
+      meaning no abbrev is there at all, ending a list of abbrevs).
+    * print_die.c: it was difficult, even with -G -v, to identify
+      the actual offset (in .debug_abbrev) of the abbreviations.
+      Now -i -G -v gives a bit more data on abbreviations.
+2016-03-09  David Anderson
+    * dwarfdump.c,globals.h,print_aranges.c,print_die.c,print_frames.c,
+      print_lines.c,print_macro.c,print_pubnames.c:
+      Remove the global dieprint_cu_offset, use local vars and pass around instead.
+      Ensure the traverse() logic when checking type references do not evaluate
+      references to other sections. Many argument lists got an additional argument or two.
+2016-03-07  David Anderson
+    * dwarfdump.c: Update version string. Added CU_low_address so
+      CU_base_address is properly used only for the DWARF
+      CU 'base address' notion. Print CU_low_address in PRINT_CU_INFO().
+    * common.c: Update version string
+    * globals.h: New macro DROP_ERROR_INSTANCE(d,r,e) improves consistency
+      where we need to drop a Dwarf_Error instance.
+    * print_die.c: Support for CU_low_address. Use DROP_ERROR_INSTANCE
+      where appropriate.
+    * print_frames.c: Use DROP_ERROR_INSTANCE
+      where appropriate.
+2016-03-03  Carlos Alberto-Enciso
+    * dwarfdump.c: Missing '_' just for consistency.
+      Print any harmless errors only the required in command line
+    * globals.h: Unused declaration.
+    * print_die.c: When displaying a DW_AT_type offset error, uses the standard
+      0xdddddddd format.  Wrap to 80 columns, a long line.
+2016-02-17  Carlos Alberto-Enciso
+    * dwarfdump/tag_attr_ext.list,dwarfdump/tag_common.h,
+      dwarfdump/tag_tree_ext.list: Tighten up the list limits
+      and add commentary about the list limits.
+2016-02-14  DavidAnderson
+    * dwarfdump.c,common.c: Updated version strings.
+    * print_die.c,print_strings.c: fixed indent errors.
+2016-02-14  Carlos Alberto-Enciso
+    * tag_attr_ext.list, tag_tree_ext.list: Adding
+      DW_TAG_GNU_template_parameter_pack,DW_TAG_GNU_formal_parameter_pack.
+    * tag_tree.c: Printed wrong name from tag-tree table in
+      a comment.
+    * tag_common.h: Ext tag table rows count was higher than needed.
+      Ext attr table rows increased to 11.
+2016-02-13  David Anderson
+    * dwarfdump.c,globals.h,print_aranges.c,print_die.c,
+      print_frames.c,print_lines.c,print_locs.c,print_macro.c,
+      print_pubnames.c,print_reloc.ckprint_static_funcs.c,
+      print_static_vars.c,print_strings.c,print_types.c,
+      print_weaknames.c: Removed global Dwarf_Error err
+      and provided local Dwarf_Error as needed.
+2016-02-13  David Anderson
+     * configure.in: Add -Wshadow to --enable-shared. Add else and
+       cross-compile [] to the AC_TRY_RUN
+     * configure: Regenerate.
+     * dwarf_tsearchbal.c: Delete shadowed variable p, we use
+       the original instead.
+     * dwarfdump.c: Rename variables to avoid confusing
+       duplicated names (found by -Wshadow). #if 0 the
+       unused function old_get_cu_name(), which should get deleted.
+     * globals.h: Fixed prototypes, #if 0 prototype of
+       the unused function old_get_cu_name().
+     * print_abbrevs.c, print_aranges.c,print_debugfission.c,
+       print_die.c,print_frames.c, print_gdbindex.c, print_lines.c,
+       print_pubnames.c, print_ranges.c, print_sections.c,
+       tag_attr.c, tag_tree.c: Add local Dwarf_Error and
+       rename variables to avoid shadowing confusion.
+2016-02-10  David Anderson
+     * globals.h: Change enum val from std to singledw5.
+       Some compilation environments reserve 'std'.
+     * dwarfdump.c,print_lines.c: Use the new spelling.
+2016-02-10  David Anderson
+     * common.c,dwarfdump.c: Update version string.
+2016-02-07  David Anderson
+     * common.c,dwarfdump.c: Update version string.
+2016-02-06  David Anderson
+     * print_die.c,tag_attr.c,tag_tree.c: Remove trailing whitespace.
+2016-02-06  David Anderson
+     * warningcontrol.h: Defines UNUSEDARG macro as needed.
+     * common.c,dwarf_tsearchbal.c,dwarfdump.c,globals.h,
+       macrocheck.c: Now use UNUSEDARG macro so known-unused
+       args do not cause spurious warnings.
+     * configure.in: Sets HAVE_UNUSED_ATTRIBUTE if the compiler
+       in use supports __attribute ((unused)). So we can have
+       lots of warnings turned on without seeing the warnings
+       we wish to ignore for now.
+     * configure,config.h.in: Regenerated.
+2016-02-06  David Anderson
+     * print_frames.c: Was printing cie index, not fde index,
+       in the fde output. Now prints more sensibly.
+       Now tests do_print_dwarf, the flag it should have been using,
+       to decide whether to print.
+2016-02-02  David Anderson
+     * dwarfdump.c:  Get section sizes so we can do a better
+       sanity check on offsets (ie, call
+       dwarf_get_section_max_offsets_c()).
+       Check DWARF2 macros for sanity just as we do DWARF5
+       macros.  Read DWARF2 macros per-cu, not as a standalone
+       section. Add global data section_high_offsets_global,
+       a struct with all known section sizes.
+     * macrocheck.c: New section size argument for more complete
+       size analysis.
+     * globals.h: Declarations for  section_high_offsets_global.
+     * macrocheck.h: Update prototype of print_macro_statistics().
+     * print_die.c: Drop section-as-a-whole macro reporting for
+       macinfo in favor of reporting per CU.
+     * print_macros.c: Allow for print and check runs (not both
+       at once).
+2016-01-28  David Anderson
+     * dwarfdump.c,common.c: Update version string.
+     * print_die.c: Changed the most frequent global die
+       offset values to print as GOFF=0x...
+       for uniformity with -G and space saving from the
+       string 'global die offset'.
+2016-01-27  David Anderson
+     * print_die.c: Added a helpertree find call on typedieoffset
+       which is really a better check for known signed/unsigned.
+2016-01-26  David Anderson
+     * dwarfdump.c,common.c: Update version string.
+2016-01-26  David Anderson
+     * Makefile.in: Added helpertree.h, and .c.
+     * dwarfdump.c: Added include helpertree.h
+     * print_die.c: Now attempts (harder) to
+       figure out if a constant is really signed or insigned
+       when printing it. Fixes annoyance with printing attributes
+       longer than 27 characters.
+       Unifies a number of printf-style calls into functions, reducing
+       the number of statically visible calls to sprintf.
+       Attempts to remember whether some things are explicitly
+       typed as signed or unsigned.
+     * helpertree.h, helpertree.c: New. Simple use of tsearch
+       to memo-ize signedness.
+2016-01-20
+     * configure.in: Added more compiler optiosn to --enable-wall
+     * configure: Regenerated
+     * dwarf_tsearchbal.c: Fixed warnings.
+     * dwarfdump.c: Fixed warnings.
+     * dwconf.c: Fixed warnings.
+     * dwconf.h: Fixed warnings.
+     * esb.c: Fixed warnings.
+     * globals.h: Fixed warnings.
+     * print_debugfission.c: Fixed warnings.
+     * print_die.c: Fixed warnings.
+     * print_frames.c: Fixed warnings.
+     * print_sections.c: Fixed warnings.
+2016-01-20
+     * macrocheck.c: Remove trailing whitespace.
+     * print_lines.c: Only print line context record
+       if we do_print_dwarf is non-zero. The directory index
+       was printing as 0 in the line_context record. Was a typo
+       in the printf, now fixed.
+2016-01-20
+     * configure.in: Now --enable-wall adds -Wdeclaration-after-statement
+       etc.
+     * configure: Regenerated.
+     * dwarfdump.c: Now all functions have visible prototypes, no ().
+     * dwconf.c: Now local func declared static.
+     * dwgetopt.c: Added include dwgetopt.h. Unused function
+       #if 0 so invisible.
+     * globals.h: Now all functions have prototypes, no ().
+     * macrocheck.c: Removed unused locals. Fixed a
+       dwarf_twalk call to *tree (not just tree).
+     * naming.c: Added include naming.h.
+     * print_gdbindex.c: Made local function static.
+     * tag_attr.c,tag_common.c: Made local function static.
+2016-01-19  David Anderson
+     * dwarf_tsearchbal.c: Deleted the  unused function rotatex().
+     * dwarfdump.c: Remove duplicate trailing ;
+     * esb.c(esb_append): Straighten out the logic
+       and avoid doing append if the to-be-appended
+       string is empty.
+     * globals.h Add ifdef __cplusplus for extern "C".
+     * esb.h,naming.h: Idempotent #ifndef and __cplusplus extern "C" added.
+     * print_frames.c: Ensure local var starts at zero.
+       Move statement to below declarations.
+     * print_lines.c: Ensure declarations before executable statements.
+2016-01-19  David Anderson
+     * print_frames.c: Fix trailing whitespace and indentation.
+2016-01-19  David Anderson
+     * print_die.c,tag_tree.c: Change statement ;; by removing
+       second semicolon.
+2016-01-17  David Anderson
+     * common.c: Update version string
+     * dwarfdump.c: Made reset_overall_CU_error_data() a global.
+       We now try to show CU name etc on case there is an error
+       reading frame data. Update version strin.
+       Added DEBUG_FRAME DEBUG_FRAME_EH to the PRINT_CU_INFO() tests.
+       New function: load_CU_error_data().
+     * print_frames.c: Now uses a local Dwarf_Error
+       in a few places (CU names for frames) instead
+       of the global 'err' so we do not get the errors
+       mixed up.
+       We now try to show CU name etc on case there is an error
+       reading frame data.
+2016-01-14  David Anderson
+     * common.c: Update version string.
+     * dwarfdump.c: Update version string. Include macrocheck.h.
+       Delete one accidental blank line.
+     * dwarf_tsearchbal.c: Added comment about compiler warning.
+     * dwarf_macrocheck.c: Added missing return statement.
+       Removed trailing whitespace. Fixed broken qsort_compare()
+     * macrocheck.h: Fixed trailing whitespace.
+     * print_abbrevs.c: Generalized an attribute count warning
+       a bit (see GENERAL_MAX_ATTRIB_COUNT). Fixed the code
+       handling the abbrev_array to be correct and a bit simpler.
+       Added new abbreviations tests.
+     * print_die.c: Include macrocheck.h. Fix trailing whitespace.
+2016-01-12  David Anderson
+     * common.c: Update version string.
+     * dwarfdump.c: Update version string.
+     * print_abbrevs.c: If an abbreviation number is a bit
+       goofy, accommodate it so we do not write to
+       memory we did not allocate.  It will
+       be caught a bit later in the run as an invalid DIE
+       or abbreviation.
+     * print_die.c: When we switch sections inside a DIE print
+       save and restore current_section_id to get the best
+       reporting on errors/checks.
+2016-01-12  David Anderson
+     * common.c,dwarfdump.c: Update version string.
+2016-01-12  David Anderson
+     * Makefile.in: Adding macrocheck.h, and .c.  Adding
+       selftest of macrocheck.c.
+     * dwarfdump.c: Now handles imported DWARF5 macros
+       and adds support for -kw for macro section checking.
+     * globals.h: Adding check_macros flag and macro_check_tree declaration
+       and print_macros_5style_this_cu() declaration..
+     * print_die.c: Now prints imported macros using
+       print_macros_5style_this_cu().
+     * print_macro.c: Now deals with imported macro units using
+       macrocheck.c and .h.  Fixed bug for DW_MACRO_define/undef
+       where we did improper string validity check.
+

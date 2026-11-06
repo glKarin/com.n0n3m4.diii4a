@@ -32,7 +32,7 @@ namespace {
 #ifdef _GLES //karin: only GL_RGBA8 for render buffer
         fbo->AddColorRenderBuffer( 0, GL_RGBA8 );
 #else
-        fbo->AddColorRenderBuffer( 0, GL_RGB8 );
+		fbo->AddColorRenderBuffer( 0, GL_RGB8 );
 #endif
 		fbo->AddDepthStencilRenderBuffer( GL_DEPTH24_STENCIL8 );
 	}
@@ -68,7 +68,7 @@ void RenderBackend::Shutdown() {
 	if (!initialized)
 		return;
 	qglDeleteBuffers( 3, lightgemPbos );
-
+	
 	tonemapStage.Shutdown();
 	frobOutlineStage.Shutdown();
 	lightPassesStage.Shutdown();
@@ -80,6 +80,7 @@ void RenderBackend::Shutdown() {
 }
 
 void RenderBackend::DrawView( const viewDef_t *viewDef, bool colorIsBackground ) {
+	TRACE_CPU_SCOPE_FORMAT( "DrawView", "viewCount = %d\nID = %d", viewDef->viewCount, viewDef->renderView.viewID );
 	TRACE_GL_SCOPE( "DrawView" );
 
 	// skip render bypasses everything that has models, assuming
@@ -168,7 +169,7 @@ void RenderBackend::DrawLightgem( const viewDef_t *viewDef, byte *lightgemData )
 	FrameBuffer *renderFbo = frameBuffers->currentRenderFbo;
 	frameBuffers->currentRenderFbo = lightgemFbo;
 	lightgemFbo->Bind();
-
+	
 	DrawView( viewDef, false );
 
 	{
@@ -179,7 +180,7 @@ void RenderBackend::DrawLightgem( const viewDef_t *viewDef, byte *lightgemData )
 #ifdef _GLES //karin: RGBA
 		qglReadPixels( 0, 0, DARKMOD_LG_RENDER_WIDTH, DARKMOD_LG_RENDER_WIDTH, GL_RGBA, GL_UNSIGNED_BYTE, nullptr );
 #else
-    	qglReadPixels( 0, 0, DARKMOD_LG_RENDER_WIDTH, DARKMOD_LG_RENDER_WIDTH, GL_RGB, GL_UNSIGNED_BYTE, nullptr );
+		qglReadPixels( 0, 0, DARKMOD_LG_RENDER_WIDTH, DARKMOD_LG_RENDER_WIDTH, GL_RGB, GL_UNSIGNED_BYTE, nullptr );
 #endif
 	}
 
@@ -333,7 +334,7 @@ void RenderBackend::DrawShadowsAndInteractions( const viewDef_t *viewDef ) {
 	for ( viewLight_t *vLight = viewDef->viewLights; vLight; vLight = vLight->next ) {
 		if ( !interactionStage.ShouldDrawLight( vLight ) )
 			continue;
-
+	
 		if ( vLight->shadows == LS_MAPS ) {
 			if ( !singlePassShadowMaps ) {
 				DrawInteractionsWithShadowMapping( viewDef, vLight );

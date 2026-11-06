@@ -5,9 +5,9 @@ ID_INLINE void Writef(idFile *file, const char *fmt, ...)
 {
     va_list argptr;
 
-            va_start(argptr, fmt);
-    file->VPrintf(fmt, argptr);
-            va_end(argptr);
+	va_start(argptr, fmt);
+	file->VPrintf(fmt, argptr);
+	va_end(argptr);
 
 }
 
@@ -26,9 +26,9 @@ ID_INLINE void Writefln(idFile *file, const char *fmt, ...)
 {
     va_list argptr;
 
-            va_start(argptr, fmt);
-    file->VPrintf(fmt, argptr);
-            va_end(argptr);
+	va_start(argptr, fmt);
+	file->VPrintf(fmt, argptr);
+	va_end(argptr);
 
     Writeln(file);
 }
@@ -100,7 +100,11 @@ void idMd5MeshFile::Write(const char *path) const
         {
             const md5meshVert_t &vert = mesh.verts[m];
             WriteIndent(file);
+#ifdef _SPLASHDAMAGE //karin: add md5mesh vert color
+            Writefln(file, "vert %d ( %.10f %.10f ) %d %d (1,1,1,1)", m, vert.uv[0], vert.uv[1], vert.weightIndex, vert.weightElem);
+#else
             Writefln(file, "vert %d ( %.10f %.10f ) %d %d", m, vert.uv[0], vert.uv[1], vert.weightIndex, vert.weightElem);
+#endif
         }
         Writeln(file);
 
@@ -221,6 +225,17 @@ bool idMd5MeshFile::Parse(const char *path)
 
             vert->weightIndex	= parser.ParseInt();
             vert->weightElem	= parser.ParseInt();
+#ifdef _SPLASHDAMAGE //karin: md5mesh version 11 vertex color
+			parser.ReadToken(&token);
+			if(!idStr::Cmp(token, "(")) // ( 1 1 1 1 )
+			{
+				parser.SkipUntilString(")");
+			}
+			else
+			{
+				parser.UnreadToken(&token);
+			}
+#endif
         }
 
         // parse tris

@@ -1,0 +1,33 @@
+
+David Anderson, September 20, 2010
+Updated July 22, 2018
+
+The dwarfgen application is intended as both a vehicle
+for testing dwarf-generation by libdwarf and as an example
+of how one uses libdwarf to generate DWARF.
+In addition, it should be useful as a test vehicle for
+evaluating future changes to the DWARF standard.
+
+It is necessary as a test-vehicle so that the libdwarf
+producer code can be updated to allow more recent features
+of DWARF to be supported while trying to guarantee current
+producer code users are correctly supported.
+
+By default dwarfgen produces a fake a.out. By that we mean
+that no relocation sections are written.  Instead, relocations
+are processed directly by dwarfgen.
+Perhaps at some point a more a.out-like output will be optionally
+supported.
+
+In its 2018 form the code calling producer functions
+leaks memory as the return values usually need to be
+dealloc'd, but only after the code is generated.
+An example from -fsanitize=
+is
+Direct leak of 2688 byte(s) in 28 object(s) allocated from:
+    #0 0x7f51fb2f9602 in malloc (/usr/lib/x86_64-linux-gnu/libasan.so.2+0x98602)
+    #1 0x5873d9 in _dwarf_p_get_alloc /home/davea/dwarf/regressiontests/../code/libdwarf/pro_alloc.c:76
+    #2 0x55cdaa in dwarf_add_AT_any_value_uleb /home/davea/dwarf/regressiontests/../code/libdwarf/pro_forms.c:1277
+    #3 0x495d4a in AddAttrToDie(Dwarf_P_Debug_s*, IRepresentation&, IRCUdata&, Dwarf_P_Die_s*, IRDie&, IRAttr&) /home/davea/dwarf/regressiontests/../code/dwarfgen/irepattrtodbg.cc:176
+
+

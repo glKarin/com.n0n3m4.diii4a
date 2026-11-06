@@ -40,7 +40,7 @@ void GL_Uniform1fv(GLint location, const GLfloat *value)
     HARM_CHECK_SHADER("GL_Uniform1fv");
 
     HARM_CHECK_SHADER_INDEX(location);
-    qglUniform1fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
+    qglUniform1fv(*(GLint *) ((char *) backEnd.glState.currentProgram + location), 1, value);
 
     HARM_CHECK_SHADER_ERROR("GL_Uniform1fv");
 }

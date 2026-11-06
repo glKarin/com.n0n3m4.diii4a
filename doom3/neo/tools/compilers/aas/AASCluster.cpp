@@ -96,6 +96,7 @@ idAASCluster::FloodClusterAreas_r
 */
 bool idAASCluster::FloodClusterAreas_r(int areaNum, int clusterNum)
 {
+#if !defined(_SPLASHDAMAGE) //karin: only used in tools
 	aasArea_t *area;
 	aasFace_t *face;
 	int faceNum, i;
@@ -157,6 +158,10 @@ bool idAASCluster::FloodClusterAreas_r(int areaNum, int clusterNum)
 			return false;
 		}
 	}
+#else
+	// TODO
+	common->Error("Disable idAASCluster::FloodClusterAreas_r(%d, %d)", areaNum, clusterNum);
+#endif
 
 	return true;
 }
@@ -430,6 +435,7 @@ idAASCluster::RemoveInvalidPortals
 */
 void idAASCluster::RemoveInvalidPortals(void)
 {
+#if !defined(_SPLASHDAMAGE) //karin: only used in tools
 	int i, j, k, face1Num, face2Num, otherAreaNum, numOpenAreas, numInvalidPortals;
 	aasFace_t *face1, *face2;
 
@@ -476,6 +482,10 @@ void idAASCluster::RemoveInvalidPortals(void)
 	}
 
 	common->Printf("\r%6d invalid portals removed\n", numInvalidPortals);
+#else
+	// TODO
+	common->Error("Disable idAASReach::RemoveInvalidPortals()");
+#endif
 }
 
 /*

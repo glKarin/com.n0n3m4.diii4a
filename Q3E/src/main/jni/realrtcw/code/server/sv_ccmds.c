@@ -199,14 +199,14 @@ static void SV_Map_f( void ) {
 		//buffer = Hunk_AllocateTempMemory(size);
 		FS_ReadFile( savemap, (void **)&buffer );
 
-		if ( Q_stricmp( savemap, "save/current.svg" ) != 0 ) {
+		if ( Q_stricmp( savemap, "save/current_realrtcw.svg" ) != 0 ) {
 			// copy it to the current savegame file
-			FS_WriteFile( "save/current.svg", buffer, size );
+			FS_WriteFile( "save/current_realrtcw.svg", buffer, size );
 			// make sure it is the correct size
-			csize = FS_ReadFile( "save/current.svg", NULL );
+			csize = FS_ReadFile( "save/current_realrtcw.svg", NULL );
 			if ( csize != size ) {
 				Hunk_FreeTempMemory( buffer );
-				FS_Delete( "save/current.svg" );
+				FS_Delete( "save/current_realrtcw.svg" );
 // TTimo
 #ifdef __linux__
 				Com_Error( ERR_DROP, "Unable to save game.\n\nPlease check that you have at least 5mb free of disk space in your home directory." );
@@ -396,7 +396,7 @@ static void SV_MapRestart_f( void ) {
 	// Ridah, check for loading a saved game
 	if ( Cvar_VariableIntegerValue( "savegame_loading" ) ) {
 		// open the current savegame, and find out what the time is, everything else we can ignore
-		char *savemap = "save/current.svg";
+		char *savemap = "save/current_realrtcw.svg";
 		byte *buffer;
 		int size, savegameTime;
 
@@ -555,9 +555,9 @@ void    SV_LoadGame_f( void ) {
 		// check mapname
 		if ( !Q_stricmp( mapname, sv_mapname->string ) ) {    // same
 
-			if ( Q_stricmp( filename, "save/current.svg" ) != 0 ) {
+			if ( Q_stricmp( filename, "save/current_realrtcw.svg" ) != 0 ) {
 				// copy it to the current savegame file
-				FS_WriteFile( "save/current.svg", buffer, size );
+				FS_WriteFile( "save/current_realrtcw.svg", buffer, size );
 			}
 
 			Hunk_FreeTempMemory( buffer );

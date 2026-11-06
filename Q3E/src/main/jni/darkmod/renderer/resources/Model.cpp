@@ -676,6 +676,9 @@ void idRenderModelStatic::FinishSurfaces() {
 
 			newSurf.material = surf->material;
 			newSurf.geometry = newTri;
+			// stgatilov: otherwise it is left uninitialized
+			// which is sometimes negative and removed by RemoveOverlaySurfacesFromModel
+			newSurf.id = 1000000 + surf->id;
 
 			AddSurface( newSurf );
 		}

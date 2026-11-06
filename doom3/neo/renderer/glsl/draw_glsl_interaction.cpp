@@ -1,11 +1,3 @@
-extern const float zero[] = { 0.0f };
-extern const float one[] = { 1.0f };
-extern const float negOne[] = { -1.0f };
-#ifdef COLOR_MODULATE_IS_NORMALIZED
-extern const float oneModulate[] = { 1.0f / 255.0f };
-extern const float negOneModulate[] = { -1.0f / 255.0f };
-#endif
-
 /*
 =========================================================================================
 
@@ -168,6 +160,10 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 	if (!surf) {
 		return;
 	}
+
+#ifdef _SPLASHDAMAGExxx //karin: megatexture interaction, move to if stage's lighting == SL_AMBIENT in RB_CreateSingleDrawInteractions
+	RB_GLSL_CreateDrawMegaTextureInteractions(surf);
+#endif
 
 	// perform setup here that will be constant for all interactions
 	GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE |
@@ -684,7 +680,7 @@ void RB_GLSL_DrawInteractions(void)
 	float clearColor[4];
 	if(ShadowMapping)
 	{
-		RB_getClearColor(clearColor);
+		RB_GetClearColor(clearColor);
 		if(r_dumpShadowMapFrontEnd)
 		{
 			r_dumpShadowMap = true;

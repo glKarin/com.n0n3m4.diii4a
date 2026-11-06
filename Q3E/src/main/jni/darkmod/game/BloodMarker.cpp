@@ -22,6 +22,8 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #include "BloodMarker.h"
 #include "StimResponse/Stim.h"
 
+#include "game/LightEstimateSystem.h"
+
 const idEventDef EV_GenerateBloodSplat("_TDM_GenerateBloodSplat", EventArgs(), EV_RETURNS_VOID, "internal");
 
 CLASS_DECLARATION( idEntity, CBloodMarker )
@@ -33,6 +35,15 @@ void CBloodMarker::Event_GenerateBloodSplat()
 	idVec3 dir = gameLocal.GetGravity();
 	dir.Normalize();
 
+	ProjectDecalParams params;
+	params.origin = GetPhysics()->GetOrigin();
+	params.dir = dir;
+	params.depth = 3.0f;
+	params.parallel = false;
+	params.size = _size;
+	params.angle = _angle;
+	params.randomizeAngle = false;
+
 	if (!_isFading)
 	{
 		// Read the stay duration from the material info
@@ -40,7 +51,8 @@ void CBloodMarker::Event_GenerateBloodSplat()
 
 		if (material != NULL)
 		{
-			gameLocal.ProjectDecal(GetPhysics()->GetOrigin(), dir, 3, false, _size, _bloodSplat, _angle);
+			params.material = _bloodSplat;
+			gameLocal.ProjectDecal( params );
 
 			PostEventMS(&EV_GenerateBloodSplat, material->GetDecalInfo().stayTime);
 		}
@@ -52,7 +64,8 @@ void CBloodMarker::Event_GenerateBloodSplat()
 	else
 	{
 		// We're fading, just spawn one last decal and schedule our removal
-		gameLocal.ProjectDecal(GetPhysics()->GetOrigin(), dir, 3, false, _size, _bloodSplatFading, _angle);
+		params.material = _bloodSplatFading;
+		gameLocal.ProjectDecal( params );
 
 		// grayman #3075 - notify the AI who spilled the blood that
 		// we're going away.
@@ -64,6 +77,29 @@ void CBloodMarker::Event_GenerateBloodSplat()
 		}
 
 		PostEventMS(&EV_Remove, 1000);
+	}
+
+	if ( LightEstimateSystem *les = gameLocal.m_LightEstimateSystem ) {
+		// generate explicit samples for LES
+		idVec3 axisU, axisV;
+		params.dir.NormalVectors( axisU, axisV );
+
+		idList<idVec3> positions;
+		for ( int i = 0; i <= 2; i++ ) {
+			float radius = (params.size * 0.5f) * i / 2;
+			int n = 1 + 6 * i;
+			for ( int i = 0; i < n; i++ ) {
+				float s, c;
+				idMath::SinCos( idMath::TWO_PI * i / n, s, c);
+				positions.Append( params.origin + radius * ( axisU * c + axisV * s ) );
+			}
+		}
+
+		// transform to model coords
+		for ( idVec3 &point : positions )
+			point = ( point - GetPhysics()->GetOrigin() ) * GetPhysics()->GetAxis().Transpose();
+
+		les->SetExplicitSamplingForEntity( this, &positions );
 	}
 }
 

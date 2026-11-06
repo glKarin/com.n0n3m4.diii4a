@@ -1,0 +1,700 @@
+
+.debug_info
+
+CU_HEADER:
+  cu_header_length = 0x00000e80 3712
+  version_stamp    = 0x0005     5
+  abbrev_offset    = 0x00000000 0
+  address_size     = 0x08       8
+  offset_size      = 0x04       4
+  cu_type          = 0x01       DW_UT_compile
+
+COMPILE_UNIT<header overall offset = 0x00000000>:
+< 0><0x0000000c>  DW_TAG_compile_unit <abbrev 22>
+  dwarf_srcfiles() returned strings. Count = 8.
+  [0] /home/davea/dwarf/code/test/testuriLE64ELf.c
+  [1] /home/davea/dwarf/code/test/testuriLE64ELf.c
+  [2] /home/davea/dwarf/code/test/../src/lib/libdwarf/libdwarf.h
+  [3] /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+  [4] /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+  [5] /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_esb.h
+  [6] /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h
+  [7] /usr/include/stdio.h
+                    DW_AT_producer              GNU C17 11.3.0 -mtune=generic -march=x86-64 -gdwarf-5 -fasynchronous-unwind-tables -fstack-protector-strong -fstack-clash-protection -fcf-protection
+                    DW_AT_language              DW_LANG_C11
+                    DW_AT_name                  testuriLE64ELf.c
+                    DW_AT_comp_dir              /home/davea/dwarf/code/test
+                    DW_AT_low_pc                0x00000000
+                    DW_AT_high_pc               <offset-from-lowpc> 913 <highpc: 0x00000391>
+                    DW_AT_stmt_list             0x00000000
+
+LOCAL_SYMBOLS:
+< 1><0x0000002e>    DW_TAG_typedef <abbrev 6>
+                      DW_AT_name                  Dwarf_Unsigned
+                      DW_AT_decl_file             0x00000002 /home/davea/dwarf/code/test/../src/lib/libdwarf/libdwarf.h
+                      DW_AT_decl_line             0x000000d1
+                      DW_AT_decl_column           0x0000001c
+                      DW_AT_type                  <0x0000003a> Refers to: long long unsigned int
+< 1><0x0000003a>    DW_TAG_base_type <abbrev 4>
+                      DW_AT_byte_size             8
+                      DW_AT_encoding              DW_ATE_unsigned
+                      DW_AT_name                  long long unsigned int
+< 1><0x00000041>    DW_TAG_base_type <abbrev 4>
+                      DW_AT_byte_size             8
+                      DW_AT_encoding              DW_ATE_signed
+                      DW_AT_name                  long long int
+< 1><0x00000048>    DW_TAG_typedef <abbrev 6>
+                      DW_AT_name                  Dwarf_Off
+                      DW_AT_decl_file             0x00000002 /home/davea/dwarf/code/test/../src/lib/libdwarf/libdwarf.h
+                      DW_AT_decl_line             0x000000d3
+                      DW_AT_decl_column           0x0000001c
+                      DW_AT_type                  <0x0000003a> Refers to: long long unsigned int
+< 1><0x00000054>    DW_TAG_typedef <abbrev 6>
+                      DW_AT_name                  Dwarf_Addr
+                      DW_AT_decl_file             0x00000002 /home/davea/dwarf/code/test/../src/lib/libdwarf/libdwarf.h
+                      DW_AT_decl_line             0x000000d4
+                      DW_AT_decl_column           0x0000001c
+                      DW_AT_type                  <0x0000003a> Refers to: long long unsigned int
+< 1><0x00000060>    DW_TAG_typedef <abbrev 6>
+                      DW_AT_name                  Dwarf_Bool
+                      DW_AT_decl_file             0x00000002 /home/davea/dwarf/code/test/../src/lib/libdwarf/libdwarf.h
+                      DW_AT_decl_line             0x000000d7
+                      DW_AT_decl_column           0x0000001c
+                      DW_AT_type                  <0x0000006c> Refers to: int
+< 1><0x0000006c>    DW_TAG_base_type <abbrev 23>
+                      DW_AT_byte_size             4
+                      DW_AT_encoding              DW_ATE_signed
+                      DW_AT_name                  int
+< 1><0x00000073>    DW_TAG_base_type <abbrev 4>
+                      DW_AT_byte_size             2
+                      DW_AT_encoding              DW_ATE_unsigned
+                      DW_AT_name                  short unsigned int
+< 1><0x0000007a>    DW_TAG_base_type <abbrev 4>
+                      DW_AT_byte_size             1
+                      DW_AT_encoding              DW_ATE_unsigned_char
+                      DW_AT_name                  unsigned char
+< 1><0x00000081>    DW_TAG_base_type <abbrev 4>
+                      DW_AT_byte_size             4
+                      DW_AT_encoding              DW_ATE_unsigned
+                      DW_AT_name                  unsigned int
+< 1><0x00000088>    DW_TAG_base_type <abbrev 4>
+                      DW_AT_byte_size             8
+                      DW_AT_encoding              DW_ATE_unsigned
+                      DW_AT_name                  long unsigned int
+< 1><0x0000008f>    DW_TAG_base_type <abbrev 4>
+                      DW_AT_byte_size             1
+                      DW_AT_encoding              DW_ATE_signed_char
+                      DW_AT_name                  char
+< 1><0x00000096>    DW_TAG_const_type <abbrev 24>
+                      DW_AT_type                  <0x0000008f> Refers to: char
+< 1><0x0000009b>    DW_TAG_pointer_type <abbrev 5>
+                      DW_AT_byte_size             8
+                      DW_AT_type                  <0x00000096>
+< 1><0x000000a0>    DW_TAG_pointer_type <abbrev 5>
+                      DW_AT_byte_size             8
+                      DW_AT_type                  <0x0000008f> Refers to: char
+< 1><0x000000a5>    DW_TAG_structure_type <abbrev 17>
+                      DW_AT_byte_size             48
+                      DW_AT_decl_file             0x00000003
+                      DW_AT_decl_line             0x00000029
+                      DW_AT_decl_column           0x00000009
+                      DW_AT_sibling               <0x000000f7> Refers to: Bucket_Data
+< 2><0x000000ac>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  bFlag
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x0000002a
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  0
+< 2><0x000000b9>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  name
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x0000002b
+                        DW_AT_decl_column           0x00000011
+                        DW_AT_type                  <0x0000009b>
+                        DW_AT_data_member_location  8
+< 2><0x000000c6>      DW_TAG_member <abbrev 18>
+                        DW_AT_name                  key
+                        DW_AT_decl_file             0x00000003
+                        DW_AT_decl_line             0x0000002c
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000054> Refers to: Dwarf_Addr
+                        DW_AT_data_member_location  16
+< 2><0x000000d1>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  base
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x0000002f
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000054> Refers to: Dwarf_Addr
+                        DW_AT_data_member_location  24
+< 2><0x000000de>      DW_TAG_member <abbrev 18>
+                        DW_AT_name                  low
+                        DW_AT_decl_file             0x00000003
+                        DW_AT_decl_line             0x00000030
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000054> Refers to: Dwarf_Addr
+                        DW_AT_data_member_location  32
+< 2><0x000000e9>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  high
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x00000031
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000054> Refers to: Dwarf_Addr
+                        DW_AT_data_member_location  40
+< 1><0x000000f7>    DW_TAG_typedef <abbrev 6>
+                      DW_AT_name                  Bucket_Data
+                      DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                      DW_AT_decl_line             0x00000032
+                      DW_AT_decl_column           0x00000003
+                      DW_AT_type                  <0x000000a5>
+< 1><0x00000103>    DW_TAG_structure_type <abbrev 25>
+                      DW_AT_name                  bucket
+                      DW_AT_byte_size             97944
+                      DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                      DW_AT_decl_line             0x0000003d
+                      DW_AT_decl_column           0x00000010
+                      DW_AT_sibling               <0x0000014b>
+< 2><0x00000113>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  nEntries
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x0000003e
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000006c> Refers to: int
+                        DW_AT_data_member_location  0
+< 2><0x00000120>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  b_number
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x0000003f
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x00000088> Refers to: long unsigned int
+                        DW_AT_data_member_location  8
+< 2><0x0000012d>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  Entries
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x00000040
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000014b>
+                        DW_AT_data_member_location  16
+< 2><0x0000013a>      DW_TAG_member <abbrev 26>
+                        DW_AT_name                  pNext
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x00000041
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000015c>
+                        DW_AT_data_member_location  97936
+< 1><0x0000014b>    DW_TAG_array_type <abbrev 10>
+                      DW_AT_type                  <0x000000f7> Refers to: Bucket_Data
+                      DW_AT_sibling               <0x0000015c>
+< 2><0x00000154>      DW_TAG_subrange_type <abbrev 19>
+                        DW_AT_type                  <0x00000088> Refers to: long unsigned int
+                        DW_AT_upper_bound           2039
+< 1><0x0000015c>    DW_TAG_pointer_type <abbrev 5>
+                      DW_AT_byte_size             8
+                      DW_AT_type                  <0x00000103> Refers to: bucket
+< 1><0x00000161>    DW_TAG_typedef <abbrev 6>
+                      DW_AT_name                  Bucket
+                      DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                      DW_AT_decl_line             0x00000042
+                      DW_AT_decl_column           0x00000005
+                      DW_AT_type                  <0x00000103> Refers to: bucket
+< 1><0x0000016d>    DW_TAG_structure_type <abbrev 17>
+                      DW_AT_byte_size             64
+                      DW_AT_decl_file             0x00000003
+                      DW_AT_decl_line             0x00000046
+                      DW_AT_decl_column           0x00000009
+                      DW_AT_sibling               <0x000001dd>
+< 2><0x00000174>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  kind
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x00000047
+                        DW_AT_decl_column           0x00000009
+                        DW_AT_type                  <0x0000006c> Refers to: int
+                        DW_AT_data_member_location  0
+< 2><0x00000181>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  bg_number
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x00000048
+                        DW_AT_decl_column           0x00000013
+                        DW_AT_type                  <0x00000088> Refers to: long unsigned int
+                        DW_AT_data_member_location  8
+< 2><0x0000018e>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  lower
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x00000049
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000054> Refers to: Dwarf_Addr
+                        DW_AT_data_member_location  16
+< 2><0x0000019b>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  upper
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x0000004a
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000054> Refers to: Dwarf_Addr
+                        DW_AT_data_member_location  24
+< 2><0x000001a8>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  pFirst
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x0000004b
+                        DW_AT_decl_column           0x00000012
+                        DW_AT_type                  <0x000001dd>
+                        DW_AT_data_member_location  32
+< 2><0x000001b5>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  pLast
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x0000004c
+                        DW_AT_decl_column           0x00000012
+                        DW_AT_type                  <0x000001dd>
+                        DW_AT_data_member_location  40
+< 2><0x000001c2>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  pHead
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x0000004d
+                        DW_AT_decl_column           0x0000000d
+                        DW_AT_type                  <0x000001e2>
+                        DW_AT_data_member_location  48
+< 2><0x000001cf>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  pTail
+                        DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                        DW_AT_decl_line             0x0000004e
+                        DW_AT_decl_column           0x0000000d
+                        DW_AT_type                  <0x000001e2>
+                        DW_AT_data_member_location  56
+< 1><0x000001dd>    DW_TAG_pointer_type <abbrev 5>
+                      DW_AT_byte_size             8
+                      DW_AT_type                  <0x000000f7> Refers to: Bucket_Data
+< 1><0x000001e2>    DW_TAG_pointer_type <abbrev 5>
+                      DW_AT_byte_size             8
+                      DW_AT_type                  <0x00000161> Refers to: Bucket
+< 1><0x000001e7>    DW_TAG_typedef <abbrev 6>
+                      DW_AT_name                  Bucket_Group
+                      DW_AT_decl_file             0x00000003 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_checkutil.h
+                      DW_AT_decl_line             0x0000004f
+                      DW_AT_decl_column           0x00000003
+                      DW_AT_type                  <0x0000016d>
+< 1><0x000001f3>    DW_TAG_enumeration_type <abbrev 27>
+                      DW_AT_name                  line_flag_type_e
+                      DW_AT_encoding              DW_ATE_unsigned
+                      DW_AT_byte_size             4
+                      DW_AT_type                  <0x00000081> Refers to: unsigned int
+                      DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                      DW_AT_decl_line             0x00000025
+                      DW_AT_decl_column           0x00000006
+                      DW_AT_sibling               <0x0000021e> Refers to: section_high_offsets_s
+< 2><0x00000205>      DW_TAG_enumerator <abbrev 13>
+                        DW_AT_name                  singledw5
+                        DW_AT_const_value           0
+< 2><0x0000020b>      DW_TAG_enumerator <abbrev 28>
+                        DW_AT_name                  s2l
+                        DW_AT_const_value           1
+< 2><0x00000211>      DW_TAG_enumerator <abbrev 13>
+                        DW_AT_name                  orig
+                        DW_AT_const_value           2
+< 2><0x00000217>      DW_TAG_enumerator <abbrev 13>
+                        DW_AT_name                  orig2l
+                        DW_AT_const_value           3
+< 1><0x0000021e>    DW_TAG_structure_type <abbrev 20>
+                      DW_AT_name                  section_high_offsets_s
+                      DW_AT_byte_size             160 (-96)
+                      DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                      DW_AT_decl_line             0x00000052
+                      DW_AT_decl_column           0x00000008
+                      DW_AT_sibling               <0x0000032f> Refers to: glflags_s
+< 2><0x0000022a>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_info_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000053
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  0
+< 2><0x00000237>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_abbrev_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000054
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  8
+< 2><0x00000244>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_line_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000055
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  16
+< 2><0x00000251>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_loc_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000056
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  24
+< 2><0x0000025e>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_aranges_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000057
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  32
+< 2><0x0000026b>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_macinfo_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000058
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  40
+< 2><0x00000278>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_pubnames_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000059
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  48
+< 2><0x00000285>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_str_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000005a
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  56
+< 2><0x00000292>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_frame_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000005b
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  64
+< 2><0x0000029f>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_ranges_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000005c
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  72
+< 2><0x000002ac>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_pubtypes_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000005d
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  80
+< 2><0x000002b9>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_types_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000005e
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  88
+< 2><0x000002c6>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_macro_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000005f
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  96
+< 2><0x000002d3>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_str_offsets_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000060
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  104
+< 2><0x000002e0>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_sup_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000061
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  112
+< 2><0x000002ed>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_cu_index_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000062
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  120
+< 2><0x000002fa>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_tu_index_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000063
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  128 (-128)
+< 2><0x00000307>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_names_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000064
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  136 (-120)
+< 2><0x00000314>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_loclists_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000065
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  144 (-112)
+< 2><0x00000321>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  debug_rnglists_size
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000066
+                        DW_AT_decl_column           0x00000014
+                        DW_AT_type                  <0x0000002e> Refers to: Dwarf_Unsigned
+                        DW_AT_data_member_location  152 (-104)
+< 1><0x0000032f>    DW_TAG_structure_type <abbrev 29>
+                      DW_AT_name                  glflags_s
+                      DW_AT_byte_size             2272
+                      DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                      DW_AT_decl_line             0x0000006c
+                      DW_AT_decl_column           0x00000008
+                      DW_AT_sibling               <0x00000b0a>
+< 2><0x0000033d>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_use_old_dwarf_loclist
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000076
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  0
+< 2><0x0000034a>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_line_flag_selection
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000077
+                        DW_AT_decl_column           0x0000001b
+                        DW_AT_type                  <0x000001f3> Refers to: line_flag_type_e
+                        DW_AT_data_member_location  4
+< 2><0x00000357>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_abbrev_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000079
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  8
+< 2><0x00000364>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_aranges_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000007a
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  12
+< 2><0x00000371>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_debug_names_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000007b
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  16
+< 2><0x0000037e>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_eh_frame_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000007c
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  20
+< 2><0x0000038b>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_frame_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000007d
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  24
+< 2><0x00000398>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_gdbindex_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000007e
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  28
+< 2><0x000003a5>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_gnu_debuglink_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000007f
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  32
+< 2><0x000003b2>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_debug_gnu_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000080
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  36
+< 2><0x000003bf>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_debug_sup_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000081
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  40
+< 2><0x000003cc>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_info_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000082
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  44
+< 2><0x000003d9>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_line_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000083
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  48
+< 2><0x000003e6>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_no_follow_debuglink
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000084
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  52
+< 2><0x000003f3>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_line_print_pc
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000085
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  56
+< 2><0x00000400>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_line_skeleton_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000086
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  60
+< 2><0x0000040d>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_loc_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000087
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  64
+< 2><0x0000041a>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_macinfo_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000088
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  68
+< 2><0x00000427>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_macro_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000089
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  72
+< 2><0x00000434>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_pubnames_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000008a
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  76
+< 2><0x00000441>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_debug_addr_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000008b
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  80
+< 2><0x0000044e>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_ranges_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000008c
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  84
+< 2><0x0000045b>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_reloc_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000008d
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  88
+< 2><0x00000468>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_static_func_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000008e
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  92
+< 2><0x00000475>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_static_var_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000008f
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  96
+< 2><0x00000482>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_string_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000090
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  100
+< 2><0x0000048f>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_pubtypes_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000091
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  104
+< 2><0x0000049c>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_types_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000092
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  108
+< 2><0x000004a9>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_weakname_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000093
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  112
+< 2><0x000004b6>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_header_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000095
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  116
+< 2><0x000004c3>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_section_groups_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000096
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  120
+< 2><0x000004d0>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_producer_children_flag
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x00000099
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  124
+< 2><0x000004dd>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_check_abbrev_code
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000009b
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  128 (-128)
+< 2><0x000004ea>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_check_pubname_attr
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000009c
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  132 (-124)
+< 2><0x000004f7>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_check_reloc_offset
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000009d
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  136 (-120)
+< 2><0x00000504>      DW_TAG_member <abbrev 1>
+                        DW_AT_name                  gf_check_tag_attr
+                        DW_AT_decl_file             0x00000004 /home/davea/dwarf/code/test/../src/bin/dwarfdump/dd_glflags.h
+                        DW_AT_decl_line             0x0000009e
+                        DW_AT_decl_column           0x00000010
+                        DW_AT_type                  <0x00000060> Refers to: Dwarf_Bool
+                        DW_AT_data_member_location  140 (-116)

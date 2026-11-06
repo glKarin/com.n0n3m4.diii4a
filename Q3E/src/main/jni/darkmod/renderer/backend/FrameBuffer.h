@@ -48,6 +48,7 @@ public:
 	const char *Name() const { return name.c_str(); }
 
 	static void CreateDefaultFrameBuffer(FrameBuffer *fbo);
+	static void ValidateStateOfBinds(FrameBuffer *readFboExpected, FrameBuffer *drawFboExpected);
 
 	static const int MAX_COLOR_ATTACHMENTS = 8;
 private:
@@ -76,8 +77,6 @@ extern idCVar r_fboDepthBits;
 extern idCVarInt r_shadowMapSize;
 extern idCVar r_fboResolution;
 extern idCVar r_tonemap;
-extern idCVar r_tonemapInternal;
-extern idCVar r_tonemapOnlyGame3d;
 
 void FB_DebugShowContents();
 void FB_ApplyViewport();

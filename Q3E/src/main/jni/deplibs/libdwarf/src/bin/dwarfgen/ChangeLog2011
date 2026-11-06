@@ -1,0 +1,20 @@
+
+2011-11-17  DavidAnderson <davea42@earthlink.net>
+     * createirepformfrombinary.cc,createirepfrombinary.cc,
+       irepattrtodbg.cc: Update copyright year.
+2011-12-14  DavidAnderson <davea42@earthlink.net>
+     * createirepfrombinary.cc, dwarfgen.cc, general.h,
+       irepattrtodbg.cc, irepdie.h, irepline.h,
+       irepresentation.h, ireptodbg.cc: Now reads in line table
+       and creates line table output (still just DWARF2 though).
+2011-06-12  DavidAnderson <davea42@earthlink.net>
+     * dwarfgen.cc: Use dwarf_producer_init_c(), the newest
+       interface to the producer.
+2011-04-23  DavidAnderson <davea42@earthlink.net>
+     * createirepformfrombinary.cc, createirepfrombinary.cc,
+       dwarfgen.cc,general.h,irepattrtodbg.cc,
+       irepattrtodbg.h,irepdie.h,
+       irepform.h,irepframe.h,irepmacro.h,irepresentation.h,ireptodbg.cc,
+       reptodbg.h,strtabdata.h: All the indentation is a multiple of 4 now.
+       All the copyrights are updated.
+

@@ -24,18 +24,18 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 /*
 ====================
-idRenderModelOverlay::idRenderModelOverlay
+idOverlayOnRenderModel::idOverlayOnRenderModel
 ====================
 */
-idRenderModelOverlay::idRenderModelOverlay() {
+idOverlayOnRenderModel::idOverlayOnRenderModel() {
 }
 
 /*
 ====================
-idRenderModelOverlay::~idRenderModelOverlay
+idOverlayOnRenderModel::~idOverlayOnRenderModel
 ====================
 */
-idRenderModelOverlay::~idRenderModelOverlay() {
+idOverlayOnRenderModel::~idOverlayOnRenderModel() {
 	int i, k;
 
 	for ( k = 0; k < materials.Num(); k++ ) {
@@ -50,28 +50,28 @@ idRenderModelOverlay::~idRenderModelOverlay() {
 
 /*
 ====================
-idRenderModelOverlay::Alloc
+idOverlayOnRenderModel::Alloc
 ====================
 */
-idRenderModelOverlay *idRenderModelOverlay::Alloc( void ) {
-	return new idRenderModelOverlay;
+idOverlayOnRenderModel *idOverlayOnRenderModel::Alloc( void ) {
+	return new idOverlayOnRenderModel;
 }
 
 /*
 ====================
-idRenderModelOverlay::Free
+idOverlayOnRenderModel::Free
 ====================
 */
-void idRenderModelOverlay::Free( idRenderModelOverlay *overlay ) {
+void idOverlayOnRenderModel::Free( idOverlayOnRenderModel *overlay ) {
 	delete overlay;
 }
 
 /*
 ====================
-idRenderModelOverlay::FreeSurface
+idOverlayOnRenderModel::FreeSurface
 ====================
 */
-void idRenderModelOverlay::FreeSurface( overlaySurface_t *surface ) {
+void idOverlayOnRenderModel::FreeSurface( overlaySurface_t *surface ) {
 	if ( surface->verts ) {
 		Mem_Free( surface->verts );
 	}
@@ -83,7 +83,7 @@ void idRenderModelOverlay::FreeSurface( overlaySurface_t *surface ) {
 
 /*
 =====================
-idRenderModelOverlay::CreateOverlay
+idOverlayOnRenderModel::CreateOverlay
 
 This projects on both front and back sides to avoid seams
 The material should be clamped, because entire triangles are added, some of which
@@ -91,7 +91,7 @@ may extend well past the 0.0 to 1.0 texture range
 
 =====================
 */
-void idRenderModelOverlay::CreateOverlay( const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *mtr,
+void idOverlayOnRenderModel::CreateOverlay( const idRenderModel *model, const idPlane localTextureAxis[2], const idMaterial *mtr,
 										  const idDeclSkin *customSkin, const idMaterial *customShader) // Skin params added -- SteveL #3844
 {
 	int i, maxVerts, maxIndexes, surfNum;
@@ -223,10 +223,10 @@ void idRenderModelOverlay::CreateOverlay( const idRenderModel *model, const idPl
 
 /*
 ====================
-idRenderModelOverlay::AddOverlaySurfacesToModel
+idOverlayOnRenderModel::AddOverlaySurfacesToModel
 ====================
 */
-void idRenderModelOverlay::AddOverlaySurfacesToModel( idRenderModel *baseModel ) {
+void idOverlayOnRenderModel::AddOverlaySurfacesToModel( idRenderModel *baseModel ) {
 	int i, j, k, numVerts, numIndexes, surfaceNum;
 	const modelSurface_t *baseSurf;
 	idRenderModelStatic *staticModel;
@@ -244,7 +244,7 @@ void idRenderModelOverlay::AddOverlaySurfacesToModel( idRenderModel *baseModel )
 	}
 
 	if ( baseModel->IsDynamicModel() != DM_STATIC ) {
-		common->Error( "idRenderModelOverlay::AddOverlaySurfacesToModel: baseModel is not a static model" );
+		common->Error( "idOverlayOnRenderModel::AddOverlaySurfacesToModel: baseModel is not a static model" );
 	}
 
 	assert( dynamic_cast<idRenderModelStatic *>(baseModel) != NULL );
@@ -326,7 +326,7 @@ void idRenderModelOverlay::AddOverlaySurfacesToModel( idRenderModel *baseModel )
 
 				if ( overlayVert->vertexNum >= baseSurf->geometry->numVerts ) {
 					// This can happen when playing a demofile and a model has been changed since it was recorded, so just issue a warning and go on.
-					common->Warning( "idRenderModelOverlay::AddOverlaySurfacesToModel: overlay vertex out of range.  Model has probably changed since generating the overlay." );
+					common->Warning( "idOverlayOnRenderModel::AddOverlaySurfacesToModel: overlay vertex out of range.  Model has probably changed since generating the overlay." );
 					FreeSurface( surf );
 					materials[k]->surfaces.RemoveIndex( i );
 					staticModel->DeleteSurfaceWithId( newSurf->id );
@@ -347,10 +347,10 @@ void idRenderModelOverlay::AddOverlaySurfacesToModel( idRenderModel *baseModel )
 
 /*
 ====================
-idRenderModelOverlay::RemoveOverlaySurfacesFromModel
+idOverlayOnRenderModel::RemoveOverlaySurfacesFromModel
 ====================
 */
-void idRenderModelOverlay::RemoveOverlaySurfacesFromModel( idRenderModel *baseModel ) {
+void idOverlayOnRenderModel::RemoveOverlaySurfacesFromModel( idRenderModel *baseModel ) {
 	idRenderModelStatic *staticModel;
 
 	assert( dynamic_cast<idRenderModelStatic *>(baseModel) != NULL );
@@ -362,18 +362,18 @@ void idRenderModelOverlay::RemoveOverlaySurfacesFromModel( idRenderModel *baseMo
 
 /*
 ====================
-idRenderModelOverlay::ReadFromDemoFile
+idOverlayOnRenderModel::ReadFromDemoFile
 ====================
 */
-void idRenderModelOverlay::ReadFromDemoFile( idDemoFile *f ) {
+void idOverlayOnRenderModel::ReadFromDemoFile( idDemoFile *f ) {
 	// FIXME: implement
 }
 
 /*
 ====================
-idRenderModelOverlay::WriteToDemoFile
+idOverlayOnRenderModel::WriteToDemoFile
 ====================
 */
-void idRenderModelOverlay::WriteToDemoFile( idDemoFile *f ) const {
+void idOverlayOnRenderModel::WriteToDemoFile( idDemoFile *f ) const {
 	// FIXME: implement
 }

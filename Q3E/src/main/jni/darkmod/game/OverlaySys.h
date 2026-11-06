@@ -16,6 +16,8 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #ifndef __DARKMOD_OVERLAYSYS_H__
 #define __DARKMOD_OVERLAYSYS_H__
 
+#include <functional>
+
 const int OVERLAYS_MIN_HANDLE = 1;
 const int OVERLAYS_INVALID_HANDLE = 0;
 
@@ -24,7 +26,12 @@ const int OVERLAYS_INVALID_HANDLE = 0;
 */
 enum
 {
+	LAYER_XRAY = -10,		// Don't use directly, call createXrayOverlay
 	LAYER_UNDERWATER = 0,	// Draw the underwater overlay first
+
+	// overlays on this and earlier layers are part of game world and are tonemapped
+	LAYER_LAST_TONEMAPPED = LAYER_UNDERWATER,
+
 	LAYER_MAIN_HUD = 1,
 	LAYER_INVENTORY = 2,
  	LAYER_INVGRID = 3,		// #4286
@@ -78,10 +85,8 @@ class COverlaySys
 	void					Restore( idRestoreGame *savefile );
 
 	/// Draws the contained GUIs to the screen, in order.
-	/// if onlyOverlayHandles is specified, all UIs not in the list are skipped
-	void					drawOverlays( idList<int> *onlyOverlayHandles = nullptr );
-	/// Returns true if any of the GUIs are opaque.
-	bool					isOpaque();
+	/// if filter is specified, then it says whether to render each overlay or not
+	void					drawOverlays( std::function<bool(int)> filter );
 	/// Returns the interactive GUI.
 	idUserInterface*		findInteractive();
 	/// Used for iterating through the overlays in drawing-order.
@@ -111,10 +116,6 @@ class COverlaySys
 	int						getLayer( int handle );
 	/// Return whether or not an overlay is external.
 	bool					isExternal( int handle );
-	/// Change whether or not an overlay is considered opaque.
-	void					setOpaque( int handle, bool isOpaque );
-	/// Return whether or not an overlay is considered opaque.
-	bool					isOpaque( int handle );
 	/// Change whether or not an overlay is considered interactive.
 	void					setInteractive( int handle, bool isInteractive );
 	/// Return whether or not an overlay is considered interactive.
@@ -140,8 +141,6 @@ class COverlaySys
 
 	/// Returns the overlay associated with a handle.
 	SOverlay*				findOverlay( int handle, bool updateCache = true );
-	/// Returns the highest opaque overlay.
-	idLinkList<SOverlay>*	findOpaque();
 
 	/// The list of overlays.
 	idLinkList<SOverlay>	m_overlays;
@@ -150,11 +149,6 @@ class COverlaySys
 	int						m_lastUsedHandle;
 	/// The overlay of the last handle accessed.
 	SOverlay*				m_lastUsedOverlay;
-
-	/// Whether or not the highest opaque overlay needs to be recalculated.
-	bool					m_updateOpaque;
-	/// The cached value of the highest opaque overlay.
-	idLinkList<SOverlay>*	m_highestOpaque;
 
 	/// Whether or not the interactive overlay needs to be recalculated.
 	bool					m_updateInteractive;
@@ -172,7 +166,6 @@ struct SOverlay
 	int						m_handle;
 	int						m_layer;
 	bool					m_external;
-	bool					m_opaque;
 	bool					m_interactive;
 };
 

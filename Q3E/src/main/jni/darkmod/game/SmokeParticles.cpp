@@ -20,6 +20,13 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 
 #include "Game_local.h"
 
+idCVar g_newSmokeParticles(
+	"g_newSmokeParticles", "1", CVAR_BOOL | CVAR_GAME,
+	"Which implementation of smoke particles to use:\n"
+	"  0 --- old implementation before 2.13\n"
+	"  1 --- new implementation in 2.14 and later"
+);
+
 static const char *smokeParticle_SnapshotName = "_SmokeParticle_Snapshot_";
 
 /*
@@ -151,7 +158,15 @@ idSmokeParticles::EmitSmoke
 Called by game code to drop another particle into the list
 ================
 */
-bool idSmokeParticles::EmitSmoke( const idDeclParticle *smoke, const int systemStartTime, const float diversity, const idVec3 &origin, const idMat3 &axis ) {
+bool idSmokeParticles::EmitSmoke( const idDeclParticle *smoke, const int startTime, const float diversity, const idVec3 &origin, const idMat3 &axis, bool allowCycling ) {
+	if ( g_newSmokeParticles.GetBool() ) {
+		return EmitSmokeNew( smoke, startTime, diversity, origin, axis, allowCycling );
+	} else {
+		return EmitSmokeOld( smoke, startTime, diversity, origin, axis );
+	}
+}
+
+bool idSmokeParticles::EmitSmokeOld( const idDeclParticle *smoke, const int systemStartTime, const float diversity, const idVec3 &origin, const idMat3 &axis ) {
 	bool	continues = false;
 
 	if ( !smoke ) {
@@ -257,7 +272,7 @@ bool idSmokeParticles::EmitSmoke( const idDeclParticle *smoke, const int systemS
 			newSmoke->index = prevCount;
 			newSmoke->axis = axis;
 			newSmoke->origin = origin;
-			newSmoke->random = steppingRandom;
+			newSmoke->randomSeed = steppingRandom.GetSeed();
 			newSmoke->privateStartTime = systemStartTime + prevCount * finalParticleTime / stage->totalParticles;
 			newSmoke->next = active->smokes;
 			active->smokes = newSmoke;
@@ -267,6 +282,121 @@ bool idSmokeParticles::EmitSmoke( const idDeclParticle *smoke, const int systemS
 	}
 
 	return continues;
+}
+
+bool idSmokeParticles::EmitSmokeNew( const idDeclParticle *smoke, const int systemStartTime, const float diversity, const idVec3 &origin, const idMat3 &axis, bool allowCycling ) {
+	if ( !smoke ) {
+		return false;
+	}
+
+	if ( !gameLocal.isNewFrame ) {
+		return false;
+	}
+
+	// dedicated doesn't smoke. No UpdateRenderEntity, so they would not be freed
+	if ( gameLocal.localClientNum < 0 ) {
+		return false;
+	}
+
+	assert( gameLocal.time == 0 || systemStartTime <= gameLocal.time );
+	if ( systemStartTime > gameLocal.time ) {
+		return false;
+	}
+
+	int numStagesStillActive = 0;
+
+	// for each stage in the smoke that is still emitting particles, emit a new singleSmoke_t
+	for ( int stageNum = 0; stageNum < smoke->stages.Num(); stageNum++ ) {
+		const idParticleStage *stage = smoke->stages[stageNum];
+
+		if ( !stage->cycleMsec ) {
+			continue;
+		}
+
+		if ( !stage->material ) {
+			continue;
+		}
+
+		if ( stage->particleLife <= 0 ) {
+			continue;
+		}
+
+		idPartSysEmit psEmit;
+		psEmit.entityParmsTimeOffset = -systemStartTime * 1e-3f;
+		psEmit.entityParmsStopTime = 0;	// don't use
+		psEmit.totalParticles = stage->totalParticles;
+		psEmit.randomizer = stageNum + diversity;
+
+		psEmit.viewTimeMs = gameLocal.previousTime;
+		bool isFullyOver;
+		int64 prevCount = idParticle_CoundEmitted( *stage, psEmit, isFullyOver );
+
+		psEmit.viewTimeMs = gameLocal.time;
+		int64 nowCount = idParticle_CoundEmitted( *stage, psEmit, isFullyOver );
+
+		if ( !allowCycling ) {
+			// the old behavior is that particle stages never loop, even if they have cycles = 0
+			prevCount = idMath::Imin( prevCount, stage->totalParticles );
+			nowCount = idMath::Imin( nowCount, stage->totalParticles );
+			if ( nowCount == stage->totalParticles )
+				isFullyOver = true;
+		}
+
+		if ( prevCount < nowCount ) {
+
+			// find an activeSmokeStage that matches this
+			int i;
+			for ( i = 0 ; i < activeStages.Num() ; i++ ) {
+				if ( activeStages[i].stage == stage )
+					break;
+			}
+			if ( i == activeStages.Num() ) {
+				// add a new one
+				activeSmokeStage_t newActive;
+				newActive.smokes = NULL;
+				newActive.stage = stage;
+				i = activeStages.Append( newActive );
+			}
+			activeSmokeStage_t *active = &activeStages[i];
+
+			// add all the required particles
+			for ( int64 globalIndex = prevCount; globalIndex < nowCount; globalIndex++ ) {
+				int index = globalIndex % stage->totalParticles;
+				idParticleData part;
+				int cycleNumber;
+				if ( !idParticle_EmitParticle( *stage, psEmit, index, part, cycleNumber ) ) {
+					// sometimes happens when CoundEmitted returns one patricle a bit ahead of time 
+					continue;
+				}
+				// per-particle coordinate system is only filled for deform particles
+				// imbue emitters coordinate system into particle
+				assert( part.origin == vec3_zero );
+				assert( part.axis == mat3_identity );
+
+				if ( !freeSmokes ) {
+					gameLocal.Printf( "idSmokeParticles::EmitSmoke: no free smokes with %d active stages\n", activeStages.Num() );
+					return true;
+				}
+				singleSmoke_t *newSmoke = freeSmokes;
+				freeSmokes = freeSmokes->next;
+				numActiveSmokes++;
+
+				newSmoke->index = index;
+				newSmoke->axis = axis;
+				newSmoke->origin = origin;
+				newSmoke->randomSeed = part.randomSeed;
+				newSmoke->privateStartTime = psEmit.viewTimeMs - part.frac * stage->particleLife * 1000;
+
+				newSmoke->next = active->smokes;
+				active->smokes = newSmoke;
+			}
+		}
+
+		if ( !isFullyOver )
+			numStagesStillActive++;
+	}
+
+	return numStagesStillActive > 0;
 }
 
 /*
@@ -345,7 +475,7 @@ bool idSmokeParticles::UpdateRenderEntity( renderEntity_s *renderEntity, const r
 			}
 
 			part.index = smoke->index;
-			part.randomSeed = smoke->random.GetSeed();
+			part.randomSeed = smoke->randomSeed;
 
 			part.origin = smoke->origin;
 			part.axis = smoke->axis;

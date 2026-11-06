@@ -170,6 +170,8 @@ class idInteraction
 		// actually create the interaction
 #ifdef _RAVEN //k: for renderEntity_s::suppressSurfaceMask
 		void					CreateInteraction(const idRenderModel *model, int suppressSurfaceMask = 0);
+#elif defined(_SPLASHDAMAGE) //karin: hide surfaces
+		void					CreateInteraction(const idRenderModel *model, const renderEntity_t *parms = NULL);
 #else
 		void					CreateInteraction(const idRenderModel *model);
 #endif

@@ -441,7 +441,14 @@ void idEntityFx::Run( int time ) {
 			case FX_DECAL: {
 				if ( !useAction->decalDropped ) {
 					useAction->decalDropped = true;
-					gameLocal.ProjectDecal( GetPhysics()->GetOrigin(), GetPhysics()->GetGravity(), 8.0f, true, fxaction.size, fxaction.data ); 
+					ProjectDecalParams params;
+					params.origin = GetPhysics()->GetOrigin();
+					params.dir = GetPhysics()->GetGravity();
+					params.depth = 8.0f;
+					params.parallel = true;
+					params.size = fxaction.size;
+					params.material = fxaction.data;
+					gameLocal.ProjectDecal( params ); 
 				}
 				break;
 			}

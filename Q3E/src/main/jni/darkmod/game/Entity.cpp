@@ -348,6 +348,7 @@ const idEventDef EV_SetGuiStringFromKey( "setGuiStringFromKey",
 const idEventDef EV_CallGui( "callGui", EventArgs('d', "handle", "", 's', "namedEvent", ""), EV_RETURNS_VOID, "Calls a named event in a GUI.");
 const idEventDef EV_CreateOverlay( "createOverlay", EventArgs('s', "guiFile", "", 'd', "layer", ""), 'd', "Creates a GUI overlay. (must be used on the player)" );
 const idEventDef EV_DestroyOverlay( "destroyOverlay", EventArgs('d', "handle", ""), EV_RETURNS_VOID, "Destroys a GUI overlay. (must be used on the player)");
+const idEventDef EV_CreateXrayOverlay( "createXrayOverlay", EventArgs('s', "guiFile", ""), 'd', "Creates a GUI overlay with X-ray material. (must be used on the player)" );
 const idEventDef EV_LoadExternalData( "loadExternalData", EventArgs('s', "declFile", "", 's', "prefix", ""), 'd', "Load an external xdata declaration." );
 
 // Obsttorte: #5976
@@ -657,6 +658,7 @@ ABSTRACT_DECLARATION( idClass, idEntity )
 	EVENT( EV_CallGui,				idEntity::Event_CallGui )
 	EVENT( EV_CreateOverlay,		idEntity::Event_CreateOverlay )
 	EVENT( EV_DestroyOverlay,		idEntity::Event_DestroyOverlay )
+	EVENT( EV_CreateXrayOverlay,	idEntity::Event_CreateXrayOverlay )
 
 	EVENT( EV_LoadExternalData,		idEntity::Event_LoadExternalData )
 
@@ -1129,6 +1131,7 @@ idEntity::idEntity()
 
 	m_LightQuotient = 0;
 	m_LightQuotientLastEvalTime = -1;
+	m_lesExplicitSampling = nullptr;
 
 	previousVoiceShader = nullptr;
 	previousBodyShader = nullptr;
@@ -1664,6 +1667,9 @@ idEntity::~idEntity( void )
 	FreeModelDef();
 	FreeSoundEmitter( false );
 
+	delete m_lesExplicitSampling;
+	m_lesExplicitSampling = NULL;
+
 	if ( xrayDefHandle != -1 ) {
 		gameRenderWorld->FreeEntityDef( xrayDefHandle );
 		xrayDefHandle = -1;
@@ -1896,6 +1902,7 @@ void idEntity::Save( idSaveGame *savefile ) const
 
 	savefile->WriteFloat(m_LightQuotient);
 	savefile->WriteInt(m_LightQuotientLastEvalTime);
+	LightEstimateSystem::SaveExplicitSampling(savefile, this);
 
 	savefile->WriteBool(m_droppedByAI);		// grayman #1330
 
@@ -1939,6 +1946,7 @@ void idEntity::Save( idSaveGame *savefile ) const
 		savefile->WriteFloat( i->decal_depth );
 		savefile->WriteBool( i->decal_parallel );
 		savefile->WriteFloat( i->decal_angle );
+		savefile->WriteBool( i->decal_randomizeAngle);
 	}
 }
 
@@ -2213,6 +2221,7 @@ void idEntity::Restore( idRestoreGame *savefile )
 
 	savefile->ReadFloat(m_LightQuotient);
 	savefile->ReadInt(m_LightQuotientLastEvalTime);
+	LightEstimateSystem::RestoreExplicitSampling(savefile, this);
 
 	savefile->ReadBool(m_droppedByAI);	// grayman #1330
 
@@ -2257,6 +2266,7 @@ void idEntity::Restore( idRestoreGame *savefile )
 		savefile->ReadFloat( di.decal_depth );
 		savefile->ReadBool( di.decal_parallel );
 		savefile->ReadFloat( di.decal_angle );
+		savefile->ReadBool( di.decal_randomizeAngle);
 		decals_list.push_back( di );
 	}
 	needsDecalRestore = ( decalscount > 0 );
@@ -3632,6 +3642,7 @@ void idEntity::SaveOverlayInfo( const idVec3& impact_origin, const idVec3& impac
 	di.decal_depth = 0.0f;		// not used for animated overlays
 	di.decal_parallel = false;	// not used for animated overlays
 	di.decal_angle = 0.0f;		// not used for animated overlays
+	di.decal_randomizeAngle = true;	// ...
 	di.decal_starttime = 0;		// not used for animated overlays
 	decals_list.push_back( di );
 }
@@ -3643,17 +3654,18 @@ idEntity::SaveDecalInfo
 For restoration after a LOD switch. -- SteveL #3817
 ================
 */
-void idEntity::SaveDecalInfo( const idVec3 &origin, const idVec3 &dir, float depth, bool parallel, float size, const char *material, float angle )
+void idEntity::SaveDecalInfo( const ProjectDecalParams &params )
 {
 	SDecalInfo di;
-	di.decal_angle = angle;
-	di.decal = material;
-	di.decal_depth = depth;
-	di.dir = dir;
+	di.decal_randomizeAngle = params.randomizeAngle;
+	di.decal_angle = params.angle;
+	di.decal = params.material;
+	di.decal_depth = params.depth;
+	di.dir = params.dir;
 	di.overlay_joint = INVALID_JOINT; // only needed for animated overlays
-	di.origin = origin;
-	di.decal_parallel = parallel;
-	di.size = size;
+	di.origin = params.origin;
+	di.decal_parallel = params.parallel;
+	di.size = params.size;
 	di.decal_starttime = gameLocal.time;
 	decals_list.push_back( di );
 }
@@ -11033,7 +11045,7 @@ void idEntity::Event_TimerStart(int stimType)
 
 	if (timer != NULL)
 	{
-		timer->Start(static_cast<unsigned int>(sys->GetClockTicks()));
+		timer->Start(gameLocal.time);
 	}
 }
 
@@ -11046,7 +11058,7 @@ void idEntity::Event_TimerRestart(int stimType)
 
 	if (timer != NULL)
 	{
-		timer->Restart(static_cast<unsigned int>(sys->GetClockTicks()));
+		timer->Restart(gameLocal.time);
 	}
 }
 
@@ -11803,27 +11815,17 @@ void idEntity::ChangeInventoryItemCount(const char* invName, const char* invCate
 		DM_LOG(LC_INVENTORY, LT_DEBUG)LOGSTRING("Removing empty item from category.\r");
 		
 		category->RemoveItem(item);
+		
+		if (category->IsEmpty())
+		{
+			DM_LOG(LC_INVENTORY, LT_DEBUG)LOGSTRING("Removing empty inventory category.\r");
+			inventory->RemoveCategory(category);
+		}
 
-		// Advance the cursor (after removal, otherwise we stick to an invalid id)
-		InventoryCursor()->GetNextItem();
+		InventoryCursor()->ClearItem();
 
 		// Call the selection changed event, passing the removed item as previously selected item
 		OnInventorySelectionChanged(item);
-	}
-	
-	// Check for empty categories after the item has been removed
-	if (category->IsEmpty()) 
-	{
-		// Remove empty category from inventory
-		DM_LOG(LC_INVENTORY, LT_DEBUG)LOGSTRING("Removing empty inventory category.\r");
-		
-		inventory->RemoveCategory(category);
-		
-		// Switch the cursor to the next category (after removal)
-		InventoryCursor()->GetNextCategory();
-
-		// There shouldn't be a need to call OnInventorySelectionChanged(), as this
-		// has already been done by the code above.
 	}
 }
 
@@ -11914,6 +11916,11 @@ void idEntity::DestroyOverlay(int handle)
 void idEntity::Event_CreateOverlay( const char *guiFile, int layer )
 {
 	idThread::ReturnInt(CreateOverlay(guiFile, layer));
+}
+
+void idEntity::Event_CreateXrayOverlay( const char *guiFile )
+{
+	idThread::ReturnInt(CreateOverlay(guiFile, LAYER_XRAY));
 }
 
 int idEntity::CreateOverlay(const char *guiFile, int layer)

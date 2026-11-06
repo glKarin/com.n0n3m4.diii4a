@@ -66,6 +66,12 @@ typedef enum {
 	MSG_CDKEY,
 	MSG_INFO,
 	MSG_WAIT
+#ifdef _SPLASHDAMAGE
+	,
+    MSG_DOWNLOAD_YESNO,
+    MSG_NEED_PASSWORD,
+    MSG_NEED_AUTH,
+#endif
 } msgBoxType_t;
 
 typedef const char *(*HandleGuiCommand_t)(const char *);
@@ -170,7 +176,7 @@ class idSession
 		idDemoFile 	*writeDemo;
 		int				renderdemoVersion;
 
-#ifdef _RAVEN //karin: from idSessionLocal
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: move from idSessionLocal
 	    idSoundWorld*	menuSoundWorld;			// so the game soundWorld can be muted
 #endif
 #ifdef _HUMANHEAD
@@ -179,6 +185,11 @@ class idSession
 #endif
 #ifdef _MULTITHREAD
 		virtual void UpdateScreen(byte *data, bool outOfSequence) = 0;
+#endif
+#ifdef _SPLASHDAMAGE //karin: compat for DOOM3
+		virtual const char *MessageBox(msgBoxType_t type, const wchar_t *message, const wchar_t *title = NULL, bool wait = false, const char *fire_yes = NULL, const char *fire_no = NULL, bool network = false) = 0;
+		virtual const char *MessageBox(msgBoxType_t type, const char *message, const wchar_t *title = NULL, bool wait = false, const char *fire_yes = NULL, const char *fire_no = NULL, bool network = false) = 0;
+		virtual const char *MessageBox(msgBoxType_t type, const wchar_t *message, const char *title = NULL, bool wait = false, const char *fire_yes = NULL, const char *fire_no = NULL, bool network = false) = 0;
 #endif
 };
 

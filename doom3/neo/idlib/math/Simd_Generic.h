@@ -108,6 +108,11 @@ class idSIMD_Generic : public idSIMDProcessor
 		virtual void VPCALL MatX_LowerTriangularSolve(const idMatX &L, float *x, const float *b, const int n, int skip = 0);
 		virtual void VPCALL MatX_LowerTriangularSolveTranspose(const idMatX &L, float *x, const float *b, const int n);
 		virtual bool VPCALL MatX_LDLTFactor(idMatX &mat, idVecX &invDiag, const int n);
+#ifdef _SPLASHDAMAGE
+	    virtual bool VPCALL MatX_LDLT_Factor( idMatX &mat, idVecX &invDiag, const int n ) { return MatX_LDLTFactor(mat, invDiag, n); }
+	    virtual bool VPCALL MatX_LU_Factor( idMatX &mat, idVecX &invDiag, const int n );
+		virtual void VPCALL DecompressJoints( idJointQuat *joints, const idCompressedJointQuat *compressedJoints, const int *index, const int numJoints );
+#endif
 
 		virtual void VPCALL BlendJoints(idJointQuat *joints, const idJointQuat *blendJoints, const float lerp, const int *index, const int numJoints);
 		virtual void VPCALL ConvertJointQuatsToJointMats(idJointMat *jointMats, const idJointQuat *jointQuats, const int numJoints);

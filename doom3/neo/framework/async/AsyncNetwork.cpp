@@ -31,6 +31,10 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "AsyncNetwork.h"
 
+#ifdef _SPLASHDAMAGE //karin: check map changed
+#include "../Session_local.h"
+#endif
+
 idAsyncServer		idAsyncNetwork::server;
 idAsyncClient		idAsyncNetwork::client;
 
@@ -63,7 +67,11 @@ idCVar				idAsyncNetwork::master3("net_master3", "", CVAR_SYSTEM | CVAR_ARCHIVE,
 idCVar				idAsyncNetwork::master4("net_master4", "", CVAR_SYSTEM | CVAR_ARCHIVE, "4th master server address");
 idCVar				idAsyncNetwork::LANServer("net_LANServer", "0", CVAR_SYSTEM | CVAR_BOOL | CVAR_NOCHEAT, "config LAN games only - affects clients and servers");
 idCVar				idAsyncNetwork::serverReloadEngine("net_serverReloadEngine", "0", CVAR_SYSTEM | CVAR_INTEGER | CVAR_NOCHEAT, "perform a full reload on next map restart (including flushing referenced pak files) - decreased if > 0");
+#ifdef _SPLASHDAMAGE
+idCVar				idAsyncNetwork::serverAllowServerMod("net_serverAllowServerMod", "1", CVAR_SYSTEM | CVAR_BOOL | CVAR_NOCHEAT, "allow server-side mods");
+#else
 idCVar				idAsyncNetwork::serverAllowServerMod("net_serverAllowServerMod", "0", CVAR_SYSTEM | CVAR_BOOL | CVAR_NOCHEAT, "allow server-side mods");
+#endif
 idCVar				idAsyncNetwork::idleServer("si_idleServer", "0", CVAR_SYSTEM | CVAR_BOOL | CVAR_INIT | CVAR_SERVERINFO, "game clients are idle");
 idCVar				idAsyncNetwork::clientDownload("net_clientDownload", "1", CVAR_SYSTEM | CVAR_INTEGER | CVAR_ARCHIVE, "client pk4 downloads policy: 0 - never, 1 - ask, 2 - always (will still prompt for binary code)");
 
@@ -102,8 +110,12 @@ void idAsyncNetwork::Init(void)
 	masters[4].var = &master4;
 
 #ifndef	ID_DEMO_BUILD
+#ifdef _SPLASHDAMAGE //karin: map completion, nextMap is defined
+	cmdSystem->AddCommand("spawnServer", SpawnServer_f, CMD_FL_SYSTEM, "spawns a server", idCmdSystem::ArgCompletion_EntitiesName);
+#else
 	cmdSystem->AddCommand("spawnServer", SpawnServer_f, CMD_FL_SYSTEM, "spawns a server", idCmdSystem::ArgCompletion_MapName);
 	cmdSystem->AddCommand("nextMap", NextMap_f, CMD_FL_SYSTEM, "loads the next map on the server");
+#endif
 	cmdSystem->AddCommand("connect", Connect_f, CMD_FL_SYSTEM, "connects to a server");
 	cmdSystem->AddCommand("reconnect", Reconnect_f, CMD_FL_SYSTEM, "reconnect to the last server we tried to connect to");
 	cmdSystem->AddCommand("serverInfo", GetServerInfo_f, CMD_FL_SYSTEM, "shows server info");
@@ -323,7 +335,18 @@ void idAsyncNetwork::SpawnServer_f(const idCmdArgs &args)
 {
 
 	if (args.Argc() > 1) {
+#ifdef _SPLASHDAMAGE //karin: prepend `maps/` prefix, it caused crash if `levelshot/generic` material missing  when map loading start by `spawn xxx.entites` without `maps/` prefix, only not in campaign mode
+		idStr mapName = args.Argv(1);
+		const char *gameRule = cvarSystem->GetCVarString("si_rules");
+		if (idStr::Icmp(gameRule, "sdGameRulesCampaign"))
+		{
+			if(idStr::Icmpn(mapName, "maps/", 5))
+				mapName.Insert("maps/", 0);
+		}
+		cvarSystem->SetCVarString("si_map", mapName.c_str());
+#else
 		cvarSystem->SetCVarString("si_map", args.Argv(1));
+#endif
 	}
 
 	// don't let a server spawn with singleplayer game type - it will crash
@@ -361,6 +384,21 @@ void idAsyncNetwork::SpawnServer_f(const idCmdArgs &args)
 
 	// use serverMapRestart if we already have a running server
 	if (server.IsActive()) {
+#ifdef _SPLASHDAMAGE //karin: check map changed, disconnect first if call spawnServer in gaming
+		idStr cvarMap = cvarSystem->GetCVarString("si_map");
+		cvarMap.StripLeadingOnce("maps/");
+		cvarMap.StripFileExtension();
+		idStr srvMap = sessLocal.mapSpawnData.serverInfo.GetString("si_map");
+		srvMap.StripLeadingOnce("maps/");
+		srvMap.StripFileExtension();
+		if(cvarMap.Icmp(srvMap))
+		{
+			common->Printf("Server map changed.\n");
+			cmdSystem->BufferCommandText(CMD_EXEC_NOW, "disconnect");
+			server.Spawn();
+		}
+		else
+#endif
 		cmdSystem->BufferCommandText(CMD_EXEC_NOW, "serverMapRestart");
 	} else {
 		server.Spawn();
@@ -524,7 +562,11 @@ void idAsyncNetwork::ExecuteSessionCommand(const char *sessCmd)
 {
 	if (sessCmd[ 0 ]) {
 		if (!idStr::Icmp(sessCmd, "game_startmenu")) {
+#ifdef _SPLASHDAMAGE //karin: show main menu
+			game->ShowMainMenu();
+#else
 			session->SetGUI(game->StartMenu(), NULL);
+#endif
 		}
 	}
 }

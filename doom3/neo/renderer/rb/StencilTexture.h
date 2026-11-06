@@ -28,6 +28,9 @@ class idStencilTexture
 			return height;
 		}
 		void BlitDepth(void);
+		idImage * GetTextureImage(void) {
+			return depthStencilTexture;
+		}
 		static bool IsAvailable(void);
 
 	private:

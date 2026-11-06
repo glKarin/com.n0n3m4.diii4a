@@ -51,7 +51,8 @@ const idEventDef EV_Thread_PrintLn( "println", EventArgs('s', "text", ""), EV_RE
 const idEventDef EV_Thread_Say( "say", EventArgs('s', "text", ""), EV_RETURNS_VOID, "Multiplayer - Print this line on the network");
 const idEventDef EV_Thread_Assert( "assert", EventArgs('f', "condition", ""), EV_RETURNS_VOID, "Breaks if the condition is zero. (Only works in debug builds.)");
 const idEventDef EV_Thread_Trigger( "trigger", EventArgs('e', "entityToTrigger", ""), EV_RETURNS_VOID, "Triggers the given entity.");
-const idEventDef EV_Thread_SetCvar( "setcvar", EventArgs('s', "name", "", 's', "value", ""), EV_RETURNS_VOID, "Sets a cvar.");
+const idEventDef EV_Thread_SetCvar( "setcvar", EventArgs('s', "name", "", 's', "value", ""), EV_RETURNS_VOID, "Sets mission override for cvar.");
+const idEventDef EV_Thread_UnsetCvar( "unsetcvar", EventArgs('s', "name", ""), EV_RETURNS_VOID, "Drops mission override for cvar (user value remains).");
 const idEventDef EV_Thread_GetCvar( "getcvar", EventArgs('s', "name", ""), 's', "Returns the string for a cvar.");
 const idEventDef EV_Thread_GetCvarF( "getcvarf", EventArgs('s', "name", ""), 'f', "Returns float value for a cvar.");
 const idEventDef EV_Thread_Random( "random", EventArgs('f', "range", ""), 'f', "Returns a random value X where 0 <= X < range.");
@@ -329,6 +330,7 @@ CLASS_DECLARATION( idClass, idThread )
 	EVENT( EV_Thread_Assert,				idThread::Event_Assert )
 	EVENT( EV_Thread_Trigger,				idThread::Event_Trigger )
 	EVENT( EV_Thread_SetCvar,				idThread::Event_SetCvar )
+	EVENT( EV_Thread_UnsetCvar,				idThread::Event_UnsetCvar )
 	EVENT( EV_Thread_GetCvar,				idThread::Event_GetCvar )
 	EVENT( EV_Thread_GetCvarF,				idThread::Event_GetCvarF )
 	EVENT( EV_Thread_Random,				idThread::Event_Random )
@@ -1356,6 +1358,15 @@ idThread::Event_SetCvar
 */
 void idThread::Event_SetCvar( const char *name, const char *value ) const {
 	cvarSystem->SetCVarMissionString( name, value );
+}
+
+/*
+================
+idThread::Event_UnsetCvar
+================
+*/
+void idThread::Event_UnsetCvar( const char *name ) const {
+	cvarSystem->SetCVarMissionString( name, nullptr );
 }
 
 /*
@@ -2792,7 +2803,8 @@ void idThread::Event_GetNextEntity( const char* key, const char* value, const id
 	int i = lastMatch ? lastMatch->entityNumber + 1 : 0;
 
 	// Step 2: Advance i to the next matching entity
-	for ( ; i < MAX_GENTITIES ; ++i )
+	bool foundMatch = false;
+	for ( ; i < gameLocal.num_entities ; ++i )
 	{
 		idEntity* ent = gameLocal.entities[i];
 		
@@ -2806,7 +2818,6 @@ void idThread::Event_GetNextEntity( const char* key, const char* value, const id
 		}
 		
 		// Search spawnargs for a matching value. If key is empty, all keys will be tested.
-		bool foundMatch = false;
 		const idKeyValue* kv = NULL;
 		while ( (kv = ent->spawnArgs.MatchPrefix(key, kv)) != NULL )
 		{
@@ -2824,7 +2835,7 @@ void idThread::Event_GetNextEntity( const char* key, const char* value, const id
 	}
 
 	// Step 3: Return a value
-	idThread::ReturnEntity( i < MAX_GENTITIES ? gameLocal.entities[i] : NULL );
+	idThread::ReturnEntity( foundMatch ? gameLocal.entities[i] : NULL );
 }
 
 // Allow scripts to use the World particle system -- SteveL #3962
@@ -2845,8 +2856,17 @@ void idThread::Event_ProjectDecal( const idVec3& traceOrigin, const idVec3& trac
 	// if trace made contact with a surface...
 	if ( trace.fraction < 1.0f )
 	{
-		gameLocal.ProjectDecal( tr.c.point, -tr.c.normal, 8.0f, true, decalSize, decal,
-								DEG2RAD(angle), gameLocal.entities[tr.c.entityNum], true, -1, false );
+		ProjectDecalParams params;
+		params.origin = tr.c.point;
+		params.dir = -tr.c.normal;
+		params.depth = 8.0f;
+		params.parallel = true;
+		params.size = decalSize;
+		params.material = decal;
+		params.randomizeAngle = false;
+		params.angle = DEG2RAD(angle);
+		params.saveOnTarget = gameLocal.entities[tr.c.entityNum];
+		gameLocal.ProjectDecal( params );
 	}
 }
 

@@ -778,11 +778,27 @@ int idMaterial::ParseExpression( idLexer &src ) {
 	return ParseExpressionPriority( src, TOP_PRIORITY );
 }
 
+static void LoadMaterialStageProgram( newShaderStage_t &newStage, const char *name ) {
+	if ( strlen(name) + 1 > sizeof(newStage.programName) )
+		common->Warning( "Material custom shader name '%s' is too long", name );
+	idStr::Copynz( newStage.programName, name, sizeof(newStage.programName) );
 
-static GLSLProgram* GLSL_LoadMaterialStageProgram(const char *name) {
-	return programManager->Load( name );
+	newStage.glslProgram = NEWSTAGE_PROGRAM_DELAYED;
+	if ( session->IsFrontend() ) {
+		// new material is being loaded from frontend during gameplay
+		// delay loading of the shader until its first usage in backend
+		return;
+	}
+	// load right now
+	newStage.GetGlslProgram();
 }
 
+GLSLProgram *newShaderStage_s::GetGlslProgram() {
+	if ( glslProgram == NEWSTAGE_PROGRAM_DELAYED ) {
+		glslProgram = programManager->Load( programName );
+	}
+	return glslProgram;
+}
 
 /*
 ===============
@@ -1214,8 +1230,39 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 
 		else if ( !token.Icmp( "remoteRenderMap" ) ) {
 			ts->dynamic = DI_REMOTE_RENDER;
-			ts->width = src.ParseInt();
-			ts->height = src.ParseInt();
+			idToken arg;
+			if ( src.ReadTokenOnLine( &arg ) ) {
+				// this case is deprecated!
+				src.UnreadToken( &arg );
+				ts->remoteWidth = src.ParseInt();
+				ts->remoteHeight = src.ParseInt();
+				// #5485: this is how resolution actually worked in 2.13 and earlier
+				ts->remoteWidth = glConfig.vidWidth * ts->remoteWidth / SCREEN_WIDTH;
+				ts->remoteHeight = glConfig.vidHeight * ts->remoteHeight / SCREEN_HEIGHT;
+				ts->remoteResolutionWorld = -1.0f;
+			} else {
+				// ideally, it should be overwritten by "remoteResolution"
+				ts->remoteWidth = 512;
+				ts->remoteHeight = 512;
+				ts->remoteResolutionWorld = -1.0f;
+			}
+			src.SkipRestOfLine();
+			continue;
+		}
+		else if ( !token.Icmp( "remoteResolution" ) ) {
+			if ( ts->dynamic != DI_REMOTE_RENDER ) {
+				common->Warning( "'remoteResolution' is before 'remoteRenderMap' in material '%s'", GetName() );
+				// yep, either useless or overwritten with 1.0
+			}
+			ts->remoteWidth = src.ParseInt();
+			ts->remoteHeight = src.ParseInt();
+			idToken arg;
+			if ( src.ReadTokenOnLine( &arg ) ) {
+				src.UnreadToken( &arg );
+				ts->remoteResolutionWorld = src.ParseFloat();
+			} else {
+				ts->remoteResolutionWorld = -1.0f;
+			}
 			continue;
 		}
 
@@ -1225,20 +1272,27 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 		}
 
 		else if ( !token.Icmp( "mirrorRenderMap" ) ) {
-			ts->dynamic = DI_MIRROR_RENDER;
-			//ts->width = src.ParseInt();
-			//ts->height = src.ParseInt();
 			src.SkipRestOfLine();
+			ts->dynamic = DI_MIRROR_RENDER;
+			ts->mirrorResolutionFactor = 1.0f;
 			ts->texgen = TG_SCREEN;
+			continue;
+		}
+		else if ( !token.Icmp( "mirrorResolutionFactor" ) ) {	// #5485
+			if ( ts->dynamic != DI_MIRROR_RENDER ) {
+				common->Warning( "'mirrorResolutionFactor' is before 'mirrorRenderMap' in material '%s'", GetName() );
+				// yep, either useless or overwritten with 1.0
+			}
+			ts->mirrorResolutionFactor = src.ParseFloat();
 			continue;
 		}
 
 		else if (  !token.Icmp( "xrayRenderMap" ) ) {
 			ts->dynamic = DI_XRAY_RENDER;
-			ts->width = 0;
+			ts->xrayInclusive = false;
 			if ( src.ReadTokenOnLine( &token ) ) {
 				if ( !token.Icmp( "inclusive" ) ) {
-					ts->width = 1;
+					ts->xrayInclusive = true;
 				}
 			}
 			src.SkipRestOfLine();
@@ -1565,21 +1619,21 @@ void idMaterial::ParseStage( idLexer &src, const textureRepeat_t trpDefault ) {
 				idStr fileExt;
 				token.ExtractFileExtension( fileExt );
 				token.StripFileExtension();
-				newStage.glslProgram = GLSL_LoadMaterialStageProgram( token );
+				LoadMaterialStageProgram( newStage, token );
 			}
 			continue;
 		}
 		else if ( !token.Icmp( "fragmentProgram" ) ) {
 			if ( src.ReadTokenOnLine( &token ) ) {
 				token.StripFileExtension();
-				newStage.glslProgram = GLSL_LoadMaterialStageProgram( token );
+				LoadMaterialStageProgram( newStage, token );
 			}
 			continue;
 		}
 		else if ( !token.Icmp( "vertexProgram" ) ) {
 			if ( src.ReadTokenOnLine( &token ) ) {
 				token.StripFileExtension();
-				newStage.glslProgram = GLSL_LoadMaterialStageProgram( token );
+				LoadMaterialStageProgram( newStage, token );
 			}
 			continue;
 		}
@@ -1896,8 +1950,8 @@ void idMaterial::SortInteractionStages() {
 		std::stable_sort( pd->parseStages + i, pd->parseStages + j, [](const shaderStage_t &a, const shaderStage_t &b) {
 			return a.lighting < b.lighting;
 		});
-				}
-			}
+	}
+}
 
 idCVar r_materialNewParse("r_materialNewParse", "1", CVAR_BOOL, "Better implementation of material stages parsing for 2.13");
 
@@ -2179,6 +2233,10 @@ void idMaterial::ParseMaterial( idLexer &src ) {
 		// overlay / decal suppression
 		else if ( !token.Icmp( "noOverlays" ) ) {
 			allowOverlays = false;
+			continue;
+		}
+		else if ( !token.Icmp( "forceInteractions" ) ) {
+			SetMaterialFlag( MF_FORCEINTERACTIONS );
 			continue;
 		}
 		// nbohr1more: #4379 lightgem culling
@@ -2482,11 +2540,11 @@ void idMaterial::ParseMaterial( idLexer &src ) {
 		DetectInteractionGroups();
 	}
 	else {
-	// add _flat or _white stages if needed
-	AddImplicitStages();
+		// add _flat or _white stages if needed
+		AddImplicitStages();
 
-	// order the diffuse / bump / specular stages properly
-	SortInteractionStages();
+		// order the diffuse / bump / specular stages properly
+		SortInteractionStages();
 	}
 
 	// stgatilov #6340: warn if output color might depend on input alpha
@@ -2502,11 +2560,9 @@ void idMaterial::ParseMaterial( idLexer &src ) {
 	if ( cullType == CT_TWO_SIDED ) {
 		for ( int l = 0 ; l < numStages ; l++ ) {
 			if ( pd->parseStages[l].lighting != SL_AMBIENT || pd->parseStages[l].texture.texgen != TG_EXPLICIT ) {
-				if ( cullType == CT_TWO_SIDED ) {
 					cullType = CT_FRONT_SIDED;
 					shouldCreateBackSides = true;
-				}
-				break;
+				  break;
 			}
 		}
 	}
@@ -3150,6 +3206,19 @@ const shaderStage_t *idMaterial::FindStageOfType( stageLighting_t type ) const {
 		}
 	}
 	return NULL;
+}
+
+/*
+===================
+idMaterial::FindXrayStage
+===================
+*/
+const shaderStage_t *idMaterial::FindXrayStage( void ) const {
+	for (int i = 0; i < numStages; i++) {
+		if (stages[i].texture.dynamic == DI_XRAY_RENDER)
+			return &stages[i];
+	}
+	return nullptr;
 }
 
 /*

@@ -184,7 +184,7 @@ void G_LoadArenas( void ) {
         if ( *type ) { 
             if ( strstr( type, "sv_normal" ) && i < MAX_MAPS ) { 
 				char *map = Info_ValueForKey( g_arenaInfos[n], "map" );
-				level.maplist[i] = G_Alloc(strlen(map));
+				level.maplist[i] = G_Alloc( strlen(map) + 1 );
 				strcpy(level.maplist[i++], map);
             }   
         }   

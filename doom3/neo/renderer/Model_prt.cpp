@@ -163,7 +163,11 @@ idRenderModel *idRenderModelPrt::InstantiateDynamicModel(const struct renderEnti
 		} else {
 			surf = &staticModel->surfaces.Alloc();
 			surf->id = stageNum;
+#ifdef _SPLASHDAMAGE
+			surf->material = stage->material;
+#else
 			surf->shader = stage->material;
+#endif
 			surf->geometry = R_AllocStaticTriSurf();
 			R_AllocStaticTriSurfVerts(surf->geometry, 4 * count);
 			R_AllocStaticTriSurfIndexes(surf->geometry, 6 * count);

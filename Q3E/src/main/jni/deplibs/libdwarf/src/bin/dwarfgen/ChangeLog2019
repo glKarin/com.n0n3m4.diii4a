@@ -1,0 +1,155 @@
+2019-10-23 David Anderson
+     * CMakeLists.txt: Use DW_FWALLXX for C++.
+2019-10-20 David Anderson
+     * createirepformfrombinary.cc,createirepfrombinary.cc,
+       dwarfgen.cc,irepattrtodbg.cc,ireptodbg.cc:
+       Be more thorough in using config.h to check for C
+       headers before #including them.
+2019-10-06 David Anderson
+     * createirepfrombinary.cc,dwarfgen.cc: Removed
+       trailing whitespace.
+2019-10-05 David Anderson
+     * dwarfgen.cc: Now it has the tools (with a little
+       help in libdwarf.h) to properly create an object file
+       that is ELFCLASS64 but has 32 bit offsets in DWARF.
+2019-10-04 David Anderson
+     * ireptodbg.cc: Corrected the code implementing
+       the dwarfgen.cc option --add-frame-advance-loc.
+       It's always been a bit wrong.
+     * dwarfgen.cc: Forgot to set the output-endianness flag bit
+       in the call to dwarf_producer_init() which meant
+       it defaulted to host endianness. Oops. Not the intent.
+       Now set as intended (to little-endian in the test cases
+       existing so far).
+2019-09-22 David Anderson
+     * createirepfrombinary.cc: Delete pointless empty lines
+       and add code to recognize and correct for a broken gcc
+       that duplicated an attribute (by dropping the duplicate).
+     * dwarfgen.cc: Adds the ability to choose the output
+       target size/endian/etc at runtime and gathers
+       the choices conveniently together so it is
+       legible. Adds a choice of generating DWARF4
+       with 64bit pointers, showing by example.
+       Now supports generating 64bit offset elf.
+2019-09-02 David Anderson
+     * dwarfgen.cc: Now running it on a big-endian machine
+       (reading and writing little-endian objects) works
+       properly.  Arbitrary endian combinations not
+       fully supported.
+     * ireptodbg.cc(specialAttrTransformations): Removed
+       four lines of useless code.
+2019-05-26 David Anderson
+     * irepattrtodbg.cc,irepdie.h: Remove trailing whitespace.
+     * irepform.h: Reformat a few lines to shorten them.
+     * ireptodbg.cc: Fix indent.
+2019-05-24 David Anderson
+     * Makefile.am: Delete mention of config.h.in.cmake.
+     * Makefile.in: Regenerate.
+2019-05-22 David Anderson
+     * dwarfgen.cc: Add ifdef/endif around include <stdint.h>
+2019-05-20 David Anderson
+     * CMakeLists.txt: No longer generates a local-build-dir
+       config.h
+     * config.h.in.cmake: Deleted.
+2019-05-20 David Anderson
+     * CMakeLists.txt: Reflects new option naming. Adds
+       compiler warning options.
+     * config.h.in.cmake: Adds needed standard defines such
+       as cmakedefine DWARF_WITH_LIBELF.
+     * createirepformfrombinary.cc,createirepfrombinary.cc:
+       Add/remove comments for readability.
+2019-05-14 David Anderson
+     * irepframe.h: Modified an argument name to avoid
+       shadowing a class-local function name. Avoiding
+       a compiler warning.
+2019-05-13 David Anderson
+     * dwarfgen.cc: A bug in a macro shows up only
+       on big-endian systems. This fixes it.
+2019-05-07 David Anderson
+     * CMakeLists.txt: Deleted a debugging message().
+2019-05-01 David Anderson
+     * configure.cmake: Deleted.
+     * CMakeLists.txt: Now does its configure_file on its own.
+2019-05-01 David Anderson
+     * configure.cmake: Removed some lines, placing them in
+       base directory configure.cmake.
+2019-04-28 David Anderson
+     * config.h.in.cmake, configure.cmake: Deleted all reference to
+       INT32 and INT64 as no longer needed.
+2019-04-26 David Anderson
+     * config.h.in.cmake,configure.cmake: Now deals with
+       latest cmake libdwarf options.
+2019-04-25 David Anderson
+     * createirepfrombinary.cc: Corrected the test for _MSC_VER.
+2019-04-22 David Anderson
+     * createirepfrombinary.cc: Add test for _MSC_VER for Windows MSVC.
+2019-03-07 David Anderson
+     * irepdie.h: The IRAttr assignment constructor
+       had a memory leak. Fixed.
+     * general.h: Added #ifndef GENERAL_H to make inclusion
+       idempotent.
+     * ireptodbg.cc: Using new IRAattr member function
+       dropFormData to ensure immediate delete of formdata_.
+       Not really needed since it would eventually be
+       delete-d anyway by the destructor.
+2019-03-04 David Anderson
+     * dwarfgen.cc: Updated the comment about the libdwarf interface
+       call return values.
+     * irepattrtodbg.cc: Changed the libdwarf producer function calls
+       to be the newer version returning an int as that version
+       is simpler to work with. The old interfaces still exist
+       and work the same as always.
+     * irepdie.h: setFormData() was failing to account for
+       a replacement value of formdata_, which could leak
+       memory.
+     * ireptodbg.cc: Replaced calls to libdwarf producer that
+       returned DW_DLV_NOCOUNT or DW_DLV_BADADDR with the ones
+       returning an int for improved readability of the code.
+       The old functions still exist and work as always but
+       we're not using them here.
+2019-02-18 David Anderson
+     * configure.cmake: Now defines DWARF_WITH_LIBELF
+       for consistency with other cmake files.
+     * dwarfgen.cc: Trivial comment correction.
+2019-02-12 David Anderson
+     * dwarfgen.cc: The new option --add-sun-func-offsets
+       tests whether the DW_AT_SUN_func_offsets data can
+       be written (and later read) properly.
+     * general.h: Added bool addSUNfuncoffsets.
+     * irepattrtodbg.cc: Now we handle DW_FORM_CLASS_BLOCK.
+     * irepform.h: Refine IRFormBlock to make it usable.
+     * ireptodbg.cc: When requested, add a
+       DW_AT_SUN_func_offsets attribute to a compile unit.
+2019-02-08 David Anderson
+     * ireptodbg.cc: std::list<Dwarf_Unsigned> adval
+       was using a non-portable initializer. Now using
+       standard C++ list initializer.
+2019-01-31 David Anderson
+     * dwarfgen.cc,dwarfgen/ireptodbg.cc: Fixing issues
+       reported by the llvm scan-build tool.
+2019-01-20 David Anderson
+     * dwarfgen.cc: Remove use of uint32_t and uint64_t
+       and use Dwarf_Unsigned for arithmetic.
+2019-01-14 David Anderson
+     * createirepfrombinary.cc: Made a partial step toward
+       being able to read eh_frame, but those few lines
+       are ignored for now.
+     * dwarfgen.cc,general.h: Adding --add-frame-advance-loc option
+       which causes testing of the new DW_CFA_advance_loc
+       emitting code (better portability of the code).
+     * irepframe.h: Changed index results from signed
+       to unsigned. Negative values never meant anything.
+     * irepresentation.h: Added code for eh_frame.
+     * ireptodbg.cc: We now use the improved DW_DLV_OK
+       producer calls so we changed away from allowing
+       indexes to be negative, we do not need to allow
+       that any longer.  Now uses the latest libdwarf
+       producer calls for frame data.
+       If --add-frame-advance-loc then emit particular
+       values of advance_loc to test the code paths
+       in the DW_CFA_advance_loc* logic.
+       We create a whole new cie/fde pair for  the new
+       fde testing output.
+2019-01-02 David Anderson
+     * ChangeLog: Renamed ChangeLog2018
+     * Makefile.am: Addec ChangeLog2018 to dist files.

@@ -83,14 +83,22 @@ void idFieldWindow::CalcPaintOffset(int len)
 	lastCursorPos = cursorPos;
 	lastTextLength = len;
 	paintOffset = 0;
+#ifdef _RAVEN // add adjust spacing
+	int tw = dc->TextWidth(text, textScale, -1, textSpacing);
+#else
 	int tw = dc->TextWidth(text, textScale, -1);
+#endif
 
 	if (tw < textRect.w) {
 		return;
 	}
 
 	while (tw > textRect.w && len > 0) {
+#ifdef _RAVEN // add adjust spacing
+		tw = dc->TextWidth(text, textScale, --len, textSpacing);
+#else
 		tw = dc->TextWidth(text, textScale, --len);
+#endif
 		paintOffset++;
 	}
 }

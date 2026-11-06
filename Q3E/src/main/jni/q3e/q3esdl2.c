@@ -18,6 +18,11 @@
 #define LOG_TAG "Q3E::SDL"
 
 #define Q3E_SDL_FAKE_CUSTOM_CURSOR 1
+#if 1
+#define Q3E_SDL_STUB_FUNCTION(...)
+#else
+#define Q3E_SDL_STUB_FUNCTION LOGW
+#endif
 #define SDL_HINT_EGL_Q3E_SPECIAL_CONFIG "SDL_HINT_EGL_Q3E_SPECIAL_CONFIG"
 
 #define GET_JNI(env) JNIEnv *env = Q3E_GetEnv();
@@ -143,7 +148,7 @@ void clipboardSetText(const char *text)
 static int mLastCursorID = 0;
 int createCustomCursor(int *pixels, int w, int h, int x, int y)
 {
-    LOGW("Q3E SDL createCustomCursor(%p, %d, %d, %d, %d) -> not supported!", pixels, w, h, x, y);
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL createCustomCursor(%p, %d, %d, %d, %d) -> not supported!", pixels, w, h, x, y);
 #ifdef Q3E_SDL_FAKE_CUSTOM_CURSOR
     return ++mLastCursorID;
 #else
@@ -153,7 +158,7 @@ int createCustomCursor(int *pixels, int w, int h, int x, int y)
 
 void destroyCustomCursor(int id)
 {
-    LOGW("Q3E SDL destroyCustomCursor(%d) -> not supported!", id);
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL destroyCustomCursor(%d) -> not supported!", id);
 }
 
 void * getContext()
@@ -245,7 +250,7 @@ int setActivityTitle(const char *title)
 
 int setCustomCursor(int cursorID)
 {
-    LOGW("Q3E SDL setCustomCursor(%d) -> not supported!", cursorID);
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL setCustomCursor(%d) -> not supported!", cursorID);
 #ifdef Q3E_SDL_FAKE_CUSTOM_CURSOR
     return Q3E_TRUE;
 #else
@@ -265,7 +270,7 @@ int shouldMinimizeOnFocusLoss()
 
 int showTextInput(int x, int y, int w, int h)
 {
-    LOGW("Q3E SDL showTextInput(%d, %d, %d, %d) -> not supported!", x, y, w, h);
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL showTextInput(%d, %d, %d, %d) -> not supported!", x, y, w, h);
     return Q3E_FALSE;
 }
 
@@ -276,7 +281,7 @@ int supportsRelativeMouse()
 
 int setSystemCursor(int cursorID)
 {
-    LOGW("Q3E SDL setSystemCursor(%d) -> not supported!", cursorID);
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL setSystemCursor(%d) -> not supported!", cursorID);
 #ifdef Q3E_SDL_FAKE_CUSTOM_CURSOR
     return Q3E_TRUE;
 #else
@@ -302,19 +307,19 @@ int getManifestEnvironmentVariables()
 
 int * getAudioOutputDevices()
 {
-    LOGW("Q3E SDL getAudioOutputDevices() -> not supported!");
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL getAudioOutputDevices() -> not supported!");
     return NULL;
 }
 
 int * getAudioInputDevices()
 {
-    LOGW("Q3E SDL getAudioInputDevices() -> not supported!");
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL getAudioInputDevices() -> not supported!");
     return NULL;
 }
 
 int * audioOpen(int freq, int audioformat, int channels, int samples, int device_id)
 {
-    LOGW("Q3E SDL audioOpen(%d, %d, %d, %d, %d) -> not supported!", freq, audioformat, channels, samples, device_id);
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL audioOpen(%d, %d, %d, %d, %d) -> not supported!", freq, audioformat, channels, samples, device_id);
     return NULL;
 }
 
@@ -335,12 +340,12 @@ void audioWriteFloatBuffer(float *buf)
 
 void audioClose()
 {
-    LOGW("Q3E SDL audioClose() -> not supported!");
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL audioClose() -> not supported!");
 }
 
 int * captureOpen(int freq, int audioformat, int channels, int samples, int device_id)
 {
-    LOGW("Q3E SDL captureOpen(%d, %d, %d, %d, %d) -> not supported!", freq, audioformat, channels, samples, device_id);
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL captureOpen(%d, %d, %d, %d, %d) -> not supported!", freq, audioformat, channels, samples, device_id);
     return NULL;
 }
 
@@ -361,13 +366,11 @@ int captureReadFloatBuffer(float *buf, int b)
 
 void captureClose()
 {
-    LOGW("Q3E SDL captureClose() -> not supported!");
+    Q3E_SDL_STUB_FUNCTION("Q3E SDL captureClose() -> not supported!");
 }
 
 void audioSetThreadPriority(int iscapture, int device_id)
 {
-    //LOGW("Q3E SDL audioSetThreadPriority(%d, %d) -> not supported!", iscapture, device_id);
-
     GET_JNI(env)
     int res = 0;
 
@@ -422,8 +425,6 @@ void audioSetThreadPriority(int iscapture, int device_id)
     //}
 
     res = 1;
-
-    //LOGW("Q3E SDL audioSetThreadPriority(%d, %d) -> not supported!", iscapture, device_id);
 
 _Exit:
     thread_id = (*env)->CallLongMethod(env, thread, getId);

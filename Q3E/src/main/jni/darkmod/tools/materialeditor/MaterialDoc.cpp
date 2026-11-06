@@ -683,17 +683,17 @@ void MaterialDoc::ParseMaterial(idLexer* src) {
 		if ( !token.Icmp( "diffusemap" ) ) {
 			//Added as a special stage
 			idStr str;
-			src->ReadRestOfLine( str );
+			src->ReadRestOfLineUnp( &str );
 			AddSpecialMapStage("diffusemap", str);
 		}
 		else if ( !token.Icmp( "specularmap" ) ) {
 			idStr str;
-			src->ReadRestOfLine( str );
+			src->ReadRestOfLineUnp( &str );
 			AddSpecialMapStage("specularmap", str);
 		}
 		else if ( !token.Icmp( "bumpmap" ) ) {
 			idStr str;
-			src->ReadRestOfLine( str );
+			src->ReadRestOfLineUnp( &str );
 			AddSpecialMapStage("bumpmap", str);
 		}
 		else if( token == "{" ) {
@@ -735,7 +735,7 @@ void MaterialDoc::ParseStage(idLexer* src) {
 		if(!token.Icmp("name")) {
 
 			idStr str;
-			src->ReadRestOfLine( str );
+			src->ReadRestOfLineUnp( &str );
 			str.StripTrailing('\"');
 			str.StripLeading('\"');
 			newStage->stageData.Set("name", str);
@@ -783,7 +783,7 @@ bool MaterialDoc::ParseMaterialDef(idToken* token, idLexer* src, int type, idDic
 					case MaterialDef::MATERIAL_DEF_TYPE_STRING:
 						{
 							idStr str;
-							src->ReadRestOfLine( str );
+							src->ReadRestOfLineUnp( &str );
 							if((*defs)[i]->quotes) {
 								str.StripTrailing('\"');
 								str.StripLeading('\"');
@@ -800,14 +800,14 @@ bool MaterialDoc::ParseMaterialDef(idToken* token, idLexer* src, int type, idDic
 					case MaterialDef::MATERIAL_DEF_TYPE_FLOAT:
 						{
 							idStr str;
-							src->ReadRestOfLine( str );
+							src->ReadRestOfLineUnp( &str );
 							dict->Set((*defs)[i]->dictName, str);
 						}
 						break;
 					case MaterialDef::MATERIAL_DEF_TYPE_INT:
 						{
 							idStr str;
-							src->ReadRestOfLine( str );
+							src->ReadRestOfLineUnp( &str );
 							dict->Set((*defs)[i]->dictName, str);
 						}
 						break;

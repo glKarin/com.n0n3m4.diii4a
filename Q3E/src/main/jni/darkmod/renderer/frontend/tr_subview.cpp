@@ -25,6 +25,13 @@ idCVar r_subviewMaxDepth(
 	"How many nested subviews to generate at most (#6434).\n"
 	"For instance: value = 1 means that direct mirrors and remotes are rendered, but all subviews nested inside them are black."
 );
+idCVar r_remoteLimitResolutionByScreenSize(
+	"r_remoteLimitResolutionByScreenSize", "1.0", CVAR_RENDERER | CVAR_FLOAT,
+	"Reduce resolution of remote subview when it is small on screen.\n"
+	"Size ratio (screen pixel / remote pixel) does not exceed X.\n"
+	"Value X = 0 disable this optimization.",
+	0.0f, 10.0f
+);
 
 
 typedef struct {
@@ -68,6 +75,42 @@ static void R_MirrorVector( const idVec3 in, orientation_t *surface, orientation
 		d = in * surface->axis[i];
 		out += d * camera->axis[i];
 	}
+}
+
+/*
+=============
+R_EstimatePositionByTexcoordDerivsOfSurface
+
+Computes derivatives of 3D position by texcoord.
+We combine them with "pixels per doom-unit" kind of resolution to known resolution in pixels.
+=============
+*/
+static idVec2 R_EstimatePositionByTexcoordDerivsOfSurface ( const srfTriangles_t *tri ) {
+	idVec2 maxDerivs;
+	maxDerivs.Zero();
+
+	for ( int i = 0; i < tri->numIndexes / 3; i++ ) {
+		const idDrawVert &v0 = tri->verts[tri->indexes[3 * i + 0]];
+		const idDrawVert &v1 = tri->verts[tri->indexes[3 * i + 1]];
+		const idDrawVert &v2 = tri->verts[tri->indexes[3 * i + 2]];
+
+		idMat2 dt( v1.st - v0.st, v2.st - v0.st );
+		dt.TransposeSelf();
+		dt.InverseSelf();
+
+		idVec3 dp01 = v1.xyz - v0.xyz;
+		idVec3 dp02 = v2.xyz - v0.xyz;
+
+		idVec3 derivS = dt[0][0] * dp01 + dt[1][0] * dp02;
+		idVec3 derivT = dt[0][1] * dp01 + dt[1][1] * dp02;
+
+		maxDerivs.x = idMath::Fmax( maxDerivs.x, derivS.LengthSqr() );
+		maxDerivs.y = idMath::Fmax( maxDerivs.y, derivT.LengthSqr() );
+	}
+	maxDerivs.x = idMath::Sqrt( maxDerivs.x );
+	maxDerivs.y = idMath::Sqrt( maxDerivs.y );
+
+	return maxDerivs;
 }
 
 /*
@@ -218,7 +261,8 @@ static viewDef_t *R_MirrorViewBySurface( drawSurf_t *drawSurf ) {
 	parms->unlockedRenderView = nullptr;
 
 	parms->isSubview = true;
-	parms->isMirror = true;
+	parms->isMirrorGen = true;
+	parms->isMirrorInverted = true;
 	parms->isPortalSky = false;
 	parms->isXray = false;
 	parms->xrayEntityMask = XR_IGNORE;
@@ -274,8 +318,8 @@ static viewDef_t *R_XrayView() {
 	parms->isXray = true;
 	parms->isSubview = true;
 	parms->isPortalSky = false;
+	parms->isMirrorGen = false;
 	parms->xrayEntityMask = XR_ONLY;
-
 
 	return parms;
 }
@@ -285,11 +329,12 @@ static viewDef_t *R_XrayView() {
 R_RemoteRender
 ===============
 */
-static void R_RemoteRender( drawSurf_t *surf, textureStage_t *stage ) {
-
+static void R_RemoteRender( drawSurf_t *surf, textureStage_t *stage, const idBounds *ndcBounds ) {
 	// if the entity doesn't have a remoteRenderView, do nothing
 	if ( !surf->space->entityDef->parms.remoteRenderView ) 
 		return;
+
+	TRACE_CPU_SCOPE( "R_RemoteRender" );
 
 	// copy the viewport size from the original
 	viewDef_t* parms = (viewDef_t *)R_FrameAlloc( sizeof( *parms ) );
@@ -297,10 +342,11 @@ static void R_RemoteRender( drawSurf_t *surf, textureStage_t *stage ) {
 	parms->unlockedRenderView = nullptr;
 
 	parms->isSubview = true;
-	parms->isMirror = false;
+	parms->isMirrorGen = false;
+	parms->isMirrorInverted = false;
 	parms->isPortalSky = false;
 	parms->isXray = false;
-		// if we see remote screen in mirror, drop mirror's clip plane
+	// if we see remote screen in mirror, drop mirror's clip plane
 	parms->numClipPlanes = 0;
 	parms->xrayEntityMask = XR_IGNORE;
 
@@ -308,7 +354,44 @@ static void R_RemoteRender( drawSurf_t *surf, textureStage_t *stage ) {
 	parms->renderView.viewID = VID_SUBVIEW;	// clear to allow player bodies to show up, and suppress view weapons
 	parms->initialViewAreaOrigin = parms->renderView.vieworg;
 
-	tr.CropRenderSize( stage->width, stage->height );
+	idVec2 positionByTexcoordDerivs = R_EstimatePositionByTexcoordDerivsOfSurface( surf->frontendGeo );
+
+	// #5485: if 3D resolution is set, multiply it by position/texcoord derivatives magnitude
+	idVec2 resolution = idVec2( FLT_MAX, FLT_MAX );
+	if ( stage->remoteResolutionWorld >= 0.0f ) {
+		resolution = positionByTexcoordDerivs * stage->remoteResolutionWorld;
+	}
+
+	if ( r_remoteLimitResolutionByScreenSize.GetFloat() > 0.0 && ndcBounds ) {
+		// estimate upper bound on "screen pixel to 3D distance" derivatives
+		const idRenderMatrix &proj = tr.viewDef->projectionRenderMatrix;
+		// note: R_GlobalToNormalizedDeviceCoordinates actually returns depth in [0..1]
+		float minDepth = (*ndcBounds)[0].z;
+		float minViewDistance = proj.DepthToZ( minDepth );	// viewZ negated!
+		float minClipW = proj[3][3] - proj[3][2] * minViewDistance;
+		idVec2 ndcMaxDeriv = idVec2( proj[0][0], proj[1][1] ) / minViewDistance;
+		int cropW, cropH;
+		tr.GetCurrentRenderCropSize( cropW, cropH );
+		idVec2 pixelMaxDeriv = ndcMaxDeriv * 0.5f;
+		pixelMaxDeriv.MulCW( idVec2( cropW, cropH ) );
+		// limit remote subview resolution by our current screen resolution
+		idVec2 pixelByTexcoordDeriv = idMath::Fmax( pixelMaxDeriv[0], pixelMaxDeriv[1] ) * positionByTexcoordDerivs;
+		idVec2 capResolution = pixelByTexcoordDeriv * r_remoteLimitResolutionByScreenSize.GetFloat();
+		if ( idMath::Fmax( capResolution.x, capResolution.y ) < (1 << 16)) {
+			// round vertical resolution to power-of-two so that resolution does not change all the time on move
+			// constant changes in remote resolution increase aliasing effects
+			int vertPot = idMath::CeilPowerOfTwo( int( capResolution.y ) );
+			capResolution *= vertPot / capResolution.x;
+			resolution.MinCW( capResolution );
+		}
+	}
+
+	// limit effective resolution by the explicit numbers
+	resolution.Clamp( idVec2( 1, 1 ), idVec2( stage->remoteWidth, stage->remoteHeight ) );
+	int resW = (int) idMath::Ceil( resolution.x );
+	int resH = (int) idMath::Ceil( resolution.y );
+
+	tr.CropRenderSize( resW, resH, false, true );
 
 	parms->renderView.x = 0;
 	parms->renderView.y = 0;
@@ -349,7 +432,29 @@ void R_MirrorRender( drawSurf_t *surf, textureStage_t *stage, idScreenRect& scis
 		return;
 	}
 
-	//tr.CropRenderSize( stage->width, stage->height, true, true );
+	TRACE_CPU_SCOPE( "R_MirrorRender" );
+
+	// #5485: find the 'root' view to read main resolution from
+	// it is usually the main view, but it can be remote subview as well
+	int rootW = 0, rootH = 0;
+	for ( viewDef_t *view = tr.viewDef; view; view = view->superView )
+		if ( !view->isMirrorGen ) {
+			rootW = view->viewport.GetWidth();
+			rootH = view->viewport.GetHeight();
+			break;
+		}
+	// compute resolution based on this subview parameters
+	float resolutionFactor = stage->mirrorResolutionFactor;
+	int thisW = (int) idMath::Ceil( resolutionFactor * rootW );
+	int thisH = (int) idMath::Ceil( resolutionFactor * rootH );
+	// but never make it more detailed than the current view
+	// so, full-resolution mirror in low-res water surface will still be rendered low-res
+	int cropW, cropH;
+	tr.GetCurrentRenderCropSize( cropW, cropH );
+	thisW = idMath::Imin( thisW, cropW );
+	thisH = idMath::Imin( thisH, cropH );
+
+	tr.CropRenderSize( thisW, thisH, false, true );
 
 	parms->renderView.x = 0;
 	parms->renderView.y = 0;
@@ -358,13 +463,22 @@ void R_MirrorRender( drawSurf_t *surf, textureStage_t *stage, idScreenRect& scis
 
 	tr.RenderViewToViewport( parms->renderView, parms->viewport );
 
-	parms->scissor = scissor;
+	parms->scissor.x1 = scissor.x1 * thisW / cropW;
+	parms->scissor.y1 = scissor.y1 * thisH / cropH;
+	parms->scissor.x2 = scissor.x2 * thisW / cropW;
+	parms->scissor.y2 = scissor.y2 * thisH / cropH;
+
+	renderCrop_t copyScissor;
+	copyScissor.x = parms->scissor.x1;
+	copyScissor.y = parms->scissor.y1;
+	copyScissor.width = parms->scissor.GetWidth();
+	copyScissor.height = parms->scissor.GetHeight();
 
 	parms->superView = tr.viewDef;
 	parms->subviewSurface = surf;
 
 	// triangle culling order changes with mirroring
-	parms->isMirror = (((int)parms->isMirror ^ (int)tr.viewDef->isMirror) != 0);
+	parms->isMirrorInverted = (((int)parms->isMirrorInverted ^ (int)tr.viewDef->isMirrorInverted) != 0);
 
 	// generate render commands for it
 	R_RenderView( *parms );
@@ -372,10 +486,11 @@ void R_MirrorRender( drawSurf_t *surf, textureStage_t *stage, idScreenRect& scis
 	// copy this rendering to the image
 	stage->image = nullptr;
 	idImageScratch *outputTexture = tr.CreateImageForSubview();
-	tr.CaptureRenderToImage( *outputTexture );
+	// TODO: optimize by copying only the scissor
+	tr.CaptureRenderToImage( *outputTexture, &copyScissor );
 	surf->dynamicImageOverride = outputTexture;
 
-	//tr.UnCrop();
+	tr.UnCrop();
 }
 
 /*
@@ -384,6 +499,8 @@ R_PortalRender
 =================
 */
 void R_PortalRender() {
+	TRACE_CPU_SCOPE( "R_PortalRender" );
+
 	viewDef_t		*parms;
 	parms = (viewDef_t *)R_FrameAlloc( sizeof( *parms ) );
 	*parms = *tr.viewDef;
@@ -394,6 +511,7 @@ void R_PortalRender() {
 	parms->superView = tr.viewDef;
 	parms->subviewSurface = nullptr;
 	parms->isPortalSky = true;
+	parms->isMirrorGen = false;
 
 	parms->renderView.viewaxis = parms->renderView.viewaxis * gameLocal.GetLocalPlayer()->playerView.ShakeAxis();
 
@@ -439,7 +557,7 @@ void R_PortalRender() {
 		// set up viewport, adjusted for resolution and OpenGL style 0 at the bottom
 		tr.RenderViewToViewport( parms->renderView, parms->viewport );
 
-		if ( tr.viewDef->isMirror ) {
+		if ( tr.viewDef->isMirrorInverted ) {
 			parms->scissor = tr.viewDef->scissor; // mirror in an area that has sky, limit to mirror rect only
 		} else {
 			parms->scissor.x1 = 0;
@@ -457,9 +575,9 @@ void R_PortalRender() {
 		idVec3	cross;
 		cross = parms->renderView.viewaxis[1].Cross( parms->renderView.viewaxis[2] );
 		if ( cross * parms->renderView.viewaxis[0] > 0 ) {
-			parms->isMirror = false;
+			parms->isMirrorInverted = false;
 		} else {
-			parms->isMirror = true;
+			parms->isMirrorInverted = true;
 		}
 
 		R_RenderView( *parms );
@@ -479,12 +597,13 @@ R_XrayRender
 =================
 */
 void R_XrayRender( drawSurf_t *surf, textureStage_t *stage, idImageScratch **imageOverride ) {
+	TRACE_CPU_SCOPE( "R_XrayRender" );
+
 	// issue a new view command
 	viewDef_t *parms = R_XrayView();
 	assert( parms );
 
-
-	if ( stage->width ) { // FIXME wrong field use?
+	if ( stage->xrayInclusive ) {
 		parms->xrayEntityMask = XR_SUBSTITUTE;
 	}
 
@@ -506,8 +625,7 @@ void R_XrayRender( drawSurf_t *surf, textureStage_t *stage, idImageScratch **ima
 	parms->subviewSurface = surf;
 
 	// triangle culling order changes with mirroring
-	parms->isMirror = ( ( (int)parms->isMirror ^ (int)tr.viewDef->isMirror ) != 0 );
-
+	parms->isMirrorInverted = ( ( (int)parms->isMirrorInverted ^ (int)tr.viewDef->isMirrorInverted ) != 0 );
 
 	// generate render commands for it
 	R_RenderView( *parms );
@@ -529,13 +647,14 @@ R_Lightgem_Render
 =================
 */
 bool R_Lightgem_Render() {
-	// issue a new view command
+	TRACE_CPU_SCOPE( "R_Lightgem_Render" );
 
 	// copy the viewport size from the original
 	auto &parms = *(viewDef_t *)R_FrameAlloc( sizeof( viewDef_t ) );
 	parms = *tr.viewDef;
 	parms.unlockedRenderView = nullptr;
 	parms.isSubview = true;
+	parms.isMirrorGen = false;
 
 	// Get position for lg
 	idEntity* lg = gameLocal.m_lightGem.m_LightgemSurface.GetEntity();
@@ -718,7 +837,7 @@ bool	R_GenerateSurfaceSubview( drawSurf_t *drawSurf ) {
 			const shaderStage_t	*stage = shader->GetStage( i );
 			switch ( stage->texture.dynamic ) {
 			case DI_REMOTE_RENDER:
-				R_RemoteRender( drawSurf, const_cast<textureStage_t *>(&stage->texture) );
+				R_RemoteRender( drawSurf, const_cast<textureStage_t *>(&stage->texture), &ndcBounds );
 				break;
 			case DI_MIRROR_RENDER:
 				R_MirrorRender( drawSurf, const_cast<textureStage_t *>(&stage->texture), scissor );
@@ -761,7 +880,7 @@ bool R_GenerateSubViews( void ) {
 
 	// nbohr1more: fix compass render error with Xray
 	if (tr.viewDef->renderWorld->mapName.IsEmpty()) {
-	    return false;
+		return false;
 	}
 
 	bool subviews = false;
@@ -804,12 +923,16 @@ bool R_GenerateSubViews( void ) {
 		}
 	}
 
+	// generate subviews for GUI overlays (from main view only)
 	if ( !tr.viewDef->isSubview ) {
-		// generate subviews for GUI overlays (from main view only)
-		if ( const textureStage_t *textureStage = tr.guiModel->NeedXraySubview() ) {
+		// note: the image which will receive Xray subview is passed into idGuiModel::ProcessOverlaySubviews
+		// that function will substitute virtual dynamic Xray texture with the actual scratch texture to display
+		tr.xrayGuiImageOverride = nullptr;
+
+		if ( const textureStage_t *textureStage = tr.viewDef->renderWorld->xrayGuiOverlayStage ) {
 			idImageScratch *imageOverride;
 			R_XrayRender( nullptr, const_cast<textureStage_t *>(textureStage), &imageOverride );
-			tr.guiModel->SetXrayImageOverride( imageOverride );
+			tr.xrayGuiImageOverride = imageOverride;
 			subviews = true;
 		}
 	}

@@ -70,10 +70,10 @@ const char* Sys_EXEPath()
 Sys_ClockTicksPerSecond
 ===============
 */
-double Sys_ClockTicksPerSecond()
+uint64 Sys_ClockTicksPerSecond()
 {
 	static bool		init = false;
-	static double	ret;
+	static uint64	ret;
 	
 	int		fd, len, pos, end;
 	char	buf[ 4096 ];
@@ -114,7 +114,7 @@ double Sys_ClockTicksPerSecond()
 				common->Printf( "measured CPU frequency: %g MHz\n", ret / 1000000.0 );
 				return ret;
 			}
-			common->Printf( "/proc/cpuinfo CPU frequency: %g MHz\n", ret );
+			common->Printf( "/proc/cpuinfo CPU frequency: %g MHz\n", ret * 1.0 );
 			ret *= 1000000;
 			init = true;
 			return ret;

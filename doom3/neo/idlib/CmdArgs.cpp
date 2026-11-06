@@ -34,6 +34,20 @@ If you have questions concerning this license or the applicable additional terms
 idCmdArgs::operator=
 ============
 */
+#ifdef _SPLASHDAMAGE
+idCmdArgs& idCmdArgs::operator=( const idCmdArgs& rhs )
+{
+    argc = rhs.argc;
+    memcpy( tokenized, rhs.tokenized, sizeof( tokenized ) );
+
+    int i;
+    for ( i = 0; i < argc; i++ ) {
+        argv[ i ] = ( rhs.argv[ i ] - rhs.tokenized ) + tokenized;
+    }
+
+    return *this;
+}
+#else
 void idCmdArgs::operator=(const idCmdArgs &args)
 {
 	int i;
@@ -45,6 +59,7 @@ void idCmdArgs::operator=(const idCmdArgs &args)
 		argv[ i ] = tokenized + (args.argv[ i ] - args.tokenized);
 	}
 }
+#endif
 
 /*
 ============
@@ -84,7 +99,11 @@ const char *idCmdArgs::Args(int start, int end, bool escapeArgs) const
 				if (*p == '\\') {
 					strcat(cmd_args, "\\\\");
 				} else {
+#ifdef _SPLASHDAMAGE
+                    int l = idStr::Length( cmd_args );
+#else
 					int l = strlen(cmd_args);
+#endif
 					cmd_args[ l ] = *p;
 					cmd_args[ l+1 ] = '\0';
 				}
@@ -126,18 +145,26 @@ void idCmdArgs::TokenizeString(const char *text, bool keepAsStrings)
 		return;
 	}
 
+#if !defined(_SPLASHDAMAGE)
 	lex.LoadMemory(text, strlen(text), "idCmdSystemLocal::TokenizeString");
+#endif
 	lex.SetFlags(LEXFL_NOERRORS
 	             | LEXFL_NOWARNINGS
 	             | LEXFL_NOSTRINGCONCAT
 	             | LEXFL_ALLOWPATHNAMES
 	             | LEXFL_NOSTRINGESCAPECHARS
 	             | LEXFL_ALLOWIPADDRESSES | (keepAsStrings ? LEXFL_ONLYSTRINGS : 0));
+#ifdef _SPLASHDAMAGE
+    lex.LoadMemory( text, idStr::Length( text ), "idCmdArgs::TokenizeString" );
+#endif
 
 	totalLen = 0;
 
 	while (1) {
 		if (argc == MAX_COMMAND_ARGS) {
+#ifdef _SPLASHDAMAGE
+            idLib::common->Warning( "idCmdArgs::TokenizeString : MAX_COMMAND_ARGS hit" );
+#endif
 			return;			// this is usually something malicious
 		}
 
@@ -175,7 +202,16 @@ void idCmdArgs::TokenizeString(const char *text, bool keepAsStrings)
 		argv[argc] = tokenized + totalLen;
 		argc++;
 
+#ifdef _SPLASHDAMAGE
+        // mac version indicated possible buffer overflow
+        int len = sizeof( tokenized ) - totalLen;
+        if ( len > token.Length() + 1 ) {
+            len = token.Length() + 1;
+        }
+        idStr::Copynz( tokenized + totalLen, token.c_str(), len );
+#else
 		idStr::Copynz(tokenized + totalLen, token.c_str(), sizeof(tokenized) - totalLen);
+#endif
 
 		totalLen += len + 1;
 	}
@@ -193,8 +229,13 @@ void idCmdArgs::AppendArg(const char *text)
 		argv[ 0 ] = tokenized;
 		idStr::Copynz(tokenized, text, sizeof(tokenized));
 	} else {
+#ifdef _SPLASHDAMAGE
+        argv[ argc ] = argv[ argc - 1 ] + idStr::Length( argv[ argc - 1 ] ) + 1;
+        idStr::Copynz( argv[ argc ], text, static_cast< int >( sizeof( tokenized ) ) - ( argv[ argc ] - tokenized ) );
+#else
 		argv[ argc ] = argv[ argc-1 ] + strlen(argv[ argc-1 ]) + 1;
 		idStr::Copynz(argv[ argc ], text, sizeof(tokenized) - (argv[ argc ] - tokenized));
+#endif
 		argc++;
 	}
 }

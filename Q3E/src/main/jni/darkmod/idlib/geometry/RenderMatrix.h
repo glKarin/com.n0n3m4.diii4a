@@ -587,10 +587,10 @@ ID_INLINE float idRenderMatrix::DepthToZ( float depth ) const
 	assert( m[8] == 0.0f && m[9] == 0.0f && m[12] == 0.0f && m[13] == 0.0f );
 	assert( m[14] == -1.0f && m[15] == 0.0f );
 
-	float clipZ = 2.0 * depth - 1.0;
+	float ndcZ = 2.0 * depth - 1.0;
 	float A = m[10];
 	float B = m[11];
-	return B / (A + clipZ);
+	return B / (A + ndcZ);
 }
 
 #endif // !__RENDERMATRIX_H__

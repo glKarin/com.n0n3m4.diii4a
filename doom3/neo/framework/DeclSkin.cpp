@@ -29,6 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "../idlib/precompiled.h"
 #pragma hdrstop
 
+#ifdef _SPLASHDAMAGE
+#include "framework/DeclParseHelper.h"
+#endif
+
 
 /*
 =================
@@ -61,11 +65,21 @@ bool idDeclSkin::Parse(const char *text, const int textLength, bool noCaching)
 bool idDeclSkin::Parse(const char *text, const int textLength)
 #endif
 {
+#ifdef _SPLASHDAMAGE //karin: using idParser instead of idLexer
+	idParser src;
+#else
 	idLexer src;
+#endif
 	idToken	token, token2;
 
+#ifdef _SPLASHDAMAGE
+	src.SetFlags(DECL_LEXER_FLAGS);
+	//src.LoadMemory( text, textLength, GetFileName(), GetLineNum() );
+	sdDeclParseHelper declHelper( this, text, textLength, src );
+#else
 	src.LoadMemory(text, textLength, GetFileName(), GetLineNum());
 	src.SetFlags(DECL_LEXER_FLAGS);
+#endif
 	src.SkipUntilString("{");
 
 	associatedModels.Clear();
@@ -197,3 +211,15 @@ const idMaterial *idDeclSkin::RemapShaderBySkin(const idMaterial *shader) const
 	// didn't find a match or wildcard, so stay the same
 	return shader;
 }
+
+#ifdef _SPLASHDAMAGE
+void idDeclSkin::CacheFromDict( const idDict& dict ) {
+	const idKeyValue* kv = NULL;
+
+	while( kv = dict.MatchPrefix( "ragdoll", kv ) ) {
+		if ( kv->GetValue().Length() ) {
+			declSkinType[ kv->GetValue() ];
+		}
+	}
+}
+#endif

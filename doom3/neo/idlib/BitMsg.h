@@ -49,6 +49,11 @@ class idBitMsg
 
 		void			Init(byte *data, int length);
 		void			Init(const byte *data, int length);
+#ifdef _SPLASHDAMAGE
+	    void			InitWrite( byte *data, int length );		// both read & write
+	    void			InitRead( const byte *data, int length );	// read only
+	    
+#endif
 		byte 			*GetData(void);						// get data for writing
 		const byte 	*GetData(void) const;					// get data for reading
 		int				GetMaxSize(void) const;				// get the maximum message size
@@ -77,6 +82,9 @@ class idBitMsg
 		int				GetRemainingSpace(void) const;		// space left in bytes
 		void			WriteByteAlign(void);					// write up to the next byte boundary
 		void			WriteBits(int value, int numBits);	// write the specified number of bits
+#ifdef _SPLASHDAMAGE
+    	void			WriteBool( bool c );
+#endif
 		void			WriteChar(int c);
 		void			WriteByte(int c);
 		void			WriteShort(int c);
@@ -90,28 +98,49 @@ class idBitMsg
 // #endif
 		void			WriteFloat(float f);
 		void			WriteFloat(float f, int exponentBits, int mantissaBits);
+#ifdef _SPLASHDAMAGE
+	    void			WriteCQuat( const idCQuat& quat );
+	    void			WriteVector( const idVec3& vec );
+#endif
 		void			WriteAngle8(float f);
 		void			WriteAngle16(float f);
 		void			WriteDir(const idVec3 &dir, int numBits);
 		void			WriteString(const char *s, int maxLength = -1, bool make7Bit = true);
+#ifdef _SPLASHDAMAGE
+    	void			WriteString( const wchar_t *s, int maxLength = -1 );
+#endif
 		void			WriteData(const void *data, int length);
 		void			WriteNetadr(const netadr_t adr);
 
 		void			WriteDeltaChar(int oldValue, int newValue);
 		void			WriteDeltaByte(int oldValue, int newValue);
 		void			WriteDeltaShort(int oldValue, int newValue);
+#ifdef _SPLASHDAMAGE
+    	void			WriteDeltaUShort( int oldValue, int newValue );
+#endif
 		void			WriteDeltaLong(int oldValue, int newValue);
+#ifdef _SPLASHDAMAGE
+	    void			WriteDeltaCQuat( const idCQuat& oldValue, const idCQuat& newValue );
+	    void			WriteDeltaVector( const idVec3& oldValue, const idVec3& newValue );
+	    void			WriteDeltaVector( const idVec3& oldValue, const idVec3& newValue, int exponentBits, int mantissaBits );
+#endif
 		void			WriteDeltaFloat(float oldValue, float newValue);
 		void			WriteDeltaFloat(float oldValue, float newValue, int exponentBits, int mantissaBits);
 		void			WriteDeltaByteCounter(int oldValue, int newValue);
 		void			WriteDeltaShortCounter(int oldValue, int newValue);
 		void			WriteDeltaLongCounter(int oldValue, int newValue);
 		bool			WriteDeltaDict(const idDict &dict, const idDict *base);
+#ifdef _SPLASHDAMAGE
+    	void			WriteDeltaData( const void* oldValue, const void* newValue, int size );
+#endif
 
 		void			BeginReading(void) const;				// begin reading.
 		int				GetRemaingData(void) const;			// number of bytes left to read
 		void			ReadByteAlign(void) const;			// read up to the next byte boundary
 		int				ReadBits(int numBits) const;			// read the specified number of bits
+#ifdef _SPLASHDAMAGE
+    	bool			ReadBool( void ) const;
+#endif
 		int				ReadChar(void) const;
 		int				ReadByte(void) const;
 		int				ReadShort(void) const;
@@ -119,23 +148,44 @@ class idBitMsg
 		int				ReadLong(void) const;
 		float			ReadFloat(void) const;
 		float			ReadFloat(int exponentBits, int mantissaBits) const;
+#ifdef _SPLASHDAMAGE
+	    idCQuat			ReadCQuat( void ) const;
+	    idVec3			ReadVector( void ) const;
+#endif
 		float			ReadAngle8(void) const;
 		float			ReadAngle16(void) const;
 		idVec3			ReadDir(int numBits) const;
 		int				ReadString(char *buffer, int bufferSize) const;
+#ifdef _SPLASHDAMAGE
+    	int				ReadString( wchar_t *buffer, int bufferSize ) const;
+#endif
 		int				ReadData(void *data, int length) const;
 		void			ReadNetadr(netadr_t *adr) const;
 
 		int				ReadDeltaChar(int oldValue) const;
 		int				ReadDeltaByte(int oldValue) const;
 		int				ReadDeltaShort(int oldValue) const;
+#ifdef _SPLASHDAMAGE
+    	int				ReadDeltaUShort( int oldValue ) const;
+#endif
 		int				ReadDeltaLong(int oldValue) const;
+#ifdef _SPLASHDAMAGE
+
+	    idCQuat			ReadDeltaCQuat( const idCQuat& oldValue ) const;
+	
+	    idVec3			ReadDeltaVector( const idVec3& oldValue ) const;
+	    idVec3			ReadDeltaVector( const idVec3& oldValue, int exponentBits, int mantissaBits ) const;
+
+#endif
 		float			ReadDeltaFloat(float oldValue) const;
 		float			ReadDeltaFloat(float oldValue, int exponentBits, int mantissaBits) const;
 		int				ReadDeltaByteCounter(int oldValue) const;
 		int				ReadDeltaShortCounter(int oldValue) const;
 		int				ReadDeltaLongCounter(int oldValue) const;
 		bool			ReadDeltaDict(idDict &dict, const idDict *base) const;
+#ifdef _SPLASHDAMAGE
+    	void			ReadDeltaData( const void* oldValue, void* newValue, int size ) const;
+#endif
 
 		static int		DirToBits(const idVec3 &dir, int numBits);
 		static idVec3	BitsToDir(int bits, int numBits);
@@ -171,6 +221,9 @@ class idBitMsg
 	private:
 		bool			CheckOverflow(int numBits);
 		byte 			*GetByteSpace(int length);
+#ifdef _SPLASHDAMAGE
+	public:
+#endif
 		void			WriteDelta(int oldValue, int newValue, int numBits);
 		int				ReadDelta(int oldValue, int numBits) const;
 };
@@ -189,6 +242,21 @@ ID_INLINE void idBitMsg::Init(const byte *data, int length)
 	readData = data;
 	maxSize = length;
 }
+#ifdef _SPLASHDAMAGE
+ID_INLINE void idBitMsg::InitWrite( byte *data, int length )
+{
+    writeData = data;
+    readData = data;
+    maxSize = length;
+}
+
+ID_INLINE void idBitMsg::InitRead( const byte *data, int length )
+{
+    writeData = NULL;
+    readData = data;
+    maxSize = length;
+}
+#endif
 
 ID_INLINE byte *idBitMsg::GetData(void)
 {
@@ -353,6 +421,13 @@ ID_INLINE void idBitMsg::WriteLong(int c)
 	WriteBits(c, 32);
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE void idBitMsg::WriteBool( bool c )
+{
+    WriteBits( c ? 1 : 0, 1 );
+}
+#endif
+
 ID_INLINE void idBitMsg::WriteFloat(float f)
 {
 	WriteBits(*reinterpret_cast<int *>(&f), 32);
@@ -394,6 +469,13 @@ ID_INLINE void idBitMsg::WriteDeltaShort(int oldValue, int newValue)
 	WriteDelta(oldValue, newValue, -16);
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE void idBitMsg::WriteDeltaUShort( int oldValue, int newValue )
+{
+    WriteDelta( oldValue, newValue, 16 );
+}
+#endif
+
 ID_INLINE void idBitMsg::WriteDeltaLong(int oldValue, int newValue)
 {
 	WriteDelta(oldValue, newValue, 32);
@@ -404,12 +486,51 @@ ID_INLINE void idBitMsg::WriteDeltaFloat(float oldValue, float newValue)
 	WriteDelta(*reinterpret_cast<int *>(&oldValue), *reinterpret_cast<int *>(&newValue), 32);
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE void idBitMsg::WriteDeltaCQuat( const idCQuat& oldValue, const idCQuat& newValue )
+{
+    WriteDeltaFloat( oldValue.x, newValue.x );
+    WriteDeltaFloat( oldValue.y, newValue.y );
+    WriteDeltaFloat( oldValue.z, newValue.z );
+}
+
+ID_INLINE void idBitMsg::WriteDeltaVector( const idVec3& oldValue, const idVec3& newValue )
+{
+    WriteDeltaFloat( oldValue[ 0 ], newValue[ 0 ] );
+    WriteDeltaFloat( oldValue[ 1 ], newValue[ 1 ] );
+    WriteDeltaFloat( oldValue[ 2 ], newValue[ 2 ] );
+}
+
+ID_INLINE void idBitMsg::WriteDeltaVector( const idVec3& oldValue, const idVec3& newValue, int exponentBits, int mantissaBits )
+{
+    WriteDeltaFloat( oldValue[ 0 ], newValue[ 0 ], exponentBits, mantissaBits );
+    WriteDeltaFloat( oldValue[ 1 ], newValue[ 1 ], exponentBits, mantissaBits );
+    WriteDeltaFloat( oldValue[ 2 ], newValue[ 2 ], exponentBits, mantissaBits );
+}
+#endif
+
 ID_INLINE void idBitMsg::WriteDeltaFloat(float oldValue, float newValue, int exponentBits, int mantissaBits)
 {
 	int oldBits = idMath::FloatToBits(oldValue, exponentBits, mantissaBits);
 	int newBits = idMath::FloatToBits(newValue, exponentBits, mantissaBits);
 	WriteDelta(oldBits, newBits, 1 + exponentBits + mantissaBits);
 }
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE void idBitMsg::WriteCQuat( const idCQuat& quat )
+{
+    WriteFloat( quat.x );
+    WriteFloat( quat.y );
+    WriteFloat( quat.z );
+}
+
+ID_INLINE void idBitMsg::WriteVector( const idVec3& vec )
+{
+    WriteFloat( vec[ 0 ] );
+    WriteFloat( vec[ 1 ] );
+    WriteFloat( vec[ 2 ] );
+}
+#endif
 
 ID_INLINE void idBitMsg::BeginReading(void) const
 {
@@ -426,6 +547,13 @@ ID_INLINE void idBitMsg::ReadByteAlign(void) const
 {
 	readBit = 0;
 }
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idBitMsg::ReadBool( void ) const
+{
+    return ( ReadBits( 1 ) == 1 );
+}
+#endif
 
 ID_INLINE int idBitMsg::ReadChar(void) const
 {
@@ -465,6 +593,26 @@ ID_INLINE float idBitMsg::ReadFloat(int exponentBits, int mantissaBits) const
 	return idMath::BitsToFloat(bits, exponentBits, mantissaBits);
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE idCQuat idBitMsg::ReadCQuat( void ) const
+{
+    idCQuat temp;
+    temp.x = ReadFloat();
+    temp.y = ReadFloat();
+    temp.z = ReadFloat();
+    return temp;
+}
+
+ID_INLINE idVec3 idBitMsg::ReadVector( void ) const
+{
+    idVec3 temp;
+    temp[ 0 ] = ReadFloat();
+    temp[ 1 ] = ReadFloat();
+    temp[ 2 ] = ReadFloat();
+    return temp;
+}
+#endif
+
 ID_INLINE float idBitMsg::ReadAngle8(void) const
 {
 	return BYTE2ANGLE(ReadByte());
@@ -495,10 +643,46 @@ ID_INLINE int idBitMsg::ReadDeltaShort(int oldValue) const
 	return (short)ReadDelta(oldValue, -16);
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE int idBitMsg::ReadDeltaUShort( int oldValue ) const
+{
+    return (short)ReadDelta( oldValue, 16 );
+}
+#endif
+
 ID_INLINE int idBitMsg::ReadDeltaLong(int oldValue) const
 {
 	return ReadDelta(oldValue, 32);
 }
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE idCQuat idBitMsg::ReadDeltaCQuat( const idCQuat& oldValue ) const
+{
+    idCQuat value;
+    value.x = ReadDeltaFloat( oldValue.x );
+    value.y = ReadDeltaFloat( oldValue.y );
+    value.z = ReadDeltaFloat( oldValue.z );
+    return value;
+}
+
+ID_INLINE idVec3 idBitMsg::ReadDeltaVector( const idVec3& oldValue ) const
+{
+    idVec3 value;
+    value[ 0 ] = ReadDeltaFloat( oldValue[ 0 ] );
+    value[ 1 ] = ReadDeltaFloat( oldValue[ 1 ] );
+    value[ 2 ] = ReadDeltaFloat( oldValue[ 2 ] );
+    return value;
+}
+
+ID_INLINE idVec3 idBitMsg::ReadDeltaVector( const idVec3& oldValue, int exponentBits, int mantissaBits ) const
+{
+    idVec3 value;
+    value[ 0 ] = ReadDeltaFloat( oldValue[ 0 ], exponentBits, mantissaBits );
+    value[ 1 ] = ReadDeltaFloat( oldValue[ 1 ], exponentBits, mantissaBits );
+    value[ 2 ] = ReadDeltaFloat( oldValue[ 2 ], exponentBits, mantissaBits );
+    return value;
+}
+#endif
 
 ID_INLINE float idBitMsg::ReadDeltaFloat(float oldValue) const
 {

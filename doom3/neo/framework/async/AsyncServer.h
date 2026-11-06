@@ -130,7 +130,7 @@ typedef struct serverClient_s {
 
 class idAsyncServer
 {
-#ifdef _RAVEN
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 	friend class idNetworkSystem;
 #endif
 	public:
@@ -186,6 +186,22 @@ class idAsyncServer
 		void				GetAsyncStatsAvgMsg(idStr &msg);
 
 		void				PrintLocalServerInfo(void);
+#ifdef _SPLASHDAMAGE //karin: jmarshall's Quake4 bot
+		int					AllocOpenClientSlotForAI(int maxPlayersOnServer);
+		int 				ServerSetBotUserCommand(int clientNum, int frameNum, const usercmd_t& cmd);
+		void				InitBotClient(int clientNum);
+
+		bool				ClientIsBot(int clientNum) const {
+			return clients[clientNum].channel.isBot;
+		}
+		static bool			ClientIsBot(const serverClient_t &client) {
+			return client.channel.isBot;
+		}
+		void				ClientSetBot(int clientNum) {
+			clients[clientNum].channel.isBot = true;
+		}
+		int					NumBotClients(void) const;
+#endif
 
 	private:
 		bool				active;						// true if server is active

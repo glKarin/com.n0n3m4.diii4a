@@ -1,0 +1,331 @@
+
+/****************************************
+
+	Alpha test version. This basically only needs a new fragment program during
+	the ambient depth fill rendering, but because use of this shader is determined
+	at parse time we need to recreate the whole tree.
+
+****************************************/
+
+renderProgram ambient/basic_alphatocoverage {
+	instanceVersion ambient/basic_alphatocoverage_instance
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic
+
+	program fragment arb { <%
+		$define alphatest_alphatocoverage
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+
+renderProgram ambient/basic_alphatest {
+	hwSkinningVersion ambient/basic_skinning_matrix_alphatest ambient/basic_hardskinning_matrix_alphatest
+	instanceVersion ambient/basic_alphatest_instance
+	alphaToCoverageVersion ambient/basic_alphatocoverage
+
+	machineSpec 1
+	fallBack ambient/basic_alphatest_fallback
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic
+
+	program fragment arb { <%
+		$define alphatest_kill
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+renderProgram ambient/basic_alphatest_fallback {
+	hwSkinningVersion ambient/basic_skinning_matrix_alphatest ambient/basic_hardskinning_matrix_alphatest
+	instanceVersion ambient/basic_alphatest_instance
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_fallback
+
+	program fragment arb { <%
+		$define alphatest_kill
+		$include "interaction/basic_ambient_fragment_fallback.inc"
+	%> }
+}
+
+renderProgram ambient/basic_alphatest_instance {
+
+	alphaToCoverageVersion ambient/basic_alphatocoverage_instance
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 1
+	fallBack ambient/basic_alphatest_instance_fallback
+
+
+	program vertex reference ambient/basic_instance
+
+	//program fragment reference ambient/basic_alphatest
+	program fragment arb { <%
+		$define enable_instdither
+		$define alphatest_kill
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+renderProgram ambient/basic_alphatocoverage_instance {
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_instance
+
+	program fragment arb { <%
+		$define enable_instdither
+		$define alphatest_alphatocoverage
+		$include "interaction/basic_ambient_fragment.inc"
+	%> }
+}
+
+renderProgram ambient/basic_alphatest_instance_fallback {
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_instance_fallback
+
+//	program fragment reference ambient/basic_alphatest_fallback
+	program fragment arb { <%
+		$define enable_instdither
+		$define alphatest_kill
+		$include "interaction/basic_ambient_fragment_fallback.inc"
+	%> }
+}
+
+
+renderProgram ambient/basic_skinning_matrix_alphatest {
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference ambient/basic_skinning_matrix 
+	
+	program fragment reference ambient/basic_alphatest
+}
+
+renderProgram ambient/basic_hardskinning_matrix_alphatest {
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference ambient/basic_hardskinning_matrix 
+	
+	program fragment reference ambient/basic_alphatest
+}
+
+renderProgram interaction/basic_alphatest {
+	interaction
+
+	amblitVersion interaction/basic_alphatest_amblit
+	ambientVersion ambient/basic_alphatest
+	instanceVersion interaction/basic_alphatest_instance
+	hwSkinningVersion interaction/basic_skinning_matrix_alphatest interaction/basic_hardskinning_matrix_alphatest
+
+	machineSpec 1
+	fallBack interaction/basic_alphatest_fallback
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic
+	
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/basic_alphatest_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic
+	
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define alphatest_kill
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_alphatest_fallback {
+	interaction
+
+	amblitVersion interaction/basic_alphatest_fallback_amblit
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_fallback
+	
+	program fragment reference interaction/basic_fallback
+}
+
+renderProgram interaction/basic_alphatest_fallback_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_fallback
+	
+	program fragment arb { <%
+		$define amblit
+		$define addambient
+		$define alphatest_kill
+		$include "interaction/basic_fragment_fallback.inc"
+	%> }
+}
+
+
+renderProgram interaction/basic_alphatest_instance {
+	interaction
+
+	amblitVersion interaction/basic_alphatest_instance_amblit
+	machineSpec 1
+	fallBack interaction/basic_alphatest_instance_fallback
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_instance
+	
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/basic_alphatest_instance_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_instance
+	
+//	program fragment reference interaction/basic_alphatest_amblit
+	program fragment arb { <%
+		$define amblit
+		$define enable_instdither
+		$define ambient
+		$define alphatest_kill
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+renderProgram interaction/basic_alphatest_instance_fallback {
+	interaction
+	amblitVersion interaction/basic_alphatest_instance_fallback_amblit
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_instance_fallback
+	
+	program fragment reference interaction/basic_fallback
+}
+
+renderProgram interaction/basic_alphatest_instance_fallback_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_instance_fallback
+	
+//	program fragment reference interaction/basic_alphatest_fallback_amblit
+	program fragment arb { <%
+		$define amblit
+		$define enable_instdither
+		$define addambient
+		$define alphatest_kill
+		$include "interaction/basic_fragment_fallback.inc"
+	%> }
+}
+
+
+renderProgram interaction/basic_skinning_matrix_alphatest {
+	interaction
+
+	amblitVersion interaction/basic_skinning_matrix_alphatest_amblit
+	ambientVersion ambient/basic_skinning_matrix_alphatest
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/basic_skinning_matrix_alphatest_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic_alphatest_amblit
+}
+
+
+renderProgram interaction/basic_hardskinning_matrix_alphatest {
+	interaction
+
+	amblitVersion interaction/basic_hardskinning_matrix_alphatest_amblit
+	ambientVersion ambient/basic_hardskinning_matrix_alphatest
+
+	state {
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/basic_hardskinning_matrix_alphatest_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic_alphatest_amblit
+}

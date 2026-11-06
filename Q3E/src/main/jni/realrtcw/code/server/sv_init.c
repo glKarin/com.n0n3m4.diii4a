@@ -785,7 +785,7 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// Ridah, check for loading a saved game
 	if ( Cvar_VariableIntegerValue( "savegame_loading" ) ) {
 		// open the current savegame, and find out what the time is, everything else we can ignore
-		char *savemap = "save/current.svg";
+		char *savemap = "save/current_realrtcw.svg";
 		byte *buffer;
 		int size, savegameTime;
 

@@ -1,0 +1,71 @@
+renderProgram megaTexture/ambient_glsl {
+	lowrangeuv
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex glsl { <%
+		$include "megatexture/ambient_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$include "megatexture/ambient_glsl_fragment.inc"
+	%> }
+}
+
+renderProgram megaTexture/ambient_premult_glsl {
+	lowrangeuv
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex glsl { <%
+		$define premult	
+		$include "megatexture/ambient_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$define premult
+		$include "megatexture/ambient_glsl_fragment.inc"
+	%> }
+}
+
+
+renderProgram megaTexture/ambient_bakedamb_glsl {
+	lowrangeuv
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex glsl { <%
+		$define premult	
+		$include "megatexture/ambient_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$define premult
+		$define bakedamb
+		$include "megatexture/ambient_glsl_fragment.inc"
+	%> }
+}
+
+renderProgram megaTexture/ambient_brightness_glsl {
+	lowrangeuv
+	
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex glsl { <%
+		$include "megatexture/ambient_glsl_vertex.inc"
+	%> }
+
+	program fragment glsl { <%
+		$define brightness
+		$include "megatexture/ambient_glsl_fragment.inc"
+	%> }
+}

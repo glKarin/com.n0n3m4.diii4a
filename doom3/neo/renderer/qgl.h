@@ -260,6 +260,14 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 
+
+// query
+#ifndef GL_SAMPLES_PASSED
+// not support on OpenGLES standard
+#define GL_SAMPLES_PASSED                 0x8914
+#endif
+
+
 //#include "matrix/esUtil.h"
 
 typedef void (*GLExtension_t)(void);

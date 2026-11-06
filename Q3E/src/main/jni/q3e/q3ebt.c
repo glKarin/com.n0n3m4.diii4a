@@ -16,6 +16,7 @@
 #define LOG_TAG        "Q3E::bt"
 
 #include "q3estd.h"
+#include "q3edw.h"
 
 #define Q3E_XUNWIND_MAX_FRAMES 128
 #define Q3E_XUNWIND_PREFIX "\t"
@@ -58,6 +59,9 @@ static void print_frames(int signum, int mask, const char *str)
 
 static void signal_caughted(int signum, int mask, char *cfi, char *fp, char *eh)
 {
+    if(cfi)
+        Q3E_DW_Addr2line(cfi, 1);
+
     if (g_signalCaughted)
     {
         pid_t pid = getpid();

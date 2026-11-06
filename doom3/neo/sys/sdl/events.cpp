@@ -712,6 +712,9 @@ sysEvent_t Sys_GetEvent() {
 	if (s[0] != '\0') {
 		res.evType = SE_CHAR;
 		res.evValue = (unsigned char)s[s_pos];
+#ifdef _SPLASHDAMAGE //karin: evValue2 also store 
+		res.evValue2 = res.evValue;
+#endif
 
 		++s_pos;
 
@@ -729,6 +732,9 @@ sysEvent_t Sys_GetEvent() {
 	if (c) {
 		res.evType = SE_CHAR;
 		res.evValue = c;
+#ifdef _SPLASHDAMAGE //karin: evValue2 also store 
+		res.evValue2 = res.evValue;
+#endif
 
 		c = 0;
 
@@ -908,6 +914,9 @@ sysEvent_t Sys_GetEvent() {
 						memcpy( s, ev.text.text, SDL_TEXTINPUTEVENT_TEXT_SIZE );
 						s_pos = 1; // pos 0 is returned
 					}
+#ifdef _SPLASHDAMAGE //karin: evValue2 also store 
+					res.evValue2 = res.evValue;
+#endif
 					return res;
 				} else if( utf8ToISO8859_1( ev.text.text, s, sizeof(s) ) && s[0] != '\0' ) {
 					res.evValue = (unsigned char)s[0];
@@ -917,6 +926,9 @@ sysEvent_t Sys_GetEvent() {
 					} else {
 						s_pos = 1; // pos 0 is returned
 					}
+#ifdef _SPLASHDAMAGE //karin: evValue2 also store 
+					res.evValue2 = res.evValue;
+#endif
 					return res;
 				}
 			}

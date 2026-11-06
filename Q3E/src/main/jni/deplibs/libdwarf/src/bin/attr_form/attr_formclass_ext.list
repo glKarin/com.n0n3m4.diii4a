@@ -1,0 +1,426 @@
+/*
+Copyright (c) 2019-2019, David Anderson
+All rights reserved.
+
+Redistribution and use in source and binary forms, with
+or without modification, are permitted provided that the
+following conditions are met:
+
+    Redistributions of source code must retain the above
+    copyright notice, this list of conditions and the following
+    disclaimer.
+
+    Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials
+    provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+#include <dwarf.h>
+
+/*  Most of these are not formally documented. */
+
+/*  badly named GNU extensions. */
+0xffffffff
+DW_AT_sf_names
+0xffffffff
+DW_AT_body_begin
+0xffffffff
+DW_AT_body_end
+0xffffffff
+DW_AT_src_info
+0xffffffff
+DW_AT_src_coords
+0xffffffff
+DW_AT_mac_info
+
+/*  DW_AT_UPC_theads_scaled would be better, but...   */
+0xffffffff
+DW_AT_upc_threads_scaled
+
+0xffffffff
+DW_AT_ALTIUM_loclist
+
+0xffffffff
+DW_AT_APPLE_block
+
+0xffffffff
+DW_AT_APPLE_flags
+
+0xffffffff
+DW_AT_go_package_name
+DW_FORM_CLASS_STRING
+
+0xffffffff
+DW_AT_APPLE_isa
+
+0xffffffff
+DW_AT_APPLE_major_runtime_vers
+
+0xffffffff
+DW_AT_APPLE_omit_frame_ptr
+DW_FORM_CLASS_FLAG
+
+0xffffffff
+DW_AT_APPLE_optimized
+
+0xffffffff
+DW_AT_APPLE_runtime_class
+
+0xffffffff
+DW_AT_APPLE_sdk
+DW_FORM_CLASS_STRING
+
+0xffffffff
+DW_AT_GNAT_descriptive_type
+
+0xffffffff
+DW_AT_GNU_addr_base
+DW_FORM_CLASS_ADDRPTR
+
+0xffffffff
+DW_AT_GNU_all_call_sites
+DW_FORM_CLASS_FLAG
+
+0xffffffff
+DW_AT_GNU_all_source_call_sites
+
+0xffffffff
+DW_AT_GNU_all_tail_call_sites
+DW_FORM_CLASS_FLAG
+
+0xffffffff
+DW_AT_GNU_bias
+DW_FORM_CLASS_CONSTANT
+
+0xffffffff
+DW_AT_GNU_call_site_data_value
+DW_FORM_CLASS_EXPRLOC
+
+0xffffffff
+DW_AT_GNU_call_site_target
+DW_FORM_CLASS_EXPRLOC
+
+0xffffffff
+DW_AT_GNU_call_site_target_clobbered
+
+0xffffffff
+DW_AT_GNU_call_site_value
+DW_FORM_CLASS_EXPRLOC
+
+0xffffffff
+DW_AT_GNU_deleted
+
+0xffffffff
+DW_AT_GNU_denominator
+DW_FORM_CLASS_CONSTANT
+
+0xffffffff
+DW_AT_GNU_discriminator
+DW_FORM_CLASS_CONSTANT
+
+/* Expect DW_FORM_ref_sig8 */
+0xffffffff
+DW_AT_GNU_dwo_id
+DW_FORM_CLASS_REFERENCE
+DW_FORM_CLASS_CONSTANT
+
+0xffffffff
+DW_AT_GNU_dwo_name
+DW_FORM_CLASS_STRING
+
+0xffffffff
+DW_AT_GNU_entry_view
+DW_FORM_CLASS_CONSTANT
+
+/*  The next few are documented on
+    https://gcc.gnu.org/wiki/ThreadSafetyAnnotationsInDWARF */
+0xffffffff
+DW_AT_GNU_guarded_by
+
+0xffffffff
+DW_AT_GNU_pt_guarded_by
+
+0xffffffff
+DW_AT_GNU_pt_guarded
+
+0xffffffff
+DW_AT_GNU_locks_excluded
+
+0xffffffff
+DW_AT_GNU_exclusive_locks_required
+
+0xffffffff
+DW_AT_GNU_shared_locks_required
+/* end Thread Safety annotations. */
+
+0xffffffff
+DW_AT_GNU_locviews
+DW_FORM_CLASS_REFERENCE
+
+0xffffffff
+DW_AT_GNU_macros
+DW_FORM_CLASS_MACROPTR
+
+0xffffffff
+DW_AT_GNU_numerator
+DW_FORM_CLASS_CONSTANT
+
+/* Expect DW_FORM_ref_sig8 */
+0xffffffff
+DW_AT_GNU_odr_signature
+DW_FORM_CLASS_CONSTANT
+DW_FORM_CLASS_REFERENCE
+
+/* https://binutils.sourceware.narkive.com/zhSf69Vo/gold-patch-handle-dw-at-gnu-pubnames-in-dw-form-flag-present */
+0xffffffff
+DW_AT_GNU_pubnames
+DW_FORM_CLASS_REFERENCE
+DW_FORM_CLASS_FLAG
+DW_FORM_CLASS_CONSTANT
+/*  Have seen all the above formclasses from gcc */
+
+0xffffffff
+DW_AT_GNU_pubtypes
+DW_FORM_CLASS_REFERENCE
+DW_FORM_CLASS_FLAG
+DW_FORM_CLASS_CONSTANT
+/*  Have seen all the above formclasses from gcc */
+
+
+0xffffffff
+DW_AT_GNU_ranges_base
+/*DW_FORM_CLASS_REFERENCE */
+DW_FORM_CLASS_RNGLISTSPTR
+
+
+0xffffffff
+DW_AT_GNU_tail_call
+DW_FORM_CLASS_FLAG
+
+0xffffffff
+DW_AT_GNU_template_name
+
+0xffffffff
+DW_AT_GNU_vector
+
+0xffffffff
+DW_AT_go_kind
+DW_FORM_CLASS_CONSTANT
+
+0xffffffff
+DW_AT_go_key
+DW_FORM_CLASS_REFERENCE
+
+0xffffffff
+DW_AT_go_elem
+DW_FORM_CLASS_REFERENCE
+
+0xffffffff
+DW_AT_go_embedded_field
+DW_FORM_CLASS_FLAG
+
+0xffffffff
+DW_AT_go_runtime_type
+DW_FORM_CLASS_ADDRESS
+
+/* some DW_AT_HP and all DW_AT_CPQ left off */
+0xffffffff
+DW_AT_HP_all_variables_modifiable
+
+0xffffffff
+DW_AT_HP_block_index
+
+0xffffffff
+DW_AT_HP_cold_region_high_pc
+
+0xffffffff
+DW_AT_HP_cold_region_low_pc
+
+0xffffffff
+DW_AT_HP_linkage_name
+
+
+0xffffffff
+DW_AT_HP_prof_version_id
+
+
+0xffffffff
+DW_AT_INTEL_other_endian
+
+0xffffffff
+DW_AT_LLVM_sysroot
+DW_FORM_CLASS_STRING
+
+0xffffffff
+DW_AT_MIPS_abstract_name
+DW_FORM_CLASS_STRING
+
+0xffffffff
+DW_AT_MIPS_allocatable_dopetype
+0xffffffff
+DW_AT_MIPS_assumed_shape_dopetype
+0xffffffff
+DW_AT_MIPS_assumed_size
+0xffffffff
+DW_AT_MIPS_clone_origin
+0xffffffff
+DW_AT_MIPS_epilog_begin
+0xffffffff
+DW_AT_MIPS_fde
+DW_FORM_CLASS_FRAMEPTR
+0xffffffff
+DW_AT_MIPS_has_inlines
+DW_FORM_CLASS_FLAG
+
+0xffffffff
+DW_AT_MIPS_linkage_name
+DW_FORM_CLASS_STRING
+
+0xffffffff
+DW_AT_MIPS_loop_begin
+0xffffffff
+DW_AT_MIPS_loop_unroll_factor
+0xffffffff
+DW_AT_MIPS_ptr_dopetype
+0xffffffff
+DW_AT_MIPS_software_pipeline_depth
+0xffffffff
+DW_AT_MIPS_stride
+0xffffffff
+DW_AT_MIPS_stride_byte
+0xffffffff
+DW_AT_MIPS_stride_elem
+0xffffffff
+DW_AT_MIPS_tail_loop_begin
+0xffffffff
+DW_AT_PGI_lbase
+0xffffffff
+DW_AT_PGI_lstride
+0xffffffff
+DW_AT_PGI_soffset
+0xffffffff
+DW_AT_SUN_alignment
+0xffffffff
+DW_AT_SUN_amd64_parmdump
+0xffffffff
+DW_AT_SUN_browser_file
+0xffffffff
+DW_AT_SUN_cf_kind
+0xffffffff
+DW_AT_SUN_command_line
+0xffffffff
+DW_AT_SUN_compile_options
+0xffffffff
+DW_AT_SUN_count_guarantee
+0xffffffff
+DW_AT_SUN_c_vla
+0xffffffff
+DW_AT_SUN_dtor_length
+0xffffffff
+DW_AT_SUN_dtor_start
+0xffffffff
+DW_AT_SUN_dtor_state_deltas
+0xffffffff
+DW_AT_SUN_dtor_state_final
+0xffffffff
+DW_AT_SUN_dtor_state_initial
+0xffffffff
+DW_AT_SUN_f90_allocatable
+0xffffffff
+DW_AT_SUN_f90_assumed_shape_array
+0xffffffff
+DW_AT_SUN_f90_pointer
+0xffffffff
+DW_AT_SUN_f90_use_only
+0xffffffff
+DW_AT_SUN_fortran_based
+0xffffffff
+DW_AT_SUN_fortran_main_alias
+0xffffffff
+DW_AT_SUN_func_offset
+0xffffffff
+DW_AT_SUN_func_offsets
+0xffffffff
+DW_AT_SUN_hwcprof_signature
+0xffffffff
+DW_AT_SUN_import_by_lname
+0xffffffff
+DW_AT_SUN_import_by_name
+0xffffffff
+DW_AT_SUN_is_omp_child_func
+0xffffffff
+DW_AT_SUN_language
+0xffffffff
+DW_AT_SUN_link_name
+DW_FORM_CLASS_STRING /* just guessing about this one */
+0xffffffff
+DW_AT_SUN_memop_signature
+0xffffffff
+DW_AT_SUN_memop_type_ref
+0xffffffff
+DW_AT_SUN_namelist_spec
+0xffffffff
+DW_AT_SUN_obj_dir
+0xffffffff
+DW_AT_SUN_obj_file
+0xffffffff
+DW_AT_SUN_omp_child_func
+0xffffffff
+DW_AT_SUN_omp_tpriv_addr
+0xffffffff
+DW_AT_SUN_original_name
+0xffffffff
+DW_AT_SUN_part_link_name
+DW_FORM_CLASS_STRING /* just guessing about this one */
+0xffffffff
+DW_AT_SUN_pass_by_ref
+0xffffffff
+DW_AT_SUN_pass_with_const
+0xffffffff
+DW_AT_SUN_profile_id
+0xffffffff
+DW_AT_SUN_return_value_ptr
+0xffffffff
+DW_AT_SUN_return_with_const
+0xffffffff
+DW_AT_SUN_template
+0xffffffff
+DW_AT_SUN_vbase
+0xffffffff
+DW_AT_SUN_vtable
+0xffffffff
+DW_AT_SUN_vtable_abi
+0xffffffff
+DW_AT_SUN_vtable_index
+0xffffffff
+DW_AT_use_GNAT_descriptive_type
+0xffffffff
+DW_AT_ghs_rsm
+DW_FORM_CLASS_CONSTANT
+0xffffffff
+DW_AT_ghs_frsm
+DW_FORM_CLASS_CONSTANT
+0xffffffff
+DW_AT_ghs_frames
+DW_FORM_CLASS_CONSTANT
+0xffffffff
+DW_AT_ghs_rso
+DW_FORM_CLASS_CONSTANT
+0xffffffff
+DW_AT_ghs_subcpu
+DW_FORM_CLASS_CONSTANT
+0xffffffff

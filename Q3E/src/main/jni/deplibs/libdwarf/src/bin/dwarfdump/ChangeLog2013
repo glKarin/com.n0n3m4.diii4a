@@ -1,0 +1,88 @@
+2013-10-17  David Anderson
+     * print_types.c: Remove pointless blank line.
+2013-08-15  David Anderson
+     * dwarfdump.c: Now calls dwarf_register_printf_callback()
+       so dwarf_print_lines() output is shown (if dwarfdump
+       wants it shown).  Update version string.
+      * common.c: Update version string.
+2013-08-13  David Anderson
+     * esb.c: Add 1 so the esb_append_printf has room for the NUL
+       byte.
+     * print_die.c: Clarified a comment about DW_AT_high_pc
+       and FORM class constant. Fixed indent error.
+     * dwarfdump.c: Fixed indent error.
+2013-08-08  David Anderson
+     * print_reloc.c: Removed duplicated call to get_scndata().
+2013-08-07  David Anderson
+     * dwarfdump.c: Changed non-fatal error messages to write
+       to stdout instead of stderr. Making it much easier to
+       have a usable output-with-errors in case of redirection.
+       Updated version string.
+     * checkutil.c: If a certain pointer not set, just do nothing,
+       there is no reason to abort.
+       Added in a missing [ in a debug printf.
+     * common.c: Updated version string.
+2013-07-30  David Anderson
+     * common.c,dwarfdump.c: updated version string.
+2013-02-05  David Anderson
+      * dwarfdump.c: Update version string.
+        get_producer_name() now uses struct esb_s;
+      * common.c: Update version string.
+      * print_die.c: Check DW_AT_sibling values for sanity,
+        and when something quite wrong is found, print an error
+        and stop.
+        get_producer_name() now uses struct esb_s;
+        Added sibling_die_global_offset_ to die_stack_data_s
+        so we can check sibling attribute values.
+        get_attr_value() now uses esb_s pointer.
+      * globals.h: get_producer_name() now uses struct esb_s;
+      * print_aranges.c, print_pubnames.c:get_producer_name()
+        now uses struct esb_s;
+      * dwconf.c: The use of esb_s means we need to consider
+        an empty config-file-path as no path and look in default
+        places.  We cannot just test for null pointer.
+2013-02-04  David Anderson
+      * dwarfdump/addrmap.c: Forgot to remove the addr_map_destroy()
+        implementation in #ifndef HAVE_TSEARCH. Now it is removed.
+2013-02-03  David Anderson
+      * dwarfdump/addrmap.c: Implement HAVE_TDESTROY.
+        tdestroy() is GNU only. Now we allow tsearch without
+        tdestroy even though that means leaking every tsearch
+        map we build.  dwarfdump2 has no such leak.
+      * dwarfdump/config.h.in: Add HAVE_TDESTROY.
+      * dwarfdump/configure: Regenerate.
+      * dwarfdump/configure.in: Test for tdestroy() function.
+      * dwarfdump/print_frames.c: Zero out the map pointer.
+2013-02-01  David Anderson
+      * print_die.c: Replaced use of makename (which did malloc)
+        with use of struct esb_s, avoiding a serious memory leak.
+        Completely removed static struct variables esb_base and
+        esb_extra, ensuring die string print-data is not
+        corrupted by recursive calls.
+      * dwarfdump.c, common.c: Update version string.
+2013-01-26  David Anderson
+      * dwarfdump.c, common.c: Update version string.
+      * print_die.c: Print DW_OP_GNU_const_type properly using
+        the binary-compatibility version of Dwarf_Loc.
+2013-01-25  David Anderson
+      * dwarfdump.c, common.c: Update version string.
+      * print_die.c: Print DW_OP_GNU_const_type properly.
+2013-01-16  David Anderson
+      * dwconf.c: Changed table size to unsigned to eliminate
+        signed/unsigned comparison warnings.
+      * dwconf.h: Changed struct fields to unsigned to eliminate
+        signed/unsigned comparison warnings.
+      * esb.c: Checked for negative vfprintf return to avoid
+        (hopefully impossible) error from crashing the program,
+        and fix comparison warnings.
+      * print_die.c: Changed counts to unsigned to fix
+        signed/unsigned comparison warnings.
+      * print_frames.c: Changed counts to unsigned to fix
+        signed/unsigned comparison warnings.
+      * print_reloc.c: Changed table sizes to unsigned to fix
+        signed/unsigned comparison warnings.
+      * tag_tree.c, tag_attr.c: Changed table sizes to unsigned to fix
+        signed/unsigned comparison warnings.
+2013-01-16  David Anderson
+      * dwarfdump.c, common.c: Update version string.
+

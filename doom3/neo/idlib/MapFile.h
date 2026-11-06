@@ -47,6 +47,9 @@ const int OLD_MAP_VERSION					= 1;
 #ifdef _RAVEN // quake4 map file version
 const int CURRENT_MAP_VERSION				= 3;
 const int DOOM3_MAP_VERSION					= 2;
+#elif defined(_SPLASHDAMAGE)
+const int CURRENT_MAP_VERSION				= 1;		//SD - added epair read/write for patchdef's
+const int   BOT_MAP_VERSION					= 2; // bumped - actions now use idBox instead of idBounds.
 #else
 const int CURRENT_MAP_VERSION				= 2;
 #endif
@@ -111,6 +114,12 @@ class idMapBrushSide
 			mat2 = texMat[1];
 		}
 		void					GetTextureVectors(idVec4 v[2]) const;
+#ifdef _SPLASHDAMAGE
+	    idPlane &				GetPlane( void ) {
+	        return plane;
+	    }
+    	void					TranslateSelf( const idVec3 &translation );
+#endif
 
 	protected:
 		idStr					material;
@@ -126,6 +135,12 @@ ID_INLINE idMapBrushSide::idMapBrushSide(void)
 	texMat[1].Zero();
 	origin.Zero();
 }
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE void idMapBrushSide::TranslateSelf( const idVec3 &translation ) {
+    origin += translation;
+}
+#endif
 
 
 class idMapBrush : public idMapPrimitive
@@ -147,6 +162,9 @@ class idMapBrush : public idMapPrimitive
 #else
 		static idMapBrush 		*Parse(idLexer &src, const idVec3 &origin, bool newFormat = true, float version = CURRENT_MAP_VERSION);
 		static idMapBrush 		*ParseQ3(idLexer &src, const idVec3 &origin);
+#endif
+#ifdef _SPLASHDAMAGE
+	    bool					Write( idStr& buffer, int primitiveNum, const idVec3 &origin ) const;
 #endif
 		bool					Write(idFile *fp, int primitiveNum, const idVec3 &origin) const;
 		int						GetNumSides(void) const {
@@ -186,6 +204,9 @@ class idMapPatch : public idMapPrimitive, public idSurface_Patch
 // RAVEN END
 #else
 		static idMapPatch 		*Parse(idLexer &src, const idVec3 &origin, bool patchDef3 = true, float version = CURRENT_MAP_VERSION);
+#endif
+#ifdef _SPLASHDAMAGE
+    	bool					Write( idStr& buffer, int primitiveNum, const idVec3 &origin ) const;
 #endif
 		bool					Write(idFile *fp, int primitiveNum, const idVec3 &origin) const;
 		const char 			*GetMaterial(void) const {
@@ -273,6 +294,10 @@ class idMapEntity
 #else
 		static idMapEntity 	*Parse(idLexer &src, bool worldSpawn = false, float version = CURRENT_MAP_VERSION);
 #endif
+#ifdef _SPLASHDAMAGE
+    	static idMapEntity *	ParseActions( idLexer &src );
+    	bool					Write( idStr& buffer, int entityNum ) const;
+#endif
 		bool					Write(idFile *fp, int entityNum) const;
 		int						GetNumPrimitives(void) const {
 			return primitives.Num();
@@ -303,7 +328,11 @@ class idMapFile
 		// normally this will use a .reg file instead of a .map file if it exists,
 		// which is what the game and dmap want, but the editor will want to always
 		// load a .map file
+#ifdef _SPLASHDAMAGE
+	    bool					Parse( const char *filename, bool ignoreRegion = false, bool osPath = false, bool moveFuncGroups = true, bool ignoreEntities = false, const char* onlyEntitiesOfClass = NULL );
+#else
 		bool					Parse(const char *filename, bool ignoreRegion = false, bool osPath = false);
+#endif
 		bool					Write(const char *fileName, const char *ext, bool fromBasePath = true);
 		// get the number of entities in the map
 		int						GetNumEntities(void) const {
@@ -330,7 +359,11 @@ class idMapFile
 		bool					NeedsReload();
 
 		int						AddEntity(idMapEntity *mapentity);
+#ifdef _SPLASHDAMAGE
+    	idMapEntity *			FindEntity( const char *name ) const;
+#else
 		idMapEntity 			*FindEntity(const char *name);
+#endif
 		void					RemoveEntity(idMapEntity *mapEnt);
 		void					RemoveEntities(const char *classname);
 		void					RemoveAllEntities();
@@ -338,6 +371,16 @@ class idMapFile
 		bool					HasPrimitiveData() {
 			return hasPrimitiveData;
 		}
+#ifdef _SPLASHDAMAGE
+	    bool					ParseBuffer( const idStr& buffer, const idStr& name, bool moveFuncGroups = true );
+	    bool					WriteBuffer( idStr& buffer );
+	
+	    bool					ParseBotEntities( const char *filename );
+	    
+	    float					GetVersion() {
+	        return version;
+	    }
+#endif
 #ifdef _RAVEN
 // RAVEN BEGIN
 // rjohnson: added resolve

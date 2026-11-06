@@ -1,0 +1,103 @@
+renderProgram depthOnly {
+	hwSkinningVersion depthOnlySkinningMatrix depthOnlyHardSkinningMatrix
+
+	state {
+		depthFunc less	
+	}
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		MOV result.color, 0;
+	%> }
+}
+
+renderProgram depthOnlySkinningMatrix {
+	state {
+		depthFunc less	
+	}
+	
+	program vertex arb { <%
+		TEMP	position;
+
+		useTemplate skinningMatrix_ARB< "position" >
+	%> }
+	
+	program fragment reference depthOnly
+}
+
+renderProgram depthOnlyHardSkinningMatrix {
+	state {
+		depthFunc less	
+	}
+	
+	program vertex arb { <%
+		TEMP	position;
+
+		useTemplate hardSkinningMatrix_ARB< "position" >
+	%> }
+	
+	program fragment reference depthOnly
+}
+
+renderProgram depthAlpha {
+	hwSkinningVersion depthAlphaSkinningMatrix depthAlphaHardSkinningMatrix
+
+	state {
+		depthFunc less	
+	}
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		DP4	result.texcoord.x, $texCoordAttrib, $diffuseMatrix_s;
+		DP4	result.texcoord.y, $texCoordAttrib, $diffuseMatrix_t;
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+		TEMP R0;
+
+		TEX R0, fragment.texcoord, $diffuseMap, 2D;
+		SUB R0, 1, R0;
+		SWZ result.color, R0, 0, 0, 0, a;
+	%> }
+}
+
+renderProgram depthAlphaSkinningMatrix {
+	state {
+		depthFunc less	
+	}
+	
+	program vertex arb { <%
+		TEMP	position;
+
+		useTemplate skinningMatrix_ARB< "position" >
+
+		DP4	result.texcoord.x, $texCoordAttrib, $diffuseMatrix_s;
+		DP4	result.texcoord.y, $texCoordAttrib, $diffuseMatrix_t;
+	%> }
+	
+	program fragment reference depthAlpha
+}
+
+renderProgram depthAlphaHardSkinningMatrix {
+	state {
+		depthFunc less	
+	}
+	
+	program vertex arb { <%
+		TEMP	position;
+
+		useTemplate hardSkinningMatrix_ARB< "position" >
+
+		DP4	result.texcoord.x, $texCoordAttrib, $diffuseMatrix_s;
+		DP4	result.texcoord.y, $texCoordAttrib, $diffuseMatrix_t;
+	%> }
+	
+	program fragment reference depthAlpha
+}

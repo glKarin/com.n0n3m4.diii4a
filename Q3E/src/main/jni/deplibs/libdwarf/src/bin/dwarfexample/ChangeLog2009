@@ -1,0 +1,8 @@
+August 7, 2009 David Anderson <davea42@earthlink.net>
+   * frame1.c: This is a new example that uses frame functions.
+July 21, 2009 David Anderson <davea42@earthlink.net>
+   * simplereader.c: After cur_die = sib_die; nothing was printing
+     cur_die, so added a print call after the assignment.
+July 8, 2009 David Anderson <davea42@earthlink.net>
+   * Makefile: New trivial Makefile to build the example.
+   * simplereader.c: New trivial example using libdwarf.

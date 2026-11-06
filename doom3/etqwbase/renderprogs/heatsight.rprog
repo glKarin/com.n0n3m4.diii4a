@@ -1,0 +1,105 @@
+renderProgram heatsight/atmosphere {
+
+	state force {
+		depthfunc equal
+		blend  GL_ONE, GL_SRC_ALPHA
+		maskDepth
+	}
+	
+	program vertex cg { <%
+		
+		struct VsInputs {
+			float3 pos	: $positionAttrib;
+			float2 tex	: $texCoordAttrib;
+		};
+
+		struct VsOutputs {
+			float3 toEye		: TEXCOORD0;
+		};
+		
+		float3 eyePos : $viewOrigin;
+
+		VsOutputs vertex(VsInputs indata) {
+			VsOutputs outdata;
+			outdata.toEye= indata.pos - eyePos;
+			return outdata;
+		}
+		
+	%> }
+
+	program fragment cg { <%
+		struct VsOutputs {
+			float3 toEye		: TEXCOORD0;
+		};
+
+
+		float4 fragment(VsOutputs indata) : COLOR {
+			float len = length( indata.toEye );
+			len *= len;
+			
+			len = min( 500000.0f, len );
+			len /= 500000.0f;
+			
+			float bright =  0.05 * len;
+			return float4( bright , bright, bright, (1.0f - len ) * 0.5 );
+		}
+	%> }
+}
+
+renderProgram heatsight/simple {
+
+	
+	program vertex cg { <%
+		
+		struct VsInputs {
+			float3 pos	: $positionAttrib;
+			float2 tex	: $texCoordAttrib;
+			float3 normal : $normalAttrib;
+			$if r_32ByteVtx
+			float4 signs : $signAttrib;
+			$endif
+			
+		};
+
+		struct VsOutputs {
+			float3 noiseLookup : TEXCOORD0;
+			float tempScale : TEXCOORD1; // allow over 1
+		};
+		
+		float3 eyePos : $viewOrigin;
+		float2 params : $parameters; 
+		
+		float GetZ( float2 value, float sign ) {
+			return ( sqrt( 1.0f - ( dot( value.xy, value.xy ) ) ) * ( sign - 1.f ) );
+		}
+
+		VsOutputs vertex(VsInputs indata) {
+			VsOutputs outdata;
+			
+			$if r_32ByteVtx
+			indata.normal.xy *= 1.f / 32767.f;
+			indata.normal.z = GetZ( indata.normal.xy, indata.signs.x );
+			$endif
+			
+			outdata.noiseLookup = indata.pos * params.y;/*+ float3( 1, -1, 1 ) * time*/;
+			float3 toEye = normalize( indata.pos - eyePos );
+			outdata.tempScale = ( min( pow( abs( dot( indata.normal, toEye ) ), 2 ), 1 )  * 0.5 + 0.5 ) * params.x;
+			return outdata;
+		}
+		
+	%> }
+
+	program fragment cg { <%
+		$include "noise.hg"
+
+		struct VsOutputs {
+			float3 noiseLookup		: TEXCOORD0;
+			float tempScale : TEXCOORD1;
+		};
+
+
+		float4 fragment(VsOutputs indata) : COLOR {
+			return ( perlin( indata.noiseLookup ) * 0.6 + 0.7 ) * indata.tempScale;
+		}
+	%> }
+}

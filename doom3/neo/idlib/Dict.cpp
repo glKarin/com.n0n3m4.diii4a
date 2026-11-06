@@ -29,8 +29,17 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
+#ifdef _SPLASHDAMAGE
+#if defined( _DEBUG ) && !defined( ID_REDIRECT_NEWDELETE )
+#define new DEBUG_NEW
+#endif
+
+idStrPool*		idDict::globalKeys		= NULL;
+idStrPool*		idDict::globalValues	= NULL;
+#else
 idStrPool		idDict::globalKeys;
 idStrPool		idDict::globalValues;
+#endif
 
 /*
 ================
@@ -54,8 +63,13 @@ idDict &idDict::operator=(const idDict &other)
 	argHash = other.argHash;
 
 	for (i = 0; i < args.Num(); i++) {
+#ifdef _SPLASHDAMAGE
+        args[ i ].key	= globalKeys->CopyString( args[i].key );
+        args[ i ].value	= globalValues->CopyString( args[i].value );
+#else
 		args[i].key = globalKeys.CopyString(args[i].key);
 		args[i].value = globalValues.CopyString(args[i].value);
+#endif
 	}
 
 	return *this;
@@ -94,11 +108,21 @@ void idDict::Copy(const idDict &other)
 		if (found && found[i] != -1) {
 			// first set the new value and then free the old value to allow proper self copying
 			const idPoolStr *oldValue = args[found[i]].value;
+#ifdef _SPLASHDAMAGE
+            args[found[i]].value = globalValues->CopyString( other.args[i].value );
+            globalValues->FreeString( oldValue );
+#else
 			args[found[i]].value = globalValues.CopyString(other.args[i].value);
 			globalValues.FreeString(oldValue);
+#endif
 		} else {
+#ifdef _SPLASHDAMAGE
+            kv.key = globalKeys->CopyString( other.args[i].key );
+            kv.value = globalValues->CopyString( other.args[i].value );
+#else
 			kv.key = globalKeys.CopyString(other.args[i].key);
 			kv.value = globalValues.CopyString(other.args[i].value);
+#endif
 			argHash.Add(argHash.GenerateKey(kv.GetKey(), false), args.Append(kv));
 		}
 	}
@@ -119,10 +143,12 @@ void idDict::TransferKeyValues(idDict &other)
 		return;
 	}
 
+#if !defined(_SPLASHDAMAGE)
 	if (other.args.Num() && other.args[0].key->GetPool() != &globalKeys) {
 		common->FatalError("idDict::TransferKeyValues: can't transfer values across a DLL boundary");
 		return;
 	}
+#endif
 
 	Clear();
 
@@ -153,16 +179,28 @@ bool idDict::Parse(idParser &parser)
 
 	errors = false;
 
+#ifdef _SPLASHDAMAGE
+    if ( !parser.ExpectTokenString( "{" ) ) {
+        return false;
+    }
+#else
 	parser.ExpectTokenString("{");
+#endif
 	parser.ReadToken(&token);
 
 	while ((token.type != TT_PUNCTUATION) || (token != "}")) {
 		if (token.type != TT_STRING) {
 			parser.Error("Expected quoted string, but found '%s'", token.c_str());
+#ifdef _SPLASHDAMAGE
+            break;
+#endif
 		}
 
 		if (!parser.ReadToken(&token2)) {
 			parser.Error("Unexpected end of file");
+#ifdef _SPLASHDAMAGE
+            break;
+#endif
 		}
 
 		if (FindKey(token)) {
@@ -174,6 +212,9 @@ bool idDict::Parse(idParser &parser)
 
 		if (!parser.ReadToken(&token)) {
 			parser.Error("Unexpected end of file");
+#ifdef _SPLASHDAMAGE
+            break;
+#endif
 		}
 	}
 
@@ -198,8 +239,13 @@ void idDict::SetDefaults(const idDict *dict)
 		kv = FindKey(def->GetKey());
 
 		if (!kv) {
+#ifdef _SPLASHDAMAGE
+            newkv.key = globalKeys->CopyString( def->key );
+            newkv.value = globalValues->CopyString( def->value );
+#else
 			newkv.key = globalKeys.CopyString(def->key);
 			newkv.value = globalValues.CopyString(def->value);
+#endif
 			argHash.Add(argHash.GenerateKey(newkv.GetKey(), false), args.Append(newkv));
 		}
 	}
@@ -215,8 +261,13 @@ void idDict::Clear(void)
 	int i;
 
 	for (i = 0; i < args.Num(); i++) {
+#ifdef _SPLASHDAMAGE
+        globalKeys->FreeString( args[i].key );
+        globalValues->FreeString( args[i].value );
+#else
 		globalKeys.FreeString(args[i].key);
 		globalValues.FreeString(args[i].value);
+#endif
 	}
 
 	args.Clear();
@@ -293,6 +344,38 @@ size_t idDict::Allocated(void) const
 idDict::Set
 ================
 */
+#ifdef _SPLASHDAMAGE
+bool idDict::Set( const char *key, const char *value )
+{
+    int i;
+    idKeyValue kv;
+
+    assert( key );
+
+    /*	if ( key == NULL || key[0] == '\0' ) {
+    		return;
+    	}*/
+
+    i = FindKeyIndex( key );
+    if ( i != -1 ) {
+        // allocstring is more expensive than this simple check
+        if( !args[i].value->Icmp( value ) ) {
+            return false;
+        }
+
+        // first set the new value and then free the old value to allow proper self copying
+        const idPoolStr *oldValue = args[i].value;
+        args[i].value = globalValues->AllocString( value );
+        globalValues->FreeString( oldValue );
+    } else {
+        kv.key = globalKeys->AllocString( key );
+        kv.value = globalValues->AllocString( value );
+        argHash.Add( argHash.GenerateKey( kv.GetKey(), false ), args.Append( kv ) );
+    }
+
+    return true;
+}
+#else
 void idDict::Set(const char *key, const char *value)
 {
 	int i;
@@ -315,6 +398,7 @@ void idDict::Set(const char *key, const char *value)
 		argHash.Add(argHash.GenerateKey(kv.GetKey(), false), args.Append(kv));
 	}
 }
+#endif
 
 /*
 ================
@@ -468,13 +552,21 @@ WriteString
 */
 static void WriteString(const char *s, idFile *f)
 {
+#ifdef _SPLASHDAMAGE
+    int	len = idStr::Length( s );
+#else
 	int	len = strlen(s);
+#endif
 
 	if (len >= MAX_STRING_CHARS-1) {
 		idLib::common->Error("idDict::WriteToFileHandle: bad string");
 	}
 
+#ifdef _SPLASHDAMAGE
+    f->Write( s, idStr::Length( s ) + 1 );
+#else
 	f->Write(s, strlen(s) + 1);
+#endif
 }
 
 /*
@@ -493,7 +585,12 @@ const idKeyValue *idDict::FindKey(const char *key) const
 
 	hash = argHash.GenerateKey(key, false);
 
-	for (i = argHash.First(hash); i != -1; i = argHash.Next(i)) {
+#ifdef _SPLASHDAMAGE
+    for ( i = argHash.GetFirst( hash ); i != idHashIndex::NULL_INDEX; i = argHash.GetNext( i ) )
+#else
+	for (i = argHash.First(hash); i != -1; i = argHash.Next(i)) 
+#endif
+	{
 		if (args[i].GetKey().Icmp(key) == 0) {
 			return &args[i];
 		}
@@ -509,15 +606,22 @@ idDict::FindKeyIndex
 */
 int idDict::FindKeyIndex(const char *key) const
 {
+#if !defined(_SPLASHDAMAGE)
 
 	if (key == NULL || key[0] == '\0') {
 		idLib::common->DWarning("idDict::FindKeyIndex: empty key");
 		return -1;
 	}
+#endif
 
 	int hash = argHash.GenerateKey(key, false);
 
-	for (int i = argHash.First(hash); i != -1; i = argHash.Next(i)) {
+#ifdef _SPLASHDAMAGE
+    for ( int i = argHash.GetFirst( hash ); i != idHashIndex::NULL_INDEX; i = argHash.GetNext( i ) )
+#else
+	for (int i = argHash.First(hash); i != -1; i = argHash.Next(i)) 
+#endif
+	{
 		if (args[i].GetKey().Icmp(key) == 0) {
 			return i;
 		}
@@ -537,6 +641,17 @@ void idDict::Delete(const char *key)
 
 	hash = argHash.GenerateKey(key, false);
 
+#ifdef _SPLASHDAMAGE
+    for ( i = argHash.GetFirst( hash ); i != -1; i = argHash.GetNext( i ) ) {
+        if ( args[i].GetKey().Icmp( key ) == 0 ) {
+            globalKeys->FreeString( args[i].key );
+            globalValues->FreeString( args[i].value );
+            args.RemoveIndex( i );
+            argHash.RemoveIndex( hash, i );
+            break;
+        }
+    }
+#else
 	for (i = argHash.First(hash); i != -1; i = argHash.Next(i)) {
 		if (args[i].GetKey().Icmp(key) == 0) {
 			globalKeys.FreeString(args[i].key);
@@ -546,6 +661,7 @@ void idDict::Delete(const char *key)
 			break;
 		}
 	}
+#endif
 
 #if 0
 
@@ -569,7 +685,11 @@ const idKeyValue *idDict::MatchPrefix(const char *prefix, const idKeyValue *last
 	int start;
 
 	assert(prefix);
+#ifdef _SPLASHDAMAGE
+    len = idStr::Length( prefix );
+#else
 	len = strlen(prefix);
+#endif
 
 	start = -1;
 
@@ -682,8 +802,20 @@ idDict::Init
 */
 void idDict::Init(void)
 {
+#ifdef _SPLASHDAMAGE
+    if ( !globalKeys ) {
+        globalKeys = new idStrPool( 1024 );
+        globalKeys->SetCaseSensitive( false );
+    }
+
+    if ( !globalValues ) {
+        globalValues = new idStrPool( 1024 );
+        globalValues->SetCaseSensitive( true );
+    }
+#else
 	globalKeys.SetCaseSensitive(false);
 	globalValues.SetCaseSensitive(true);
+#endif
 }
 
 /*
@@ -693,8 +825,22 @@ idDict::Shutdown
 */
 void idDict::Shutdown(void)
 {
+#ifdef _SPLASHDAMAGE
+    if ( globalKeys ) {
+        globalKeys->Clear();
+        delete globalKeys;
+        globalKeys = NULL;
+    }
+
+    if ( globalValues ) {
+        globalValues->Clear();
+        delete globalValues;
+        globalValues = NULL;
+    }
+#else
 	globalKeys.Clear();
 	globalValues.Clear();
+#endif
 }
 
 /*
@@ -704,8 +850,13 @@ idDict::ShowMemoryUsage_f
 */
 void idDict::ShowMemoryUsage_f(const idCmdArgs &args)
 {
+#ifdef _SPLASHDAMAGE
+    idLib::common->Printf( "%5zd KB in %d keys\n", globalKeys->Size() >> 10, globalKeys->Num() );
+    idLib::common->Printf( "%5zd KB in %d values\n", globalValues->Size() >> 10, globalValues->Num() );
+#else
 	idLib::common->Printf("%5zd KB in %d keys\n", globalKeys.Size() >> 10, globalKeys.Num());
 	idLib::common->Printf("%5zd KB in %d values\n", globalValues.Size() >> 10, globalValues.Num());
+#endif
 }
 
 /*
@@ -730,9 +881,15 @@ void idDict::ListKeys_f(const idCmdArgs &args)
 	int i;
 	idList<const idPoolStr *> keyStrings;
 
+#ifdef _SPLASHDAMAGE
+    for ( i = 0; i < globalKeys->Num(); i++ ) {
+        keyStrings.Append( ( *globalKeys )[ i ] );
+    }
+#else
 	for (i = 0; i < globalKeys.Num(); i++) {
 		keyStrings.Append(globalKeys[i]);
 	}
+#endif
 
 	keyStrings.Sort();
 
@@ -753,9 +910,15 @@ void idDict::ListValues_f(const idCmdArgs &args)
 	int i;
 	idList<const idPoolStr *> valueStrings;
 
+#ifdef _SPLASHDAMAGE
+    for ( i = 0; i < globalValues->Num(); i++ ) {
+        valueStrings.Append( ( *globalValues )[ i ] );
+    }
+#else
 	for (i = 0; i < globalValues.Num(); i++) {
 		valueStrings.Append(globalValues[i]);
 	}
+#endif
 
 	valueStrings.Sort();
 
@@ -788,5 +951,149 @@ const char *idDict::RandomPrefix( const char *prefix, idRandom &random, const ch
 		list[count++] = kv->GetValue().c_str();
 	}
 	return list[random.RandomInt( count )];
+}
+#endif
+
+#ifdef _SPLASHDAMAGE
+
+/*
+================
+idDict::Parse
+================
+*/
+bool idDict::Parse( idLexer &parser )
+{
+    idToken	token;
+    idToken	token2;
+    bool	errors;
+
+    errors = false;
+
+    if ( !parser.ExpectTokenString( "{" ) ) {
+        return false;
+    }
+
+    parser.ReadToken( &token );
+    while( ( token.type != TT_PUNCTUATION ) || ( token != "}" ) ) {
+        if ( token.type != TT_STRING ) {
+            parser.Error( "Expected quoted string, but found '%s'", token.c_str() );
+            break;
+        }
+
+        if ( !parser.ReadToken( &token2 ) ) {
+            parser.Error( "Unexpected end of file" );
+            break;
+        }
+
+        if ( FindKey( token ) ) {
+            parser.Warning( "'%s' already defined", token.c_str() );
+            errors = true;
+        }
+        Set( token, token2 );
+
+        if ( !parser.ReadToken( &token ) ) {
+            parser.Error( "Unexpected end of file" );
+            break;
+        }
+    }
+
+    return !errors;
+}
+
+/*
+================
+idDict::Set
+================
+*/
+bool idDict::Set( int index, const char *value )
+{
+    assert( index >= 0 && index < args.Num() );
+
+    // allocstring is more expensive than this simple check
+    if( !args[ index ].value->Icmp( value ) ) {
+        return false;
+    }
+
+    // first set the new value and then free the old value to allow proper self copying
+    const idPoolStr *oldValue = args[index].value;
+    args[index].value = globalValues->AllocString( value );
+    globalValues->FreeString( oldValue );
+
+    return true;
+}
+
+/*
+================
+idDict::GenerateKey
+================
+*/
+int idDict::GenerateKey( const char *key )
+{
+    int hash = argHash.GenerateKey( key, false );
+    for ( int i = argHash.GetFirst( hash ); i != -1; i = argHash.GetNext( i ) ) {
+        if ( args[i].GetKey().Icmp( key ) == 0 ) {
+            return i;
+        }
+    }
+
+    int keyIndex;
+
+    idKeyValue kv;
+    kv.key = globalKeys->AllocString( key );
+    kv.value = globalValues->AllocString( "" );
+    keyIndex = args.Append( kv );
+    argHash.Add( argHash.GenerateKey( kv.GetKey(), false ), keyIndex );
+
+    return keyIndex;
+}
+
+/*
+============
+idDict::Write
+write the key value pairs to a file
+============
+*/
+bool idDict::WriteIndented( idFile* file, bool indentFirst ) const
+{
+    sdTextUtil::GetInstance().Write( file, "{\n", indentFirst );
+
+    sdTextUtil::GetInstance().Indent( file );
+    for( int i = 0; i < GetNumKeyVals(); i++ ) {
+        const idKeyValue* kv = GetKeyVal( i );
+        sdTextUtil::GetInstance().Write( file, va( "\"%s\"\t\"%s\"\n", kv->GetKey().c_str(), kv->GetValue().c_str() ));
+    }
+    sdTextUtil::GetInstance().Unindent( file );
+
+    sdTextUtil::GetInstance().Write( file, "}\n" );
+    return true;
+}
+
+/*
+============
+idDict::SetGlobalPools
+============
+*/
+void idDict::SetGlobalPools( idStrPool* _globalKeys, idStrPool* _globalValues )
+{
+    if( globalValues || globalKeys ) {
+        return;
+    }
+    /*
+    	assert( globalKeys == NULL );
+    	assert( globalValues == NULL );
+    */
+    globalKeys		= _globalKeys;
+    globalValues	= _globalValues;
+}
+
+/*
+============
+idDict::GetGlobalPools
+============
+*/
+void idDict::GetGlobalPools( idStrPool*& _globalKeys, idStrPool*& _globalValues )
+{
+    _globalKeys		= globalKeys;
+    _globalValues	= globalValues;
 }
 #endif

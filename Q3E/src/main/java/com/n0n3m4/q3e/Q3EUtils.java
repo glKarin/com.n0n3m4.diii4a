@@ -658,4 +658,21 @@ public final class Q3EUtils
         df.setRoundingMode(RoundingMode.HALF_UP);
         return df.format(d);
     }
+
+    // process CPU time(utime + stime) in clock ticks, -1 if unavailable
+    public static long GetCPUTime()
+    {
+        String content = file_get_contents("/proc/self/stat");
+        if(KStr.IsEmpty(content))
+            return -1;
+        // comm(field 2) is wrapped in parentheses and may contain spaces, so split after it
+        int index = content.lastIndexOf(')');
+        if(index < 0 || index + 1 >= content.length())
+            return -1;
+        String[] parts = content.substring(index + 1).trim().split("\\s+");
+        if(parts.length < 13)
+            return -1;
+        // fields after comm: 0=state ... 11=utime 12=stime
+        return Long.parseLong(parts[11]) + Long.parseLong(parts[12]);
+    }
 }

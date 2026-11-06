@@ -452,11 +452,11 @@ idClass::new
 #endif
 
 void * idClass::operator new( size_t s ) {
-	int *p;
+	intptr_t *p;
 
-	s += sizeof( int );
-	p = (int *)Mem_Alloc(static_cast<int>(s));
-	*p = static_cast<int>(s);
+	s += sizeof( intptr_t );
+	p = (intptr_t *)Mem_Alloc( s );
+	*p = s;
 	memused += static_cast<int>(s);
 	numobjects++;
 
@@ -475,11 +475,11 @@ void * idClass::operator new( size_t s ) {
 }
 
 void * idClass::operator new( size_t s, int, int, char *, int ) {
-	int *p;
+	intptr_t *p;
 
-	s += sizeof( int );
-	p = (int *)Mem_Alloc(static_cast<int>(s));
-	*p = static_cast<int>(s);
+	s += sizeof( intptr_t );
+	p = (intptr_t *)Mem_Alloc( s );
+	*p = s;
 	memused += static_cast<int>(s);
 	numobjects++;
 
@@ -507,24 +507,24 @@ idClass::delete
 ================
 */
 void idClass::operator delete( void *ptr ) {
-	int *p;
+	intptr_t *p;
 
 	if ( ptr ) {
-		p = ( ( int * )ptr ) - 1;
+		p = ( ( intptr_t * )ptr ) - 1;
 		memused -= *p;
 		numobjects--;
-        Mem_Free( p );
+		Mem_Free( p );
 	}
 }
 
 void idClass::operator delete( void *ptr, int, int, char *, int ) {
-	int *p;
+	intptr_t *p;
 
 	if ( ptr ) {
-		p = ( ( int * )ptr ) - 1;
+		p = ( ( intptr_t * )ptr ) - 1;
 		memused -= *p;
 		numobjects--;
-        Mem_Free( p );
+		Mem_Free( p );
 	}
 }
 

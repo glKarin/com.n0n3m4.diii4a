@@ -362,6 +362,8 @@ public:
 	// It would also be acceptable to render a scene multiple times, for "rear view mirrors", etc
 	virtual void			RenderScene( const renderView_t &renderView ) = 0;
 
+	virtual void			SetXrayGuiOverlayStage( const textureStage_t *stage ) = 0;
+
 	//-------------- Portal Area Information -----------------
 
 	// returns the number of portals

@@ -1,0 +1,419 @@
+renderProgram postprocess/downsample {
+
+	program vertex glsl { <%
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+		varying vec2 texCoord2;
+		varying vec2 texCoord3;
+		varying vec4 col;
+		$define screenSize $currentRenderTexelSize
+
+		void main() {
+			vec2 tex = $texCoordAttrib.xy;
+		$if r_32ByteVtx
+			tex *= 1.0/4096.0;
+		$endif
+
+			vec2 coord = tex.xy * screenSize.xy;
+			coord.y = screenSize.y - coord.y;
+
+			texCoord0 = coord;
+			texCoord1 = coord + vec2(2.0, 0.0);
+			texCoord2 = coord + vec2(2.0, 2.0);
+			texCoord3 = coord + vec2(0.0, 2.0);
+			col = VERTEX_BYTE_COLOR($colorAttrib);
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%		
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+		varying vec2 texCoord2;
+		varying vec2 texCoord3;
+		varying vec4 col;
+
+		$define framebuffer $currentRender // rect
+
+		$define glareParameters $postGlareParameters
+
+		void main() {
+			vec4 c;
+			c = texture2D( framebuffer, texCoord0 / $currentRenderTexSize.xy ) * 0.25; // rect
+			c += texture2D( framebuffer, texCoord1 / $currentRenderTexSize.xy ) * 0.25; // rect
+			c += texture2D( framebuffer, texCoord2 / $currentRenderTexSize.xy ) * 0.25; // rect
+			c += texture2D( framebuffer, texCoord3 / $currentRenderTexSize.xy ) * 0.25; // rect
+			gl_FragColor = c;
+		}
+	%> }
+}
+
+/**
+	This one does some extra stuff based on the post process parameters
+*/
+renderProgram postprocess/downsample_glare {
+
+	program vertex reference postprocess/downsample
+
+	program fragment glsl { <%		
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+		varying vec2 texCoord2;
+		varying vec2 texCoord3;
+		varying vec4 col;
+
+		$define framebuffer $currentRender // rect
+
+		float luminance( vec3 c ){
+			return dot( c, vec3( 0.33, 0.33, 0.33 ) );
+		}
+
+
+		$define glareParameters $postGlareParameters
+
+		void main() {
+
+			vec4 c;
+
+			c = texture2D( framebuffer, texCoord0 / $currentRenderTexSize.xy ) * 0.25; // rect
+			c += texture2D( framebuffer, texCoord1 / $currentRenderTexSize.xy ) * 0.25; // rect
+			c += texture2D( framebuffer, texCoord2 / $currentRenderTexSize.xy ) * 0.25; // rect
+			c += texture2D( framebuffer, texCoord3 / $currentRenderTexSize.xy ) * 0.25; // rect
+			float scale = mix( 1.0, smoothstep( glareParameters.z, 1.0, luminance (c.rgb ) ), glareParameters.w )*( c.a );
+			gl_FragColor = c * vec4( scale, scale, scale, 1.0 );
+		}
+	%> }
+}
+
+renderProgram postprocess/blur_bilinear {
+
+	program vertex glsl { <%
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+		varying vec2 texCoord2;
+		varying vec2 texCoord3;
+		varying vec2 texCoord4;
+		varying vec2 texCoord5;
+		varying vec2 texCoord6;
+		varying vec2 texCoord7;
+
+		$define blurSize $parameters
+		
+		//Offset texture coords by half a texel so we can use bilinear interpolation on them
+		//This gives the same filter factor for two neighbouring texels but who cares it looks good...
+		void main() {
+			vec4 screenSize = $currentRenderTexelSize;
+			screenSize *= 0.25;// Blurring happens at 1/4 of the screen size
+
+			vec4 tex = $texCoordAttrib;
+		$if r_32ByteVtx
+			tex *= 1.0/4096.0;
+		$endif
+			
+			vec2 coord = tex.xy * screenSize.xy; 
+			coord.y =  screenSize.y - coord.y;
+			
+			texCoord0 = coord + 6.5 * blurSize.xy;
+			texCoord1 = coord + 4.5 * blurSize.xy;
+			texCoord2 = coord + 2.5 * blurSize.xy;
+			texCoord3 = coord + 0.5 * blurSize.xy;
+			texCoord4 = coord - 0.5 * blurSize.xy;
+			texCoord5 = coord - 2.5 * blurSize.xy;
+			texCoord6 = coord - 4.5 * blurSize.xy;
+			texCoord7 = coord - 6.5 * blurSize.xy;
+
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+		varying vec2 texCoord2;
+		varying vec2 texCoord3;
+		varying vec2 texCoord4;
+		varying vec2 texCoord5;
+		varying vec2 texCoord6;
+		varying vec2 texCoord7;
+
+		$define sourceBuffer $map // rect
+
+		$define WT9_0 1.0
+		$define WT9_1 0.8
+		$define WT9_2 0.6
+		$define WT9_3 0.4
+
+		//the compiler precalculates all the normalization factors...
+		$define WT9_NORMALIZE (2.0*(WT9_0+WT9_1+WT9_2+WT9_3))
+
+		void main() {
+			vec4 result = vec4(0.0);
+			result += texture2D(sourceBuffer, texCoord0 / $mapTexSize.xy) * (WT9_3/WT9_NORMALIZE); // rect
+			result += texture2D(sourceBuffer, texCoord1 / $mapTexSize.xy) * (WT9_2/WT9_NORMALIZE); // rect
+			result += texture2D(sourceBuffer, texCoord2 / $mapTexSize.xy) * (WT9_1/WT9_NORMALIZE); // rect
+			result += texture2D(sourceBuffer, texCoord3 / $mapTexSize.xy) * (WT9_0/WT9_NORMALIZE); // rect
+			result += texture2D(sourceBuffer, texCoord4 / $mapTexSize.xy) * (WT9_0/WT9_NORMALIZE); // rect
+			result += texture2D(sourceBuffer, texCoord5 / $mapTexSize.xy) * (WT9_1/WT9_NORMALIZE); // rect
+			result += texture2D(sourceBuffer, texCoord6 / $mapTexSize.xy) * (WT9_2/WT9_NORMALIZE); // rect
+			result += texture2D(sourceBuffer, texCoord7 / $mapTexSize.xy) * (WT9_3/WT9_NORMALIZE); // rect
+			gl_FragColor = result;
+		}
+	%> }
+}
+
+renderProgram postprocess/glow {
+
+	program vertex glsl { <%
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+		
+		$define screenSize $currentRenderTexelSize
+		//$define blurSize $parameters
+
+		void main() {
+			vec4 tex = $texCoordAttrib;
+			$if r_32ByteVtx
+				tex *= 1.0/4096.0;
+			$endif
+
+			vec2 coord = tex.xy;
+			coord.y =  1.0 - coord.y;
+			
+			vec2 blurSize = screenSize.xy * 0.25;
+			
+			texCoord0 = coord * screenSize.xy;
+			texCoord1 = coord * blurSize;
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+		
+		$define blurbuffer $map // rect
+		$define framebuffer $currentRender // rect
+
+		$define glareParameters $postGlareParameters
+	
+		void main() {
+			//vec4 rain = tex2D( rainmask, indata.texCoord1 );
+			//indata.texCoord0 += ( rain.xy * 2.0 - 1.0 ) * -0.0;
+
+			vec4 clean = texture2D( framebuffer, texCoord0 / $currentRenderTexSize.xy ); // rect
+			vec4 blur = texture2D( blurbuffer, texCoord1 / $mapTexSize.xy ); // rect
+			vec4 final = clean * glareParameters.x + blur * glareParameters.y;
+
+			vec4 grayscale = vec4(dot( final.rgb, vec3( 0.299, 0.587, 0.114 ) ));
+			gl_FragColor = mix( vec4( 0.5, 0.5, 0.5, 0.5 ), mix( grayscale, final, $postSaturationContrast.x ) , $postSaturationContrast.y ) * $postTint;
+		}
+	%> }
+}
+
+renderProgram postprocess/glowStrogg {
+
+	program vertex glsl { <%
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+		varying vec2 texCoord2;
+
+		$define screenSize $currentRenderTexelSize
+
+		void main() {
+			vec4 tex = $texCoordAttrib;
+		$if r_32ByteVtx
+			tex *= 1.0/4096.0;
+		$endif
+
+			vec2 coord = tex.xy;
+			coord.y =  1.0 - coord.y;
+			
+			vec2 blurSize = screenSize.xy * 0.25;
+			
+			texCoord0 = coord * screenSize.xy;
+			texCoord1 = coord * blurSize;
+			texCoord2 = coord.xy;
+			texCoord2.y = ( texCoord2.y + $parameters.z ) * 2.0;
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+		varying vec2 texCoord2;
+
+		$define blurbuffer $map // rect
+		$define dsdtNoise $mask
+		$define framebuffer $currentRender // rect
+
+		$define glareParameters $postGlareParameters
+		
+		$define screenSize $currentRenderTexelSize
+	
+		void main() {
+			vec4 dstd = texture2D( dsdtNoise, texCoord2.xy );
+			
+			//float angle = $parameters.x;
+			float scale = $parameters.y;
+
+			// dsdt offset
+			vec2 texcoord;
+			float a1 = ( /*cos( angle ) * */scale / 16.0 ) * screenSize.x;
+			float a2 = ( /*-sin( angle ) * */scale / 16.0 ) * screenSize.y;
+			float a3 = -a2;
+			float a4 = a1;
+			
+			texcoord.x = texcoord.x + ( a1 * dstd.x + a3 * dstd.y ) * 1.0;
+			texcoord.y = texcoord.y + ( a2 * dstd.x + a4 * dstd.y ) * 0.4;
+
+			vec4 color;
+			vec4 clean;
+
+			clean = texture2D( framebuffer, texcoord / $currentRenderTexSize.xy ); // rect
+color = clean;
+
+			vec4 blur = texture2D( blurbuffer, texCoord1 / $mapTexSize.xy );
+			vec4 final = clean * glareParameters.x + blur * glareParameters.y;
+
+			vec4 grayscale = vec4( dot( final.rgb, vec3( 0.299, 0.587, 0.114 ) ) );
+
+			gl_FragColor = mix( vec4( 0.5, 0.5, 0.5, 0.5 ), mix( grayscale, final, $postSaturationContrast.x ) , $postSaturationContrast.y ) * $postTint;
+		}
+	%> }
+}
+
+renderProgram postprocess/showrect {
+
+	program vertex glsl { <%
+		varying vec2 texCoord0;
+
+		$define mat_s $diffuseMatrix_s
+		$define mat_t $diffuseMatrix_t
+
+		void main() {
+			vec4 tex = $texCoordAttrib;
+
+			$if r_32ByteVtx
+			tex.xy *= 1.0/4096.0;
+			tex.zw = 1.0;
+			$endif
+			
+			texCoord0.x = dot( tex, mat_s );
+			texCoord0.y = dot( tex, mat_t );
+
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec2 texCoord0;
+		
+		$define blurbuffer $currentRender
+
+		void main() {
+			gl_FragColor = texture2D( blurbuffer, texCoord0.xy / $currentRenderTexSize.xy ); // rect
+		}
+	%> }
+}
+
+renderProgram postprocess/heatsight {
+
+	program vertex glsl { <%
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+		
+		$define screenSize $currentRenderTexelSize
+		//$define blurSize $parameters
+
+		void main() {
+			vec4 tex = $texCoordAttrib;
+
+			$if r_32ByteVtx
+			tex *= 1.0/4096.0;
+			$endif
+
+			vec2 coord = tex.xy;
+			coord.y =  1.0 - coord.y;
+			
+			vec2 blurSize = screenSize.xy * 0.25;
+			
+			texCoord0 = coord * screenSize.xy;
+			texCoord1 = coord * blurSize;
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		$include "noise.glsl"
+		
+		varying vec2 texCoord0;
+		varying vec2 texCoord1;
+
+		$define blurbuffer $map
+		$define framebuffer $currentRender
+		$define gradient $mask
+		
+		$define glareParameters $postGlareParameters
+		$define time $parameters
+	
+		void main() {
+			//vec4 rain = tex2D( rainmask, indata.texCoord1 );
+			//indata.texCoord0 += ( rain.xy * 2.0 - 1.0 ) * -0.0;
+
+			//vec4 clean = texRECT( framebuffer, indata.texCoord0 );
+			vec4 blur = texture2D( blurbuffer, texCoord1 / $mapTexSize.xy );
+			//vec4 final = clean * glareParameters.x + blur * glareParameters.y;
+
+			//vec4 grayscale = dot( final.rgb, vec3( 0.299, 0.587, 0.114 ) );
+			//return lerp( vec4( 0.5, 0.5, 0.5, 0.5 ), lerp( grayscale, final, postSaturationContrast.x ) , postSaturationContrast.y ) * postTint;
+			//float noise = bandLimitedNoise( vec3( indata.texCoord1 * 0.05, time * 0.1 ) ) * 0.3 + 0.7; 
+			gl_FragColor = texture2D( gradient, vec2( blur.x, 0.0 ) ) /** noise*/;
+		}
+	%> }
+}
+
+renderProgram postprocess/motionblur {
+
+	program vertex glsl { <%
+		varying vec2 texCoord0;
+
+		$define mat_s $diffuseMatrix_s
+		$define mat_t $diffuseMatrix_t
+
+		void main() {
+			vec4 tex = $texCoordAttrib;
+
+			$if r_32ByteVtx
+			tex.xy *= 1.0/4096.0;
+			tex.zw = 1.0;
+			$endif
+			
+			texCoord0.x = dot( tex, mat_s );
+			texCoord0.y = dot( tex, mat_t );
+
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		}
+	%> }
+
+	program fragment glsl { <%
+		varying vec2 texCoord0;
+		$define wpos gl_FragCoord.xy
+		
+		$define blurbuffer $currentRender
+		$define screenMovement $viewMovement
+
+		void main() {
+		
+			vec4 accum = vec4( 0.0 );
+			for (int i=0; i<4; i+=1) {
+				vec4 previous2 = texture2D( blurbuffer, ( wpos - screenMovement.xy * float(i) * 5.0 ) / $currentRenderTexSize.xy ); // rect
+				accum += vec4( previous2 );
+			}
+			gl_FragColor = accum / 4.0;
+			//vec4 previous1 = texRECT( blurbuffer, indata.wpos - screenMovement * 25);
+			//vec4 current = texRECT( blurbuffer, indata.wpos);
+			//return (previous2*0.6 + previous1*0.3 + current*0.1);
+		}
+	%> }
+}

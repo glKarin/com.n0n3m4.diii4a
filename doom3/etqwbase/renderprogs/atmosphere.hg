@@ -1,0 +1,61 @@
+
+
+uniform float4 fog_depths : $fogDepths;
+$if ( r_megaDrawMethod == 0 )
+uniform float4 fog_parameters : $fogParams;
+uniform float3 fog_eyePos : $viewOriginWorld;
+$endif
+uniform float3 fog_viewOrigin : $viewOrigin;
+$if ( r_megaDrawMethod == 0 )
+uniform float4 fog_matrix_x : $transposedModelMatrix_x;
+uniform float4 fog_matrix_y : $transposedModelMatrix_y;
+uniform float4 fog_matrix_z : $transposedModelMatrix_z;
+$endif
+//MAD		result.color.secondary, _F1.x, $fogDepths.z, $fogDepths.w; 
+
+float2 Extinction(float3 inpos) {
+$if ( r_megaDrawMethod != 0 )
+	float3 diff = inpos - fog_viewOrigin;
+	float d = length( diff );
+	return 1.f-saturate( d * fog_depths.z + fog_depths.w );
+$else
+	float3 eye = fog_eyePos;
+
+	float4 iP = float4(inpos,1);
+	float3 pos;
+	pos.x = dot( iP, fog_matrix_x );
+	pos.y = dot( iP, fog_matrix_y );
+	pos.z = dot( iP, fog_matrix_z );
+
+	float oneOverA = fog_parameters.x;
+	float oneOverB = fog_parameters.y;
+	float C = fog_parameters.z;
+
+	//Cheap clutch for horizontal rays
+	if (abs(eye.z-pos.z) < 100) {
+		eye.z = pos.z + 100;
+	}
+
+	float3 ray = (pos - eye);
+
+	//Deviation from the vertical ray
+	float3 rayn = normalize(ray);
+	float3 up = float3(0,0,1);
+	float costheta = dot(up, rayn);
+
+	float z1 = max(pos.z+C,0);
+	float z2 = max(eye.z+C,0);
+
+	//Integrate along a vertical ray
+	float dens = pow(0.5,z2*oneOverB)-pow(0.5,z1*oneOverB);
+
+	//Correct for horizontal rays
+	dens = dens/costheta;
+
+	//Multiply with distance
+	float thick = dens*(length(ray)*oneOverA);
+	float T = pow(0.5, thick);
+
+	return float2(T, rayn.z);
+$endif
+}

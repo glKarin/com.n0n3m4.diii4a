@@ -42,6 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 #define GL_BLIT_FRAMEBUFFER_AVAILABLE() ( GLIMP_PROCISVALID(qglBlitFramebuffer) )
 #define GL_DRAW_BUFFERS_AVAILABLE() ( GLIMP_PROCISVALID(qglDrawBuffers) )
 #define GL_DEBUG_MESSAGE_AVAILABLE() ( GLIMP_PROCISVALID(qglDebugMessageControl) && GLIMP_PROCISVALID(qglDebugMessageCallback) && GLIMP_PROCISVALID(qglGetDebugMessageLog))
+#define GL_QUERY_AVAILABLE() ( GLIMP_PROCISVALID(qglBeginQuery) )
 #endif
 
 
@@ -247,10 +248,8 @@ typedef struct areaReference_s {
 	idRenderEntityLocal 	*entity;					// only one of entity / light will be non-NULL
 	idRenderLightLocal 	*light;					// only one of entity / light will be non-NULL
 	struct portalArea_s		*area;					// so owners can find all the areas they are in
-#ifdef _RAVEN
-#ifdef _RAVEN_BSE
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
     rvRenderEffectLocal	*effect;		// head/tail of doubly linked list, may change
-#endif
 #endif
 } areaReference_t;
 
@@ -415,6 +414,18 @@ class idRenderEntityLocal : public idRenderEntity
         idBounds		globalReferenceBounds;
         RenderMatrix			inverseBaseModelProject;	// transforms the unit cube to exactly cover the model in world space
 #endif
+#ifdef _SPLASHDAMAGE //karin: save last call renderEntity_t::callback game time
+		int						lastModifiedGameTime;
+		idRenderModel 			*imposterModel;
+		idList<qhandle_t>		instList;
+
+public:
+		void					CreateInstanceList(void);
+		void					UpdateInstanceList(void);
+		void					FreeInstanceList(void);
+		idVec3					GetVisDistOrigin(void) const;
+		idBounds				GetVisDistWorldBounds(idRenderModel *model) const;
+#endif
 };
 
 
@@ -471,6 +482,9 @@ typedef struct viewLight_s {
     idVec3					lightRadius;		// xyz radius for point lights
 	const struct drawSurf_s	*perforatedShadows;	//karin: perforated surface for shadow mapping
 #endif
+#ifdef _SPLASHDAMAGE //karin: light fade by distance
+	float					fadeFraction; // 0.0 is disable, fade = 1.0 - fadeFraction
+#endif
 } viewLight_t;
 
 
@@ -500,6 +514,10 @@ typedef struct viewEntity_s {
 	float				modelViewMatrix[16];	// local coords to eye coords
 #if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
 	RenderMatrix		mvp;
+#endif
+#ifdef _SPLASHDAMAGE //karin: frontend area ambient
+	const sdDeclAmbientCubeMap *areaAmbient;
+	float						fadeFraction; // 0.0 is disable, fade = 1.0 - fadeFraction
 #endif
 } viewEntity_t;
 
@@ -569,7 +587,11 @@ typedef struct viewDef_s {
 	// crossing a closed door.  This is used to avoid drawing interactions
 	// when the light is behind a closed door.
 
-#ifdef _RAVEN
+#ifdef _RAVENxxx //openQ4: fade portal view
+	bool *				areaVisible;	// in frame temporary memory, numPortalAreas entries
+#endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE) //karin: BSE
     struct viewEffect_s	*viewEffects;			// chain of all viewEffects effecting view
 #endif
 
@@ -608,6 +630,9 @@ typedef struct {
 	idVec4				bumpMatrix[2];
 	idVec4				diffuseMatrix[2];
 	idVec4				specularMatrix[2];
+#if defined(_SPLASHDAMAGE) //karin: alpha test in interaction stage
+	float				alphaTest;
+#endif
 } drawInteraction_t;
 
 
@@ -627,7 +652,9 @@ typedef enum {
 	RC_SET_BUFFER,
 	RC_COPY_RENDER,
 	RC_SWAP_BUFFERS		// can't just assume swap at end of list because
-	// of forced list submission before syncs
+#ifdef _SPLASHDAMAGE //karin: copy frontend parms to backend
+		, RC_COPY_PARMS
+#endif
 } renderCommand_t;
 
 typedef struct {
@@ -651,6 +678,37 @@ typedef struct {
 	idImage	*image;
 	int		cubeFace;					// when copying to a cubeMap
 } copyRenderCommand_t;
+
+#ifdef _SPLASHDAMAGE //karin: copy frontend parms to backend
+typedef struct materialStageBuiltinUniform_s {
+	idVec4 currentRenderTexelSize;
+	idVec3 postTint;
+	idVec2 postSaturationContrast;
+	idVec4 postGlareParameters;		// source brightness, blur brightness, brightness threshold, threshold dependency
+	idVec3 sunDir;
+	idVec3 sunColor;
+	idImage	*environmentCubeMap;
+	idVec3 fogColor;
+	float ambientBrightness;
+	idVec4 ambientAvgColor;
+	idImage	*skyGradientCubeMap;
+	idVec2 sunHaloParameters; // scale, bias
+	idImage	*ambientCubeMap;
+	float ambientScale;
+	idVec3 fogParams; // distHalf, heightHalf, heightOffset
+	idVec4 fogDepths; // ?, ?, start, end
+} materialStageBuiltinUniform_t;
+
+typedef struct {
+	renderCommand_t		commandId, *next;
+	materialStageBuiltinUniform_t parms;
+} copyParmsCommand_t;
+
+void R_AddCopyParmsCmd(const viewDef_t *view);
+void RB_CopyParms(const void *data);
+
+#include "renderer/PostprocessBuffer.h"
+#endif
 
 //=======================================================================
 
@@ -753,7 +811,11 @@ typedef struct {
 #endif
 } tmu_t;
 
+#ifdef _SPLASHDAMAGE //karin: for megatexture in shadow mapping
+const int MAX_MULTITEXTURE_UNITS =	16;
+#else
 const int MAX_MULTITEXTURE_UNITS =	8;
+#endif
 typedef struct {
 	tmu_t		tmu[MAX_MULTITEXTURE_UNITS];
 	int			currenttmu;
@@ -793,6 +855,7 @@ typedef struct {
 	int		msec;			// total msec for backend run
 } backEndCounters_t;
 
+
 // all state modified by the back end is separated
 // from the front end state
 typedef struct {
@@ -825,6 +888,9 @@ typedef struct {
 #ifdef _SHADOW_MAPPING
     RenderMatrix		shadowV[6];				// shadow depth view matrix
     RenderMatrix		shadowP[6];				// shadow depth projection matrix
+#endif
+#ifdef _SPLASHDAMAGE //karin: custom stage shader parms
+	materialStageBuiltinUniform_t parms;
 #endif
 } backEndState_t;
 
@@ -961,6 +1027,36 @@ class idRenderSystemLocal : public idRenderSystem
             }
         virtual void			DebugGraph( float cur, float min, float max, const idVec4 &color ) { (void)cur, (void)min; (void)max; (void)color; }
 #endif
+#ifdef _SPLASHDAMAGE
+		virtual bool			UploadImage(const char *imageName, const byte *data, int width, int height,
+		                         bool generateMipMaps, bool copy = true);
+
+		virtual void			SyncRenderSystem(void);
+
+		virtual int				GetNumMSAAModes(void) const;
+
+		virtual const char *	GetMSAAMode(int idx, int &val) const;
+
+		virtual void			LockThreads(void);
+
+		virtual void			UnlockThreads(void);
+
+		virtual int				GetSyncNum(void);
+
+		virtual int				RegisterPtr(void *ptr);
+
+		virtual void			UnregisterPtr(int uid);
+
+		virtual void *			PtrForUID(int uid);
+
+		virtual class idRenderModel *InstantiateDynamicModel(class idRenderModel *model, struct renderEntity_s *ent);
+
+		virtual bool			IsSMPEnabled(void);
+
+		idList<void *>			registerPtrs;
+		class sdGuiModel 		*gameGuiModel;
+		int						syncNum;
+#endif
 
 	public:
 		// renderer globals
@@ -1055,6 +1151,10 @@ extern idCVar r_useETC2;				// ETC2 compression
 
 extern idCVar harm_r_useFenceSync;
 extern void RB_FenceSync(void);
+
+#ifdef _SPLASHDAMAGE //karin: Occlusion testing
+#include "rb/OcclusionQuery.h"
+#endif
 #endif
 //#define DEBUG_SYNC_MIN_INTERVAL 1
 #ifdef DEBUG_SYNC_MIN_INTERVAL
@@ -1222,6 +1322,8 @@ extern idCVar r_screenshotFormat;
 extern idCVar r_screenshotJpgQuality;
 extern idCVar r_screenshotPngCompression;
 
+extern idCVar harm_r_debugDistance;
+
 #ifdef _D3BFG_CULLING
 extern idCVar harm_r_occlusionCulling;
 extern idCVar r_useLightPortalCulling;		// 0 = none, 1 = box, 2 = exact clip of polyhedron faces, 3 MVP to plane culling
@@ -1232,6 +1334,7 @@ extern idCVar r_useEntityPortalCulling;		// 0 = none, 1 = box
 #ifdef _RAVEN
 extern idCVar r_skipSky;
 extern idCVar r_forceAmbient;
+extern idCVar r_portalsDistanceCull;
 #endif
 
 /*
@@ -1438,6 +1541,7 @@ void RB_ComputeMVP( const drawSurf_t * const surf, float mvp[16] );
 #define DRAWSURF_HAS_DEPTHHACK(surf) ((surf)->space->weaponDepthHack && (surf)->space->modelDepthHack == 0.0f)
 void RB_LoadProjectionMatrix( void );
 void RB_ComputeDrawSurfMVP( const drawSurf_t * const surf );
+void RB_SetupDrawSurfMVP( const drawSurf_t * const surf );
 extern float rb_MVP[16];
 
 /*
@@ -1482,11 +1586,9 @@ void R_ModulateLights_f(const idCmdArgs &args);
 void R_SetLightProject(idPlane lightProject[4], const idVec3 origin, const idVec3 targetPoint,
                        const idVec3 rightVector, const idVec3 upVector, const idVec3 start, const idVec3 stop);
 
-#ifdef _RAVEN // particle
-#ifdef _RAVEN_BSE
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 void R_AddEffectSurfaces(void);
 viewEffect_s * R_SetEffectDefViewEntity(rvRenderEffectLocal *def);
-#endif
 #endif
 
 void R_AddLightSurfaces(void);
@@ -1566,6 +1668,9 @@ DRAW_STANDARD
 */
 
 void RB_DrawElementsWithCounters(const srfTriangles_t *tri);
+#ifdef GL_ES_VERSION_2_0
+void RB_DrawElementsWithCountersLines(const srfTriangles_t *tri);
+#endif
 void RB_DrawShadowElementsWithCounters(const srfTriangles_t *tri, int numIndexes);
 void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs);
 void RB_BindVariableStageImage(const textureStage_t *texture, const float *shaderRegisters);
@@ -1628,14 +1733,19 @@ typedef enum {
 #endif
 	SHADER_DIFFUSECUBEMAP,
 	// SHADER_GLASSWARP,
+#ifdef _SPLASHDAMAGE //karin: Occlusion testing
+	SHADER_OCCLUSIONTEST,
+#endif
 	SHADER_TEXGEN,
 	// new stage
+#if !defined(_SPLASHDAMAGE)
+	SHADER_COLORPROCESS,
 	SHADER_HEATHAZE,
 	SHADER_HEATHAZE_WITH_MASK,
 	SHADER_HEATHAZE_WITH_MASK_AND_VERTEX,
-	SHADER_COLORPROCESS,
 	// D3XP
     SHADER_ENVIROSUIT,
+#endif
 #ifdef _HUMANHEAD
 	SHADER_SCREENEFFECT, // spiritview
 	SHADER_RADIALBLUR, // deathview
@@ -1696,7 +1806,7 @@ typedef enum {
 #define SHADER_BASE_BEGIN SHADER_INTERACTION
 #define SHADER_BASE_END SHADER_TEXGEN
 
-#define SHADER_NEW_STAGE_BEGIN SHADER_HEATHAZE
+#define SHADER_NEW_STAGE_BEGIN (SHADER_TEXGEN + 1)
 #define SHADER_NEW_STAGE_END SHADER_MEGATEXTURE
 
 #ifdef _SHADOW_MAPPING
@@ -1869,89 +1979,7 @@ typedef struct shaderProgram_s {
 #define SHADER_NOT_VALID(shader) (shader.program == 0)
 void R_InitShaderProgram(shaderProgram_t *program);
 
-struct GLSLShaderProp
-{
-	idStr name;
-	shaderProgram_t *program;
-	idStr default_vertex_shader_source;
-	idStr default_fragment_shader_source;
-	idStr macros;
-	idStr vertex_shader_source_file;
-	idStr fragment_shader_source_file;
-    int type; // glsl_program_t
-
-	GLSLShaderProp()
-			: program(NULL),
-            type(SHADER_CUSTOM)
-	{}
-
-	GLSLShaderProp(const char *name)
-			: name(name),
-			  program(NULL),
-              type(SHADER_CUSTOM)
-	{
-		vertex_shader_source_file = name;
-		vertex_shader_source_file += ".vert";
-		fragment_shader_source_file = name;
-		fragment_shader_source_file += ".frag";
-	}
-
-	GLSLShaderProp(const char *name, int type, shaderProgram_t *program, const idStr &vs, const idStr &fs, const idStr &macros)
-			: name(name),
-              type(type),
-			  program(program),
-			  default_vertex_shader_source(vs),
-			  default_fragment_shader_source(fs),
-			  macros(macros)
-	{
-		vertex_shader_source_file = name;
-		vertex_shader_source_file += ".vert";
-		fragment_shader_source_file = name;
-		fragment_shader_source_file += ".frag";
-	}
-};
-
-typedef int shaderHandle_t; // > 0 is internal shader(index = handle - 1), < 0 is custom shader(index = -handle - 1), = 0 is invalid
-#define SHADER_HANDLE_IS_VALID(x) ( (x) != idGLSLShaderManager::INVALID_SHADER_HANDLE )
-#define SHADER_HANDLE_IS_INVALID(x) ( (x) == idGLSLShaderManager::INVALID_SHADER_HANDLE )
-#define SHADER_HANDLE_INVALID (idGLSLShaderManager::INVALID_SHADER_HANDLE )
-#define SHADER_HANDLE_IS_BUILTIN(x) ( (x) > idGLSLShaderManager::INVALID_SHADER_HANDLE )
-#define SHADER_HANDLE_IS_CUSTOM(x) ( (x) < idGLSLShaderManager::INVALID_SHADER_HANDLE )
-#define SHADER_MAX_CUSTOM 32
-class idGLSLShaderManager
-{
-public:
-	~idGLSLShaderManager();
-	int Add(shaderProgram_t *shader); // return added shader's index
-    void Shutdown(void);
-	const shaderProgram_t * Find(const char *name) const;
-	const shaderProgram_t * Find(GLuint handle) const; // handle is OpenGL shader program's handle
-	shaderHandle_t Load(const GLSLShaderProp &prop); // frontend: if in multi-threading, only add on queue, because current thread has not OpenGL context; else if not in multi-threading, actual load directly. however always return a shader program handle, if has loaded, return OpenGL program handle(> 0), else return -(customShaders::index + 1), error return 0.
-	void ActuallyLoad(void); // backend: if in multi-threading, load actually from queue with OpenGL context
-	const shaderProgram_t * Get(shaderHandle_t handle) const;
-	shaderHandle_t GetHandle(const char *name) const;
-	void ReloadShaders(void);
-
-	static idGLSLShaderManager _shaderManager;
-	static const shaderHandle_t INVALID_SHADER_HANDLE;
-
-private:
-	int FindIndex(const char *name) const; // return raw index
-	int FindIndex(GLuint handle) const; // return raw index
-    int FindCustomIndex(const char *name) const; // return raw index
-    GLSLShaderProp * FindCustom(const char *name, int *index = NULL);
-
-private:
-	idList<shaderProgram_t *> shaders; // available shaders, include internal shaders and loaded custom shaders
-	idList<GLSLShaderProp> customShaders; // custom shaders load list. GLSLShaderProp::program == NULL: loading not start; GLSLShaderProp::program->program > 0: load success; GLSLShaderProp::program->program == 0: load failed
-	// idList<unsigned int> queue; // custom shaders load queue: index to customShaders
-	unsigned int queueCurrentIndex; // current loaded index in customShaders
-
-private:
-	idGLSLShaderManager() : queueCurrentIndex(0) {}
-};
-extern idGLSLShaderManager *shaderManager;
-
+#include "glsl/ShaderManager.h"
 
 /* This file was automatically generated.  Do not edit! */
 void R_ReloadGLSLPrograms_f(const idCmdArgs &args);
@@ -2223,6 +2251,7 @@ typedef enum screenshotFormat_e {
 void LoadJPG_stb(const char *filename, unsigned char **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadPNG(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadDDS(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
+void LoadDXT(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadBimage(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadEXR(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
 void LoadHDR(const char *filename, byte **pic, int *width, int *height, ID_TIME_T *timestamp);
@@ -2307,7 +2336,9 @@ idScreenRect R_CalcIntersectionScissor(const idRenderLightLocal *lightDef,
 #define SUPPRESS_SURFACE_MASK(x) (1 << (x))
 #define SUPPRESS_SURFACE_MASK_CHECK(t, x) ((t) & SUPPRESS_SURFACE_MASK(x))
 #include "../raven/renderer/NewShaderStage.h"
+#endif
 
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
 typedef struct viewEffect_s/* : viewEntity_s*/ // 164 bytes in 32bits
 {
     struct viewEffect_s *next;
@@ -2328,9 +2359,8 @@ typedef struct viewEffect_s/* : viewEntity_s*/ // 164 bytes in 32bits
     float distanceToCamera;
 } viewEffect_t;
 
-#ifdef _RAVEN_BSE
 #include "../raven/bse/BSE.h"
-#endif
+
 class rvRenderModelBSE;
 class rvRenderEffectLocal : public rvRenderEffect
 {
@@ -2356,28 +2386,13 @@ public:
 
 
 
-
-
-
     class rvBSE* effect;
     int dynamicModelFrameCount;
     bool writeToDemo;
     rvRenderModelBSE *model;
-#ifdef _RAVEN_FX
-    int gameTime;
-    int serviceTime;
-    bool newEffect;
-    bool expired;
-    //cullLink_t* cullLinks;
-    bool remove;
-    int updateFramenum;
-    idLinkList<rvRenderEffectLocal> node;
-#endif
 };
 
-#ifdef _RAVEN_BSE
 void R_FreeEffectDefDerivedData(rvRenderEffectLocal *def);
-#endif
 #endif
 
 void GLSL_AddCommand(void);
@@ -2445,8 +2460,16 @@ extern bool r_useDepthTexture;
 extern bool r_useCubeDepthTexture;
 extern bool r_usePackColorAsDepth;
 
+extern bool r_shadowMapping;
+extern bool r_shadowMapCombine;
+extern bool r_shadowMapPerforated;
+extern int r_shadowMapParallelSplitFrustums;
+
+extern const float SampleFactors[MAX_SHADOWMAP_RESOLUTIONS];
+
 void R_SetupShadowMappingLOD(const idRenderLightLocal *light, viewLight_t *vLight);
 void R_SetupShadowMappingProjectionMatrix(idRenderLightLocal *light);
+idImage * RB_ShadowMappingInteraction_GetTexture(void);
 #endif
 
 #if defined(_SHADOW_MAPPING) || defined(_D3BFG_CULLING)
@@ -2457,12 +2480,20 @@ extern idBounds bounds_unitCube;
 #ifdef _STENCIL_SHADOW_IMPROVE
 extern idCVar harm_r_stencilShadowTranslucent;
 extern idCVar harm_r_stencilShadowAlpha;
+extern idCVar harm_r_stencilShadowCombine;
+
+extern bool r_stencilShadowCombine;
+extern bool r_stencilShadowTranslucent;
+extern float r_stencilShadowAlpha;
 
 #ifdef _SOFT_STENCIL_SHADOW
 extern idCVar harm_r_stencilShadowSoft;
 extern idCVar harm_r_stencilShadowSoftBias;
 extern idCVar harm_r_stencilShadowSoftCopyStencilBuffer;
+
+extern bool r_stencilShadowSoft;
 #endif
+
 #endif
 
 #ifdef _NO_GAMMA //karin: r_brightness when unsupport gamma
@@ -2541,6 +2572,7 @@ extern idCVar harm_r_globalIllumination;
 extern idCVar harm_r_globalIlluminationBrightness;
 #define HARM_RENDER_GLOBAL_ILLUMINATION() (harm_r_globalIllumination.GetBool() && harm_r_globalIlluminationBrightness.GetFloat() > 0.0f)
 
+void RB_CreateSingleDrawGlobalIllumination(const drawSurf_t *drawSurf, void (*DrawInteraction)(const drawInteraction_t *));
 void RB_DrawGlobalIlluminations( drawSurf_t **drawSurfs, int numDrawSurfs );
 #endif
 

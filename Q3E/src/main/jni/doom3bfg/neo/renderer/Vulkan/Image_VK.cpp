@@ -41,6 +41,135 @@ Contains the Image implementation for Vulkan
 #include "../RenderCommon.h"
 #include "Staging_VK.h"
 
+#ifdef D3_VK_SHARED_SAMPLER
+void idImageManager::GenSamplerKey(idImage *image, samplerCache_t &createInfo)
+{
+	memset(&createInfo, 0, sizeof(createInfo));
+
+	createInfo.compareEnable = ( image->opts.format == FMT_DEPTH );
+	createInfo.compareOp = image->opts.format == FMT_DEPTH ? VK_COMPARE_OP_LESS_OR_EQUAL : VK_COMPARE_OP_NEVER;
+
+	createInfo.maxLod = image->opts.numLevels;
+
+	switch( image->filter )
+	{
+		case TF_DEFAULT:
+			createInfo.filter = VK_FILTER_LINEAR;
+			createInfo.mipmapFilter = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+			// RB: enable anisotropic filtering
+			if( r_maxAnisotropicFiltering.GetInteger() > 0 )
+			{
+				createInfo.anisotropyEnable = true;
+				createInfo.maxAnisotropy = Min( r_maxAnisotropicFiltering.GetFloat(), vkcontext.gpu->props.limits.maxSamplerAnisotropy );
+			}
+			break;
+
+		case TF_LINEAR:
+			createInfo.filter = VK_FILTER_LINEAR;
+			createInfo.mipmapFilter = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			break;
+
+		case TF_NEAREST:
+			createInfo.filter = VK_FILTER_NEAREST;
+			createInfo.mipmapFilter = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+			break;
+
+		// RB:
+		case TF_NEAREST_MIPMAP:
+			createInfo.filter = VK_FILTER_NEAREST;
+			createInfo.mipmapFilter = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			break;
+
+		default:
+			idLib::FatalError( "idImage::GenSamplerKey: unrecognized texture filter %d", image->filter );
+	}
+
+	switch( image->repeat )
+	{
+		case TR_REPEAT:
+			createInfo.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			break;
+
+		case TR_CLAMP:
+			createInfo.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			break;
+
+		case TR_CLAMP_TO_ZERO_ALPHA:
+			createInfo.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+			createInfo.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+			break;
+
+		case TR_CLAMP_TO_ZERO:
+			createInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+			createInfo.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+			break;
+		default:
+			idLib::FatalError( "idImage::GenSamplerKey: unrecognized texture repeat mode %d", image->repeat );
+	}
+}
+
+ID_INLINE bool Image_SamplerEquals(const samplerCache_t &a, const samplerCache_t &b)
+{
+	return a.filter == b.filter
+		&& a.mipmapFilter == b.mipmapFilter
+		&& a.borderColor == b.borderColor
+		&& a.addressMode == b.addressMode
+		&& a.compareOp == b.compareOp
+		&& a.maxLod == b.maxLod
+		&& a.maxAnisotropy == b.maxAnisotropy
+		&& a.compareEnable == b.compareEnable
+		&& a.anisotropyEnable == b.anisotropyEnable
+		;
+}
+
+bool idImageManager::FindSampler(samplerCache_t &key) const
+{
+	int i;
+	const samplerCache_t *item = samplerList.Ptr();
+
+	for( i = 0; i < samplerList.Num(); i++, item++ )
+	{
+		if( Image_SamplerEquals(key, *item) )
+		{
+			//Sys_Printf("FFF %d %p\n", i, item->sampler);
+			key.sampler = item->sampler;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void idImageManager::SetSampler(samplerCache_t &key)
+{
+	int i;
+	samplerCache_t *item = samplerList.Ptr();
+
+	for( i = 0; i < samplerList.Num(); i++, item++ )
+	{
+		if( Image_SamplerEquals(key, *item) )
+		{
+			item->sampler = key.sampler;
+			return;
+		}
+	}
+
+	samplerList.Append(key);
+	//Sys_Printf("NNN %d %p\n", samplerList.Num(), key.sampler);
+}
+
+void idImageManager::DestroySamplers(void)
+{
+	Sys_Printf("Destroy shared samplers: %d\n", samplerList.Num());
+	for( int i = 0; i < samplerList.Num(); ++i )
+	{
+		vkDestroySampler( vkcontext.device, samplerList[ i ].sampler, NULL );
+	}
+	samplerList.Clear();
+}
+#endif
+
 int						idImage::garbageIndex = 0;
 #if defined( USE_AMD_ALLOCATOR )
 	idList< VmaAllocation > idImage::allocationGarbage[ NUM_FRAME_DATA ];
@@ -246,6 +375,15 @@ idImage::CreateSampler
 */
 void idImage::CreateSampler()
 {
+#ifdef D3_VK_SHARED_SAMPLER //karin: find shared sampler from global pool
+	samplerCache_t key;
+	idImageManager::GenSamplerKey(this, key);
+	if(globalImages->FindSampler(key))
+	{
+		this->sampler = key.sampler;
+		return;
+	}
+#endif
 	VkSamplerCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 	createInfo.maxAnisotropy = 1.0f;
@@ -327,6 +465,10 @@ void idImage::CreateSampler()
 	}
 
 	ID_VK_CHECK( vkCreateSampler( vkcontext.device, &createInfo, NULL, &sampler ) );
+#ifdef D3_VK_SHARED_SAMPLER
+	key.sampler = sampler;
+	globalImages->SetSampler(key);
+#endif
 }
 
 /*
@@ -611,7 +753,9 @@ void idImage::PurgeImage()
 {
 	if( sampler != VK_NULL_HANDLE )
 	{
+#if !defined(D3_VK_SHARED_SAMPLER) //karin: sampler is shared
 		samplerGarbage[ garbageIndex ].Append( sampler );
+#endif
 		sampler = VK_NULL_HANDLE;
 	}
 

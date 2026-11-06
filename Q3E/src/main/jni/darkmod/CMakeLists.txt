@@ -12,18 +12,21 @@ if(NOT is_multi_config AND NOT CMAKE_BUILD_TYPE)
 endif()
 
 if (ANDROID)
-    # we want debug symbols even with Release builds
-    string(APPEND CMAKE_CXX_FLAGS_RELEASE_INIT "-ffast-math") #[[ -fsigned-char]]
-    string(APPEND CMAKE_C_FLAGS_RELEASE_INIT "-ffast-math") #[[ -fsigned-char]]
-#[[    string(REPLACE "-O2" "-O1" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
-    string(REPLACE "-O2" "-O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")]]
+	# we want debug symbols even with Release builds; enable the "good parts" of -ffast-math (which is not to be trusted)
+	string(APPEND CMAKE_CXX_FLAGS_RELEASE_INIT "-g -fno-math-errno -fno-trapping-math -ffinite-math-only") #[[ -fsigned-char]]
+	string(APPEND CMAKE_C_FLAGS_RELEASE_INIT "-g -fno-math-errno -fno-trapping-math -ffinite-math-only") #[[ -fsigned-char]]
 elseif (UNIX)
-	# we want debug symbols even with Release builds
-	string(APPEND CMAKE_CXX_FLAGS_RELEASE_INIT "-g -ffast-math")
-	string(APPEND CMAKE_C_FLAGS_RELEASE_INIT "-g -ffast-math")
+	# we want debug symbols even with Release builds; enable the "good parts" of -ffast-math (which is not to be trusted)
+	string(APPEND CMAKE_CXX_FLAGS_RELEASE_INIT "-g -fno-math-errno -fno-trapping-math -ffinite-math-only")
+	string(APPEND CMAKE_C_FLAGS_RELEASE_INIT "-g -fno-math-errno -fno-trapping-math -ffinite-math-only")
+
+	option(FORCE_COLORED_OUTPUT "Always produce ANSI-colored compiler warnings/errors (GCC/Clang only; esp. useful with ninja)." OFF)
+	option(ASAN		"Enable GCC/Clang Adress Sanitizer (ASan)" OFF) # TODO: MSVC also supports this, somehow?
 elseif(MSVC)
 	set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 endif()
+
+option(TDM_THIRDPARTY_ARTEFACTS "Use prebuilt artefacts at ThirdParty/artefacts?" OFF) # ON
 
 # find ordinary cmake includes
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/sys/cmake")
@@ -40,23 +43,18 @@ include(CheckPIESupported)
 project(TheDarkMod)
 # note: must be after project: https://gitlab.kitware.com/cmake/cmake/-/issues/14983
 check_pie_supported()
+if(TDM_THIRDPARTY_ARTEFACTS)
+	include(ThirdParty/use_artefacts.cmake)
+endif()
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-#set(CMAKE_VERBOSE_MAKEFILE ON)
-
 cmake_dependent_option(WITH_TOOLS "Compile with Tools" ON "MSVC" OFF)
 set(GAME_DIR "${PROJECT_SOURCE_DIR}/../darkmod" CACHE STRING "The directory where the game assets are stored")
-option(COPY_EXE "Copy executable to GAME_DIR after build" OFF)
-set(THIRDPARTY_PLATFORM_OVERRIDE "" CACHE STRING "If you build conan dependencies yourself with custom platform_name, pass platform_name string here")
+option(COPY_EXE "Copy executable to GAME_DIR after build" OFF) # ON
 option(ENABLE_TRACY "Enable tracy profiling support. Needs to be activated ingame by enabling the cvar com_enableTracing." OFF) #k ON
-
-if (UNIX)
-    # configure sensible warnings
-    add_compile_options(-fPIC)
-endif()
 
 if (UNIX)
 	# configure sensible warnings
@@ -68,7 +66,13 @@ if (UNIX)
 			-Wno-format-security            # format string is often composed dynamically
 			-Woverloaded-virtual            # almost-overriding virtual functions is dangerous for us
 			-Wsuggest-override              # recommend using "override" keyword
+			-fPIC
 	)
+	CHECK_CXX_COMPILER_FLAG("-Wdangling-reference" cxx_has_Wdangling_reference)
+	if(cxx_has_Wdangling_reference)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=dangling-reference")
+	endif()
+
 	# configure other compile options
 	add_compile_options(
 			-pipe
@@ -76,10 +80,10 @@ if (UNIX)
 			-fno-omit-frame-pointer         # crashdumps!
 			-fmessage-length=0
 			-fvisibility=hidden
+			#-std=c++14
 			-fno-unsafe-math-optimizations
 	)
 
-    set(CMAKE_CXX_STANDARD "14")
     if(NOT ANDROID)
 	# enable SSE2 if supported (mainly 32-bit x86)
 	check_cxx_compiler_flag(-msse2 MSSE2_SUPPORTED)
@@ -87,6 +91,29 @@ if (UNIX)
 		add_compile_options(-msse2)
     endif()
     endif()
+
+	# don't mess up math code with useless FMA "optimizations"
+	# (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839)
+	# see also https://github.com/dhewm/dhewm3/commit/2521c3dfdb87c9261f69615ab7ecc241c1046bb4
+	# and https://github.com/dhewm/dhewm3/issues/147
+	# and https://github.com/RobertBeckebans/RBDOOM-3-BFG/issues/436#issuecomment-850930254 (and following)
+	CHECK_CXX_COMPILER_FLAG("-ffp-contract=off" cxx_has_fp-contract)
+	if(cxx_has_fp-contract)
+		add_compile_options(-ffp-contract=off)
+	endif()
+
+	if(FORCE_COLORED_OUTPUT)
+		if(CMAKE_COMPILER_IS_GNUCC)
+		   add_compile_options (-fdiagnostics-color=always)
+		else() # clang, probably
+		   add_compile_options (-fcolor-diagnostics)
+		endif ()
+	endif ()
+
+	if(ASAN)
+		# if this doesn't work, ASan might not be available on your platform, don't set ASAN then..
+		add_compile_options(-fsanitize=address)
+	endif()
 
 	# TODO: do we really want to keep using this
 	# use old ABI for std::string and std::list to allow TDM to run on distros with old
@@ -115,14 +142,10 @@ elseif (MSVC)
 endif ()
 
 
-#[[set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb -O0")
-set(CMAKE_CXX_FLAGS_DEBUGALL "-g -ggdb -O0")
-set(CMAKE_CXX_FLAGS_PROFILE "-g -ggdb -O0")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -ggdb -O0")]]
 if(ANDROID)
     add_library(TheDarkMod SHARED)
 else()
-    add_executable(TheDarkMod)
+add_executable(TheDarkMod)
 endif()
 
 get_svn_revision(SVNVERSION)
@@ -142,6 +165,10 @@ ucm_add_dirs(
 		"tools/compilers"
 		TO TDM_SOURCE_FILES RECURSIVE
 )
+ucm_add_dirs(
+	"sys/renderdoc"
+	TO TDM_SOURCE_FILES RECURSIVE
+)
 ucm_add_files(
 	"sys/sys_local.cpp"
 	"sys/sys_local.h"
@@ -149,8 +176,8 @@ ucm_add_files(
 	"sys/sys_padinput.cpp"
 	"sys/sys_padinput.h"
 	"sys/sys_cpu.cpp"
-	"ThirdParty/artefacts/tracy/src/TracyClient.cpp"
-TO TDM_SOURCE_FILES)
+	TO TDM_SOURCE_FILES
+)
 
 if(ANDROID)
     ucm_remove_files(
@@ -159,13 +186,6 @@ if(ANDROID)
     )
     add_definitions(-D_NO_TRACY)
     add_definitions(-D_GLES)
-else()
-    include_directories(
-            "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include"
-            "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include/common"
-            "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include/client"
-            "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/tracy/include/libbacktrace"
-    )
 endif()
 
 if (WITH_TOOLS)
@@ -245,7 +265,13 @@ endif ()
 # note TypeInfo.cpp must be excluded from precompiled header because it uses some dirty hacks
 add_precompiled_header(TheDarkMod
 		"idlib/precompiled.h" "idlib/precompiled.cpp" "precompiled.h"
-		EXCLUDE "game/gamesys/TypeInfo.cpp" "idlib/Token.cpp" "idlib/bv/Frustum_gcc.cpp" "sys/win32/rc/CreateResourceIDs.cpp" "ThirdParty/artefacts/tracy/src/TracyClient.cpp"
+		EXCLUDE
+		"game/gamesys/TypeInfo.cpp"
+		"idlib/Token.cpp"
+		"sys/win32/win_shared.cpp"
+		"sys/win32/rc/CreateResourceIDs.cpp"
+		"framework/TracingEmbeddedSourceCode.cpp"
+		"ThirdParty/artefacts/tracy/src/TracyClient.cpp"
 )
 
 add_compile_definitions(
@@ -267,20 +293,14 @@ if (ENABLE_TRACY)
 	)
 endif()
 
-if (THIRDPARTY_PLATFORM_OVERRIDE)
-	if (UNIX)
-		set_target_properties(TheDarkMod PROPERTIES OUTPUT_NAME "thedarkmod.custom")
-	elseif (MSVC)
-		set_target_properties(TheDarkMod PROPERTIES OUTPUT_NAME "thedarkmod_custom.exe")
-	endif ()
-elseif (ANDROID)
+if (ANDROID)
     set_target_properties(TheDarkMod PROPERTIES OUTPUT_NAME "TheDarkMod")
 elseif (UNIX)
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set_target_properties(TheDarkMod PROPERTIES OUTPUT_NAME "thedarkmod.x64")
-    else ()
-        set_target_properties(TheDarkMod PROPERTIES OUTPUT_NAME "thedarkmod.x86")
-    endif ()
+	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set_target_properties(TheDarkMod PROPERTIES OUTPUT_NAME "thedarkmod.x64")
+	else ()
+		set_target_properties(TheDarkMod PROPERTIES OUTPUT_NAME "thedarkmod.x86")
+	endif ()
 elseif (MSVC)
 	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
 		set_target_properties(TheDarkMod PROPERTIES OUTPUT_NAME "TheDarkModx64")
@@ -289,22 +309,8 @@ elseif (MSVC)
 	endif ()
 endif ()
 # ffmpeg dep was compiled without -fPIC, so need to disable PIE on 64bit builds
-set_target_properties(TheDarkMod PROPERTIES POSITION_INDEPENDENT_CODE ON)	# see also CMP0083
+set_target_properties(TheDarkMod PROPERTIES POSITION_INDEPENDENT_CODE OFF)	# see also CMP0083
 ucm_set_runtime(STATIC)
-
-#[[find_package(zlib REQUIRED)
-find_package(minizip REQUIRED)
-find_package(CURL REQUIRED)
-find_package(openal REQUIRED)
-find_package(ogg REQUIRED)
-find_package(vorbis REQUIRED)
-find_package(libjpeg REQUIRED)
-find_package(ffmpeg REQUIRED)
-find_package(pugixml REQUIRED)
-find_package(libpng REQUIRED)
-find_package(mbedtls REQUIRED)
-find_package(glfw REQUIRED)]]
-
 
 
 set(DEPLIBS_PATH "${PROJECT_SOURCE_DIR}/../deplibs")
@@ -328,6 +334,41 @@ include_directories(
         "${DEPLIBS_PATH}/libvorbis/include"
         "${DEPINCS_PATH}"
 )
+
+#[[
+find_package(ZLIB REQUIRED CONFIG)
+find_package(minizip REQUIRED CONFIG)
+find_package(CURL REQUIRED CONFIG)
+find_package(OpenAL REQUIRED CONFIG)
+find_package(Ogg REQUIRED CONFIG)
+find_package(Vorbis REQUIRED CONFIG)
+find_package(JPEG REQUIRED CONFIG)
+find_package(PNG REQUIRED CONFIG)
+find_package(ffmpeg REQUIRED CONFIG)
+find_package(pugixml REQUIRED CONFIG)
+find_package(MbedTLS REQUIRED CONFIG)
+find_package(glfw3 REQUIRED CONFIG)
+find_package(doctest REQUIRED CONFIG)
+find_package(tracy REQUIRED CONFIG)
+
+target_link_libraries(TheDarkMod
+		ZLIB::ZLIB
+		minizip::minizip
+		CURL::libcurl
+		OpenAL::OpenAL
+		vorbis::vorbis
+		Ogg::ogg
+		JPEG::JPEG
+		PNG::PNG
+		ffmpeg::ffmpeg
+		glfw
+		pugixml::pugixml
+		doctest::doctest
+		tracy::tracy
+)
+]]
+
+
 if(TDM_USE_INTERNAL_MINIZIP)
     include_directories(
             "${PROJECT_SOURCE_DIR}/ThirdParty/artefacts/minizip/include"
@@ -352,7 +393,6 @@ target_link_libraries(TheDarkMod
         vorbisfile
         jpeg
 )
-#k target_link_libraries(TheDarkMod debug ${pugixml_LIBRARIES_D} optimized ${pugixml_LIBRARIES})
 
 if (WIN32)
 	target_link_libraries(TheDarkMod ws2_32 iphlpapi winmm bcrypt dinput8 dbghelp)
@@ -363,6 +403,11 @@ elseif (ANDROID)
     #set_target_properties(TheDarkMod PROPERTIES LINK_FLAGS "-static-libstdc++")
 elseif (UNIX)
 	target_link_libraries(TheDarkMod pthread dl stdc++fs X11 Xext Xxf86vm)
+
+	if(ASAN)
+		target_link_libraries(TheDarkMod -fsanitize=address)
+	endif()
+
 	# strip debug symbols from executable and put them into a separate symbols file
 	add_custom_command(
 			TARGET TheDarkMod POST_BUILD

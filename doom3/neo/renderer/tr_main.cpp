@@ -1047,7 +1047,12 @@ void R_SetupProjection(void)
 	//
 	zNear = r_znear.GetFloat();
 
-	if (tr.viewDef->renderView.cramZNear) {
+#ifdef _SPLASHDAMAGE
+	if (tr.viewDef->renderView.flags.cramZNear)
+#else
+	if (tr.viewDef->renderView.cramZNear)
+#endif
+	{
 		zNear *= 0.25;
 	}
 
@@ -1138,7 +1143,12 @@ static void R_SetupViewFrustum(void)
 
 	dNear = r_znear.GetFloat();
 
-	if (tr.viewDef->renderView.cramZNear) {
+#ifdef _SPLASHDAMAGE
+	if (tr.viewDef->renderView.flags.cramZNear)
+#else
+	if (tr.viewDef->renderView.cramZNear)
+#endif
+	{
 		dNear *= 0.25f;
 	}
 
@@ -1293,10 +1303,12 @@ void R_RenderView(viewDef_t *parms)
 	// lists
 	R_AddModelSurfaces();
 
-#ifdef _RAVEN
-#ifdef _RAVEN_BSE
-    R_AddEffectSurfaces();
+#ifdef _SPLASHDAMAGE //karin: send gui surfs of current view
+	tr.gameGuiModel->EmitCurrentView();
 #endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+    R_AddEffectSurfaces();
 #endif
 
 	// any viewLight that didn't have visible surfaces can have it's shadows removed

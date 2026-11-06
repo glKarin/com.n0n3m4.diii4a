@@ -147,7 +147,7 @@ public:
 	virtual int					GetNumFreeJobLists() const = 0;
 	virtual idParallelJobList *	GetJobList( int index ) = 0;
 
-	virtual int					GetNumProcessingUnits() = 0;
+	virtual int					GetNumProcessingUnits( int parallelism = JOBLIST_PARALLELISM_REALTIME ) = 0;
 
 	virtual void				WaitForAllJobLists() = 0;
 };

@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 2.8.12...3.5 FATAL_ERROR) # 2.6
 
 project(doom3)
 
-add_subdirectory (Q3E/src/main/jni/doom3/neo)
+add_subdirectory (doom3/neo)

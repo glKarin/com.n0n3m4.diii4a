@@ -48,7 +48,11 @@ void idSurface_Polytope::FromPlanes(const idPlane *planes, const int numPlanes)
 
 	for (i = 0; i < numPlanes; i++) {
 
+#ifdef _SPLASHDAMAGE
+        w.BaseForPlane( planes[i], MAX_WORLD_COORD );
+#else
 		w.BaseForPlane(planes[i]);
+#endif
 
 		for (j = 0; j < numPlanes; j++) {
 			if (j == i) {

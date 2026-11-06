@@ -192,6 +192,12 @@ void idProjectile::Restore( idRestoreGame *savefile ) {
 
 	savefile->ReadRenderLight( renderLight );
 	savefile->ReadInt( (int &)lightDefHandle );
+
+	// DG: enforce getting fresh handle, else this may be tied to an unrelated light!
+	if ( lightDefHandle != -1 ) {
+		lightDefHandle = gameRenderWorld->AddLightDef( &renderLight );
+	}
+
 	savefile->ReadVec3( lightOffset );
 	savefile->ReadInt( lightStartTime );
 	savefile->ReadInt( lightEndTime );
@@ -971,8 +977,16 @@ void idProjectile::DefaultDamageEffect( idEntity *soundEnt, const idDict &projec
 	}
 
 	if ( *decal != '\0' ) {
-		gameLocal.ProjectDecal( collision.c.point, -collision.c.normal, 8.0f, true, projectileDef.GetFloat( "decal_size", "6.0" ), decal,
-								0.0f, gameLocal.entities[collision.c.entityNum], true); // last 2 params (target entity and save=true) added #3817 for persistent decals -- SteveL
+		ProjectDecalParams params;
+		params.origin = collision.c.point;
+		params.dir = -collision.c.normal;
+		params.depth = 8.0f;
+		params.parallel = true;
+		params.size = projectileDef.GetFloat( "decal_size", "6.0" );
+		params.material = decal;
+		// added #3817 for persistent decals -- SteveL
+		params.saveOnTarget = gameLocal.entities[collision.c.entityNum];
+		gameLocal.ProjectDecal( params );
 	}
 }
 

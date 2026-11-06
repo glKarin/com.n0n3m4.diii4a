@@ -273,7 +273,9 @@ void VPCALL idSIMD_SSE2::CmpLT(byte *dst, const byte bitNum, const float *src0, 
 #define M_PI	3.14159265358979323846f
 #endif
 
+#if !defined(_SPLASHDAMAGE) //karin: defined in geometry/JointTransform.h
 #define JOINTQUAT_SIZE				(7*4)
+#endif
 #define JOINTMAT_SIZE				(4*3*4)
 
 template< typename _type_ >

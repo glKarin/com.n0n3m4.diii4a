@@ -278,9 +278,15 @@ idWinding2D::ClipInPlace
 bool idWinding2D::ClipInPlace(const idVec3 &plane, const float epsilon, const bool keepOn)
 {
 	int i, j, maxpts, newNumPoints;
+#ifdef _SPLASHDAMAGE
+    int sides[idWinding2D::MAX_POINTS+1], counts[3];
+    float dot, dists[idWinding2D::MAX_POINTS+1];
+    idVec2 *p1, *p2, *st1, *st2, mid, midST,newPoints[idWinding2D::MAX_POINTS+4], newST[idWinding2D::MAX_POINTS+4];
+#else
 	int sides[MAX_POINTS_ON_WINDING_2D+1], counts[3];
 	float dot, dists[MAX_POINTS_ON_WINDING_2D+1];
 	idVec2 *p1, *p2, mid, newPoints[MAX_POINTS_ON_WINDING_2D+4];
+#endif
 
 	counts[SIDE_FRONT] = counts[SIDE_BACK] = counts[SIDE_ON] = 0;
 
@@ -320,6 +326,9 @@ bool idWinding2D::ClipInPlace(const idVec3 &plane, const float epsilon, const bo
 
 	for (i = 0; i < numPoints; i++) {
 		p1 = &p[i];
+#ifdef _SPLASHDAMAGE
+        st1 = &st[i];
+#endif
 
 		if (newNumPoints+1 > maxpts) {
 			return true;		// can't split -- fall back to original
@@ -327,12 +336,18 @@ bool idWinding2D::ClipInPlace(const idVec3 &plane, const float epsilon, const bo
 
 		if (sides[i] == SIDE_ON) {
 			newPoints[newNumPoints] = *p1;
+#ifdef _SPLASHDAMAGE
+            newST[newNumPoints] = *st1;
+#endif
 			newNumPoints++;
 			continue;
 		}
 
 		if (sides[i] == SIDE_FRONT) {
 			newPoints[newNumPoints] = *p1;
+#ifdef _SPLASHDAMAGE
+            newST[newNumPoints] = *st1;
+#endif
 			newNumPoints++;
 		}
 
@@ -346,6 +361,9 @@ bool idWinding2D::ClipInPlace(const idVec3 &plane, const float epsilon, const bo
 
 		// generate a split point
 		p2 = &p[(i+1)%numPoints];
+#ifdef _SPLASHDAMAGE
+        st2 = &st[(i+1)%numPoints];
+#endif
 
 		dot = dists[i] / (dists[i] - dists[i+1]);
 
@@ -357,10 +375,16 @@ bool idWinding2D::ClipInPlace(const idVec3 &plane, const float epsilon, const bo
 				mid[j] = -plane.z;
 			} else {
 				mid[j] = (*p1)[j] + dot * ((*p2)[j] - (*p1)[j]);
+#ifdef _SPLASHDAMAGE
+                midST[j] = (*st1)[j] + dot * ((*st2)[j] - (*st1)[j]);
+#endif
 			}
 		}
 
 		newPoints[newNumPoints] = mid;
+#ifdef _SPLASHDAMAGE
+        newST[newNumPoints] = midST;
+#endif
 		newNumPoints++;
 	}
 
@@ -370,6 +394,9 @@ bool idWinding2D::ClipInPlace(const idVec3 &plane, const float epsilon, const bo
 
 	numPoints = newNumPoints;
 	memcpy(p, newPoints, newNumPoints * sizeof(idVec2));
+#ifdef _SPLASHDAMAGE
+    memcpy( st, newST, newNumPoints * sizeof(idVec2) );
+#endif
 
 	return true;
 }
@@ -397,6 +424,10 @@ idWinding2D::Reverse
 idWinding2D *idWinding2D::Reverse(void) const
 {
 	idWinding2D *w;
+#ifdef _SPLASHDAMAGE
+    w = Copy();
+    w->ReverseSelf();
+#else
 	int i;
 
 	w = new idWinding2D;
@@ -405,6 +436,7 @@ idWinding2D *idWinding2D::Reverse(void) const
 	for (i = 0; i < numPoints; i++) {
 		w->p[ numPoints - i - 1 ] = p[i];
 	}
+#endif
 
 	return w;
 }
@@ -673,7 +705,11 @@ bool idWinding2D::PointInside(const idVec2 &point, const float epsilon) const
 	idVec3 plane;
 
 	for (i = 0; i < numPoints; i++) {
+#ifdef _SPLASHDAMAGE
+        plane = Plane2DFromPoints( p[i], p[(i+1) % numPoints], true );
+#else
 		plane = Plane2DFromPoints(p[i], p[(i+1) % numPoints]);
+#endif
 		d = plane.x * point.x + plane.y * point.y + plane.z;
 
 		if (d > epsilon) {
@@ -698,7 +734,11 @@ bool idWinding2D::LineIntersection(const idVec2 &start, const idVec2 &end) const
 
 	counts[SIDE_FRONT] = counts[SIDE_BACK] = counts[SIDE_ON] = 0;
 
+#ifdef _SPLASHDAMAGE
+    plane = Plane2DFromPoints( start, end, true );
+#else
 	plane = Plane2DFromPoints(start, end);
+#endif
 
 	for (i = 0; i < numPoints; i++) {
 		d1 = plane.x * p[i].x + plane.y * p[i].y + plane.z;
@@ -772,7 +812,11 @@ bool idWinding2D::RayIntersection(const idVec2 &start, const idVec2 &dir, float 
 	scale1 = scale2 = 0.0f;
 	counts[SIDE_FRONT] = counts[SIDE_BACK] = counts[SIDE_ON] = 0;
 
+#ifdef _SPLASHDAMAGE
+    plane = Plane2DFromVecs( start, dir, true );
+#else
 	plane = Plane2DFromVecs(start, dir);
+#endif
 
 	for (i = 0; i < numPoints; i++) {
 		d1 = plane.x * p[i].x + plane.y * p[i].y + plane.z;
@@ -844,3 +888,233 @@ bool idWinding2D::RayIntersection(const idVec2 &start, const idVec2 &dir, float 
 
 	return true;
 }
+
+#ifdef _SPLASHDAMAGE
+
+/*
+=============
+idWinding2D::Reverse
+=============
+*/
+idWinding2D& idWinding2D::ReverseSelf( void )
+{
+    int i;
+    for ( i = 0; i < (numPoints>>1); i++ ) {
+        idSwap( p[i], p[numPoints - i - 1] );
+        idSwap( st[i], st[numPoints - i - 1] );
+    }
+    return *this;
+}
+
+/*
+============
+idWinding2D::Rotation
+============
+*/
+void idWinding2D::Rotation( const idVec2& org, float angle )
+{
+    idMat2 mat;
+    mat.Rotation( angle );
+
+    int i;
+    for ( i = 0; i < numPoints; i++ ) {
+        p[ i ] -= org;
+        p[ i ] *= mat;
+        p[ i ] += org;
+    }
+}
+
+/*
+============
+idWinding2D::Scale
+============
+*/
+void idWinding2D::Scale( const idVec2& scale )
+{
+    int i;
+    for ( i = 0; i < numPoints; i++ ) {
+        p[ i ].x *= scale.x;
+        p[ i ].y *= scale.y;
+    }
+}
+
+/*
+============
+idWinding2D::RotationST
+============
+*/
+void idWinding2D::RotationST( const idVec2& org, float angle )
+{
+    idMat2 mat;
+    mat.Rotation( angle );
+
+    int i;
+    for ( i = 0; i < numPoints; i++ ) {
+        st[ i ] -= org;
+        st[ i ] *= mat;
+        st[ i ] += org;
+    }
+}
+
+
+/*
+============
+idWinding2D::SplitEdgesByLine
+============
+*/
+bool idWinding2D::SplitEdgesByLine( const idVec2& start, const idVec2& end, const float epsilon )
+{
+    float frac1 = 0.0f;
+    float frac2 = 0.0f;
+    float denom = 0.0f;
+    bool clipped = false;
+
+    idWinding2D tempWinding;
+
+    const idVec2& p1 = start;
+    const idVec2& p2 = end;
+
+    const idVec2 dirLine = end - start;
+
+    for( int i = 0; i < numPoints; i++ ) {
+        const idVec2& p3 = p[ i ];
+        const idVec2& p4 = p[ ( i + 1 )% numPoints ];
+
+        const idVec2 dirEdge = p4 - p3;
+
+        const idVec2& st1 = st[ i ];
+        const idVec2& st2 = st[ ( i + 1 )% numPoints ];
+
+        if( tempWinding.GetNumPoints() >= idWinding2D::MAX_POINTS ) {
+            continue;
+        }
+
+        tempWinding.AddPoint( p3, st1 );
+
+        if( tempWinding.GetNumPoints() >= idWinding2D::MAX_POINTS ) {
+            continue;
+        }
+
+        denom = (( p4.y - p3.y ) * ( p2.x - p1.x )) - (( p4.x - p3.x ) * ( p2.y - p1.y ));
+        if( idMath::Fabs( denom ) < VECTOR_EPSILON ) {
+            continue;	// parallel
+        }
+
+        frac1 = ((( p4.x - p3.x ) * ( p1.y - p3.y )) - (( p4.y - p3.y ) * ( p1.x - p3.x ))) / denom;
+        frac2 = ((( p2.x - p1.x ) * ( p1.y - p3.y )) - (( p2.y - p1.y ) * ( p1.x - p3.x ))) / denom;
+
+        if( ( frac1 < 0.0f || frac1 > 1.0f ) || ( frac2 < 0.0f || frac2 > 1.0f )) {
+            continue;	// co-linear
+        }
+
+        idVec2 newPoint	= p3 + (( p4 - p3 ) * frac2 );
+        idVec2 newST = st1 + (( st2 - st1 ) * frac2 );
+
+        tempWinding.AddPoint( newPoint, newST );
+        clipped = true;
+    }
+
+    *this = tempWinding;
+    return clipped;
+}
+
+/*
+============
+ClipWindingClassify
+============
+*/
+ID_INLINE bool ClipWindingClassify( float val, float min, float max, bool sign, int index, const idVec2& v1, const idVec2& v2, const idVec2& st1, const idVec2& st2, idWinding2D& winding )
+{
+    if( winding.GetNumPoints() >= idWinding2D::MAX_POINTS ) {
+        return false;
+    }
+
+    bool inside[ 2 ];
+
+    inside[ 0 ] = sign ? v1[ index ] < val : v1[ index ] > val;
+    inside[ 1 ] = sign ? v2[ index ] < val : v2[ index ] > val;
+
+    if( inside[ 0 ] != inside[ 1 ] ) {
+        idVec2 intersectionXY;
+        idVec2 intersectionST;
+        float frac = ( val - v1[ index ] ) / ( v1[ index ] - v2[ index ] );
+
+        intersectionXY = (( v1 - v2 ) * frac ) + v1;
+        intersectionST = (( st1 - st2 ) * frac ) + st1;
+
+        if ( intersectionXY[ 1 - index ] < min ) {
+            intersectionXY[ 1 - index ] = min;
+        } else if ( intersectionXY[ 1 - index ] > max ) {
+            intersectionXY[ 1 - index ] = max;
+        }
+
+        winding.AddPoint( intersectionXY, intersectionST );
+    }
+
+    return inside[0] != inside[1];
+}
+
+/*
+============
+idWinding2D::ClipByBounds
+============
+*/
+bool idWinding2D::ClipByBounds( const sdBounds2D& bounds, const float epsilon )
+{
+    sdBounds2D boundsLocal;
+    GetBounds( boundsLocal );
+    if( !boundsLocal.IntersectsBounds( bounds )) {
+        Clear();
+        return true;
+    }
+
+    if( bounds.ContainsBounds( boundsLocal ) ) {
+        return false;
+    }
+
+    static idVec2 verts[ MAX_POINTS ];
+    static idVec2 st[ MAX_POINTS ];
+
+    int i;
+
+    for( i = 0; i < numPoints; i++ ) {
+        verts[ i ] = p[ i ];
+        st[ i ] = this->st[ i ];
+    }
+
+    int count = numPoints;
+    Clear();
+    for( i = 0; i < count; i++ ) {
+        int j = ( i + 1 ) % count;
+
+        bool inside0 = verts[ i ].x > bounds.GetMins().x;
+        bool inside1 = verts[ j ].x > bounds.GetMins().x;
+        bool inside2 = verts[ i ].x < bounds.GetMins().x + bounds.GetWidth();
+        bool inside3 = verts[ j ].x < bounds.GetMins().x + bounds.GetWidth();
+        bool inside4 = verts[ i ].y > bounds.GetMins().y;
+        bool inside5 = verts[ j ].y > bounds.GetMins().y;
+        bool inside6 = verts[ i ].y < bounds.GetMins().y + bounds.GetHeight();
+        bool inside7 = verts[ j ].y < bounds.GetMins().y + bounds.GetHeight();
+
+        // add current point if inside
+        if ( inside0 && inside2 && inside4 && inside6 ) {
+            if( numPoints < MAX_POINTS ) {
+                AddPoint( verts[ i ], st[ i ] );
+            }
+        }
+
+        // if line is intersected, add next point
+        if ( inside0 != inside1 ) {
+            ClipWindingClassify( bounds.GetMins().x,						bounds.GetMins().y, bounds.GetMins().y + bounds.GetHeight(),	false,	0, verts[ i ], verts[ j ], st[ i ], st[ j ], *this );
+        } else if ( inside2 != inside3 ) {
+            ClipWindingClassify( bounds.GetMins().x + bounds.GetWidth(),	bounds.GetMins().y, bounds.GetMins().y + bounds.GetHeight(),	true,	0, verts[ i ], verts[ j ], st[ i ], st[ j ], *this );
+        } else if ( inside4 != inside5 ) {
+            ClipWindingClassify( bounds.GetMins().y,						bounds.GetMins().x, bounds.GetMins().x + bounds.GetWidth(),		false,	1, verts[ i ], verts[ j ], st[ i ], st[ j ], *this );
+        } else if ( inside6 != inside7 ) {
+            ClipWindingClassify( bounds.GetMins().y + bounds.GetHeight(),	bounds.GetMins().x, bounds.GetMins().x + bounds.GetWidth(),		true,	1, verts[ i ], verts[ j ], st[ i ], st[ j ], *this );
+        }
+    }
+
+    return numPoints == 0;
+}
+#endif

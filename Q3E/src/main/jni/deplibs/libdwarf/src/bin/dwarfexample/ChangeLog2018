@@ -1,0 +1,36 @@
+2018-09-21 David Anderson
+    * Makefile.am: Now config.h.in.cmake gets into releases.
+2018-08-21 David Anderson
+    * Makefile.am: Now honors --enable-wall.
+2018-08-02 David Anderson
+    * Makefile.am: Removed unused variables and references
+      to them.
+2018-07-31 David Anderson
+    * Makefile.am: Moves ChangeLog and other files
+      to the distribution,
+      and out of the set of installed files.
+2018-07-16 David Anderson
+    * simplereader.c: Refines the ifdef of HAVE_STDAFX_H
+2018-07-16 David Anderson
+    * simplereader.c: Changed // comments to /* */
+    * Makefile.am: New, used by autotools to create configure.
+    * configure.ac, Makefile.in, config.h.in: Deleted.
+2018-06-14  David Anderson
+    * Makefile.in,config.h.in,configure,configure.ac:
+      Removed unnecessary configure lines, regenerated
+      configure.
+2018-06-13  David Anderson
+    * configure.ac: New option --enable-elf-open
+      setting HAVE_ELF_OPEN
+    * config.h.in: HAVE_ELF_OPEN
+    * configure.ac: Regenerated.
+    * simplereader.c: Now uses open() unless HAVE_ELF_OPEN
+      is explicitly set.
+2018-06-05  David Anderson
+     * simplereader.c: Remove erroneous _MSC_VER
+       per Carlos Alberto Enciso.
+       Change WIN32 to _WIN32.
+2018-05-12  David Anderson
+     * frame1.c: Adding new code (select with option
+       --just-print-selected-regs) to test a new
+       frame access function.

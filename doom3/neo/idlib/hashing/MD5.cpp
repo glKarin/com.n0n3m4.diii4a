@@ -26,11 +26,15 @@ will fill a supplied 16-byte array with the digest.
 */
 
 /* MD5 context. */
+#ifdef _SPLASHDAMAGE
+typedef md5Context_t MD5_CTX;
+#else
 typedef struct {
 	unsigned int	state[4];
 	unsigned int	bits[2];
 	unsigned char	in[64];
 } MD5_CTX;
+#endif
 
 /* The four core functions - F1 is optimized somewhat */
 /* #define F1(x, y, z) (x & y | ~x & z) */
@@ -279,3 +283,60 @@ unsigned int MD5_BlockChecksum(const void *data, int length)
 
 	return val;
 }
+
+#ifdef _SPLASHDAMAGE
+
+/*
+===============
+MD5_StartChecksum
+===============
+*/
+void MD5_StartChecksum( md5Context_t& context )
+{
+    MD5_Init( &context );
+}
+
+/*
+===============
+MD5_UpdateChecksum
+===============
+*/
+void MD5_UpdateChecksum( md5Context_t& context, const void *data, int length )
+{
+    MD5_Update( &context, (unsigned char *)data, length );
+}
+
+/*
+===============
+MD5_FinishChecksum
+===============
+*/
+unsigned int MD5_FinishChecksum( md5Context_t& context )
+{
+    unsigned int	digest[4];
+    unsigned int	val;
+
+    MD5_Final( &context, (unsigned char *)digest );
+
+    val = digest[0] ^ digest[1] ^ digest[2] ^ digest[3];
+
+    return val;
+}
+
+/*
+===============
+MD5_FinishChecksum
+===============
+*/
+unsigned int MD5_FinishChecksum( md5Context_t& context, unsigned char digest[16] )
+{
+    unsigned int	*dg;
+    unsigned int	val;
+
+    MD5_Final( &context, (unsigned char *)digest );
+    dg = (unsigned int *)digest;
+
+    val = dg[0] ^ dg[1] ^ dg[2] ^ dg[3];
+    return val;
+}
+#endif

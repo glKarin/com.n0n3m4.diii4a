@@ -2222,6 +2222,25 @@ void CL_KeyDownEvent( int key, unsigned time )
 	//int activeMenu = 0;
 	keys[key].down = qtrue;
 	keys[key].repeats++;
+
+	// Prevent DPAD from auto-repeating (fixes skipping in menus and item cycling).
+	if (key == K_PAD0_DPAD_UP || key == K_PAD0_DPAD_DOWN ||
+		key == K_PAD0_DPAD_LEFT || key == K_PAD0_DPAD_RIGHT)
+	{
+		if (keys[key].repeats > 1)
+		{
+			return;
+		}
+	}
+
+	// In-level cinematic overlay: any key skips it, and we swallow input so UI/console can't open.
+	if ( SCR_LevelCinematicActive() && key == K_ESCAPE ) {
+
+		CL_LevelCin_Stop();
+		Key_ClearStates();   // prevents stuck keys (+attack etc) if you skipped mid-hold
+		return;
+	}
+	
 	if( keys[key].repeats == 1 )
 		anykeydown++;
 
@@ -2323,6 +2342,12 @@ void CL_KeyDownEvent( int key, unsigned time )
 		return;
 	}
 
+	if ((Key_GetCatcher() & KEYCATCH_UI) && key == K_PAD0_A)
+	{
+		VM_Call(uivm, UI_KEY_EVENT, K_MOUSE1, qtrue);
+		return;
+	}
+
 	// send the bound action
 	CL_ParseBinding( key, qtrue, time );
 
@@ -2395,6 +2420,12 @@ void CL_KeyUpEvent( int key, unsigned time )
 	// don't process key-up events for the console key
 	if ( key == K_CONSOLE || ( key == K_ESCAPE && keys[K_SHIFT].down ) )
 		return;
+
+	if ((Key_GetCatcher() & KEYCATCH_UI) && key == K_PAD0_A)
+	{
+		VM_Call(uivm, UI_KEY_EVENT, K_MOUSE1, qfalse);
+		return;
+	}
 
 	//
 	// key up events only perform actions if the game key binding is

@@ -1,0 +1,11 @@
+April 26, 2010 David Anderson <davea42@earthlink.net>
+   * simplereader.c: Now prints all TAGs regardless of
+     whether a DIE has a DW_AT_name attribute.  All names
+     print an "" pair so it's easy to recognize empty names
+     and names with embedded spaces.
+March 31, 2010 David Anderson <davea42@earthlink.net>
+   * simplereader.c: Added a new option --names which
+     shows additional detail on getting attributes and source
+     file information.
+January 3, 2010 David Anderson <davea42@earthlink.net>
+   * frame1.c, simplereader.c: Update copyright year.

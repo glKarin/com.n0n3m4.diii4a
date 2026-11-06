@@ -1,36 +1,61 @@
 # RealRTCW
 
-RealRTCW is a community single-player overhaul project for Return to Castle Wolfenstein based on the iortcw and rtcw-sp source code.
+**RealRTCW** is a community-driven single-player overhaul for **Return to Castle Wolfenstein**, built on top of the original **iortcw** and **rtcw-sp** source code.
 
-Features:
-* All iortcw features including proper widescreen support
-* Steam integration support using Steamshim by Ryan C. Gordon
-* Support for 99% of community made maps
-* Expanded .weap files system from Enemy Territory
-* Reworked difficulty levels
-* Automatic AI attributes system
-* Greatly expanded arsenal of weapons
-* Overhauled recoil system
-* Atmospheric effects support
-* Foliage tech support
-* Subtitles support
-* New inventory items
-* Increased engine limits
-* Improved controller support
-* Extended scripting functionality
-* Custom BSPC and BSPCUI included in sdk folder
-* A lot of bug fixes and QOL improvements
+The project focuses on modernizing the engine, expanding gameplay systems, and improving overall stability and quality of life—while staying true to the original RTCW experience.
 
-The original id software readme that accompanied the RTCW source release is named README.txt and is contained within the source tree of both MP and SP games.
+---
 
-Available on ModDB:
-https://www.moddb.com/mods/realrtcw-realism-mod
+## ✨ Features
 
-And on Steam:
-https://store.steampowered.com/app/1379630/RealRTCW/
+### Engine & Platform
+- Full **iortcw feature set**, including proper widescreen support  
+- **Steam integration** via *Steamshim* (by Ryan C. Gordon)  
+- **FFmpeg** video playback support  
+- Increased engine limits  
+- Custom **BSPC** and **BSPCUI** tools  
 
-Arch Linux Repo by M0Rf30:
-https://aur.archlinux.org/packages/realrtcw/
+### Gameplay & Content
+- Expanded weapon arsenal  
+- Survival game mode  
+- Atmospheric and environmental effects  
+- Foliage rendering support  
+- Automatic AI attribute system (`.aidefaults`)  
+- Extended scripting functionality  
+- Expanded `.weap` file system  
 
-Opensuse package:
-https://build.opensuse.org/package/show/games/realrtcw
+### Usability & Quality of Life
+- Subtitles support  
+- Improved localization system  
+- Enhanced controller/gamepad support  
+- `.pk3` gating via CVARs  
+- Numerous bug fixes and general QoL improvements  
+
+---
+
+## 📄 Original README
+
+The original id Software README that accompanied the RTCW source release is preserved as **`README.txt`** and can be found in the source tree for both the SP and MP codebases.
+
+---
+
+## 📦 Availability
+
+- **ModDB**  
+  https://www.moddb.com/mods/realrtcw-realism-mod
+
+- **Steam**  
+  https://store.steampowered.com/app/1379630/RealRTCW/
+
+- **GOG**  
+  https://www.gog.com/en/game/realrtcw
+
+---
+
+## 🐧 Linux Packages
+
+- **Arch Linux (AUR)** – maintained by *M0Rf30*  
+  https://aur.archlinux.org/packages/realrtcw/
+
+- **openSUSE**  
+  https://build.opensuse.org/package/show/games/realrtcw

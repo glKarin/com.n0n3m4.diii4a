@@ -703,7 +703,94 @@ AICharacterDefaults_t aiDefaults[NUM_CHARACTERS] = {
 		AISTATE_ALERT
 	},
 
+
+	//AICHAR_MERCENARY
+	{
+		"Mercenary",
+		{ // Default
+			0
+		},
+		{
+			"mercSightPlayer",
+			"mercAttackPlayer",
+			"mercOrders",
+			"mercDeath",
+			"mercSilentDeath",				//----(SA)	added
+			"mercFlameDeath",				//----(SA)	added
+			"mercPain",
+			"mercStay",						// stay - you're told to stay put
+			"mercFollow",					// follow - go with ordering player ("i'm with you" rather than "yes sir!")
+			"mercOrdersDeny",				// deny - refuse orders (doing something else)
+		},
+		AITEAM_NAZI,							// team
+		"merc/default",					// default model/skin
+		{WP_MP40,WP_GRENADE_LAUNCHER},			// starting weapons
+		BBOX_SMALL, {32,48},					// bbox, crouch/stand height
+		AIFL_CATCH_GRENADE | AIFL_STAND_IDLE2,	// flags
+		0, 0, 0,								// special attack routine
+		NULL,									// looping sound
+		AISTATE_RELAXED
+	},
+
+		//AICHAR_TRENCH
+	{
+		"Trench",
+		{ // Default
+			0
+		},
+		{
+			"infantrySightPlayer",
+			"infantryAttackPlayer",
+			"infantryOrders",
+			"infantryDeath",
+			"infantrySilentDeath",				//----(SA)	added
+			"infantryFlameDeath",				//----(SA)	added
+			"infantryPain",
+			"infantryStay",						// stay - you're told to stay put
+			"infantryFollow",					// follow - go with ordering player ("i'm with you" rather than "yes sir!")
+			"infantryOrdersDeny",				// deny - refuse orders (doing something else)
+		},
+		AITEAM_NAZI,							// team
+		"trench/base1",					        // default model/skin
+		{WP_M97,WP_GRENADE_LAUNCHER},			// starting weapons
+		BBOX_SMALL, {32,48},					// bbox, crouch/stand height
+		AIFL_CATCH_GRENADE | AIFL_STAND_IDLE2,	// flags
+		0, 0, 0,								// special attack routine
+		NULL,									// looping sound
+		AISTATE_RELAXED
+	},
+
+	//AICHAR_ZOMBIE_SURV
+	{
+		"Flesh",
+		{ // Default
+			0
+		},
+		{
+			"fleshSightPlayer",
+			"fleshAttackPlayer",
+			"flehOrders",
+			"fleshDeath",
+			"fleshSilentDeath",				//----(SA)	added
+			"fleshFlameDeath",					//----(SA)	added
+			"fleshPain",
+			"sound/weapons/melee/fstatck.wav",	// stay - you're told to stay put
+			"sound/weapons/melee/fstmiss.wav",	// follow - go with ordering player ("i'm with you" rather than "yes sir!")
+			"fleshOrdersDeny",					// deny - refuse orders (doing something else)
+		},
+		AITEAM_MONSTER,
+		"flesh/lab",
+		{WP_MONSTER_ATTACK3},
+		BBOX_SMALL, {32,48},
+		AIFL_NO_RELOAD,
+		AIFunc_ZombieFlameAttackStart, AIFunc_ZombieAttack2Start, AIFunc_ZombieMeleeStart,
+		NULL,
+		AISTATE_ALERT
+	},
+
 };
+
+
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
@@ -1200,7 +1287,7 @@ void AIChar_spawn( gentity_t *ent ) {
 	// create the character
 
 	// (there will always be an ent->aiSkin (SA)) AAAS
-	if (g_gametype.integer == GT_SURVIVAL)
+	if (g_gametype.integer == GT_SURVIVAL && !ent->oneshot )
 	{
 		BG_SetBehaviorForSurvival(ent->aiCharacter);
 	}
@@ -1227,9 +1314,11 @@ void AIChar_spawn( gentity_t *ent ) {
 	newent->spawnflags = ent->spawnflags;
 	newent->aiTeam = ent->aiTeam;
 	newent->canSpeak = ent->canSpeak;
+	newent->oneshot = ent->oneshot;
 	if ( newent->aiTeam < 0 ) {
 		newent->aiTeam = aiCharDefaults->aiTeam;
 	}
+	G_FixupEntityTeamNum( ent );
 	newent->client->ps.teamNum = newent->aiTeam;
 	//
 	// kill the old entity
@@ -1714,6 +1803,56 @@ void SP_ai_loper_special( gentity_t *ent ) {
 	level.loperZapSound = G_SoundIndex( "loperZap" );
 }
 
+
+//----------------------------------------------------------------------------------------------------------------------------
+/*QUAKED ai_mercenary (1 0.25 0) (-16 -16 -24) (16 16 64) TriggerSpawn NoRevive
+soldier entity
+"skin" the .skin file to use for this character (must exist in the player characters directory, otherwise 'infantryss/default' is used)
+"head" the .skin file to use for his head (must exist in the pc's dir, otherwise 'default' is used)
+"ainame" name of AI
+*/
+/*
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models\mapobjects\characters\test\nazi.md3"
+*/
+/*
+============
+SP_ai_mercenary
+============
+*/
+void SP_ai_mercenary( gentity_t *ent ) {
+	AICast_DelayedSpawnCast( ent, AICHAR_MERCENARY );
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+/*QUAKED ai_trench (1 0.25 0) (-16 -16 -24) (16 16 64) TriggerSpawn NoRevive
+soldier entity
+"skin" the .skin file to use for this character (must exist in the player characters directory, otherwise 'infantryss/default' is used)
+"head" the .skin file to use for his head (must exist in the pc's dir, otherwise 'default' is used)
+"ainame" name of AI
+*/
+/*
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models\mapobjects\characters\test\nazi.md3"
+*/
+/*
+============
+SP_ai_trench
+============
+*/
+void SP_ai_trench( gentity_t *ent ) {
+	AICast_DelayedSpawnCast( ent, AICHAR_TRENCH );
+}
+
+/*
+============
+SP_ai_flesh
+============
+*/
+void SP_ai_flesh( gentity_t *ent ) {
+	AICast_DelayedSpawnCast( ent, AICHAR_FLESH );
+}
+
 // Load behavior parameters from .aidefaults file
 void AI_LoadBehaviorTable( AICharacters_t characterNum )
 {
@@ -1774,6 +1913,9 @@ char *BG_GetCharacterFilename( AICharacters_t characterNum )
 		case AICHAR_DOG:               return "dog.aidefaults";
 		case AICHAR_PRIEST:            return "priest.aidefaults";
 		case AICHAR_XSHEPHERD:         return "xshepherd.aidefaults";
+		case AICHAR_MERCENARY:         return "merc.aidefaults";
+		case AICHAR_TRENCH:            return "trench.aidefaults";
+		case AICHAR_FLESH:             return "flesh.aidefaults";
 		case AICHAR_NONE:              return "";
 		default:                       Com_Printf( "Missing filename entry for character id %d\n", characterNum );
     }

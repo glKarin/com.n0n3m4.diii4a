@@ -1,0 +1,468 @@
+
+template paralax_step {
+	parameters < NormalizedEyeInTang, InTexCoord, OutTexCoord >
+
+	text { <%	
+		TEX		__HEIGHT, InTexCoord, $heightMap, 2D;
+		MAD		__HEIGHT, __HEIGHT, 2, -1;
+				
+		MUL		OutTexCoord.xy, NormalizedEyeInTang, __HEIGHT;
+		MAD		OutTexCoord.xy, OutTexCoord, $parameters.x, InTexCoord;	
+	%> }
+	
+}
+
+renderBinding heightMap		{ texture { diffuse _black } }
+
+/**
+
+	Issues:	
+	* This is slower
+	* NO hardware skinning (set r_MD5UseHardwareSkinning 0)
+	* Only the bumpmap texture matrix is used
+
+	How to use:
+	* Set the "parameters" renderbinding to the height scale
+	* Set the "heightMap" renderbinding to the grayscale heightmap to use... (128 == 0,  black is pits, white it bumps)
+
+*/
+
+renderProgram ambient/parallax {
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		TEMP	bitangent;
+		TEMP	R0, R1, R2;
+
+		PARAM	defaultTexCoord = { 0, 0.5, 0, 1 };
+
+		XPD		bitangent, $normalAttrib, $tangentAttrib;
+		MUL		bitangent, bitangent, $tangentAttrib.w;
+
+		# textures 1 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[1], defaultTexCoord;
+		DP4		result.texcoord[1].x, $texCoordAttrib, $bumpMatrix_s;
+		DP4		result.texcoord[1].y, $texCoordAttrib, $bumpMatrix_t;
+
+		# textures 4 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[4], defaultTexCoord;
+		DP4		result.texcoord[4].x, $texCoordAttrib, $diffuseMatrix_s;
+		DP4		result.texcoord[4].y, $texCoordAttrib, $diffuseMatrix_t;
+
+		# generate the vertex color, which can be 1.0, color, or 1.0 - color
+		MAD		result.color, $colorAttrib, $colorModulate, $colorAdd;
+
+		# build tangent space -> world space conversion matrix
+		DP3		result.texcoord[5].x, $transposedModelMatrix_x, $tangentAttrib;
+		DP3		result.texcoord[6].x, $transposedModelMatrix_y, $tangentAttrib;
+		DP3		result.texcoord[7].x, $transposedModelMatrix_z, $tangentAttrib;
+
+		DP3		result.texcoord[5].y, $transposedModelMatrix_x, bitangent;
+		DP3		result.texcoord[6].y, $transposedModelMatrix_y, bitangent;
+		DP3		result.texcoord[7].y, $transposedModelMatrix_z, bitangent;
+
+		DP3		result.texcoord[5].z, $transposedModelMatrix_x, $normalAttrib;
+		DP3		result.texcoord[6].z, $transposedModelMatrix_y, $normalAttrib;
+		DP3		result.texcoord[7].z, $transposedModelMatrix_z, $normalAttrib;
+
+		# calculate vector to eye
+		DP4		R0.x, $transposedModelMatrix_x, $positionAttrib;
+		DP4		R0.y, $transposedModelMatrix_y, $positionAttrib;
+		DP4		R0.z, $transposedModelMatrix_z, $positionAttrib;
+
+		# normalize
+		SUB		R0.xyz, R0, $viewOriginWorld;
+		DP3		R0.w, R0, R0;
+		RSQ		R0.w, R0.w;
+		MUL		R0, R0, -R0.w;
+		MOV		result.texcoord[2], R0;	
+		
+		# vector to eye in tangent space
+		SUB		R0.xyz, $positionAttrib, $viewOrigin;
+		DP3		result.texcoord[3].x, R0, $tangentAttrib;
+		DP3		result.texcoord[3].y, R0, bitangent;
+		DP3		result.texcoord[3].z, R0, $normalAttrib;
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP	R0, R1, color, localNormal, worldNormal, ambient, localAmbient, specLook, normalizedEyeT, paralaxCoord, paralaxCoordTmp;
+		TEMP	__HEIGHT;
+		
+		PARAM	subOne = { -1, -1, -1, -1 };
+		PARAM	scaleTwo = { 2, 2, 2, 2 };
+
+		# normalize to eye
+		DP3		normalizedEyeT.w, fragment.texcoord[3], fragment.texcoord[3];
+		RSQ		normalizedEyeT.w, normalizedEyeT.w;
+		MUL		normalizedEyeT, fragment.texcoord[3], -normalizedEyeT.w;
+		
+		# do paralax mapping offset
+		useTemplate paralax_step < "normalizedEyeT", "fragment.texcoord[1]", "paralaxCoordTmp" >
+		useTemplate paralax_step < "normalizedEyeT", "paralaxCoordTmp", "paralaxCoord" >
+			
+		
+		TEX		localNormal, paralaxCoord, $bumpMap, 2D;
+$if !r_dxnNormalMaps
+		MOV		localNormal.x, localNormal.a;
+$endif
+		MAD		localNormal.xyz, localNormal, scaleTwo, subOne;
+
+		$if r_normalizeNormalMaps
+		MOV		localNormal.z, 0;
+		DP3		R1.x, localNormal,localNormal;
+		ADD		R1.x, 1, -R1.x;
+		RSQ		R1.x, R1.x;
+		RCP		localNormal.z, R1.x;
+		$endif
+
+		# put normal into world space
+		DP3		worldNormal.x, fragment.texcoord[5], localNormal;
+		DP3		worldNormal.y, fragment.texcoord[6], localNormal;
+		DP3		worldNormal.z, fragment.texcoord[7], localNormal;
+
+		# get diffuse lighting from cubemap
+		TEX		ambient, worldNormal, $ambientCubeMap, CUBE;
+		MUL		ambient, ambient, $ambientBrightness;
+
+		# modulate by the diffuse map and constant diffuse factor
+		TEX		R0, paralaxCoord, $diffuseMap, 2D;
+		MUL		color, R0, $diffuseColor;
+
+		# kill if we need this
+		$ifdef alphatest_kill
+		SUB		R0.a, R0.a, $alphaThresh;
+		KIL		R0.a;
+		$endif
+
+		# modulate by ambient
+		MUL		color, ambient, color;
+
+		# calc reflection vector: i - 2 * dot(i, n) * n
+		DP3		R1, fragment.texcoord[2], worldNormal;
+		ADD		R1, R1, R1;
+		MAD		R0, -worldNormal, R1.x, fragment.texcoord[2];
+
+		#DP3		ambient.a, fragment.texcoord[2], fragment.texcoord[2];
+		#RSQ		ambient.a, ambient.a;
+		#MUL		ambient, fragment.texcoord[2], ambient.a;
+		#MAD		ambient, ambient, 0.5, 0.5;
+
+		# get specular from cubemap
+		TEX		ambient, R0, $specularCubeMap, CUBE;
+
+		# modulate by the specular map * 2
+		TEX		specLook, paralaxCoord, $specularMap, 2D;
+		ADD		R0, specLook, specLook;
+		MAD		color, R0, ambient, color;
+
+		# multiply with ambient brightness
+		MUL		color, $ambientScale.x, color;
+
+		# do some special effects if we're compiling certain shaders
+		# we could move this to a separate file but this saves us from
+		# duplicating the shader
+
+		# modify by the vertex color
+		MUL		result.color, color, fragment.color;
+		MOV		result.color.a, $ambientScale.y;
+	%> }
+}
+
+/**
+
+	parameters.x is the depth, be aware that this is dependend on the number of steps we take
+	so if the number of steps is rased existing materials will have to be adapted to keep the same
+	"depth"
+**/
+renderProgram interaction/parallax {
+	interaction
+
+	machineSpec 3
+	fallback interaction/basic
+
+	amblitVersion interaction/parallax_amblit
+	ambientVersion ambient/parallax
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		TEMP	bitangent;
+		TEMP	R0, R1, R2;
+
+		PARAM	defaultTexCoord = { 0, 0.5, 0, 1 };
+
+		# derive bitangent
+		XPD		bitangent, $normalAttrib, $tangentAttrib;
+		MUL		bitangent, bitangent, $tangentAttrib.w;
+
+		# calculate vector to light in R0
+		SUB		R0, $lightOrigin, $positionAttrib;
+
+		# put into texture space for TEX0
+		DP3		result.texcoord[0].x, $tangentAttrib, R0;
+		DP3		result.texcoord[0].y, bitangent, R0;
+		DP3		result.texcoord[0].z, $normalAttrib, R0;
+
+		# textures 1 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[1], defaultTexCoord;
+		DP4		result.texcoord[1].x, $texCoordAttrib, $bumpMatrix_s;
+		DP4		result.texcoord[1].y, $texCoordAttrib, $bumpMatrix_t;
+
+		# texture 2 has one texgen
+		MOV		result.texcoord[2], defaultTexCoord;
+		DP4		result.texcoord[2].x, $positionAttrib, $lightFalloff_s;
+
+		# texture 3 has three texgens
+		DP4		result.texcoord[3].x, $positionAttrib, $lightProject_s;
+		DP4		result.texcoord[3].y, $positionAttrib, $lightProject_t;
+		DP4		result.texcoord[3].w, $positionAttrib, $lightProject_q;
+
+		# textures 4 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[4], defaultTexCoord;
+		DP4		result.texcoord[4].x, $texCoordAttrib, $diffuseMatrix_s;
+		DP4		result.texcoord[4].y, $texCoordAttrib, $diffuseMatrix_t;
+
+		# textures 5 takes the base coordinates by the texture matrix
+		MOV		result.texcoord[5], defaultTexCoord;
+		DP4		result.texcoord[5].x, $texCoordAttrib, $specularMatrix_s;
+		DP4		result.texcoord[5].y, $texCoordAttrib, $specularMatrix_t;
+
+		# calculate vector to light in R0
+		SUB		R0, $viewOrigin, $positionAttrib;
+
+		# put into texture space for TEX6
+		DP3		result.texcoord[6].x, $tangentAttrib, R0;
+		DP3		result.texcoord[6].y, bitangent, R0;
+		DP3		result.texcoord[6].z, $normalAttrib, R0;
+
+		# generate the vertex color, which can be 1.0, color, or 1.0 - color
+		# for 1.0 : env[16] = 0, env[17] = 1
+		# for color : env[16] = 1, env[17] = 0
+		# for 1.0-color : env[16] = -1, env[17] = 1
+		MAD		result.color, $colorAttrib, $colorModulate, $colorAdd;
+	%> }
+
+	program fragment arb { <%
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP	light, color, R1, R2, localNormal, specular, paralaxCoord, paralaxCoordTmp;
+
+		PARAM	subOne = { -1, -1, -1, -1 };
+		PARAM	scaleTwo = { 2, 2, 2, 2 };
+		PARAM	grayscale = { 0.3, 0.59, 0.11, 0.0 };
+
+		TEMP	view;
+		TEMP	__HEIGHT;
+
+		# normalize view vector
+		DP3	view.x, fragment.texcoord[6], fragment.texcoord[6];
+		RSQ	view.x, view.x;
+		MUL	view, view.x, fragment.texcoord[6];
+
+		# do paralax mapping offset
+		useTemplate paralax_step < "view", "fragment.texcoord[1]", "paralaxCoordTmp" >	
+		useTemplate paralax_step < "view", "paralaxCoordTmp", "paralaxCoord" >	
+			
+		#
+		# the amount of light contacting the fragment is the
+		# product of the two light projections and the surface
+		# bump mapping
+		#
+
+		# perform the diffuse bump mapping
+		DP3	light.x, fragment.texcoord[0], fragment.texcoord[0];
+		RSQ	light.x, light.x;
+		MUL	light, light.x, fragment.texcoord[0];
+
+		# calculate the half angle vector in object space
+		ADD	specular, view, light;
+
+		# normalize
+		DP3	R1.x, specular, specular;
+		RSQ	R1.x, R1.x;
+		MUL	specular, R1.x, specular;
+
+		TEX	localNormal, paralaxCoord, $bumpMap, 2D;
+$if !r_dxnNormalMaps
+		MOV localNormal.x, localNormal.a;
+$endif
+		MAD	localNormal, localNormal, scaleTwo, subOne;
+		
+		$if r_normalizeNormalMaps
+		MOV		localNormal.z, 0;
+		DP3		R1.x, localNormal,localNormal;
+		ADD		R1.x, 1, -R1.x;
+		RSQ		R1.x, R1.x;
+		RCP		localNormal.z, R1.x;
+		$endif
+
+		
+		DP3	light.x, light, localNormal;
+
+		# modulate by the light projection
+		TXP	R1, fragment.texcoord[3], $lightProjectionMap, 2D;
+		MUL	light, light.x, R1;
+
+		# modulate by the light falloff
+		TEX	R1.x, fragment.texcoord[2], $lightFalloffMap, 2D;
+		MUL	light, light, R1.x;
+
+		#
+		# the light will be modulated by the diffuse and
+		# specular surface characteristics
+		#
+
+		# modulate by the diffuse map and constant diffuse factor
+		TEX	R1, paralaxCoord, $diffuseMap, 2D;
+		MUL	color, R1, $diffuseColor;
+
+		# perform the specular bump mapping
+		DP3	specular.x, specular, localNormal;
+
+		# perform a dependent table read for the specular falloff
+		TEX	R1, specular, $specularTable, 2D;
+
+		# modulate by the constant specular factor
+		MUL	R1, R1.x, $specularColor;
+
+		# modulate by the specular map * 2
+		TEX	R2, paralaxCoord, $specularMap, 2D;
+		ADD	R2, R2, R2;
+		MAD	color, R1, R2, color;
+
+
+		MUL	color, light, color;
+
+		# modify by the vertex color
+
+		MUL result.color.rgb, color, fragment.color;
+
+		MUL R1, R1, R2;
+		MUL R1, R1, light;
+		DP3 result.color.a, R1, grayscale;
+	%> }
+}
+
+renderProgram interaction/parallax_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/parallax
+
+	program fragment arb { <%
+		$define ambient
+		
+		OPTION ARB_precision_hint_fastest;
+
+		TEMP	light, color, R1, R2, localNormal, specular, paralaxCoord, paralaxCoordTmp;
+
+		PARAM	subOne = { -1, -1, -1, -1 };
+		PARAM	scaleTwo = { 2, 2, 2, 2 };
+		PARAM	grayscale = { 0.3, 0.59, 0.11, 0.0 };
+
+		TEMP	view;
+		TEMP	__HEIGHT;
+
+		# normalize view vector
+		DP3	view.x, fragment.texcoord[6], fragment.texcoord[6];
+		RSQ	view.x, view.x;
+		MUL	view, view.x, fragment.texcoord[6];
+
+		# do paralax mapping offset
+		useTemplate paralax_step < "view", "fragment.texcoord[1]", "paralaxCoordTmp" >	
+		useTemplate paralax_step < "view", "paralaxCoordTmp", "paralaxCoord" >	
+			
+		#
+		# the amount of light contacting the fragment is the
+		# product of the two light projections and the surface
+		# bump mapping
+		#
+
+		# perform the diffuse bump mapping
+		DP3	light.x, fragment.texcoord[0], fragment.texcoord[0];
+		RSQ	light.x, light.x;
+		MUL	light, light.x, fragment.texcoord[0];
+
+		# calculate the half angle vector in object space
+		ADD	specular, view, light;
+
+		# normalize
+		DP3	R1.x, specular, specular;
+		RSQ	R1.x, R1.x;
+		MUL	specular, R1.x, specular;
+
+		TEX	localNormal, paralaxCoord, $bumpMap, 2D;
+$if !r_dxnNormalMaps
+		MOV localNormal.x, localNormal.a;
+$endif
+		MAD	localNormal, localNormal, scaleTwo, subOne;
+		
+		$if r_normalizeNormalMaps
+		MOV		localNormal.z, 0;
+		DP3		R1.x, localNormal,localNormal;
+		ADD		R1.x, 1, -R1.x;
+		RSQ		R1.x, R1.x;
+		RCP		localNormal.z, R1.x;
+		$endif
+
+		
+		DP3	light.x, light, localNormal;
+
+		# modulate by the light projection
+		TXP	R1, fragment.texcoord[3], $lightProjectionMap, 2D;
+		MUL	light, light.x, R1;
+
+		# modulate by the light falloff
+		TEX	R1.x, fragment.texcoord[2], $lightFalloffMap, 2D;
+		MUL	light, light, R1.x;
+
+		#
+		# the light will be modulated by the diffuse and
+		# specular surface characteristics
+		#
+
+		# modulate by the diffuse map and constant diffuse factor
+		TEX	R1, paralaxCoord, $diffuseMap, 2D;
+		MUL	color, R1, $diffuseColor;
+
+		# perform the specular bump mapping
+		DP3	specular.x, specular, localNormal;
+
+		# perform a dependent table read for the specular falloff
+		TEX	R1, specular, $specularTable, 2D;
+
+		# modulate by the constant specular factor
+		MUL	R1, R1.x, $specularColor;
+
+		# modulate by the specular map * 2
+		TEX	R2, paralaxCoord, $specularMap, 2D;
+		ADD	R2, R2, R2;
+		MAD	color, R1, R2, color;
+
+
+		MUL	color, light, color;
+
+		# modify by the vertex color
+
+		MUL result.color.rgb, color, fragment.color;
+
+		MUL R1, R1, R2;
+		MUL R1, R1, light;
+		DP3 result.color.a, R1, grayscale;
+	%> }
+}

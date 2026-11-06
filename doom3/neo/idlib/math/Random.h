@@ -46,14 +46,25 @@ class idRandom
 		int					GetSeed(void) const;
 
 		int					RandomInt(void);			// random integer in the range [0, MAX_RAND]
-		int					RandomInt(int max);		// random integer in the range [0, max[
+    	int					RandomInt( int maxValue );		// random integer in the range [0, maxValue[
 		float				RandomFloat(void);		// random number in the range [0.0f, 1.0f]
 		float				CRandomFloat(void);		// random number in the range [-1.0f, 1.0f]
+#ifdef _SPLASHDAMAGE
+	    idVec3				RandomVectorInCone( float halfOpeningAngle ); //Random vector in the cone with angle 2 * halfOpeningAngle centered around the z-axis
+	    idVec3				RandomVectorInCone( idVec3 dir, float halfOpeningAngle );
+	    static idRandom		&StaticRandom( void )
+	    {
+	        return staticRandom;
+	    }
+#endif
 
 		static const int	MAX_RAND = 0x7fff;
 
 	private:
 		int					seed;
+#ifdef _SPLASHDAMAGE
+    	static idRandom		staticRandom;
+#endif
 };
 
 ID_INLINE idRandom::idRandom(int seed)
@@ -77,13 +88,13 @@ ID_INLINE int idRandom::RandomInt(void)
 	return (seed & idRandom::MAX_RAND);
 }
 
-ID_INLINE int idRandom::RandomInt(int max)
+ID_INLINE int idRandom::RandomInt(int maxValue)
 {
-	if (max == 0) {
+	if (maxValue == 0) {
 		return 0;			// avoid divide by zero error
 	}
 
-	return RandomInt() % max;
+	return RandomInt() % maxValue;
 }
 
 ID_INLINE float idRandom::RandomFloat(void)
@@ -114,7 +125,7 @@ class idRandom2
 		unsigned/* 64long */int			GetSeed(void) const;
 
 		int						RandomInt(void);			// random integer in the range [0, MAX_RAND]
-		int						RandomInt(int max);		// random integer in the range [0, max]
+    	int						RandomInt( int maxValue );	// random integer in the range [0, maxValue[
 		float					RandomFloat(void);		// random number in the range [0.0f, 1.0f]
 		float					CRandomFloat(void);		// random number in the range [-1.0f, 1.0f]
 
@@ -148,13 +159,13 @@ ID_INLINE int idRandom2::RandomInt(void)
 	return ((int) seed & idRandom2::MAX_RAND);
 }
 
-ID_INLINE int idRandom2::RandomInt(int max)
+ID_INLINE int idRandom2::RandomInt(int maxValue)
 {
-	if (max == 0) {
+	if (maxValue == 0) {
 		return 0;		// avoid divide by zero error
 	}
 
-	return (RandomInt() >> (16 - idMath::BitsForInteger(max))) % max;
+	return (RandomInt() >> (16 - idMath::BitsForInteger(maxValue))) % maxValue;
 }
 
 ID_INLINE float idRandom2::RandomFloat(void)

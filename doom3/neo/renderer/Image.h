@@ -26,6 +26,9 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
+#ifndef __IMAGE_H__ // add ifndef
+#define __IMAGE_H__
+
 /*
 ====================================================================
 
@@ -161,6 +164,9 @@ typedef enum {
 	CF_2D,			// not a cube map
 	CF_NATIVE,		// _px, _nx, _py, etc, directly sent to GL
 	CF_CAMERA		// _forward, _back, etc, rotated and flipped as needed before sending to GL
+#ifdef _SPLASHDAMAGE // cubemap with single image
+	, CF_HALFSPHERE	// Half-Spherical projection map resampled to cubemap at load time
+#endif
 #ifdef GL_ES_VERSION_3_0
 	, CF_2D_ARRAY		// not a cube map but not a single 2d texture either
 #endif
@@ -168,6 +174,63 @@ typedef enum {
 
 #define	MAX_IMAGE_NAME	256
 
+#ifdef _SPLASHDAMAGE
+
+struct mipmapState_t {
+	enum colorType_e {
+		MT_NONE,
+		MT_DEFAULT,
+		MT_WATER,
+		MT_COLORLEVELS
+#define MT_BLEND MT_DEFAULT // jmarshall23's DarklightNG
+#define MT_ALPHA MT_WATER // jmarshall23's DarklightNG
+#define MT_COLOR MT_COLORLEVELS // jmarshall23's DarklightNG
+	};
+
+	bool operator == ( const mipmapState_t &a ) {
+		return !memcmp( this, &a, sizeof( mipmapState_t ) );
+	}
+
+	bool operator != ( const mipmapState_t &a ) {
+		return !operator ==( a );
+	}
+
+	float		color[4];	// Color to blend to
+	float		blend[4];	// Blend factor for every channel
+	colorType_e	colorType;
+};
+
+static const mipmapState_t defaultMipmapState = { {0,0,0,0}, {0,0,0,0}, mipmapState_t::MT_NONE };
+
+class idImageGeneratorFunctorBase
+{
+public:
+    virtual ~idImageGeneratorFunctorBase( void ) { }
+    virtual void	operator()( class idImage *image ) const = 0;
+};
+
+template <class T> class idImageGeneratorFunctor : public idImageGeneratorFunctorBase
+{
+public:
+    typedef void( T::*func_t )( class idImage *image );
+
+    void			Init( T* generatorClass, func_t imageGenerator )
+    {
+        this->generatorClass = generatorClass;
+        this->imageGenerator = imageGenerator;
+    }
+
+    virtual void	operator()( class idImage *image ) const
+    {
+        (*generatorClass.*imageGenerator)( image );
+    }
+
+private:
+    T *				generatorClass;
+    func_t			imageGenerator;
+};
+
+#endif
 class idImage
 {
 	public:
@@ -197,9 +260,15 @@ class idImage
 		// data goes from the bottom to the top line of the image, as OpenGL expects it
 		// These perform an implicit Bind() on the current texture unit
 		// FIXME: should we implement cinematics this way, instead of with explicit calls?
+#ifdef _SPLASHDAMAGE
+		void		GenerateImage(const byte *pic, int width, int height,
+									  textureFilter_t filter, bool allowDownSize,
+									  textureRepeat_t repeat, textureDepth_t depth, mipmapState_t mipmapState = defaultMipmapState);
+#else
 		void		GenerateImage(const byte *pic, int width, int height,
 		                              textureFilter_t filter, bool allowDownSize,
 		                              textureRepeat_t repeat, textureDepth_t depth);
+#endif
 
 		int		GenerateImageETC(int width, int height,
 		                              textureFilter_t filter, bool allowDownSize,
@@ -238,7 +307,11 @@ class idImage
 		void		Print() const;
 
 		// check for changed timestamp on disk and reload if necessary
-		void		Reload(bool checkPrecompressed, bool force, bool fromBackEnd = false);
+		void		Reload(bool checkPrecompressed, bool force
+#ifdef _MULTITHREAD
+				, bool fromBackEnd = false
+#endif
+			);
 
 		void		AddReference()				{
 			refCount++;
@@ -299,6 +372,19 @@ class idImage
 
 		int					classification;			// just for resource profiling
 
+#ifdef _SPLASHDAMAGE
+		mipmapState_t		mipmapState;			// Mipmap level coloring
+		int					numMipLevels;
+		float				minLod;
+		float				maxLod;
+
+    	int					sourceWidth, sourceHeight;				// after power of two, before downsample
+		const idImageGeneratorFunctorBase *	generatorFunctor;	// NULL for files
+
+		bool				IsLoaded() const;
+		virtual void		SetMipmapLevel( byte *pixels, int width, int height, int level, mipmapState_t &state );
+#endif
+
 		// data for listImages
 		int					uploadWidth, uploadHeight, uploadDepth;	// after power of two, downsample, and MAX_TEXTURE_SIZE
 		int					internalFormat;
@@ -355,6 +441,10 @@ ID_INLINE idImage::idImage()
 
     imageReferencePtr = NULL;
 #endif
+#ifdef _SPLASHDAMAGE
+	sourceWidth = sourceHeight = 0;
+	generatorFunctor = NULL;
+#endif
 }
 
 
@@ -378,9 +468,15 @@ class idImageManager
 		// If the load fails for any reason, the image will be filled in with the default
 		// grid pattern.
 		// Will automatically resample non-power-of-two images and execute image programs if needed.
+#ifdef _SPLASHDAMAGE
+		idImage 			*ImageFromFile(const char *name,
+						textureFilter_t filter, bool allowDownSize,
+						textureRepeat_t repeat, textureDepth_t depth, cubeFiles_t cubeMap = CF_2D, mipmapState_t mipmapState = defaultMipmapState);
+#else
 		idImage 			*ImageFromFile(const char *name,
 		                textureFilter_t filter, bool allowDownSize,
 		                textureRepeat_t repeat, textureDepth_t depth, cubeFiles_t cubeMap = CF_2D);
+#endif
 
 		// look for a loaded image, whatever the parameters
 		idImage 			*GetImage(const char *name) const;
@@ -427,6 +523,15 @@ class idImageManager
 		void				AddDDSCommand(const char *cmd);
 
 		void				PrintMemInfo(MemInfo_t *mi);
+#ifdef _SPLASHDAMAGE //karin: mega texture of jmarshall23's DarklightNG
+		// ETQW MegaTextures are image-manager resources. Materials hold borrowed
+		// pointers so duplicate declarations share one streaming/cache object.
+		idMegaTexture *		MegaTextureFromFile( const char *name );
+		void				PurgeAllMegaTextures();
+		void				ReloadAllMegaTextures();
+
+		idList<idMegaTexture*> megaTextures;
+#endif
 
 		// cvars
 		static idCVar		image_roundDown;			// round bad sizes down to nearest power of two
@@ -466,6 +571,16 @@ class idImageManager
 		idImage 			*alphaRampImage;				// 0-255 in alpha, 255 in RGB
 		idImage 			*alphaNotchImage;			// 2x1 texture with just 1110 and 1111 with point sampling
 		idImage 			*whiteImage;					// full of 0xff
+#ifdef _SPLASHDAMAGE //karin: globals built-in images
+	    idImage			    *grayImage;					// full of 0x77
+		idImage 			*blackCubeMapImage;			// RGB is 0, A is 255
+		idImage				*postProcessBuffers[2];
+	    idImage			    *diffusionMaskImage;		// store in alpha bit
+	    idImage			    *cinematicYImage;			// GL_LUMINANCE8
+	    idImage			    *cinematicUImage;			// GL_LUMINANCE8
+	    idImage			    *cinematicVImage;			// GL_LUMINANCE8
+		idImage 			*ImageFromFunctor(const char *name, const idImageGeneratorFunctorBase *generatorFunctor);
+#endif
 		idImage 			*blackImage;					// full of 0x00
 		idImage 			*normalCubeMapImage;			// cube map to normalize STR into RGB
 		idImage 			*noFalloffImage;				// all 255, but zero clamped
@@ -578,5 +693,10 @@ IMAGEPROGRAM
 */
 
 void R_LoadImageProgram(const char *name, byte **pic, int *width, int *height, ID_TIME_T *timestamp, textureDepth_t *depth = NULL);
+#ifdef _SPLASHDAMAGE
+const char *R_ParsePastImageProgram(idParser &src);
+#else
 const char *R_ParsePastImageProgram(idLexer &src);
+#endif
 
+#endif

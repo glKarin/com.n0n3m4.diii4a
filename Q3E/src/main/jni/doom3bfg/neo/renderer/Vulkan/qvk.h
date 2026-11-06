@@ -56,9 +56,15 @@ If you have questions concerning this license or the applicable additional terms
 const char* VK_ErrorToString( VkResult result );
 
 
+#ifdef __ANDROID__ //karin: fix vkAllocateDescriptorSets out of memory: VK: UNKNOWN - vkAllocateDescriptorSets( vkcontext.device, &setAllocInfo, &descriptorSets[ currentData ][ currentDescSet ] ) -1000069000[RBDoom3]
+static const int MAX_DESC_SETS				= (16384*2);
+static const int MAX_DESC_UNIFORM_BUFFERS	= (8192*2);
+static const int MAX_DESC_IMAGE_SAMPLERS	= (12384*2);
+#else
 static const int MAX_DESC_SETS				= 16384;
 static const int MAX_DESC_UNIFORM_BUFFERS	= 8192;
 static const int MAX_DESC_IMAGE_SAMPLERS	= 12384;
+#endif
 static const int MAX_DESC_SET_WRITES		= 32;
 static const int MAX_DESC_SET_UNIFORMS		= 48;
 static const int MAX_IMAGE_PARMS			= 16;

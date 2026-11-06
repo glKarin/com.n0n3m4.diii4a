@@ -94,7 +94,6 @@ public:
 	virtual void				SetPersistentPlayerInfo( int clientNum, const idDict &playerInfo ) = 0;
 
 	// Obsttorte
-	virtual idStr				triggeredSave() = 0; 
 	virtual bool				savegamesDisallowed() = 0;
 	virtual bool				quicksavesDisallowed() = 0;
 	// <-- end

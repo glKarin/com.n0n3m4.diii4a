@@ -69,8 +69,8 @@ typedef struct {
 
 #ifdef _HUMANHEAD
 	// HUMANHEAD nla
-	int					useAxis;
-	idVec3				dir;
+	int					    useAxis;
+	idVec3				    dir;
 	// HUMANHEAD END
 #endif
 	float					delay;

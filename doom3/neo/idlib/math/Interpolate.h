@@ -516,4 +516,202 @@ ID_INLINE type idInterpolateAccelDecelSine<type>::GetCurrentSpeed(float time) co
 	return extrapolate.GetCurrentSpeed(time);
 }
 
+
+#ifdef _SPLASHDAMAGE
+/*
+==============================================================================================
+
+	Bandpass filter styleee, with lerping on the leading and falling edges.
+	If OOB flag is set, an additional OOB value will be returned if the
+	time is out with the boundaries of the filter.
+
+	        _______
+		   /       \
+		  /         \
+	_____/           \______
+
+
+	With OOB conditions:
+	        _______
+		   /       \
+		  /         \
+	     /           \
+	     |           |
+	     |           |
+	     |           |
+	_____|           |______
+
+==============================================================================================
+*/
+
+template< typename type >
+class sdInterpolateBandPass
+{
+public:
+    sdInterpolateBandPass( void );
+    void				Init( const float lowPassStart, const float lowPassDuration, const float highPassStart, const float highPassDuration, const type &lowValue, const type &highValue );
+    void				SetLowPassStart( float _time )
+    {
+        lowStartTime = _time;
+    }
+    void				SetLowPassDuration( float _duration )
+    {
+        lowDuration = _duration;
+    }
+    void				SetHighPassStart( float _time )
+    {
+        highStartTime = _time;
+    }
+    void				SetHighPassDuration( float _duration )
+    {
+        highDuration = _duration;
+    }
+    void				SetLowValue( const type& _low )
+    {
+        lowValue = _low;
+    }
+    void				SetHighValue( const type& _high )
+    {
+        highValue = _high;
+    }
+    void				SetOOBValue( const type& _value )
+    {
+        oobFlag = true;
+        oobValue = _value;
+    }
+    void				SetOOBFlag( bool _flag )
+    {
+        oobFlag = _flag;
+    }
+    type				GetCurrentValue( float time ) const;
+    bool				IsDone( float time ) const
+    {
+        return ( time >= highStartTime + highDuration );
+    }
+    float				GetLowPassStart( void ) const
+    {
+        return lowStartTime;
+    }
+    float				GetLowPassDuration( void ) const
+    {
+        return lowDuration;
+    }
+    float				GetHighPassStart( void ) const
+    {
+        return highStartTime;
+    }
+    float				GetHighPassDuration( void ) const
+    {
+        return highDuration;
+    }
+    const type&			GetOOBValue( void ) const
+    {
+        return oobValue;
+    }
+    bool				GetOOBFlag( void ) const
+    {
+        return oobFlag;
+    }
+    const type&			GetLowValue( void ) const
+    {
+        return lowValue;
+    }
+    const type&			GetHighValue( void ) const
+    {
+        return highValue;
+    }
+
+private:
+    float				lowStartTime, lowDuration;
+    float				highStartTime, highDuration;
+    type				oobValue;
+    bool				oobFlag;
+    type				lowValue, highValue;
+};
+
+/*
+====================
+sdInterpolateBandPass::idInterpolate
+====================
+*/
+template< typename type >
+ID_INLINE sdInterpolateBandPass<type>::sdInterpolateBandPass( void )
+{
+    lowStartTime	= 0.f;
+    lowDuration		= 0.f;
+    highStartTime	= 0.f;
+    highDuration	= 0.f;
+
+    oobFlag			= false;
+
+    memset( &lowValue, 0, sizeof( lowValue ) );
+    highValue = lowValue;
+}
+
+/*
+====================
+sdInterpolateBandPass::Init
+====================
+*/
+template< typename type >
+ID_INLINE void sdInterpolateBandPass< type >::Init( const float lowPassStart, const float lowPassDuration, const float highPassStart, const float highPassDuration, const type& _lowValue, const type& _highValue )
+{
+    assert( lowPassDuration >= 0 );
+    assert( highPassDuration >= 0 );
+    assert( lowPassStart + lowPassDuration <= highPassStart );
+
+    lowStartTime		= lowPassStart;
+    lowDuration			= lowPassDuration;
+    highStartTime		= highPassStart;
+    highDuration		= highPassDuration;
+
+    lowValue			= _lowValue;
+    highValue			= _highValue;
+}
+
+/*
+====================
+sdInterpolateBandPass::GetCurrentValue
+====================
+*/
+template< typename type >
+ID_INLINE type sdInterpolateBandPass< type >::GetCurrentValue( float time ) const
+{
+    if( time < lowStartTime ) {
+        // pre leading edge condition
+
+        if( oobFlag ) {
+            return oobValue;
+        }
+        return lowValue;
+    }
+
+    if( time < lowStartTime + lowDuration ) {
+        // on the leading edge
+
+        float frac = ( time - lowStartTime ) / lowDuration;
+        return Lerp( lowValue, highValue, frac );
+    }
+
+    if( time < highStartTime ) {
+        // on the upper level
+
+        return highValue;
+    }
+
+    if( time < highStartTime + highDuration ) {
+        // on the trailing edge
+
+        float frac = ( time - highStartTime ) / highDuration;
+        return Lerp( highValue, lowValue, frac );
+    }
+
+    if( oobFlag ) {
+        return oobValue;
+    }
+    return lowValue;
+}
+
+#endif
+
 #endif /* !__MATH_INTERPOLATE_H__ */

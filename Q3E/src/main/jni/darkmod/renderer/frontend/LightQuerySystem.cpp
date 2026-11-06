@@ -355,7 +355,10 @@ idVec3 LightQuerySystem::ComputeQueryLightStage( const LightQuery &query, Contex
 		if ( lenSq > POS_TOLERANCE * POS_TOLERANCE ) {
 			end += ( start - end ).Normalized() * POS_TOLERANCE;
 			modelTrace_t trace;
-			if ( world->TraceAll( trace, start, end, true, 0.0f, LambdaToFuncPtr( Filter ), &Filter ) )
+			// stgatilov #6649: ignore BSP tree for parallel lights
+			// since their origin is in the void
+			bool useBsp = !light->isOriginInVoidButActive;
+			if ( world->TraceAll( trace, start, end, useBsp, 0.0f, LambdaToFuncPtr( Filter ), &Filter ) )
 				return vec3_zero;
 		}
 	}

@@ -1421,7 +1421,7 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 	int ammobits[4];                //----(SA)	modified
 	int clipbits;                   //----(SA)	added
 	int powerupbits;
-	int holdablebits;
+    int holdablebits[2];
 	int numFields;
 	int perksbits;
 	netField_t      *field;
@@ -1510,12 +1510,18 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 			persistantbits |= 1 << i;
 		}
 	}
-	holdablebits = 0;
-	for ( i = 0 ; i < 16 ; i++ ) {
-		if ( to->holdable[i] != from->holdable[i] ) {
-			holdablebits |= 1 << i;
-		}
-	}
+	holdablebits[0] = 0;
+	holdablebits[1] = 0;
+	for ( j = 0; j < 2; j++ ) {
+        for ( i = 0; i < 16; i++ ) {
+            int idx = i + j * 16;
+            if ( idx >= MAX_HOLDABLE ) break;
+
+            if ( to->holdable[idx] != from->holdable[idx] ) {
+                holdablebits[j] |= 1 << i;
+            }
+        }
+    }
 	powerupbits = 0;
 	for (i = 0; i < MAX_POWERUPS; i++) {
 		if (to->powerups[i] != from->powerups[i]) {
@@ -1529,7 +1535,8 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 		}
 	}
 
-	if ( statsbits || persistantbits || holdablebits || powerupbits || perksbits ) {
+	if (statsbits || persistantbits || holdablebits[0] || holdablebits[1] || powerupbits || perksbits)
+	{
 
 		MSG_WriteBits( msg, 1, 1 ); // something changed
 
@@ -1559,17 +1566,28 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 		}
 
 
-		if ( holdablebits ) {
-			MSG_WriteBits( msg, 1, 1 ); // changed
-			MSG_WriteShort( msg, holdablebits );
-			for ( i = 0 ; i < 16 ; i++ )
-				if ( holdablebits & ( 1 << i ) ) {
-					MSG_WriteShort( msg, to->holdable[i] );
-				}
-		} else {
-			MSG_WriteBits( msg, 0, 1 ); // no change to holdables
-		}
+        // holdables
+        if ( holdablebits[0] || holdablebits[1] ) {
+            MSG_WriteBits( msg, 1, 1 ); // changed
 
+            for ( j = 0; j < 2; j++ ) {
+                if ( holdablebits[j] ) {
+                    MSG_WriteBits( msg, 1, 1 ); // this block changed
+                    MSG_WriteShort( msg, holdablebits[j] );
+
+                    for ( i = 0; i < 16; i++ ) {
+                        if ( holdablebits[j] & ( 1 << i ) ) {
+                            int idx = i + j * 16;
+                            MSG_WriteShort( msg, to->holdable[idx] );
+                        }
+                    }
+                } else {
+                    MSG_WriteBits( msg, 0, 1 ); // this block unchanged
+                }
+            }
+        } else {
+            MSG_WriteBits( msg, 0, 1 ); // no change to holdables
+        }
 
 		if ( powerupbits ) {
 			MSG_WriteBits( msg, 1, 1 ); // changed
@@ -1592,10 +1610,11 @@ void MSG_WriteDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct p
 		} else {
 			MSG_WriteBits( msg, 0, 1 ); // no change to powerups
 		}
-	} else {
+	}
+	else
+	{
 		MSG_WriteBits( msg, 0, 1 ); // no change to any
 	}
-
 
 #if 0
 // RF, optimization
@@ -1902,16 +1921,28 @@ void MSG_ReadDeltaPlayerstate( msg_t *msg, playerState_t *from, playerState_t *t
 			}
 		}
 
-		// parse holdable stats
-		if ( MSG_ReadBits( msg, 1 ) ) {
-			LOG( "PS_HOLDABLE" );
-			bits = MSG_ReadShort( msg );
-			for ( i = 0 ; i < 16 ; i++ ) {
-				if ( bits & ( 1 << i ) ) {
-					to->holdable[i] = MSG_ReadShort( msg );
-				}
-			}
-		}
+        // parse holdables (two 16-item blocks)
+        if ( MSG_ReadBits( msg, 1 ) ) {
+            LOG( "PS_HOLDABLE" );
+
+            for ( j = 0; j < 2; j++ ) {
+                if ( MSG_ReadBits( msg, 1 ) ) {
+                    bits = MSG_ReadShort( msg );
+
+                    for ( i = 0; i < 16; i++ ) {
+                        if ( bits & ( 1 << i ) ) {
+                            int idx = i + j * 16;
+                            if ( idx < MAX_HOLDABLE ) {
+                                to->holdable[idx] = MSG_ReadShort( msg );
+                            } else {
+                                // still need to consume stream in sync even if idx out of range
+                                (void)MSG_ReadShort( msg );
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
 		// parse powerups
 		if ( MSG_ReadBits( msg, 1 ) ) {

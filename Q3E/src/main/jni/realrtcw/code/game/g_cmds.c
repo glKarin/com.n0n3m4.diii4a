@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "g_local.h"
 #include "g_survival.h"
 
+#include "../steam/steam.h"
+
 /*
 ==================
 DeathmatchScoreboardMessage
@@ -301,8 +303,11 @@ void Cmd_Give_f( gentity_t *ent ) {
 	}
 
 	if ( give_all || Q_stricmp( name, "holdable" ) == 0 ) {
-		ent->client->ps.stats[STAT_HOLDABLE_ITEM] = ( 1 << ( HI_LP_SYRINGE - 1 ) ) - 1 - ( 1 << HI_NONE );
-		for ( i = 1 ; i <= HI_LP_SYRINGE ; i++ ) {
+		for ( int j = HI_WINE; j < HI_HUD_VISIBLE_END; j++ ) {
+			ent->client->ps.stats[STAT_HOLDABLE_ITEM] |= (1 << j);
+		}
+
+		for ( i = 1 ; i < HI_HUD_VISIBLE_END ; i++ ) {
 			ent->client->ps.holdable[i] = 10;
 		}
 
@@ -391,6 +396,42 @@ void Cmd_Give_f( gentity_t *ent ) {
 	}
 }
 
+
+/*
+==================
+Cmd_reset_stats
+
+Resets Steam Achievements
+==================
+*/
+void Cmd_reset_stats( gentity_t *ent ) {
+    int clientNum;
+
+    if ( !ent || !ent->client ) {
+        return;
+    }
+
+    clientNum = (int)( ent - g_entities );
+
+	if ( !CheatsOk( ent ) ) {
+		return;
+	}
+
+    // 10-second confirm window
+    if ( ent->client->pers.resetStatsConfirmTime < level.time ) {
+        ent->client->pers.resetStatsConfirmTime = level.time + 10000;
+        trap_SendServerCommand( clientNum,
+            "print \"WARNING: This will reset ALL Steam achievements/stats. Type reset_stats again within 10 seconds to confirm.\\n\"" );
+        return;
+    }
+
+    // confirmed
+    ent->client->pers.resetStatsConfirmTime = 0;
+
+    steamResetStats( 1 );
+
+    trap_SendServerCommand( clientNum, "print \"All Steam Achievements were successfully reset!\\n\"" );
+}
 
 /*
 ==================
@@ -1338,7 +1379,6 @@ qboolean G_ThrowChair( gentity_t *ent, vec3_t dir, qboolean force ) {
 	return ( isthrown || force );
 }
 
-
 // Rafael
 /*
 ==================
@@ -1889,7 +1929,7 @@ void ClientDamage( gentity_t *clent, int entnum, int enemynum, int id ) {
 		break;
 	case CLDMG_FLAMETHROWER:
 
-		if (ent->client && ent->client->ps.powerups[PW_BATTLESUIT_SURV])
+		if (ent->client && (ent->client->ps.powerups[PW_BATTLESUIT_SURV] || ent->client->ps.powerups[PW_XSHIELD] ) )
 		{
 			break; // Don't apply flamethrower effects
 		}
@@ -2138,6 +2178,8 @@ void ClientCommand( int clientNum ) {
 		Cmd_Give_f( ent );
 	} else if ( Q_stricmp( cmd, "god" ) == 0 )  {
 		Cmd_God_f( ent );
+	} else if ( Q_stricmp( cmd, "reset_stats" ) == 0 )  {
+		Cmd_reset_stats( ent );
 	} else if ( Q_stricmp( cmd, "nofatigue" ) == 0 )  {
 		Cmd_Nofatigue_f( ent );
 	} else if ( Q_stricmp( cmd, "notarget" ) == 0 )  {

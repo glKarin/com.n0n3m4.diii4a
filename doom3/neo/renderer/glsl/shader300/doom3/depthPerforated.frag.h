@@ -1,0 +1,28 @@
+
+// z-fill perforated depth
+GLSL_SHADER const char ES3_DEPTH_PERFORATED_FRAG[] =
+"#version 300 es\n"
+"//#pragma optimize(off)\n"
+"\n"
+"precision mediump float;\n"
+"\n"
+"uniform sampler2D u_fragmentMap0;\n"
+"uniform lowp float u_alphaTest;\n"
+"uniform lowp vec4 u_glColor;\n"
+"\n"
+"in vec2 var_TexDiffuse;\n"
+"#ifdef _DEBUG\n"
+"out vec4 _gl_FragColor;\n"
+"#endif\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"    if (u_alphaTest > texture(u_fragmentMap0, var_TexDiffuse).a) {\n"
+"        discard;\n"
+"    }\n"
+"\n"
+"#ifdef _DEBUG\n"
+"    _gl_FragColor = vec4((gl_FragCoord.z + 1.0) * 0.5, 0.0, 0.0, 1.0); // DEBUG\n"
+"#endif\n"
+"}\n"
+;

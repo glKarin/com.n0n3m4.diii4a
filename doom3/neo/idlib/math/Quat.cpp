@@ -142,12 +142,41 @@ idQuat::ToAngularVelocity
 idVec3 idQuat::ToAngularVelocity(void) const
 {
 	idVec3 vec;
+#ifdef _SPLASHDAMAGE
+    float angle;
+
+    //
+    // FeaRog:
+    //		Negative w basically indicates reverse rotation
+    //		ACos will return a value in the range PI/2 <= x <= PI for negative w
+    //		If this function doubled the angle (which is mathematically correct -> theta = 2*acos(w) )
+    //		and then normalized it so it was in the range -PI/2 <= x <= PI/2
+    //		then this function would return the correct value.
+    //
+    //		However its easier & faster just to do the one branch and invert the axis
+    //
+    if ( w > 0.0f ) {
+        vec.x = x;
+        vec.y = y;
+        vec.z = z;
+        angle = idMath::ACos( w );
+    } else {
+        vec.x = -x;
+        vec.y = -y;
+        vec.z = -z;
+        angle = idMath::ACos( -w );
+    }
+
+    vec.Normalize();
+    return vec * angle;
+#else
 
 	vec.x = x;
 	vec.y = y;
 	vec.z = z;
 	vec.Normalize();
 	return vec * idMath::ACos(w);
+#endif
 }
 
 /*
@@ -169,6 +198,53 @@ Spherical linear interpolation between two quaternions.
 */
 idQuat &idQuat::Slerp(const idQuat &from, const idQuat &to, float t)
 {
+#ifdef _SPLASHDAMAGE
+    float cosom, absCosom, sinom, omega, scale0, scale1;
+
+    if ( t <= 0.0f ) {
+        *this = from;
+        return *this;
+    }
+
+    if ( t >= 1.0f ) {
+        *this = to;
+        return *this;
+    }
+
+    if ( from == to ) {
+        *this = to;
+        return *this;
+    }
+
+    cosom = from.x * to.x + from.y * to.y + from.z * to.z + from.w * to.w;
+    absCosom = fabs( cosom );
+
+    if ( ( 1.0f - absCosom ) > 1e-6f ) {
+#if 0
+        omega = acos( absCosom );
+        sinom = 1.0f / sin( omega );
+        scale0 = sin( ( 1.0f - t ) * omega ) * sinom;
+        scale1 = sin( t * omega ) * sinom;
+#else
+        scale0 = 1.0f - absCosom * absCosom;
+        sinom = idMath::InvSqrt( scale0 );
+        omega = idMath::ATan16( scale0 * sinom, absCosom );
+        scale0 = idMath::Sin16( ( 1.0f - t ) * omega ) * sinom;
+        scale1 = idMath::Sin16( t * omega ) * sinom;
+#endif
+    } else {
+        scale0 = 1.0f - t;
+        scale1 = t;
+    }
+
+    scale1 = ( cosom >= 0.0f ) ? scale1 : -scale1;
+
+    x = scale0 * from.x + scale1 * to.x;
+    y = scale0 * from.y + scale1 * to.y;
+    z = scale0 * from.z + scale1 * to.z;
+    w = scale0 * from.w + scale1 * to.w;
+
+#else
 	idQuat	temp;
 	float	omega, cosom, sinom, scale0, scale1;
 
@@ -215,6 +291,7 @@ idQuat &idQuat::Slerp(const idQuat &from, const idQuat &to, float t)
 	}
 
 	*this = (scale0 * from) + (scale1 * temp);
+#endif
 	return *this;
 }
 
@@ -267,3 +344,54 @@ const char *idCQuat::ToString(int precision) const
 {
 	return idStr::FloatArrayToString(ToFloatPtr(), GetDimension(), precision);
 }
+
+#ifdef _SPLASHDAMAGE
+
+/*
+=====================
+idQuat::SlerpFast
+
+Approximation of spherical linear interpolation between two quaternions.
+The interpolation traces out the exact same curve as Slerp but does not maintain a constant speed across the arc.
+=====================
+*/
+idQuat &idQuat::SlerpFast( const idQuat &from, const idQuat &to, float t )
+{
+    float cosom, scale0, scale1, s;
+
+    if ( t <= 0.0f ) {
+        *this = from;
+        return *this;
+    }
+
+    if ( t >= 1.0f ) {
+        *this = to;
+        return *this;
+    }
+
+    if ( from == to ) {
+        *this = to;
+        return *this;
+    }
+
+    cosom = from.x * to.x + from.y * to.y + from.z * to.z + from.w * to.w;
+
+    scale0 = 1.0f - t;
+    scale1 = ( cosom >= 0.0f ) ? t : -t;
+
+    x = scale0 * from.x + scale1 * to.x;
+    y = scale0 * from.y + scale1 * to.y;
+    z = scale0 * from.z + scale1 * to.z;
+    w = scale0 * from.w + scale1 * to.w;
+
+    s = idMath::InvSqrt( x * x + y * y + z * z + w * w );
+
+    x *= s;
+    y *= s;
+    z *= s;
+    w *= s;
+
+    return *this;
+}
+#endif
+

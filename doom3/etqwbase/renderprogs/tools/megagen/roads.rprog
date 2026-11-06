@@ -1,0 +1,187 @@
+renderProgram megagen/roads/following {
+	program vertex arb { <%
+		OPTION ARB_position_invariant;
+
+		TEMP bitangent;
+		TEMP R0;
+
+		PARAM	identityModelMatrix_0 = { 1, 0, 0, 0 };
+		PARAM	identityModelMatrix_1 = { 0, 1, 0, 0 };
+		PARAM	identityModelMatrix_2 = { 0, 0, 1, 0 };
+		#PARAM	identityModelMatrix_3 = { 0, 0, 0, 1 };
+
+		XPD		bitangent, vertex.attrib[10], vertex.attrib[9];
+		MUL		bitangent, bitangent, vertex.attrib[9].w;
+
+		# build tangent space -> world space conversion matrix
+		DP3	result.texcoord[5].x, identityModelMatrix_0, -vertex.attrib[9];	# remove this sign to make it correct for in radiant preview, but not too bothered about that for now
+		DP3	result.texcoord[6].x, identityModelMatrix_1, -vertex.attrib[9];
+		DP3	result.texcoord[7].x, identityModelMatrix_2, vertex.attrib[9];
+
+		DP3	result.texcoord[5].y, identityModelMatrix_0, bitangent;
+		DP3	result.texcoord[6].y, identityModelMatrix_1, -bitangent;
+		DP3	result.texcoord[7].y, identityModelMatrix_2, bitangent;
+
+		DP3	result.texcoord[5].z, identityModelMatrix_0, vertex.attrib[10];
+		DP3	result.texcoord[6].z, identityModelMatrix_1, vertex.attrib[10];
+		DP3	result.texcoord[7].z, identityModelMatrix_2, vertex.attrib[10];
+
+		# calculate dest image texture coordinates
+		ADD R0, vertex.position, program.local[0];
+		MUL result.texcoord[1], R0, program.local[1];
+
+		# transfer base texture coordinate
+		MOV	result.texcoord[0], vertex.texcoord[0];
+
+		# transfer vertex color
+		MOV result.color, vertex.color;
+	%> }
+
+	program fragment arb { <%
+		TEMP localNormal, R0, R1;
+		TEMP colorDest, colorSource, scalar;
+
+		PARAM	subOne = { -1, -1, -1, -1 };
+		PARAM	scaleTwo = { 2, 2, 2, 2 };
+
+		TEX	localNormal, fragment.texcoord[0], texture[0], 2D;
+
+		MOV scalar.x, localNormal.a;
+		ADD scalar.y, 1, -scalar.x;
+
+		MAD	localNormal, localNormal, scaleTwo, subOne;
+
+		# put normal into world space
+		DP3 R0.x, fragment.texcoord[5], localNormal;
+		DP3 R0.y, fragment.texcoord[6], localNormal;
+		DP3 R0.z, fragment.texcoord[7], localNormal;
+
+		# renormalize
+		DP3	R1, R0, R0;
+		RSQ	R1, R1.x;
+		MUL	R1, R1.x, R0;
+
+		MAD	localNormal, R1, .5, .5;
+
+		#
+		# ADDNORMALS
+		#
+
+		TEX colorDest, fragment.texcoord[1], texture[1], 2D;
+		MOV colorSource, localNormal;
+
+		# Decode normals
+		MAD	colorDest, colorDest, scaleTwo, subOne;
+		MAD	colorSource, colorSource, scaleTwo, subOne;
+
+		# Flatten normals
+		RCP R0, colorSource.z;
+		MUL scalar.x, scalar, R0;
+		MUL colorSource.xy, scalar.x, colorSource;
+		MOV colorSource.z, 1;
+
+		RCP R1, colorDest.z;
+		MUL scalar.y, scalar, R1;
+		MUL colorDest.xy, scalar.y, colorDest;
+
+		# Add together
+		ADD colorSource.xy, colorSource, colorDest;
+
+		# Normalize
+		DP3	R1, colorSource, colorSource;
+		RSQ	R1, R1.x;
+		MUL	R1, R1.x, colorSource;
+
+		# Encode normals
+		MAD	result.color.rgb, R1, .5, .5;
+		MOV result.color.a, 1;
+	%> }
+}
+
+renderProgram megagen/roads/tiling {
+	program vertex arb { <%
+		OPTION ARB_position_invariant ;
+
+		TEMP colorTexCoordFinal;
+		TEMP tempTexCoord;
+		TEMP tempTexCoord2;
+		TEMP R0;
+
+		# rotate the texture
+		SUB tempTexCoord, vertex.texcoord[ 0 ], 0.5;
+
+		MUL tempTexCoord2.x, tempTexCoord.x, program.local[1].y;
+		MUL tempTexCoord2.y, tempTexCoord.y, program.local[1].x;
+		SUB colorTexCoordFinal.x, tempTexCoord2.x, tempTexCoord2.y;
+
+		MUL tempTexCoord2.x, tempTexCoord.y, program.local[1].y;
+		MUL tempTexCoord2.y, tempTexCoord.x, program.local[1].x;
+		ADD colorTexCoordFinal.y, tempTexCoord2.x, tempTexCoord2.y;
+
+		ADD colorTexCoordFinal.xy, colorTexCoordFinal, 0.5;
+
+		# scale the texture
+		MUL result.texcoord[0].xy, colorTexCoordFinal, program.local[0];
+
+		# calculate dest image texture coordinates
+		ADD R0, vertex.position, program.local[2];
+		MUL result.texcoord[1], R0, program.local[3];
+
+		# transfer alpha texture coordinate
+		MOV result.texcoord[2], vertex.attrib[9];
+
+		# transfer vertex color
+		MOV result.color, vertex.color;
+	%> }
+
+	program fragment arb { <%
+		TEMP alphaSource, diffuseColor;
+		TEMP colorDest, colorSource, scalar, R0, R1;
+
+		PARAM	subOne = { -1, -1, -1, -1 };
+		PARAM	scaleTwo = { 2, 2, 2, 2 };
+
+		TEX colorSource, fragment.texcoord[0], texture[0], 2D;
+		TEX alphaSource, fragment.texcoord[2], texture[2], 2D;
+
+		MOV colorSource.a, alphaSource.rrrr;
+		MOV diffuseColor, colorSource;
+
+		#
+		# ADDNORMALS
+		#
+
+		TEX colorDest, fragment.texcoord[1], texture[1], 2D;
+
+		MOV scalar.x, diffuseColor.a;
+		ADD scalar.y, 1, -scalar.x;
+
+		# Decode normals
+		MAD	colorDest, colorDest, scaleTwo, subOne;
+		MAD	colorSource, colorSource, scaleTwo, subOne;
+
+		# Flatten normals
+		RCP R0, colorSource.z;
+		MUL scalar.x, scalar, R0;
+		MUL colorSource.xy, scalar.x, colorSource;
+		MOV colorSource.z, 1;
+
+		RCP R1, colorDest.z;
+		MUL scalar.y, scalar, R1;
+		MUL colorDest.xy, scalar.y, colorDest;
+
+		# Add together
+		ADD colorSource.xy, colorSource, colorDest;
+
+		# Normalize
+		DP3	R1, colorSource, colorSource;
+		RSQ	R1, R1.x;
+		MUL	R1, R1.x, colorSource;
+
+		# Encode normals
+		MAD	R1, R1, .5, .5;
+		MOV R1.a, 1;
+
+		CMP result.color, program.local[0].x, R1, diffuseColor;
+	%> }
+}

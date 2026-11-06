@@ -34,6 +34,10 @@ typedef struct {
 	int					numVerts;
 	int					firstIndex;
 	int					numIndexes;
+#ifdef _SPLASHDAMAGE //karin: register shaderParms from GUI
+	float				registers[MAX_ENTITY_SHADER_PARMS];
+	bool				registerShaderParms;
+#endif
 } guiModelSurface_t;
 
 class idGuiModel
@@ -67,5 +71,55 @@ class idGuiModel
 		idList<guiModelSurface_t>	surfaces;
 		idList<glIndex_t>		indexes;
 		idList<idDrawVert>	verts;
+#ifdef _SPLASHDAMAGE //karin: using sdGuiModel on sdDeviceContext, so idGuiModel only used on renderer
+		friend class sdGuiModel;
+#endif
 };
 
+#ifdef _SPLASHDAMAGE //karin: using sdGuiModel on sdDeviceContext, so idGuiModel only used on renderer
+class sdGuiModel : public idGuiModel
+{
+public:
+	sdGuiModel(void);
+
+	void	BeginEmitToCurrentView(const float modelMatrix[16], int allowInViewID, bool depthHack);
+	void	BeginEmitFullScreen(void);
+	void	End(void);
+	idVec4	CurrentColor(void);
+	void	SetRegister(int index, float value);
+	void	SetRegisters(const float *values);
+	void	Flush(void);
+	// idDrawVert must setup color
+	void	DrawStretchPic(const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *hShader,
+			bool clip = true, float min_x = 0.0f, float min_y = 0.0f, float max_x = 640.0f, float max_y = 480.0f);
+	void	DrawStretchPicWithColor(const idDrawVert *verts, const glIndex_t *indexes, int vertCount, int indexCount, const idMaterial *hShader,
+			bool clip = true, const idVec4 *color = NULL, float min_x = 0.0f, float min_y = 0.0f, float max_x = 640.0f, float max_y = 480.0f);
+	void	ClearCurrentView(void);
+	void	EmitCurrentView(void);
+
+private:
+	struct emitCurrentView_t 
+	{
+		srfTriangles_t	tri;
+		float shaderParms[MAX_ENTITY_SHADER_PARMS];
+		float modelMatrix[16];
+		bool weaponDepthHack;
+		const idMaterial *material;
+	};
+	void	EndCurrentView(void);
+	void	AddCurrentViewSurface(guiModelSurface_t *surf);
+
+	//---------------------------
+private:
+	enum {
+		EMIT_TO_NONE,
+		EMIT_TO_CURRENTVIEW,
+		EMIT_TO_FULLSCREEN,
+	};
+
+	float					emitModelMatrix[16];
+	bool					emitDepthHack;
+	int						usingCurrentView;
+	idList<emitCurrentView_t> currentViewSurfs;
+};
+#endif

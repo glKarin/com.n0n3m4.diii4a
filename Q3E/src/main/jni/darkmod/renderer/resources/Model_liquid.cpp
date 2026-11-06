@@ -485,6 +485,12 @@ idRenderModel *idRenderModelLiquid::InstantiateDynamicModel( const struct render
 		t = view->renderView.time;
 	}
 
+	if ( t < time ) {
+		// stgatilov: this typically happens after loading savegame
+		// time is reset to arbitrary number, but model's state is not restored
+		Reset();
+	}
+
 	// update the liquid model
 	frames = ( t - time ) / update_tics;
 	if ( frames > LIQUID_MAX_SKIP_FRAMES ) {

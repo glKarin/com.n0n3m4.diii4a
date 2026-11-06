@@ -1,0 +1,851 @@
+//
+//	Interaction shader with self ilumination in the ambient pass
+//
+
+renderProgram ambient/selfillum {
+	hwSkinningVersion ambient/selfillum_skinning_matrix ambient/selfillum_hardskinning_matrix
+	instanceVersion ambient/selfillum_instance
+	coverageVersion ambient/selfillum_coverage
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 1
+	fallBack ambient/selfillum_fallback
+
+	program vertex reference ambient/basic
+	
+	program fragment arb { <%
+		$define self_illum
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+renderProgram ambient/selfillum_fallback {
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic
+	
+	program fragment arb { <%
+		$define self_illum
+		$include "interaction/basic_ambient_fragment_fallback.inc"	
+	%> }
+}
+
+renderProgram ambient/selfillum_coverage {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 1
+	fallBack ambient/selfillum_coverage_fallback
+
+	program vertex reference ambient/basic
+	
+	program fragment arb { <%
+		$define self_illum
+		$define r_useDitherMask
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+renderProgram ambient/selfillum_coverage_fallback {
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic
+	
+	program fragment arb { <%
+		$define self_illum
+		$define r_useDitherMask
+		$include "interaction/basic_ambient_fragment_fallback.inc"	
+	%> }
+}
+
+
+renderProgram ambient/selfillum_instance {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 1
+	fallBack ambient/selfillum_instance_fallback
+
+	program vertex reference ambient/basic_instance
+	
+	program fragment reference ambient/selfillum
+}
+
+renderProgram ambient/selfillum_instance_fallback {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_instance_fallback
+	
+	program fragment reference ambient/selfillum_fallback
+}
+
+renderProgram ambient/selfillum_skinning_matrix {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 1
+	fallBack ambient/selfillum_skinning_matrix_fallback
+	
+	program vertex reference ambient/basic_skinning_matrix
+
+	program fragment reference ambient/selfillum
+}
+
+renderProgram ambient/selfillum_skinning_matrix_fallback {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_skinning_matrix_fallback
+
+	program fragment reference ambient/selfillum_fallback
+}
+
+renderProgram ambient/selfillum_hardskinning_matrix {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	machineSpec 1
+	fallBack ambient/selfillum_hardskinning_matrix_fallback
+	
+	program vertex reference ambient/basic_hardskinning_matrix
+
+	program fragment reference ambient/selfillum
+}
+
+renderProgram ambient/selfillum_hardskinning_matrix_fallback {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_hardskinning_matrix_fallback
+
+	program fragment reference ambient/selfillum_fallback
+}
+
+//
+//	This basically just changes the ambient shader do do some extra work.
+//	so all the per light interaction passes are just referencing the normal
+//	ones.
+//
+renderProgram interaction/selfillum {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	amblitVersion interaction/selfillum_amblit
+	ambientVersion ambient/selfillum  
+	hwSkinningVersion interaction/selfillum_skinning_matrix interaction/selfillum_hardskinning_matrix
+	instanceVersion interaction/selfillum_instance
+	coverageVersion interaction/selfillum_coverage
+	
+	machineSpec 1
+	fallBack interaction/selfillum_fallback
+	
+	program vertex reference interaction/basic
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/selfillum_fallback {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	amblitVersion interaction/selfillum_fallback_amblit
+	
+	program vertex reference interaction/basic_fallback
+
+	program fragment reference interaction/basic_fallback
+}
+
+renderProgram interaction/selfillum_coverage {
+	interaction
+	
+	amblitVersion interaction/selfillum_coverage_amblit
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	machineSpec 1
+	fallBack interaction/selfillum_coverage_fallback
+	
+	program vertex reference interaction/basic
+
+	program fragment reference interaction/basic_coverage
+}
+
+renderProgram interaction/selfillum_coverage_fallback {
+	interaction
+	
+	amblitVersion interaction/selfillum_coverage_fallback_amblit
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	program vertex reference interaction/basic_fallback
+
+	program fragment reference interaction/basic_coverage_fallback
+}
+
+renderProgram interaction/selfillum_coverage_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	machineSpec 1
+	fallBack interaction/selfillum_coverage_fallback_amblit
+	
+	program vertex reference interaction/basic
+
+	program fragment reference interaction/basic_coverage_amblit
+}
+
+
+renderProgram interaction/selfillum_coverage_fallback_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic_fallback
+
+	program fragment reference interaction/basic_coverage_fallback_amblit
+}
+
+
+renderProgram interaction/selfillum_skinning_matrix {
+	interaction
+
+	amblitVersion interaction/selfillum_skinning_matrix_amblit
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	machineSpec 1
+	fallBack interaction/selfillum_skinning_matrix_fallback
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/selfillum_skinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/selfillum_amblit
+}
+
+renderProgram interaction/selfillum_skinning_matrix_fallback {
+	interaction
+
+	amblitVersion interaction/selfillum_skinning_matrix_fallback_amblit
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix_fallback
+
+	program fragment reference interaction/basic_fallback
+}
+
+renderProgram interaction/selfillum_skinning_matrix_fallback_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix_fallback
+
+	program fragment reference interaction/selfillum_fallback_amblit
+}
+
+
+renderProgram interaction/selfillum_hardskinning_matrix {
+	interaction
+
+	amblitVersion interaction/selfillum_hardskinning_matrix_amblit
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	machineSpec 1
+	fallBack interaction/selfillum_hardskinning_matrix_fallback
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/selfillum_hardskinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/selfillum_amblit
+}
+
+renderProgram interaction/selfillum_hardskinning_matrix_fallback {
+	interaction
+
+	amblitVersion interaction/selfillum_hardskinning_matrix_amblit_fallback
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix_fallback
+
+	program fragment reference interaction/basic_fallback
+}
+
+renderProgram interaction/selfillum_hardskinning_matrix_amblit_fallback {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix_fallback
+
+	program fragment reference interaction/selfillum_fallback_amblit
+}
+
+
+renderProgram interaction/selfillum_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define amblit
+		$define self_illum
+		$define  ambient	
+		$include "interaction/basic_fragment.inc"
+	%> }
+}              
+
+
+renderProgram interaction/selfillum_instance {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	amblitVersion interaction/selfillum_instance_amblit
+	
+	program vertex reference interaction/basic_instance
+
+	program fragment reference interaction/basic_instance
+}              
+
+renderProgram interaction/selfillum_instance_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic_instance
+
+	program fragment reference interaction/selfillum_amblit
+}              
+
+// Self illumnation versions with colour modulation
+
+renderProgram ambient/selfillum_modulate {
+	hwSkinningVersion ambient/selfillum_modulate_skinning_matrix ambient/selfillum_modulate_hardskinning_matrix
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic
+	
+	program fragment arb { <%
+		$define self_illum
+		$define self_illum_modulate
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+renderProgram ambient/selfillum_modulate_skinning_matrix {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+	
+	program vertex reference ambient/basic_skinning_matrix
+
+	program fragment reference ambient/selfillum_modulate
+}
+
+renderProgram ambient/selfillum_modulate_hardskinning_matrix {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+	
+	program vertex reference ambient/basic_hardskinning_matrix
+
+	program fragment reference ambient/selfillum_modulate
+}
+
+renderProgram interaction/selfillum_modulate {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	amblitVersion interaction/selfillum_modulate_amblit
+	ambientVersion ambient/selfillum_modulate  
+	hwSkinningVersion interaction/selfillum_modulate_skinning_matrix interaction/selfillum_modulate_hardskinning_matrix
+	
+	program vertex reference interaction/basic
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/selfillum_modulate_skinning_matrix {
+	interaction
+
+	amblitVersion interaction/selfillum_modulate_skinning_matrix_amblit
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/selfillum_modulate_skinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix
+
+	program fragment reference interaction/selfillum_modulate_amblit
+}
+
+renderProgram interaction/selfillum_modulate_hardskinning_matrix {
+	interaction
+
+	amblitVersion interaction/selfillum_modulate_hardskinning_matrix_amblit
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/basic
+}
+
+renderProgram interaction/selfillum_modulate_hardskinning_matrix_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix
+
+	program fragment reference interaction/selfillum_modulate_amblit
+}
+
+renderProgram interaction/selfillum_modulate_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define amblit
+		$define self_illum
+		$define self_illum_modulate
+		$define  ambient	
+		$include "interaction/basic_fragment.inc"
+	%> }
+}
+
+/*********************************************************/
+
+renderProgram ambient/selfillum_detail {
+	hwSkinningVersion ambient/selfillum_skinning_matrix_detail ambient/selfillum_hardskinning_matrix_detail
+	lodVersion ambient/selfillum
+	
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_detail
+	
+	program fragment arb { <%
+		$define self_illum
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+renderProgram ambient/selfillum_skinning_matrix_detail {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+	
+	program vertex reference ambient/basic_skinning_matrix_detail
+
+	program fragment reference ambient/selfillum_detail
+}
+
+renderProgram ambient/selfillum_hardskinning_matrix_detail {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+	
+	program vertex reference ambient/basic_hardskinning_matrix_detail
+
+	program fragment reference ambient/selfillum_detail
+}
+
+renderProgram interaction/selfillum_detail {
+	interaction
+	
+	machineSpec 3
+	fallBack interaction/selfillum
+
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+	
+	amblitVersion interaction/selfillum_detail_amblit
+	ambientVersion ambient/selfillum_detail
+	hwSkinningVersion interaction/selfillum_skinning_matrix_detail interaction/selfillum_hardskinning_matrix_detail
+	
+	program vertex reference interaction/basic
+
+	program fragment reference interaction/basic_detail
+}              
+
+renderProgram interaction/selfillum_skinning_matrix_detail {
+	interaction
+
+	amblitVersion interaction/selfillum_skinning_matrix_detail_amblit
+	lodVersion interaction/basic_skinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix_detail
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram interaction/selfillum_skinning_matrix_detail_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix_detail
+
+	program fragment reference interaction/selfillum_detail_amblit
+}
+
+
+renderProgram interaction/selfillum_hardskinning_matrix_detail {
+	interaction
+
+	amblitVersion interaction/selfillum_hardskinning_matrix_detail_amblit
+	lodVersion interaction/selfillum_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix_detail
+
+	program fragment reference interaction/basic_detail
+}
+
+renderProgram interaction/selfillum_hardskinning_matrix_detail_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix_detail
+
+	program fragment reference interaction/selfillum_detail_amblit
+}
+
+
+renderProgram interaction/selfillum_detail_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+	
+	program vertex reference interaction/basic
+
+	program fragment arb { <%
+		$define amblit
+		$define ambient
+		$define self_illum
+		$define enable_detail
+		$define enable_detailweight_const
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_fragment.inc"	
+	%> }
+}              
+
+/*********************************************************/
+
+renderProgram ambient/selfillum_detailwm {
+	hwSkinningVersion ambient/selfillum_skinning_matrix_detailwm ambient/selfillum_hardskinning_matrix_detailwm
+	lodVersion ambient/selfillum
+	
+
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+
+	program vertex reference ambient/basic_detail
+	
+	program fragment arb { <%
+		$define self_illum
+		$define enable_detail
+		$define enable_detailweight_tex
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_ambient_fragment.inc"	
+	%> }
+}
+
+renderProgram ambient/selfillum_skinning_matrix_detailwm {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+	
+	program vertex reference ambient/basic_skinning_matrix_detail
+
+	program fragment reference ambient/selfillum_detailwm
+}
+
+renderProgram ambient/selfillum_hardskinning_matrix_detailwm {
+	state force {
+		depthFunc less // so it behaves like a proper depth fill pass
+	}
+	
+	program vertex reference ambient/basic_hardskinning_matrix_detail
+
+	program fragment reference ambient/selfillum_detailwm
+}
+
+renderProgram interaction/selfillum_detailwm {
+	interaction
+	
+	state {
+		depthFunc lequal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}	
+
+	machineSpec 3
+	fallBack interaction/selfillum
+	
+	amblitVersion interaction/selfillum_detailwm_amblit
+	ambientVersion ambient/selfillum_detailwm
+	hwSkinningVersion interaction/selfillum_skinning_matrix_detailwm interaction/selfillum_hardskinning_matrix_detailwm
+	
+	program vertex reference interaction/basic_detail
+
+	program fragment reference interaction/basic_detailwm
+}              
+
+renderProgram interaction/selfillum_skinning_matrix_detailwm {
+	interaction
+
+	amblitVersion interaction/selfillum_skinning_matrix_detailwm_amblit
+	lodVersion interaction/basic_skinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_skinning_matrix_detailwm
+
+	program fragment reference interaction/basic_detailwm
+}
+
+renderProgram interaction/selfillum_skinning_matrix_detailwm_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_skinning_matrix_detailwm
+
+	program fragment reference interaction/selfillum_detailwm_amblit
+}
+
+
+renderProgram interaction/selfillum_hardskinning_matrix_detailwm {
+	interaction
+
+	amblitVersion interaction/selfillum_hardskinning_matrix_detailwm_amblit
+	lodVersion interaction/selfillum_hardskinning_matrix
+
+	state {
+		depthFunc equal
+		maskDepth
+		blend GL_ONE, GL_ONE
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix_detailwm
+
+	program fragment reference interaction/basic_detailwm
+}
+
+renderProgram interaction/selfillum_hardskinning_matrix_detailwm_amblit {
+	interaction
+
+	state force {
+		depthFunc less
+	}
+
+	program vertex reference interaction/basic_hardskinning_matrix_detailwm
+
+	program fragment reference interaction/selfillum_detailwm_amblit
+}
+
+
+renderProgram interaction/selfillum_detailwm_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}	
+
+	program vertex reference interaction/basic_detail
+
+	program fragment arb { <%
+		$define amblit
+		$define self_illum
+		$define ambient
+		$define enable_detail
+		$define enable_detailweight_tex
+		$define enable_bumpdetail
+		$define enable_detaildetail
+		$define enable_specdetail
+		$include "interaction/basic_fragment.inc"	
+	%> }
+}              
+
+
+
+
+renderProgram interaction/selfillum_fallback_amblit {
+	interaction
+	
+	state force {
+		depthFunc less
+	}
+	
+	program vertex reference interaction/basic_fallback
+
+	program fragment arb { <%
+		$define amblit
+		$define addambient
+		$define self_illum
+		$include "interaction/basic_fragment_fallback.inc"
+	%> }
+}

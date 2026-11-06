@@ -84,7 +84,7 @@
     <string name="quake_2">雷神之锤2</string>
     <string name="quake_3">雷神之锤3</string>
     <string name="rtcw">重返德军总部</string>
-    <string name="etw">德军总部: 深入敌后</string>
+    <string name="etw">深入敌后: 德军总部</string>
     <string name="realrtcw">真·重返德军总部</string>
     <string name="fteqw">FTEQW</string>
     <string name="samtfe">英雄萨姆TFE</string>
@@ -376,7 +376,8 @@
     <string name="ambient_lighting_brightness_harm_r_ambientlightingbrightness">环境光照亮度(harm_r_ambientLightingBrightness):</string>
     <string name="ambient_lighting_brightness">环境光照亮度</string>
     <string name="hardqore">Hardqore</string>
-    <string name="etw_base">德军总部: 深入敌后</string>
+    <string name="awakening">觉醒</string>
+    <string name="etw_base">深入敌后: 德军总部</string>
     <string name="launcher">启动器</string>
     <string name="auto_save_buttons_settings_immediately_if_changed">如果按键设置被修改立即保存</string>
     <string name="auto_save_button_settings">自动保存按键设置</string>
@@ -462,8 +463,8 @@
     <string name="renderer_backend">渲染器后端</string>
     <string name="change_game">切换游戏</string>
     <string name="renderer_backend_vid_renderer">渲染器后端(vid_renderer)</string>
-    <string name="openja">OpenJA</string>
-    <string name="openjo">OpenJO</string>
+    <string name="openja">绝地武士:绝地学院</string>
+    <string name="openjo">绝地武士2:绝地放逐者</string>
     <string name="openja_base">星球大战：绝地武士-绝地学院</string>
     <string name="openjo_base">星球大战：绝地武士2-绝地放逐者</string>
     <string name="samtfe_base">英雄萨姆：第一次遭遇</string>
@@ -538,7 +539,7 @@
     <string name="env">环境变量</string>
     <string name="must_choose_a_env">必须只选择一个环境变量</string>
     <string name="name_must_not_empty">名称不能为空!</string>
-    <string name="urbanterror">UrT</string>
+    <string name="urbanterror">Urban Terror</string>
     <string name="urbanterror_base">Urban Terror</string>
     <string name="add_bots_automatic_harm_bot_autoadd">自动添加Bot(harm_bot_autoAdd)</string>
     <string name="number_of_bots">Bot数量</string>
@@ -552,7 +553,7 @@
     <string name="fixed_ratio">固定比例</string>
     <string name="ratio">比例</string>
     <string name="use_custom_resolution_as_fullscreen_size">使用自定义分辨率大小作为屏幕总大小</string>
-    <string name="openmohaa">OpenMOHAA</string>
+    <string name="openmohaa">荣誉勋章:联合袭击</string>
     <string name="openmohaa_base">荣誉勋章: 联合袭击</string>
     <string name="wolf3d">德军总部</string>
     <string name="wolf3d_base">德军总部3D</string>
@@ -591,4 +592,15 @@
     <string name="idtech_3_engine">idTech3引擎</string>
     <string name="idtech_4_engine">idTech4引擎</string>
     <string name="other_engine">其他引擎</string>
+    <string name="etqw">深入敌后:雷神战争</string>
+    <string name="etqw_base">深入敌后: 雷神战争</string>
+    <string name="gyroscope_dead_zone">陀螺仪死区</string>
+    <string name="dead_zone_rad_s">弧度/秒</string>
+    <string name="debug_overlay_x_offset">调试文本层X</string>
+    <string name="setup_debug_text_x_offset">设置调试文本层X</string>
+    <string name="debug_overlay_y_offset">调试文本层Y</string>
+    <string name="setup_debug_text_y_offset">设置调试文本层Y</string>
+    <string name="debug_overlay_background">调试文本层背景</string>
+    <string name="show_debug_text_background">显示调试文本层黑色背景</string>
+    <string name="hazzzzzy">hazzzzzy翻译字幕</string>
 </resources>

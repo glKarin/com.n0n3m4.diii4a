@@ -1,8 +1,34 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR) # 2.6
 project(realrtcw)
-set(REALRTCW_VERSION "5.3")
+set(REALRTCW_VERSION "5.4")
 set(REALRTCW_SUFFIX "")
 set(REALRTCW_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+
+#libavcodec libavformat libavutil libswscale libswresample
+set(REALRTCW_FFMPEG "dl")
+
+if(REALRTCW_FFMPEG STREQUAL "none")
+	message(STATUS "no FFMpeg support")
+	add_definitions(-DNO_FFMPEG)
+elseif(REALRTCW_FFMPEG STREQUAL "dl")
+	message(STATUS "Dynamic FFMpeg")
+	add_definitions(-DDL_FFMPEG)
+	include_directories(${DIII4A_DEPEND_INCLUDE_PATH}/ffmpeg/ffmpeg60/include)
+	set(ffmpeg_src code/ffmpeg/dl_ffmpeg.c)
+	include_directories(code/ffmpeg)
+else()
+	message(STATUS "Link FFMpeg")
+	include_directories(${DIII4A_DEPEND_INCLUDE_PATH}/ffmpeg/ffmpeg60/include)
+	include(ffmpeg.cmake)
+	set(ffmpeg_libs
+		ffmpeg::avformat
+		ffmpeg::avcodec
+		ffmpeg::swscale
+		ffmpeg::avutil
+		ffmpeg::swresample
+	)
+endif()
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 98)
@@ -17,6 +43,7 @@ option(USE_INTERNAL_ZLIB "" OFF)
 option(USE_BLOOM "" ON)
 option(USE_VOIP "" OFF)
 option(USE_MUMBLE "" OFF)
+option(REALRTCW_STEAM "" OFF)
 
 add_definitions(-DPRODUCT_VERSION=\"${REALRTCW_VERSION}\")
 add_definitions(-D_DIII4A) # android
@@ -33,6 +60,10 @@ add_definitions(-DUSE_VOIP)
 endif()
 if(USE_BLOOM)
 add_definitions(-DUSE_BLOOM)
+endif()
+
+if(REALRTCW_STEAM)
+    add_definitions(-DSTEAM)
 endif()
 
 set(realrtcwclient_libs android log GLESv1_CM EGL)
@@ -154,6 +185,7 @@ set(realrtcwgame_src
         code/game/ai_cast_func_boss1.c
         code/game/ai_cast_func_hein.c
         code/game/ai_cast_funcs.c
+        code/game/ai_cast_loadouts.c
         code/game/ai_cast_script_actions.c
         code/game/ai_cast_script.c
         code/game/ai_cast_script_ents.c
@@ -437,6 +469,7 @@ set(realrtcwclient_src
         code/sys/sys_unix.c
         code/sys/con_log.c
         code/sys/con_passive.c
+		${ffmpeg_src}
         )
 
 if(USE_CODEC_OPUS)
@@ -712,6 +745,7 @@ set_target_properties(${REALRTCWLIBRARY} PROPERTIES COMPILE_DEFINITIONS "BOTLIB"
 target_link_libraries(${REALRTCWLIBRARY}
         ${realrtcwclient_libs}
         ${REALRTCWLIBRARY_VORBIS}
+		${ffmpeg_libs}
         )
 target_include_directories(${REALRTCWLIBRARY} PRIVATE "code/curl-7.60.0/include")
 target_include_directories(${REALRTCWLIBRARY} PRIVATE "code/${realrtcw_ogg_dir}/include")

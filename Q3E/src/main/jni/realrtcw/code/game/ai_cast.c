@@ -407,6 +407,7 @@ gentity_t *AICast_CreateCharacter( gentity_t *ent, float *attributes, cast_weapo
 	newent->aiTeam = ent->aiTeam;
 	newent->targetname = ent->targetname;
 	newent->canSpeak = ent->canSpeak;
+	newent->oneshot = ent->oneshot;
 	//
 	newent->AIScript_AlertEntity = ent->AIScript_AlertEntity;
 	newent->aiInactive = ent->aiInactive;
@@ -434,10 +435,10 @@ gentity_t *AICast_CreateCharacter( gentity_t *ent, float *attributes, cast_weapo
 		newent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = cs->attributes[STARTING_HEALTH];
 	}
     
-	// Unlimited respawn in Survival mode
-	if ( g_gametype.integer == GT_SURVIVAL )  {
-		AICast_ApplySurvivalAttributes(newent, cs);
-	    AICast_CreateCharacter_Survival(newent, cs);
+	// Unlimited respawn in Survival mode (unless entity is oneshot)
+	if ( g_gametype.integer == GT_SURVIVAL && !ent->oneshot ) {
+		AICast_ApplySurvivalAttributes( newent, cs );
+		AICast_CreateCharacter_Survival( newent, cs );
 	} else {
 		cs->respawnsleft = g_airespawn.integer;
 	}
@@ -582,7 +583,7 @@ AIChar_AIScript_AlertEntity
 */
 void AIChar_AIScript_AlertEntity( gentity_t *ent ) {
 
-	if (g_gametype.integer == GT_SURVIVAL) {
+	if (g_gametype.integer == GT_SURVIVAL  && !ent->oneshot) {
 		AIChar_AIScript_AlertEntity_Survival(ent);
 		return;
 	}

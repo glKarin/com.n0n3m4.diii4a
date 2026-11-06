@@ -12,9 +12,15 @@ message(STATUS "Product flavor: ${DIII4A_PRODUCT_FLAVOR}")
 if(DIII4A_PRODUCT_FLAVOR STREQUAL "fdroid")
     set(PRODUCT_FLAVOR_IS_GITHUB False)
     set(PRODUCT_FLAVOR_IS_FDROID True)
+    set(PRODUCT_FLAVOR_IS_IDTECH False)
+elseif(DIII4A_PRODUCT_FLAVOR STREQUAL "idtech")
+    set(PRODUCT_FLAVOR_IS_GITHUB False)
+    set(PRODUCT_FLAVOR_IS_FDROID False)
+    set(PRODUCT_FLAVOR_IS_IDTECH True)
 else()
     set(PRODUCT_FLAVOR_IS_GITHUB True)
     set(PRODUCT_FLAVOR_IS_FDROID False)
+    set(PRODUCT_FLAVOR_IS_IDTECH False)
 endif()
 
 
@@ -36,15 +42,17 @@ OPTION(GAME_ETW                     "Build Wolfenstein: Enemy Territory"        
 OPTION(GAME_REALRTCW                "Build RealRTCW"                                ON)
 OPTION(GAME_JK                      "Build Jedi Knight"                             ON)
 OPTION(GAME_FTEQW                   "Build FTEQW"                                   ON)
-OPTION(GAME_SERIOUSSAM              "Build Serious Sam"                             ON)
 OPTION(GAME_URT                     "Build Urbant Error"                            ON)
 OPTION(GAME_OPENMOHAA               "Build Medal of Honor: Allied Assault"          ON)
 OPTION(GAME_WOLF3D                  "Build Wolfenstein 3D"                          ON)
 OPTION(GAME_SKINDEEP                "Build Skin Deep"                               ON)
 OPTION(GAME_QC                      "Build Quadrilateral Cowboy"                    ON)
 OPTION(GAME_ICARUS                  "Build Icarus Starship Command Simulator"       ON)
+if(NOT PRODUCT_FLAVOR_IS_IDTECH)
+OPTION(GAME_SERIOUSSAM              "Build Serious Sam"                             ON)
+endif()
 # Not in F-Droid
-if(NOT PRODUCT_FLAVOR_IS_FDROID)
+if(NOT PRODUCT_FLAVOR_IS_FDROID AND NOT PRODUCT_FLAVOR_IS_IDTECH)
 OPTION(GAME_XASH3D                  "Build Xash3D"                                  ON)
 OPTION(GAME_SOURCE                  "Build Source"                                  ON)
 endif()
@@ -154,7 +162,7 @@ if(GAME_QUAKE1) # https://github.com/DarkPlacesEngine/DarkPlaces/commit/dbebfea9
     add_subdirectory ( quake1 ) # Quake 1
 endif()
 
-if(GAME_TDM) # 2.13 | 2da36cc9e83046160b91bca91c116dc642740b78 | Mar 8, 2025 | Merge one commit from trunk.
+if(GAME_TDM) # 2.14 | 6f73ae5ac7824d56752521e13d98c17bd26ea342 | Mar 19, 2026 | Hardcode savegame revision to 11208.
     message(STATUS "Build The Dark Mod")
     add_subdirectory ( darkmod ) # The Dark Mod
 #[[    if(BUILD_BACKPORT)
@@ -182,7 +190,7 @@ if(GAME_ETW) # v2.83.1 | e8d0ec06800630fd458791ccd29ed488e04648d9 | Nov 12, 2024
     add_subdirectory ( etw ) # ETW
 endif()
 
-if(GAME_REALRTCW) # 5.3 | Jul 26, 2025 | 32e574d19bc3d5fa92c3c67cfe168154a26ed217 | Never do special wave if chance is 0
+if(GAME_REALRTCW) # 5.4 | Mar 18, 2026 | 7668d64152d88857cc7bcc8d395438186d866497 | New items achievements
     message(STATUS "Build RealRTCW")
     add_subdirectory ( realrtcw ) # RealRTCW
 #[[    if(BUILD_BACKPORT)

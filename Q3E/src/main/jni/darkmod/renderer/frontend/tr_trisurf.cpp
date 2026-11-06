@@ -695,6 +695,17 @@ void R_FreeStaticTriSurfSilIndexes( srfTriangles_t *tri ) {
 }
 
 /*
+=================
+R_FreeStaticTriSurfSilEdges
+=================
+*/
+void R_FreeStaticTriSurfSilEdges( srfTriangles_t *tri ) {
+	triSilEdgeAllocator.Free( tri->silEdges );
+	tri->silEdges = NULL;
+	tri->numSilEdges = 0;
+}
+
+/*
 ===============
 R_RangeCheckIndexes
 
@@ -826,24 +837,24 @@ R_CreateDupVerts
 =====================
 */
 void R_CreateDupVerts( srfTriangles_t *tri ) {
-	int i;
-
-	int *remap = (int *) _alloca16( tri->numVerts * sizeof( remap[0] ) );
+	idFlexList<int, 1024> remap;
+	remap.SetNum( tri->numVerts );
 
 	// initialize vertex remap in case there are unused verts
-	for ( i = 0; i < tri->numVerts; i++ ) {
+	for ( int i = 0; i < tri->numVerts; i++ ) {
 		remap[i] = i;
 	}
 
 	// set the remap based on how the silhouette indexes are remapped
-	for ( i = 0; i < tri->numIndexes; i++ ) {
+	for ( int i = 0; i < tri->numIndexes; i++ ) {
 		remap[tri->indexes[i]] = tri->silIndexes[i];
 	}
 
 	// create duplicate vertex index based on the vertex remap
-	int * tempDupVerts = (int *) _alloca16( tri->numVerts * 2 * sizeof( tempDupVerts[0] ) );
+	idFlexList<int, 1024> tempDupVerts;
+	tempDupVerts.SetNum( tri->numVerts * 2 );
 	tri->numDupVerts = 0;
-	for ( i = 0; i < tri->numVerts; i++ ) {
+	for ( int i = 0; i < tri->numVerts; i++ ) {
 		if ( remap[i] != i ) {
 			tempDupVerts[tri->numDupVerts*2+0] = i;
 			tempDupVerts[tri->numDupVerts*2+1] = remap[i];
@@ -852,7 +863,7 @@ void R_CreateDupVerts( srfTriangles_t *tri ) {
 	}
 
 	tri->dupVerts = triDupVertAllocator.Alloc( tri->numDupVerts * 2 );
-	memcpy( tri->dupVerts, tempDupVerts, tri->numDupVerts * 2 * sizeof( tri->dupVerts[0] ) );
+	memcpy( tri->dupVerts, tempDupVerts.Ptr(), tri->numDupVerts * 2 * sizeof( tri->dupVerts[0] ) );
 }
 
 /*
@@ -1307,30 +1318,24 @@ typedef struct {
 } tangentVert_t;
 
 static void	R_DuplicateMirroredVertexes( srfTriangles_t *tri ) {
-	tangentVert_t	*tverts, *vert;
-	int				i, j;
-	int				totalVerts;
-	int				numMirror;
-
-	tverts = (tangentVert_t *)_alloca16( tri->numVerts * sizeof( *tverts ) );
-	memset( tverts, 0, tri->numVerts * sizeof( *tverts ) );
+	idFlexList<tangentVert_t, 1024> tverts;
+	tverts.SetNum( tri->numVerts );
+	memset( tverts.Ptr(), 0, tri->numVerts * sizeof( tverts[0] ) );
 
 	// determine texture polarity of each surface
 
 	// mark each vert with the polarities it uses
-	for ( i = 0 ; i < tri->numIndexes ; i+=3 ) {
-		int	polarity;
-
-		polarity = R_FaceNegativePolarity( tri, i );
-		for ( j = 0 ; j < 3 ; j++ ) {
+	for ( int i = 0 ; i < tri->numIndexes ; i+=3 ) {
+		int	polarity = R_FaceNegativePolarity( tri, i );
+		for ( int j = 0 ; j < 3 ; j++ ) {
 			tverts[tri->indexes[i+j]].polarityUsed[ polarity ] = true;
 		}
 	}
 
 	// now create new verts as needed
-	totalVerts = tri->numVerts;
-	for ( i = 0 ; i < tri->numVerts ; i++ ) {
-		vert = &tverts[i];
+	int totalVerts = tri->numVerts;
+	for ( int i = 0 ; i < tri->numVerts ; i++ ) {
+		tangentVert_t *vert = &tverts[i];
 		if ( vert->polarityUsed[0] && vert->polarityUsed[1] ) {
 			vert->negativeRemap = totalVerts;
 			totalVerts++;	
@@ -1358,9 +1363,9 @@ static void	R_DuplicateMirroredVertexes( srfTriangles_t *tri ) {
 #endif
 
 	// create the duplicates
-	numMirror = 0;
-	for ( i = 0 ; i < tri->numVerts ; i++ ) {
-		j = tverts[i].negativeRemap;
+	int numMirror = 0;
+	for ( int i = 0 ; i < tri->numVerts ; i++ ) {
+		int j = tverts[i].negativeRemap;
 		if ( j ) {
 			tri->verts[j] = tri->verts[i];
 			tri->mirroredVerts[numMirror] = i;
@@ -1370,7 +1375,7 @@ static void	R_DuplicateMirroredVertexes( srfTriangles_t *tri ) {
 
 	tri->numVerts = totalVerts;
 	// change the indexes
-	for ( i = 0 ; i < tri->numIndexes ; i++ ) {
+	for ( int i = 0 ; i < tri->numIndexes ; i++ ) {
 		if ( tverts[tri->indexes[i]].negativeRemap && 
 			R_FaceNegativePolarity( tri, 3*(i/3) ) ) {
 			tri->indexes[i] = tverts[tri->indexes[i]].negativeRemap;
@@ -1415,27 +1420,23 @@ this version only handles bilateral symetry
 =================
 */
 void R_DeriveTangentsWithoutNormals( srfTriangles_t *tri ) {
-	int			i, j;
-	faceTangents_t	*faceTangents;
-	faceTangents_t	*ft;
-	idDrawVert		*vert;
-
-	faceTangents = (faceTangents_t *)_alloca16( sizeof(faceTangents[0]) * tri->numIndexes/3 );
-	R_DeriveFaceTangents( tri, faceTangents );
+	idFlexList<faceTangents_t, 1024> faceTangents;
+	faceTangents.SetNum( tri->numIndexes/3 );
+	R_DeriveFaceTangents( tri, faceTangents.Ptr() );
 
 	// clear the tangents
-	for ( i = 0 ; i < tri->numVerts ; i++ ) {
+	for ( int i = 0 ; i < tri->numVerts ; i++ ) {
 		tri->verts[i].tangents[0].Zero();
 		tri->verts[i].tangents[1].Zero();
 	}
 
 	// sum up the neighbors
-	for ( i = 0 ; i < tri->numIndexes ; i+=3 ) {
-		ft = &faceTangents[i/3];
+	for ( int i = 0 ; i < tri->numIndexes ; i+=3 ) {
+		faceTangents_t *ft = &faceTangents[i/3];
 
 		// for each vertex on this face
-		for ( j = 0 ; j < 3 ; j++ ) {
-			vert = &tri->verts[tri->indexes[i+j]];
+		for ( int j = 0 ; j < 3 ; j++ ) {
+			idDrawVert *vert = &tri->verts[tri->indexes[i+j]];
 
 			vert->tangents[0] += ft->tangents[0];
 			vert->tangents[1] += ft->tangents[1];
@@ -1445,7 +1446,7 @@ void R_DeriveTangentsWithoutNormals( srfTriangles_t *tri ) {
 #if 0
 	// sum up both sides of the mirrored verts
 	// so the S vectors exactly mirror, and the T vectors are equal
-	for ( i = 0 ; i < tri->numMirroredVerts ; i++ ) {
+	for ( int i = 0 ; i < tri->numMirroredVerts ; i++ ) {
 		idDrawVert	*v1, *v2;
 
 		v1 = &tri->verts[ tri->numVerts - tri->numMirroredVerts + i ];
@@ -1464,12 +1465,11 @@ void R_DeriveTangentsWithoutNormals( srfTriangles_t *tri ) {
 	// and normalize.  The tangent vectors will not necessarily
 	// be orthogonal to each other, but they will be orthogonal
 	// to the surface normal.
-	for ( i = 0 ; i < tri->numVerts ; i++ ) {
-		vert = &tri->verts[i];
-		for ( j = 0 ; j < 2 ; j++ ) {
-			float	d;
+	for ( int i = 0 ; i < tri->numVerts ; i++ ) {
+		idDrawVert *vert = &tri->verts[i];
 
-			d = vert->tangents[j] * vert->normal;
+		for ( int j = 0 ; j < 2 ; j++ ) {
+			float d = vert->tangents[j] * vert->normal;
 			vert->tangents[j] = vert->tangents[j] - d * vert->normal;
 			vert->tangents[j].Normalize();
 		}
@@ -1687,9 +1687,6 @@ Builds tangents, normals, and face planes
 ==================
 */
 void R_DeriveTangents( srfTriangles_t *tri, bool allocFacePlanes ) {
-	int				i;
-	idPlane			*planes;
-
 	if ( tri->dominantTris != NULL ) {
 		R_DeriveUnsmoothedTangents( tri );
 		return;
@@ -1704,10 +1701,12 @@ void R_DeriveTangents( srfTriangles_t *tri, bool allocFacePlanes ) {
 	if ( !tri->facePlanes && allocFacePlanes ) {
 		R_AllocStaticTriSurfPlanes( tri, tri->numIndexes );
 	}
-	planes = tri->facePlanes;
 
+	idPlane *planes = tri->facePlanes;
+	idFlexList<idPlane, 1024> planesStorage;
 	if ( !planes ) {
-		planes = (idPlane *)_alloca16( ( tri->numIndexes / 3 ) * sizeof( planes[0] ) );
+		planesStorage.SetNum( tri->numIndexes / 3 );
+		planes = planesStorage.Ptr();
 	}
 
 	SIMDProcessor->DeriveTangents( planes, tri->verts, tri->numVerts, tri->indexes, tri->numIndexes );
@@ -1716,12 +1715,12 @@ void R_DeriveTangents( srfTriangles_t *tri, bool allocFacePlanes ) {
 	idDrawVert *verts = tri->verts;
 
 	// add the normal of a duplicated vertex to the normal of the first vertex with the same XYZ
-	for ( i = 0; i < tri->numDupVerts; i++ ) {
+	for ( int i = 0; i < tri->numDupVerts; i++ ) {
 		verts[dupVerts[i*2+0]].normal += verts[dupVerts[i*2+1]].normal;
 	}
 
 	// copy vertex normals to duplicated vertices
-	for ( i = 0; i < tri->numDupVerts; i++ ) {
+	for ( int i = 0; i < tri->numDupVerts; i++ ) {
 		verts[dupVerts[i*2+1]].normal = verts[dupVerts[i*2+0]].normal;
 	}
 

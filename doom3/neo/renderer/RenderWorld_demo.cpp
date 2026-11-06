@@ -137,8 +137,14 @@ bool		idRenderWorldLocal::ProcessDemoCommand(idDemoFile *readDemo, renderView_t 
 			readDemo->ReadFloat(renderView->fov_y);
 			readDemo->ReadVec3(renderView->vieworg);
 			readDemo->ReadMat3(renderView->viewaxis);
+#ifdef _SPLASHDAMAGE
+			bool b;
+			readDemo->ReadBool(b); renderView->flags.cramZNear = b;
+			readDemo->ReadBool(b); renderView->flags.forceUpdate = b;
+#else
 			readDemo->ReadBool(renderView->cramZNear);
 			readDemo->ReadBool(renderView->forceUpdate);
+#endif
 			// binary compatibility with win32 padded structures
 			char tmp;
 			readDemo->ReadChar(tmp);
@@ -377,8 +383,13 @@ void	idRenderWorldLocal::WriteRenderView(const renderView_t *renderView)
 	session->writeDemo->WriteFloat(renderView->fov_y);
 	session->writeDemo->WriteVec3(renderView->vieworg);
 	session->writeDemo->WriteMat3(renderView->viewaxis);
+#ifdef _SPLASHDAMAGE
+	session->writeDemo->WriteBool(renderView->flags.cramZNear);
+	session->writeDemo->WriteBool(renderView->flags.forceUpdate);
+#else
 	session->writeDemo->WriteBool(renderView->cramZNear);
 	session->writeDemo->WriteBool(renderView->forceUpdate);
+#endif
 	// binary compatibility with old win32 version writing padded structures directly to disk
 	session->writeDemo->WriteUnsignedChar(0);
 	session->writeDemo->WriteUnsignedChar(0);
@@ -462,10 +473,17 @@ void	idRenderWorldLocal::WriteRenderLight(qhandle_t handle, const renderLight_t 
 	session->writeDemo->WriteVec3(light->origin);
 	session->writeDemo->WriteInt(light->suppressLightInViewID);
 	session->writeDemo->WriteInt(light->allowLightInViewID);
+#ifdef _SPLASHDAMAGE
+	session->writeDemo->WriteBool(light->flags.noShadows);
+	session->writeDemo->WriteBool(light->flags.noSpecular);
+	session->writeDemo->WriteBool(light->flags.pointLight);
+	session->writeDemo->WriteBool(light->flags.parallel);
+#else
 	session->writeDemo->WriteBool(light->noShadows);
 	session->writeDemo->WriteBool(light->noSpecular);
 	session->writeDemo->WriteBool(light->pointLight);
 	session->writeDemo->WriteBool(light->parallel);
+#endif
 	session->writeDemo->WriteVec3(light->lightRadius);
 	session->writeDemo->WriteVec3(light->lightCenter);
 	session->writeDemo->WriteVec3(light->target);
@@ -474,8 +492,15 @@ void	idRenderWorldLocal::WriteRenderLight(qhandle_t handle, const renderLight_t 
 	session->writeDemo->WriteVec3(light->start);
 	session->writeDemo->WriteVec3(light->end);
 	session->writeDemo->WriteInt(light->prelightModel ? 1 : 0);
+#ifdef _SPLASHDAMAGE //karin: multi prelights in light
+	session->writeDemo->WriteInt(light->numPrelightModels);
+#endif
 	session->writeDemo->WriteInt(light->lightId);
+#ifdef _SPLASHDAMAGE
+	session->writeDemo->WriteInt(light->material ? 1 : 0);
+#else
 	session->writeDemo->WriteInt(light->shader ? 1 : 0);
+#endif
 
 	for (int i = 0; i < MAX_ENTITY_SHADER_PARMS; i++)
 		session->writeDemo->WriteFloat(light->shaderParms[i]);
@@ -490,9 +515,18 @@ void	idRenderWorldLocal::WriteRenderLight(qhandle_t handle, const renderLight_t 
 		session->writeDemo->WriteHashString(light->prelightModel->Name());
 	}
 
+#ifdef _SPLASHDAMAGE //karin: multi prelights in light
+	for (int i = 0; i < light->numPrelightModels; i++)
+		session->writeDemo->WriteHashString(light->prelightModels[i]->Name());
+
+	if (light->material) {
+		session->writeDemo->WriteHashString(light->material->GetName());
+	}
+#else
 	if (light->shader) {
 		session->writeDemo->WriteHashString(light->shader->GetName());
 	}
+#endif
 
 #ifdef _RAVEN //karin: quake4 using handle
 	if (light->referenceSoundHandle > 0) {
@@ -532,10 +566,18 @@ void	idRenderWorldLocal::ReadRenderLight()
 	session->readDemo->ReadVec3(light.origin);
 	session->readDemo->ReadInt(light.suppressLightInViewID);
 	session->readDemo->ReadInt(light.allowLightInViewID);
+#ifdef _SPLASHDAMAGE
+	bool b;
+	session->readDemo->ReadBool(b); light.flags.noShadows = b;
+	session->readDemo->ReadBool(b); light.flags.noSpecular = b;
+	session->readDemo->ReadBool(b); light.flags.pointLight = b;
+	session->readDemo->ReadBool(b); light.flags.parallel = b;
+#else
 	session->readDemo->ReadBool(light.noShadows);
 	session->readDemo->ReadBool(light.noSpecular);
 	session->readDemo->ReadBool(light.pointLight);
 	session->readDemo->ReadBool(light.parallel);
+#endif
 	session->readDemo->ReadVec3(light.lightRadius);
 	session->readDemo->ReadVec3(light.lightCenter);
 	session->readDemo->ReadVec3(light.target);
@@ -544,6 +586,9 @@ void	idRenderWorldLocal::ReadRenderLight()
 	session->readDemo->ReadVec3(light.start);
 	session->readDemo->ReadVec3(light.end);
 	session->readDemo->ReadInt(prelightModel);
+#ifdef _SPLASHDAMAGE //karin: multi prelights in light
+	session->readDemo->ReadInt(light.numPrelightModels);
+#endif
 	session->readDemo->ReadInt(light.lightId);
 	session->readDemo->ReadInt(shader);
 
@@ -557,10 +602,21 @@ void	idRenderWorldLocal::ReadRenderLight()
 		light.prelightModel = renderModelManager->FindModel(session->readDemo->ReadHashString());
 	}
 
+#ifdef _SPLASHDAMAGE //karin: multi prelights in light
+	memset(light.prelightModels, 0, sizeof(light.prelightModels));
+	for (int i = 0; i < light.numPrelightModels; i++)
+		light.prelightModels[i] = renderModelManager->FindModel(session->readDemo->ReadHashString());
+
+	light.material = NULL;
+	if (shader) {
+		light.material = declManager->FindMaterial(session->readDemo->ReadHashString());
+	}
+#else
 	light.shader = NULL;
 	if (shader) {
 		light.shader = declManager->FindMaterial(session->readDemo->ReadHashString());
 	}
+#endif
 
 #ifdef _RAVEN //karin: quake4 using handle
 	light.referenceSoundHandle = -1;
@@ -603,7 +659,11 @@ void	idRenderWorldLocal::WriteRenderEntity(qhandle_t handle, const renderEntity_
 	session->writeDemo->WriteInt(handle);
 
 	session->writeDemo->WriteInt(ent->hModel ? 1 : 0);
+#ifdef _SPLASHDAMAGE
+	session->writeDemo->WriteInt(ent->spawnID);
+#else
 	session->writeDemo->WriteInt(ent->entityNum);
+#endif
 	session->writeDemo->WriteInt(ent->bodyId);
 	session->writeDemo->WriteVec3(ent->bounds[0]);
 	session->writeDemo->WriteVec3(ent->bounds[1]);
@@ -634,11 +694,19 @@ void	idRenderWorldLocal::WriteRenderEntity(qhandle_t handle, const renderEntity_
 	session->writeDemo->WriteInt(ent->numJoints);
 	session->writeDemo->WriteInt(0);	/* ent->joints */
 	session->writeDemo->WriteFloat(ent->modelDepthHack);
+#ifdef _SPLASHDAMAGE
+	session->writeDemo->WriteBool(ent->flags.noSelfShadow);
+	session->writeDemo->WriteBool(ent->flags.noShadow);
+	session->writeDemo->WriteBool(ent->flags.noDynamicInteractions);
+	session->writeDemo->WriteBool(ent->flags.weaponDepthHack);
+	session->writeDemo->WriteInt(ent->flags.forceUpdate);
+#else
 	session->writeDemo->WriteBool(ent->noSelfShadow);
 	session->writeDemo->WriteBool(ent->noShadow);
 	session->writeDemo->WriteBool(ent->noDynamicInteractions);
 	session->writeDemo->WriteBool(ent->weaponDepthHack);
 	session->writeDemo->WriteInt(ent->forceUpdate);
+#endif
 
 	if (ent->customShader) {
 		session->writeDemo->WriteHashString(ent->customShader->GetName());
@@ -732,7 +800,11 @@ void	idRenderWorldLocal::ReadRenderEntity()
 	}
 
 	session->readDemo->ReadInt(hModel);
+#ifdef _SPLASHDAMAGE
+	session->readDemo->ReadInt(ent.spawnID);
+#else
 	session->readDemo->ReadInt(ent.entityNum);
+#endif
 	session->readDemo->ReadInt(ent.bodyId);
 	session->readDemo->ReadVec3(ent.bounds[0]);
 	session->readDemo->ReadVec3(ent.bounds[1]);
@@ -761,11 +833,21 @@ void	idRenderWorldLocal::ReadRenderEntity()
 	session->readDemo->ReadInt(ent.numJoints);
 	session->readDemo->ReadInt(tmp);	/* ent.joints */
 	session->readDemo->ReadFloat(ent.modelDepthHack);
+#ifdef _SPLASHDAMAGE
+	bool b;
+	session->readDemo->ReadBool(b); ent.flags.noSelfShadow = b;
+	session->readDemo->ReadBool(b); ent.flags.noShadow = b;
+	session->readDemo->ReadBool(b); ent.flags.noDynamicInteractions = b;
+	session->readDemo->ReadBool(b); ent.flags.weaponDepthHack = b;
+	int n;
+	session->readDemo->ReadInt(n); ent.flags.forceUpdate = n;
+#else
 	session->readDemo->ReadBool(ent.noSelfShadow);
 	session->readDemo->ReadBool(ent.noShadow);
 	session->readDemo->ReadBool(ent.noDynamicInteractions);
 	session->readDemo->ReadBool(ent.weaponDepthHack);
 	session->readDemo->ReadInt(ent.forceUpdate);
+#endif
 	ent.callback = NULL;
 
 	ent.customShader = NULL;

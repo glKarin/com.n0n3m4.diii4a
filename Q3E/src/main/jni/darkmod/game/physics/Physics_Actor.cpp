@@ -98,6 +98,11 @@ void idPhysics_Actor::Restore( idRestoreGame *savefile ) {
 	savefile->ReadClipModel( clipModel );
 	savefile->ReadMat3( clipModelAxis );
 
+	// #6276 prevent corrupted clipmodel on restore
+	if ( clipModel != nullptr ) {
+		clipModel->SetPosition( clipModel->GetOrigin(), mat3_identity );
+	}
+
 	savefile->ReadFloat( mass );
 	savefile->ReadFloat( invMass );
 

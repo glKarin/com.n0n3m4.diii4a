@@ -1,0 +1,273 @@
+//
+// Version for fading out using coverage
+//
+
+renderProgram filterCoverage {
+	hwSkinningVersion filterCoverageSkinningMatrix filterCoverageHardSkinningMatrix
+
+	program vertex reference trivial
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord;
+		varying vec4 var_Color;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 R0;
+			R0 = texture2D ( $map , var_TexCoord.xy );
+			R0 = R0 * var_Color;
+			R0 = R0 - 1.0;
+			gl_FragColor.rgb = (R0 * $coverage + 1.0).rgb;
+			gl_FragColor.a = 1.0;
+		} 
+	%> }
+}
+
+renderProgram filterCoverageSkinningMatrix {
+	program vertex reference trivialSkinningMatrix
+
+	program fragment reference filterCoverage
+}
+
+renderProgram filterCoverageHardSkinningMatrix {
+	program vertex reference trivialHardSkinningMatrix
+
+	program fragment reference filterCoverage
+}
+
+//
+// Version for fading out using vertexColor
+//
+
+renderProgram filterVertexColor {
+	hwSkinningVersion filterVertexColorSkinningMatrix filterVertexColorHardSkinningMatrix
+
+	program vertex reference trivial
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord;
+		varying vec4 var_Color;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 R0;
+			R0 = texture2D ( $map , var_TexCoord.xy );
+			R0 = R0 - 1.0;
+			gl_FragColor.rgb = (R0 * var_Color + 1.0).rgb;
+			gl_FragColor.a = 1.0;
+		} 
+	%> }
+}
+
+renderProgram filterVertexColorWithTextureMatrix {
+	program vertex reference trivialWithTextureMatrix
+
+	program fragment reference filterVertexColor
+}
+
+renderProgram filterVertexColorAlpha {
+	hwSkinningVersion filterVertexColorSkinningMatrix filterVertexColorHardSkinningMatrix
+
+	program vertex reference trivial
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord;
+		varying vec4 var_Color;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 R0;
+			R0 = texture2D ( $map , var_TexCoord.xy );
+			R0 = R0 - 1.0;
+			gl_FragColor.rgb = R0.rgb * var_Color.a + 1.0;
+			gl_FragColor.a = 1.0;
+		} 
+	%> }
+}
+
+renderProgram filterAlpha {
+	hwSkinningVersion filterVertexColorSkinningMatrix filterVertexColorHardSkinningMatrix
+
+	program vertex reference trivial
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord;
+		varying vec4 var_Color;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 R0;
+			R0 = texture2D ( $map , var_TexCoord.xy );
+			vec4 R1;
+			R1 = var_Color * R0;
+			R0 = R0 - 1.0;
+			gl_FragColor.rgb = R0.rgb * R1.a + 1.0;
+			gl_FragColor.a = 1.0;
+		} 
+	%> }
+}
+
+renderProgram filterVertexColorSkinningMatrix {
+	program vertex reference trivialSkinningMatrix
+
+	program fragment reference filterVertexColor
+}
+
+renderProgram filterVertexColorHardSkinningMatrix {
+	program vertex reference trivialHardSkinningMatrix
+
+	program fragment reference filterVertexColor
+}
+
+//
+// Version for fading out using vertexColor and coverage, useful for outside where
+//
+
+renderProgram filterVertexColorCoverage {
+	hwSkinningVersion filterVertexColorCoverageSkinningMatrix filterVertexColorCoverageHardSkinningMatrix
+	instanceVersion filterVertexColorCoverage_instance
+
+	program vertex reference trivial
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord;
+		varying vec4 var_Color;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 R0;
+			R0 = texture2D ( $map , var_TexCoord.xy );
+			R0 = R0 - 1.0;
+			R0 = R0 * var_Color;
+			gl_FragColor.rgb = (R0 * $coverage + 1.0).rgb;
+			gl_FragColor.a = 1.0;
+		} 
+	%> }
+}
+
+renderProgram filterVertexColorCoverageFogged {
+	program vertex glsl { <%
+		varying vec4 var_TexCoord;
+		varying vec4 var_Color;
+		varying vec4 var_Color2;
+
+		void main ( void ) { 
+			// ARB_position_invariant; 
+			vec4 R0;
+			var_TexCoord.x = dot ( $texCoordAttrib , $diffuseMatrix_s );
+			var_TexCoord.y = dot ( $texCoordAttrib , $diffuseMatrix_t );
+			R0 = $colorAttrib * $colorModulate + $colorAdd;
+			var_Color = $diffuseColor * R0;
+			vec4 _F1;
+			vec4 _F2;
+			_F2 = $positionAttrib - $viewOrigin;
+			_F1.x = dot ( _F2 .xyz , _F2 .xyz );
+			_F1.y = 1.0 / sqrt ( _F1.x );
+			_F1.x = _F1.y * _F1.x;
+			var_Color2 = vec4( _F1.x * $fogDepths.z + $fogDepths.w );
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		} 
+	%> }
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord;
+		varying vec4 var_Color;
+		varying vec4 var_Color2;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 R0;
+			vec4 R1;
+			R0 = texture2D ( $map , var_TexCoord.xy );
+			R1 = vec4( 1.0 - var_Color2.r );
+			R1 = var_Color * R1;
+			R0 = R0 - 1.0;
+			R0 = R0 * R1;
+			gl_FragColor.rgb = (R0 * $coverage + 1.0).rgb;
+			gl_FragColor.a = 1.0;
+		} 
+	%> }
+}
+
+renderProgram filterVertexColorCoverage_instance {
+	program vertex reference trivial_instance
+
+	program fragment reference filterVertexColorCoverage
+}
+
+
+renderProgram filterVertexColorCoverageSkinningMatrix {
+	program vertex reference trivialSkinningMatrix
+
+	program fragment reference filterVertexColorCoverage
+}
+
+renderProgram filterVertexColorCoverageHardSkinningMatrix {
+	program vertex reference trivialHardSkinningMatrix
+
+	program fragment reference filterVertexColorCoverage
+}
+
+renderProgram addVertexColorCoverage {
+
+	program vertex reference trivial
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord;
+		varying vec4 var_Color;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 R0;
+			R0 = texture2D ( $map , var_TexCoord.xy );
+			R0 = R0 * var_Color;
+			gl_FragColor.rgb = R0.rgb * $coverage.xyz;
+			gl_FragColor.a = 1.0;
+		} 
+	%> }
+}
+
+renderProgram addVertexColorCoverageFogged {
+
+	program vertex glsl { <%
+		varying vec4 var_TexCoord;
+		varying vec4 var_Color;
+		varying vec4 var_Color2;
+
+		void main ( void ) { 
+			// ARB_position_invariant; 
+			vec4 R0;
+			var_TexCoord.x = dot ( $texCoordAttrib , $diffuseMatrix_s );
+			var_TexCoord.y = dot ( $texCoordAttrib , $diffuseMatrix_t );
+			R0 = $colorAttrib * $colorModulate + $colorAdd;
+			var_Color = $diffuseColor * R0;
+			vec4 _F1;
+			vec4 _F2;
+			_F2 = $positionAttrib - $viewOrigin;
+			_F1.x = dot ( _F2 .xyz , _F2 .xyz );
+			_F1.y = 1.0 / sqrt ( _F1.x );
+			_F1.x = _F1.y * _F1.x;
+			R0 = vec4( $fogDepths.z * 0.75 );
+			var_Color2 = _F1.x * R0 + $fogDepths.w;
+			gl_Position = u_modelViewProjectionMatrix * attr_Vertex;
+		} 
+	%> }
+
+	program fragment glsl { <%
+		varying vec4 var_TexCoord;
+		varying vec4 var_Color;
+		varying vec4 var_Color2;
+
+		void main ( void ) { 
+			// ARB_precision_hint_fastest; 
+			vec4 R0;
+			vec4 R1;
+			R0 = texture2D ( $map , var_TexCoord.xy );
+			R0 = R0 * var_Color;
+			R1 = vec4( 1.0 - var_Color2.r );
+			R0 = R0 * R1;
+			gl_FragColor.rgb = ( R0 * $coverage ).rgb;
+			gl_FragColor.a = 1.0;
+		} 
+	%> }
+}

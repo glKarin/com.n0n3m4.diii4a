@@ -338,10 +338,6 @@ void InteractionStage::ChooseInteractionProgram( const viewLight_t *vLight, bool
 	if ( translucent && !( r_shadowMapOnTranslucent.GetBool() && vLight->shadowMapPage.width > 0 ) )
 		doShadows = false;
 
-	if ( doShadows && vLight->shadows == LS_MAPS ) {
-		// FIXME shadowmap only valid when globalInteractions not empty, otherwise garbage
-		doShadows = vLight->globalInteractions != NULL;
-	}
 	if ( doShadows ) {
 		lightFlags |= SFL_INTERACTION_SHADOWS;
 		const renderCrop_t &page = vLight->shadowMapPage;

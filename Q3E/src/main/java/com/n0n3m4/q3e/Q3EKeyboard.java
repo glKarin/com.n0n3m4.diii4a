@@ -45,19 +45,9 @@ public class Q3EKeyboard
             Context context = m_context;
             m_keyToolbar = new KKeyToolBar(context);
             m_keyToolbar.Close();
-            try
-            {
-                String str = PreferenceManager.getDefaultSharedPreferences(context).getString(Q3EPreference.pref_harm_function_key_toolbar_y, "0");
-                if(null == str)
-                    str = "0";
-                int y = Integer.parseInt(str);
-                if(y > 0)
-                    m_keyToolbar.setY(y);
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-            }
+            int y = Q3EPreference.GetIntFromString(context, Q3EPreference.pref_harm_function_key_toolbar_y, 0);
+            if(y > 0)
+                m_keyToolbar.setY(y);
         }
         return m_keyToolbar;
     }

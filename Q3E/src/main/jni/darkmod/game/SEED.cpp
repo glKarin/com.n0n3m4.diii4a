@@ -1701,7 +1701,7 @@ float Seed::LODBIAS ( void ) const
 	// scale density with GUI setting
 	// The GUI specifies: 0.5;0.75;1.0;1.5;2.0;3.0, but 0.5 and 3.0 are quite extreme,
 	// so we scale the values first:
-	float lod_bias = cv_lod_bias.GetFloat();
+	float lod_bias = idMath::ClampFloat( 0.0f, 5.0f, cv_lod_bias.GetFloat() );
 	if (lod_bias < 0.8)
 	{
 		if (lod_bias < 0.7)

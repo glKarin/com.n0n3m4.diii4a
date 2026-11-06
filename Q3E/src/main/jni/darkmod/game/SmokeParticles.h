@@ -42,7 +42,7 @@ typedef struct singleSmoke_s {
 	struct singleSmoke_s	 *	next;
 	int							privateStartTime;	// start time for this particular particle
 	int							index;				// particle index in system, 0 <= index < stage->totalParticles
-	idRandom					random;
+	int							randomSeed;
 	idVec3						origin;
 	idMat3						axis;
 } singleSmoke_t;
@@ -65,12 +65,18 @@ public:
 
 	// spits out a particle, returning false if the system will not emit any more particles in the future
 	bool						EmitSmoke( const idDeclParticle *smoke, const int startTime, const float diversity,
-											const idVec3 &origin, const idMat3 &axis );
+											const idVec3 &origin, const idMat3 &axis, bool allowCycling = false );
 
 	// free old smokes
 	void						FreeSmokes( void );
 
 private:
+	bool						EmitSmokeOld( const idDeclParticle *smoke, const int startTime, const float diversity,
+											const idVec3 &origin, const idMat3 &axis );
+	bool						EmitSmokeNew( const idDeclParticle *smoke, const int startTime, const float diversity,
+											const idVec3 &origin, const idMat3 &axis, bool allowCycling );
+
+
 	bool						initialized;
 
 	renderEntity_t				renderEntity;			// used to present a model to the renderer

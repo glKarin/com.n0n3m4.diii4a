@@ -721,6 +721,9 @@ void idImageManager::Init()
 {
 	images.Resize( 1024, 1024 );
 	imageHash.ResizeIndex( 1024 );
+#ifdef D3_VK_SHARED_SAMPLER
+	samplerList.Resize(SHARED_SAMPLERS_INITIALIZE_SIZE, SHARED_SAMPLERS_INITIALIZE_GRANULARITY);
+#endif
 
 	CreateIntrinsicImages();
 

@@ -1,0 +1,1560 @@
+2020-12-26 David Anderson
+    *  buildopscounttab.c,esb.c: Fixed indentation and trailing
+       whitespace.
+2020-12-25 David Anderson
+    * command_options.c,dwconf.c,dwgetopt.c,dwgetopt.h,
+      print_die.c,print_frames.c,print_locs.c,print_pubnames.c,
+      testesb.c: Correct spelling in comments.
+2020-12-25 David Anderson
+    * print_die.c: expression -> expression in a printf string.
+2020-12-24 David Anderson
+    * CMakeLists.txt: Needed the same sed transformation
+      that was added in runtests.sh a few minutes ago to
+      pass 'make test'.
+2020-12-24 David Anderson
+    * runtests.sh: The 'last time' timestamp expansion
+      got different strings out of libc depending on timezone.
+      We do not really care what the date/time is, so
+      now we trim off the date/time text portion.
+    * testobjLE32PE.base: Now contains the trimmed
+      data with 0x0 but no day or year or time
+      so we can compare equal with 'make check'
+      anywhere we run it.
+2020-12-24 David Anderson
+    * macrocheck.h: Added a needed 'extern' for macdefundeftree.
+2020-12-23 David Anderson
+    * CMakeLists.txt: Adds opscounttab.c and opscounttab.h
+      to the files in the build of dwarfdump.
+    * Makefile.am: Adds opscounttab.c opscounttab.h and
+      buildopscounttab.c appropriately.
+    * Makefile.in: Regenerated.
+    * buildopscounttab.h: Fixes spelling mistake.
+    * buildopscounttab.c: Fixes DW_OP_lit0 input.
+      Adjusts indents, remove trailing white and trailing
+      blank lines.
+    * esb.c: Added ESBERR checks and that found mistakes
+      in dwarfdump source.
+    * print_die.c: include opscounttab.h. op_has_no_operands()
+      is just  reference to a byte in dwarf_opscounttab array.
+      Deleted a struct and table that is not used.
+    * print_macro.c: Fixed a esb_append_printf_u() call
+      missing a % .  Removed a stray newline from printf output.
+    * print_ranges.c: An error message was missing
+      a % to esb_append_printf_u. Fixed.
+    * print_loclists.c: Rearranged 4 lines so it is easy
+      to see that the printf has its 0x%  before DW_PR_XZEROS etc.
+2020-12-22 David Anderson
+    * buildopscounttab.c: Builds a simple table per DW_OP
+      operator. More use of it shortly.
+    * opscounttab.h: Type decl and array decl.
+    * opscounttab.c: Generated this file.Speeds up
+      inquiring if a DW_OP has zero operands.
+2020-12-22 David Anderson
+    * dwarfdump.1: Added descriptions to the
+      options for
+      .debug_macro printing and checking.
+    * dwarfdump.c: Ensure a total of the MACRONOTES
+      messages gets printed at the end.
+    * glflags.h: Added gf_count_macronotes.
+    * print_macro.c: Now issue MACRONOTE, not ERROR,
+      for items of interest that are possibly
+      not errors at all, and only list the counts
+      of def/undef with -kw (--check-macros).
+2020-12-20 David Anderson
+    * dwconf.c: Removed BOOLEAN_TYPEDEF as the 'boolean'
+      define it referred to is no longer present anywhere.
+2020-12-20 David Anderson
+    * sanitized.c: Removed unused global variable.
+    * command_options.c,compiler_info.c,compiler_info.h,
+      defined_types.h,dwarfdump.c,glflags.c,glflags.h,globals.h,
+      print_aranges.c,print_die.c,print_hipc_lopc_attr.c,
+      print_lines.c,print_macro.c,print_ranges.c,print_reloc.c,
+      print_section_groups.c,sanitized.h,section_bitmaps.c,
+      section_bitmaps.h,strstrnocase.c,tag_attr.c,tag_common.c,
+      tag_common.h,tag_tree.c: Switched all instances of
+      'boolean' to be Dwarf_Bool.
+2020-12-20 David Anderson
+    * dwarfdump.c: Revised calls to print DWARF5 macro data.
+    * dwconf.c: Removed  dead code.
+    * glflags.c, glflags.h: Renamed two flags as the names
+      in use were awkwardly long.
+    * globals.h:  Moved a couple extern decls to macrocheck.c
+      Revised prototypes for printing .debug_macro data.
+    * macrocheck.c: Major changes to support full printing
+      and checking of .debug_macro data.
+    * macrocheck.h: extern decls for .debug_macro moved from
+      globals.h to here.
+    * print_die.c: Revised dwarfdump arglists to deal
+      with .debug_macro data and revised glflags names.
+    * print_frames.c: To match revised glflags names.
+    * print_macinfo.c: To match revised import recording
+      function args to add_macro_import().
+    * print_macro.c: Major revisions to descend through
+      imported macros and print and assess-correctness.
+    * runtests.sh: Changing comments to make it clearer
+      what each test is.
+    * testobjLE32PE.base: Updated baseline to match
+      improved .debug_macro reporting.
+2020-12-10 David Anderson
+    * command_options.c, dwarfdump.1: Refined the
+      description of the --file-tied option to be
+      a bit more accurate.
+2020-12-07 David Anderson
+    * dwarf_names.c: Regenerated. The new version has
+      a new comment (no code change).
+2020-12-06 David Anderson
+    * addrmap.c,checkutil.c,command_options.c,dwarfdump.c,
+      getopttest.c,helpertree.c,macrocheck.c,naming.c,
+      print_aranges.c,print_debug_gnu.c,print_debug_names.c,
+      print_debug_sup.c,print_debugfission.c,print_die.c,
+      print_frames.c,print_gdbindex.c,print_hipc_lopc_attr.c,
+      print_llex_codes.c,print_loclists.c,print_loclists_codes.c,
+      print_locs.c,print_macinfo.c,print_macro.c,print_pubnames.c,
+      print_ranges.c,print_rnglist.c,print_section_groups.c,
+      print_static_funcs.c,print_static_vars.c,print_str_offsets.c:
+      Small adjustments to comments and code lines to
+      get close to libdwarf codingstyle.
+2020-12-05 David Anderson
+    * addrmap.h,checkutil.h,dwgetopt.c,dwgetopt.h,helpertree.h,
+      macrocheck.h,naming.h,print_frames.h,print_reloc.h,
+      print_reloc_decls.h: modified for line length.
+      No logic changes.
+
+    * tag_attr.c,tag_tree.c: Modified to generate no
+      long C source lines.
+
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated using the above
+      tag_*.c sources, now with no long lines.
+2020-12-04 David Anderson
+    * print_reloc.c,print_reloc_test.c,print_types.c,
+      print_weaknames.c: Trivial tiny changes for codingstyle.
+2020-12-04 David Anderson
+    * dwarf_tsearchbal.c,dwarfdump.c,dwconf.c,dwconf.h,dwgetopt.c:
+      Trivial tiny changes for codingstyle.
+2020-12-04 David Anderson
+    * esb.c,glflags.c,glflags.h,globals.h,sanitized.c,
+      section_bitmaps.c,section_bitmap,.h,section_bitmaps_test.c,
+      strstrnocase.c: Trivial tiny changes for codingstyle.
+2020-12-04 David Anderson
+    * tag_common.c,testesb.c,uritablebuild.c: Revisions to pass
+      dicheck coding-style
+      rules (libdwarf codingstyle).
+2020-12-04 David Anderson
+    * compiler_info.h: Reduced 2 line lengths for consistency
+      with libdwarf codingstyle.
+    * compiler_info.c: Introducing a local pointer shortened
+      a few lines. Is now easier to read two small functions.
+2020-12-03 David Anderson
+    * command_options.c: The --print-macinfo prints whatever
+      .debug_macro or .debug_macinfo section exists.
+      Updated the --help output to say that.
+      Removed trailing whitespace and a few other
+      small changes to match libdwarf codingstyle.
+    * compiler_info.c: Removed trailing whitespace and a few other
+      small changes to match libdwarf codingstyle.
+2020-11-30 David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-11-26 David Anderson
+    * print_debug_gnu.c: In current compilers the blocks
+      have a CU offset to the skeleton DIEs (when
+      is split dwarf) so we print some data on
+      each CU DIE now.
+2020-11-25 David Anderson
+    * Makefile.in: Regenerated from configure.ac.
+      To support data needed for dwarfexample make check.
+2020-11-25: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-11-23: David Anderson
+    * CMakeLists.txt: now -D-DDWARF_WITH_LIBELF=OFF works
+2020-11-23: David Anderson
+    * glflags.h, glflags.c: Added field glflags.gf_max_space_indent
+      with value 10 so that really deep TAG nesting does not
+      result in mostly blank thousand-character lines.
+      If there is a call for it, the value could be supplied
+      by a new dwarfdump option.
+    * globals.h: Removed two functions defined and
+      only used in print_die.c.
+    * print_die.c: Too deep nesting is unreadable so now
+      when 10 or more deep the output uses for example ...100...
+      instead of hundreds of spaces to indicate depth.
+      Indentation of DW_OP output changed in some cases.
+2020-11-22: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-11-22: David Anderson
+    * print_frames.c: The refactoring left old dealloc
+      in place that are no longer appropriate.  Removed them.
+    * print_die.c: DW_FORM_exprloc was, when printing FORMs,
+      printing the FORM later than desired. Now shows
+      up in the right place.
+2020-11-22: David Anderson
+    * print_die.c: When an attribute expression DW_OP is
+      a DWARF5 reference to a DW_TAG the details of the
+      reference are indented a little and printed on
+      the line after the DW_OP itself.
+      Seems easier to read that way.
+2020-11-22: David Anderson
+    * command_options.c: The option is now
+      --format-expr-ops-joined
+    * dwarfdump.1,dwarfdump.conf,testdwarfdump.conf: Reflects
+      the new option.
+    * dwconf.c,glflags.c,glflags.h: Reflects the new option.
+    * print_die.c: Reflects the new option.
+2020-11-21: David Anderson
+    * dwconf.c: Error message needed a slight wording change
+      when we discover the abi requested does not exist.
+2020-11-21: David Anderson
+    * command_options.c: Added a new option, but it will be
+      removed shortly as not needed.
+    * dwconf.c: Clarified the code with a more complete
+      set of return values.
+    * dwconf.h: Macro defines for the new return values.
+    * print_die.c: Now allows printing expression operations
+      one per line. Which will be the default very soon.
+2020-11-21: David Anderson
+    * print_frames.c: Error message improvements and
+      refactored fde/cie printing to make it easier
+      to follow.  Now if fde printing errors-out
+      we continue on to attempting to print cies.
+2020-11-20: David Anderson
+    * print_frames.c: A better indent for expression ops
+      from frames. More detailed error message too.
+2020-11-17: David Anderson
+    * command_options.c: Minor line shortening.
+    * dwconf.c: Previous commit introduced a few bugs.
+      Fixed, and clearer now.
+2020-11-16: David Anderson
+    * command_options.c: Now accepts --format-expr-op-per-line
+    * dwarfdump.1: Mentions the option.
+    * dwarfdump.c: Small changes passing die_indent_level
+      around so formatting looks sensible with the new option.
+    * dwconf.c: Now deals with
+      option:  --format-expr-op-per-line
+      in dwarfdump.conf. the option: command must preceed every
+      beginabi: command.
+    * esb_using_functions.h: Adding die_indent level to another
+      function prototype.
+    * glflags.c,glflags.h: Renamed the flag for the option to
+      gf_expr_op_per_line.
+    * print_die.c,print_frames.c,print_frames.h,
+      print_hipc_lopc_attr.c,print_locs.c: Now passing
+      die_indent_level anywhere needed.
+2020-11-15: David Anderson
+    * testdwarfdump.conf: A special version to test
+      the 'option:' command.
+2020-11-15: David Anderson
+    * esb_using_functions.h: Add Dwarf_Die arg to
+      dwarfdump_print_location_operations().
+    * glflags.h, glflags.c: Adding gf_multi_line_expr. Not used yet.
+    * globals.h: Adding Dwarf_Die to check_die_expr_op_basic_data().
+    * print_die.c: Now printing references to DIEs in
+      DWARF expressions.
+    * print_frames.c,print_frames.h,print_locs.c: Adding Dwarf_Die
+      to arg lists. Some reformatting to libdwarf coding style.
+2020-11-12: David Anderson
+    * dwarfdump.1: Clarified the role of the --verbose
+      option and corrected spelling and formatting errors.
+    * print_lines.c: Revised one glflags.verbose test so it
+      reads the same way as other verbose tests. Fixed
+      various lines to meet the libdwarf coding style.
+    * tag_attr.c,tag_tree.c: Changed to meet the
+      libdwarf coding style.
+2020-11-11: David Anderson
+    * print_abbrevs.c: Fixing a mistake in the
+      new code. The error lead to an
+      erroneous  error being reported
+      in objects where the compiler left off the final
+      zero in the .debug_abbrev section.
+2020-11-09: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-11-08: David Anderson
+    * globals.h: Declaring new function print_all_abbrevs_for_cu()
+    * print_abbrevs.c: Refactored to allow printing abbrevs
+      for a single CU and/or all abbreves at once.
+    * print_die.c: If -vvvv and printing .debug_info/.debug_types
+      print the abbrev section applying to each CU reported.
+      If checking (as with -ka) check for errors in
+      the abbrevs of each CU (no -v required for checking).
+2020-11-05: David Anderson
+    * dwarf_tsearchbal.c,dwarfdump.c,print_lines.c,tag_attr.c:
+      These had some #include not protected by the HAVE_*H
+      config.h (and cmake) provide. Fixed.
+    * testobjLE32PE.base: baseline update to match current
+      output.
+
+2020-11-04: David Anderson
+    * globals.h,print_lines.c,print_die.c: Adding arguments for a
+      srcfiles array for the CU to
+      to print_line_numbers_this_cu(). Now, with -vvv
+      just printing line tables will print the dwarf_srcfiles
+      array of strings.
+2020-11-03: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-11-03: David Anderson
+    * Makefile.am, CMakeLists.txt: print_macros.c renamed
+      to print_macinfo.c for clarity in naming.
+    * Makefile.in: Regenerated.
+    * globals.h: Added Dwarf_Die argument to
+      print_macinfo_by_offset().
+      Added srccfiles, count argument to
+      print_macros_5style_this_cu().
+    * print_die.c: Renamed macro_check_cu() to
+      print_macinfo_for_cu() for clarity in naming.
+      print_macinfo_for_cu() now prints the file name
+      (from srcfiles list) if it is DW_MACINFO_start_file.
+    * print_macinfo.c: Nowuses passed-in srcfiles
+      to get the full path for the file index
+      DW_MACINFO_start_file.
+    * print_macro.c: Prints the DWARF5 set_file macro
+      correctly with name.
+    * runtests.sh: 'make check' baselines made a bit
+      larger and added -vvv to the dwarfdump command
+      generating those baselines.
+    * test-mach-o-32.base,testobjLE32PE.base,
+      testobjLE32PE.base,testuriLE64ELf.base: New baselines
+      with additional content per CU and more lines.
+2020-11-01: David Anderson
+    * print_die.c: With -vvv dwarfdump now prints
+      the array dwarf_srcfiles generates so library
+      users can compare the compilation unit, its
+      line table header, and what dwarf_srcfile()
+      provides. DW_AT_decl_file and DW_AT_call_file
+      now result (in printing attributes) in the right
+      source file printing.
+2020-10-30: David Anderson
+    * esb.c,esb.h,uri.c: Removed trailing whitespace,
+      shortened a few lines.
+2020-10-29: David Anderson
+    * command_options.c,print_die.c: Fix indents, remove
+      trailing whitespace.
+    * In this ChangeLog some of the August lines
+      had tabs and the lines were kind of messed up.
+      Fixed.
+2020-10-29: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-10-29: David Anderson
+    * print_die.c: Factored out the indent-spaces code
+      into static function print_indent_prefix().
+      For now there is no change in output format,
+      though for large indents (greater than around 6)
+      the spacing gets so large the output becomes
+      unreadable.
+2020-10-28: David Anderson
+    * print_die.c: Dwarfbug DW202010-002. In case of
+      a circular DIE tree memory outside of the target
+      DIE stack array would be written to and
+      referenced.  Now we test at all the places
+      the stack index is incremented and print
+      a useful error message.
+    * print_section_groups.c: #if 0 code updating
+      glftab as the table data has never been used.
+2020-10-22: David Anderson
+    * command_options.c,dwarfdump.1: The man
+      page and the -h (help) output spelled the long-form
+      option for seeing Elf Section Group DWARF data
+      incorrectly as --format-group=<n> but the real option
+      has always been --format-group-number=<n> .  To see
+      any section groups and the number libdwarf assigns
+      to them do dwarfdump -i -vv <object name> Most object
+      will have just section group 1 and dwarfdump/libdwarf
+      handle that automatically. Groupnumber support was
+      added in May 2017. See dwarf_init_path() page 34
+      and Section 6.3 Page 46 in libdwarf2.1.pdf .
+2020-10-20: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+    * glflags.c: see TRIVIAL_NAMING, used when doing
+      scripts/buildstandardsource.sh
+2020-10-19: David Anderson
+    * dwarfdump.1: Document --format-suppress-sanitize
+      Added documentation on --format-suppress-uri too.
+      Reorganized the URI sections for greater clarity.
+    * command_options.c: show --format-suppress-sanitize
+      thus mentioning the option. If there are corruptions
+      or bad string data in an object this can be dangerous
+      to your terminal window.
+    * esb.c: Remove #if 0 and the code for a function
+      that was not a good idea: esb_constructor_rigid().
+    * glflags.c: Adding glflags.gf_no_sanitize_strings
+      initializer (used to use a global not in glflags).
+    * glflags.c: Adding boolean gf_no_sanitize_strings
+      declaration.
+    * print_frames.c(print_location_operations): Remove
+      unwanted code #if 0 through #endif
+    * print_macro.c(print_macros_5style_this_cu): #if 0
+      code removed. So deleted duplicate die printing
+      calls.
+    * print_pubnames.c: deal_with_name_offset_err()
+      has not been used in a long time. Deleted.
+    * sanitized.c(sanitized): add includes to allow
+      glflags.h
+      and use glflags.gf_no_sanitize_strings for checking
+      whether to sanitize.
+2020-10-19: David Anderson
+    * dwarfdump.c,getopttest.c,print_lines.c,
+      testobjLE32PE.test.c: Fixed indents and
+      removed trailing whitespace.
+2020-10-19: David Anderson
+    * *.c *.h: No license terms changed but nearly
+      all the copyright notices are now reformatted to
+      line lengths appropriate for dwarfdump.
+2020-10-18: David Anderson
+    * tag_attr.list: Added standard tag-attribute
+    relationships
+      that are being used now.
+    * tag_tree.list: Added standard tag-tag relationships
+      that are being used now.
+    * dwarfdump-ta-table.h: Regenerated.
+    * dwarfdump-tt-table.h: Regenerated.
+2020-10-17: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-10-15: David Anderson
+    * print_lines.c(print_line_context_record): Fixed the
+      comments about DWARF4 vs 5.
+2020-10-13: David Anderson
+    * print_macro.c: Added the required check for 0
+      opcode and print appropriately (it's the null byte
+      at end of macro operands).
+2020-10-12: David Anderson
+    * dwarfdump.c: Now printf callbacks from libdwarf
+      are sanitized() to prevent corrupted line data from
+      compromising user terminal settings.
+    * print_lines.c: Accommodation of DWARF5 in more places.
+2020-10-11: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-10-11: David Anderson
+    * command_options.c: Refined a wordy comment.
+    * dwarfdump.1: Document the new ability to
+      get to GNU debuglink files automatically.
+    * dwarfdump.c: Implement support for reading GNU
+      debuglink and use it to find the target object.
+2020-10-05: David Anderson
+    * command_options.c: Implemented first part of
+      making GNU debuglink options work.
+    * dwarfdump.c: Now using dwarf_init_path()
+      working toward making GNU debuglink options work.
+    * glflags.h: Commented gf_debug_names_flag
+      to avoid confusing it with debuglink.
+2020-10-03: David Anderson
+    * Makefile.in: Autoreconf using Ubuntu 20.04
+      made small changes.
+    * COPYING: Corrected the references to the BSD
+      copyright
+      to use "two-clause BSD license".
+2020-10-02: David Anderson
+    * command_options.c,glflags.h,print_frames.c: Remove
+      trailing whitespace.
+2020-10-02: David Anderson
+    * command_options.c: New options --no-follow-debuglink
+      and --add-debuglink_path=<text> for working with
+      GNU debuglink.
+    * glflags.h: Added gf_no_follow_debuglink and
+      gf_global_debuglink_paths and
+      gf_global_debuglink_count.
+2020-09-30: David Anderson
+    * command_options.c: If more than one non-dash
+      word is at the end of the dwarfdump command it used
+      to complain no object name given.  Now in that case
+      it complains that more than one was given. Slightly
+      more sensible.
+2020-09-27: David Anderson
+    * dwarfdump.c: --print-gnu_debuglink output wording
+      made clearer.
+2020-09-27: David Anderson
+    * dwarfdump.c: Now --print-gnu_debuglink also
+      indicates what files it found in the paths
+      calculated, making --print-gnu_debuglink more useful.
+    * command_options.c: Corrected a typo in a comment
+      about
+      the option --print-gnu_debuglink.
+2020-09-26: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-09-18: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-09-18: David Anderson
+    * print_frames.c: Shortened too-long comment lines.
+2020-09-17: David Anderson
+    * print_frames.c: A very old typgraphical error
+      meant that in rare circumstances memory leakage
+      of a few bytes was possible with option
+      --suppress-de-alloc-tree.
+2020-09-10: David Anderson
+    * esb_using_functions.h: Adding new argument to
+      the print_ranges_list_to_extra() prototype.
+    * print_die.c: Using that new argument to
+      pass the true offset to the printing code.
+    * print_ranges.c: Updated the printing to make it
+    clearer
+      it clearer the .debug_ranges offset is using a base
+      address (when there is one).
+2020-09-10: David Anderson
+    * dwarfdump.c: Remove trailing whitespace.
+2020-09-08: David Anderson
+    * dwarfdump.c: Now cleans up terminating DW_DLV_ERROR
+      allocation even when the object cannot finish
+      dwarf_init*().  Fixes print_error() so it works
+      right with dbg null.
+2020-09-08: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-09-07: David Anderson
+    * glflags.h,print_die.c: Fixed idents and trailing
+      whitespace.
+2020-09-06: David Anderson
+    * globals.h:  print_die_and_children() declaration
+      removed, the function is now static in print_die.c.
+    * print_die.c: On an error following a call to
+      dwarf_child
+      (but where dwarf_child() succeeded) we were failing
+      to dwarf_dealloc_die(child). And even the main path
+      (no error from dwarf_child) failed to dealloc child.
+2020-09-05: David Anderson
+    * print_die.c: In a couple error messages spell the
+      function name that returned error correctly.
+2020-08-28: David Anderson
+    * print_die.c: Fixed indent and trailing whitespace.
+2020-08-27: David Anderson
+    * dwarfdump.c: Fix some warnings counted as errors
+      by ensuring the ERROR string is in them (they just
+      flag in particular situations that the DW_AT_producer
+      attribute is missing on the Compilation Unit).
+    * print_die.c: Fix places where we double-counted
+      errors.
+    * print_frames.c: Annotate an existing ERROR so that
+      it is counted in the ERROR count.
+    * print_llex_codes.c, print_origloclist_codes.c,
+      print_ranges.c,print_reloc.c: Fix double-counts
+      of errors.
+    * print_reloc_decls.h: Just do a printf, no reason
+      to use struct esb_s here.
+2020-08-23: David Anderson
+    * compiler_info.c: Now we apply sanitized() to all
+      the printed strings (just in case an object file is
+      corrupted or maybe not plain ascii strings).
+2020-08-23: David Anderson
+    * dwarfdump-ta-ext-table.h: Regenerated
+    * tag_attr_ext.list: Added DW_AT_GNU_macros
+      to the known-extensions list.
+2020-08-23: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-08-23: David Anderson
+    * checkutil.c,dwarfdump.c,print_die.c: Removed trailing
+      whitespace, fixed indents.
+2020-08-23: David Anderson
+    * checkutil.c: Removed #if 0 lines from previous
+      commit.
+    * dwarfdump.c: Removed debug printf lines.
+    * print_die.c: Removed debug printf lines.
+2020-08-22: David Anderson
+    * checkutil.c: Temporary debug printf.
+    * dwarfdump.c: Revised pRangesInfo reset
+      when we have a tied dbg, as in that case we often
+      miss function/scope address ranges.  Temporary debug
+      printf too.
+    * globals.h: Adding a Dwarf_Debug argument to
+      tag_specific_checks_setup() for when tied file
+      present.
+    * print_abbreves.c: Temporary debug.
+      New arglist for tag_specific_checks_setup()
+    * print_die.c: Get the text section bounds
+      set (from tied object, if any) so checks of address
+      will not incorrectly fail.
+2020-08-22: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-08-10: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Updated version string,
+      regenerated files using it.
+2020-08-02: David Anderson
+    * print_die.c: Now with Additional checking of DW_LKIND
+      values and an error report if one tries to use
+      the original location interface with newer DWARF
+      location data.
+    * print_frames.c: Added short comments for clarity.
+2020-07-28: David Anderson
+    * dwarf_names.c: Regenerated.
+    * print_die.c: Added DW_OP_GNU_variable_value to the table.
+2020-07-19: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with latest
+      version string.
+2020-07-16: David Anderson
+    * tag_attr.list: Added some normal standard TAG/ATTR
+      combinations (some new in DWARF5)
+    * tag_attr_ext.list: Added some normal GNU
+      TAG/ATTR usages.
+    * tag_tree.list: Added some normal standard TAG/TAG
+      relationships.
+    * tag_common.h: Increased a row maximum by one
+      to match the increase in the lists.
+    * dwarfdump.1: Improved the wording for -kt -kr
+      and the modifier -C (they have longopts names too).
+    * dwarfdump-ta-ext-table.h,dwarfdump-ta-table.h,
+      dwarfdump-tt-table.h: Regenerated
+    * print_hipc_lopc_attr.c: Fixed indents and
+      trailing whitespace.
+2020-07-16: David Anderson
+    * tag_attr.list,tag_attr_ext.list,tag_tree.list:
+      corrections and some DWARF5 additions to the tables.
+    * tag_common.h: Increased table sizes where necessary
+      for the new *list data.
+    * dwarfdump-ta-ext-table.h,dwarfdump-ta-table.h,
+      dwarfdump-tt-table.h: Regenerated
+2020-07-16: David Anderson
+    * globals.h,print_die.c: Revised a key function name,
+      yesterdays name was excessively long. New name is
+      dd_get_integer_and_name().
+    * print_hipc_lopc_attr.c: That name changed here too.
+      and a blob of code was factored out into a new
+      function update_cu_base_addresses() which just
+      establishes names used in presenting details in
+      case of errors (a function with no side effects but
+      setting the glflags fields for use in error reports).
+2020-07-15: David Anderson
+    * CMakeLists.txt,Makefile.am: Added print_hipc_lopc_attr.c.
+    * Makefile.in: Regenerated.
+    * print_die.c: Moved print_hipc_lopc_attribute() from
+      here to print_hipc_lopc_attr.c.  Moved file-static
+      variables bSawLow bSawHigh lowAddr highAddr
+      to print_one_die(), no need to be global.
+      get_small_encoding_integer_and_name() renamed.
+    * print_hipc_lopc_attr.c: New. Holds the larg-ish
+      function print_hipc_lopc_attribute() from .
+    * globals.h: Now
+      _dwarf_get_small_encoding_integer_and_name()
+      can be called from more than one file in libdwarf.
+      Added print_hipc_lopc_attribute() declaration as it
+      is moved to its own source file.
+    * glflags.h: Added new member in_valid_code.
+    * glflags.c: Added glflags.in_valid_code = FALSE,
+      a new global-like variable to replace the old
+      print_die.c static variable in_valid_code.  Adds a
+      bit of clarity.
+    * dwarfdump.c(tag_specific_checks_setup): Added new
+      DWARF5 CU DIE tags here.
+    * print_debug_sup.c: Fixed indent and trailing
+    whitespace.
+2020-07-14: David Anderson
+    * print_die.c: Moved 4 variables, including
+      bSawLow and bSawHigh from static to being local
+      variables. Altered one internal interface to suit.
+      Now easier to understand.
+2020-07-14: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with new version
+      string.
+2020-07-13: David Anderson
+    * CMAkeLists.txt: Adding print_debug_sup.c    .
+    * Makefile.am: Adding print_debug_sup.c  .
+    * Makefile.in: Regenerated.
+    * command_options.c: Added
+    flag  gf_debug_sup_flag
+      amd --print-debug-sup options.
+    * dwarf_names.c: Regenerated. Reflects the correction
+      of
+      DW_GNUIVIS_static value for the .debug_sup section.
+    * dwarfdump.c: Adds check of gf_debug_sup_flag and
+      call of print_debug_sup().
+    * glflags.h: Adds boolean gf_debug_sup_flag.
+    * globals.h: Adds print_debug_sup() declaration.
+    * print_debug_sup.c: new to print .debug_sup.
+2020-07-11: David Anderson
+    * print_debug_gnu.c: After printing the section
+      added the dwarf_gnu_index_dealloc() to immediately
+      free the data allocated for printing the section.
+2020-07-08: David Anderson
+    * dwarfdump.1: Mentioning new print options (the
+      latest additions to dwarfdump) and suggesting that
+      -v -G and -M are sometimes helpful.
+2020-07-08: David Anderson
+    * print_debug_gnu.c,print_die.c: Fixed indents and
+      removed trailing whitespace.
+2020-07-08: David Anderson
+    * command_options.c: Misspelled argname in a comment.
+    * print_debug_gnu.c: Added minor checking for errors,
+      there is more to come in error checking.
+2020-07-06: David Anderson
+    * dwarf_names.c, dwarf_names.h: Regenerated,
+      Adding the non-standard dwarf prefixes
+      DW_GNUIVIS* and DW_GNUIKIND* in support of
+      .debug_gnu_pubtypes and .debug_gnu_pubnames.
+      The first support for these sections.
+      DW_DLE_GNU_PUBNAMES_ERROR DW_DLE_GNU_PUBTYPES_ERROR
+      DW_DLE_DUPLICATE_GNU_DEBUG_PUBNAMES
+      DW_DLE_DUPLICATE_GNU_DEBUG_PUBTYPES
+    * Makefile.am: Adding print_debug_gnu.[ch] to
+      the files list.
+    * Makefile.in: Regenerated.
+    * command_options.c: Add --print-debug-gnu option
+      to print these sections.
+    * dwarfdump.c: Implement printing of these sections.
+    * glflags.h: Add boolean gf_debug_gnu_flag for the
+      --print-debug-gnu option.
+    * print_debug_gnu.c: Now prints these sections.
+2020-07-04: David Anderson
+    * print_die.c(dot_ok_in_identifier): Removed unused
+      argument.
+      Added DW_TAG_skeleton_unit to the if condition.
+      This function affects only whether a CHECK message
+      reports a warning, it has no effect when printing.
+2020-07-04: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with new version
+      string.
+2020-07-03: David Anderson
+    * CMakeLists.txt, Makefile.am: Renamed print_dnames.c
+    to
+      print_debug_names.c
+    * Makefile.in: Regenerated.
+    * command_options.c: Corrected the help text for
+      --print-fission.    Added --print-debug_names, which
+      does not yet do anything useful.
+2020-07-01: David Anderson
+    * esb.h: Make debug-only locals unsigned long instead
+    of long.  * print_die.c: Where there is a N iteration
+    loop adding
+      to esb strings use N and an estimate of per-loop text
+      size request a sensible space increment to ensure
+      there is enough space  that completing the set of
+      strings will not need another malloc.  Saved about 1%
+      of cputime in full regression test.
+2020-06-29: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Regenerated with new version
+      string.
+2020-06-29: David Anderson
+    * print_die.c: Fixed a minor formatting error on
+      DW_AT_location and related attributes.
+2020-06-28: David Anderson
+    * tag_attr.list,tag_tree.list: Adding standard DWARF5
+      tag-tag and tag-attr relationships to the lists.
+    * dwarfdump-ta-ext-table.h,dwarfdump-ta-table.h,
+      dwarfdump-tt-table.h: Regenerated.
+2020-06-26: David Anderson
+    * print_die.c (print_attribute): Increased the stack
+      alloc of a string so that even fairly long
+      loclists/rangelists won't require malloc.  A tiny
+      indent and trailing whitespace instance fixed too.
+    * test-mach-o-32.base: Updated baseline so make check
+      passes again.
+2020-06-25: David Anderson
+    * checkutil.c: Removed trailing whitespace.  *
+    command_options.c: * dwarfdump.1: Making the -C
+    option intent
+      clearer.
+    * dwarfdump.c: Fixed trailing whitespace and indents.
+    * naming.c: Fixed trailing whitespace.  * print_die.c:
+    Removed dead code. Corrected printing
+      if rnglists, ranges, loclists locations. Corrected
+      handling of the output with -k detected an error.
+      Ensured a couple esb_s variables get destructed
+      in case of error.  Added explanation how the
+      print_attribute() code actually works.
+    * print_frames.c: Corrected handling location
+    operations
+      when checking (-k options).
+    * print_llex_codes.c,print_loclists_codes.c,
+      print_origloclist_codes.c: Corrected handling
+      location data when checking (-k options).
+    * tag_attr_ext_list.c: Added DW_AT_MIPS_linkage_name
+      as a common extension on a couple TAGs.
+2020-06-22: David Anderson
+    * checkutil.c: Document a bit
+    more about how this works.    *
+    dwarfdump-ta-ext-table.h,dwarfdump-ta-table.h,
+      dwarfdump-tt-table.h: regenerated
+    * dwarfdump.c: Doing a slightly better job identifying
+      the true range of text addresses in the object file,
+      which matters for some -k (checking) options.
+    * globals.h: Revised some argument lists for nicer
+      reporting of errors found with -k options.
+    * naming.c: regenerated.  * print_die.c: Certain names
+      revised for greater
+      clarity of intent. print_information ->
+      print_else_name_match which at least hints at what
+      the variable is doing.
+    * print_frames.c: Suppresses some output when checking.
+    * print_llex_codes.c: When checking suppress some
+      output.
+    * print_loclists.c: Removed pointless {}.
+    * print_loclists_codes.c,print_original_loclist_linecodes.c:
+      Suppresses some output when checking.
+    * print_rnglists.c: Clarify which routines apply solely
+      to printing raw rangelists.
+    * tag_attr_ext.list: Added DW_AT_encoding to
+      common extensions
+    * tag_common.h: Incremented
+      EXT_ATTR_TABLE_ROWS 16
+      so the tables can be rebuilt.
+2020-06-22: David Anderson
+    * dwarfdump.c: Fixing some old formatting mistakes.
+      NOT TO BE USED Yet.
+2020-06-20: David Anderson
+    * tag_attr.c,tag_attr.list,tag_common.h: Adding in
+      DWARF5 TAG ATTR combinations required raising hard
+      coded value, and improving one of the error messages
+      appearing with the wrong limit.
+2020-06-20: David Anderson
+    * tag_attr.list: Added DW_AT_loclists_base,
+      DW_AT_alignment,DW_AT_call_all_calls,DW_AT_noreturn
+      with the TAGs they go with.
+2020-06-17: David Anderson
+    * Makefile.am, CMakeLists.txt: Renamed
+      print_loclist_original.c -> print_origloclist_codes.c
+      so the three distinct format loclist printers all
+      end in codes.c.
+    * Makefile.in: Regenerated
+2020-06-17: David Anderson
+    * print_loclists.c: Improve the formatting
+      of the raw report.
+    * print_rnglists.c: Significantly improve
+      the formatting of the raw report.
+2020-06-17: David Anderson
+    * globals.h: Some args now just values, not pointers,
+      the Dwarf_Addr * hipc in print_llex_linecodes()
+      was a holdover from past versions. Not needed.
+    * print_die.c,print_llex_codes.c,print_loclist_original.c,
+      print_loclists_codes.c: Similarly.
+2020-06-12: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h : updated version string.
+2020-06-12: David Anderson
+    * dwarfdump.c,
+    globals.h,print_die.c,print_llex_codes.c,
+      print_loclist_original.c,print_loclists.c,
+      print_loclists_codes.c,print_rnglists.c: Fix indents
+      and remove trailing whitespace.
+2020-06-10: David Anderson
+    * CMakeLists.txt: Added print_loclists.c to the C
+      file list.
+    * runtests.sh: Changed the generated
+      (temporary) filenames
+      so it is easier to understand where to copy the new
+      baseline result to update the right baseline.
+    * testobjLE32PE.base: New baseline, needed as loclist
+      output changed.
+    * print_frames.c: Calling loclist dealloc on
+      error to avoid leaks.
+2020-06-10: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h : Updated  version string
+2020-06-09: David Anderson
+    * Makefile.am: New files due to refactoring.
+    * Makefile.in: Regenerated.
+    * command_options.c: Added --print-raw-loclists
+      which prints all the details of .debug_lists but does
+      not do any reference to .debug_info or .debug_addr
+      (for example).
+    * dwarfdump.c: Deals with --print-raw-loclists by
+      calling new function print_raw_all_loclists()
+    * esb_using_functions.c: Minor change to support
+      revised internal function interface to
+      dwarfdump_print_location_operations().
+    * glflags.h: Added global flag gf_print_raw_loclists.
+    * globals.h: Several new interfaces added so
+      dwarf_loc.c and dwarf_loclists.c call each other
+      as needed. And support for the different loclists
+      supported: DWARF 3, GNU Dwarf4 dwo extension,
+      and DWARF5.
+    * print_die.c:  Added die_indent_level a few places
+      for loclist printing. Significant changes to support
+      the loclist details.  Some renaming of things (data,
+      functions) whose purpose was obfuscated by the name.
+      Using new libdwarf interfaces that support the new
+      data in libdwarf.  Some significant refactoring so the
+      structure of what is being done can be easily seen.
+      No longer computes final loclist low/high addr as
+      libdwarf does that for us now.
+    * print_frames.c: Reflects the revised function
+      naming.
+    * print_frames.h: Reflects the revised function name.
+    * print_llex_codes.c: Factored out of print_die.c
+      and heavily revised to reflect the new location data.
+    * print_loclist_original.c: Factored out of print_die.c
+      and heavily revised to reflect the new location data.
+    * print_loclists.c: All new, this does the
+    .debug_loclists
+      specific printing.
+    * print_loclists_codes.c: All new. Prints DWARF5
+      loclists data properly.
+    * print_locs.c: Reflects a revised function name.  *
+    print_rnglists.c: Corrected an out of date comment.
+    * uri.c: 'unsigned int' instead of 'unsigned' for a
+      picky compiler.
+2020-05-23: David Anderson
+    * dwarf_globals.h: Define ESB_FIXED_ALLOC_SIZE 380.
+    * print_die.c,print_lines.c,print_pubnames.c: Now using
+      ESB_FIXED_ALLOC_SIZE in many places to (mostly)
+      avoid any need for malloc/free by the esb functions.
+2020-05-21: David Anderson
+    * dwarfdump.c: Now using DROP_ERROR_INSTANCE macro
+      everywhere needed, avoiding the hand-coding.
+      Using dwarf_dealloc_attribute() now.
+    * dwarf_globals.h: Extra parens in DROP_ERROR_INSTANCE
+      for readability, and using dwarf_dealloc_error()
+      in it for type-checking.
+    * print_die.c: Using dwarf_dealloc_attribute()
+      and dwarf_dealloc_die() now.
+    * print_frames.c: Now we call DROP_ERROR_INSTANCE
+      with the proper arguments as the compiler can
+      type-check that sort of thing. And fixed code to
+      honor its invariants (a function that should not
+      return DW_DLV_ERROR now avoids doing so).
+    * print_lines.c: Also using DROP_ERROR_INSTANCE now.
+    * print_macro.c: Now using DROP_ERROR_INSTANCE
+      and dwarf_dealloc_attribute().
+2020-05-19: David Anderson
+    * print_die.c: In an error case failed to dealloc the
+    rnglists head.
+2020-05-19: David Anderson
+    * dwarf_names.c,dwarf_names.h,
+    dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: New version string.
+2020-05-19: David Anderson
+    * print_die.c: Removed arguments that were not
+    needed from
+      a couple of libdwarf rnglists functions and changed
+      code here to match.
+    * print_rnglists.c:  Fix trailing whitespace.
+      Turn on printing range lists and offset table entries
+      (if any) with --print-raw-rnglists even if no -v.
+2020-05-17: David Anderson
+    * globals.h: Remove trailing whitespace.  *
+    print_die.c: Now prints DWARF5 .debug_rnglists section.
+      Fixes issues with handling certain attributes with
+      new FORMs in DWARF5.
+    * print_frames.c: Avoids terminating frame printing
+    when
+      errors are seen attempting to get a function name
+      for an fde.
+    * print_rnglists.c: New. Implements the details
+    of reading
+      the .debug_rnglists section.
+    * dwarf_alloc.c: Added new type, DW_DLA_RNGLISTS_HEAD.
+    * dwarf_die_deliv.c: Now reads all the DWARF5 CU
+    DIE fields
+      that are needed to evaluate FORMs and section
+      references.
+2020-05-04: David Anderson
+    * print_rnglists.c: Completing the code to print
+      all the details of the raw content of the DWARF5
+      .debug_rnglists section.
+2020-05-02: David Anderson
+    * CMakeLists.txt: Added print_rnglists.c.  *
+    Makefile.am: Added print_rnglists.c.  * Makefile.in:
+    Regenerated.  * command_options.c: Added a new option
+    --print-raw-rnglists.  * dwarfdump.c: Implemented
+    printing raw rangelists, but
+      not yet completely.
+    * gflags.c: Added a new flag gf_print_raw_rnglists.
+    * print_rnglists.c: Prints an initial partial
+      report on  contents of any .debug_rnglists[.dwo]
+      section.
+    * print_sections.h: Just minor reformatting of
+      comments. No change.
+2020-04-28: David Anderson
+    * dwarfdump.c,print_die.c,print_frames.c: Removed
+      the use of tab chars in the output and use a space or
+      two instead. This greatly shortens the line length
+      needed when printing frame information details.
+      Looks better without the 16 or 24 leading blanks on
+      all those lines too.  The tab characters elsewhere
+      were removed long ago.
+2020-04-26: David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: Updated version string.
+2020-04-25: David Anderson
+    * print_die.c: Fix indents and remove trailing
+    whitespace.  * print_frames.c: Rearranged what was
+    local Dwarf_Error
+      and what was local. Fixed a dwarf_dealloc to say
+      DW_DLA_ERROR, not DW_DLV_ERROR. Yikes.
+    * print_lines.c: Changed a local variable name,
+      filename->lsrc_filename so searches were more
+      meaningful. Added missing dwarf_dealloc to clear
+      dead data when appropriate.
+2020-04-24  David Anderson
+    * dwarf_names.c, dwarf_names.h: Updated version string.
+    * dwarfdump-ta-ext-table.h,dwarfdump-ta-table.h,
+      dwarfdump-tt-ext-table.h,dwarfdump-tt-table.h:
+      Updated version string.
+2020-04-23  David Anderson
+    * print_aranges.c: Remove a debugging printf.
+      Delete duplicate dealloc calls.
+    * print_lines.c: clarify what the dealloc's do
+      so we don't call dealloc on something already
+      cleared.
+2020-04-23  David Anderson
+    * dwarfdump.c: Added in dealloc to prevent leaks.
+    * print_aranges.c: More thorough doing dealloc
+      as soon as appropriate.
+    * print_die.c,print_frames.c,print_lines.c:  Doing
+      appropriate early dealloc in the necessary places.
+2020-04-22  David Anderson
+    * command_options.c: Added to a stderr warning
+    (longer message).  * dwarfdump.1: Removed SELECTIVE
+    ENTRY PRINTING
+      section in favor of the new URI-STYLE INPUT/OUTPUT
+      and the SELECTIVE* data renamed as  LIMITING OUTPUT.
+    * dwarfdump.c: Now everywhere expects to get back
+    status
+      from printing DWARF section data, reports on it if
+      there as an error , and continues.
+    * esb_using_functions.h: Various functions now have
+      Dwarf_Error * arg and return a DW_DLV_* value.
+    * globals.h: Now all the relevant functions return
+      a DW_DLV_* value and require Dwarf_Error * argument.
+    * print_aranges.c: Some formatting fixes plus
+      now get_producer_name() returns a DW_DLV* value,
+      like more or less everything else.
+    * print_die.c: Major revision to now return on error
+      with DW_DLV_* instead of printf followed by exit().
+    * print_frames.c: New local function
+    dealloc_loc_atlist()
+      to clean up on-the-spot. Reintroduced
+      load_CU_error_data() to amplify the information
+      reported on error.
+    * print_lines.c: Line formatting corrected.
+    * print_macro.c: Line formatting corrected.
+    * print_pubnames.c: Reflects new arglist to
+      get_producer_name().
+    * print_ranges.c: Line
+      formatting corrected.
+    * dwarf_errmsg_list.h: Added
+      DW_DLE_USER_DECLARED_ERROR so
+      dwarfdump can declare an error on its own.
+    * dwarf_error.c: Added dwarf_error_creation() to
+      allow dwarfdump
+      to create an error with a detailed explanation.
+    * dwarf_form.c: declared a DW_FORM_rnglistx to be
+      used soon.
+    * dwarf_ranges.c: Comments about the
+      missing .debug_rnglists
+      section support (coming soon).
+2020-04-22  David Anderson
+    * dwarfdump-ta-ext-table.h: regenerated
+    * tag_attr_ext.list: Added to common extensions list
+      DW_AT_GNU_pubnames DW_AT_GNU_pubtypes
+      DW_AT_GNU_dwo_name DW_AT_GNU_ranges_base
+      DW_AT_GNU_addr_base
+2020-04-17  David Anderson
+    * dwarfdump.c: Clarified some error messages and
+      changed the should_skip_this_cu() from a predicate
+      function to one in the standard form returning
+      a DW_DLV_* value with a boolean pointer and a
+      Dwarf_Error*
+    * globals.h: Now should_skip_this_cu and
+      print_section_groups_data are in standard form for
+      calling libdwarf functions, returning a DW_DLV*.
+    * print_die.c, print_aranges.c, print_pubmames.c,
+      print_ranges.c,print_section_groups.c: Now with the
+      standard form returning a DW_DLV* and no longer call
+      print_error so returns on error, does not exit().
+      Also fixed a lack of a dealloc of cu_die2 in
+      print_die.c.
+    * print_macro.c: Deleted dwarf_dealloc() that are
+      no longer appropriate given we don't just call
+      exit(). These were not allocated by the function that
+      was dealloc-ing so removed the deallocs here: Let
+      higher levels do it when we return the DW_DLV_ERROR.
+2020-04-16  David Anderson
+    * globals.h:prototypes of print_line_numbers_this_cu
+      and
+      print_macros_5style_this_cu changed to the new style
+      with int return and Dwarf_Error *argument.
+    * dwarf_macrocheck.c: Added a comment line.  *
+      print_die.c(print_one_die_section): Calls the
+      revised section prints per-CU- so errors are passed
+      back and dealt with.
+    * print_lines.c: Now functions return int instead
+      of print_error and exit. Various errors get more
+      detailed output too.
+    * print_macro.c: Now with the new style of returning
+      errors up to caller.
+2020-04-14  David Anderson
+    * globals.h: Deleted unused function prototype.
+      Updated print_macinfo_by_offset() to the new style
+      of returning a DW_DLV*.
+    * print_die.c: Now a couple of places we avoid
+      calling print_error() as it exits and deal sensibly
+      with return values.
+    * print_macros.c: The printing of DWARF2,3,4 macro data
+      is now updated to avoid print_error() and to print
+      more details about problems.  And report output now
+      looks more regular.
+    * print_abbrevs.c: Fixed indents and trailing
+    whitespace.
+2020-04-13  David Anderson
+    * dwarfdump.c,globals.h, print_abbrevs.c:
+      print_abbrevs()
+      now returns an error properly with the details so
+      dwarfdump can deal with it properly.
+2020-04-10  David Anderson
+    * dwarfdump.c: Printing gdb_index and debugfission
+      index
+      code now all returns DW_DLV* in the new style.
+    * globals.h: print_gdb_index() and
+      print_debugfission_index()
+      get updated prototypes.
+    * print_debugfission.c: Code to match the new protypes,
+      passig errors back up.  Revised formatting a bit
+      for accuracy and completeness.
+    * print_die.c: Eliminated the odd use of stderr. All
+      now stdout.
+    * print_gdbindex.c: Improved various error messages.
+      Updated print_gdb_index() to the new return-on-error
+      approach.
+2020-04-07  David Anderson
+    * compiler_info.c: Clarified a comment and
+      split a too-long line.
+    * dwarfdump.c: Now handles a print_pubnames that
+      returns a DW_DLV* and deals with it. Made
+      a dwarf_dealloc conditional on  a non-null
+      cu_die_for_print_frames. get_producer_name()
+      now always returns and avoids leaks.  We add
+      DEBUG_PUBNAMES  to the list wh print CU data on error
+      (It knows the CU-DIE)
+    * gflags.c: Reformatted to avoid a too-long line.
+    * globals.h: Revised prototype for print_pubnames().
+    * print_aranges.c: Removed too early destructor
+      on producer_name.
+    * print_die.c: Fixed a too-long-comment-line.  *
+    print_frames.c: Moved a check for DW_DLV_ERROR up
+      a few lines so we don't check gf_check_frames()
+      when not needed.
+    * print_pubnames.c: Removed deal_with_name_offset_err()
+      as not the right thing to do. Now print_pubnames
+      accepts a Dwarf_Error * argument and always returns
+      a DW_DLV* result.
+2020-04-03  David Anderson
+    * print_aranges.c: Fixed trailing whitespace and
+    indents.
+2020-04-03  David Anderson
+    * dwarfdump.c: Now print_strings() and
+    print_macro_statistics()
+      take Dwarf_Error * as argument and return a DW_DLV*
+      value.
+    * globals.h: prototype of print_strings altered.  *
+    macrocheck.c(print_macro_statistics): Using esb_s to
+      more detailed messages and returning a DW_DLV*
+      value..
+    * macrocheck.h: Updated prototype for
+    print_macro_statistics().  * print_frames.c: Deleted
+    many #if 0/#endif and their
+      debug printf-s.
+    * print_strings.c: Now uses get_true_section_name() so
+      we report on any compression used.
+2020-04-03  David Anderson
+    * runtests.sh: Added esb to the build of selfmc as
+    macro check
+      now uses esb.c. Made the dwarfdump tests mention
+      of update 'mv' commands be conditional on having
+      actually found a difference (having them show when
+      no difference was pointlessly confusing).
+2020-04-03  David Anderson
+    * dwarfdump.c: print_aranges() now uses the new form
+    and returns
+      a DW_DLV_* value.
+    * globals.h: print_aranges returns a value and has
+    a Dwarf_Error*
+      second argument now.
+    * print_aranges.c: No longer calls print_error()
+    but instead
+      returns a DW_DLV to dwarfdump.c.
+2020-04-03  David Anderson
+    *
+    dwarfdump.c,glflags.h,globals.h,print_die.c,print_frames.c,
+      print_locs.c,print_reloc.c,print_reloc_decls.h,print_static_funcs.c:
+      Fix indent errors and remove trailing whitespace.
+2020-04-02  David Anderson
+    * addrmap.c: Ensure it wn't try to use a null input to
+    addr_map_destroy().  * dwarfdump.1: Add documentation
+    on running dwarfdump on split-dwarf
+      objects (See DWARF5 standard, section 6.3).
+    * dwarfdump.c (process_one_file):Applyingthe new
+    error-return scheme
+      to dwarf_frames.c required serious revisions and
+      refactoring.
+    * dwconf_using_functions.h: The declaration of
+    print_frames()
+      changed.
+    * glflags.h: gf_debug_addr_missing_search_by_address,
+      gf_error_code_in_name_search_by_address, and
+      gf_all_cus_seen_search_by_address are here now
+      instead of being hard to reason about global/local
+      data.
+    * glflags.c: Initializes the three fields.
+    * globals.h: Revised declaration of print_frames() and
+      get_proc_name.  Removed the declaration of
+      current_cu_die_for_print_frames.
+    * print_die.c(print_attribute): Properly use the
+    return value
+      of dwarfdump function get_proc_name_by_die().
+      Also renamed a small number of local variables
+      in print_exprloc_content() to make the code more
+      readable( tempud -> exprlength, tempud->fileindex);
+    * print frames.c: Major revisions to clarify
+      data lifetimes and to return DW_DLV_ERROR
+      to let higher levels clean up for themselves.
+      Stop returning true/false and return DW_DLV_OK or
+      DW_DLV_NO_ENTRY with respect to finding procedure
+      names from code addresses`.
+    * print_locs.c: Added an accidentally-omitted
+      esb_constructor for secname.`
+    * print_ranges.c: Move acquiring section name down
+      after the first call of dwarf_get_ranges() so we get
+      the true name with any compression involved reported.
+    * print_sections.c: Removed Dwarf_Die
+    current_cu_die_for_print_frames,
+      it is no longer needed.
+    * print_reloc.c: Was failing to free locally allocated
+      space in some places in print_relocinfo_32().
+2020-03-30  David Anderson
+    * dwarfdump.c,dwconf_using_functions.h,
+      globals.h,print_die.c,print_frames.c,print_frames.h,
+      print_locs.c: Applyingthe new error-return scheme
+      to print_locs.c involves a number of changes beyond
+      print_locs.c itself.
+2020-03-29  David Anderson
+    * dwarfdump.c: Change several section reports to the
+      new approach of errors propagating back to dwarfdump
+      process_one_file().
+    * globals.h: print_debug_names(), print_object_header()
+      print_relocinfo(),print_tag_attributes_usage()
+      print_attributes_encoding() all now return status
+      DW_DLV_OK etc as appropriate.
+    * print_die.c(print_attributes_encoding,
+      print_tag_attributes_usage): Implement passing status
+      back to process_one_file().
+    * print_dnames.c,print_reloc.c,print_reloc_decls.h:
+      Implement passing status back to process_one_file().
+2020-03-28  David Anderson
+    * dwarfdump.c: print debuglink and print str_offsets
+      now getting dwarf status and Dwarf_Error back.
+    * dwarf_globals.h: Revised prototype for
+      print_str_offsets_section().
+    * print_str_offsets.c: Now returns libdwarf status
+      and lets dwarfdump print the error if there is one.
+2020-03-28  David Anderson
+    * dwarfdump.c(process_one_file): Beginning a
+      project to pass libdwarf status all the way back to
+      dwarfdump.c. Enables more flexibility in printing
+      and better ability to dealloc memory.
+    * globals.h: print_static_funcs(), print_static_vars(),
+      print_types(), and print_weaknames() now return int
+      and pass in a Dwarf_Error.
+    * print_static_funcs.c,print_static_vars.c,
+      print_types.c, print_weaknames.c: Implement
+      passing back (to dwarfdump.c) of libdwarf status
+      and Dwarf_Error by returning as required when
+      DW_DLV_ERROR encountered.
+2020-03-27  David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: regenerated with latest version
+      date string.
+2020-03-27  David Anderson
+    * print_die.c: Cleaned trailing whitespace and an
+      indent error.
+2020-03-27  David Anderson
+    * print_die.c: Now does a better job of cleaning
+      up libdwarf data it requested when there is a serious
+      DWARF error.
+2020-03-26  David Anderson
+    * print_ranges.c: For a particular serious
+    error/corruption
+      print a detailed error message, dwarf_dealloc() the
+      Dwarf_Error instance and skip to the next section
+      to continue.
+2020-03-26  David Anderson
+    * dwarfdump.c: Now calls the new free_all_dwconf()
+      to avoid leaking memory. should_skip_this_cu()
+      ensures it does not leak.
+    * dwconf.c: Use struct esb to build a string, avoid
+      leaving a static string pointer around.
+      Add free_all_dwconf() so the dwconf malloc space
+      can be cleaned up at end of run.
+    * dwconf.h: Declare free_all_dwconf().  *
+    print_frames.c(get_proc_name): Add loopok variable so
+    the loop
+      on cu contexts can stop early when a serious error
+      is encountered. The procedure name is not very
+      critical, just nice to have.  Ensured no leaks in
+      dwarfdump here.
+    * print_lines.c: When an error but we wish to continue
+      ensure the Dwarf_Error is dealloc-d.
+    * print_pubnames.c: Ensure no leaks on error from
+    libdwarf.
+2020-03-25  David Anderson
+    * print_die.c,print_lines.c,print_pubnames.c:
+      Fix indents and remove trailing whitespace.
+    * print_frames.c : Fix whitespace and ensure
+      a return of DW_DLV_ERROR (which will basically be
+      ignored anyway) gets a dwarf_dealloc applied to the
+      Dwarf_Error argument.
+2020-03-24  David Anderson
+    * print_lines.c: Added a dwarf_dealloc DW DLA STRING
+      that had been overlooked.
+2020-03-24  David Anderson
+    * print_die.c: Ensuring that when an error is
+      created it gets dealloc-d.
+    * print_gdbindex.c(print_gdb_index): It was failing
+    to dealloc
+      the data it requested from libdwarf.
+2020-03-23  David Anderson
+    * print_die.c: More cases trying to continue after
+    error.
+      And ensuring no dwarf leakages.
+    * print_frames.c: More accurate error report (one
+    place).  * print_pubnames.c: Fixing leaks and making
+    some error
+      message more precise (showing values).
+2020-03-21  David Anderson
+    * dwarfdump.c:Add flag_data_post_cleanup() in a few
+      more places early termination situations.
+    * print_abbrevs.c: Move some variables to the most
+      local scope. Revise the while loop so we can ensure
+      local alloc cleaned up in case of error. Remove
+      pointless duplicate tests for zero abbrev_code.
+    * print_die_stack: Refactor, adding dealloc_die_stack()
+      and calling it where needed to free up local malloc
+      data.
+    * print_frames.c: Add more dwarf_fde_cie_list_dealloc()
+      where appropriate.
+2020-03-20  David Anderson
+    * print_aranges.c: In case of error was not cleaning
+      up allocations immediately in all cases.
+2020-03-20  David Anderson
+    * print_frames.c,print_dgbindex.c,print_macros.c,
+      print_pubnames.c,print_ranges.c,print_reloc.c,
+      sanitized.c,tag_attr.c,testesb.c, uri.c: Remove use
+      of esb_append_printf() and use esb_append_printf_i
+      etc instead.  Then null device will never be set up.
+2020-03-19  David Anderson
+    * globals.h: Using parens in the DROP_ERROR_INSTANCE
+      macro to avoid accidental side effects.
+    * print_die.c: Now uses more localized pointers
+      where possible to make understanding the code
+      simpler. Much more careful to dwarf_dealloc
+      things in the face of errors in the DWARF and early
+      termination of dwarfdump.
+    * print_lines.c: Much more careful to dwarf_dealloc
+      things in case of error.
+2020-03-17:   David Anderson
+    * dwarfdump.c: Report the number of major errors
+      more accurately.
+    * print_die.c: Report the number of major errors
+      more accurately.
+    * print_pubnames.c: Revise certain if/then/else
+      to make the flow clearer.
+2020-03-16:   David Anderson
+    * print_ranges.c: Added a dealloc of
+    rangeset,DW_DLA_RANGES.
+2020-03-15:   David Anderson
+    * glflags.c: Now defaults to not printing the global
+      alloc sums. Use --print-alloc-sums option to
+      dwarfdump to print them (ensure GLOBAL_ALLOC_SUMS
+      defined in libdwarf/dwarf_alloc.c).
+2020-03-15:   David Anderson
+    * print_pubnames.c: Reformat a too-long line.
+2020-03-14:   David Anderson
+    * dwarfdump.c: Changed an argument name in the
+    print_error*
+      group of functions to reflect the real meaning,
+      dwarf_code -> dwarf_ret_val.
+    * print_aranges.c (print_aranges): Only call
+    dwarf_dealloc() in
+      case pa_error is non-null.
+    * print_die: Initialize no_of_elements at long last.
+    * print_pubnames.c: A code line was ... long. 2
+    lines now.
+2020-03-12:   David Anderson
+    * print_abbrevs.c: Add zero of dealloc'd pointer.
+2020-03-12:   David Anderson
+    * dwarfdump.c: Simplified check_for_major_errors().
+      Deleted some #if 0 code.
+    * print_die.c: Fiexed indent and trailing whitespace.
+    * print_macro.c: Deleted a bogus
+      dwarf_dealloc_macro_context() call.
+2020-03-12:   David Anderson
+    * print_die.c: Small changes to cleanup DIE allocations
+      so not relying on de_alloc_tree.
+2020-03-12:   David Anderson
+    * print_aranges.c: Fixed trailing whitespace and
+    indents.
+2020-03-12:   David Anderson
+    * esb.c, dwarfdump.c: Fixed trailing whitespace and
+    indents.
+2020-03-12:   David Anderson
+    * print_str_offsets.c: Clean up by doing
+      proper dealloc calls instead of relying on
+      de_alloc_tree to clean up.
+2020-03-12:   David Anderson
+    * print_pubnames.c: Clean up by doing
+      proper dealloc calls instead of relying on
+      de_alloc_tree to clean up.
+2020-03-12:   David Anderson
+    * print_macro.c: Clean up by doing
+      proper dealloc calls instead of relying on
+      de_alloc_tree to clean up.
+2020-03-12:   David Anderson
+    * print_lines.c: Eliminate leaks that relied
+      on de_alloc_tree to clean up.
+2020-03-12:   David Anderson
+    * makename.c: Correct some comments.
+2020-03-12:   David Anderson
+    * print_aranges.c: Eliminate leaks that relied
+      on de_alloc_tree to clean up.
+2020-03-12:   David Anderson
+    * print_abbrevs.c: Eliminate leaks that relied
+      on de_alloc_tree to clean up.
+2020-03-12:   David Anderson
+    * command_options.h, command_options.c: Adds
+      uri_data_constructor() and uri_data_destructor() to
+      avoid an old memory leak (called from dwarfdump.c).
+2020-03-12:   David Anderson
+    * dwarfdump.c: Cleans up old and small memory
+      leaks and simplifies the code as well.
+2020-03-09:   David Anderson
+    * command_options.c: Implements two options primarily
+    for
+      dwarfdump developers: --suppress-de-alloc-tree and
+      --print-alloc-sums.
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: regenerated with latest version
+      date string.
+    * dwarfdump.c: Implements the two new options.  *
+    glflags.c,glflags.h: declares and instantiates
+      a new global flag gf_print_alloc_sums for the new
+      option --print-alloc-sums.
+    * print_die.c: Arranged correct dwarf_dealloc of
+      DW_DLA_ERROR errors when calling
+      dwarf_formudata/sdata and discarding errors.
+2020-02-25:   David Anderson
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h dwarfdump-tt-ext-table.h
+      dwarfdump-tt-table.h: updated date string.
+2020-02-25:   David Anderson
+    * esb.c: Slight corrections so a %-12s will ignore
+    the -12
+      if the string to be inserted is more than 11 bytes
+      long.  Allowed use of UNUSEDARG.
+    * runtests.sh: Restore the running of the testesb.c
+      test program.
+    * testesb.c: Added a new test case specifically for
+      testing the change in esb.c. Eliminated the unneeded
+      tests on allocation-size, that was not helpful,
+      yet was tedious to make meaningful.
+2020-02-20:   David Anderson
+    * print_die.c: Removed the last snprintf the required
+      fixed spaces and now use esb functions to do the
+      message creation.
+2020-02-19:   David Anderson
+    *
+    checkutil.c,common.c,naming.c,print_abbrevs.c,print_die.c,
+      print_lines.c: Removed the ORIGINAL_SPRINTF versions
+      in favor of esb_append_printf_[usi] versions.
+      We have not been using the s[n]printf versions for
+      a while now.
+2020-02-16:   David Anderson
+    * globals.h: Adds DWVERSION5 to use with testing for
+      version number details (which matters when calling
+      dwarf_srcfiles())
+    * print_die.c: Now recognizes that DWARF5 is different
+      from earlier versions in the way dwarf_srcfiles()
+      array of string pointers is to be used.  Refactored
+      the srcfiles checking to its own function to simplify
+      reading the code.
+2020-02-13:   David Anderson
+    * dwarf_names.c dwarf_names.c,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,
+      dwarfdump-tt-table.h: regenerated with new date
+      string.
+2020-01-27:   David Anderson
+    * print_die.c: Now attributes the correct actual form
+      in more places (meaning in error messages, here and
+      in the previous commit)..
+2020-01-25:   David Anderson
+    * print_die.c: Now attributes the correct actual form
+      name (as opposed to a vaguely generic FORM name)
+2020-01-16:   David Anderson
+    * print_die.c: Now ensures local Dwarf_Sig8
+      variables are always initialized with zero bytes.
+      This does not fix bugs, but it makes the code easier
+      for the reader to reason about.
+    * testobjLE32PE.test.c: Removed trailing whitespace
+      and fixed indentation errors.
+2020-01-14:
+    * dwarf_names.c,dwarf_names.h,dwarfdump-ta-ext-table.h,
+      dwarfdump-ta-table.h,dwarfdump-tt-ext-table.h,dwarfdump-tt-table.h:
+      Updated version string.
+2020-01-05:
+    * dwconf.c: Fix CoveritySan CID 206594 resource leak
+      if an error reading dwarfdump.conf.
+    * sanitized.c(no_questionable_chars): Fixed
+    CoverityScan
+      CID 206595. The code was failing to sanitize %
+      characters: the test for % has been moved up a
+      few lines.  do_sanity_insert() had the same problem
+      with %. Fixed.  And do_sanity_insert() had a final
+      line of unreachable code; now fixed by simplifying
+      the code (an ASSERT added in a comment). Coverity
+      Scan CID 206596.
+    * print_die.c(traverse_one_die): Was failing to check
+      for the normal dwarf return int and letting next
+      code deal with the fallout (and leak an error
+      record). Now we check and avoid any leak or surprise.
+      Coverity Scan CID 20659
+
+

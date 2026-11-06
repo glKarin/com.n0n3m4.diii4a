@@ -7,7 +7,7 @@
 #pragma hdrstop
 
 #include "../Game_local.h"
-#include "../../game/Projectile.h"
+#include "../Projectile.h"
 #include "../ai/AI.h"
 
 #ifdef _QUAKE4 //karin: mute player footstep sound

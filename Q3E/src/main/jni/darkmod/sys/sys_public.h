@@ -317,8 +317,8 @@ void			Sys_Sleep( int msec );
 int				Sys_Milliseconds( void );
 
 // for accurate performance testing
-double			Sys_GetClockTicks( void );
-double			Sys_ClockTicksPerSecond( void );
+uint64			Sys_GetClockTicks( void );
+uint64			Sys_ClockTicksPerSecond( void );
 
 // timing equivalent to boost::posix_time::microsec_clock
 // returns number of microseconds passed after 1970-Jan-01
@@ -572,8 +572,8 @@ public:
 	virtual void			DebugPrintf( const char *fmt, ... )id_attribute((format(printf,2,3))) = 0;
 	virtual void			DebugVPrintf( const char *fmt, va_list arg ) = 0;
 
-	virtual double			GetClockTicks( void ) = 0;
-	virtual double			ClockTicksPerSecond( void ) = 0;
+	virtual uint64			GetClockTicks( void ) = 0;
+	virtual uint64			ClockTicksPerSecond( void ) = 0;
 	virtual cpuid_t			GetProcessorId( void ) = 0;
 	virtual const char *	GetProcessorString( void ) = 0;
 	virtual void			FPU_SetFTZ( bool enable ) = 0;

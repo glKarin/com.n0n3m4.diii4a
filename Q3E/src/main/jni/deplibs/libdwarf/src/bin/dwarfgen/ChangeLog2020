@@ -1,0 +1,21 @@
+2020-11-25 David Anderson
+    * Makefile.in: Regenerated from configure.ac.
+      To support data needed for dwarfexample make check.
+2020-10-03 David Anderson
+    * Makefile.in: autoreconf with newly installed ubuntu
+      20.04 created small changes.
+    * COPYING: Corrected the references to the BSD copyright
+      to use "two-clause BSD license".
+2020-07-13 David Anderson
+    * dwarfgen.cc: Add create_debug_sup_content() so we
+      could create a .debug_sup print testcase.
+      New option --add-debug-sup. and cmdoptions.adddebugsup
+      flag.
+    * general.h: Added  bool adddebugsup.
+    * ireptodbg.cc: Ugly indent error fixed.
+2020-06-14 David Anderson
+    * irepattrtodbg.cc: DWARF5 required adding new
+      DW_FORM_CLASS entries in libdwarf.h.
+      To aviod annoying warnings from dwarfgen we now
+      add the new ones. We do not do anything with them
+      at present.

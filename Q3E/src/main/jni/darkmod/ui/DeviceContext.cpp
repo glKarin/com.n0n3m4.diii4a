@@ -74,7 +74,7 @@ int idDeviceContext::FindFont( const char *name ) {
 	fontParameters_t fontParams;
 	idStr fileName = ParseFontParameters( fontName, fontParams );
 
-	fontInfoEx_t fontInfo;
+	fontInfoEx_t fontInfo = {}; // DG: initialize this
 	if ( renderSystem->RegisterFont( fileName, fontParams, fontInfo ) )
 	{
 		idStr::Copynz( fontInfo.name, name, sizeof( fontInfo.name ) );

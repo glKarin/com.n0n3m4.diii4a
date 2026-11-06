@@ -47,16 +47,26 @@ typedef struct {
 } inServer_t;
 
 // the menu gui uses a hard-coded control type to display a list of network games
-typedef struct {
+typedef struct 
+#ifdef _RAVEN
+networkServer_t : scannedServer_t
+#endif
+{
+#if !defined(_RAVEN)
 	netadr_t	adr;
 	idDict		serverInfo;
 	int			ping;
+#endif
 	int			id;			// idnet mode sends an id for each server in list
+#if !defined(_RAVEN)
 	int			clients;
+#endif
 	char		nickname[ MAX_NICKLEN ][ MAX_ASYNC_CLIENTS ];
 	short		pings[ MAX_ASYNC_CLIENTS ];
 	int			rate[ MAX_ASYNC_CLIENTS ];
+#if !defined(_RAVEN)
 	int			OSMask;
+#endif
 	int			challenge;
 } networkServer_t;
 

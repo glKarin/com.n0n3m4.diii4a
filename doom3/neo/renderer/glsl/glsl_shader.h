@@ -25,17 +25,8 @@
 	GLSL_SHADER const char * x##_FRAG = a##_FRAG;
 
 #include "glsl_shader_100.h"
-#include "glsl_shader_d3xp_100.h"
 
-#ifdef _POSTPROCESS
-#include "glsl_shader_postprocess_100.h"
-#endif
 
-#include "glsl_shader_debug_100.h"
-
-#ifdef _HUMANHEAD
-#include "glsl_shader_prey_100.h"
-#endif
 
 #ifdef GL_ES_VERSION_3_0
 #define ES3_SHADER_SOURCE_PLACEHOLDER(x) \
@@ -55,17 +46,6 @@
 	ES3_SHADER_SOURCE_ALIAS(x, a);
 
 #include "glsl_shader_300.h"
-#include "glsl_shader_d3xp_300.h"
-
-#ifdef _POSTPROCESS
-#include "glsl_shader_postprocess_300.h"
-#endif
-
-#include "glsl_shader_debug_300.h"
-
-#ifdef _HUMANHEAD
-#include "glsl_shader_prey_300.h"
-#endif
 
 #else
 #define ES_SHADER_SOURCE_PLACEHOLDER ES2_SHADER_SOURCE_PLACEHOLDER

@@ -1,0 +1,51 @@
+2019-11-07 David Anderson
+     * run-all-tests.sh,buildandreleasetest.sh: Now handle
+       --enable-nonstandardprintf
+       though that's not sufficient to let these work everywhere.
+2019-11-04 David Anderson
+     * buildandreleasetest.sh: Now handles --disable-libelf
+       so we can run this test successfully in more environments.
+       A few fixes to silly indentations.
+       If cmake is not available skip the cmake test.
+     * run-all-tests.sh: Now handles --disable-libelf
+       and --enable-nonstandardprintf
+       and when libelf missing avoids checks that could
+       not possibly pass.
+2019-10-29 David Anderson
+     * buildandreleasetest.sh: If cmake is not installed
+       do not attempt to run it.
+2019-10-28 David Anderson
+     * FIX-CONFIGURE-TIMES: No longer does echo on every file name,
+       that was silly.  Answers the  'are we in the right place?' now.
+2019-10-24 David Anderson
+     * run-all-tests.sh: Improving the precision of
+       (meaning adding words to) the
+       status messages so it's easier to interpret
+       the output text.
+2019-10-23 David Anderson
+     * buildandreleasetest.sh: Do --enable-wall or cmake
+       equivalent for every build.
+2019-10-22 David Anderson
+     * baseconfig.h: Now has a fake PACKAGE_VERSION
+       and defines BUILD_STANDARD_SOURCE, both for use
+       by buildstandardsource.sh
+     * ddbuild.sh: One comment line was long for no
+       good reason. Made it into two lines.
+     * buildandreleasetest.sh: now the cmake is with -DWALL
+2019-10-18 David Anderson
+     * buildandreleasetest.sh: Reference $HOME, not
+       a hard coded home dir.
+2019-10-18 David Anderson
+     * run-all-tests.sh: using a small function to check for failure
+       reduces the file size by more than 40 lines and improves
+       readability.
+2019-10-17 David Anderson
+     * buildandreleasetest.sh:  The cmake test had misspellings
+       in the cmake command options.
+     * run-all-tests.sh: Renamed from run-bld-tests-readelfobj.sh
+       and with small corrections. It now works in one environment!
+2019-10-16 David Anderson
+     * run-bld-tests-readelfobj.sh: New runs all the make check
+       and the overall tests.
+     * buildandreleasetest.sh: Added a ctest -R self
+       to the test.

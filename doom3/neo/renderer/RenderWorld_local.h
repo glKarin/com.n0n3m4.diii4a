@@ -43,6 +43,11 @@ typedef struct portal_s {
 	idPlane					plane;			// view must be on the positive side of the plane to cross
 	struct portal_s 		*next;			// next portal of the area
 	struct doublePortal_s 	*doublePortal;
+#ifdef _RAVEN //openQ4: fade portals
+	idImage *				image;			// optional fade image for distance-cull portal transitions
+	float					cullNear;		// near threshold for portal fade/cull
+	float					cullFar;		// far threshold for portal fade/cull
+#endif
 #ifdef _HUMANHEAD
 #if GAMEPORTAL_PVS
     bool                    isGamePortal;
@@ -71,10 +76,12 @@ typedef struct portalArea_s {
 	portal_t 		*portals;		// never changes after load
 	areaReference_t	entityRefs;		// head/tail of doubly linked list, may change
 	areaReference_t	lightRefs;		// head/tail of doubly linked list, may change
-#ifdef _RAVEN
-#ifdef _RAVEN_BSE
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
     areaReference_t	effectRefs;		// head/tail of doubly linked list, may change
 #endif
+#ifdef _SPLASHDAMAGE
+	int				portalFlags;
+	const sdDeclAmbientCubeMap *cubeMapDecl;
 #endif
 } portalArea_t;
 
@@ -88,7 +95,6 @@ typedef struct {
 	// this is the area number, else CHILDREN_HAVE_MULTIPLE_AREAS
 } areaNode_t;
 
-
 #ifdef _HUMANHEAD
 #if GAMEPORTAL_PVS
 typedef struct gamePortalInfo_s
@@ -100,6 +106,30 @@ typedef struct gamePortalInfo_s
 	idVec3 dstPosition; // cameraTarget position
 } gamePortalInfo_t;
 #endif
+#endif
+
+#ifdef _SPLASHDAMAGE
+typedef struct envBounds_s
+{
+	idBounds bounds;
+	int numPlanes;
+	idList<idPlane> planes;
+} envBounds_t;
+typedef struct mapEnvBounds_s
+{
+	idStr name;
+	idBounds bounds;
+	int numEnvBounds;
+	idList<envBounds_t> envBounds;
+} mapEnvBounds_t;
+struct atmosLightProjection_s
+{
+	int num;
+	int length;
+	idMat3 mat3;
+	idBounds bounds;
+	idList<byte> list;
+};
 #endif
 
 class idRenderWorldLocal : public idRenderWorld
@@ -182,6 +212,8 @@ class idRenderWorldLocal : public idRenderWorld
         virtual void			DebugFOV(const idVec4& color, const idVec3& origin, const idVec3& dir, float farDot, float farDist, float nearDot, float nearDist, float alpha, int lifetime) { (void)color; (void)origin; (void)dir; (void)farDot; (void)farDist; (void)nearDot; (void)nearDist; (void)alpha; (void)lifetime; }
 
         virtual void			FindVisibleAreas( idVec3 origin, int areaNum, bool *visibleAreas );
+
+		virtual void			RenderPortalFades( void );
 #if 1
         void					FindVisibleAreas_r(const idVec3 &origin, int areaNum, bool *visibleAreas);
 #else
@@ -189,14 +221,11 @@ class idRenderWorldLocal : public idRenderWorld
 #endif
 
 // jscott: handling of effects
-        virtual qhandle_t		AddEffectDef(const renderEffect_t* reffect, int time);
-        virtual bool			UpdateEffectDef(qhandle_t effectHandle, const renderEffect_t* reffect, int time);
-        virtual void			StopEffectDef(qhandle_t effectHandle);
-        virtual const class rvRenderEffectLocal* GetEffectDef(qhandle_t effectHandle) const;
-        virtual void			FreeEffectDef(qhandle_t effectHandle);
         virtual bool			EffectDefHasSound(const renderEffect_s* reffect);
+		virtual const class rvRenderEffectLocal* GetEffectDef(qhandle_t effectHandle) const;
+#endif
 
-#ifdef _RAVEN_BSE
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
         void                    MarkEffectDef(int effectHandle);
         void                    PushEffectDef(int effectHandle);
         void                    AddAreaEffectRefs(int areaNum, const struct portalStack_s *ps);
@@ -204,10 +233,89 @@ class idRenderWorldLocal : public idRenderWorld
         void					PushPolytopeIntoTree_r(idRenderEntityLocal *def, idRenderLightLocal *light, rvRenderEffectLocal *reffect, const idBox *box, const idVec3 *points, int numPoints, int nodeNum);
 
         void					PushPolytopeIntoTree(idRenderEntityLocal *def, idRenderLightLocal *light, rvRenderEffectLocal *reffect, const idBox *box, const idVec3 *points, int numPoints);
-#endif
+
+		// RAVEN BEGIN
+		// jscott: handling of effects
+		virtual qhandle_t		AddEffectDef(const renderEffect_t* reffect, int time);
+		virtual bool			UpdateEffectDef(qhandle_t effectHandle, const renderEffect_t* reffect, int time);
+		virtual void			StopEffectDef(qhandle_t effectHandle);
+		virtual void			FreeEffectDef(qhandle_t effectHandle);
+		// RAVEN END
 
 	    idList<rvRenderEffectLocal*>	effectDefs;
-        int                             procVersion; //karin: for compat doom3 proc
+#endif
+
+#ifdef _SPLASHDAMAGE
+		virtual void			RestartEffectDef( qhandle_t effectHandle );
+		virtual void			FreeStoppedEffectDefs( void );
+
+		// Game side occlusion tests
+		virtual qhandle_t		AddOcclusionTestDef( const occlusionTest_t *occtest );
+		virtual void			UpdateOcclusionTestDef( qhandle_t occtestHandle, const occlusionTest_t *occtest );
+		virtual bool			IsVisibleOcclusionTestDef( qhandle_t occtestHandle );
+		virtual	void			FreeOcclusionTestDef( qhandle_t occtestHandle );
+		virtual int				CountVisibleOcclusionTestDef( qhandle_t occtestHandle );
+		virtual void			UpdateOcclusionTests( void );
+
+		virtual idRenderModel*	CreateDecalModel();
+		virtual void 			AddToProjectedDecal( const idFixedWinding& winding, const idVec3 &projectionOrigin, const bool parallel, const idVec4& color, idRenderModel* model, int entityNum, const idMaterial** onlyMaterials = NULL, const int numOnlyMaterials = 1 );
+		virtual void			ResetDecalModel( idRenderModel* model );
+
+		virtual void			ProjectDecalOntoWorld( const idFixedWinding &winding, const idVec3 &projectionOrigin, const bool parallel, const float fadeDepth, const idMaterial *material, const int startTime, const int currentTime );
+
+		virtual void			AddCheapDecal( qhandle_t entityHandle, const cheapDecalParameters_t &params, float time );
+
+		virtual void			ClearDecals( void );
+
+		virtual void			AddEnvBounds( idVec3 const &origin, idVec3 const &scale, const char *cubemap );
+
+		virtual void			UpdatePortalOccTestView( int viewID );
+
+		virtual	bool			AreasAreConnected( int areaNum1, int areaNum2, portalFlags_t flag );
+		virtual	bool			AreasAreConnected( int areaNum1, int areaNum2 );
+
+		// set portal flags on areas directly; primarely for editor reasons
+		virtual void			SetAreaPortalFlags( int areaNum, int flags );
+		virtual int				GetAreaPortalFlags( int areaNum ) const;
+
+		// set the ambient lighting & atmosphere to use for this area
+		virtual void			SetAreaAmbientCubeMap( int areaNum, const sdDeclAmbientCubeMap *cubeMapDecl );
+		virtual void			SetCubemapSunProperties( const sdDeclAmbientCubeMap *cubeMapDecl, const idVec3 &sunDir, const idVec3 &sunColor );
+
+		virtual bool			ModelTrace( modelTrace_t &trace, qhandle_t entityHandle, const idVec3 &start, const idVec3 &end, const float radius, int surfCollision/* = SURF_COLLISION*/ ) const;
+
+		virtual void			DebugArrow( const idVec4 &color, const idVec3 &start, const idVec3 &end, int size, const int lifetime/**/, bool depthTest/* = false*/ );
+
+		virtual void			DebugBounds( const idVec4 &color, const idBounds &bounds, const idVec3 &org/* = vec3_origin*/, const idMat3& axes/* = mat3_identity*/, const int lifetime );
+
+		// Atmosphere / Ambient Systems.
+		virtual void			SetAtmosphere( const sdDeclAtmosphere* atmosphere );
+
+		virtual const sdDeclAtmosphere*	GetAtmosphere() const;
+
+		virtual void			SetupMatrices( const renderView_t* renderView, float* projectionMatrix, float* modelViewMatrix, const bool allowJitter );
+
+		virtual struct atmosLightProjection_t *FindAtmosLightProjection( int lightID );
+
+		idRenderModel 			*ParseShadowModel_Binary(idFile *file);
+		void					ParseNodes_Binary(idFile *file);
+		idRenderModel 			*ParseModel_Binary(idFile *file, const idStrList &materialsTable);
+		void					ParseInterAreaPortals_Binary(idFile *file);
+		void					ParseMegatextureInfo_Binary(idFile *file);
+		void					ParseAtmosLightProjection_Binary(idFile *file);
+		void					ParseEnvBounds_Binary(idFile *file);
+		bool					InitFromMap_Binary(const char *name);
+
+		void					PushIntoOutsideAreas(idRenderEntityLocal *def, idRenderLightLocal *light);
+		void					PushIntoConnectedOutsideAreas(const idVec3 &point, idRenderEntityLocal *def, idRenderLightLocal *light);
+
+		virtual void			SetMegaTextureSTGrid( const idBounds &bounds, const idVec2 *grid, int width, int height );
+
+		//karin: mega texture of jmarshall23's DarklightNG
+		idBounds				megaTextureBounds;
+		idList<idVec2>			megaTextureSTGrid;
+		int						megaTextureSTGridWidth;
+		int						megaTextureSTGridHeight;
 #endif
 
 #ifdef _D3BFG_CULLING
@@ -250,6 +358,13 @@ class idRenderWorldLocal : public idRenderWorld
 
 
 		bool					generateAllInteractionsCalled;
+#ifdef _RAVEN
+		int                             procVersion; //karin: for compat doom3 proc
+#endif
+#ifdef _SPLASHDAMAGE
+		const sdDeclAtmosphere	*atmosphere;
+		idList<class sdOcclusionTestLocal *> occlusionTestDefs;
+#endif
 
 		//-----------------------
 		// RenderWorld_load.cpp

@@ -16,6 +16,8 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 #ifndef __MODELDECAL_H__
 #define __MODELDECAL_H__
 
+#include <renderer/resources/Model_local.h>
+
 /*
 ===============================================================================
 
@@ -24,6 +26,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 	decals will be allocated as needed. The material should not be
 	one that receives lighting, because no interactions are generated
 	for these lightweight surfaces.
+	#5867: it is now possible to generate decals with light interactions.
 
 	FIXME:	Decals on models in portalled off areas do not get freed
 			until the area becomes visible again.
@@ -47,13 +50,14 @@ typedef struct decalProjectionInfo_s {
 } decalProjectionInfo_t;
 
 
-class idRenderModelDecal {
+class idDecalOnRenderModel {
 public:
-								idRenderModelDecal( void );
-								~idRenderModelDecal( void );
+								idDecalOnRenderModel( void );
+								~idDecalOnRenderModel( void );
 
-	static idRenderModelDecal *	Alloc( void );
-	static void					Free( idRenderModelDecal *decal );
+	void						Clear( void );
+	static idDecalOnRenderModel *Alloc( void );
+	static void					Free( idDecalOnRenderModel *decal );
 
 								// Creates decal projection info.
 	static bool					CreateProjectionInfo( decalProjectionInfo_t &info, const idFixedWinding &winding, const idVec3 &projectionOrigin, const bool parallel, const float fadeDepth, const idMaterial *material, const int startTime );
@@ -61,18 +65,23 @@ public:
 								// Transform the projection info from global space to local.
 	static void					GlobalProjectionInfoToLocal( decalProjectionInfo_t &localInfo, const decalProjectionInfo_t &info, const idVec3 &origin, const idMat3 &axis );
 
-								// Creates a deal on the given model.
-	void						CreateDecal( const idRenderModel *model, const decalProjectionInfo_t &localInfo );
+								// Creates a decal on the given model.
+	void						CreateDecal( const idRenderModel *model, const decalProjectionInfo_t &localInfo, bool *pAdded = nullptr );
 
 								// Remove decals that are completely faded away.
-	static idRenderModelDecal *	RemoveFadedDecals( idRenderModelDecal *decals, int time );
+	static idDecalOnRenderModel *RemoveFadedDecals( idDecalOnRenderModel *decals, int time, bool *pRemoved = nullptr );
 
 								// Updates the vertex colors, removing any faded indexes,
 								// then copy the verts to temporary vertex cache and adds a drawSurf.
 	void						AddDecalDrawSurf( struct viewEntity_s *space );
 
+	const srfTriangles_t &		UpdateAndGetDecalSurface( int time );
+	const idMaterial *			GetMaterial() const;
+
+	idBounds					ComputeBoundingBox() const;
+
 								// Returns the next decal in the chain.
-	idRenderModelDecal *		Next( void ) const { return nextDecal; }
+	idDecalOnRenderModel *		Next( void ) const { return nextDecal; }
 
 	void						ReadFromDemoFile( class idDemoFile *f );
 	void						WriteToDemoFile( class idDemoFile *f ) const;
@@ -85,7 +94,7 @@ private:
 	srfTriangles_t				tri;
 	float						vertDepthFade[MAX_DECAL_VERTS];
 	int							indexStartTime[MAX_DECAL_INDEXES];
-	idRenderModelDecal *		nextDecal;
+	idDecalOnRenderModel *		nextDecal;
 
 								// Adds the winding triangles to the appropriate decal in the
 								// chain, creating a new one if necessary.
@@ -96,6 +105,22 @@ private:
 								// The part of the winding at the front side of both fade planes is not faded.
 								// The parts at the back sides of the fade planes are faded with the given depth.
 	void						AddDepthFadedWinding( const idWinding &w, const idMaterial *decalMaterial, const idPlane fadePlanes[2], float fadeDepth, int startTime );
+};
+
+
+// stgatilov #5867: idRenderModel representation of decals
+// decals using it can be properly processed by frontend
+class idRenderModelDecal : public idRenderModelStatic {
+public:
+	idRenderModelDecal();
+	~idRenderModelDecal();
+
+	virtual dynamicModel_t IsDynamicModel() const override;
+	virtual idRenderModel *InstantiateDynamicModel( const struct renderEntity_s *ent, const struct viewDef_s *view, idRenderModel *cachedModel ) override;
+
+	void RecomputeBoundingBox();
+
+	idDecalOnRenderModel *decalsList = nullptr;
 };
 
 #endif /* !__MODELDECAL_H__ */

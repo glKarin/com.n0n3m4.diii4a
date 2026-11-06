@@ -240,8 +240,12 @@ idAngles::ToAngularVelocity
 */
 idVec3 idAngles::ToAngularVelocity(void) const
 {
+#ifdef _SPLASHDAMAGE
+    return idAngles::ToRotation().ToAngularVelocity();
+#else
 	idRotation rotation = idAngles::ToRotation();
 	return rotation.GetVec() * DEG2RAD(rotation.GetAngle());
+#endif
 }
 
 /*
@@ -253,3 +257,69 @@ const char *idAngles::ToString(int precision) const
 {
 	return idStr::FloatArrayToString(ToFloatPtr(), GetDimension(), precision);
 }
+
+#ifdef _SPLASHDAMAGE
+
+/*
+=================
+idAngles::ToMat3NoRoll
+=================
+*/
+void idAngles::ToMat3NoRoll( idMat3& mat ) const
+{
+    float sp, sy, cp, cy;
+
+    idMath::SinCos( DEG2RAD( yaw ), sy, cy );
+    idMath::SinCos( DEG2RAD( pitch ), sp, cp );
+
+    mat[ 0 ].Set( cp * cy, cp * sy, -sp );
+    mat[ 1 ].Set( -sy, cy, 0.0f );
+    mat[ 2 ].Set( sp * cy, sp * sy, cp );
+}
+
+/*
+=================
+idAngles::ToMat3Maya
+
+	Rotation matrices used:
+
+		| 1    0      0    |
+	X =	| 0  cos(x) sin(x) |
+		| 0 -sin(x) cos(x) |
+
+		| cos(y) 0 -sin(y) |
+	Y =	|   0    1    0    |
+		| sin(y) 0  cos(y) |
+
+		| cos(z)  sin(z) 0 |
+	Z =	| -sin(z) cos(z) 0 |
+		|   0       0    1 |
+
+	Rotation order: M = X.Y.Z
+
+		| cos(y) * cos(z)                               cos(y) * sin(z)                              -sin(y)         |
+	M = | sin(x) * sin(y) * cos(z) + cos(x) * -sin(z)   sin(x) * sin(y) * sin(z) + cos(x) * cos(z)   sin(x) * cos(y) |
+		| cos(x) * sin(y) * cos(z) + -sin(x) * -sin(z)  cos(x) * sin(y) * sin(z) + -sin(x) * cos(z)  cos(x) * cos(y) |
+
+	pitch = rotation around x axis
+	yaw = rotation around y axis
+	roll = rotation around z axis
+
+=================
+*/
+idMat3 idAngles::ToMat3Maya( void ) const
+{
+    idMat3 mat;
+    float sr, sp, sy, cr, cp, cy;
+
+    idMath::SinCos( DEG2RAD( yaw ), sy, cy );
+    idMath::SinCos( DEG2RAD( pitch ), sp, cp );
+    idMath::SinCos( DEG2RAD( roll ), sr, cr );
+
+    mat[ 0 ].Set( cy * cr, cy * sr, -sy );
+    mat[ 1 ].Set( sp * sy * cr + cp * -sr, sp * sy * sr + cp * cr, sp * cy );
+    mat[ 2 ].Set( cp * sy * cr + -sp * -sr, cp * sy * sr + -sp * cr, cp * cy );
+
+    return mat;
+}
+#endif

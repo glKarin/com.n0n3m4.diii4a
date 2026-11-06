@@ -710,7 +710,11 @@ void PutPrimitivesInAreas(uEntity_t *e)
 
 				mapTri_t	mapTri;
 				memset(&mapTri, 0, sizeof(mapTri));
+#ifdef _SPLASHDAMAGE
+				mapTri.material = surface->material;
+#else
 				mapTri.material = surface->shader;
+#endif
 
 				// don't let discretes (autosprites, etc) merge together
 				if (mapTri.material->IsDiscrete()) {
@@ -871,7 +875,12 @@ static void BuildLightShadows(uEntity_t *e, mapLight_t *light)
 
 	// if the light is no-shadows, don't add any surfaces
 	// to the beam tree at all
-	if (!light->def.parms.noShadows
+	if (
+#ifdef _SPLASHDAMAGE
+		!light->def.parms.flags.noShadows
+#else
+		!light->def.parms.noShadows
+#endif
 	    && light->def.lightShader->LightCastsShadows()) {
 		for (i = 0 ; i < e->numAreas ; i++) {
 			for (group = e->areas[i].groups ; group ; group = group->nextGroup) {

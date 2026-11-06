@@ -94,146 +94,50 @@ enum
 class idVec3;
 class idMat3;
 
-void R_DeriveFacePlanes(struct srfTriangles_s* tris);
+void R_DeriveFacePlanes(srfTriangles_t* tris);
 
 //───────────────────────────────────────────────────────────────────────────────
 //  Free helper functions – declared here, defined in the .cpp
 //───────────────────────────────────────────────────────────────────────────────
-void SpawnGetNormal(idVec3* normal, const idVec3& pos,
-    const idVec3* centre = NULL);
+void SpawnGetNormal(idVec3* normal, const idVec3& pos, const idVec3* centre = NULL);
 
-void SpawnNone1(float* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
-void SpawnNone2(float* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
-void SpawnNone3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnNone1            (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnNone2            (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnNone3            (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-void SpawnOne1(float* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
-void SpawnOne2(float* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
-void SpawnOne3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnOne1             (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnOne2             (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnOne3             (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-void SpawnPoint1(float* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
-void SpawnPoint2(float* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
-void SpawnPoint3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnPoint1           (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnPoint2           (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnPoint3           (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-void SpawnLinear1(float* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
-void SpawnLinear2(float* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
-void SpawnLinear3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnLinear1          (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnLinear2          (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnLinear3          (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-void SpawnBox1(float* out,
-    const rvParticleParms& p);
-void SpawnBox2(float* out,
-    const rvParticleParms& p);
-void SpawnBox3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnBox1             (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnBox2             (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnBox3             (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-void SpawnSurfaceBox1(float* out,
-    const rvParticleParms& p);
-void SpawnSurfaceBox2(float* out,
-    const rvParticleParms& p);
-void SpawnSurfaceBox3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnSurfaceBox1      (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnSurfaceBox2      (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnSurfaceBox3      (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-void SpawnSphere2(float* out,
-    const rvParticleParms& p);
-void SpawnSphere3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnSphere2          (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnSphere3          (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-void SpawnSurfaceSphere2(float* out,
-    const rvParticleParms& p);
-void SpawnSurfaceSphere3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnSurfaceSphere2   (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnSurfaceSphere3   (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-void SpawnCylinder3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
-void SpawnSurfaceCylinder3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnCylinder3        (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnSurfaceCylinder3 (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-void SpawnSpiral2(float* out,
-    const rvParticleParms& p);
-void SpawnSpiral3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnSpiral2          (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
+void SpawnSpiral3          (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-void SpawnModel3(idVec3* out,
-    const rvParticleParms& p,
-    idVec3* n = NULL,
-    const idVec3* c = NULL);
+void SpawnModel3           (float* out, const rvParticleParms& p, idVec3* n = NULL, const idVec3* c = NULL);
 
-
-void SpawnStub(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnNone1(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnNone2(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnNone3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnOne1(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnOne2(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnOne3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnPoint1(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnPoint2(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnPoint3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnLinear1(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnLinear2(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnLinear3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnBox1(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnBox2(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnBox3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnSurfaceBox1(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnSurfaceBox2(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnSurfaceBox3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnSphere2(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnSphere3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnSurfaceSphere2(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnSurfaceSphere3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnCylinder3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnSurfaceCylinder3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnSpiral2(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnSpiral3(float*, const rvParticleParms&, idVec3*, const idVec3*);
-void SpawnModel3(float*, const rvParticleParms&, idVec3*, const idVec3*);
+void SpawnStub             (float*, const rvParticleParms&, idVec3*, const idVec3*);
 

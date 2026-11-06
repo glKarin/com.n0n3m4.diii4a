@@ -143,6 +143,10 @@ public:
 #include <typeinfo>
 #include <errno.h>
 #include <math.h>
+#ifdef _SPLASHDAMAGE //karin: wmemset
+#include <wchar.h>
+#include "idlib/LibOS.h"
+#endif
 
 #include <inttypes.h>
 
@@ -236,7 +240,9 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 
 // user interfaces
 #include "../ui/ListGUI.h"
+#if !defined(_ETQW) //karin: sdUserInterface* on ETQW game
 #include "../ui/UserInterface.h"
+#endif
 
 // collision detection system
 #include "../cm/CollisionModel.h"
@@ -248,14 +254,6 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 #ifdef _RAVEN // raven_engine.h
 #include "../raven/idlib/TextCompiler.h"
 #include "../raven/idlib/math/Radians.h"
-// RAVEN BEGIN
-// jscott: Effects system interface
-#ifdef _RAVEN_BSE
-#include "../raven/bse/BSEInterface.h"
-#else
-#include "../raven/fx/BSEInterface.h"
-#endif
-// RAVEN END
 
 #include "../raven/framework/DeclPlayerModel.h"
 // RAVEN BEGIN
@@ -267,6 +265,17 @@ const int MAX_EXPRESSION_REGISTERS = 4096;
 
 // Sanity check for any axis in bounds
 const float MAX_BOUND_SIZE = 65536.0f;
+#endif
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+// RAVEN BEGIN
+// jscott: Effects system interface
+#include "../raven/bse/BSEInterface.h"
+// RAVEN END
+#endif
+
+#ifdef _SPLASHDAMAGE
+#include "decllib/DeclTypeInfo.h"
 #endif
 
 // game
@@ -295,6 +304,10 @@ const float MAX_BOUND_SIZE = 65536.0f;
 #else
     #ifdef _HARDQORE
         #include "../mod/quake4/hardqore/Game.h"
+    #elif defined(_Q4XBASE)
+        #include "../mod/quake4/q4xbase/Game.h"
+    #elif defined(_HAZZZZZY)
+        #include "../mod/quake4/hazzzzzy/Game.h"
     #else
         #include "../quake4/Game.h"
     #endif
@@ -308,6 +321,8 @@ const float MAX_BOUND_SIZE = 65536.0f;
     #include "../prey/Game.h"
 #endif
 
+#elif defined(_SPLASHDAMAGE)
+    #include "../etqw/Game.h"
 #else
 
     #if defined(_CDOOM)
@@ -359,6 +374,10 @@ const float MAX_BOUND_SIZE = 65536.0f;
 #else
     #ifdef _HARDQORE
         #include "../mod/quake4/hardqore/Game_local.h"
+    #elif defined(_Q4XBASE)
+        #include "../mod/quake4/q4xbase/Game_local.h"
+    #elif defined(_HAZZZZZY)
+        #include "../mod/quake4/hazzzzzy/Game_local.h"
     #else
         #include "../quake4/Game_local.h"
     #endif
@@ -372,6 +391,7 @@ const float MAX_BOUND_SIZE = 65536.0f;
     #include "../prey/Game_local.h"
 #endif
 
+#elif defined(_SPLASHDAMAGE) //karin: ETQW has game/precompiled.h self
 #else
 
     #if defined(_CDOOM)
@@ -420,6 +440,10 @@ const float MAX_BOUND_SIZE = 65536.0f;
 #endif // _SDK
 
 #endif /* !GAME_DLL */
+
+#ifdef _SPLASHDAMAGE
+#include "idlib/LibImpl.h"
+#endif
 
 //-----------------------------------------------------
 

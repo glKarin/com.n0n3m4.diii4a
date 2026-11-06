@@ -1,0 +1,82 @@
+I would prefer you try using ../dwarfdump2, not this source.
+If you  must use this for some reason, could you let me know why?
+Thanks.
+
+To build dwarfdump, first build libdwarf in the neighboring
+directory then type
+	./configure
+	make
+
+Installation is a bit primitive.
+      sudo make install
+may or may not work.
+Some or all of the following might be required on Unix or Linux or MacOS:
+      sudo mkdir -p /usr/local/share/man/man1/
+      sudo mkdir -p /usr/local/lib
+      sudo mkdir -p /usr/local/bin
+Then retry the 'sudo make install' and (if necessary) try
+      sudo chmod a+x /usr/local/bin/dwarfdump
+      sudo chmod a+r /usr/local/share/man/man1/dwarfdump.1
+      sudo chmod a+r /usr/local/lib/dwarfdump.conf
+You don't really need the dwarfdump.1 man page,
+but you might as well have it. If the man page is not visible
+with 'man dwarfdump' try  'man manpath' for hints.
+
+If you don't need others using dwarfdump on your computer,
+just
+    cp dwarfdump $HOME/bin/dwarfdump
+(by convention many people put personal executables in $HOME/bin
+and fix up $PATH to refer there) which suffices as 'installation'.
+Also
+    cp dwarfdump.conf $HOME
+
+To use dwarf or libdwarf, you may want to install dwarf.h
+and libdwarf.h somewhere convenient.
+You can just copy those two headers to /usr/local/include by hand
+(or anywhere, really, that you have permission to copy to)
+(you may need to use -I/usr/local/include on compile lines
+to reference them there, but see below on configure and make).
+
+Notice that dwarf_names.c and dwarf_names.h are supplied by
+the release though the Makefile can and may rebuild them.
+Some users find it difficult to get a reliable awk(1) program,
+so for them these prebuilt versions may be useful.
+
+If your headers or libelf/libdwarf are not in the expected places,
+use the make command line to add flags and include directories.
+For example
+  ./configure
+  PREINCS="-I /usr/local/include" POSTINCS="-I /home/x/include"  make
+PREINCS content is inserted before CFLAGS as make(1) is running.
+POSTINCS content is added after the CFLAGS value.
+
+To set LDFLAGS,
+do so at configure time, for example:
+  ./configure LDFLAGS="-L /some/dir"
+And/or use PRELIBS and/or POSTLIBS at 'make' time similar to the use
+of PREINCS and POSTINCS.
+
+If the libdwarf directory
+has both libdwarf.so and libdwarf.a, the libdwarf.so
+will be picked up and
+  "./tag_tree_build: error while loading shared libraries:
+        libdwarf.so: cannot open shared object file:
+        No such file or directory"
+will probably result.
+Either: remove libdwarf.so  and rebuild or set
+the environment variable LD_LIBRARY_PATH to  the directory
+containing the .so or use LDFLAGS to set rpath (see just below).
+It is perhaps simpler to ensure that the libdwarf directory
+only has an archive, not  a shared-library.
+But sometimes one wants a shared library.
+In that case
+one can set ld's -rpath on the gcc command line like this:
+    LDFLAGS="-Wl,-rpath=/some/path/libdir"
+so the shared library can be found at run time automatically.
+
+The same problem may arise with libelf, and the same approach
+will solve the problem.
+
+
+
+David Anderson.  davea42  at  earthlink dot net.

@@ -1,0 +1,26 @@
+
+// shadow map(depth)
+GLSL_SHADER const char DEPTH_VERT[] =
+"#version 100\n"
+"//#pragma optimize(off)\n"
+"\n"
+"precision highp float;\n"
+"\n"
+"attribute highp vec4 attr_Vertex;\n"
+"\n"
+"uniform highp mat4 u_modelViewProjectionMatrix;\n"
+"uniform highp vec4 u_lightOrigin;\n"
+"\n"
+"// uniform lowp float u_uniformParm0; // .w 1.0 or 0.0\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"    highp vec4 pos;\n"
+"    //pos = attr_Vertex.w * u_lightOrigin + attr_Vertex - u_lightOrigin;\n"
+"    //float w = max(attr_Vertex.w, u_uniformParm0);\n"
+"    //pos = w * u_lightOrigin + vec4(attr_Vertex.xyz, w) - u_lightOrigin;\n"
+"    //pos = attr_Vertex - u_lightOrigin; pos = (pos.wwww * u_lightOrigin) + pos;\n"
+"    pos = vec4(attr_Vertex.xyz, 1.0);\n"
+"    gl_Position = pos * u_modelViewProjectionMatrix;\n"
+"}\n"
+;

@@ -33,8 +33,10 @@ struct StencilShadowStage::Uniforms : GLSLUniformGroup {
 void StencilShadowStage::Init() {
 	stencilShadowShader = programManager->LoadFromFiles(
 		"stencil_shadow",
-		"stages/stencil/stencil_shadow.vert.glsl",
-		"stages/stencil/stencil_shadow.frag.glsl"
+		"stages/stencil/stencil_shadow.vert.glsl"
+#ifdef _GLES
+		, "stages/stencil/stencil_shadow.frag.glsl"
+#endif
 	);
 }
 
@@ -80,12 +82,12 @@ void StencilShadowStage::DrawStencilShadows( const viewDef_t *viewDef, const vie
 	}
 
 	// draw depth-fail stencil shadows
-	qglStencilOpSeparate( viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, GL_DECR_WRAP, GL_KEEP );
-	qglStencilOpSeparate( viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, GL_INCR_WRAP, GL_KEEP );
+	qglStencilOpSeparate( viewDef->isMirrorInverted ? GL_FRONT : GL_BACK, GL_KEEP, GL_DECR_WRAP, GL_KEEP );
+	qglStencilOpSeparate( viewDef->isMirrorInverted ? GL_BACK : GL_FRONT, GL_KEEP, GL_INCR_WRAP, GL_KEEP );
 	DrawSurfs( viewDef, vLight, depthFailSurfs.Ptr(), depthFailSurfs.Num() );
 	// draw traditional depth-pass stencil shadows
-	qglStencilOpSeparate( viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, GL_KEEP, GL_INCR_WRAP );
-	qglStencilOpSeparate( viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, GL_KEEP, GL_DECR_WRAP );
+	qglStencilOpSeparate( viewDef->isMirrorInverted ? GL_FRONT : GL_BACK, GL_KEEP, GL_KEEP, GL_INCR_WRAP );
+	qglStencilOpSeparate( viewDef->isMirrorInverted ? GL_BACK : GL_FRONT, GL_KEEP, GL_KEEP, GL_DECR_WRAP );
 	DrawSurfs( viewDef, vLight, depthPassSurfs.Ptr(), depthPassSurfs.Num() );
 
 	// reset state
@@ -205,11 +207,10 @@ void StencilShadowStage::FillStencilShadowMipmaps( const viewDef_t *viewDef, con
 
 		if ( newProps.softShadowQuality > 0 ) {
 			stencilShadowMipmap.Init(
-				TiledCustomMipmapStage::MM_STENCIL_SHADOW,
 #ifdef _GLES //karin: only GL_RGBA if texture
-                GL_RGBA,
+				TiledCustomMipmapStage::MM_STENCIL_SHADOW, GL_RGBA,
 #else
-                GL_R8,
+				TiledCustomMipmapStage::MM_STENCIL_SHADOW, GL_R8,
 #endif
 				newProps.renderWidth,
 				newProps.renderHeight,

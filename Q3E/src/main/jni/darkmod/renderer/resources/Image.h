@@ -503,6 +503,7 @@ public:
 	idImageScratch *	shadowDepthFbo;
 	idImageScratch *	shadowAtlas;
 	idImageScratch *	currentStencilFbo; // these two are only used on Intel since no one else support separate stencil
+	idImageScratch *	menuLastGameFrame;			// #6608: can be used in in-game main menu
 
 	//--------------------------------------------------------
 

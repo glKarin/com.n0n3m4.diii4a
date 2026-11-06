@@ -1139,6 +1139,10 @@ Used for cinematics.
 void RE_StretchRaw( int x, int y, int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty ) {
 	int i, j;
 	int start, end;
+	float s0 = 0.0f;
+	float t0 = 0.0f;
+	float s1 = 1.0f;
+	float t1 = 1.0f;
 
 	if ( !tr.registered ) {
 		return;
@@ -1162,8 +1166,10 @@ void RE_StretchRaw( int x, int y, int w, int h, int cols, int rows, const byte *
 	}
 	for ( j = 0 ; ( 1 << j ) < rows ; j++ ) {
 	}
-	if ( ( 1 << i ) != cols || ( 1 << j ) != rows ) {
-		ri.Error( ERR_DROP, "Draw_StretchRaw: size not a power of 2: %i by %i", cols, rows );
+	if ( !tr.supportsNPOT ) {
+		if ( ( 1 << i ) != cols || ( 1 << j ) != rows ) {
+			ri.Error( ERR_DROP, "Draw_StretchRaw: size not a power of 2: %i by %i", cols, rows );
+		}
 	}
 
 	RE_UploadCinematic (w, h, cols, rows, data, client, dirty);
@@ -1178,12 +1184,19 @@ void RE_StretchRaw( int x, int y, int w, int h, int cols, int rows, const byte *
 
 	qglColor3f( tr.identityLight, tr.identityLight, tr.identityLight );
 
+	if ( !tr.supportsNPOT ) {
+		s0 = 0.5f / cols;
+		t0 = 0.5f / rows;
+		s1 = (cols - 0.5f) / cols;
+		t1 = (rows - 0.5f) / rows;
+	}
+
 #ifdef USE_OPENGLES
 	GLfloat tex[] = {
-	 0.5f / cols,  0.5f / rows,
-	 ( cols - 0.5f ) / cols ,  0.5f / rows,
-	 ( cols - 0.5f ) / cols, ( rows - 0.5f ) / rows,
-	 0.5f / cols, ( rows - 0.5f ) / rows };
+	 s0,  t0,
+	 s1 ,  t0,
+	 s1, t1,
+	 s0, t1 };
 	GLfloat vtx[] = {
 	 x, y,
 	 x+w, y,
@@ -1204,13 +1217,13 @@ void RE_StretchRaw( int x, int y, int w, int h, int cols, int rows, const byte *
 		qglEnableClientState(GL_COLOR_ARRAY);
 #else
 	qglBegin( GL_QUADS );
-	qglTexCoord2f( 0.5f / cols,  0.5f / rows );
+	qglTexCoord2f( s0,  t0 );
 	qglVertex2f( x, y );
-	qglTexCoord2f( ( cols - 0.5f ) / cols,  0.5f / rows );
+	qglTexCoord2f( s1,  t0 );
 	qglVertex2f( x + w, y );
-	qglTexCoord2f( ( cols - 0.5f ) / cols, ( rows - 0.5f ) / rows );
+	qglTexCoord2f( s1, t1 );
 	qglVertex2f( x + w, y + h );
-	qglTexCoord2f( 0.5f / cols, ( rows - 0.5f ) / rows );
+	qglTexCoord2f( s0, t1 );
 	qglVertex2f( x, y + h );
 	qglEnd();
 #endif

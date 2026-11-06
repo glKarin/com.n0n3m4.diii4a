@@ -720,7 +720,11 @@ ID_INLINE void idPolynomial::Resize(int d, bool keep)
 	int alloc = (d + 1 + 3) & ~3;
 
 	if (alloc > allocated) {
+#ifdef _SPLASHDAMAGE
+        float *ptr = (float *) Mem_AllocAligned( alloc * sizeof( float ), ALIGN_16 );
+#else
 		float *ptr = (float *) Mem_Alloc16(alloc * sizeof(float));
+#endif
 
 		if (coefficient != NULL) {
 			if (keep) {
@@ -729,7 +733,11 @@ ID_INLINE void idPolynomial::Resize(int d, bool keep)
 				}
 			}
 
+#ifdef _SPLASHDAMAGE
+            Mem_FreeAligned( coefficient );
+#else
 			Mem_Free16(coefficient);
+#endif
 		}
 
 		allocated = alloc;

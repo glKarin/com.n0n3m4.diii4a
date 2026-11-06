@@ -71,6 +71,13 @@ public:
 	const char *			GetName() const {
 		return fboName.c_str();
 	}
+	// framebuffer size
+	int						Width(void) const {
+		return width;
+	}
+	int						Height(void) const {
+		return height;
+	}
 
 private:
 	void					PrintFramebuffer(void);
@@ -106,6 +113,8 @@ public:
 	static void				Append(idFramebuffer *fb);
 	static idFramebuffer *	Alloc(const char *name, int width, int height);
 	static idFramebuffer *	Find(const char *name);
+	static void				BindDraw(idFramebuffer *fb);
+	static void				UnbindDraw();
 
 	static idList<idFramebuffer*>	framebuffers;
 };

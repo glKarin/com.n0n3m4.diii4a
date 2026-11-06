@@ -97,7 +97,11 @@ void idChoiceWindow::UpdateVars( bool read, bool force ) {
 			if ( read ) {
 				cvarStr.Set( cvar->GetString() );
 			} else {
-				cvar->SetString( cvarStr.c_str() );
+				// #6655: only set cvar if GUI has different value
+				// without this comparison we can silently promote "mission cvar override" into user value!
+				if ( idStr::Cmp( cvarStr.c_str(), cvar->GetString() ) != 0 ) {
+					cvar->SetString( cvarStr.c_str() );
+				}
 			}	
 		}
 		if ( !read && guiStr.NeedsUpdate() ) {

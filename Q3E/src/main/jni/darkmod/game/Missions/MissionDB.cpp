@@ -127,13 +127,18 @@ void CMissionDB::Save()
 	DM_LOG(LC_MAINMENU, LT_INFO)LOGSTRING("Done saving mission info declarations\r");
 }
 
-const CModInfoPtr& CMissionDB::GetModInfo(const idStr& name)
+const CModInfoPtr& CMissionDB::GetModInfo(const idStr& name, bool skipCreate /*= false*/)
 {
 	MissionInfoMap::iterator i = _missionInfo.find(name.c_str());
 	
 	if (i != _missionInfo.end())
 	{
 		return i->second;
+	}
+	if (skipCreate)
+	{
+		static const CModInfoPtr NullMod;
+		return NullMod;
 	}
 
 	// Create a new one

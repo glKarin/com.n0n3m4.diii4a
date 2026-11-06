@@ -78,6 +78,10 @@ class idVec4;
 #define FILE_HASH_SIZE		1024
 #endif
 
+#ifdef _SPLASHDAMAGE
+const int COLOR_BITS				= 31;
+#endif
+
 // color escape character
 const int C_COLOR_ESCAPE			= '^';
 const int C_COLOR_DEFAULT			= '0';
@@ -90,6 +94,17 @@ const int C_COLOR_MAGENTA			= '6';
 const int C_COLOR_WHITE				= '7';
 const int C_COLOR_GRAY				= '8';
 const int C_COLOR_BLACK				= '9';
+#ifdef _SPLASHDAMAGE
+const int C_COLOR_LTGREY			= ':';
+const int C_COLOR_MDGREEN			= '<';
+const int C_COLOR_MDYELLOW			= '=';
+const int C_COLOR_MDBLUE			= '>';
+const int C_COLOR_MDRED				= '?';
+const int C_COLOR_LTORANGE			= 'A';
+const int C_COLOR_MDCYAN			= 'B';
+const int C_COLOR_MDPURPLE			= 'C';
+const int C_COLOR_ORANGE			= 'D';
+#endif
 
 // color escape string
 #define S_COLOR_DEFAULT				"^0"
@@ -143,6 +158,16 @@ const int C_COLOR_CONSOLE			= ':';
 #define S_ESCAPE_COMMAND			BIT(4)
 #define	S_ESCAPE_ALL				( S_ESCAPE_COLOR | S_ESCAPE_COLORINDEX | S_ESCAPE_ICON | S_ESCAPE_COMMAND )
 // RAVEN END
+#elif defined(_SPLASHDAMAGE)
+#define S_COLOR_LTGREY				"^:"
+#define S_COLOR_MDGREEN				"^<"
+#define S_COLOR_MDYELLOW			"^="
+#define S_COLOR_MDBLUE				"^>"
+#define S_COLOR_MDRED				"^?"
+#define S_COLOR_LTORANGE			"^A"
+#define S_COLOR_MDCYAN				"^B"
+#define S_COLOR_MDPURPLE			"^C"
+#define S_COLOR_ORANGE				"^D"
 #endif
 
 // make idStr a multiple of 16 bytes long
@@ -154,6 +179,13 @@ typedef enum {
 	MEASURE_SIZE = 0,
 	MEASURE_BANDWIDTH
 } Measure_t;
+#ifdef _SPLASHDAMAGE
+#ifdef ID_THREAD_SAFE_STR
+typedef idDynamicBlockAlloc< char, 1<<18, 128, true >	stringDataAllocator_t;
+#else
+typedef idDynamicBlockAlloc< char, 1<<18, 128, false >	stringDataAllocator_t;
+#endif
+#endif
 
 #ifdef _WCHAR_LANG
 enum utf8Encoding_t
@@ -170,6 +202,15 @@ class idStr
 {
 
 	public:
+#ifdef _SPLASHDAMAGE
+	    struct hmsFormat_t {
+	        hmsFormat_t() : showZeroMinutes( false ), showZeroHours( false ), showZeroSeconds( true ) {}
+	        bool showZeroMinutes;
+	        bool showZeroHours;
+	        bool showZeroSeconds;
+	    };
+#endif
+
 		idStr(void);
 		idStr(const idStr &text);
 		idStr(const idStr &text, int start, int end);
@@ -277,6 +318,9 @@ class idStr
 		void				ToUpper(void);
 		bool				IsNumeric(void) const;
 		bool				IsColor(void) const;
+#ifdef _SPLASHDAMAGE
+    	bool				IsHexColor( void ) const;
+#endif
 		bool				HasLower(void) const;
 		bool				HasUpper(void) const;
 		int					LengthWithoutColors(void) const;
@@ -313,9 +357,21 @@ class idStr
 		void				StripTrailingWhitespace(void);				// strip trailing white space characters
 		idStr 				&StripQuotes(void);							// strip quotes around string
 		void				Replace(const char *old, const char *nw);
+#ifdef _SPLASHDAMAGE
+    	void				StripLeadingWhiteSpace( void );					// strip leading white space characters
+   	 	void				StripTrailingWhiteSpace( void );				// strip trailing white space characters
+    	void				ReplaceFirst( const char *old, const char *nw );
+    	void				ReplaceChar( char oldChar, char newChar );
+    	void				EraseRange( int start, int len = INVALID_POSITION );
+#endif
 
 		// file name methods
 		int					FileNameHash(void) const;						// hash key for the filename (skips extension)
+#ifdef _SPLASHDAMAGE
+		int					FileNameHash( const int hashSize ) const;						// hash key for the filename (skips extension)
+    	idStr &				CollapsePath( void );							// where possible removes /../ and /./ from path
+    	idStr &				SlashesToBackSlashes( void );					// convert slashes
+#endif
 		idStr 				&BackSlashesToSlashes(void);					// convert slashes
 		idStr 				&SetFileExtension(const char *extension);		// set the given file extension
 		idStr 				&StripFileExtension(void);						// remove any file extension
@@ -330,6 +386,11 @@ class idStr
 		void				ExtractFileBase(idStr &dest) const;			// copy the filename minus the extension to another string
 		void				ExtractFileExtension(idStr &dest) const;		// copy the file extension to another string
 		bool				CheckExtension(const char *ext);
+#ifdef _SPLASHDAMAGE
+    	idStr&				CleanFilename( void );							// strips bad characters
+    	bool				IsValidEmailAddress( void );
+    	idStr&				CollapseColors( void );							// removes redundant color codes
+#endif
 
 		// char * methods to replace library functions
 		static int			Length(const char *s);
@@ -337,10 +398,17 @@ class idStr
 		static char 		*ToUpper(char *s);
 		static bool			IsNumeric(const char *s);
 		static bool			IsColor(const char *s);
+#ifdef _SPLASHDAMAGE
+    	static bool			IsHexColor( const char *s );
+#endif
 		static bool			HasLower(const char *s);
 		static bool			HasUpper(const char *s);
 		static int			LengthWithoutColors(const char *s);
 		static char 		*RemoveColors(char *s);
+#ifdef _SPLASHDAMAGE
+    	static bool			IsBadFilenameChar( char c );
+    	static char *		CleanFilename( char *s );
+#endif
 		static int			Cmp(const char *s1, const char *s2);
 		static int			Cmpn(const char *s1, const char *s2, int n);
 		static int			Icmp(const char *s1, const char *s2);
@@ -358,6 +426,11 @@ class idStr
 		static void			StripMediaName(const char *name, idStr &mediaName);
 		static bool			CheckExtension(const char *name, const char *ext);
 		static const char 	*FloatArrayToString(const float *array, const int length, const int precision);
+#ifdef _SPLASHDAMAGE
+    	static bool			IsValidEmailAddress( const char* address );
+
+    	static const char*	MS2HMS( double ms, const hmsFormat_t& formatSpec = defaultHMSFormat );
+#endif
 
 		// hash keys
 		static int			Hash(const char *string);
@@ -377,6 +450,15 @@ class idStr
 		static bool			CharIsTab(char c);
 		static int			ColorIndex(int c);
 		static idVec4 		&ColorForIndex(int i);
+#ifdef _SPLASHDAMAGE
+		static int			ColorChar(int c);
+		static const idVec4&ColorForChar( int c );
+    	static bool			CharIsHex( int c );
+    	static const char*	StrForColorIndex( int i );
+    	static int			HexForChar( int c );
+    	void				SetStaticBuffer( char *buffer, int l );
+		static int			FileNameHash( const char *string, const int hashSize );	// hash key for the filename (skips extension)
+#endif
 
 		friend int			sprintf(idStr &dest, const char *fmt, ...);
 		friend int			vsprintf(idStr &dest, const char *fmt, va_list ap);
@@ -394,6 +476,9 @@ class idStr
 		static void			PurgeMemory(void);
 		static void			ShowMemoryUsage_f(const idCmdArgs &args);
 
+#ifdef _SPLASHDAMAGE
+    	static void			SetStringAllocator( stringDataAllocator_t* allocator );
+#endif
 		int					DynamicMemoryUsed() const;
 		static idStr		FormatNumber(int number);
 
@@ -436,22 +521,52 @@ class idStr
         static int          	JointUnique(idStr &ret, const idList<idStr> &list, const char *ch = ",");
 		static void 			StripWhitespace(idStr &str);
 
+#ifdef _SPLASHDAMAGE //karin: compat for DOOM3
+		void				operator=(const wchar_t *text);
+
+		static void			Append( char *dest, int size, const wchar_t *src );
+		static void			Copynz( char *dest, const wchar_t *src, int destsize );
+#endif
+
 	protected:
 		int					len;
 		char 				*data;
+#ifdef _SPLASHDAMAGE
+		/*
+		 * > 0: allocate in heap
+		 * < 0: static buffer
+		 */
+#endif
 		int					alloced;
 		char				baseBuffer[ STR_ALLOC_BASE ];
 
 		void				Init(void);										// initialize string using base buffer
 		void				EnsureAlloced(int amount, bool keepold = true);	// ensure string data buffer is large anough
+
+#ifdef _SPLASHDAMAGE
+	    static				stringDataAllocator_t*	stringDataAllocator;
+	    static				bool					stringAllocatorIsShared;
+	    static hmsFormat_t	defaultHMSFormat;
+    
+	public:
+	    static const int	INVALID_POSITION = -1;
+#endif
 };
 
 char 					*va(const char *fmt, ...) id_attribute((format(printf,1,2)));
+#ifdef _SPLASHDAMAGE
+char *					va_floatstring( const char *fmt, ... );
+#endif
 
 
 ID_INLINE void idStr::EnsureAlloced(int amount, bool keepold)
 {
-	if (amount > alloced) {
+#ifdef _SPLASHDAMAGE
+	if ( amount > abs(alloced) )
+#else
+	if (amount > alloced)
+#endif
+	{
 		ReAllocate(amount, keepold);
 	}
 }
@@ -459,7 +574,11 @@ ID_INLINE void idStr::EnsureAlloced(int amount, bool keepold)
 ID_INLINE void idStr::Init(void)
 {
 	len = 0;
+#ifdef _SPLASHDAMAGE
+	alloced = -STR_ALLOC_BASE;
+#else
 	alloced = STR_ALLOC_BASE;
+#endif
 	data = baseBuffer;
 	data[ 0 ] = '\0';
 #ifdef ID_DEBUG_UNINITIALIZED_MEMORY
@@ -897,7 +1016,11 @@ ID_INLINE int idStr::Length(void) const
 ID_INLINE int idStr::Allocated(void) const
 {
 	if (data != baseBuffer) {
+#ifdef _SPLASHDAMAGE
+		return abs( alloced );
+#else
 		return alloced;
+#endif
 	} else {
 		return 0;
 	}
@@ -1066,6 +1189,13 @@ ID_INLINE bool idStr::IsColor(void) const
 	return idStr::IsColor(data);
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idStr::IsHexColor( void ) const
+{
+    return IsHexColor( data );
+}
+#endif
+
 ID_INLINE bool idStr::HasLower(void) const
 {
 	return idStr::HasLower(data);
@@ -1175,6 +1305,15 @@ ID_INLINE bool idStr::CheckExtension(const char *ext)
 	return idStr::CheckExtension(data, ext);
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE idStr& idStr::CleanFilename( void )
+{
+    CleanFilename( data );
+    len = Length( data );
+    return *this;
+}
+#endif
+
 ID_INLINE int idStr::Length(const char *s)
 {
 	int i;
@@ -1267,6 +1406,19 @@ ID_INLINE bool idStr::IsColor(const char *s)
 	return (s[0] == C_COLOR_ESCAPE && s[1] != '\0' && s[1] != ' ');
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idStr::IsHexColor( const char *s )
+{
+    int i;
+    for ( i = 0; s[i] && i < 6; i++ ) {
+        if( !CharIsHex( s[i] ) ) {
+            return false;
+        }
+    }
+    return ( i == 6 );
+}
+#endif
+
 ID_INLINE char idStr::ToLower(char c)
 {
 	if (c <= 'Z' && c >= 'A') {
@@ -1327,13 +1479,39 @@ ID_INLINE bool idStr::CharIsTab(char c)
 
 ID_INLINE int idStr::ColorIndex(int c)
 {
+#ifdef _SPLASHDAMAGE
+    return ( ( c - '0' ) & COLOR_BITS );
+#else
 	return (c & 15);
+#endif
 }
 
 ID_INLINE int idStr::DynamicMemoryUsed() const
 {
 	return (data == baseBuffer) ? 0 : alloced;
 }
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idStr::CharIsHex( int c )
+{
+    return ( ( c >= '0' && c <= '9' ) || ( c >= 'A' && c <= 'F' ) || ( c >= 'a' && c <= 'f' ) );
+}
+
+ID_INLINE int idStr::HexForChar( int c )
+{
+    return ( c > '9' ? ( c >= 'a' ? ( c - 'a' + 10 ) : ( c - '7' ) ) : ( c - '0' ) );
+}
+
+ID_INLINE bool idStr::IsValidEmailAddress( void )
+{
+    return IsValidEmailAddress( data );
+}
+
+ID_INLINE int idStr::ColorChar(int c)
+{
+    return ( c & COLOR_BITS ) + '0';
+}
+#endif
 
 #ifdef _WCHAR_LANG
 /*
@@ -1435,6 +1613,24 @@ ID_INLINE idStr &idStr::RemoveEscapes ( int escapes ) {
 	return *this;
 }
 // RAVEN END
+#endif
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE void idStr::Append( char *dest, int size, const wchar_t *src ) {
+	idStr tmp;
+	tmp = src;
+	Append(dest, size, tmp.c_str());
+}
+
+ID_INLINE void idStr::Copynz( char *dest, const wchar_t *src, int destsize ) {
+	idStr tmp;
+	tmp = src;
+	Copynz(dest, tmp.c_str(), destsize);
+}
+
+ID_INLINE int idStr::FileNameHash( const int hashSize ) const {
+	return FileNameHash( data, hashSize );
+}
 #endif
 
 #endif /* !__STR_H__ */

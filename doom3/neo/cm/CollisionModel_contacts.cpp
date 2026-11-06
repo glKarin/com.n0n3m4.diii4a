@@ -56,6 +56,9 @@ int idCollisionModelManagerLocal::Contacts(contactInfo_t *contacts, const int ma
                 const idTraceModel *trm, const idMat3 &trmAxis, int contentMask,
                 cmHandle_t model, const idVec3 &origin, const idMat3 &modelAxis)
 {
+#ifdef _SPLASHDAMAGE //karin: lock in multi-threading
+	CM_LOCK_THREAD();
+#endif
 	trace_t results;
 	idVec3 end;
 

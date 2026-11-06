@@ -37,8 +37,13 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+#define MATRIX_INVERSE_EPSILON		1e-14f
+#define MATRIX_EPSILON				1e-6f
+#else
 #define MATRIX_INVERSE_EPSILON		1e-14
 #define MATRIX_EPSILON				1e-6
+#endif
 
 class idAngles;
 class idQuat;
@@ -102,6 +107,10 @@ class idMat2
 		const float 	*ToFloatPtr(void) const;
 		float 			*ToFloatPtr(void);
 		const char 	*ToString(int precision = 2) const;
+#ifdef _SPLASHDAMAGE
+	    void			Rotation( float angle );
+	    int				GetSquareDimension( void ) const;
+#endif
 
 	private:
 		idVec2			mat[ 2 ];
@@ -289,7 +298,14 @@ ID_INLINE void idMat2::Zero(void)
 
 ID_INLINE void idMat2::Identity(void)
 {
+#ifdef _SPLASHDAMAGE
+    mat[ 0 ].x = 1.0f;
+    mat[ 0 ].y = 0.0f;
+    mat[ 1 ].x = 0.0f;
+    mat[ 1 ].y = 1.0f;
+#else
 	*this = mat2_identity;
+#endif
 }
 
 ID_INLINE bool idMat2::IsIdentity(const float epsilon) const
@@ -374,6 +390,23 @@ ID_INLINE float *idMat2::ToFloatPtr(void)
 	return mat[0].ToFloatPtr();
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE int idMat2::GetSquareDimension( void ) const
+{
+    return 2;
+}
+
+ID_INLINE void idMat2::Rotation( float angle )
+{
+    float s;
+    float c;
+    idMath::SinCos( angle, s, c );
+
+    mat[ 0 ].Set( c, s );
+    mat[ 1 ].Set( -s, c );
+}
+#endif
+
 
 //===============================================================
 //
@@ -397,6 +430,13 @@ class idMat3
 		idMat3			operator*(const float a) const;
 		idVec3			operator*(const idVec3 &vec) const;
 		idMat3			operator*(const idMat3 &a) const;
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+// RAVEN BEGIN
+// jscott: multiply by the transpose
+	    idVec3			operator/( const idVec3 &vec ) const;
+	    idMat3			operator/( const idMat3 &a ) const;
+// RAVEN END
+#endif
 		idMat3			operator+(const idMat3 &a) const;
 		idMat3			operator-(const idMat3 &a) const;
 		idMat3 		&operator*=(const float a);
@@ -424,7 +464,11 @@ class idMat3
 		void			UnprojectVector(const idVec3 &src, idVec3 &dst) const;
 
 		bool			FixDegeneracies(void);	// fix degenerate axial cases
+#ifdef _SPLASHDAMAGE
+    	bool			FixDenormals( float epsilon = MATRIX_EPSILON );				// change tiny numbers to zero
+#else
 		bool			FixDenormals(void);		// change tiny numbers to zero
+#endif
 
 		float			Trace(void) const;
 		float			Determinant(void) const;
@@ -458,14 +502,25 @@ class idMat3
 		friend void		TransposeMultiply(const idMat3 &inv, const idMat3 &b, idMat3 &dst);
 		friend idMat3	SkewSymmetric(idVec3 const &src);
 #ifdef _RAVEN
-	void			RotateAbsolute(int whichAxis, float	howManyDegrees);
-	void			RotateRelative(int whichAxis, float	howManyDegrees);
-	void			RotateArbitrary(const idVec3 &rotAxis, float howManyDegrees);
+		void			RotateAbsolute(int whichAxis, float	howManyDegrees);
+		void			RotateRelative(int whichAxis, float	howManyDegrees);
+		void			RotateArbitrary(const idVec3 &rotAxis, float howManyDegrees);
 
 // RAVEN BEGIN
 // abahr:
-	int				GetVec3Dimension( void ) const;
+		int				GetVec3Dimension( void ) const;
 // RAVEN END
+#endif
+#ifdef _SPLASHDAMAGE
+	    idMat3&			operator=( const idMat3 &a );
+	    idVec3			TransposeMultiply( const idVec3 &vec ) const;
+	    int				GetSquareDimension( void ) const;
+	    idMat3			ToMaya( void ) const;
+	    idMat3&			ToMayaSelf( void );
+	    idMat3			FromMaya( void ) const;
+	    idMat3&			FromMayaSelf( void );
+	
+	    idAngles		ToAnglesMaya( void ) const;
 #endif
 
 	private:
@@ -562,6 +617,38 @@ ID_INLINE idMat3 idMat3::operator*(const idMat3 &a) const
 
 	return dst;
 }
+
+#if defined(_RAVEN) || defined(_SPLASHDAMAGE)
+// RAVEN BEGIN
+// jscott: divide is overridden to multiply by transpose
+ID_INLINE idVec3 idMat3::operator/( const idVec3 &vec ) const
+{
+    return( idVec3(
+                mat[0].x * vec.x + mat[0].y * vec.y + mat[0].z * vec.z,
+                mat[1].x * vec.x + mat[1].y * vec.y + mat[1].z * vec.z,
+                mat[2].x * vec.x + mat[2].y * vec.y + mat[2].z * vec.z ) );
+}
+
+ID_INLINE idMat3 idMat3::operator/( const idMat3 &a ) const
+{
+    idMat3		dst;
+
+    dst[0].x = mat[0].x * a.mat[0].x + mat[0].y * a.mat[0].y + mat[0].z * a.mat[0].z;
+    dst[0].y = mat[0].x * a.mat[1].x + mat[0].y * a.mat[1].y + mat[0].z * a.mat[1].z;
+    dst[0].z = mat[0].x * a.mat[2].x + mat[0].y * a.mat[2].y + mat[0].z * a.mat[2].z;
+
+    dst[1].x = mat[1].x * a.mat[0].x + mat[1].y * a.mat[0].y + mat[1].z * a.mat[0].z;
+    dst[1].y = mat[1].x * a.mat[1].x + mat[1].y * a.mat[1].y + mat[1].z * a.mat[1].z;
+    dst[1].z = mat[1].x * a.mat[2].x + mat[1].y * a.mat[2].y + mat[1].z * a.mat[2].z;
+
+    dst[2].x = mat[2].x * a.mat[0].x + mat[2].y * a.mat[0].y + mat[2].z * a.mat[0].z;
+    dst[2].y = mat[2].x * a.mat[1].x + mat[2].y * a.mat[1].y + mat[2].z * a.mat[1].z;
+    dst[2].z = mat[2].x * a.mat[2].x + mat[2].y * a.mat[2].y + mat[2].z * a.mat[2].z;
+
+    return( dst );
+}
+// RAVEN END
+#endif
 
 ID_INLINE idMat3 idMat3::operator*(const float a) const
 {
@@ -716,7 +803,19 @@ ID_INLINE void idMat3::Zero(void)
 
 ID_INLINE void idMat3::Identity(void)
 {
+#ifdef _SPLASHDAMAGE
+    mat[ 0 ].x = 1.0f;
+    mat[ 0 ].y = 0.0f;
+    mat[ 0 ].z = 0.0f;
+    mat[ 1 ].x = 0.0f;
+    mat[ 1 ].y = 1.0f;
+    mat[ 1 ].z = 0.0f;
+    mat[ 2 ].x = 0.0f;
+    mat[ 2 ].y = 0.0f;
+    mat[ 2 ].z = 1.0f;
+#else
 	*this = mat3_identity;
+#endif
 }
 
 ID_INLINE bool idMat3::IsIdentity(const float epsilon) const
@@ -757,7 +856,12 @@ ID_INLINE bool idMat3::IsDiagonal(const float epsilon) const
 
 ID_INLINE bool idMat3::IsRotated(void) const
 {
+#ifdef _SPLASHDAMAGE
+    // NOTE: assumes the 3x3 matrix is orthonormal
+    return ( mat[0][0] != 1.0f || mat[1][1] != 1.0f || mat[2][2] != 1.0f );
+#else
 	return !Compare(mat3_identity);
+#endif
 }
 
 ID_INLINE void idMat3::ProjectVector(const idVec3 &src, idVec3 &dst) const
@@ -780,6 +884,15 @@ ID_INLINE bool idMat3::FixDegeneracies(void)
 	return r;
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE bool idMat3::FixDenormals( float epsilon )
+{
+    bool r = mat[0].FixDenormals( epsilon );
+    r |= mat[1].FixDenormals( epsilon );
+    r |= mat[2].FixDenormals( epsilon );
+    return r;
+}
+#else
 ID_INLINE bool idMat3::FixDenormals(void)
 {
 	bool r = mat[0].FixDenormals();
@@ -787,6 +900,7 @@ ID_INLINE bool idMat3::FixDenormals(void)
 	r |= mat[2].FixDenormals();
 	return r;
 }
+#endif
 
 ID_INLINE float idMat3::Trace(void) const
 {
@@ -906,6 +1020,79 @@ ID_INLINE float *idMat3::ToFloatPtr(void)
 	return mat[0].ToFloatPtr();
 }
 
+#ifdef _RAVEN
+// abahr: made version for when getting vectors
+ID_INLINE int idMat3::GetVec3Dimension( void ) const {
+	return 3;
+}
+#endif
+
+#ifdef _SPLASHDAMAGE
+ID_INLINE int idMat3::GetSquareDimension( void ) const
+{
+    return 3;
+}
+
+ID_INLINE idMat3& idMat3::operator=( const idMat3 &a )
+{
+    memcpy( mat[ 0 ].ToFloatPtr(), a.mat[ 0 ].ToFloatPtr(), sizeof( mat ) );
+    return *this;
+}
+
+ID_INLINE idVec3 idMat3::TransposeMultiply( const idVec3 &vec ) const
+{
+    return idVec3(
+               mat[0].x * vec.x + mat[0].y * vec.y + mat[0].z * vec.z,
+               mat[1].x * vec.x + mat[1].y * vec.y + mat[1].z * vec.z,
+               mat[2].x * vec.x + mat[2].y * vec.y + mat[2].z * vec.z );
+}
+
+ID_INLINE idMat3 idMat3::ToMaya( void ) const
+{
+    idMat3 matMaya;
+
+    matMaya = *this;
+    matMaya.ToMayaSelf();
+    return matMaya;
+}
+
+ID_INLINE idMat3& idMat3::ToMayaSelf( void )
+{
+    Swap( mat[ 0 ][ 2 ], mat[ 0 ][ 1 ] );
+    mat[ 0 ][ 2 ] = -mat[ 0 ][ 2 ];
+
+    Swap( mat[ 1 ][ 2 ], mat[ 1 ][ 1 ] );
+    mat[ 1 ][ 2 ] = -mat[ 1 ][ 2 ];
+
+    Swap( mat[ 2 ][ 1 ], mat[ 2 ][ 2 ] );
+    mat[ 2 ][ 2 ] = -mat[ 2 ][ 2 ];
+
+    return (*this);
+}
+
+ID_INLINE idMat3 idMat3::FromMaya( void ) const
+{
+    idMat3 matId;
+
+    matId = *this;
+    matId.FromMayaSelf();
+    return matId;
+}
+
+ID_INLINE idMat3& idMat3::FromMayaSelf( void )
+{
+    Swap( mat[ 0 ][ 2 ], mat[ 0 ][ 1 ] );
+    mat[ 0 ][ 1 ] = -mat[ 0 ][ 1 ];
+
+    Swap( mat[ 1 ][ 2 ], mat[ 1 ][ 1 ] );
+    mat[ 1 ][ 1 ] = -mat[ 1 ][ 1 ];
+
+    Swap( mat[ 2 ][ 1 ], mat[ 2 ][ 2 ] );
+    mat[ 2 ][ 1 ] = -mat[ 2 ][ 1 ];
+
+    return (*this);
+}
+#endif
 
 //===============================================================
 //
@@ -970,6 +1157,9 @@ class idMat4
 		idMat4			TransposeMultiply(const idMat4 &b) const;
 
 		int				GetDimension(void) const;
+#ifdef _SPLASHDAMAGE
+    	int				GetSquareDimension( void ) const;
+#endif
 
 		const float 	*ToFloatPtr(void) const;
 		float 			*ToFloatPtr(void);
@@ -1287,7 +1477,26 @@ ID_INLINE void idMat4::Zero(void)
 
 ID_INLINE void idMat4::Identity(void)
 {
+#ifdef _SPLASHDAMAGE
+    mat[ 0 ].x = 1.0f;
+    mat[ 0 ].y = 0.0f;
+    mat[ 0 ].z = 0.0f;
+    mat[ 0 ].w = 0.0f;
+    mat[ 1 ].x = 0.0f;
+    mat[ 1 ].y = 1.0f;
+    mat[ 1 ].z = 0.0f;
+    mat[ 1 ].w = 0.0f;
+    mat[ 2 ].x = 0.0f;
+    mat[ 2 ].y = 0.0f;
+    mat[ 2 ].z = 1.0f;
+    mat[ 2 ].w = 0.0f;
+    mat[ 3 ].x = 0.0f;
+    mat[ 3 ].y = 0.0f;
+    mat[ 3 ].z = 0.0f;
+    mat[ 3 ].w = 1.0f;
+#else
 	*this = mat4_identity;
+#endif
 }
 
 ID_INLINE bool idMat4::IsIdentity(const float epsilon) const
@@ -1718,7 +1927,35 @@ ID_INLINE void idMat5::Zero(void)
 
 ID_INLINE void idMat5::Identity(void)
 {
+#ifdef _SPLASHDAMAGE
+    mat[ 0 ].x = 1.0f;
+    mat[ 0 ].y = 0.0f;
+    mat[ 0 ].z = 0.0f;
+    mat[ 0 ].s = 0.0f;
+    mat[ 0 ].t = 0.0f;
+    mat[ 1 ].x = 0.0f;
+    mat[ 1 ].y = 1.0f;
+    mat[ 1 ].z = 0.0f;
+    mat[ 1 ].s = 0.0f;
+    mat[ 1 ].t = 0.0f;
+    mat[ 2 ].x = 0.0f;
+    mat[ 2 ].y = 0.0f;
+    mat[ 2 ].z = 1.0f;
+    mat[ 2 ].s = 0.0f;
+    mat[ 2 ].t = 0.0f;
+    mat[ 3 ].x = 0.0f;
+    mat[ 3 ].y = 0.0f;
+    mat[ 3 ].z = 0.0f;
+    mat[ 3 ].s = 1.0f;
+    mat[ 3 ].t = 0.0f;
+    mat[ 4 ].x = 0.0f;
+    mat[ 4 ].y = 0.0f;
+    mat[ 4 ].z = 0.0f;
+    mat[ 4 ].s = 0.0f;
+    mat[ 4 ].t = 1.0f;
+#else
 	*this = mat5_identity;
+#endif
 }
 
 ID_INLINE bool idMat5::IsIdentity(const float epsilon) const
@@ -2167,7 +2404,46 @@ ID_INLINE void idMat6::Zero(void)
 
 ID_INLINE void idMat6::Identity(void)
 {
+#ifdef _SPLASHDAMAGE
+    mat[ 0 ][ 0 ] = 1.0f;
+    mat[ 0 ][ 1 ] = 0.0f;
+    mat[ 0 ][ 2 ]= 0.0f;
+    mat[ 0 ][ 3 ] = 0.0f;
+    mat[ 0 ][ 4 ] = 0.0f;
+    mat[ 0 ][ 5 ] = 0.0f;
+    mat[ 1 ][ 0 ] = 0.0f;
+    mat[ 1 ][ 1 ] = 1.0f;
+    mat[ 1 ][ 2 ]= 0.0f;
+    mat[ 1 ][ 3 ] = 0.0f;
+    mat[ 1 ][ 4 ] = 0.0f;
+    mat[ 1 ][ 5 ] = 0.0f;
+    mat[ 2 ][ 0 ] = 0.0f;
+    mat[ 2 ][ 1 ] = 0.0f;
+    mat[ 2 ][ 2 ]= 1.0f;
+    mat[ 2 ][ 3 ] = 0.0f;
+    mat[ 2 ][ 4 ] = 0.0f;
+    mat[ 2 ][ 5 ] = 0.0f;
+    mat[ 3 ][ 0 ] = 0.0f;
+    mat[ 3 ][ 1 ] = 0.0f;
+    mat[ 3 ][ 2 ]= 0.0f;
+    mat[ 3 ][ 3 ] = 1.0f;
+    mat[ 3 ][ 4 ] = 0.0f;
+    mat[ 3 ][ 5 ] = 0.0f;
+    mat[ 4 ][ 0 ] = 0.0f;
+    mat[ 4 ][ 1 ] = 0.0f;
+    mat[ 4 ][ 2 ]= 0.0f;
+    mat[ 4 ][ 3 ] = 0.0f;
+    mat[ 4 ][ 4 ] = 1.0f;
+    mat[ 4 ][ 5 ] = 0.0f;
+    mat[ 5 ][ 0 ] = 0.0f;
+    mat[ 5 ][ 1 ] = 0.0f;
+    mat[ 5 ][ 2 ]= 0.0f;
+    mat[ 5 ][ 3 ] = 0.0f;
+    mat[ 5 ][ 4 ] = 0.0f;
+    mat[ 5 ][ 5 ] = 1.0f;
+#else
 	*this = mat6_identity;
+#endif
 }
 
 ID_INLINE bool idMat6::IsIdentity(const float epsilon) const
@@ -2222,6 +2498,7 @@ ID_INLINE idMat6 idMat6::Inverse(void) const
 	idMat6 invMat;
 
 	invMat = *this;
+
 	int r id_attribute((unused)) = invMat.InverseSelf();
 	assert(r);
 	return invMat;
@@ -2232,6 +2509,7 @@ ID_INLINE idMat6 idMat6::InverseFast(void) const
 	idMat6 invMat;
 
 	invMat = *this;
+
 	int r id_attribute((unused)) = invMat.InverseFastSelf();
 	assert(r);
 	return invMat;
@@ -2494,7 +2772,11 @@ ID_INLINE idMatX::~idMatX(void)
 {
 	// if not temp memory
 	if (mat != NULL && (mat < idMatX::tempPtr || mat > idMatX::tempPtr + MATX_MAX_TEMP) && alloced != -1) {
+#ifdef _SPLASHDAMAGE
+        Mem_FreeAligned( mat );
+#else
 		Mem_Free16(mat);
+#endif
 	}
 }
 
@@ -2783,15 +3065,25 @@ ID_INLINE bool idMatX::operator!=(const idMatX &a) const
 
 ID_INLINE void idMatX::SetSize(int rows, int columns)
 {
+#if !defined(_SPLASHDAMAGE)
 	assert(mat < idMatX::tempPtr || mat > idMatX::tempPtr + MATX_MAX_TEMP);
+#endif
 	int alloc = (rows * columns + 3) & ~3;
 
 	if (alloc > alloced && alloced != -1) {
 		if (mat != NULL) {
+#ifdef _SPLASHDAMAGE
+            Mem_FreeAligned( mat );
+#else
 			Mem_Free16(mat);
+#endif
 		}
 
+#ifdef _SPLASHDAMAGE
+        mat = (float *) Mem_AllocAligned( alloc * sizeof( float ), ALIGN_16 );
+#else
 		mat = (float *) Mem_Alloc16(alloc * sizeof(float));
+#endif
 		alloced = alloc;
 	}
 
@@ -2824,7 +3116,11 @@ ID_INLINE void idMatX::SetData(int rows, int columns, float *data)
 	assert(mat < idMatX::tempPtr || mat > idMatX::tempPtr + MATX_MAX_TEMP);
 
 	if (mat != NULL && alloced != -1) {
+#ifdef _SPLASHDAMAGE
+        Mem_FreeAligned( mat );
+#else
 		Mem_Free16(mat);
+#endif
 	}
 
 	assert((((uintptr_t) data) & 15) == 0);       // data must be 16 byte aligned
@@ -3595,12 +3891,5 @@ ID_INLINE float *idMatX::ToFloatPtr(void)
 {
 	return mat;
 }
-
-#ifdef _RAVEN
-// abahr: made version for when getting vectors
-ID_INLINE int idMat3::GetVec3Dimension( void ) const {
-	return 3;
-}
-#endif
 
 #endif /* !__MATH_MATRIX_H__ */

@@ -280,12 +280,10 @@ void idGuiModel::EmitFullScreen( void ) {
 	tr.viewDef = viewDef;
 
 	// add the surfaces to this view
-	needXraySubview = nullptr;
 	for ( int i = 0 ; i < surfaces.Num() ; i++ ) {
 		guiModelSurface_t *surface = &surfaces[i];
 		EmitSurface( surface, viewDef->worldSpace.modelMatrix, viewDef->worldSpace.modelViewMatrix, false );
 	}
-	xrayImageOverride = nullptr;
 
 	tr.viewDef = oldViewDef;
 
@@ -656,45 +654,9 @@ Also assigns image override into draw surface if it uses X-ray.
 =============
 */
 void idGuiModel::ProcessOverlaySubviews( drawSurf_t *drawSurf ) {
-	const textureStage_t *xrayStage = nullptr;
-	int xrayStageCount = 0;
-	for ( int j = 0; j < drawSurf->material->GetNumStages(); j++ ) {
-		const shaderStage_t *stage = drawSurf->material->GetStage( j );
-		if ( stage->texture.dynamic == DI_XRAY_RENDER ) {
-			xrayStage = &stage->texture;
-			xrayStageCount++;
-		}
-	}
+	const shaderStage_t *xrayStage = drawSurf->material->FindXrayStage();
+	if ( !xrayStage )
+		return;
 
-
-	if ( xrayStageCount > 0 ) {
-		if ( xrayStageCount > 1 ) {
-			// we can't process several X-ray objects with different settings in GUI overlay
-			// so let's guard against it with a warning
-			static bool issuedWarning = false;
-			if (!issuedWarning) {
-				common->Warning( "GUI overlays have several surfaces with X-ray material (not supported)" );
-				issuedWarning = true;
-			}
-		}
-
-		// we generate subviews in main view rendering, and GUI overlays are processed later
-		// on the first frame we use transparent image in overlay but mark that we need subview
-		// on the second frame we generate subview because of the mark, then use it in overlay
-		needXraySubview = xrayStage;
-		if ( xrayImageOverride ) {
-			drawSurf->dynamicImageOverride = xrayImageOverride;
-		} else {
-			// note: this image is actually fully transparent
-			drawSurf->dynamicImageOverride = globalImages->blackImage;
-		}
-	}
-}
-
-const textureStage_t *idGuiModel::NeedXraySubview() const {
-	return needXraySubview;
-}
-
-void idGuiModel::SetXrayImageOverride(idImageScratch *image) {
-	xrayImageOverride = image;
+	drawSurf->dynamicImageOverride = tr.xrayGuiImageOverride;
 }

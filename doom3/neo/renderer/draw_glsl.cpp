@@ -32,6 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 
 #include "glsl/draw_glsl_shader.cpp"
+#ifdef _SPLASHDAMAGE
+#include "renderer/RenderProgramManager.h"
+#endif
 
 #if 1
 #define ENABLE_STENCIL_TEST() qglEnable(GL_STENCIL_TEST);
@@ -50,6 +53,10 @@ static idCVar harm_r_PBRRMAOSpecularMap("harm_r_PBRRMAOSpecularMap", "0", CVAR_B
 static idCVar harm_r_PBRRoughnessCorrection("harm_r_PBRRoughnessCorrection", "0.55", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "max roughness for old specular texture in PBR. 0 = disable; else = roughness = harm_r_PBRRoughnessCorrection - texture(specularTexture, st).r", -1, 1); // 0.6 0.5
 static idCVar harm_r_PBRMetallicCorrection("harm_r_PBRMetallicCorrection", "0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "min metallic for old specular texture in PBR. 0 = disable; else = metallic = texture(specularTexture, st).r + harm_r_PBRMetallicCorrection", -1, 1);
 static idCVar harm_r_ambientLightingBrightness("harm_r_ambientLightingBrightness", "1.0", CVAR_FLOAT|CVAR_RENDERER|CVAR_ARCHIVE, "Lighting brightness in ambient lighting");
+
+#ifdef _SPLASHDAMAGE //karin: megatexture interaction
+extern void RB_GLSL_CreateDrawMegaTextureInteractions(const drawSurf_t *surf);
+#endif
 
 #include "glsl/draw_glsl_backend.cpp"
 
@@ -180,6 +187,9 @@ void R_CheckBackEndCvars(void)
 	{
 		r_shadowMapping = r_useShadowMapping.GetBool();
 		r_useShadowMapping.ClearModified();
+#ifdef _SPLASHDAMAGE //karin: reload shaders if has cvar defines
+		renderProgramManager->CVarChanged(r_useShadowMapping.GetName());
+#endif
 	}
 	if(r_forceShadowMapsOnAlphaTestedSurfaces.IsModified())
 	{
@@ -203,6 +213,9 @@ void R_CheckBackEndCvars(void)
 	{
 		r_stencilShadowTranslucent = harm_r_stencilShadowTranslucent.GetBool();
 		harm_r_stencilShadowTranslucent.ClearModified();
+#ifdef _SPLASHDAMAGE //karin: reload shaders if has cvar defines
+		renderProgramManager->CVarChanged(harm_r_stencilShadowTranslucent.GetName());
+#endif
 	}
 	if(harm_r_stencilShadowAlpha.IsModified())
 	{
@@ -229,6 +242,9 @@ void R_CheckBackEndCvars(void)
 		{
 			r_stencilShadowSoft = harm_r_stencilShadowSoft.GetBool();
 			harm_r_stencilShadowSoft.ClearModified();
+#ifdef _SPLASHDAMAGE //karin: reload shaders if has cvar defines
+			renderProgramManager->CVarChanged(harm_r_stencilShadowSoft.GetName());
+#endif
 		}
 		if(harm_r_stencilShadowSoftCopyStencilBuffer.IsModified())
 		{

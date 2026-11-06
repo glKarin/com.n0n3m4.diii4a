@@ -1,0 +1,105 @@
+2019-11-10 David Anderson
+     * Makefile.am: Added debuglink example.
+       Added a small executable. Added test code.
+     * Makefile.in: Regenerated.
+     * debuglink.base: Baseline output of getdebuglink.
+     * dummyexecutable.c: A tiny C source to create
+       an executable via "cc -g dummyexecutable.c"
+     * dummyexecutable: The output of the compile.
+       This is included in the distribution as a binary
+       testcase for getdebuglink.
+     * getdebuglink.c: A new example showing how one
+       can use libdwarf to find the external gnu
+       DWARF object.
+     * runtests.sh: Use 'make check' to run this
+       test case shell.
+2019-11-07 David Anderson
+     * simplereader.c: It was using %llx for printf
+       (wrong) and is now using the DW_PR_DUx macros
+       as it should.  Avoiding errors
+       when --enable-nonstandardprintf is needed.
+2019-10-21 David Anderson
+     * findfuncbypc.c,frame1.c,simplereader.c: Be more
+       thorough in using config.h contents to check for
+       for headers before including them.
+2019-10-06 David Anderson
+     * findfuncbypc.c: Removed trailing whitespace.
+2019-10-02 David Anderson
+     * findfuncbypc.c: Now lists options if no
+       options presented (instead of dumping core!).
+2019-10-01 David Anderson
+     * frame1.c: Now uses dwarf_init_b() instead
+       of dwarf_init(). Better reporting of error
+       returns from dwarf_init_b().
+2019-09-16 David Anderson
+     * findfuncbypc.c: A new example showing
+       how, in fairly simple cases, one can find the source file
+       line number given a  address in the code.
+       It is not pleasantly organized yet.
+2019-08-29 David Anderson
+     * CMakeLists.txt: Adding findfuncbypc.c for cmake.
+     * Makefile.am: Adding findfuncbypc.c for build.
+       It builds, but ignore it it is not yet useful.
+     * Makefile.in: Regenerated
+     * frame1.c: Add O_BINARY so reads work ok
+       in Windows.
+2019-07-07 David Anderson
+     * findfuncbypc.c: New example. Which compiles
+       but as yet does absolutely nothing.
+     * CMakeLists.txt: cmake build of the new program.
+     * Makefile.am: For findfuncbypc build.
+     * Makefile.in: For findfuncbypc.
+2019-06-04 David Anderson
+     * frame1.c,simplereader.c: Removed inttypes.h
+       include as nothing in it is referenced.
+2019-05-26 David Anderson
+     * frame1.c, simplereader.c: Reformat comments for a shorter
+       line length. Remove an incorrect comment.
+2019-05-24 David Anderson
+     * Makefile.am: Delete mention of config.h.in.cmake.
+     * Makefile.in: Regenerate.
+2019-05-20 David Anderson
+     * CMakeLists.txt: No longer generates a local-build-dir
+       config.h
+     * config.h.in.cmake: Deleted.
+2019-05-20 David Anderson
+     * CMakeLists.txt: Reflects renamed options.
+       Adds use of compiler-warning options.
+     * config.h.in.cmake: Adds needed standard cmakedefine
+       lines, such as DWARF_WITH_LIBELF.
+     * frame1.c: Adding a Windows-related ifdef set.
+2019-05-01 David Anderson
+     * configure.cmake: deleted.
+     * CMakeLists.txt: Now does its configure_file on its own.
+2019-05-01 David Anderson
+     * configure.cmake: Removed some lines, placing them in
+       base directory configure.cmake.
+2019-04-28 David Anderson
+     * config.h.in.cmake, configure.cmake: Deleted all reference to
+       INT32 and INT64 as no longer needed.
+2019-04-24 David Anderson
+     * frame1.c, remove accidental space.
+2019-04-22 David Anderson
+     * frame1.c: Add use of uintptr_t to suppress
+       compiler warning. Fix _WIN32 #includes for _MSC_VER
+       and io.h to the usual way we do that.
+2019-04-22 David Anderson
+     * frame1.c: Add test for _MSC_VER for Windows MSVC.
+2019-03-08 David Anderson
+    * simplereader.c: Remove trailing whitespace.
+2019-02-18 David Anderson
+    * configure.cmake: Now defines DWARF_WITH_LIBELF for
+      consistency with other cmake files.
+2019-01-09 David Anderson
+    * simplereader.c: Added comments about the dwarf_init()
+      case and dSYM objects.
+2019-01-03 David Anderson
+    * simplereader.c: Now uses dwarf_init_path()
+      to initialize libdwarf instead of dwarf_init()
+      or dwarf_init_b().
+      Thus ensuring we test dwarf_init_path() in
+      regression tests on elf, mach-o and pe
+      object files.
+2019-01-02 David Anderson
+    * Makefile.am: Added ChangeLog2018 to files.
+    * ChangeLog: renamed ChangeLog2018

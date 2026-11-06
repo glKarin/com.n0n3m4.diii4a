@@ -1,0 +1,20 @@
+--- core/fpu_ctrl.cpp	Mon Jun 27 10:33:53 2022
++++ core/fpu_ctrl.cpp	Sat May 25 21:14:50 2024
+@@ -29,7 +29,7 @@
+     sseState |= _MM_FLUSH_ZERO_ON | _MM_DENORMALS_ZERO_ON;
+     _mm_setcsr(sseState);
+ 
+-#elif defined(__GNUC__) && defined(HAVE_SSE)
++#elif defined(__GNUC__) && defined(HAVE_SSE) && (defined(__i386__) || defined(__x86_64__))
+ 
+     if((CPUCapFlags&CPU_CAP_SSE))
+     {
+@@ -52,7 +52,7 @@
+ #if defined(HAVE_SSE_INTRINSICS)
+     _mm_setcsr(this->sse_state);
+ 
+-#elif defined(__GNUC__) && defined(HAVE_SSE)
++#elif defined(__GNUC__) && defined(HAVE_SSE) && (defined(__i386__) || defined(__x86_64__))
+ 
+     if((CPUCapFlags&CPU_CAP_SSE))
+         __asm__ __volatile__("ldmxcsr %0" : : "m" (*&this->sse_state));

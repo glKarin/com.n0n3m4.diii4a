@@ -34,6 +34,13 @@ void steamSetAchievement(const char* id)
 	return;
 }
 
+void steamResetStats(const int bAlsoAchievements)
+{
+	STEAMSHIM_resetStats(bAlsoAchievements);
+
+	return;
+}
+
 int steamAlive()
 {
 	return STEAMSHIM_alive();
@@ -67,6 +74,11 @@ int steamAlive()
 }
 
 void steamSetRichPresence(const char* key, const char* value)
+{
+	return;
+}
+
+void steamResetStats(const int bAlsoAchievements)
 {
 	return;
 }

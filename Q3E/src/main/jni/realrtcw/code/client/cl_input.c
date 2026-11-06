@@ -33,6 +33,9 @@ If you have questions concerning this license or the applicable additional terms
 unsigned frame_msec;
 int old_com_frameTime;
 
+static int s_lastMouseInputTime = 0;
+static int s_lastJoyInputTime   = 0;
+
 /*
 ===============================================================================
 
@@ -209,9 +212,34 @@ float CL_KeyState( kbutton_t *key ) {
 }
 
 
+void IN_ClearKButton( kbutton_t *b ) {
+	b->down[0] = 0;
+	b->down[1] = 0;
+	b->active = 0;
+	b->wasPressed = 0;
+	b->downtime = 0;
+	b->msec = 0;
+}
+
+void IN_ForceUntoggleCrouch( void ) {
+	if ( !s_isToggledCrouch ) {
+		return;
+	}
+
+	IN_ClearKButton( &kb[KB_DOWN] );
+
+	s_isToggledCrouch = qfalse;
+}
+
 void IN_DownToggle( void ) {IN_KeyToggle( &kb[KB_DOWN] );}
 
-void IN_UpDown( void ) {IN_KeyDown( &kb[KB_UP] );}
+void IN_UpDown( void ) {
+    if ( s_isToggledCrouch ) {
+        IN_ForceUntoggleCrouch();
+        return;
+    }
+    IN_KeyDown( &kb[KB_UP] );
+}
 void IN_UpUp( void ) {IN_KeyUp( &kb[KB_UP] );}
 void IN_DownDown( void ) {IN_KeyDown( &kb[KB_DOWN] );}
 void IN_DownUp( void ) {IN_KeyUp( &kb[KB_DOWN] );}
@@ -428,14 +456,25 @@ CL_MouseEvent
 =================
 */
 void CL_MouseEvent( int dx, int dy, int time ) {
-	if ( Key_GetCatcher( ) & KEYCATCH_UI ) {
-		VM_Call( uivm, UI_MOUSE_EVENT, dx, dy );
-	} else if (Key_GetCatcher( ) & KEYCATCH_CGAME) {
-		VM_Call( cgvm, CG_MOUSE_EVENT, dx, dy );
-	} else {
-		cl.mouseDx[cl.mouseIndex] += dx;
-		cl.mouseDy[cl.mouseIndex] += dy;
-	}
+    // Any real mouse movement marks KBM as active input device
+    if ( dx || dy ) {
+        s_lastMouseInputTime = time;
+    }
+
+    if ( Key_GetCatcher( ) & KEYCATCH_UI ) {
+        VM_Call( uivm, UI_MOUSE_EVENT, dx, dy );
+    } else if (Key_GetCatcher( ) & KEYCATCH_CGAME) {
+        VM_Call( cgvm, CG_MOUSE_EVENT, dx, dy );
+    } else {
+        cl.mouseDx[cl.mouseIndex] += dx;
+        cl.mouseDy[cl.mouseIndex] += dy;
+    }
+}
+
+static float CL_NormalizeJoyAxis16(int v)
+{
+    // v is Sint16-ish in [-32768..32767]
+    return (v >= 0) ? (v / 32767.0f) : (v / 32768.0f);
 }
 
 /*
@@ -446,10 +485,170 @@ Joystick values stay set until changed
 =================
 */
 void CL_JoystickEvent( int axis, int value, int time ) {
-	if ( axis < 0 || axis >= MAX_JOYSTICK_AXIS ) {
-		Com_Error( ERR_DROP, "CL_JoystickEvent: bad axis %i", axis );
-	}
-	cl.joystickAxis[axis] = value;
+    if ( axis < 0 || axis >= MAX_JOYSTICK_AXIS ) {
+        Com_Error( ERR_DROP, "CL_JoystickEvent: bad axis %i", axis );
+    }
+
+    float norm = CL_NormalizeJoyAxis16(value);
+    cl.joystickAxis[axis] = norm;
+
+    // Mark gamepad as active only if it exceeds a small noise floor.
+    // Use something close to your deadzone (or a little smaller).
+    if ( fabsf(norm) > 0.08f ) {
+        s_lastJoyInputTime = time;
+    }
+}
+
+static qboolean CL_UsingGamepadNow( void )
+{
+    // If the most recent meaningful input was joystick, we’re in gamepad mode.
+    // Also add a small “hold” so tiny mouse bumps don’t instantly kill AA.
+    const int HOLD_MS = 250;
+
+    if ( (cls.realtime - s_lastJoyInputTime) > 2000 ) {
+        // No joystick activity for a while -> definitely not using gamepad
+        return qfalse;
+    }
+
+    // If mouse input happened very recently after joystick, treat as KBM.
+    if ( (cls.realtime - s_lastMouseInputTime) < HOLD_MS &&
+         s_lastMouseInputTime > s_lastJoyInputTime ) {
+        return qfalse;
+    }
+
+    return (s_lastJoyInputTime >= s_lastMouseInputTime);
+}
+
+
+static float CL_DeadzoneRescale(float x, float dz)
+{
+    float ax = fabsf(x);
+    if (ax <= dz) return 0.0f;
+    float sign = (x < 0.0f) ? -1.0f : 1.0f;
+    return sign * ((ax - dz) / (1.0f - dz));
+}
+
+static float CL_ApplyExpo(float x, float expo)
+{
+    float ax = fabsf(x);
+    float sign = (x < 0.0f) ? -1.0f : 1.0f;
+    return sign * powf(ax, expo);
+}
+
+void CL_GamepadUIMouseMove( void ) {
+    if ( !(Key_GetCatcher() & KEYCATCH_UI) ) {
+        return;
+    }
+
+float lx = cl.joystickAxis[0];
+float ly = cl.joystickAxis[1];
+
+    float dt = cls.frametime * 0.001f;
+    if ( dt <= 0.0f ) dt = 1.0f / 60.0f;
+
+    // Tunables
+    float dz   = j_uiDeadzone->value; 
+    float expo = j_uiExpo->value;      
+    float speed = j_uiSpeed->value;    
+
+    // Deadzone + rescale
+    lx = CL_DeadzoneRescale(lx, dz);
+    ly = CL_DeadzoneRescale(ly, dz);
+
+    if ( lx == 0.0f && ly == 0.0f ) {
+        return;
+    }
+
+    // Expo for precision near center
+    lx = CL_ApplyExpo(lx, expo);
+    ly = CL_ApplyExpo(ly, expo);
+
+    static float fracX = 0.0f;
+    static float fracY = 0.0f;
+
+    float fx = lx * speed * dt + fracX;
+    float fy = ly * speed * dt + fracY;
+
+    int dx = (int)fx;
+    int dy = (int)fy;
+
+    fracX = fx - dx;
+    fracY = fy - dy;
+
+    if ( dx || dy ) {
+        CL_MouseEvent( dx, dy, cls.realtime );
+    }
+}
+
+
+static int s_lastAimAssistPreset = -999;
+
+static void CL_ApplyAimAssistPreset( int preset ) {
+    switch ( preset ) {
+    default:
+    case 0: // OFF
+        Cvar_SetValue( "j_aimassist_slowdown",       0.0f );
+        Cvar_SetValue( "j_aimassist_magnet",         0.0f );
+        Cvar_SetValue( "j_aimassist_strafemagnet",   0.0f );
+        Cvar_SetValue( "j_aimassist_minstrength",    1.0f );
+        Cvar_SetValue( "j_aimassist_minstick",       0.12f );
+        Cvar_SetValue( "j_aimassist_turnrate",       0.0f );
+        Cvar_SetValue( "j_aimassist_turnrate_ads",   0.0f );
+		Cvar_SetValue( "j_aimassist_recoil", 0.0f );
+        break;
+
+    case 1: // LIGHT (noticeably on, still subtle)
+        Cvar_SetValue( "j_aimassist_slowdown",       0.42f );   // was 0.34
+        Cvar_SetValue( "j_aimassist_magnet",         0.26f );   // was 0.16 (biggest bump)
+        Cvar_SetValue( "j_aimassist_strafemagnet",   0.14f );   // was 0.10
+        Cvar_SetValue( "j_aimassist_minstrength",    0.55f );   // keep
+        Cvar_SetValue( "j_aimassist_minstick",       0.11f );   // slightly easier engage
+        Cvar_SetValue( "j_aimassist_turnrate",       130.0f );  // was 105
+        Cvar_SetValue( "j_aimassist_turnrate_ads",   95.0f );   // was 75
+		Cvar_SetValue( "j_aimassist_recoil", 0.10f );
+        break;
+
+    case 2: // MEDIUM (strong, “modern shooter” feeling)
+        Cvar_SetValue( "j_aimassist_slowdown",       0.60f );   // was 0.52
+        Cvar_SetValue( "j_aimassist_magnet",         0.42f );   // was 0.28
+        Cvar_SetValue( "j_aimassist_strafemagnet",   0.24f );   // was 0.20
+        Cvar_SetValue( "j_aimassist_minstrength",    0.40f );   // engage a bit more often than 0.42
+        Cvar_SetValue( "j_aimassist_minstick",       0.10f );   // easier micro-corrections
+        Cvar_SetValue( "j_aimassist_turnrate",       175.0f );  // was 140
+        Cvar_SetValue( "j_aimassist_turnrate_ads",   125.0f );  // was 95
+		Cvar_SetValue( "j_aimassist_recoil", 0.22f );
+        break;
+
+    case 3: // STRONG (very noticeable, but breakout+escape still prevent glue)
+        Cvar_SetValue( "j_aimassist_slowdown",       0.78f );   // was 0.68
+        Cvar_SetValue( "j_aimassist_magnet",         0.60f );   // was 0.42
+        Cvar_SetValue( "j_aimassist_strafemagnet",   0.34f );   // was 0.30
+        Cvar_SetValue( "j_aimassist_minstrength",    0.30f );   // a bit more strafe follow engagement
+        Cvar_SetValue( "j_aimassist_minstick",       0.09f );   // allows “sticky” micro-aim
+        Cvar_SetValue( "j_aimassist_turnrate",       220.0f );  // was 175 (more correction bandwidth)
+        Cvar_SetValue( "j_aimassist_turnrate_ads",   160.0f );  // was 120
+		 Cvar_SetValue( "j_aimassist_recoil", 0.35f );
+        break;
+    }
+}
+
+void CL_UpdateAimAssistPreset( void ) {
+    int preset;
+
+    if ( !j_aimassist ) {
+        return;
+    }
+
+    preset = j_aimassist->integer;
+    if ( preset < 0 ) preset = 0;
+    if ( preset > 3 ) preset = 3;
+
+    if ( preset == s_lastAimAssistPreset ) {
+        return; // no change
+    }
+
+    s_lastAimAssistPreset = preset;
+    CL_ApplyAimAssistPreset( preset );
 }
 
 /*
@@ -458,41 +657,314 @@ CL_JoystickMove
 =================
 */
 void CL_JoystickMove( usercmd_t *cmd ) {
-	float anglespeed;
+	CL_UpdateAimAssistPreset();
+    float anglespeed;
 
-	float yaw     = j_yaw->value     * cl.joystickAxis[j_yaw_axis->integer];
-	float right   = j_side->value    * cl.joystickAxis[j_side_axis->integer];
-	float forward = j_forward->value * cl.joystickAxis[j_forward_axis->integer];
-	float pitch   = j_pitch->value   * cl.joystickAxis[j_pitch_axis->integer];
-	float up      = j_up->value      * cl.joystickAxis[j_up_axis->integer];
+    float yawAxis   = cl.joystickAxis[j_yaw_axis->integer];
+    float pitchAxis = cl.joystickAxis[j_pitch_axis->integer];
 
-	if ( !( kb[KB_SPEED].active ^ cl_run->integer ) ) {
+    float yaw   = (j_yaw->value   * j_lookSens->value) * yawAxis;
+    float pitch = (j_pitch->value * j_lookSens->value) * pitchAxis;
+
+    float forward = (j_forward->value * j_moveSens->value) * cl.joystickAxis[j_forward_axis->integer];
+    float right   = (j_side->value    * j_moveSens->value) * cl.joystickAxis[j_side_axis->integer];
+	float up = (j_up->value * j_moveSens->value) * cl.joystickAxis[j_up_axis->integer];
+
+	// Analog-walk
+	if (j_walk_threshold && j_walk_threshold->value > 0.0f)
+	{
+		float moveMag = sqrtf(forward * forward + right * right);
+
+		// hysteresis band to prevent rapid toggling near the threshold.
+		float thresh = j_walk_threshold->value;
+		float hyst = (j_walk_hysteresis) ? j_walk_hysteresis->value : 0.0f;
+
+		static qboolean s_forcedWalk = qfalse;
+
+		if (!s_forcedWalk)
+		{
+			if (moveMag > 0.0f && moveMag < (thresh - hyst))
+			{
+				s_forcedWalk = qtrue;
+			}
+		}
+		else
+		{
+			if (moveMag >= (thresh + hyst) || moveMag <= 0.0f)
+			{
+				s_forcedWalk = qfalse;
+			}
+		}
+
+		if (s_forcedWalk)
+		{
+			cmd->buttons |= BUTTON_WALKING;
+		}
+		else
+		{
+			// IMPORTANT:
+			// Don't blindly clear BUTTON_WALKING here, because keyboard logic (speed/run)
+			// may have set it intentionally. We'll only clear it if joystick is the reason.
+			// If you want joystick to override completely, uncomment the clear below.
+			// cmd->buttons &= ~BUTTON_WALKING;
+		}
+	}
+
+	if (!(kb[KB_SPEED].active ^ cl_run->integer))
+	{
 		cmd->buttons |= BUTTON_WALKING;
 	}
 
-	if ( kb[KB_SPEED].active ) {
-		anglespeed = 0.001 * cls.frametime * cl_anglespeedkey->value;
-	} else {
-		anglespeed = 0.001 * cls.frametime;
+	if (kb[KB_SPEED].active)
+	{
+		anglespeed = 0.001f * cls.frametime * cl_anglespeedkey->value;
+	}
+	else
+	{
+		anglespeed = 0.001f * cls.frametime;
 	}
 
-	if ( !kb[KB_STRAFE].active ) {
-		cl.viewangles[YAW] += anglespeed * yaw;
-		cmd->rightmove = ClampChar( cmd->rightmove + (int)right );
-	} else {
-		cl.viewangles[YAW] += anglespeed * right;
-		cmd->rightmove = ClampChar( cmd->rightmove + (int)yaw );
-	}
-	if ( kb[KB_MLOOK].active ) {
-		cl.viewangles[PITCH] += anglespeed * forward;
-		cmd->forwardmove = ClampChar( cmd->forwardmove + (int)pitch );
-	} else {
-		cl.viewangles[PITCH] += anglespeed * pitch;
-		cmd->forwardmove = ClampChar( cmd->forwardmove + (int)forward );
-	}
+// ---------------------------------------------------------
+// Aim Assist (gamepad) - affects only look (yaw/pitch)
+// Drop-in replacement for your current aim assist block inside CL_JoystickMove()
+// ---------------------------------------------------------
+if ( j_aimassist && j_aimassist->integer && CL_UsingGamepadNow() ) {
+    float strength = cl.cgameAA_Strength; // 0..1 from cgame
+    if ( strength > 0.0f ) {
 
-	cmd->upmove = ClampChar( cmd->upmove + (int)up );
+        float stickMag = sqrtf( yawAxis * yawAxis + pitchAxis * pitchAxis );
+
+        // Seconds
+        float dt = cls.frametime * 0.001f;
+
+        // Turn rate (deg/sec), optional ADS
+        float turnRate = j_aimassist_turnrate->value;
+        if ( cl.cgameIsZoomed && j_aimassist_turnrate_ads ) {
+            turnRate = j_aimassist_turnrate_ads->value;
+        }
+
+        // Max correction this frame in degrees (from turn rate)
+        float maxStep = turnRate * dt;
+
+        // Read deltas in degrees from cgame
+        float dy = cl.cgameAA_DYaw;
+        float dp = cl.cgameAA_DPitch;
+
+        // Clamp correction per frame
+        if ( dy >  maxStep ) dy =  maxStep;
+        if ( dy < -maxStep ) dy = -maxStep;
+        if ( dp >  maxStep ) dp =  maxStep;
+        if ( dp < -maxStep ) dp = -maxStep;
+
+
+        // ---------------------------------------------------------
+        // HARD BREAKOUT:
+        // If player pushes stick hard, aim assist must fully disengage.
+        // This prevents any "glue / can't move away" behavior.
+        // ---------------------------------------------------------
+        {
+            const float breakout = 0.75f; // tune 0.45..0.70
+            if ( stickMag >= breakout ) {
+                // Do not apply slowdown or any magnetism this frame.
+                goto aimassist_done;
+            }
+        }
+
+        // ---------------------------------------------------------
+        // ESCAPE LOGIC:
+        // If player pushes against the correction direction,
+        // weaken or fully disable the assist.
+        // (Use a SMALL threshold so it triggers earlier than minstick.)
+        // ---------------------------------------------------------
+		float escape = 1.0f;
+		if (stickMag >= 0.06f)
+		{
+			// input vs correction alignment (-1 resisting, +1 helping)
+			float inLen = stickMag;
+			float corLen = sqrtf(dy * dy + dp * dp);
+
+			if (corLen > 0.001f)
+			{
+				float nx = yawAxis / inLen;
+				float ny = pitchAxis / inLen;
+
+				float cx = dy / corLen;
+				float cy = dp / corLen;
+
+				float align = nx * cx + ny * cy; // -1..+1
+
+				// If resisting (align < 0), fade out smoothly instead of hard-off
+				if (align < 0.0f)
+				{
+					// tune 0.15..0.40 : bigger = more forgiving
+					float resist = (-align) / 0.25f;
+					if (resist > 1.0f)
+						resist = 1.0f;
+					escape = 1.0f - resist;
+				}
+			}
+		}
+
+		// ---------------------------------------------------------
+		// 0) Recoil compensation (pitch-only) while firing & locked
+		// ---------------------------------------------------------
+		if (j_aimassist_recoil && j_aimassist_recoil->value > 0.0f)
+		{
+
+			// Only when actually firing
+			if (cmd->buttons & BUTTON_ATTACK)
+			{
+
+				// Only when stick is mostly idle (prevents fighting player aim)
+				if (stickMag < 0.22f)
+				{
+
+					// Only when we have a confident lock
+					if (strength > 0.25f && escape > 0.0f)
+					{
+
+						// Cap recoil compensation independently (deg/sec)
+						// (Keep modest so it feels like stabilization, not auto-aim)
+						float recoilRate = 90.0f; // tune 60..140
+						if (cl.cgameIsZoomed)
+							recoilRate = 70.0f; // tune ADS separately
+						float maxRecoilStep = recoilRate * dt;
+
+						// Use dp as "how far target is from crosshair in pitch"
+						float rdp = dp;
+
+						if (rdp > maxRecoilStep)
+							rdp = maxRecoilStep;
+						if (rdp < -maxRecoilStep)
+							rdp = -maxRecoilStep;
+
+						// Scale by preset strength and escape
+						float rc = j_aimassist_recoil->value * strength * escape;
+
+						// Optional: fade out as stick approaches breakout
+						// (avoids weirdness if player starts aiming harder)
+						{
+							const float breakout = 0.75f;
+							float relief = 1.0f - (stickMag / breakout);
+							if (relief < 0.0f)
+								relief = 0.0f;
+							rc *= relief;
+						}
+
+						// Apply pitch-only stabilization
+						cl.viewangles[PITCH] += rdp * rc;
+					}
+				}
+			}
+		}
+
+		// ---------------------------------------------------------
+        // 1) Slowdown (friction) when actively aiming
+        // - fades out as stick approaches breakout
+        // - never applies during escape
+        // - clamp kept high to avoid "stuck" feeling
+        // ---------------------------------------------------------
+        if ( stickMag >= j_aimassist_minstick->value && j_aimassist_slowdown->value > 0.0f ) {
+            const float breakout = 0.75f;
+
+            // 1.0 when barely moving, 0.0 near breakout
+            float inputRelief = 1.0f - (stickMag / breakout);
+            if ( inputRelief < 0.0f ) inputRelief = 0.0f;
+
+            float slowdown = j_aimassist_slowdown->value * inputRelief * escape;
+
+            float scale = 1.0f - ( strength * slowdown );
+
+            // IMPORTANT: keep high; low values feel like glue
+            if ( scale < 0.65f ) scale = 0.65f;
+
+            yaw   *= scale;
+            pitch *= scale;
+        }
+
+        // ---------------------------------------------------------
+        // 2) Stick magnet:
+        // Only help for SMALL stick input ("micro-corrections"),
+        // never when player is turning hard.
+        // Also respects escape.
+        // ---------------------------------------------------------
+        {
+            const float magnetMaxStick = 0.65f; // tune 0.25..0.45
+            if ( j_aimassist_magnet->value > 0.0f &&
+                 stickMag >= j_aimassist_minstick->value &&
+                 stickMag <= magnetMaxStick &&
+                 escape > 0.0f )
+            {
+                float m = j_aimassist_magnet->value * strength * escape;
+
+				float stickW = 1.0f - (stickMag / magnetMaxStick); // 1 at tiny input, 0 at max band
+				if (stickW < 0.0f)
+					stickW = 0.0f;
+				stickW = stickW * stickW; // optional curve
+				cl.viewangles[YAW] += dy * m * stickW;
+				cl.viewangles[PITCH] += dp * m * stickW * 0.65f;
+			}
+        }
+
+        // ---------------------------------------------------------
+        // 3) Strafe magnet:
+        // Very subtle follow while moving + right stick mostly idle.
+        // - HARD capped to low deg/sec
+        // - respects escape
+        // ---------------------------------------------------------
+        if ( j_aimassist_strafemagnet && j_aimassist_minstrength &&
+             j_aimassist_strafemagnet->value > 0.0f &&
+             strength >= j_aimassist_minstrength->value )
+        {
+            // Gate: only help when right stick is basically idle
+            if ( stickMag < 0.10f ) {
+
+                float moveMag = sqrtf( right * right + forward * forward );
+                if ( moveMag > 8.0f ) {
+
+                    // Cap strafe-follow authority independently of main turn rate
+                    float maxStrafeStep = 30.0f * dt; // 25 deg/sec equivalent (tune 15..35)
+
+                    float sdy = dy;
+                    float sdp = dp;
+
+                    if ( sdy >  maxStrafeStep ) sdy =  maxStrafeStep;
+                    if ( sdy < -maxStrafeStep ) sdy = -maxStrafeStep;
+                    if ( sdp >  maxStrafeStep ) sdp =  maxStrafeStep;
+                    if ( sdp < -maxStrafeStep ) sdp = -maxStrafeStep;
+
+                    float m = j_aimassist_strafemagnet->value * strength * escape;
+
+                    cl.viewangles[YAW]   += sdy * m;
+                    cl.viewangles[PITCH] += sdp * (m * 0.25f);
+                }
+            }
+        }
+    }
 }
+
+aimassist_done:
+;
+    if ( !kb[KB_STRAFE].active ) {
+        cl.viewangles[YAW] += anglespeed * ( yaw * cl.cgameSensitivity );
+        cmd->rightmove = ClampChar( cmd->rightmove + (int)right );
+    } else {
+        cl.viewangles[YAW] += anglespeed * ( right * cl.cgameSensitivity );
+        cmd->rightmove = ClampChar( cmd->rightmove + (int)yaw );
+    }
+
+    if ( kb[KB_MLOOK].active ) {
+        cl.viewangles[PITCH] += anglespeed * ( forward * cl.cgameSensitivity );
+        cmd->forwardmove = ClampChar( cmd->forwardmove + (int)pitch );
+    } else {
+        cl.viewangles[PITCH] += anglespeed * ( pitch * cl.cgameSensitivity );
+        cmd->forwardmove = ClampChar( cmd->forwardmove + (int)forward );
+    }
+
+    cmd->upmove = ClampChar( cmd->upmove + (int)up );
+    CL_GamepadUIMouseMove();
+}
+
 
 /*
 =================
@@ -569,8 +1041,21 @@ void CL_MouseMove(usercmd_t *cmd) {
 	}
 
 	// ingame FOV
-	mx *= cl.cgameSensitivity;
-	my *= cl.cgameSensitivity;
+	if (cl.cgameIsZoomed) {
+
+		if (cl_zoomSensitivityFovScaled->integer) {
+			mx *= cl.cgameSensitivity;
+			my *= cl.cgameSensitivity;
+		}
+
+		mx *= cl_zoomSensitivity->value;
+		my *= cl_zoomSensitivity->value;
+	}
+	else
+	{
+		mx *= cl.cgameSensitivity;
+		my *= cl.cgameSensitivity;
+	}
 
 	// add mouse X/Y movement to cmd
 	if ( kb[KB_STRAFE].active ) {

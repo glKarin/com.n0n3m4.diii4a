@@ -45,6 +45,10 @@ class idBox
 		explicit idBox(const idVec3 &point);
 		explicit idBox(const idBounds &bounds);
 		explicit idBox(const idBounds &bounds, const idVec3 &origin, const idMat3 &axis);
+#ifdef _SPLASHDAMAGE
+    	explicit idBox( const idBounds &bounds, const float modelMatrix[16] );
+    	idBox &			ExpandSelf( const float dx, const float dy, const float dz );	// expand box in all directions with given values
+#endif
 
 		idBox			operator+(const idVec3 &t) const;				// returns translated box
 		idBox 			&operator+=(const idVec3 &t);					// translate the box
@@ -247,7 +251,11 @@ ID_INLINE const idMat3 &idBox::GetAxis(void) const
 
 ID_INLINE float idBox::GetVolume(void) const
 {
+#ifdef _SPLASHDAMAGE
+    return ( extents[0] * extents[1] * extents[2] * ( 2.0f * 2.0f * 2.0f ) );
+#else
 	return (extents * 2.0f).LengthSqr();
+#endif
 }
 
 ID_INLINE bool idBox::IsCleared(void) const
@@ -331,4 +339,37 @@ ID_INLINE void idBox::AxisProjection(const idMat3 &ax, idBounds &bounds) const
 	}
 }
 
+#ifdef _SPLASHDAMAGE
+ID_INLINE idBox::idBox( const idBounds &bounds, const float modelMatrix[16] )
+{
+    this->center = ( bounds[0] + bounds[1] ) * 0.5f;
+    this->extents = bounds[1] - this->center;
+
+    idVec3 origin;
+    axis[0][0] = modelMatrix[0];
+    axis[0][1] = modelMatrix[1];
+    axis[0][2] = modelMatrix[2];
+
+    axis[1][0] = modelMatrix[4];
+    axis[1][1] = modelMatrix[5];
+    axis[1][2] = modelMatrix[6];
+
+    axis[2][0] = modelMatrix[8];
+    axis[2][1] = modelMatrix[9];
+    axis[2][2] = modelMatrix[10];
+
+    origin[0]  = modelMatrix[12];
+    origin[1]  = modelMatrix[13];
+    origin[2]  = modelMatrix[14];
+    this->center = origin + this->center * this->axis;
+}
+
+ID_INLINE idBox &idBox::ExpandSelf ( const float dx, const float dy, const float dz )
+{
+    extents[0] += dx;
+    extents[1] += dy;
+    extents[2] += dz;
+    return *this;
+}
+#endif
 #endif /* !__BV_BOX_H__ */

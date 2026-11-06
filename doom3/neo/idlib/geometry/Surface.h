@@ -50,23 +50,64 @@ class idSurface
 {
 	public:
 		idSurface(void);
+#ifdef _SPLASHDAMAGE
+	    idSurface( const idSurface &surf );
+	    explicit idSurface( const idDrawVert *verts, const int numVerts, const vertIndex_t *indexes, const int numIndexes );
+#else
 		explicit idSurface(const idSurface &surf);
 		explicit idSurface(const idDrawVert *verts, const int numVerts, const int *indexes, const int numIndexes);
+#endif
 		~idSurface(void);
 
 		const idDrawVert 		&operator[](const int index) const;
 		idDrawVert 			&operator[](const int index);
 		idSurface 				&operator+=(const idSurface &surf);
+#ifdef _SPLASHDAMAGE
+    	idSurface &				operator=( const idSurface & surf );
+#endif
 
 		int						GetNumIndexes(void) const {
 			return indexes.Num();
 		}
+#ifdef _SPLASHDAMAGE
+	    const vertIndex_t *		GetIndexes( void ) const {
+	        return indexes.Begin();
+	    }
+#else
 		const int 				*GetIndexes(void) const {
 			return indexes.Ptr();
 		}
+#endif
 		int						GetNumVertices(void) const {
 			return verts.Num();
 		}
+#ifdef _SPLASHDAMAGE
+	    const idDrawVert *		GetVertices( void ) const {
+	        return verts.Begin();
+	    }
+	    idDrawVert *			GetVertices( void ) {
+	        return verts.Begin();
+	    }
+	    const int *				GetEdgeIndexes( void ) const {
+	        return edgeIndexes.Begin();
+	    }
+	    int						GetNumEdges( void ) const {
+	        return edges.Num();
+	    }
+	    const surfaceEdge_t *	GetEdges( void ) const {
+	        return edges.Begin();
+	    }
+	
+	    vertIndex_t				GetIndex( int index ) const {
+	        return indexes[ index];
+	    }
+	    const idDrawVert&		GetVertex( int index ) const {
+	        return verts[ index ];
+	    }
+	    const idDrawVert&		GetIndexedVertex( int index ) const {
+	        return verts[ indexes[ index ] ];
+	    }
+#else
 		const idDrawVert 		*GetVertices(void) const {
 			return verts.Ptr();
 		}
@@ -76,6 +117,7 @@ class idSurface
 		const surfaceEdge_t 	*GetEdges(void) const {
 			return edges.Ptr();
 		}
+#endif
 
 		void					Clear(void);
 		void					SwapTriangles(idSurface &surf);
@@ -107,7 +149,11 @@ class idSurface
 
 	protected:
 		idList<idDrawVert>		verts;			// vertices
+#ifdef _SPLASHDAMAGE
+    	idList<vertIndex_t>		indexes;		// 3 references to vertices for each triangle
+#else
 		idList<int>				indexes;		// 3 references to vertices for each triangle
+#endif
 		idList<surfaceEdge_t>	edges;			// edges
 		idList<int>				edgeIndexes;	// 3 references to edges for each triangle, may be negative for reversed edge
 
@@ -130,6 +176,17 @@ ID_INLINE idSurface::idSurface(void)
 idSurface::idSurface
 =================
 */
+#ifdef _SPLASHDAMAGE
+ID_INLINE idSurface::idSurface( const idDrawVert *verts, const int numVerts, const vertIndex_t *indexes, const int numIndexes )
+{
+    assert( verts != NULL && indexes != NULL && numVerts > 0 && numIndexes > 0 );
+    this->verts.SetNum( numVerts );
+    memcpy( this->verts.Begin(), verts, numVerts * sizeof( verts[0] ) );
+    this->indexes.SetNum( numIndexes );
+    memcpy( this->indexes.Begin(), indexes, numIndexes * sizeof( indexes[0] ) );
+    GenerateEdgeIndexes();
+}
+#else
 ID_INLINE idSurface::idSurface(const idDrawVert *verts, const int numVerts, const int *indexes, const int numIndexes)
 {
 	assert(verts != NULL && indexes != NULL && numVerts > 0 && numIndexes > 0);
@@ -139,6 +196,7 @@ ID_INLINE idSurface::idSurface(const idDrawVert *verts, const int numVerts, cons
 	memcpy(this->indexes.Ptr(), indexes, numIndexes * sizeof(indexes[0]));
 	GenerateEdgeIndexes();
 }
+#endif
 
 /*
 ====================
@@ -189,6 +247,11 @@ idSurface::operator+=
 */
 ID_INLINE idSurface &idSurface::operator+=(const idSurface &surf)
 {
+#ifdef _SPLASHDAMAGE
+    if( surf.verts.Num() == 0 && surf.indexes.Num() == 0 ) {
+        return *this;
+    }
+#endif
 	int i, m, n;
 	n = verts.Num();
 	m = indexes.Num();
@@ -202,6 +265,22 @@ ID_INLINE idSurface &idSurface::operator+=(const idSurface &surf)
 	GenerateEdgeIndexes();
 	return *this;
 }
+
+#ifdef _SPLASHDAMAGE
+/*
+=================
+idSurface::operator=
+=================
+*/
+ID_INLINE idSurface &idSurface::operator=( const idSurface &surf )
+{
+    if( this != &surf ) {
+        Clear();
+        *this += surf;
+    }
+    return *this;
+}
+#endif
 
 /*
 =================
@@ -250,9 +329,14 @@ ID_INLINE void idSurface::RotateSelf(const idMat3 &rotation)
 {
 	for (int i = 0; i < verts.Num(); i++) {
 		verts[i].xyz *= rotation;
+#ifdef _SPLASHDAMAGE
+        verts[i].SetNormal( verts[i].GetNormal() * rotation );
+        verts[i].SetTangent( verts[i].GetTangent() * rotation );
+#else
 		verts[i].normal *= rotation;
 		verts[i].tangents[0] *= rotation;
 		verts[i].tangents[1] *= rotation;
+#endif
 	}
 }
 

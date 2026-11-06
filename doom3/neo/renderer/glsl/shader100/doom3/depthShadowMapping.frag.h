@@ -1,0 +1,32 @@
+
+// shadow map(depth)
+GLSL_SHADER const char DEPTH_FRAG[] =
+"#version 100\n"
+"//#pragma optimize(off)\n"
+"\n"
+"//#define _USING_DEPTH_TEXTURE\n"
+"//#define _PACK_FLOAT\n"
+"\n"
+"precision highp float;\n"
+"\n"
+"#ifdef _PACK_FLOAT\n"
+PACK_FLOAT_FUNC()
+"#endif\n"
+"\n"
+"void main(void)\n"
+"{\n"
+"#ifdef _USING_DEPTH_TEXTURE\n"
+"   #ifdef _DEBUG\n"
+"       gl_FragColor = vec4((gl_FragCoord.z + 1.0) * 0.5, 0.0, 0.0, 1.0); // DEBUG\n"
+"   #endif\n"
+"#else\n"
+"    highp float depth;\n"
+"    depth = gl_FragCoord.z;\n"
+"   #ifdef _PACK_FLOAT\n"
+"        gl_FragColor = pack(depth);\n"
+"   #else\n"
+"        gl_FragColor = vec4(depth, 0.0, 0.0, 1.0);\n"
+"   #endif\n"
+"#endif\n"
+"}\n"
+;

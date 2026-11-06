@@ -237,7 +237,11 @@ float rvSegment::AttenuateInterval(rvBSE* effect,
     const float minRate = mSecondsPerParticle.x;
     const float maxRate = mSecondsPerParticle.y;
 
+#ifdef _SPLASHDAMAGE
+    float rate = Lerp(maxRate, minRate, bse_scale.GetFloat());
+#else
     float rate = idMath::Lerp(maxRate, minRate, bse_scale.GetFloat());
+#endif
     rate = Clamp(rate, maxRate, minRate);
 
     if (!(st->mFlags & STFLAG_ATTENUATE_EMITTER/* 0x40 */))
@@ -260,7 +264,11 @@ float rvSegment::AttenuateCount(rvBSE* effect,
     const rvSegmentTemplate* st,
     float min, float max)
 {
+#ifdef _SPLASHDAMAGE
+    const float scaledMax = Lerp(min, max, bse_scale.GetFloat());
+#else
     const float scaledMax = idMath::Lerp(min, max, bse_scale.GetFloat());
+#endif
     float count = rvRandom::flrand(min, scaledMax);
     count = Clamp(count, min, max);
 
@@ -378,6 +386,10 @@ void rvSegment::PlayEffect(rvBSE* effect,
     const int idx =
         rvRandom::irand(0, st->mNumEffects - 1);
 
+#ifdef _SPLASHDAMAGE
+	const rvDeclEffect *fxName = st->mEffects[idx];
+	game->PlayEffect(fxName ? fxName->Index() : -1, vec3_one, effect->mCurrentOrigin, effect->mCurrentAxis, false, vec3_origin, 0.0f);
+#else
     game->PlayEffect(
         st->mEffects[idx],
         effect->mCurrentOrigin,
@@ -388,6 +400,7 @@ void rvSegment::PlayEffect(rvBSE* effect,
         /* predictBit = */false,
         EC_IGNORE,
         vec4_one);
+#endif
 }
 
 void rvSegment::Handle(rvBSE* effect,
@@ -988,7 +1001,11 @@ bool rvSegment::Check(rvBSE *effect, float time)
 				case SEG_SOUND: // 5:
                     if ( (v8->mFlags & STFLAG_ENABLED/* 1 */) == 0 )
                         break;
+#ifdef _SPLASHDAMAGE
+                    ReferenceSound = effect->GetReferenceSound(1);
+#else
                     ReferenceSound = effect->GetReferenceSound(SOUNDWORLD_GAME/* 1 */);
+#endif
                     if ( ReferenceSound )
                     {
                         mSoundVolume = v8->GetSoundVolume();

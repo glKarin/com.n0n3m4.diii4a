@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../precompiled.h"
 #pragma hdrstop
 
+#if !defined(_SPLASHDAMAGE)
 int idHashIndex::INVALID_INDEX[1] = { -1 };
 
 /*
@@ -169,3 +170,4 @@ int idHashIndex::GetSpread(void) const
 	delete[] numHashItems;
 	return 100 - (error * 100 / totalItems);
 }
+#endif

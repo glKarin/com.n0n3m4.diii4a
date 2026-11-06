@@ -29,6 +29,29 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __NETWORKSYSTEM_H__
 #define __NETWORKSYSTEM_H__
 
+#ifdef _SPLASHDAMAGE
+struct repeaterUserOrigin_t {
+    idVec3	origin;
+    int		followClient;
+};
+
+#ifdef _XENON
+
+const int MAX_ASYNC_CLIENTS			= 16;
+
+#else
+
+const int MAX_ASYNC_CLIENTS			= 32;
+
+#endif
+
+#ifdef SD_SUPPORT_REPEATER
+
+const int REPEATER_CLIENT_INDEX		= -1;
+
+#endif // SD_SUPPORT_REPEATER
+#endif
+
 #ifdef _RAVEN
     //RAVEN END
     typedef enum {
@@ -82,6 +105,30 @@ typedef struct {
 ===============================================================================
 */
 
+#ifdef _SPLASHDAMAGE
+struct clientNetworkAddress_t {
+    unsigned char	ip[ 4 ];
+    unsigned short	port;
+
+    bool operator==( const clientNetworkAddress_t& rhs ) const
+    {
+        return	ip[ 0 ] == rhs.ip[ 0 ] &&
+                ip[ 1 ] == rhs.ip[ 1 ] &&
+                ip[ 2 ] == rhs.ip[ 2 ] &&
+                ip[ 3 ] == rhs.ip[ 3 ] &&
+                port == rhs.port;
+    }
+};
+
+enum voiceMode_t {
+    VO_GLOBAL,
+    VO_TEAM,
+    VO_FIRETEAM,
+    VO_NUM_MODES,
+};
+
+struct sdNetClientId;
+#endif
 class idNetworkSystem
 {
 	public:
@@ -103,6 +150,61 @@ class idNetworkSystem
 		virtual int				ClientGetOutgoingRate(void);
 		virtual int				ClientGetIncomingRate(void);
 		virtual float			ClientGetIncomingPacketLoss(void);
+#ifdef _SPLASHDAMAGE
+    	virtual void			ServerGetClientNetworkInfo( int clientNum, clientNetworkAddress_t& info );
+    	virtual void			ServerGetClientNetId( int clientNum, sdNetClientId& netClientId );
+    	virtual void			ServerKickClient( int clientNum, const char* reason, bool localizedReason );
+    	
+//mal: allow the network to access some engine side bot functions....
+    	virtual int				AllocateClientSlotForBot( int maxPlayersOnServer );
+    	virtual int				ServerSetBotUserCommand( int clientNum, int frameNum, const usercmd_t& cmd );
+    	virtual int				ServerSetBotUserName( int clientNum, const char* playerName );
+    	
+    	virtual void			WriteClientUserCmds( int clientNum, idBitMsg& msg );
+    	virtual void			ReadClientUserCmds( int clientNum, const idBitMsg& msg );
+	    virtual bool			IsDedicated( void );
+	    virtual bool			IsLANServer( void );
+    	virtual bool			IsActive( void );
+    	
+    	virtual netadr_t		ClientGetServerAddress( void ) const;
+    	virtual void			EnableVoip( voiceMode_t mode );
+    	virtual void			DisableVoip( void );
+
+    	virtual int				GetLastVoiceSentTime( void );
+    	virtual int				GetLastVoiceReceivedTime( int clientIndex );
+    	
+    	virtual int				ClientGetFrameTime( void );
+
+
+    	virtual int				GetDemoState( int& time, int& position, int& length, int& startPosition, int& endPosition, int &cutStartMarker, int &cutEndMarker );
+    	virtual const char*		GetDemoName( void );
+    	
+    	virtual bool			CanPlayDemo( const char* fileName );
+    
+    	virtual const idDict&	GetUserInfo( int clientNum );
+
+    	virtual bool			IsRankedServer( void );
+
+    	virtual void			StartSoundTest( int duration );
+    	virtual bool			IsSoundTestActive( void );
+    	virtual bool			IsSoundTestPlaybackActive( void );
+    	virtual float			GetSoundTestProgress( void );
+    	
+    	virtual voiceMode_t		GetVoiceMode( void );
+
+		virtual void			RegisterServerInterest( const netadr_t& address );
+#ifdef SD_SUPPORT_REPEATER
+		virtual void			RepeaterSendReliableMessage( int clientNum, const idBitMsg& msg, bool ignoreRelays );
+
+		virtual void			RepeaterSetInfo( const idDict& info );
+		virtual const idDict&	RepeaterGetClientInfo( int clientNum );
+		virtual void			SetClientRepeaterUserOrigin( const repeaterUserOrigin_t& origin );
+#endif // SD_SUPPORT_REPEATER
+
+#if !defined( SD_PUBLIC_TOOLS )
+    	virtual bool			HTTPEnable( bool enable );
+#endif // !SD_PUBLIC_TOOLS
+#endif
 
 #ifdef _RAVEN
         // for MP games 
@@ -117,16 +219,16 @@ class idNetworkSystem
 
         virtual bool            RemoveSortFunction(const sortInfo_t& sortInfo);
 
-	virtual const char* GetClientGUID(int clientNum);
-
-// ddynerman: added some utility functions
-	// uses a static buffer, copy it before calling in game again
-	virtual const char* GetServerAddress(void);
-	virtual int				ServerGetClientNum(int clientId);
-	virtual	int				ServerGetServerTime(void);
-
-	virtual	void			AddFriend(int clientNum);
-	virtual void			RemoveFriend(int clientNum);
+		virtual const char* GetClientGUID(int clientNum);
+	
+		// ddynerman: added some utility functions
+		// uses a static buffer, copy it before calling in game again
+		virtual const char* GetServerAddress(void);
+		virtual int				ServerGetClientNum(int clientId);
+		virtual	int				ServerGetServerTime(void);
+	
+		virtual	void			AddFriend(int clientNum);
+		virtual void			RemoveFriend(int clientNum);
 #endif
 
 };

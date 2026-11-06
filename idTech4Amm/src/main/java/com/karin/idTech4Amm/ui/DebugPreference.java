@@ -18,6 +18,7 @@ import com.karin.idTech4Amm.sys.Constants;
 import com.n0n3m4.q3e.Q3EContextUtils;
 import com.n0n3m4.q3e.Q3EGlobals;
 import com.n0n3m4.q3e.Q3ELang;
+import com.n0n3m4.q3e.Q3EPreference;
 import com.n0n3m4.q3e.Q3EUtils;
 import com.n0n3m4.q3e.karin.KBacktraceHandler;
 import com.n0n3m4.q3e.karin.KLog;
@@ -35,6 +36,8 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
     {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.debug_preference);
+        findPreference(Q3EPreference.pref_harm_debug_text_x).setOnPreferenceChangeListener(this);
+        findPreference(Q3EPreference.pref_harm_debug_text_y).setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -198,6 +201,19 @@ public class DebugPreference extends PreferenceFragment implements Preference.On
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue)
     {
-        return true;
+        String key = preference.getKey();
+        switch (key)
+        {
+            case Q3EPreference.pref_harm_debug_text_x:
+            {
+                return Q3EUtils.parseInt_s((String) newValue) >= 0;
+            }
+            case Q3EPreference.pref_harm_debug_text_y:
+            {
+                return Q3EUtils.parseInt_s((String) newValue) >= 0;
+            }
+            default:
+                return false;
+        }
     }
 }

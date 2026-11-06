@@ -20,7 +20,7 @@ Project: The Dark Mod (http://www.thedarkmod.com/)
 * DarkMod cvars - See text description in syscvar.cpp for descriptions
 **/
 extern idCVar cv_player_spawnclass;
-extern idCVar cv_player_waituntilready;
+extern idCVar cv_player_wait_until_ready;
 
 extern idCVar cv_default_mission_info_file;
 
@@ -71,6 +71,7 @@ extern idCVar cv_ai_opt_noobstacleavoidance;
 extern idCVar cv_ai_hiding_spot_max_light_quotient;
 extern idCVar cv_ai_max_hiding_spot_tests_per_frame;
 extern idCVar cv_ai_debug_anims;
+extern idCVar cv_ai_ko_susceptibility_after_flash_duration;
 
 extern idCVar cv_show_health;
 
@@ -260,6 +261,7 @@ extern idCVar cv_frob_width;
 extern idCVar cv_frob_debug_bounds;
 extern idCVar cv_frob_fadetime;
 extern idCVar cv_frob_weapon_selects_weapon;
+extern idCVar cv_frob_item_selects_item;
 extern idCVar cv_frob_debug_hud;
 
 extern idCVar cv_frobhelper_active;
@@ -378,10 +380,6 @@ extern idCVar cv_pm_stepvol_crouch_run;
 extern idCVar cv_pm_min_stepsound_interval;
 
 // Lightgem
-extern idCVar cv_lg_distance;
-extern idCVar cv_lg_xoffs;
-extern idCVar cv_lg_yoffs;
-extern idCVar cv_lg_zoffs;
 extern idCVar cv_lg_oxoffs;
 extern idCVar cv_lg_oyoffs;
 extern idCVar cv_lg_ozoffs;

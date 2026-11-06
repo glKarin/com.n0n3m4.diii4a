@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 class idSIMD_3DNow : public idSIMD_MMX
 {
-#if defined(_MSC_VER) && defined(_M_IX86)
+#if (defined(_MSC_VER) && defined(_M_IX86)) || defined(ID_WIN_X86_ASM)
 	public:
 		virtual const char *VPCALL GetName(void) const;
 

@@ -1994,6 +1994,9 @@ void idRenderBackend::Shutdown()
 	// RB: release input before anything goes wrong
 	Sys_ShutdownInput();
 
+	//karin: wait all commands ending
+	vkDeviceWaitIdle( vkcontext.device );
+
 	// Destroy Shaders
 	renderProgManager.Shutdown();
 
@@ -2001,6 +2004,11 @@ void idRenderBackend::Shutdown()
 	{
 		idImage::EmptyGarbage();
 	}
+
+#ifdef D3_VK_SHARED_SAMPLER
+	// Destroy shared samplers
+	globalImages->DestroySamplers();
+#endif
 
 	// Detroy Frame Buffers
 	DestroyFrameBuffers();

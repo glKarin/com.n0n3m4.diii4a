@@ -6,8 +6,10 @@ client/cl_main.c
 client/cl_ui.c
 client/cl_openal.c
 cgame/cg_main.c
+game/g_items.c: compile error
 game/g_main.c
 game/g_mem.c
+opusfile/src/stream.c
 renderer/qgl.h
 renderer/tr_animation.c
 renderer/tr_backend.c
