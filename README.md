@@ -85,7 +85,7 @@ GPLv3
 * Add `Quake 4: Translate Subtitle` mod of Quake4 support, game data directory named `hazzzzzy`. More view in [Quake 4: Translate Subtitle](https://github.com/hazzzzzy/Quake4-Translate-Subtitle).
 * Update RealRTCW version to 5.4.
 * Update The Dark Mod version to 2.14.
-* Fix DOOM3-BFG vulkan.
+* Fix DOOM3-BFG Vulkan.
 * Add gyroscope dead zone(rad/s) setting in launcher's controls tab panel.
 
 ----------------------------------------------------------------------------------
@@ -117,6 +117,7 @@ bind "Your key of spirit walk" "_impulse54"
 bind "Your key of second mode attack of weapons" "_attackAlt"
 bind "Your key of toggle lighter" "_impulse16"
 bind "Your key of drop" "_impulse25"
+```
 
 ----------------------------------------------------------------------------------
 

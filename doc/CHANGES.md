@@ -9,7 +9,7 @@
 * Add `Quake 4: Translate Subtitle` mod of Quake4 support, game data directory named `hazzzzzy`. More view in [Quake 4: Translate Subtitle](https://github.com/hazzzzzy/Quake4-Translate-Subtitle).
 * Update RealRTCW version to 5.4.
 * Update The Dark Mod version to 2.14.
-* Fix DOOM3-BFG vulkan.
+* Fix DOOM3-BFG Vulkan.
 * Add gyroscope dead zone(rad/s) setting in launcher's controls tab panel.
 
 ----------------------------------------------------------------------------------
