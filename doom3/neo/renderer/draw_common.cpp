@@ -1630,8 +1630,8 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 
 		if (pStage->vertexColor != SVC_IGNORE) {
 			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), zero);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorModulate), zero);
+			GL_Uniform1fv(offsetof(shaderProgram_t, colorAdd), one);
 		}
 
 		if(usingTexCoord)
