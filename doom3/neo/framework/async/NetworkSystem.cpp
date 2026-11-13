@@ -329,8 +329,8 @@ void idNetworkSystem::ServerGetClientNetworkInfo( int clientNum, clientNetworkAd
 }
 
 void idNetworkSystem::ServerGetClientNetId( int clientNum, sdNetClientId& netClientId ) {
-	netClientId.id[0] = clientNum;
-	netClientId.id[1] = clientNum;
+	// A local slot number is not an authenticated account identifier.
+	netClientId.id[0] = netClientId.id[1] = 0;
 }
 
 void idNetworkSystem::ServerKickClient( int clientNum, const char* reason, bool localizedReason ) {
@@ -347,6 +347,7 @@ int idNetworkSystem::ServerSetBotUserCommand( int clientNum, int frameNum, const
 
 int idNetworkSystem::ServerSetBotUserName( int clientNum, const char* playerName ) {
 	sessLocal.mapSpawnData.userInfo[clientNum].Set("ui_name", playerName);
+	sessLocal.mapSpawnData.userInfo[clientNum].Set("ui_realname", playerName);
 	// must sync to game: else it maybe cause forever loop on sdBotThreadData::ChangeBotName
 	game->ValidateUserInfo(clientNum, sessLocal.mapSpawnData.userInfo[ clientNum ]);
 	game->UserInfoChanged(clientNum);
@@ -354,21 +355,67 @@ int idNetworkSystem::ServerSetBotUserName( int clientNum, const char* playerName
 }
 
 void idNetworkSystem::WriteClientUserCmds( int clientNum, idBitMsg& msg ) {
+	idAsyncServer &server = idAsyncNetwork::server;
+	const int count = idMath::ClampInt( 1, MAX_USERCMD_RELAY,
+		Min( server.clients[clientNum].gameFrame, server.gameFrame + MAX_USERCMD_RELAY ) - server.gameFrame );
+	msg.WriteByte( count );
+	const usercmd_t *last = NULL;
+	for ( int i = 0; i < count; ++i ) {
+		const usercmd_t &cmd = server.userCmds[(server.gameFrame + i) & (MAX_USERCMD_BACKUP - 1)][clientNum];
+		idAsyncNetwork::WriteUserCmdDelta( msg, cmd, last );
+		last = &cmd;
+	}
 }
 
 void idNetworkSystem::ReadClientUserCmds( int clientNum, const idBitMsg& msg ) {
+	idAsyncClient &client = idAsyncNetwork::client;
+	const int count = client.UsesRetailProtocol() ? msg.ReadBits(4) : msg.ReadByte();
+	if ( clientNum < 0 || clientNum >= MAX_ASYNC_CLIENTS || count < 0 || count > (client.UsesRetailProtocol() ? 15 : MAX_USERCMD_RELAY) ) {
+		common->Error( "Invalid ETQW user-command relay" );
+		return;
+	}
+	const usercmd_t *last = NULL;
+	for ( int i = 0; i < count; ++i ) {
+		usercmd_t &cmd = client.userCmds[(client.snapshotGameFrame + i) & (MAX_USERCMD_BACKUP - 1)][clientNum];
+		if (client.UsesRetailProtocol()) {
+            const bool delta = client.retailRelayValid;
+            usercmd_t &base = client.retailRelayBase;
+            memset(&cmd, 0, sizeof(cmd));
+            const int packed = delta ? msg.ReadDelta(client.retailRelayPacked, 16) : msg.ReadUShort();
+            client.retailRelayPacked = packed;
+            cmd.buttons.btnValue = packed & 1023;
+            signed char *moves[] = { &cmd.forwardmove, &cmd.rightmove, &cmd.upmove };
+            const signed char oldMoves[] = { base.forwardmove, base.rightmove, base.upmove };
+            for (int axis = 0; axis < 3; ++axis) {
+                const int mode = (packed >> (10 + axis * 2)) & 3;
+                *moves[axis] = mode == 0 ? 0 : mode == 1 ? 127 : mode == 2 ? -127 :
+                    delta ? msg.ReadDeltaChar(oldMoves[axis]) : msg.ReadChar();
+            }
+            cmd.angles[0] = delta ? msg.ReadDeltaShort(base.angles[0]) : msg.ReadShort();
+            cmd.angles[1] = delta ? msg.ReadDeltaShort(base.angles[1]) : msg.ReadShort();
+            cmd.gameTime = client.snapshotGameTime + i * 33;
+            base = cmd; client.retailRelayValid = true;
+        }
+        else idAsyncNetwork::ReadUserCmdDelta( msg, cmd, last );
+		cmd.gameFrame = client.snapshotGameFrame + i;
+		last = &cmd;
+	}
+	for ( int i = count; i < MAX_USERCMD_BACKUP; ++i ) {
+		usercmd_t &cmd = client.userCmds[(client.snapshotGameFrame + i) & (MAX_USERCMD_BACKUP - 1)][clientNum];
+		cmd.gameFrame = cmd.gameTime = 0;
+	}
 }
 
 bool idNetworkSystem::IsDedicated( void ) {
 #ifdef ID_DEDICATED
 	return true;
 #else
-	return false;
+	return idAsyncNetwork::serverDedicated.GetInteger() != 0;
 #endif
 }
 
 bool idNetworkSystem::IsLANServer( void ) {
-	return true;
+	return idAsyncNetwork::LANServer.GetBool();
 }
 
 bool idNetworkSystem::IsActive( void ) {
@@ -395,7 +442,7 @@ int idNetworkSystem::GetLastVoiceReceivedTime( int clientIndex ) {
 }
 
 int idNetworkSystem::ClientGetFrameTime( void ) {
-	return idAsyncNetwork::client.clientTime;
+	return idAsyncNetwork::client.GetUsercmdMsec();
 }
 
 int idNetworkSystem::GetDemoState( int& time, int& position, int& length, int& startPosition, int& endPosition, int &cutStartMarker, int &cutEndMarker ) {

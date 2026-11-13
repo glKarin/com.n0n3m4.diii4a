@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 #ifdef _SPLASHDAMAGE //karin: binary data info
+#include "decllib/declRenderProgram.h"
 
 #define GENERATED_PREFIX "generated"
 #define GENERATED_DECLB "declb"
@@ -62,7 +63,7 @@ struct binaryTokenCache_t {
 struct binaryDeclEntry_t {
 	idStr type;
 	idStr name;
-	//byte whitespace;
+	byte textPayload;
 	unsigned int offset;
 
 	unsigned int uncompressedLength;
@@ -1208,8 +1209,7 @@ static int LoadBinaryDeclHeader(binaryDecl_t &header, idFile *file) {
 			binaryDeclEntry_t &entry = header.entries[i];
 			file->ReadString(entry.type);
 			file->ReadString(entry.name);
-			byte whitespace;
-			file->ReadUnsignedChar(whitespace);
+			file->ReadUnsignedChar(entry.textPayload);
 			file->ReadUnsignedInt(entry.offset);
 			if((int)entry.offset >= file->Length())
 			{
@@ -1323,9 +1323,11 @@ int idDeclFile::LoadAndParseBinary(void)
 		//file->Seek(pos, FS_SEEK_SET);
 
 		idList<byte> out;
-		DecompressDeclb(entry, out);
+		if (!entry.textPayload) {
+			DecompressDeclb(entry, out);
+		}
 
-		if(out[0] == 6 && !idStr::Cmpn((const char *)&out[4], LEXB_VERSION, 6)) // is binary lex: like idFile::ReadString() num:int32 chars[num]
+		if(!entry.textPayload && out.Num() >= 10 && out[0] == 6 && !idStr::Cmpn((const char *)&out[4], LEXB_VERSION, 6)) // is binary lex: like idFile::ReadString() num:int32 chars[num]
 		{
 			newDecl->SetBinarySource(&out[0], entry.uncompressedLength);
 			newDecl->sourceTextLength = 0;
@@ -1333,8 +1335,11 @@ int idDeclFile::LoadAndParseBinary(void)
 		}
 		else
 		{
-			newDecl->SetTextLocal((const char *)entry.data.Ptr(), entry.uncompressedLength);
-			newDecl->sourceTextLength = entry.uncompressedLength;
+			// Text records include their terminator; retail hashes only the text.
+			int textLength = 0;
+			while (textLength < entry.data.Num() && entry.data[textLength]) { ++textLength; }
+			newDecl->SetTextLocal((const char *)entry.data.Ptr(), textLength);
+			newDecl->sourceTextLength = textLength;
 			//Sys_Printf("is text1|%s|%s|\n", fileName.c_str(),(const char *)entry.data.Ptr());
 		}
 
@@ -1551,8 +1556,6 @@ void idDeclManagerLocal::Init(void)
 
 #ifdef _SPLASHDAMAGE //karin: register template first
 	RegisterDeclFolder("templates",		".template",				DECL_TEMPLATE);
-    RegisterDeclFolder("renderprogs",			".rprog",				DECL_RENDERPROGRAM);
-    RegisterDeclFolder("renderprogs",			".rprog",				DECL_RENDERBINDING);
 #endif
 	RegisterDeclFolder("materials",		".mtr",				DECL_MATERIAL);
 	RegisterDeclFolder("skins",			".skin",			DECL_SKIN);
@@ -1576,16 +1579,19 @@ void idDeclManagerLocal::Init(void)
 #endif
 
 #ifdef _SPLASHDAMAGE
-    RegisterDeclFolder("localization",			".locstr",				DECL_LOCSTR);
-    RegisterDeclFolder("effects",			".effect",				DECL_EFFECT);
-    RegisterDeclFolder("atmosphere",			".atm",				DECL_ATMOSPHERE);
-    RegisterDeclFolder("ambientCubemap",			".atm",				DECL_AMBIENTCUBEMAP);
-    RegisterDeclFolder("decals",			".decal",				DECL_DECAL);
-    RegisterDeclFolder("surfacetypes",			".stp",				DECL_SURFACETYPE);
-    RegisterDeclFolder("surfacetypes",			".stmap",				DECL_SURFACETYPEMAP);
-    RegisterDeclFolder("imposters",			".imp",				DECL_IMPOSTER);
-    RegisterDeclFolder("imposters",			".imp",				DECL_IMPOSTERGENERATOR);
-    RegisterDeclFolder("stuff",			".stuff",				DECL_STUFFTYPE);
+	// Preserve the retail registration order: definitions in several folders
+	// can contribute to the same declaration type (notably templates).
+	RegisterDeclFolder("atmosphere", ".atm", DECL_ATMOSPHERE);
+	RegisterDeclFolder("ambientCubemap", ".atm", DECL_AMBIENTCUBEMAP);
+	RegisterDeclFolder("stuff", ".stuff", DECL_STUFFTYPE);
+	RegisterDeclFolder("surfacetypes", ".stp", DECL_SURFACETYPE);
+	RegisterDeclFolder("surfacetypes", ".stmap", DECL_SURFACETYPEMAP);
+	RegisterDeclFolder("renderprogs", ".rprog", DECL_RENDERPROGRAM);
+	RegisterDeclFolder("renderprogs", ".rprog", DECL_RENDERBINDING);
+	RegisterDeclFolder("imposters", ".imp", DECL_IMPOSTER);
+	RegisterDeclFolder("imposters", ".imp", DECL_IMPOSTERGENERATOR);
+	RegisterDeclFolder("localization", ".locstr", DECL_LOCSTR);
+	// The game registers effects and decals after its other definition folders.
 #endif
 
 	// add console commands
@@ -1846,17 +1852,32 @@ int idDeclManagerLocal::GetChecksum(void) const
 	total = 0;
 
 	for (i = 0; i < DECL_MAX_TYPES; i++) {
-		declType_t type = (declType_t) i;
+		// The shared Doom enum places decal after locString. Retail ETQW
+		// registers it before surfaceType, and the checksum follows that order.
+		int typeIndex = i;
+#ifdef _SPLASHDAMAGE
+		if (cvarSystem->GetCVarBool("net_retailProtocol") && i >= DECL_SURFACETYPE && i <= DECL_DECAL) {
+			typeIndex = i == DECL_SURFACETYPE ? DECL_DECAL : i - 1;
+		}
+#endif
+		declType_t type = (declType_t) typeIndex;
 
+#ifdef _SPLASHDAMAGE
+		if (cvarSystem->GetCVarBool("net_retailProtocol")) {
+			if (typeIndex >= declTypes.Num() || !declTypes[typeIndex] || declTypes[typeIndex]->SkipChecksum()) {
+				continue;
+			}
+		}
+#endif
 		// FIXME: not particularly pretty but PDAs and associated decls are localized and should not be checksummed
 		if (type == DECL_PDA || type == DECL_VIDEO || type == DECL_AUDIO || type == DECL_EMAIL) {
 			continue;
 		}
 
-		num = linearLists[i].Num();
+		num = linearLists[typeIndex].Num();
 
 		for (j = 0; j < num; j++) {
-			idDeclLocal *decl = linearLists[i][j];
+			idDeclLocal *decl = linearLists[typeIndex][j];
 
 			if (decl->sourceFile == &implicitDecls) {
 				continue;
@@ -1932,6 +1953,13 @@ const idDecl *idDeclManagerLocal::FindType(declType_t type, const char *name, bo
 		//common->Warning( "idDeclManager::FindType: empty %s name", GetDeclType( (int)type )->typeName.c_str() );
 	}
 
+#ifdef _SPLASHDAMAGE
+	// Translated shaders may reference additional renderer-only programs or
+	// templates. Implicit declarations do not participate in retail checksums.
+	if (R_MetalRetailDeclSource(type, name)) {
+		makeDefault = true;
+	}
+#endif
 	decl = FindTypeWithoutParsing(type, name, makeDefault);
 
 	if (!decl) {
@@ -4279,9 +4307,11 @@ void idDeclManagerLocal::DeclbToText_f(const idCmdArgs &args) {
 			//file->Seek(pos, FS_SEEK_SET);
 
 			idList<byte> out;
-			DecompressDeclb(entry, out);
+			if (!entry.textPayload) {
+				DecompressDeclb(entry, out);
+			}
 
-			if(out[0] == 6 && !idStr::Cmpn((const char *)&out[4], LEXB_VERSION, 6)) // is binary lex: like idFile::ReadString() num:int32 chars[num]
+			if(!entry.textPayload && out.Num() >= 10 && out[0] == 6 && !idStr::Cmpn((const char *)&out[4], LEXB_VERSION, 6)) // is binary lex: like idFile::ReadString() num:int32 chars[num]
 			{
 				idParser src;
 				src.LoadMemoryBinary(&out[0], entry.uncompressedLength, "<declbToText>", &declManagerLocal.globalTokencache);

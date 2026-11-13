@@ -418,6 +418,11 @@ void idMegaTextureLevel::ShutdownTileCache() {
 }
 
 void idMegaTextureLevel::EmptyLevelImage( idImage *target ) {
+	// Dedicated servers parse terrain materials without a graphics device.
+	// GenerateImage deliberately does nothing in this state.
+	if ( !glConfig.isInitialized ) {
+		return;
+	}
 	const int pixels = MEGA_TEXTURE_LEVEL_SIZE * MEGA_TEXTURE_LEVEL_SIZE;
 	byte *data = new byte[pixels * 4];
 	for ( int i = 0; i < pixels; ++i ) {
@@ -521,7 +526,9 @@ bool idMegaTextureLevel::UploadTiles( int time ) {
 	parms[0] = newParms[0];
 	parms[1] = newParms[1];
 	if ( image ) {
-		image->BindFragment();
+		// Uploads share texture units with rendering. Keep the GL state cache in
+		// sync so a subsequent sampler bind cannot skip the required texture.
+		image->Bind();
 	}
 	for ( int y = 0; y < 16; ++y ) {
 		for ( int x = 0; x < 16; ++x ) {
@@ -819,13 +826,28 @@ void idMegaTexture::Reset() {
 }
 
 unsigned int idMegaTexture::GetPureServerChecksum( unsigned int offset ) {
-	unsigned int hash = 2166136261u ^ offset;
-	for ( const char *p = fileName.c_str(); *p; ++p ) hash = ( hash ^ (byte)*p ) * 16777619u;
-	for ( int i = 0, count = TotalStoredTileCount( resolution ); i < count; ++i ) {
-		hash = ( hash ^ (unsigned int)tileIndexMap[i] ) * 16777619u;
-		hash = ( hash ^ (unsigned int)tileIndexedDataSizes[i] ) * 16777619u;
+	// Retail 1.5 samples 64 bytes of the installed mega file with an LCG.
+	// Open a separate handle so the streaming threads keep their file position.
+	idFile* source = fileSystem->OpenFileRead(fileName.c_str());
+	if (!source || source->Length() < 2) {
+		if (source) fileSystem->CloseFile(source);
+		return 0;
 	}
-	return hash;
+	unsigned int checksum = 0;
+	for (int group = 0; group < 16; ++group) {
+		unsigned int word = 0;
+		for (int octet = 0; octet < 4; ++octet) {
+			offset = offset * 69069U + 1;
+			const int position = (offset & 0x7fff) % (source->Length() - 1);
+			source->Seek(position, FS_SEEK_SET);
+			byte value = 0;
+			if (source->Read(&value, 1) != 1) { fileSystem->CloseFile(source); return 0; }
+			word |= (unsigned int)value << (octet * 8);
+		}
+		checksum ^= word;
+	}
+	fileSystem->CloseFile(source);
+	return checksum;
 }
 
 void idMegaTexture::UpdateMapping( const idRenderWorldLocal *world ) {
@@ -1043,6 +1065,7 @@ void idMegaTexture::Unbind() {
 }
 
 bool idMegaTexture::UploadTiles( int time ) {
+	if ( !glConfig.isInitialized ) return true;
 	bool complete = true;
 	for ( int i = numLevels - 1; i >= 0; --i ) complete &= levels[i].UploadTiles( time );
 	if ( upscaleLevel ) complete &= upscaleLevel->UploadTiles( time );
@@ -1137,7 +1160,7 @@ void idMegaTexture::LoadDetailTexture() {
 }
 
 void idMegaTexture::ForceUpdate() {
-	if ( purged ) return;
+	if ( purged || !glConfig.isInitialized ) return;
 	const int savedShaderQuality = lastShaderQuality;
 	lastShaderQuality = r_shaderQuality.GetInteger();
 	forcedUpdate = true;

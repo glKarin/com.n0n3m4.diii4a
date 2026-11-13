@@ -63,6 +63,7 @@ void RB_SetDefaultGLState(void)
 	//
 	memset(&backEnd.glState, 0, sizeof(backEnd.glState));
 	backEnd.glState.forceGlState = true;
+    Framebuffer::Default();
 
 	GL_UseProgram(NULL);
 
@@ -694,6 +695,9 @@ void RB_ExecuteBackEndCommands(const emptyCommand_t *cmds)
 				break;
 			case RC_DRAW_VIEW:
 				RB_DrawView(cmds);
+#if defined(__APPLE__) && defined(_SPLASHDAMAGE)
+                R_MetalRT_Draw();
+#endif
 
 				if (((const drawSurfsCommand_t *)cmds)->viewDef->viewEntitys) {
 					c_draw3d++;

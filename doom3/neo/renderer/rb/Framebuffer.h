@@ -115,6 +115,7 @@ public:
 	static idFramebuffer *	Find(const char *name);
 	static void				BindDraw(idFramebuffer *fb);
 	static void				UnbindDraw();
+    static void                 Present(int width, int height);
 
 	static idList<idFramebuffer*>	framebuffers;
 };

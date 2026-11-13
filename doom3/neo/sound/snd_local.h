@@ -46,7 +46,7 @@ If you have questions concerning this license or the applicable additional terms
 // broken OpenAL SDK ?
 #define ID_ALCHAR (ALubyte *)
 #endif
-#elif defined( MACOS_X )
+#elif defined( MACOS_X ) && !defined(_OPENAL_SOFT)
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 #define ID_ALCHAR

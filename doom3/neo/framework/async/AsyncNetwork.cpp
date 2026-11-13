@@ -220,7 +220,13 @@ void idAsyncNetwork::WriteUserCmdDelta(idBitMsg &msg, const usercmd_t &cmd, cons
 {
 	if (base) {
 		msg.WriteDeltaLongCounter(base->gameTime, cmd.gameTime);
+#ifdef _SPLASHDAMAGE
+		msg.WriteDeltaShort(base->buttons.btnValue, cmd.buttons.btnValue);
+		msg.WriteDeltaChar(base->impulse, cmd.impulse);
+		msg.WriteDeltaByte(base->flags, cmd.flags);
+#else
 		msg.WriteDeltaByte(base->buttons, cmd.buttons);
+#endif
 		msg.WriteDeltaShort(base->mx, cmd.mx);
 		msg.WriteDeltaShort(base->my, cmd.my);
 		msg.WriteDeltaChar(base->forwardmove, cmd.forwardmove);
@@ -233,7 +239,13 @@ void idAsyncNetwork::WriteUserCmdDelta(idBitMsg &msg, const usercmd_t &cmd, cons
 	}
 
 	msg.WriteLong(cmd.gameTime);
+#ifdef _SPLASHDAMAGE
+	msg.WriteShort(cmd.buttons.btnValue);
+	msg.WriteChar(cmd.impulse);
+	msg.WriteByte(cmd.flags);
+#else
 	msg.WriteByte(cmd.buttons);
+#endif
 	msg.WriteShort(cmd.mx);
 	msg.WriteShort(cmd.my);
 	msg.WriteChar(cmd.forwardmove);
@@ -255,7 +267,13 @@ void idAsyncNetwork::ReadUserCmdDelta(const idBitMsg &msg, usercmd_t &cmd, const
 
 	if (base) {
 		cmd.gameTime = msg.ReadDeltaLongCounter(base->gameTime);
+#ifdef _SPLASHDAMAGE
+		cmd.buttons.btnValue = msg.ReadDeltaShort(base->buttons.btnValue);
+		cmd.impulse = msg.ReadDeltaChar(base->impulse);
+		cmd.flags = msg.ReadDeltaByte(base->flags);
+#else
 		cmd.buttons = msg.ReadDeltaByte(base->buttons);
+#endif
 		cmd.mx = msg.ReadDeltaShort(base->mx);
 		cmd.my = msg.ReadDeltaShort(base->my);
 		cmd.forwardmove = msg.ReadDeltaChar(base->forwardmove);
@@ -268,7 +286,13 @@ void idAsyncNetwork::ReadUserCmdDelta(const idBitMsg &msg, usercmd_t &cmd, const
 	}
 
 	cmd.gameTime = msg.ReadLong();
+#ifdef _SPLASHDAMAGE
+	cmd.buttons.btnValue = msg.ReadShort();
+	cmd.impulse = msg.ReadChar();
+	cmd.flags = msg.ReadByte();
+#else
 	cmd.buttons = msg.ReadByte();
+#endif
 	cmd.mx = msg.ReadShort();
 	cmd.my = msg.ReadShort();
 	cmd.forwardmove = msg.ReadChar();
@@ -317,7 +341,14 @@ idAsyncNetwork::UsercmdInputChanged
 */
 bool idAsyncNetwork::UsercmdInputChanged(const usercmd_t &previousUserCmd, const usercmd_t &currentUserCmd)
 {
-	return	previousUserCmd.buttons != currentUserCmd.buttons ||
+	return
+#ifdef _SPLASHDAMAGE
+	        previousUserCmd.buttons.btnValue != currentUserCmd.buttons.btnValue ||
+	        previousUserCmd.impulse != currentUserCmd.impulse ||
+	        previousUserCmd.flags != currentUserCmd.flags ||
+#else
+	        previousUserCmd.buttons != currentUserCmd.buttons ||
+#endif
 	        previousUserCmd.forwardmove != currentUserCmd.forwardmove ||
 	        previousUserCmd.rightmove != currentUserCmd.rightmove ||
 	        previousUserCmd.upmove != currentUserCmd.upmove ||
@@ -615,3 +646,26 @@ void idAsyncNetwork::BuildInvalidKeyMsg(idStr &msg, bool valid[ 2 ])
 	msg += common->GetLanguageDict()->GetString("#str_04304");
 }
 
+#ifdef _SPLASHDAMAGE
+void idAsyncNetwork::WriteRetailUserCmdDelta(idBitMsg &msg, const usercmd_t &cmd, const usercmd_t *base) {
+    if (base) {
+        msg.WriteDeltaLongCounter(base->gameTime, cmd.gameTime);
+        const bool changed = base->buttons.btnValue != cmd.buttons.btnValue || base->forwardmove != cmd.forwardmove ||
+            base->rightmove != cmd.rightmove || base->upmove != cmd.upmove;
+        msg.WriteBits(changed, 1);
+        if (changed) {
+            msg.WriteDelta(base->buttons.btnValue, cmd.buttons.btnValue, 10);
+            msg.WriteDeltaChar(base->forwardmove, cmd.forwardmove);
+            msg.WriteDeltaChar(base->rightmove, cmd.rightmove);
+            msg.WriteDeltaChar(base->upmove, cmd.upmove);
+        }
+        msg.WriteDeltaShort(base->angles[0], cmd.angles[0]);
+        msg.WriteDeltaShort(base->angles[1], cmd.angles[1]);
+    } else {
+        msg.WriteLong(cmd.gameTime); msg.WriteBits(cmd.buttons.btnValue, 10);
+        msg.WriteDeltaChar(0, cmd.forwardmove); msg.WriteDeltaChar(0, cmd.rightmove); msg.WriteDeltaChar(0, cmd.upmove);
+        msg.WriteShort(cmd.angles[0]); msg.WriteShort(cmd.angles[1]);
+    }
+}
+
+#endif

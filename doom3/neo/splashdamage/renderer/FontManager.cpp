@@ -19,6 +19,7 @@
 #define DRAW_TEXT_LINE_SPACING 2 // 5 doom3
 
 extern idCVar harm_gui_useD3BFGFont;
+extern idCVar harm_gui_fontRasterScale;
 static bool _hasWideCharFont = false;
 
 extern bool R_ExportTrueTypeFont(const char *fontPath, const char *fontType, const char *language, int width);
@@ -1236,7 +1237,7 @@ bool sdFontManagerLocal::ConvertFont(const sdLocFont_t *fc, const char *name, co
 {
 	common->Printf("Converting and caching true type font '%s' to DOOM3 font......\n", name);
 	RemoveChecksum(fileName);
-	if(R_ExportTrueTypeFont(fc->file.c_str(), name, lang, DEFAULT_FONT_TEXTURE_SIZE))
+	if(R_ExportTrueTypeFont(fc->file.c_str(), name, lang, DEFAULT_FONT_TEXTURE_SIZE * harm_gui_fontRasterScale.GetInteger()))
 	{
 		common->Printf("Convert and cached true type font '%s' to DOOM3 font successful.\n", name);
 		WriteChecksum(fileName, fc->checksum);
@@ -1255,7 +1256,7 @@ unsigned int sdFontManagerLocal::TrueTypeFontFileChecksum(const char *file) cons
 	void *data = NULL;
 	int length = fileSystem->ReadFile(file, &data, NULL);
 	if(length > 0)
-		checksum = MD5_BlockChecksum(data, length);
+		checksum = MD5_BlockChecksum(data, length) ^ (0x46540000u + harm_gui_fontRasterScale.GetInteger());
 	else
 		checksum = 0;
 	Mem_Free(data);

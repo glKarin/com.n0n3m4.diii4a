@@ -1462,9 +1462,10 @@ R_ListImages_f
 */
 void R_ListImages_f(const idCmdArgs &args)
 {
-	int		i, j, partialSize;
+	int		i, j;
+	long long partialSize;
 	idImage	*image;
-	int		totalSize;
+	long long totalSize;
 	int		count = 0;
 	int		matchTag = 0;
 	bool	uncompressedOnly = false;
@@ -2913,4 +2914,16 @@ void idImageManager::PurgeAllMegaTextures() {
 void idImageManager::ReloadAllMegaTextures() {
 	for ( int i = 0; i < megaTextures.Num(); ++i ) megaTextures[i]->Load();
 }
+#endif
+
+#ifdef _SPLASHDAMAGE
+unsigned int idImageManager::GetRetailMegaChecksum(unsigned int seed) {
+    unsigned int checksum = 0; int count = 0;
+    for (int i = 0; i < megaTextures.Num(); ++i) {
+        if (!megaTextures[i]->IsLoaded()) continue;
+        checksum |= megaTextures[i]->GetPureServerChecksum(seed); ++count;
+    }
+    return count ? checksum : 0x3e3e3e3e;
+}
+unsigned int R_RetailMegaTextureChecksum(unsigned int seed) { return globalImages->GetRetailMegaChecksum(seed); }
 #endif

@@ -76,6 +76,12 @@ bool sdRenderProgram::LoadProgram(const sdDeclRenderProgram *decl)
     shaderHandle_t handle;
     declRenderProgram = decl;
 
+    // The dedicated server needs material declarations for collision/gameplay,
+    // but never has a GL/Metal device on which to compile their shaders.
+    if (cvarSystem->GetCVarInteger("net_serverDedicated") == 1) {
+        return true;
+    }
+
     if (!declRenderProgram->IsCompleted()) {
         common->Warning("sdRenderProgram::LoadProgram: render program decl '%s' not completed", decl->GetName());
         return false;
@@ -597,6 +603,7 @@ void sdRenderProgram::GetLocations(shaderHandle_t handle)
 	nameHash.Clear();
 	locations.Clear();
 	textureUnits.Clear();
+	numTextureUnits = 0;
 
 	GetShaderLocations(shader->program, declRenderProgram->GetVertexShader());
 	GetShaderLocations(shader->program, declRenderProgram->GetFragmentShader());
@@ -632,7 +639,6 @@ void sdRenderProgram::GetShaderLocations(GLuint glHandle, const sdRenderProgramS
     GLint location;
 	const char *name;
 	int index;
-	numTextureUnits = 0;
 	int unit;
 
     for (int i = 0; i < shader->NumBindings(); i++) {
@@ -671,7 +677,6 @@ void sdRenderProgram::GetBuiltinLocations(GLuint glHandle)
     GLint location;
 	const char *name;
 	int index;
-	numTextureUnits = 0;
 	int unit;
 
     for (int i = 0; i < sizeof(Builtin_Vectors) / sizeof(Builtin_Vectors[0]); i++) {
@@ -883,7 +888,7 @@ void sdRenderProgram::InsertBuiltinBinding(sdStringBuilder_Heap &buf, const char
 	for (i = 0; i < MAX_FRAGMENT_IMAGES; i++) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_fragmentIntMap%d", i);
 		if(!idStr::Icmp(rawName, buffer)) {
-			InsertUniformBinding(buf, NULL, rawName, "usampler2D");
+			InsertUniformBinding(buf, NULL, rawName, "highp usampler2D");
 			return;
 		}
 	}
@@ -893,7 +898,7 @@ void sdRenderProgram::InsertBuiltinBinding(sdStringBuilder_Heap &buf, const char
 	for ( i = 0; i < MAX_FRAGMENT_IMAGES; i++ ) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_fragment2DArrayShadowMap%d", i);
 		if(!idStr::Icmp(rawName, buffer)) {
-			InsertUniformBinding(buf, NULL, rawName, "sampler2DArrayShadow");
+			InsertUniformBinding(buf, NULL, rawName, "highp sampler2DArrayShadow");
 			return;
 		}
 	}
@@ -913,12 +918,7 @@ GLint sdRenderProgram::GetUniformLocation(const char *name) const {
 int sdRenderProgram::FindIndex(const char *name) const {
 	if(name[0] == '$')
 		name++;
-#if 1
-	int key = idStr::Hash(name);
-	int index = nameHash.FindIndex(key);
-#else
 	int index = bindingNames.FindIndex(name);
-#endif
 	return index;
 }
 

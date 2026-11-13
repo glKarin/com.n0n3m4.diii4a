@@ -47,6 +47,9 @@ idRenderWorldLocal::FreeWorld
 */
 void idRenderWorldLocal::FreeWorld()
 {
+#if defined(__APPLE__) && defined(_SPLASHDAMAGE)
+    R_MetalRT_ResetWorld();
+#endif
 	int i;
 
 	// this will free all the lightDefs and entityDefs

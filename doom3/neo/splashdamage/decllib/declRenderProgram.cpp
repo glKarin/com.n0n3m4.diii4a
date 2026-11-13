@@ -7,6 +7,26 @@
 #include "renderer/RenderProgramManager.h"
 #include "framework/DeclParseHelper.h"
 #include "renderer/tr_local.h"
+#include "DeclTemplate.h"
+
+#if defined(__APPLE__) && defined(_SPLASHDAMAGE)
+#include "metal_renderprogs.h"
+#endif
+
+const char* R_MetalRetailDeclSource(declType_t type, const char* name) {
+#if defined(__APPLE__) && defined(_SPLASHDAMAGE)
+	if ((type == DECL_RENDERPROGRAM || type == DECL_TEMPLATE) &&
+		cvarSystem->GetCVarBool("r_metalBackend") && cvarSystem->GetCVarBool("net_retailProtocol")) {
+		for (int i = 0; i < sizeof(metalRenderPrograms) / sizeof(metalRenderPrograms[0]); ++i) {
+			if (metalRenderPrograms[i].isTemplate == (type == DECL_TEMPLATE) &&
+				!idStr::Icmp(name, metalRenderPrograms[i].name)) {
+				return metalRenderPrograms[i].source;
+			}
+		}
+	}
+#endif
+	return NULL;
+}
 
 /*
 ===============================================================================
@@ -34,7 +54,20 @@ bool sdDeclRenderProgram::Parse( const char* text, const int textLength ) {
 
 	src.SetFlags(DECL_LEXER_FLAGS);
 	//src.LoadMemory( text, textLength, GetFileName(), GetLineNum() );
-	sdDeclParseHelper declHelper( this, text, textLength, src );
+	// Use the port's shader implementations as renderer code. Keep the original
+	// declaration text, binary tokens and network checksum untouched: pure
+	// servers still validate the player's installed retail archives.
+	const char* rendererSource = R_MetalRetailDeclSource(DECL_RENDERPROGRAM, GetName());
+	idStr expandedSource;
+	sdAutoPtr<sdDeclParseHelper> declHelper;
+	if (rendererSource) {
+		if (sdDeclTemplate::ExpandTemplate(expandedSource, rendererSource, strlen(rendererSource))) {
+			rendererSource = expandedSource.c_str();
+		}
+		src.LoadMemory(rendererSource, strlen(rendererSource), GetName());
+	} else {
+		declHelper.Reset(new sdDeclParseHelper(this, text, textLength, src));
+	}
 	src.SkipUntilString("{");
 
 	while (1) {
@@ -345,6 +378,9 @@ void sdDeclRenderProgram::ParseBlend(idParser &src)
 {
 	idToken token;
 	int		srcBlend, dstBlend;
+	// A blend directive replaces only the blend factors. In particular,
+	// atmosphere programs declare depthfunc equal before their blend mode.
+	const int otherStateBits = drawStateBits & ~(GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS);
 
 	if (!src.ReadToken(&token)) {
 		return;
@@ -352,23 +388,23 @@ void sdDeclRenderProgram::ParseBlend(idParser &src)
 
 	// blending combinations
 	if (!token.Icmp("blend")) {
-		drawStateBits = GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
+		drawStateBits = otherStateBits | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA;
 		return;
 	}
 
 	if (!token.Icmp("add")) {
-		drawStateBits = GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE;
+		drawStateBits = otherStateBits | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE;
 		return;
 	}
 
 	if (!token.Icmp("filter") || !token.Icmp("modulate")) {
-		drawStateBits = GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO;
+		drawStateBits = otherStateBits | GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO;
 		return;
 	}
 
 	if (!token.Icmp("none")) {
 		// none is used when defining an alpha mask that doesn't draw
-		drawStateBits = GLS_SRCBLEND_ZERO | GLS_DSTBLEND_ONE;
+		drawStateBits = otherStateBits | GLS_SRCBLEND_ZERO | GLS_DSTBLEND_ONE;
 		return;
 	}
 
@@ -386,7 +422,7 @@ void sdDeclRenderProgram::ParseBlend(idParser &src)
 
 	dstBlend = NameToDstBlendMode(token);
 
-	drawStateBits = srcBlend | dstBlend;
+	drawStateBits = otherStateBits | srcBlend | dstBlend;
 }
 
 void sdDeclRenderProgram::ParseDepthFunc(idParser &src)

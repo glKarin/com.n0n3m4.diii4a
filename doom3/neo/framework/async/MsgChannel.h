@@ -45,8 +45,12 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-#define	MAX_MESSAGE_SIZE				16384		// max length of a message, which may
-// be fragmented into multiple packets
+// Maximum length of a message, which may be fragmented into multiple packets.
+#ifdef _SPLASHDAMAGE
+#define MAX_MESSAGE_SIZE 32768
+#else
+#define MAX_MESSAGE_SIZE 16384
+#endif
 #define CONNECTIONLESS_MESSAGE_ID		-1			// id for connectionless messages
 #define CONNECTIONLESS_MESSAGE_ID_MASK	0x7FFF		// value to mask away connectionless message id
 
@@ -169,6 +173,7 @@ class idMsgChannel
 		void			ClearReliableMessages(void);
 #ifdef _SPLASHDAMAGE //karin: bot fake client
 		bool			isBot;
+		bool retailProtocol;
 #endif
 
 	private:

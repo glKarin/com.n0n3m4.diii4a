@@ -32,7 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include <sys/types.h>
 #include <fcntl.h>
 
-#include <SDL_main.h>
+#include <SDL.h>
 
 #include "../platform.h"
 #include "../../framework/Licensee.h"
@@ -99,6 +99,9 @@ Sys_EXEPath
 ==============
 */
 const char *Sys_EXEPath( void ) {
+#ifdef __APPLE__
+	return path_exe;
+#else
 	static char	buf[ 1024 ];
 	idStr		linkpath;
 	int			len;
@@ -106,11 +109,14 @@ const char *Sys_EXEPath( void ) {
 	buf[ 0 ] = '\0';
 	sprintf( linkpath, "/proc/%d/exe", getpid() );
 	len = readlink( linkpath.c_str(), buf, sizeof( buf ) );
-	if ( len == -1 ) {
+	if ( len < 0 || len >= sizeof( buf ) ) {
 		Sys_Printf("couldn't stat exe path link %s\n", linkpath.c_str());
+		buf[ 0 ] = '\0';
+	} else {
 		buf[ len ] = '\0';
 	}
 	return buf;
+#endif
 }
 
 const char * Sys_DLLDefaultPath(void)
@@ -297,6 +303,14 @@ void Sys_FPE_handler( int signum, siginfo_t *info, void *context ) {
 #include <pthread.h>
 
 xthreadInfo asyncThread;
+#ifdef __APPLE__
+static SDL_atomic_t asyncRunning;
+
+void Posix_StopAsyncThread() {
+	SDL_AtomicSet(&asyncRunning, 0);
+	if (asyncThread.threadHandle) Sys_DestroyThread(asyncThread);
+}
+#endif
 
 /*
 =================
@@ -306,6 +320,9 @@ Posix_StartAsyncThread
 void Posix_StartAsyncThread()
 {
 	if (asyncThread.threadHandle == 0) {
+#ifdef __APPLE__
+		SDL_AtomicSet(&asyncRunning, 1);
+#endif
 		Sys_CreateThread(Sys_AsyncThread, &asyncThread, THREAD_NORMAL, asyncThread, "Async", g_threads, &g_thread_count);
 	} else {
 		common->Printf("Async thread already running\n");
@@ -328,7 +345,11 @@ void * Sys_AsyncThread( void * ) {
 	int ticked, to_ticked;
 	now = Sys_Milliseconds();
 	ticked = now >> 4;
+#ifdef __APPLE__
+	while (SDL_AtomicGet(&asyncRunning)) {
+#else
 	while (1) {
+#endif
 		// sleep
 		now = Sys_Milliseconds();		
 		next = ( now & 0xFFFFFFF0 ) + 0x10;
@@ -370,6 +391,7 @@ void * Sys_AsyncThread( void * ) {
 		// thread exit
 		pthread_testcancel();
 	}
+	return NULL;
 }
 
 
@@ -382,11 +404,18 @@ const char* Posix_GetSavePath()
 
 static void SetSavePath()
 {
+#ifdef __APPLE__
+	char *path = SDL_GetPrefPath("idtech4amm", GAME_NAME_ID);
+	if (!path) Sys_Error("Cannot locate the user save directory: %s", SDL_GetError());
+	D3_snprintfC99(save_path, sizeof(save_path), "%s", path);
+	SDL_free(path);
+#else
 	const char* s = getenv("XDG_DATA_HOME");
 	if (s)
 		D3_snprintfC99(save_path, sizeof(save_path), "%s/idtech4amm/" GAME_NAME_ID, s);
 	else
 		D3_snprintfC99(save_path, sizeof(save_path), "%s/.local/share/idtech4amm/" GAME_NAME_ID, getenv("HOME"));
+#endif
 }
 
 const char* Posix_GetExePath()
@@ -517,16 +546,22 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 		}
 
 		// fallback to vanilla doom3 install
+#ifdef LINUX_DEFAULT_PATH
 		if (stat(LINUX_DEFAULT_PATH, &st) != -1 && S_ISDIR(st.st_mode)) {
 			common->Warning("using hardcoded default base path: " LINUX_DEFAULT_PATH);
 
 			path = LINUX_DEFAULT_PATH;
 			return true;
 		}
+#endif
 
 		return false;
 
 	case PATH_CONFIG:
+#ifdef __APPLE__
+		path = save_path;
+		return true;
+#else
 		s = getenv("XDG_CONFIG_HOME");
 		if (s)
 			idStr::snPrintf(buf, sizeof(buf), "%s/idtech4amm/" GAME_NAME_ID, s);
@@ -535,6 +570,7 @@ bool Sys_GetPath(sysPath_t type, idStr &path) {
 
 		path = buf;
 		return true;
+#endif
 
 	case PATH_SAVE:
 		if(save_path[0] != '\0') {
@@ -571,6 +607,9 @@ returns in megabytes
 ================
 */
 int Sys_GetSystemRam( void ) {
+#ifdef __APPLE__
+	return SDL_GetSystemRAM();
+#else
 	long	count, page_size;
 	int		mb;
 
@@ -588,6 +627,7 @@ int Sys_GetSystemRam( void ) {
 	// round to the nearest 16Mb
 	mb = ( mb + 8 ) & ~15;
 	return mb;
+#endif
 }
 
 /*

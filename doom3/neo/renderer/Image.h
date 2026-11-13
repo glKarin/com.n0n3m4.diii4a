@@ -528,6 +528,7 @@ class idImageManager
 		// pointers so duplicate declarations share one streaming/cache object.
 		idMegaTexture *		MegaTextureFromFile( const char *name );
 		void				PurgeAllMegaTextures();
+        unsigned int GetRetailMegaChecksum(unsigned int seed);
 		void				ReloadAllMegaTextures();
 
 		idList<idMegaTexture*> megaTextures;

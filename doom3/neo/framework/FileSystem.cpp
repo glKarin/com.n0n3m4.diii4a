@@ -210,7 +210,17 @@ bool excludeFullName(const pureExclusion_t &excl, int l, const idStr &name)
 	return false;
 }
 
+#ifdef _SPLASHDAMAGE
+static bool excludeETQWLocalization(const pureExclusion_t&, int, const idStr& name) {
+    return !name.IcmpPrefixPath("localization/") || !name.IcmpPrefixPath("generated/ogg/localization/") ||
+        !name.IcmpPrefixPath("generated/declb/localization/");
+}
+#endif
+
 static pureExclusion_t pureExclusions[] = {
+#ifdef _SPLASHDAMAGE
+    { 0, 0, NULL, NULL, excludeETQWLocalization },
+#endif
 	{ 0,	0,	NULL,											"/",		excludeExtension },
 	{ 0,	0,	NULL,											"\\",		excludeExtension },
 	{ 0,	0,	NULL,											".pda",		excludeExtension },
@@ -490,6 +500,7 @@ class idFileSystemLocal : public idFileSystem
 		idList<int>				addonChecksums;			// list of checksums that should go to the search list directly ( for restarts )
 		int						restartGamePakChecksum;
 		int						gameDLLChecksum;		// the checksum of the last loaded game DLL
+		int						retailGamePakChecksum = 0;
 		int						gamePakChecksum;		// the checksum of the pak holding the loaded game DLL
 
 		int						gamePakForOS[ MAX_GAME_OS ];
@@ -3070,6 +3081,7 @@ idFileSystemLocal::ClearPureChecksums
 */
 void idFileSystemLocal::ClearPureChecksums(void)
 {
+	retailGamePakChecksum = 0;
 	common->DPrintf("Cleared pure server lock\n");
 	serverPaks.Clear();
 }
@@ -3208,7 +3220,19 @@ fsPureReply_t idFileSystemLocal::SetPureServerChecksums(const int pureChecksums[
 	gamePakChecksum = _gamePakChecksum;
 #endif
 
-	if (_gamePakChecksum != gamePakChecksum) {
+#ifdef _SPLASHDAMAGE
+	// The stock SDK port is wire compatible with the 1.5 Mac game package.
+	// Keep the actual loaded module identity separate from that compatibility
+	// baseline, and require the original archive to be installed and verified.
+	retailGamePakChecksum = 0;
+	if (cvarSystem->GetCVarBool("net_retailProtocol") && (unsigned int)_gamePakChecksum == 0xa02f1c18U &&
+		GetPackForChecksum(_gamePakChecksum) != NULL) {
+		retailGamePakChecksum = _gamePakChecksum;
+		common->Printf("Retail stock SDK compatibility baseline: installed game package %08x; executing ARM64 module\n", _gamePakChecksum);
+	}
+#endif
+	if (_gamePakChecksum != gamePakChecksum &&
+		(!retailGamePakChecksum || _gamePakChecksum != retailGamePakChecksum)) {
 		// current DLL is wrong, search for a pak with the approriate checksum
 		// ( search all paks, the pure list is not relevant here )
 		pack = GetPackForChecksum(_gamePakChecksum);
@@ -3283,7 +3307,7 @@ void idFileSystemLocal::GetPureServerChecksums(int checksums[ MAX_PURE_PAKS ], i
 		if (OS >= 0) {
 			*_gamePakChecksum = gamePakForOS[ OS ];
 		} else {
-			*_gamePakChecksum = gamePakChecksum;
+			*_gamePakChecksum = retailGamePakChecksum ? retailGamePakChecksum : gamePakChecksum;
 		}
 	}
 }
@@ -3448,6 +3472,7 @@ void idFileSystemLocal::Shutdown(bool reloading)
 	loadedFileFromDir = false;
 	gameDLLChecksum = 0;
 	gamePakChecksum = 0;
+	retailGamePakChecksum = 0;
 
 	ClearDirCache();
 
@@ -3521,6 +3546,13 @@ bool idFileSystemLocal::FileAllowedFromDir(const char *path)
 	unsigned int l;
 
 	l = strlen(path);
+#ifdef _SPLASHDAMAGE
+	// Rasterized font caches are local display resources.
+	if (l > 10 && !idStr::Icmpn(path, "fonts/", 6) &&
+		(!idStr::Icmp(path + l - 4, ".tga") || !idStr::Icmp(path + l - 4, ".txt"))) return true;
+	// ETQW ships terrain containers outside PK4s and checks them separately.
+	if (l > 17 && !idStr::Icmpn(path, "megatextures/", 13) && !idStr::Icmp(path + l - 5, ".mega")) return true;
+#endif
 
 	if (!strcmp(path + l - 4, ".cfg")		// for config files
 	    || !strcmp(path + l - 4, ".dat")		// for journal files
@@ -3578,6 +3610,16 @@ pureStatus_t idFileSystemLocal::GetPackStatus(pack_t *pak)
 		return pak->pureStatus;
 	}
 
+#ifdef _SPLASHDAMAGE
+	// All stock pakNNN archives belong to the retail pure manifest, including
+	// pak006, whose localized content would otherwise classify it as optional.
+	pak->pakFilename.ExtractFileName(name);
+	if (name.Length() == 10 && !name.Icmpn("pak", 3) && !idStr::Icmp(name.c_str() + 6, ".pk4") &&
+		name[3] >= '0' && name[3] <= '9' && name[4] >= '0' && name[4] <= '9' && name[5] >= '0' && name[5] <= '9') {
+		pak->pureStatus = PURE_ALWAYS;
+		return PURE_ALWAYS;
+	}
+#endif
 	// check content for PURE_NEVER
 	i = 0;
 	file = pak->buildBuffer;

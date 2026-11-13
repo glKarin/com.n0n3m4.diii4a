@@ -657,12 +657,19 @@ unsigned char Sys_GetConsoleKey( bool shifted ) {
 		return 0;
 	}
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+	// SDL events normalize the physical console key to K_CONSOLE.
+	// Comparing it with a layout-specific character breaks AZERTY keyboards.
+	return K_CONSOLE;
+#else
+
 	if ( in_kbd.IsModified() ) {
 		initConsoleKeyMapping();
 		in_kbd.ClearModified();
 	}
 
 	return shifted ? consoleKeyMappings[consoleKeyMappingIdx].keyShifted : consoleKeyMappings[consoleKeyMappingIdx].key;
+#endif
 }
 
 /*

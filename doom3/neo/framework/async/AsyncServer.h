@@ -167,6 +167,7 @@ class idAsyncServer
 		int					GetLocalClientNum(void) const {
 			return localClientNum;
 		}
+		int GetGameTime(void) const { return gameTime; }
 
 		void				RunFrame(void);
 		void				ProcessConnectionLessMessages(void);

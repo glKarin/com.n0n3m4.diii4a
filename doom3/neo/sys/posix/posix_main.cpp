@@ -91,7 +91,12 @@ void Posix_Exit(int ret)
 	 Posix_ClearSigs();
 
 	if (asyncThread.threadHandle) {
+#if defined(__APPLE__) && defined(_SDL)
+		extern void Posix_StopAsyncThread();
+		Posix_StopAsyncThread();
+#else
 		Sys_DestroyThread(asyncThread);
+#endif
 	}
 
 	// process spawning. it's best when it happens after everything has shut down

@@ -29,3 +29,7 @@ CMakeCache.txt
 build
 Release
 Debug
+
+# Local macOS port builds and Python checks
+/build-macos*/
+/doom3/macos/**/__pycache__/

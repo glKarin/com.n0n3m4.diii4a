@@ -295,8 +295,10 @@ typedef int ammoType_t;
 
 #ifdef ASYNC_SECURITY
 
+// Retail release snapshots omit the SDK development markers. Keep them for
+// the native protocol, whose server still writes these markers.
 #define ASYNC_SECURITY_READ( STREAM )													\
-	if ( STREAM.ReadLong() != ASYNC_MAGIC_NUMBER ) {									\
+	if ( !( gameLocal.isClient && cvarSystem->GetCVarBool( "net_retailProtocol" ) ) && STREAM.ReadLong() != ASYNC_MAGIC_NUMBER ) {									\
 		gameLocal.Error( "Network State Corrupted: %s(%d)", __FILE__, __LINE__ );		\
 	}
 

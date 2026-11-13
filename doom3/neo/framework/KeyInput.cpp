@@ -42,7 +42,7 @@ typedef struct {
 // keys that can be set without a special name
 static const char unnamedkeys[] = "*,-=./[\\]1234567890abcdefghijklmnopqrstuvwxyz";
 
-#if MACOS_X
+#if defined(MACOS_X) && !defined(_SDL)
 const char *OSX_GetLocalizedString(const char *);
 #endif
 
@@ -530,7 +530,7 @@ const char *idKeyInput::KeyNumToString(int keynum, bool localized)
 			if (!localized || kn->strId[0] != '#') {
 				return kn->name;
 			} else {
-#if MACOS_X
+#if defined(MACOS_X) && !defined(_SDL)
 
 				switch (kn->keynum) {
 					case K_ENTER:
